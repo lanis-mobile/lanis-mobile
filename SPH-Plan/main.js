@@ -1,7 +1,13 @@
 const back = require('androidjs').back;
-const { SPHclient } = require('sphclient');
 
-var sphclient = new SPHclient();
+SPHclient = null
+
+import("sphclient").then(mod => {
+	SPHclient = mod;
+});
+
+sphclient = null
+
 
 
 back.on("sphclient.auth", async (username, pass, schoolID) => {
