@@ -1,0 +1,29 @@
+{
+    "version": "1.0.0",
+    "name": "SPH-Plan",
+    "app-name": "SPH-Plan",
+    "package-name": "webview",
+    "project-type": "webview",
+    "icon": "./assets/icon/icon.png",
+    "dist-path": "./dist",
+    "permission": [
+        "android.permission.INTERNET"
+    ],
+    "description": "",
+    "main": "main.js",
+    "scripts": {
+        "start:dev": "node .",
+        "build": "androidjs build"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "androidjs": "^2.0.2",
+        "bulma": "^0.9.4",
+        "sphclient": "^2.1.0"
+    },
+    "project-name": "SPH-Plan",
+    "theme": {
+        "fullScreen": true
+    }
+}
