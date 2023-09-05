@@ -49,7 +49,7 @@
                 <div class="item-inner">
                   <div class="item-title item-floating-label">Benutzername (vorname.nachname // Kürzel)</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="username" placeholder="">
+                    <input type="text" name="username" id="login.username" placeholder="">
                     <span class="input-clear-button"></span>
                   </div>
                 </div>
@@ -58,7 +58,7 @@
                 <div class="item-inner">
                   <div class="item-title item-floating-label">Passwort</div>
                   <div class="item-input-wrap">
-                    <input type="password" name="password" placeholder="">
+                    <input type="password" id="login.pass" name="password" placeholder="">
                     <span class="input-clear-button"></span>
                   </div>
                 </div>
@@ -67,14 +67,14 @@
                 <div class="item-inner">
                   <div class="item-title item-floating-label">Schulnummer (eg 5182)</div>
                   <div class="item-input-wrap">
-                    <input type="number" name="number" placeholder="" pattern="[0-9]{3,5}">
+                    <input type="number" name="number" id="login.schoolid" placeholder="" pattern="[0-9]{3,5}">
                     <span class="input-clear-button"></span>
                   </div>
                 </div>
               </li>
               <li class="item-content">
                 <div class="item-inner">
-                  <button class="button">Login</button>
+                  <button class="button" id="loginButton">Login</button>
                 </div>
               </li>
               <li class="item-content">
@@ -216,6 +216,8 @@
     // Append new items
     document.querySelector('#striped-list').innerHTML += (html);
   </script>
+  <script src="../assets/androidjs.js"></script>
+  <script src="../assets/front.js"></script>
 
 </body>
 

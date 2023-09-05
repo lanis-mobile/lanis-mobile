@@ -1,0 +1,11 @@
+{
+  "appId": "io.github.alessioc42.sphvertretungsplan",
+  "appName": "SPH-Plan",
+  "bundledWebRuntime": false,
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
