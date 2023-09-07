@@ -13,9 +13,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor/core": "latest",
+    "@capacitor/android": "^5.3.0",
     "@capacitor/camera": "latest",
-    "@capacitor/splash-screen": "latest"
+    "@capacitor/core": "latest",
+    "@capacitor/splash-screen": "latest",
+    "framework7": "^8.3.0"
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
