@@ -1,9 +1,3 @@
-//name of the database file. (must be in the same directory)
-const DBFILENAME = "database.db";
-
-//interval to fetch the new plan data. (in ms)
-const UPDATEINTERVAL = 1200000 //=20min
-
 const WEBSERVERCONFIG = {
     https : false,
     port: {
@@ -17,4 +11,4 @@ const WEBSERVERCONFIG = {
     }
 }
 
-module.exports = {DBFILENAME, UPDATEINTERVAL, WEBSERVERCONFIG}
+module.exports = {WEBSERVERCONFIG}
