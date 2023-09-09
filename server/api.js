@@ -34,13 +34,12 @@ api.get("/plan", async (req, res) => {
       client.cookies.sid = { value: sid };
       client.logged_in = true;
 
-      console.log("hello");
       const date = await client.getNextVplanDate();
       const plan = await client.getVplan(date);
       
       res.status(200).json(plan).end();
     } catch (error) {
-      console.error(error); // Log the error for debugging
+      console.log(error); // Log the error for debugging
       res.status(500).send("Error while authenticating");
     }
   }
