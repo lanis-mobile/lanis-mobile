@@ -9,9 +9,6 @@ const app = express();
 app.use("/api", api);
 
 
-app.listen(3000, ()=> {
-    console.log("running on port 3000")
-});
 
 if (WEBSERVERCONFIG.https) {
     const https = require("https");
