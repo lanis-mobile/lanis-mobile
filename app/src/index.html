@@ -1,118 +1,126 @@
 <!DOCTYPE html>
 <html lang="de">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
 
-<head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <!-- Framework7 CDN links -->
+    <link rel="stylesheet" href="./framework7/framework7-bundle.min.css" />
+    <!-- Your custom styles -->
+    <style>
+      /* Put your custom styles here */
+    </style>
+  </head>
 
-  <!-- Framework7 CDN links -->
-  <link rel="stylesheet" href="./framework7/framework7-bundle.min.css">
-  <!-- Your custom styles -->
-  <style>
-    /* Put your custom styles here */
-  </style>
-</head>
-
-<body>
-
-  <!-- HTML -->
-  <div class="views tabs safe-areas">
-    <!-- Tabbar for switching views-tabs -->
-    <div class="toolbar tabbar tabbar-labels toolbar-bottom">
-      <div class="toolbar-inner">
-        <a href="#view-plan" class="tab-link">
-          <span class="tabbar-label">Plan</span>
-        </a>
-        <a href="#view-filter" class="tab-link">
-          <span class="tabbar-label">Filter</span>
-        </a>
-      </div>
-    </div>
-
-
-    <!-- Your main view/tab, should have "view-main" class. It also has "tab-active" class -->
-
-    <!-- Another view -->
-    <div id="view-plan" class="view view-main tab tab-active">
-      <!-- Plan page -->
-      <div class="page" data-name="plan">
-        <!-- Top Navbar -->
-        <!-- Scrollable page content -->
-        <div class="fab fab-left-bottom">
-          <a id="openSettingsScreenButton" href="#">
-            <i class="icon">settings</i>
+  <body>
+    <!-- HTML -->
+    <div class="views tabs safe-areas">
+      <!-- Tabbar for switching views-tabs -->
+      <div class="toolbar tabbar tabbar-labels toolbar-bottom">
+        <div class="toolbar-inner">
+          <a href="#view-plan" class="tab-link">
+            <span class="tabbar-label">Plan</span>
+          </a>
+          <a href="#view-filter" class="tab-link">
+            <span class="tabbar-label">Filter</span>
           </a>
         </div>
-        <div class="page-content">
+      </div>
 
-          <!-- List block -->
-          <div class="list">
-            <ul id="striped-list"></ul>
+      <!-- Another view -->
+      <div id="view-plan" class="view view-main tab tab-active">
+        <!-- Plan page -->
+        <div class="page" data-name="plan">
+          <!-- Top Navbar -->
+          <!-- Scrollable page content -->
+          <div class="fab fab-left-bottom">
+            <a id="openSettingsScreenButton" href="#">
+              <i class="icon">settings</i>
+            </a>
           </div>
-
+          <div class="page-content">
+            <!-- List block -->
+            <div class="list">
+              <ul id="striped-list"></ul>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Another view -->
-    <div id="view-filter" class="view tab">
-      <!-- Filter page -->
-      <div class="page" data-name="filter">
-        <!-- Top Navbar -->
+      <!-- Another view -->
+      <div id="view-filter" class="view tab">
+        <!-- Filter page -->
+        <div class="page" data-name="filter">
+          <!-- Top Navbar -->
 
-        <!-- Scrollable page content -->
+          <!-- Scrollable page content -->
+          <div class="page-content">
+            <!-- Text area and input field -->
+            <div class="list no-hairlines-md">
+              <ul>
+                <li class="item-content item-input">
+                  <div class="item-inner">
+                    <div class="item-title item-label">Text Area</div>
+                    <div class="item-input-wrap">
+                      <textarea placeholder=""></textarea>
+                    </div>
+                  </div>
+                </li>
+                <li class="item-content item-input">
+                  <div class="item-inner">
+                    <div class="item-title item-label">Input Field</div>
+                    <div class="item-input-wrap">
+                      <input type="text" placeholder="" />
+                      <span class="input-clear-button"></span>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Screen -->
+      <div id="settings-screen" class="login-screen">
         <div class="page-content">
-          <!-- Text area and input field -->
+          <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner sliding">
+              <div class="title">Einstellungen</div>
+            </div>
+          </div>
           <div class="list no-hairlines-md">
             <ul>
-              <li class="item-content item-input">
+              <li class="item-content item-input item-input-with-value">
                 <div class="item-inner">
-                  <div class="item-title item-label">Text Area</div>
+                  <div class="item-title item-floating-label">Instanz (Server)</div>
                   <div class="item-input-wrap">
-                    <textarea placeholder=""></textarea>
-                  </div>
-                </div>
-              </li>
-              <li class="item-content item-input">
-                <div class="item-inner">
-                  <div class="item-title item-label">Input Field</div>
-                  <div class="item-input-wrap">
-                    <input type="text" placeholder="">
+                    <input
+                      type="text"
+                      name="serverURL"
+                      id="login.server"
+                      value="http://localhost:3000"
+                      placeholder="http://localhost:3000"
+                    />
                     <span class="input-clear-button"></span>
                   </div>
                 </div>
               </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Login Screen -->
-    <div id="settings-screen" class="login-screen">
-      <div class="subnavbar">
-        <div class="subnavbar-inner">
-          <!-- Subnavbar content, for example tabs buttons -->
-          <div class="segmented">
-            <a href="#instanceConfigTab" class="button button-active">Instanz</a>
-            <a href="#schoolTab" class="button">Schule</a>
-            <a href="#tab3" class="button">Tab 3</a>
-          </div>
-        </div>
-      </div>
-      <div class="page-content">
-        <!-- Floating labels -->
-
-        <!-- Instance Config Tab -->
-        <div id="instanceConfigTab" class="tab">
-          <div class="list no-hairlines-md">
-            <ul>
               <li class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-floating-label">Instanz (Server)</div>
+                  <div class="item-title item-floating-label">Benutzername</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="username" id="login.username" value="" placeholder="alessio.ddnss.de:4843">
+                    <input
+                      type="text"
+                      name="username"
+                      id="login.username"
+                      value=""
+                    />
                     <span class="input-clear-button"></span>
                   </div>
                 </div>
@@ -121,36 +129,43 @@
                 <div class="item-inner">
                   <div class="item-title item-floating-label">Passwort</div>
                   <div class="item-input-wrap">
-                    <input type="password" id="login.pass" name="password" placeholder="">
+                    <input
+                      type="password"
+                      id="login.pass"
+                      name="password"
+                      placeholder=""
+                    />
                     <span class="input-clear-button"></span>
                   </div>
                 </div>
               </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- School Tab -->
-        <div id="schoolTab" class="tab">
-          <div class="list no-hairlines-md">
-            <ul>
-              <li class="item-content item-input">
+              <li class="item-content item-input item-input-with-value">
                 <div class="item-inner">
-                  <div class="item-title item-floating-label">Schulnummer (eg 5182)</div>
+                  <div class="item-title item-floating-label">Schule</div>
                   <div class="item-input-wrap">
-                    <input type="number" name="number" id="login.schoolid" placeholder="" pattern="[0-9]{3,5}">
-                    <span class="input-clear-button"></span>
+                    <div class="item-input-wrap input-dropdown-wrap">
+                      <select>
+                        <option>Planck</option>
+                        <option>Andere</option>
+                        <option>Sowas in Mainz</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </li>
               <li class="item-content">
                 <div class="item-inner">
-                  <button class="button" id="login.button">Login</button>
+                  <button class="button button-fill button-outline">Login</button>
                 </div>
               </li>
               <li class="item-content">
                 <div class="item-inner">
-                  <div><i id="connectionInformation">Aktuell nicht Verbunden!!!</i></div>
+                  <i>in tellus integer feugiat scelerisque varius morbi enim nunc faucibus a pellentesque sit amet porttitor eget dolor morbi non arcu risus quis varius quam quisque id diam vel quam elementum pulvinar etiam non quam lacus suspendisse faucibus interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit duis tristique sollicitudin</i>
+                </div>
+              </li>
+              <li class="item-content">
+                <div class="item-inner">
+                  <button class="button button-fill button-outline">Delete all user data</button>
                 </div>
               </li>
             </ul>
@@ -158,11 +173,8 @@
         </div>
       </div>
     </div>
-
-  </div>
-  <script type="module" src="./framework7/framework7-bundle.min.js"></script>
-  <script type="module" src="./script.js"></script>
-  <!-- Add this script to your script.js file -->
-</body>
-
+    <script type="module" src="./framework7/framework7-bundle.min.js"></script>
+    <script type="module" src="./script.js"></script>
+    <!-- Add this script to your script.js file -->
+  </body>
 </html>
