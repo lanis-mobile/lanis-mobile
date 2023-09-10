@@ -125,7 +125,7 @@ function createCardItem(data) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
       labelCell.classList.add('label-cell');
-      labelCell.style.paddingRight = "20vw"; // TODO better solution
+      labelCell.style.paddingRight = "17vw"; // TODO better solution
       labelCell.textContent = label;
       const numericCell = document.createElement('td');
       numericCell.classList.add('numeric-cell');
@@ -138,7 +138,7 @@ function createCardItem(data) {
 
   let keys = Object.keys(data);
   keys.forEach(key => {
-    if (data[key] && !(["Tag_en", "_hervorgehoben", "Tag", "Stunde", "Fach"].includes(key))) {
+    if (data[key] && !(["Tag_en", "_hervorgehoben", "Tag", "Stunde", "Fach", "Art"].includes(key))) {
       addRow(`${key.replace("_", " ")}:`, data[key])
     }
   });
@@ -156,7 +156,6 @@ function createCardItem(data) {
 
   return listItem;
 }
-
 
 async function updatePlanView() {
   const serverURL = (await Preferences.get({ key: "serverURL" })).value;
