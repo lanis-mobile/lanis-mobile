@@ -17,8 +17,10 @@ var app = new Framework7({
 });
 
 function openSettingsScreen() {
-  app.loginScreen.open('#settings-screen');
+  loadMemoryEntryOptions();
   loadSchoolSelect();
+
+  app.loginScreen.open('#settings-screen');
 }
 
 function closeSettingsScreen() {
@@ -261,7 +263,6 @@ async function init() {
   if (loggedIn) {
     updatePlanView();
   } else {
-    loadMemoryEntryOptions();
     openSettingsScreen();
   }
 }
