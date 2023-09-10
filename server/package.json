@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/alessioC42/SPH-vertretungsplan#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "sphclient": "^2.2.2"
   }

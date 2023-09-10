@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const api = require("./api");
 
 const { WEBSERVERCONFIG } = require("./config");
@@ -6,6 +7,8 @@ const { WEBSERVERCONFIG } = require("./config");
 const app = express();
 
 app.use("/api", api);
+app.use(cors())
+
 
 if (WEBSERVERCONFIG.https) {
   const https = require("https");

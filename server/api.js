@@ -1,16 +1,16 @@
 const SPHclient = require("sphclient");
+const cors = require("cors");
+
 
 const api = require("express").Router();
 
 // Variable to store all SPHclient Objects in.
 
-api.get("/login", (req, res) => {
+api.get("/login", cors() ,(req, res) => {
   try {
     let username = req.query.username;
     let password = req.query.password;
     let schoolid = req.query.schoolid;
-
-    console.log(username + " " + password + " " + schoolid);
 
     if (username && password && schoolid) {
       let client = new SPHclient(username, password, schoolid, false);
@@ -24,7 +24,7 @@ api.get("/login", (req, res) => {
   }
 });
 
-api.get("/isValidSession", async (req, res) => {
+api.get("/isValidSession", cors(),  async (req, res) => {
   let sid = req.query.sid;
   let schoolid = req.query.schoolid;
 
@@ -44,7 +44,7 @@ api.get("/isValidSession", async (req, res) => {
   }
 });
 
-api.get("/plan", async (req, res) => {
+api.get("/plan", cors(), async (req, res) => {
   let sid = req.query.sid;
   let schoolid = req.query.schoolid;
 
