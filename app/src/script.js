@@ -41,7 +41,7 @@ async function loggedIn() {
 
 
 var schoolSelectAlreadyLoaded = false;
-function loadSchoolSelect() {
+async function loadSchoolSelect() {
     if (!schoolSelectAlreadyLoaded) {
         schoolSelectAlreadyLoaded = true;
 
@@ -49,8 +49,6 @@ function loadSchoolSelect() {
         Array.from(schoolData).forEach(landkreis => {
             schools = schools.concat(landkreis.Schulen);
         });
-
-        console.log(schools)
 
         let fuse = new Fuse(schools, {
             keys: ["Id", "Name", "Ort"]
@@ -61,7 +59,6 @@ function loadSchoolSelect() {
             openIn: 'dropdown',
             source: async (query, render) => {
                 let items = fuse.search(query, {limit: 10});
-                console.log(items)
                 items = items.map((item) => `${item.item["Id"]} - ${item.item["Name"]} - ${item.item["Ort"]}`);
                 render(items);
             }
@@ -71,7 +68,11 @@ function loadSchoolSelect() {
 
 document.getElementById("openSettingsScreenButton").addEventListener("click", () => {
     openSettingsScreen()
-})
+});
+
+document.getElementById("closeSettingsScreenButton").addEventListener("click", () => {
+    closeSettingsScreen();
+});
 
 app.tab.show('#instanceConfigTab');
 // Event-Handling für das Umschalten zwischen Tabs
@@ -82,5 +83,5 @@ app.on('tabShow', function (tabEl) {
 
 
 async function init() {
-    
+
 }
