@@ -169,7 +169,8 @@ async function updatePlanView() {
       responseType: "json"
     }).then(async response => {
 
-      let cardContainer = document.getElementById("cardContainer")
+      let cardContainer = document.getElementById("cardContainer");
+      cardContainer.innerHTML = "";
 
       response.data.forEach(entry => {
         cardContainer.appendChild(createCardItem(entry))
