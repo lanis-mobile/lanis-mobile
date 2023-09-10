@@ -24,6 +24,26 @@ api.get("/login", (req, res) => {
   }
 });
 
+api.get("/isValidSession", async (req, res) => {
+  let sid = req.query.sid;
+  let schoolid = req.query.schoolid;
+
+  if (sid) {
+    try {
+      let client = new SPHclient({ schoolID: schoolid });
+      client.cookies.sid = { value: sid };
+      client.logged_in = true;
+
+      await client.getVplan(new Date());
+      
+      res.status(200).send("OK").end();
+    } catch (error) {
+      //console.log(error);
+      res.status(401).send("NO");
+    }
+  }
+});
+
 api.get("/plan", async (req, res) => {
   let sid = req.query.sid;
   let schoolid = req.query.schoolid;
@@ -40,7 +60,7 @@ api.get("/plan", async (req, res) => {
       res.status(200).json(plan).end();
     } catch (error) {
       console.log(error); // Log the error for debugging
-      res.status(500).send("Error while authenticating");
+      res.status(401).send("Error while authenticating");
     }
   }
 });
