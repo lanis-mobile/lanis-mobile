@@ -3,6 +3,9 @@
   "appName": "SPH-Plan",
   "bundledWebRuntime": false,
   "webDir": "dist",
+  "server": {
+    "cleartext": true
+  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0
