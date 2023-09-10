@@ -86,9 +86,9 @@ async function login() {
 
         console.log((await Preferences.get({ key: "sid" })).value);
         closeSettingsScreen()
-        /*
-        TODO: Auto show Plan data. 
-        */
+        
+        updatePlanView();
+
       } else if (response.status == 500) {
         app.toast.create({ text: 'login failed!' }).open()
       } else {
