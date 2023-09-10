@@ -121,7 +121,7 @@ function createCardItem(data) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
       labelCell.classList.add('label-cell');
-      labelCell.style.paddingRight =  "20vw"; // TODO better solution
+      labelCell.style.paddingRight = "20vw"; // TODO better solution
       labelCell.textContent = label;
       const numericCell = document.createElement('td');
       numericCell.classList.add('numeric-cell');
@@ -155,10 +155,13 @@ function createCardItem(data) {
 
 
 async function updatePlanView() {
+  app.dialog.preloader('Lade Plan...');
+  var cardContainer = document.getElementById("cardContainer");
+  cardContainer.innerHTML = ``;
+
   const serverURL = (await Preferences.get({ key: "serverURL" })).value;
   const sid = (await Preferences.get({ key: "sid" })).value;
   const schoolid = (await Preferences.get({ key: "schoolid" })).value;
-
   if (serverURL && sid && schoolid) {
     CapacitorHttp.get({
       url: `${serverURL}/api/plan`,
@@ -168,13 +171,10 @@ async function updatePlanView() {
       },
       responseType: "json"
     }).then(async response => {
-
-      let cardContainer = document.getElementById("cardContainer");
-      cardContainer.innerHTML = "";
-
       response.data.forEach(entry => {
         cardContainer.appendChild(createCardItem(entry))
       });
+      app.dialog.close();
     });
   }
 }
@@ -205,6 +205,15 @@ async function loadSchoolSelect() {
   }
 }
 
+async function loadMemoryEntryOptions() {
+  document.getElementById("login-username").value = (await Preferences.get({key: "username"})).value;
+  document.getElementById("login-schoolid").value = (await Preferences.get({key: "schoolid"})).value;
+  document.getElementById("login-instance").value = (await Preferences.get({key: "serverURL"})).value;
+  document.getElementById("login-password").value = "";
+  document.getElementById("login-username-li").classList.add("item-input-with-value");
+
+}
+
 document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
 document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
 document.getElementById("loginButton").addEventListener("click", login);
@@ -219,4 +228,14 @@ app.on('tabShow', function (tabEl) {
 
 
 async function init() {
+  let loggedIn = await isLoggedIn();
+
+  if (loggedIn) {
+    updatePlanView();
+  } else {
+    loadMemoryEntryOptions();
+    openSettingsScreen();
+  }
 }
+
+init();
