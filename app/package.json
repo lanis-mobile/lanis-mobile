@@ -21,6 +21,7 @@
     "@capacitor/local-notifications": "^5.0.6",
     "@capacitor/splash-screen": "latest",
     "framework7": "^8.3.0",
+    "framework7-icons": "^5.0.5",
     "fuse.js": "^6.6.2"
   },
   "devDependencies": {

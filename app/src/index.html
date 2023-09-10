@@ -10,6 +10,7 @@
 
     <!-- Framework7 CDN links -->
     <link rel="stylesheet" href="./framework7/framework7-bundle.min.css" />
+    <link rel="stylesheet" href="./framework7/icons/css/framework7-icons.css" />
     <!-- Your custom styles -->
     <style>
       /* Put your custom styles here */
@@ -39,7 +40,12 @@
           <!-- Scrollable page content -->
           <div class="fab fab-left-bottom">
             <a id="openSettingsScreenButton" href="#">
-              <i class="icon">settings</i>
+              <i class="icon f7-icons">gear_alt_fill</i>
+            </a>
+          </div>
+          <div class="fab fab-right-bottom">
+            <a id="reloadPlanDataButton" href="#">
+              <i class="icon f7-icons">arrow_counterclockwise_circle_fill</i>
             </a>
           </div>
           <div class="page-content">
@@ -51,7 +57,6 @@
         </div>
       </div>
 
-      <!-- Another view -->
       <div id="view-filter" class="view tab">
         <!-- Filter page -->
         <div class="page" data-name="filter">
@@ -92,6 +97,9 @@
             <div class="navbar-bg"></div>
             <div class="navbar-inner sliding">
               <div class="title">Einstellungen</div>
+              <div class="right">
+                  <a id="closeSettingsScreenButton" href="#" class="button">schließen</a>
+              </div>
             </div>
           </div>
           <div class="list no-hairlines-md">
@@ -154,7 +162,12 @@
               </li>
               <li class="item-content">
                 <div class="item-inner">
-                  <i>in tellus integer feugiat scelerisque varius morbi enim nunc faucibus a pellentesque sit amet porttitor eget dolor morbi non arcu risus quis varius quam quisque id diam vel quam elementum pulvinar etiam non quam lacus suspendisse faucibus interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit duis tristique sollicitudin</i>
+                  <strong>nicht eingeloggt</strong>
+                </div>
+              </li>
+              <li class="item-content">
+                <div class="item-inner">
+                  <i>Auf dem Server werden keine Daten gespeichert. Der Server stellt lediglich eine Verbindung zu den Lanis-Servern her. Der Wechsel der Instanz ist nicht mit einer Abmeldung verbunden. <br>Um alle Daten auf diesem Gerät bezüglich der Lanis Aktivität zu löschen, klicken Sie auf diese Schaltfläche.</i>
                 </div>
               </li>
               <li class="item-content">

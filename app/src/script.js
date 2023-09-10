@@ -4,19 +4,10 @@ import schoolData from './schools.json';
 
 // Initialize app
 var app = new Framework7({
-    // App root element
     root: '#app',
-    // App Name
-    name: 'My App',
-    // App id
-    id: 'com.myapp.test',
-    // Enable swipe panel
-    panel: {
-        swipe: 'left',
-    },
+    name: 'SPH-Plan',
+    id: 'io.github.sphplan',
 });
-
-
 
 function openSettingsScreen() {
     app.loginScreen.open('#settings-screen');
