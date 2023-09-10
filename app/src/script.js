@@ -2,6 +2,7 @@ import Fuse from 'fuse.js';
 import schoolData from './schools.json';
 import { Preferences } from '@capacitor/preferences';
 import { CapacitorHttp } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 // Initialize app
 var app = new Framework7({
@@ -227,11 +228,23 @@ async function wipeStorageAndRestartApp() {
   document.location.href = 'index.html';
 }
 
+async function openInBrowser(url) {
+  await Browser.open({url: url});
+}
+
 document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
 document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
 document.getElementById("loginButton").addEventListener("click", login);
 document.getElementById("reloadPlanDataButton").addEventListener("click", updatePlanView);
 document.getElementById("resetAppButton").addEventListener("click", wipeStorageAndRestartApp);
+
+
+//Buttons on startpage
+document.getElementById("browserOpenBugreport").addEventListener("click", ()=>{openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues")});
+document.getElementById("browserOpenFeatureRequest").addEventListener("click", ()=>{openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues")});
+document.getElementById("browserOpenLatestrelease").addEventListener("click", ()=>{openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest")});
+document.getElementById("browserOpenGitHubPage").addEventListener("click", ()=>{openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan")});
+
 
 app.tab.show('#instanceConfigTab');
 // Event-Handling für das Umschalten zwischen Tabs
