@@ -4,6 +4,8 @@ import { Preferences } from '@capacitor/preferences';
 import { CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
+const REQUEST_TIMEOUT = 2500;
+
 // Initialize app
 var app = new Framework7({
   root: '#app',
@@ -41,7 +43,11 @@ async function isLoggedIn() {
         schoolid: schoolid,
         sid: sid
       },
-      responseType: "text"
+      responseType: "text",
+      connectTimeout: REQUEST_TIMEOUT
+    }).catch(error => {
+      app.toast.create({ text: 'Error calling the server!' }).open();
+      document.getElementById("loginInformationLabel").innerText = "keine Verbindung";
     });
 
     if (response.status == 200) {
@@ -75,7 +81,8 @@ async function login() {
         password: password,
         schoolid: schoolid
       },
-      responseType: "text"
+      responseType: "text",
+      connectTimeout: REQUEST_TIMEOUT
     }).then(async response => {
       app.dialog.close();
       if (response.status == 200) {
@@ -96,9 +103,10 @@ async function login() {
       } else {
         app.toast.create({ text: 'login failed: unknown error' }).open()
       }
-    })
-
-
+    }).catch(error => {
+      app.dialog.close();
+      app.toast.create({ text: 'Login Failed: unknown error' }).open()
+    });
 
   } catch (err) {
     app.dialog.close();
@@ -172,7 +180,8 @@ async function updatePlanView() {
       url: `${serverURL}/api/plan`,
       params: {
         sid: sid,
-        schoolid: schoolid
+        schoolid: schoolid,
+        connectTimeout: REQUEST_TIMEOUT
       },
       responseType: "json"
     }).then(async response => {
@@ -180,9 +189,12 @@ async function updatePlanView() {
         cardContainer.appendChild(createCardItem(entry))
       });
       app.dialog.close();
-    });
+    }).catch(error => {
+      app.dialog.close();
+      app.toast.create({ text: 'Netzwerkfehler!' }).open();
+    })
   } else {
-    app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open()
+    app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
   }
 }
 
