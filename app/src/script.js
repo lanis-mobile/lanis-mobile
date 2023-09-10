@@ -1,5 +1,7 @@
 import Fuse from 'fuse.js';
 import schoolData from './schools.json';
+import { Preferences } from '@capacitor/preferences';
+
 
 
 // Initialize app
@@ -16,6 +18,25 @@ function openSettingsScreen() {
 
 function closeSettingsScreen() {
     app.loginScreen.close('#settings-screen');
+}
+
+
+//returns whether the user has a valid session or not
+async function loggedIn() {
+    const serverURL = (await Preferences.get({key: "serverURL"})).value;
+    const sid = (await Preferences.get({key: "sid"})).value;
+    const schoolid = (await Preferences.get({key: "schoolid"})).value;
+
+    if (serverURL && sid && schoolid) {
+        let response = await fetch(`${serverURL}/isValidSession?schoolid=${schoolid}&sid=${sid}`);
+        if (response.status == 200) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
 
@@ -59,3 +80,7 @@ app.on('tabShow', function (tabEl) {
     app.tab.show(tabId);
 });
 
+
+async function init() {
+    
+}
