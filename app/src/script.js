@@ -42,11 +42,14 @@ async function isLoggedIn() {
     });
 
     if (response.status == 200) {
+      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
       return true;
     } else {
+      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
       return false;
     }
   } else {
+    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
     return false;
   }
 }
@@ -214,10 +217,21 @@ async function loadMemoryEntryOptions() {
 
 }
 
+async function wipeStorageAndRestartApp() {
+  let keys = await Preferences.keys();
+  console.log(keys)
+  keys.keys.forEach(async key => {
+    await Preferences.remove({key: key});
+  });
+
+  document.location.href = 'index.html';
+}
+
 document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
 document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
 document.getElementById("loginButton").addEventListener("click", login);
 document.getElementById("reloadPlanDataButton").addEventListener("click", updatePlanView);
+document.getElementById("resetAppButton").addEventListener("click", wipeStorageAndRestartApp);
 
 app.tab.show('#instanceConfigTab');
 // Event-Handling für das Umschalten zwischen Tabs
