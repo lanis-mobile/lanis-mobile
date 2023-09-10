@@ -10,7 +10,7 @@ var app = new Framework7({
   name: 'SPH-Plan',
   id: 'io.github.sphplan',
   toast: {
-    closeTimeout: 3000,
+    closeTimeout: 2500,
     closeButton: true,
     position: "top"
   }
@@ -159,14 +159,14 @@ function createCardItem(data) {
 
 
 async function updatePlanView() {
-  app.dialog.preloader('Lade Plan...');
-  var cardContainer = document.getElementById("cardContainer");
-  cardContainer.innerHTML = ``;
-
   const serverURL = (await Preferences.get({ key: "serverURL" })).value;
   const sid = (await Preferences.get({ key: "sid" })).value;
   const schoolid = (await Preferences.get({ key: "schoolid" })).value;
   if (serverURL && sid && schoolid) {
+    app.dialog.preloader('Lade Plan...');
+    var cardContainer = document.getElementById("cardContainer");
+    cardContainer.innerHTML = ``;
+
     CapacitorHttp.get({
       url: `${serverURL}/api/plan`,
       params: {
@@ -180,6 +180,8 @@ async function updatePlanView() {
       });
       app.dialog.close();
     });
+  } else {
+    app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open()
   }
 }
 
