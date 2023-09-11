@@ -140,7 +140,7 @@ function createCardItem(data) {
 
   const cardHeader = document.createElement('div');
   cardHeader.classList.add('card-header');
-  cardHeader.innerHTML = `Stunde ${data.Stunde} <strong>${data.Art}</strong>`;
+  cardHeader.innerHTML = `Stunde ${data.Stunde} <b>${data.Klasse}</b> <strong>${data.Art}</strong>`;
   card.appendChild(cardHeader);
 
   const cardContent = document.createElement('div');
@@ -154,7 +154,7 @@ function createCardItem(data) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
       labelCell.classList.add('label-cell');
-      labelCell.style.paddingRight = "17vw"; // TODO better solution
+      labelCell.style.paddingRight = "16vw"; // TODO better solution
       labelCell.textContent = label;
       const numericCell = document.createElement('td');
       numericCell.classList.add('numeric-cell');
@@ -167,7 +167,7 @@ function createCardItem(data) {
 
   let keys = Object.keys(data);
   keys.forEach(key => {
-    if (data[key] && !(["Tag_en", "_hervorgehoben", "Tag", "Stunde", "Fach", "Art"].includes(key))) {
+    if (data[key] && !(["Tag_en", "_hervorgehoben", "Tag", "Stunde", "Fach", "Art", "Klasse"].includes(key))) {
       addRow(`${key.replace("_", " ")}:`, data[key])
     }
   });
