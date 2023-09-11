@@ -67,13 +67,23 @@ async function handlePlan(params) {
     client.logged_in = true;
 
     try {
-      const date = await client.getNextVplanDate();
-      const plan = await client.getVplan(date);
-      
+      const dates = await client.getVplanDates();
+      const fetchPromises = [];
+
+      dates.forEach(date => {
+        console.log("fetching date: " + date);
+        const promise = client.getVplan(date);
+        fetchPromises.push(promise);
+      });
+
+      const plans = await Promise.all(fetchPromises);
+      const plan = [].concat(...plans);
+
       return new Response(JSON.stringify(plan), { status: 200, headers: {"Access-Control-Allow-Origin": "*"}});
     } catch (error) {
-      console.log(error); // Log the error for debugging
-      return new Response("Error while authenticating", { status: 401, headers: {"Access-Control-Allow-Origin": "*"}});
+      return new Response("Error while handling data", { status: 500, headers: {"Access-Control-Allow-Origin": "*"}});
     }
   }
+
+  return new Response("Invalid request", { status: 400, headers: {"Access-Control-Allow-Origin": "*"}});
 }
