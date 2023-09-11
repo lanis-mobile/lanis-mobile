@@ -226,12 +226,21 @@ async function loadSchoolSelect() {
 }
 
 async function loadMemoryEntryOptions() {
-  document.getElementById("login-username").value = (await SecureStorage.get({key: "username"}));
-  document.getElementById("login-schoolid").value = (await SecureStorage.get({key: "schoolid"}));
-  document.getElementById("login-instance").value = (await SecureStorage.get({key: "serverURL"}));
-  document.getElementById("login-password").value = "";
-  document.getElementById("login-username-li").classList.add("item-input-with-value");
+  let serverURL = (await SecureStorage.getItem("serverURL"));
+  if (!serverURL) {
+    serverURL="https://production.sphvertretungsplan.alessioc42.workers.dev";
+  }
 
+  let username = (await SecureStorage.getItem("username"));
+  if (username) {
+    document.getElementById("login-username-li").classList.add("item-input-with-value");
+
+  }
+
+  document.getElementById("login-schoolid").value = (await SecureStorage.getItem("schoolid"));
+  document.getElementById("login-username").value = username;
+  document.getElementById("login-instance").value = serverURL;
+  document.getElementById("login-password").value = "";
 }
 
 async function wipeStorageAndRestartApp() {
