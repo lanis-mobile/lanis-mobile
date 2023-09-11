@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy src/worker.js",
     "start": "wrangler dev"
   },
   "devDependencies": {

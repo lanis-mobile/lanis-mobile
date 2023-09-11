@@ -10,7 +10,9 @@ Vplan anschicht         |  Einstellungen
 ## sehr frühe dev version!
 Aktuell ist die App zwar funktionsfähig, es sind aber einige Features noch nicht Implementiert. Auch ist mit Bugs zu rechnen!
 
-Zum Ausprobieren kann die Server-Instanz im Bild verwendet werden. 
+Zum Ausprobieren kann diese Server-Instanz verwendet werden:
+
+https://production.sphvertretungsplan.alessiocaputo2007.workers.dev
 
 ## Diese App soll 2 probleme Lösen:
 
