@@ -248,11 +248,13 @@ async function loadMemoryEntryOptions() {
   if (!serverURL) {
     serverURL = "https://production.sphvertretungsplan.alessioc42.workers.dev";
   }
+  document.getElementById("login-instance-li").classList.add("item-input-with-value");
 
   let username = (await SecureStorage.getItem("username"));
   if (username) {
     document.getElementById("login-username-li").classList.add("item-input-with-value");
-
+  } else {
+    document.getElementById("login-username-li").classList.remove("item-input-with-value");
   }
 
   document.getElementById("login-schoolid").value = (await SecureStorage.getItem("schoolid_raw"));
