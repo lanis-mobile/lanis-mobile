@@ -1,24 +1,15 @@
 {
-  "name": "sphvertrtungsplanserver",
-  "version": "0.0.1",
-  "description": "The server to power sph-plan",
-  "main": "index.js",
+  "name": "sphvertretungsplan",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "node index.js"
+    "deploy": "wrangler deploy",
+    "start": "wrangler dev"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alessioC42/SPH-vertretungsplan.git"
+  "devDependencies": {
+    "wrangler": "^3.0.0"
   },
-  "author": "Alessio C.",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/alessioC42/SPH-vertretungsplan/issues"
-  },
-  "homepage": "https://github.com/alessioC42/SPH-vertretungsplan#readme",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "sphclient": "^2.2.2"
+    "sphclient": "^2.2.3"
   }
 }
