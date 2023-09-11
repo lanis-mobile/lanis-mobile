@@ -14,10 +14,9 @@
     "b": "vite build && npx cap sync"
   },
   "dependencies": {
-    "@capacitor-community/http": "^1.4.1",
+    "@aparajita/capacitor-secure-storage": "^4.0.0",
     "@capacitor/android": "^5.3.0",
     "@capacitor/browser": "^5.0.6",
-    "@capacitor/camera": "latest",
     "@capacitor/core": "latest",
     "@capacitor/local-notifications": "^5.0.6",
     "@capacitor/preferences": "^5.0.6",

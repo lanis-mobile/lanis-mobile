@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 import schoolData from './schools.json';
-import { Preferences } from '@capacitor/preferences';
+import {SecureStorage} from '@aparajita/capacitor-secure-storage'
 import { CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
@@ -32,9 +32,9 @@ function closeSettingsScreen() {
 
 //returns whether the user has a valid session or not
 async function isLoggedIn() {
-  const serverURL = (await Preferences.get({ key: "serverURL" })).value;
-  const sid = (await Preferences.get({ key: "sid" })).value;
-  const schoolid = (await Preferences.get({ key: "schoolid" })).value;
+  const serverURL = (await SecureStorage.getItem("serverURL"));
+  const sid = (await SecureStorage.getItem("sid"));
+  const schoolid = (await SecureStorage.getItem("schoolid"));
 
   if (serverURL && sid && schoolid) {
     let response = await CapacitorHttp.get({
@@ -87,13 +87,13 @@ async function login() {
       app.dialog.close();
       if (response.status == 200) {
         let sid = await response.data;
-        await Preferences.set({ key: "sid", value: sid });
-        await Preferences.set({ key: "serverURL", value: serverURL });
-        await Preferences.set({ key: "schoolid", value: schoolid });
-        await Preferences.set({ key: "username", value: username });
+        await SecureStorage.setItem("sid", sid );
+        await SecureStorage.setItem("serverURL", serverURL);
+        await SecureStorage.setItem("schoolid", schoolid);
+        await SecureStorage.setItem("username", username );
         app.toast.create({ text: 'logged in!' }).open()
 
-        console.log((await Preferences.get({ key: "sid" })).value);
+        console.log(await SecureStorage.getItem("sid"));
         closeSettingsScreen()
         
         updatePlanView();
@@ -104,6 +104,7 @@ async function login() {
         app.toast.create({ text: 'login failed: unknown error' }).open()
       }
     }).catch(error => {
+      console.error(error);
       app.dialog.close();
       app.toast.create({ text: 'Login Failed: unknown error' }).open()
     });
@@ -168,9 +169,9 @@ function createCardItem(data) {
 }
 
 async function updatePlanView() {
-  const serverURL = (await Preferences.get({ key: "serverURL" })).value;
-  const sid = (await Preferences.get({ key: "sid" })).value;
-  const schoolid = (await Preferences.get({ key: "schoolid" })).value;
+  const serverURL = (await SecureStorage.getItem("serverURL"));
+  const sid = (await SecureStorage.getItem("sid"));
+  const schoolid = (await SecureStorage.getItem("schoolid"));
   if (serverURL && sid && schoolid) {
     app.dialog.preloader('Lade Plan...');
     var cardContainer = document.getElementById("cardContainer");
@@ -225,9 +226,9 @@ async function loadSchoolSelect() {
 }
 
 async function loadMemoryEntryOptions() {
-  document.getElementById("login-username").value = (await Preferences.get({key: "username"})).value;
-  document.getElementById("login-schoolid").value = (await Preferences.get({key: "schoolid"})).value;
-  document.getElementById("login-instance").value = (await Preferences.get({key: "serverURL"})).value;
+  document.getElementById("login-username").value = (await SecureStorage.get({key: "username"}));
+  document.getElementById("login-schoolid").value = (await SecureStorage.get({key: "schoolid"}));
+  document.getElementById("login-instance").value = (await SecureStorage.get({key: "serverURL"}));
   document.getElementById("login-password").value = "";
   document.getElementById("login-username-li").classList.add("item-input-with-value");
 
@@ -237,7 +238,7 @@ async function wipeStorageAndRestartApp() {
   let keys = await Preferences.keys();
   console.log(keys)
   keys.keys.forEach(async key => {
-    await Preferences.remove({key: key});
+    await Preferences.remove(key);
   });
 
   document.location.href = 'index.html';

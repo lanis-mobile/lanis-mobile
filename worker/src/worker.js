@@ -17,7 +17,7 @@ async function handleRequest(request) {
     case '/api/plan':
       return handlePlan(urlParams);
     default:
-      return new Response(`Not found: ${pathname}`, { status: 404 });
+      return new Response(`Not found: ${pathname}`, { status: 404 , headers: {"Access-Control-Allow-Origin": "*"}});
   }
 }
 
@@ -32,9 +32,9 @@ async function handleLogin(params) {
 
     try {
       await client.authenticate();
-      return new Response(client.cookies.sid.value);
+      return new Response(client.cookies.sid.value, {headers: {"Access-Control-Allow-Origin": "*"}});
     } catch (error) {
-      return new Response(error, { status: 500 });
+      return new Response(error, { status: 500, headers: {"Access-Control-Allow-Origin": "*"}});
     }
   }
 }
@@ -50,9 +50,9 @@ async function handleIsValidSession(params) {
 
     try {
       await client.getVplan(new Date());
-      return new Response("OK", { status: 200 });
+      return new Response("OK", { status: 200, headers: {"Access-Control-Allow-Origin": "*"}});
     } catch (error) {
-      return new Response("NO", { status: 401 });
+      return new Response("NO", { status: 401, headers: {"Access-Control-Allow-Origin": "*"}});
     }
   }
 }
@@ -70,10 +70,10 @@ async function handlePlan(params) {
       const date = await client.getNextVplanDate();
       const plan = await client.getVplan(date);
       
-      return new Response(JSON.stringify(plan), { status: 200 });
+      return new Response(JSON.stringify(plan), { status: 200, headers: {"Access-Control-Allow-Origin": "*"}});
     } catch (error) {
       console.log(error); // Log the error for debugging
-      return new Response("Error while authenticating", { status: 401 });
+      return new Response("Error while authenticating", { status: 401, headers: {"Access-Control-Allow-Origin": "*"}});
     }
   }
 }
