@@ -12,7 +12,7 @@ Aktuell ist die App zwar funktionsfähig, es sind aber einige Features noch nich
 
 Zum Ausprobieren kann diese Server-Instanz verwendet werden:
 
-https://production.sphvertretungsplan.alessiocaputo2007.workers.dev
+https://production.sphvertretungsplan.alessioc42.workers.dev
 
 ## Diese App soll 2 probleme Lösen:
 
