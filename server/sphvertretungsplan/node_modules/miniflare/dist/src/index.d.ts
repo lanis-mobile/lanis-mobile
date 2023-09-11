@@ -1,0 +1,6355 @@
+/// <reference types="node" />
+
+import type { Abortable } from 'events';
+import type { AbortSignal as AbortSignal_2 } from '@cloudflare/workers-types/experimental';
+import { Agent } from 'undici';
+import type { Blob as Blob_2 } from '@cloudflare/workers-types/experimental';
+import { Blob as Blob_3 } from 'buffer';
+import { BodyInit } from 'undici';
+import type { CacheStorage } from '@cloudflare/workers-types/experimental';
+import type { D1Database } from '@cloudflare/workers-types/experimental';
+import { Database } from 'better-sqlite3';
+import { default as default_2 } from 'undici/types/mock-agent';
+import type { DurableObjectNamespace } from '@cloudflare/workers-types/experimental';
+import { File } from 'undici';
+import type { File as File_2 } from '@cloudflare/workers-types/experimental';
+import { FormData } from 'undici';
+import { Headers } from 'undici';
+import type { Headers as Headers_2 } from '@cloudflare/workers-types/experimental';
+import { HeadersInit } from 'undici';
+import type { IncomingRequestCfProperties } from '@cloudflare/workers-types/experimental';
+import type { KVNamespace } from '@cloudflare/workers-types/experimental';
+import { MockAgent } from 'undici';
+import NodeWebSocket from 'ws';
+import { PathLike } from 'fs';
+import type { Queue } from '@cloudflare/workers-types/experimental';
+import type { R2Bucket } from '@cloudflare/workers-types/experimental';
+import type { R2StringChecksums } from '@cloudflare/workers-types/experimental';
+import { ReadableByteStreamController } from 'stream/web';
+import { ReadableStream } from 'stream/web';
+import type { ReadableStream as ReadableStream_2 } from '@cloudflare/workers-types/experimental';
+import { ReadableStreamBYOBRequest } from 'stream/web';
+import { ReferrerPolicy } from 'undici';
+import { Request as Request_2 } from 'undici';
+import type { Request as Request_3 } from '@cloudflare/workers-types/experimental';
+import { RequestCache } from 'undici';
+import { RequestCredentials } from 'undici';
+import { RequestDestination } from 'undici';
+import { RequestDuplex } from 'undici';
+import { RequestInfo } from 'undici';
+import { RequestInit as RequestInit_2 } from 'undici';
+import type { RequestInit as RequestInit_3 } from '@cloudflare/workers-types/experimental';
+import type { RequestInitCfProperties } from '@cloudflare/workers-types/experimental';
+import { RequestMode } from 'undici';
+import { RequestRedirect } from 'undici';
+import { Response as Response_2 } from 'undici';
+import type { Response as Response_3 } from '@cloudflare/workers-types/experimental';
+import { ResponseInit as ResponseInit_2 } from 'undici';
+import { ResponseRedirectStatus } from 'undici';
+import { ResponseType } from 'undici';
+import type { ServiceWorkerGlobalScope } from '@cloudflare/workers-types/experimental';
+import { Statement } from 'better-sqlite3';
+import { compatibilityDate as supportedCompatibilityDate } from 'workerd';
+import { Transform } from 'stream';
+import { TransformStream } from 'stream/web';
+import { URLSearchParams as URLSearchParams_2 } from 'url';
+import { WritableStream } from 'stream/web';
+import { z } from 'zod';
+
+export declare const allowUnauthorizedAgent: Agent;
+
+export declare type Awaitable<T> = T | Promise<T>;
+
+export declare const BASE64_REGEXP: RegExp;
+
+export declare const Base64DataSchema: z.ZodEffects<z.ZodString, Buffer, string>;
+
+export declare function base64Decode(encoded: string): string;
+
+export declare function base64Encode(value: string): string;
+
+export declare const BINDING_TEXT_NAMESPACE = "MINIFLARE_NAMESPACE";
+
+export declare const BINDING_TEXT_PERSIST = "MINIFLARE_PERSIST";
+
+export declare const BINDING_TEXT_PLUGIN = "MINIFLARE_PLUGIN";
+
+export declare type BlobId = string;
+
+export declare interface BlobStore {
+    get(id: BlobId, range?: InclusiveRange): Promise<ReadableStream<Uint8Array> | null>;
+    get(id: BlobId, ranges: InclusiveRange[], opts: MultipartOptions): Promise<MultipartReadableStream | null>;
+    put(stream: ReadableStream<Uint8Array>): Promise<BlobId>;
+    delete(id: BlobId): Promise<void>;
+}
+
+export { BodyInit }
+
+export declare const CACHE_LOOPBACK_SCRIPT: string;
+
+export declare const CACHE_PLUGIN: Plugin<typeof CacheOptionsSchema, typeof CacheSharedOptionsSchema, CacheGateway>;
+
+export declare const CACHE_PLUGIN_NAME = "cache";
+
+export declare class CacheGateway {
+    private readonly log;
+    private readonly timers;
+    private readonly storage;
+    constructor(log: Log, storage: Storage, timers: Timers);
+    match(request: Request, cacheKey?: string): Promise<Response>;
+    put(request: Request, value: ReadableStream<Uint8Array>, cacheKey?: string): Promise<Response>;
+    delete(request: Request, cacheKey?: string): Promise<Response>;
+}
+
+export declare const CacheOptionsSchema: z.ZodObject<{
+    cache: z.ZodOptional<z.ZodBoolean>;
+    cacheWarnUsage: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    cache?: boolean | undefined;
+    cacheWarnUsage?: boolean | undefined;
+}, {
+    cache?: boolean | undefined;
+    cacheWarnUsage?: boolean | undefined;
+}>;
+
+export declare const CacheSharedOptionsSchema: z.ZodObject<{
+    cachePersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+}, "strip", z.ZodTypeAny, {
+    cachePersist?: string | boolean | undefined;
+}, {
+    cachePersist?: string | boolean | undefined;
+}>;
+
+export declare enum CfHeader {
+    Error = "cf-r2-error",
+    Request = "cf-r2-request",
+    MetadataSize = "cf-r2-metadata-size",
+    Blob = "cf-blob",
+    CacheNamespace = "cf-cache-namespace",
+    CacheStatus = "cf-cache-status"
+}
+
+export declare type Clock = Timers["now"];
+
+export declare class CloseEvent extends Event {
+    readonly code: number;
+    readonly reason: string;
+    readonly wasClean: boolean;
+    constructor(type: "close", init?: {
+        code?: number;
+        reason?: string;
+        wasClean?: boolean;
+    });
+}
+
+export declare type CloudflareFetch = z.infer<typeof CloudflareFetchSchema>;
+
+export declare const CloudflareFetchSchema: z.ZodType<(resource: string, searchParams?: URLSearchParams_2, init?: RequestInit) => Awaitable<Response>, z.ZodTypeDef, (resource: string, searchParams?: URLSearchParams_2, init?: RequestInit) => Awaitable<Response>>;
+
+export declare interface Config {
+    services?: Service[];
+    sockets?: Socket[];
+    v8Flags?: string[];
+    extensions?: Extension[];
+}
+
+export declare function configureEntrySocket(coreOpts: z.infer<typeof CORE_PLUGIN.sharedOptions>): Promise<Socket>;
+
+export declare const CORE_PLUGIN: Plugin<typeof CoreOptionsSchema, typeof CoreSharedOptionsSchema>;
+
+export declare const CORE_PLUGIN_NAME = "core";
+
+export declare const CoreBindings: {
+    readonly SERVICE_LOOPBACK: "MINIFLARE_LOOPBACK";
+    readonly SERVICE_USER_ROUTE_PREFIX: "MINIFLARE_USER_ROUTE_";
+    readonly SERVICE_USER_FALLBACK: "MINIFLARE_USER_FALLBACK";
+    readonly TEXT_CUSTOM_SERVICE: "MINIFLARE_CUSTOM_SERVICE";
+    readonly TEXT_UPSTREAM_URL: "MINIFLARE_UPSTREAM_URL";
+    readonly JSON_CF_BLOB: "CF_BLOB";
+    readonly JSON_ROUTES: "MINIFLARE_ROUTES";
+    readonly JSON_LOG_LEVEL: "MINIFLARE_LOG_LEVEL";
+    readonly DATA_LIVE_RELOAD_SCRIPT: "MINIFLARE_LIVE_RELOAD_SCRIPT";
+    readonly DURABLE_OBJECT_NAMESPACE_PROXY: "MINIFLARE_PROXY";
+};
+
+export declare const CoreHeaders: {
+    readonly CUSTOM_SERVICE: "MF-Custom-Service";
+    readonly ORIGINAL_URL: "MF-Original-URL";
+    readonly ERROR_STACK: "MF-Experimental-Error-Stack";
+    readonly ROUTE_OVERRIDE: "MF-Route-Override";
+    readonly CUSTOM_EVENT: "MF-Custom-Event";
+    readonly OP: "MF-Op";
+    readonly OP_TARGET: "MF-Op-Target";
+    readonly OP_KEY: "MF-Op-Key";
+    readonly OP_SYNC: "MF-Op-Sync";
+    readonly OP_STRINGIFIED_SIZE: "MF-Op-Stringified-Size";
+    readonly OP_RESULT_TYPE: "MF-Op-Result-Type";
+};
+
+export declare const CoreOptionsSchema: z.ZodEffects<z.ZodIntersection<z.ZodUnion<[z.ZodObject<{
+    modules: z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+        path: z.ZodString;
+        contents: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<Uint8Array, z.ZodTypeDef, Uint8Array>]>>;
+    }, "strip", z.ZodTypeAny, {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }, {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }>, "many">;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    modulesRoot?: string | undefined;
+    modules: {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }[];
+}, {
+    modulesRoot?: string | undefined;
+    modules: {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }[];
+}>, z.ZodObject<{
+    script: z.ZodString;
+    scriptPath: z.ZodOptional<z.ZodString>;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+        include: z.ZodArray<z.ZodString, "many">;
+        fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    script: string;
+}, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    script: string;
+}>, z.ZodObject<{
+    scriptPath: z.ZodString;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+        include: z.ZodArray<z.ZodString, "many">;
+        fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    scriptPath: string;
+}, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    scriptPath: string;
+}>]>, z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    compatibilityDate: z.ZodOptional<z.ZodString>;
+    compatibilityFlags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    routes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    bindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<Json, z.ZodTypeDef, Json>>>;
+    wasmBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    textBlobBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    dataBlobBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    serviceBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodObject<{
+        network: z.ZodObject<{
+            allow: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            deny: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            tlsOptions: z.ZodOptional<z.ZodObject<{
+                keypair: z.ZodOptional<z.ZodObject<{
+                    privateKey: z.ZodOptional<z.ZodString>;
+                    certificateChain: z.ZodOptional<z.ZodString>;
+                }, "strip", z.ZodTypeAny, {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                }, {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                }>>;
+                requireClientCerts: z.ZodOptional<z.ZodBoolean>;
+                trustBrowserCas: z.ZodOptional<z.ZodBoolean>;
+                trustedCertificates: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+                minVersion: z.ZodOptional<z.ZodNativeEnum<TlsOptions_Version>>;
+                cipherList: z.ZodOptional<z.ZodString>;
+            }, "strip", z.ZodTypeAny, {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            }, {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            }>>;
+        }, "strip", z.ZodTypeAny, {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        }, {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    }, {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    }>, z.ZodObject<{
+        external: z.ZodType<ExternalServer, z.ZodTypeDef, ExternalServer>;
+    }, "strip", z.ZodTypeAny, {
+        external: ExternalServer;
+    }, {
+        external: ExternalServer;
+    }>, z.ZodObject<{
+        disk: z.ZodObject<{
+            path: z.ZodString;
+            writable: z.ZodOptional<z.ZodBoolean>;
+        }, "strip", z.ZodTypeAny, {
+            writable?: boolean | undefined;
+            path: string;
+        }, {
+            writable?: boolean | undefined;
+            path: string;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    }, {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    }>, z.ZodFunction<z.ZodTuple<[z.ZodType<Request<RequestInitCfType>, z.ZodTypeDef, Request<RequestInitCfType>>], z.ZodUnknown>, z.ZodUnion<[z.ZodType<Response, z.ZodTypeDef, Response>, z.ZodPromise<z.ZodType<Response, z.ZodTypeDef, Response>>]>>]>>>;
+    outboundService: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
+        network: z.ZodObject<{
+            allow: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            deny: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            tlsOptions: z.ZodOptional<z.ZodObject<{
+                keypair: z.ZodOptional<z.ZodObject<{
+                    privateKey: z.ZodOptional<z.ZodString>;
+                    certificateChain: z.ZodOptional<z.ZodString>;
+                }, "strip", z.ZodTypeAny, {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                }, {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                }>>;
+                requireClientCerts: z.ZodOptional<z.ZodBoolean>;
+                trustBrowserCas: z.ZodOptional<z.ZodBoolean>;
+                trustedCertificates: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+                minVersion: z.ZodOptional<z.ZodNativeEnum<TlsOptions_Version>>;
+                cipherList: z.ZodOptional<z.ZodString>;
+            }, "strip", z.ZodTypeAny, {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            }, {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            }>>;
+        }, "strip", z.ZodTypeAny, {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        }, {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    }, {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    }>, z.ZodObject<{
+        external: z.ZodType<ExternalServer, z.ZodTypeDef, ExternalServer>;
+    }, "strip", z.ZodTypeAny, {
+        external: ExternalServer;
+    }, {
+        external: ExternalServer;
+    }>, z.ZodObject<{
+        disk: z.ZodObject<{
+            path: z.ZodString;
+            writable: z.ZodOptional<z.ZodBoolean>;
+        }, "strip", z.ZodTypeAny, {
+            writable?: boolean | undefined;
+            path: string;
+        }, {
+            writable?: boolean | undefined;
+            path: string;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    }, {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    }>, z.ZodFunction<z.ZodTuple<[z.ZodType<Request<RequestInitCfType>, z.ZodTypeDef, Request<RequestInitCfType>>], z.ZodUnknown>, z.ZodUnion<[z.ZodType<Response, z.ZodTypeDef, Response>, z.ZodPromise<z.ZodType<Response, z.ZodTypeDef, Response>>]>>]>>;
+    fetchMock: z.ZodOptional<z.ZodType<MockAgent<MockAgent.Options>, z.ZodTypeDef, MockAgent<MockAgent.Options>>>;
+    unsafeEphemeralDurableObjects: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: MockAgent<MockAgent.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+}, {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: MockAgent<MockAgent.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+}>>, ({
+    modulesRoot?: string | undefined;
+    modules: {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }[];
+} & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: MockAgent<MockAgent.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+}) | ({
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    script: string;
+} & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: MockAgent<MockAgent.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+}) | ({
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    scriptPath: string;
+} & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: MockAgent<MockAgent.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+}), ({
+    modulesRoot?: string | undefined;
+    modules: {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }[];
+} | {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    script: string;
+} | {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    scriptPath: string;
+}) & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+        network: {
+            allow?: string[] | undefined;
+            deny?: string[] | undefined;
+            tlsOptions?: {
+                minVersion?: TlsOptions_Version | undefined;
+                keypair?: {
+                    privateKey?: string | undefined;
+                    certificateChain?: string | undefined;
+                } | undefined;
+                requireClientCerts?: boolean | undefined;
+                trustBrowserCas?: boolean | undefined;
+                trustedCertificates?: string[] | undefined;
+                cipherList?: string | undefined;
+            } | undefined;
+        };
+    } | {
+        external: ExternalServer;
+    } | {
+        disk: {
+            writable?: boolean | undefined;
+            path: string;
+        };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: MockAgent<MockAgent.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+}>;
+
+export declare const CoreSharedOptionsSchema: z.ZodObject<{
+    host: z.ZodOptional<z.ZodString>;
+    port: z.ZodOptional<z.ZodNumber>;
+    https: z.ZodOptional<z.ZodBoolean>;
+    httpsKey: z.ZodOptional<z.ZodString>;
+    httpsKeyPath: z.ZodOptional<z.ZodString>;
+    httpsCert: z.ZodOptional<z.ZodString>;
+    httpsCertPath: z.ZodOptional<z.ZodString>;
+    inspectorPort: z.ZodOptional<z.ZodNumber>;
+    verbose: z.ZodOptional<z.ZodBoolean>;
+    log: z.ZodOptional<z.ZodType<Log, z.ZodTypeDef, Log>>;
+    timers: z.ZodOptional<z.ZodType<Timers<unknown>, z.ZodTypeDef, Timers<unknown>>>;
+    upstream: z.ZodOptional<z.ZodString>;
+    cf: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString, z.ZodRecord<z.ZodString, z.ZodAny>]>>;
+    liveReload: z.ZodOptional<z.ZodBoolean>;
+    unsafeSourceMapIgnoreSourcePredicate: z.ZodOptional<z.ZodFunction<z.ZodTuple<[z.ZodString], z.ZodUnknown>, z.ZodBoolean>>;
+}, "strip", z.ZodTypeAny, {
+    host?: string | undefined;
+    port?: number | undefined;
+    cf?: string | boolean | Record<string, any> | undefined;
+    inspectorPort?: number | undefined;
+    verbose?: boolean | undefined;
+    https?: boolean | undefined;
+    httpsKey?: string | undefined;
+    httpsKeyPath?: string | undefined;
+    httpsCert?: string | undefined;
+    httpsCertPath?: string | undefined;
+    log?: Log | undefined;
+    timers?: Timers<unknown> | undefined;
+    upstream?: string | undefined;
+    liveReload?: boolean | undefined;
+    unsafeSourceMapIgnoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined;
+}, {
+    host?: string | undefined;
+    port?: number | undefined;
+    cf?: string | boolean | Record<string, any> | undefined;
+    inspectorPort?: number | undefined;
+    verbose?: boolean | undefined;
+    https?: boolean | undefined;
+    httpsKey?: string | undefined;
+    httpsKeyPath?: string | undefined;
+    httpsCert?: string | undefined;
+    httpsCertPath?: string | undefined;
+    log?: Log | undefined;
+    timers?: Timers<unknown> | undefined;
+    upstream?: string | undefined;
+    liveReload?: boolean | undefined;
+    unsafeSourceMapIgnoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined;
+}>;
+
+export declare function coupleWebSocket(ws: NodeWebSocket, pair: WebSocket): Promise<void>;
+
+export declare function createArrayReadableStream(array: Uint8Array, range?: InclusiveRange): ReadableStream<Uint8Array>;
+
+export declare function createFetchMock(): MockAgent<MockAgent.Options>;
+
+export declare function createFileReadableStream(filePath: PathLike, range?: InclusiveRange): Promise<ReadableStream<Uint8Array>>;
+
+export declare function createFileStorage(root: string): Storage;
+
+export declare function createFileWritableStream(filePath: PathLike, exclusive?: boolean): Promise<WritableStream<Uint8Array>>;
+
+export declare function createHTTPReducers(impl: PlatformImpl<unknown>): ReducersRevivers;
+
+export declare function createHTTPRevivers<RS>(impl: PlatformImpl<RS>): ReducersRevivers;
+
+export declare function createMemoryStorage(): Storage;
+
+export declare function createMultipartArrayReadableStream(array: Uint8Array, ranges: InclusiveRange[], opts: MultipartOptions): MultipartReadableStream;
+
+export declare function createMultipartFileReadableStream(filePath: PathLike, ranges: InclusiveRange[], opts: MultipartOptions): Promise<MultipartReadableStream>;
+
+export declare function createReadableStream(source: RangeSource, range?: InclusiveRange): ReadableStream<Uint8Array>;
+
+export declare const D1_PLUGIN: Plugin<typeof D1OptionsSchema, typeof D1SharedOptionsSchema, D1Gateway>;
+
+export declare const D1_PLUGIN_NAME = "d1";
+
+export declare class D1Error extends HttpError {
+    constructor(cause: Error);
+    toResponse(): Response;
+}
+
+export declare interface D1ErrorResponse {
+    error: string;
+    success: false;
+    served_by: string;
+}
+
+export declare class D1Gateway {
+    #private;
+    private readonly log;
+    private readonly db;
+    constructor(log: Log, storage: Storage);
+    query(query: D1Query): D1SuccessResponse | D1SuccessResponse[];
+    execute(query: D1Query): D1SuccessResponse | D1SuccessResponse[];
+    dump(): Promise<Uint8Array>;
+}
+
+export declare const D1OptionsSchema: z.ZodObject<{
+    d1Databases: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+}, "strip", z.ZodTypeAny, {
+    d1Databases?: string[] | Record<string, string> | undefined;
+}, {
+    d1Databases?: string[] | Record<string, string> | undefined;
+}>;
+
+export declare type D1Query = z.infer<typeof D1QuerySchema>;
+
+export declare const D1QuerySchema: z.ZodUnion<[z.ZodObject<{
+    sql: z.ZodString;
+    params: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<[z.ZodNumber, z.ZodString, z.ZodNull, z.ZodArray<z.ZodNumber, "many">]>, "many">>>;
+}, "strip", z.ZodTypeAny, {
+    params?: (string | number | number[] | null)[] | null | undefined;
+    sql: string;
+}, {
+    params?: (string | number | number[] | null)[] | null | undefined;
+    sql: string;
+}>, z.ZodArray<z.ZodObject<{
+    sql: z.ZodString;
+    params: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<[z.ZodNumber, z.ZodString, z.ZodNull, z.ZodArray<z.ZodNumber, "many">]>, "many">>>;
+}, "strip", z.ZodTypeAny, {
+    params?: (string | number | number[] | null)[] | null | undefined;
+    sql: string;
+}, {
+    params?: (string | number | number[] | null)[] | null | undefined;
+    sql: string;
+}>, "many">]>;
+
+export declare interface D1ResponseMeta {
+    duration: number;
+    last_row_id: number | null;
+    changes: number | null;
+    served_by: string;
+    internal_stats: null;
+}
+
+export declare const D1SharedOptionsSchema: z.ZodObject<{
+    d1Persist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+}, "strip", z.ZodTypeAny, {
+    d1Persist?: string | boolean | undefined;
+}, {
+    d1Persist?: string | boolean | undefined;
+}>;
+
+export declare type D1SingleQuery = z.infer<typeof D1SingleQuerySchema>;
+
+export declare const D1SingleQuerySchema: z.ZodObject<{
+    sql: z.ZodString;
+    params: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<[z.ZodNumber, z.ZodString, z.ZodNull, z.ZodArray<z.ZodNumber, "many">]>, "many">>>;
+}, "strip", z.ZodTypeAny, {
+    params?: (string | number | number[] | null)[] | null | undefined;
+    sql: string;
+}, {
+    params?: (string | number | number[] | null)[] | null | undefined;
+    sql: string;
+}>;
+
+export declare interface D1SuccessResponse {
+    results: Record<string, D1Value>[] | null;
+    duration: number;
+    success: true;
+    served_by: string;
+    meta: D1ResponseMeta | null;
+    lastRowId: null;
+    changes: null;
+}
+
+export declare type D1Value = z.infer<typeof D1ValueSchema>;
+
+export declare const D1ValueSchema: z.ZodUnion<[z.ZodNumber, z.ZodString, z.ZodNull, z.ZodArray<z.ZodNumber, "many">]>;
+
+export declare const DateSchema: z.ZodEffects<z.ZodNumber, Date, number>;
+
+export declare function decodePersist(headers: Headers): Persistence;
+
+export declare const DEFAULT_PERSIST_ROOT = ".mf";
+
+export declare const defaultClock: () => number;
+
+export declare const defaultTimers: Timers<NodeJS.Timeout>;
+
+export declare class DeferredPromise<T> extends Promise<T> {
+    readonly resolve: DeferredPromiseResolve<T>;
+    readonly reject: DeferredPromiseReject;
+    constructor(executor?: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void);
+}
+
+export declare type DeferredPromiseReject = (reason?: any) => void;
+
+export declare type DeferredPromiseResolve<T> = (value: T | PromiseLike<T>) => void;
+
+export declare const DELETE: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare function deserialiseRegExps(matcher: SerialisableMatcherRegExps): MatcherRegExps;
+
+export declare interface DiskDirectory {
+    path?: string;
+    writable?: boolean;
+}
+
+export declare type DispatchFetch = (input: RequestInfo, init?: RequestInit<Partial<IncomingRequestCfProperties>>) => Promise<Response>;
+
+export declare const DURABLE_OBJECTS_PLUGIN: Plugin<typeof DurableObjectsOptionsSchema, typeof DurableObjectsSharedOptionsSchema>;
+
+export declare const DURABLE_OBJECTS_PLUGIN_NAME = "do";
+
+export declare const DURABLE_OBJECTS_STORAGE_SERVICE_NAME: string;
+
+export declare type DurableObjectClassNames = Map<string, Map</* className */ string, /* unsafeUniqueKey */ /* unsafeUniqueKey */ string | undefined>>;
+
+export declare const DurableObjectsOptionsSchema: z.ZodObject<{
+    durableObjects: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodObject<{
+        className: z.ZodString;
+        scriptName: z.ZodOptional<z.ZodString>;
+        unsafeUniqueKey: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        scriptName?: string | undefined;
+        unsafeUniqueKey?: string | undefined;
+        className: string;
+    }, {
+        scriptName?: string | undefined;
+        unsafeUniqueKey?: string | undefined;
+        className: string;
+    }>]>>>;
+}, "strip", z.ZodTypeAny, {
+    durableObjects?: Record<string, string | {
+        scriptName?: string | undefined;
+        unsafeUniqueKey?: string | undefined;
+        className: string;
+    }> | undefined;
+}, {
+    durableObjects?: Record<string, string | {
+        scriptName?: string | undefined;
+        unsafeUniqueKey?: string | undefined;
+        className: string;
+    }> | undefined;
+}>;
+
+export declare const DurableObjectsSharedOptionsSchema: z.ZodObject<{
+    durableObjectsPersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+}, "strip", z.ZodTypeAny, {
+    durableObjectsPersist?: string | boolean | undefined;
+}, {
+    durableObjectsPersist?: string | boolean | undefined;
+}>;
+
+export declare interface EncodedMetadata {
+    metadataSize: number;
+    value: ReadableStream<Uint8Array>;
+}
+
+export declare function encodePersist(persist: Persistence): Worker_Binding[];
+
+export declare class ErrorEvent extends Event {
+    readonly error: Error | null;
+    constructor(type: "error", init?: {
+        error?: Error;
+    });
+}
+
+export declare function escapeLike(prefix: string): string;
+
+export declare interface Extension {
+    modules?: Extension_Module[];
+}
+
+export declare interface Extension_Module {
+    name?: string;
+    internal?: boolean;
+    esModule?: string;
+}
+
+export declare type ExternalServer = {
+    address?: string;
+} & ({
+    http: HttpOptions;
+} | {
+    https: ExternalServer_Https;
+});
+
+export declare interface ExternalServer_Https {
+    options?: HttpOptions;
+    tlsOptions?: TlsOptions;
+    certificateHost?: string;
+}
+
+export declare function fetch(input: RequestInfo, init?: RequestInit | Request): Promise<Response>;
+
+export { File }
+
+export declare class FileBlobStore implements BlobStore {
+    #private;
+    constructor(root: string);
+    get(id: BlobId, range?: InclusiveRange): Promise<ReadableStream<Uint8Array> | null>;
+    get(id: BlobId, ranges: InclusiveRange[], opts: MultipartOptions): Promise<MultipartReadableStream | null>;
+    put(stream: ReadableStream<Uint8Array>): Promise<BlobId>;
+    delete(id: BlobId): Promise<void>;
+}
+
+export declare function formatResponse(info: ResponseInfo): Promise<string>;
+
+export { FormData }
+
+export declare interface GatewayConstructor<Gateway> {
+    new (log: Log, storage: Storage, timers: Timers, namespace: string, dispatchFetch: DispatchFetch): Gateway;
+}
+
+export declare class GatewayFactory<Gateway> {
+    #private;
+    private readonly log;
+    private readonly timers;
+    private readonly dispatchFetch;
+    private readonly pluginName;
+    private readonly gatewayClass;
+    constructor(log: Log, timers: Timers, dispatchFetch: DispatchFetch, pluginName: string, gatewayClass: GatewayConstructor<Gateway>);
+    getStorage(namespace: string, persist: Persistence): Storage;
+    get(namespace: string, persist: Persistence): Gateway;
+}
+
+export declare type GatewayMessage = z.infer<typeof GatewayMessageSchema>;
+
+export declare const GatewayMessageSchema: z.ZodObject<{
+    body: z.ZodEffects<z.ZodString, Buffer, string>;
+    contentType: z.ZodDefault<z.ZodEnum<["text", "json", "bytes", "v8"]>>;
+}, "strip", z.ZodTypeAny, {
+    body: Buffer;
+    contentType: "text" | "json" | "bytes" | "v8";
+}, {
+    contentType?: "text" | "json" | "bytes" | "v8" | undefined;
+    body: string;
+}>;
+
+export declare const GET: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare function getAccessibleHosts(ipv4Only?: boolean): string[];
+
+export declare function getCacheServiceName(workerIndex: number): string;
+
+export declare function getGlobalServices({ sharedOptions, allWorkerRoutes, fallbackWorkerName, loopbackPort, log, proxyBindings, }: GlobalServicesOptions): Service[];
+
+export declare interface GlobalServicesOptions {
+    sharedOptions: z.infer<typeof CoreSharedOptionsSchema>;
+    allWorkerRoutes: Map<string, string[]>;
+    fallbackWorkerName: string | undefined;
+    loopbackPort: number;
+    log: Log;
+    proxyBindings: Worker_Binding[];
+}
+
+export declare function globsToRegExps(globs?: string[]): MatcherRegExps;
+
+export declare const HEAD: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare const HEADER_CF_BLOB = "MF-CF-Blob";
+
+export declare const HEADER_PERSIST = "MF-Persist";
+
+export { Headers }
+
+export { HeadersInit }
+
+export declare const HEX_REGEXP: RegExp;
+
+export declare const HexDataSchema: z.ZodEffects<z.ZodString, Buffer, string>;
+
+export declare class HttpError extends MiniflareError<number> {
+    constructor(code: number, message?: string, cause?: Error);
+    toResponse(): Response;
+}
+
+export declare interface HttpOptions {
+    style?: HttpOptions_Style;
+    forwardedProtoHeader?: string;
+    cfBlobHeader?: string;
+    injectRequestHeaders?: HttpOptions_Header[];
+    injectResponseHeaders?: HttpOptions_Header[];
+}
+
+export declare interface HttpOptions_Header {
+    name?: string;
+    value?: string;
+}
+
+export declare enum HttpOptions_Style {
+    HOST = 0,
+    PROXY = 1
+}
+
+/* Excluded from this release type: _HttpParser */
+
+export declare type IgnoreSourcePredicate = z.infer<typeof IgnoreSourcePredicateSchema>;
+
+export declare const IgnoreSourcePredicateSchema: z.ZodFunction<z.ZodTuple<[z.ZodString], z.ZodUnknown>, z.ZodBoolean>;
+
+export declare interface InclusiveRange {
+    start: number;
+    end: number;
+}
+
+/* Excluded from this release type: _initialiseInstanceRegistry */
+
+export declare type InternalR2CreateMultipartUploadOptions = OmitRequest<z.infer<typeof R2CreateMultipartUploadRequestSchema>>;
+
+export declare type InternalR2GetOptions = OmitRequest<z.infer<typeof R2GetRequestSchema>>;
+
+export declare type InternalR2ListOptions = OmitRequest<z.infer<typeof R2ListRequestSchema>>;
+
+export declare class InternalR2Object {
+    #private;
+    readonly key: string;
+    readonly version: string;
+    readonly size: number;
+    readonly etag: string;
+    readonly uploaded: number;
+    readonly httpMetadata: R2HttpFields;
+    readonly customMetadata: Record<string, string>;
+    readonly range?: R2Range;
+    readonly checksums: R2StringChecksums;
+    constructor(row: Omit<ObjectRow, "blob_id">, range?: R2Range);
+    encode(): EncodedMetadata;
+    static encodeMultiple(objects: InternalR2Objects): EncodedMetadata;
+}
+
+export declare class InternalR2ObjectBody extends InternalR2Object {
+    readonly body: ReadableStream<Uint8Array>;
+    constructor(metadata: Omit<ObjectRow, "blob_id">, body: ReadableStream<Uint8Array>, range?: R2Range);
+    encode(): EncodedMetadata;
+}
+
+export declare interface InternalR2Objects {
+    objects: InternalR2Object[];
+    truncated: boolean;
+    cursor?: string;
+    delimitedPrefixes: string[];
+}
+
+export declare type InternalR2PutOptions = OmitRequest<z.infer<typeof R2PutRequestSchema>>;
+
+export declare function isFetcherFetch(targetName: string, key: string): boolean;
+
+export declare function isR2ObjectWriteHttpMetadata(targetName: string, key: string): boolean;
+
+export declare function isSitesRequest(request: Request): boolean;
+
+export declare type Json = Literal | {
+    [key: string]: Json;
+} | Json[];
+
+export declare const JsonSchema: z.ZodType<Json>;
+
+declare const kAccepted: unique symbol;
+
+declare const kCf: unique symbol;
+
+declare const kClose: unique symbol;
+
+declare const kClosedIncoming: unique symbol;
+
+declare const kClosedOutgoing: unique symbol;
+
+declare const kCoupled: unique symbol;
+
+declare const kError: unique symbol;
+
+export declare interface KeyEntries<Metadata = unknown> {
+    keys: KeyEntry<Metadata>[];
+    cursor?: string;
+}
+
+export declare interface KeyEntriesQuery {
+    prefix?: string;
+    cursor?: string;
+    limit: number;
+}
+
+export declare interface KeyEntry<Metadata = unknown> {
+    key: string;
+    expiration?: number;
+    metadata?: Metadata;
+}
+
+export declare interface KeyMultipartValueEntry<Metadata = unknown> extends KeyEntry<Metadata> {
+    value: MultipartReadableStream;
+}
+
+export declare interface KeyValueEntry<Metadata = unknown> extends KeyEntry<Metadata> {
+    value: ReadableStream<Uint8Array>;
+}
+
+export declare class KeyValueStorage<Metadata = unknown> {
+    #private;
+    private readonly storage;
+    private readonly timers;
+    constructor(storage: Storage, timers?: Timers);
+    get(key: string): Promise<KeyValueEntry<Metadata> | null>;
+    get(key: string, optsFactory?: RangeOptionsFactory<Metadata>): Promise<KeyMultipartValueEntry<Metadata> | null>;
+    put(entry: KeyValueEntry<Awaitable<Metadata>>): Promise<void>;
+    delete(key: string): Promise<boolean>;
+    list(opts: KeyEntriesQuery): Promise<KeyEntries<Metadata>>;
+}
+
+declare const kPair: unique symbol;
+
+export declare const kProxyNodeBinding: unique symbol;
+
+declare const kSend: unique symbol;
+
+export declare const KV_PLUGIN: Plugin<typeof KVOptionsSchema, typeof KVSharedOptionsSchema, KVGateway>;
+
+export declare const KV_PLUGIN_NAME = "kv";
+
+export declare class KVError extends HttpError {
+}
+
+export declare class KVGateway {
+    private readonly log;
+    private readonly timers;
+    private readonly storage;
+    constructor(log: Log, storage: Storage, timers: Timers);
+    get<Metadata = unknown>(key: string, options?: KVGatewayGetOptions): Promise<KVGatewayGetResult<Metadata> | undefined>;
+    put(key: string, value: ReadableStream<Uint8Array>, options?: KVGatewayPutOptions): Promise<void>;
+    delete(key: string): Promise<void>;
+    list(options?: KVGatewayListOptions): Promise<KVGatewayListResult>;
+}
+
+export declare interface KVGatewayGetOptions {
+    cacheTtl?: number;
+}
+
+export declare interface KVGatewayGetResult<Metadata = unknown> {
+    value: ReadableStream<Uint8Array>;
+    expiration?: number;
+    metadata?: Metadata;
+}
+
+export declare interface KVGatewayListKey {
+    name: string;
+    expiration?: number;
+    metadata?: string;
+}
+
+export declare interface KVGatewayListOptions {
+    limit?: number;
+    prefix?: string;
+    cursor?: string;
+}
+
+export declare type KVGatewayListResult = {
+    keys: KVGatewayListKey[];
+} & ({
+    list_complete: false;
+    cursor: string;
+} | {
+    list_complete: true;
+    cursor: undefined;
+});
+
+export declare interface KVGatewayPutOptions<Metadata = unknown> {
+    expiration?: string | number;
+    expirationTtl?: string | number;
+    metadata?: Metadata;
+    valueLengthHint?: number;
+}
+
+export declare const kVoid: unique symbol;
+
+export declare const KVOptionsSchema: z.ZodObject<{
+    kvNamespaces: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    sitePath: z.ZodOptional<z.ZodString>;
+    siteInclude: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    siteExclude: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    kvNamespaces?: string[] | Record<string, string> | undefined;
+    sitePath?: string | undefined;
+    siteInclude?: string[] | undefined;
+    siteExclude?: string[] | undefined;
+}, {
+    kvNamespaces?: string[] | Record<string, string> | undefined;
+    sitePath?: string | undefined;
+    siteInclude?: string[] | undefined;
+    siteExclude?: string[] | undefined;
+}>;
+
+export declare const KVSharedOptionsSchema: z.ZodObject<{
+    kvPersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+}, "strip", z.ZodTypeAny, {
+    kvPersist?: string | boolean | undefined;
+}, {
+    kvPersist?: string | boolean | undefined;
+}>;
+
+declare const kWebSocket: unique symbol;
+
+export declare function lexicographicCompare(x: string, y: string): number;
+
+export declare type Literal = z.infer<typeof LiteralSchema>;
+
+export declare const LiteralSchema: z.ZodUnion<[z.ZodString, z.ZodNumber, z.ZodBoolean, z.ZodNull]>;
+
+export declare class Log {
+    #private;
+    readonly level: LogLevel;
+    constructor(level?: LogLevel, opts?: LogOptions);
+    protected log(message: string): void;
+    protected logWithLevel(level: LogLevel, message: string): void;
+    error(message: Error): void;
+    warn(message: string): void;
+    info(message: string): void;
+    debug(message: string): void;
+    verbose(message: string): void;
+}
+
+export declare enum LogLevel {
+    NONE = 0,
+    ERROR = 1,
+    WARN = 2,
+    INFO = 3,
+    DEBUG = 4,
+    VERBOSE = 5
+}
+
+export declare interface LogOptions {
+    prefix?: string;
+    suffix?: string;
+}
+
+export declare interface MatcherRegExps {
+    include: RegExp[];
+    exclude: RegExp[];
+}
+
+export declare function matchRoutes(routes: WorkerRoute[], url: URL): string | null;
+
+export declare function maybeApply<From, To>(f: (value: From) => To, maybeValue: From | undefined): To | undefined;
+
+export declare function maybeGetSitesManifestModule(bindings: Worker_Binding[]): Worker_Module | undefined;
+
+export declare function maybeParseURL(url: Persistence): URL | undefined;
+
+export declare class MemoryBlobStore implements BlobStore {
+    #private;
+    get(id: BlobId, range?: InclusiveRange): Promise<ReadableStream<Uint8Array> | null>;
+    get(id: BlobId, ranges: InclusiveRange[], opts: MultipartOptions): Promise<MultipartReadableStream | null>;
+    put(stream: ReadableStream<Uint8Array>): Promise<BlobId>;
+    delete(id: BlobId): Promise<void>;
+}
+
+export declare class Message {
+    #private;
+    readonly id: string;
+    readonly timestamp: number;
+    readonly body: unknown;
+    constructor(id: string, timestamp: number, body: unknown);
+    incrementFailedAttempts(): number;
+}
+
+export declare class MessageEvent extends Event {
+    readonly data: ArrayBuffer | string;
+    constructor(type: "message", init: {
+        data: ArrayBuffer | string;
+    });
+}
+
+export declare function millisToSeconds(millis: number): number;
+
+export declare class Miniflare {
+    #private;
+    constructor(opts: MiniflareOptions);
+    get ready(): Promise<URL>;
+    setOptions(opts: MiniflareOptions): Promise<void>;
+    dispatchFetch: DispatchFetch;
+    /* Excluded from this release type: _getPluginStorage */
+    /* Excluded from this release type: _getProxyClient */
+    getBindings<Env = Record<string, unknown>>(workerName?: string): Promise<Env>;
+    getCaches(): Promise<ReplaceWorkersTypes<CacheStorage>>;
+    getD1Database(bindingName: string, workerName?: string): Promise<D1Database>;
+    getDurableObjectNamespace(bindingName: string, workerName?: string): Promise<ReplaceWorkersTypes<DurableObjectNamespace>>;
+    getKVNamespace(bindingName: string, workerName?: string): Promise<ReplaceWorkersTypes<KVNamespace>>;
+    getQueueProducer<Body = unknown>(bindingName: string, workerName?: string): Promise<Queue<Body>>;
+    getR2Bucket(bindingName: string, workerName?: string): Promise<ReplaceWorkersTypes<R2Bucket>>;
+    dispose(): Promise<void>;
+}
+
+export declare class MiniflareCoreError extends MiniflareError<MiniflareCoreErrorCode> {
+}
+
+export declare type MiniflareCoreErrorCode = "ERR_RUNTIME_FAILURE" | "ERR_DISPOSED" | "ERR_MODULE_PARSE" | "ERR_MODULE_STRING_SCRIPT" | "ERR_MODULE_DYNAMIC_SPEC" | "ERR_MODULE_RULE" | "ERR_PERSIST_UNSUPPORTED" | "ERR_PERSIST_REMOTE_UNAUTHENTICATED" | "ERR_PERSIST_REMOTE_UNSUPPORTED" | "ERR_FUTURE_COMPATIBILITY_DATE" | "ERR_NO_WORKERS" | "ERR_DUPLICATE_NAME" | "ERR_DIFFERENT_UNIQUE_KEYS" | "ERR_MULTIPLE_OUTBOUNDS";
+
+export declare class MiniflareError<Code extends string | number = string | number> extends Error {
+    readonly code: Code;
+    readonly cause?: Error | undefined;
+    constructor(code: Code, message?: string, cause?: Error | undefined);
+}
+
+export declare type MiniflareOptions = SharedOptions & (WorkerOptions | {
+    workers: WorkerOptions[];
+});
+
+export declare type ModuleDefinition = z.infer<typeof ModuleDefinitionSchema>;
+
+export declare const ModuleDefinitionSchema: z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    path: z.ZodString;
+    contents: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<Uint8Array, z.ZodTypeDef, Uint8Array>]>>;
+}, "strip", z.ZodTypeAny, {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+}, {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+}>;
+
+export declare type ModuleRule = z.infer<typeof ModuleRuleSchema>;
+
+export declare const ModuleRuleSchema: z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    include: z.ZodArray<z.ZodString, "many">;
+    fallthrough: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+}, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+}>;
+
+export declare type ModuleRuleType = z.infer<typeof ModuleRuleTypeSchema>;
+
+export declare const ModuleRuleTypeSchema: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+
+export declare interface MultipartOptions {
+    contentLength: number;
+    contentType?: string;
+}
+
+export declare interface MultipartPartRow {
+    upload_id: string;
+    part_number: number;
+    blob_id: string;
+    size: number;
+    etag: string;
+    checksum_md5: string;
+    object_key: string | null;
+}
+
+export declare interface MultipartReadableStream {
+    multipartContentType: string;
+    body: ReadableStream<Uint8Array>;
+}
+
+export declare interface MultipartUploadRow {
+    upload_id: string;
+    key: string;
+    http_metadata: string;
+    custom_metadata: string;
+    state: ValueOf<typeof MultipartUploadState>;
+}
+
+export declare const MultipartUploadState: {
+    readonly IN_PROGRESS: 0;
+    readonly COMPLETED: 1;
+    readonly ABORTED: 2;
+};
+
+export declare class Mutex {
+    private locked;
+    private resolveQueue;
+    private drainQueue;
+    private lock;
+    private unlock;
+    get hasWaiting(): boolean;
+    runWith<T>(closure: () => Awaitable<T>): Promise<T>;
+    drained(): Promise<void>;
+}
+
+export declare function namespaceEntries(namespaces?: Record<string, string> | string[]): [bindingName: string, id: string][];
+
+export declare function namespaceKeys(namespaces?: Record<string, string> | string[]): string[];
+
+export declare interface Network {
+    allow?: string[];
+    deny?: string[];
+    tlsOptions?: TlsOptions;
+}
+
+export declare const NODE_PLATFORM_IMPL: PlatformImpl<ReadableStream>;
+
+export declare function nonCircularClone<T>(value: T): T;
+
+export declare const NOOP_CACHE_SCRIPT: string;
+
+export declare class NoOpLog extends Log {
+    constructor();
+    protected log(): void;
+    error(message: Error): void;
+}
+
+export declare function normaliseDurableObject(designator: NonNullable<z.infer<typeof DurableObjectsOptionsSchema>["durableObjects"]>[string]): {
+    className: string;
+    serviceName?: string;
+    unsafeUniqueKey?: string;
+};
+
+export declare interface ObjectRow {
+    key: string;
+    blob_id: string | null;
+    version: string;
+    size: number;
+    etag: string;
+    uploaded: number;
+    checksums: string;
+    http_metadata: string;
+    custom_metadata: string;
+}
+
+export declare type OmitRequest<T> = Omit<T, "method" | "object">;
+
+export declare type OptionalZodTypeOf<T extends z.ZodTypeAny | undefined> = T extends z.ZodTypeAny ? z.TypeOf<T> : undefined;
+
+export declare type OverloadReplaceWorkersTypes<T> = T extends (...args: any[]) => any ? UnionToIntersection<ReplaceWorkersTypes<OverloadUnion<T>>> : ReplaceWorkersTypes<T>;
+
+export declare type OverloadUnion<T extends (...args: any[]) => any> = Parameters<T> extends [] ? T : OverloadUnion9<T>;
+
+export declare type OverloadUnion2<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) : T;
+
+export declare type OverloadUnion3<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) : OverloadUnion2<T>;
+
+export declare type OverloadUnion4<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+    (...args: infer P4): infer R4;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) | ((...args: P4) => R4) : OverloadUnion3<T>;
+
+export declare type OverloadUnion5<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+    (...args: infer P4): infer R4;
+    (...args: infer P5): infer R5;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) | ((...args: P4) => R4) | ((...args: P5) => R5) : OverloadUnion4<T>;
+
+export declare type OverloadUnion6<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+    (...args: infer P4): infer R4;
+    (...args: infer P5): infer R5;
+    (...args: infer P6): infer R6;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) | ((...args: P4) => R4) | ((...args: P5) => R5) | ((...args: P6) => R6) : OverloadUnion5<T>;
+
+export declare type OverloadUnion7<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+    (...args: infer P4): infer R4;
+    (...args: infer P5): infer R5;
+    (...args: infer P6): infer R6;
+    (...args: infer P7): infer R7;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) | ((...args: P4) => R4) | ((...args: P5) => R5) | ((...args: P6) => R6) | ((...args: P7) => R7) : OverloadUnion6<T>;
+
+export declare type OverloadUnion8<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+    (...args: infer P4): infer R4;
+    (...args: infer P5): infer R5;
+    (...args: infer P6): infer R6;
+    (...args: infer P7): infer R7;
+    (...args: infer P8): infer R8;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) | ((...args: P4) => R4) | ((...args: P5) => R5) | ((...args: P6) => R6) | ((...args: P7) => R7) | ((...args: P8) => R8) : OverloadUnion7<T>;
+
+export declare type OverloadUnion9<T> = T extends {
+    (...args: infer P1): infer R1;
+    (...args: infer P2): infer R2;
+    (...args: infer P3): infer R3;
+    (...args: infer P4): infer R4;
+    (...args: infer P5): infer R5;
+    (...args: infer P6): infer R6;
+    (...args: infer P7): infer R7;
+    (...args: infer P8): infer R8;
+    (...args: infer P9): infer R9;
+} ? ((...args: P1) => R1) | ((...args: P2) => R2) | ((...args: P3) => R3) | ((...args: P4) => R4) | ((...args: P5) => R5) | ((...args: P6) => R6) | ((...args: P7) => R7) | ((...args: P8) => R8) | ((...args: P9) => R9) : OverloadUnion8<T>;
+
+export declare const PARAM_FILE_UNSANITISE = "unsanitise";
+
+/* Excluded from this release type: _parseRanges */
+
+export declare function parseRoutes(allRoutes: Map<string, string[]>): WorkerRoute[];
+
+export declare function parseWithReadableStreams<RS>(impl: PlatformImpl<RS>, stringified: StringifiedWithStream<RS>, revivers: ReducersRevivers): unknown;
+
+export declare const PATCH: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare type Persistence = z.infer<typeof PersistenceSchema>;
+
+export declare const PersistenceSchema: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+
+export declare interface PlatformImpl<RS> {
+    Blob: typeof Blob_2;
+    File: typeof File_2;
+    Headers: typeof Headers_2;
+    Request: typeof Request_3;
+    Response: typeof Response_3;
+    isReadableStream(value: unknown): value is RS;
+    bufferReadableStream(stream: RS): Promise<ArrayBuffer>;
+    unbufferReadableStream(buffer: ArrayBuffer): RS;
+}
+
+export declare type Plugin<Options extends z.ZodType, SharedOptions extends z.ZodType | undefined = undefined, Gateway = undefined> = PluginBase<Options, SharedOptions> & (SharedOptions extends undefined ? {
+    sharedOptions?: undefined;
+} : {
+    sharedOptions: SharedOptions;
+}) & (Gateway extends undefined ? {
+    gateway?: undefined;
+    router?: undefined;
+} : {
+    gateway: GatewayConstructor<Gateway>;
+    router: RouterConstructor<Gateway>;
+});
+
+export declare const PLUGIN_ENTRIES: ["core" | "kv" | "cache" | "do" | "d1" | "queues" | "r2", ValueOf<{
+    core: Plugin<z.ZodEffects<z.ZodIntersection<z.ZodUnion<[z.ZodObject<{
+    modules: z.ZodArray<z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    path: z.ZodString;
+    contents: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<Uint8Array, z.ZodTypeDef, Uint8Array>]>>;
+    }, "strip", z.ZodTypeAny, {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }, {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }>, "many">;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    }, {
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    }>, z.ZodObject<{
+    script: z.ZodString;
+    scriptPath: z.ZodOptional<z.ZodString>;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    include: z.ZodArray<z.ZodString, "many">;
+    fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    }, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    }>, z.ZodObject<{
+    scriptPath: z.ZodString;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    include: z.ZodArray<z.ZodString, "many">;
+    fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    }, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    }>]>, z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    compatibilityDate: z.ZodOptional<z.ZodString>;
+    compatibilityFlags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    routes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    bindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<Json, z.ZodTypeDef, Json>>>;
+    wasmBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    textBlobBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    dataBlobBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    serviceBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodObject<{
+    network: z.ZodObject<{
+    allow: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    deny: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    tlsOptions: z.ZodOptional<z.ZodObject<{
+    keypair: z.ZodOptional<z.ZodObject<{
+    privateKey: z.ZodOptional<z.ZodString>;
+    certificateChain: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }>>;
+    requireClientCerts: z.ZodOptional<z.ZodBoolean>;
+    trustBrowserCas: z.ZodOptional<z.ZodBoolean>;
+    trustedCertificates: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    minVersion: z.ZodOptional<z.ZodNativeEnum<TlsOptions_Version>>;
+    cipherList: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }>>;
+    }, "strip", z.ZodTypeAny, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }>, z.ZodObject<{
+    external: z.ZodType<ExternalServer, z.ZodTypeDef, ExternalServer>;
+    }, "strip", z.ZodTypeAny, {
+    external: ExternalServer;
+    }, {
+    external: ExternalServer;
+    }>, z.ZodObject<{
+    disk: z.ZodObject<{
+    path: z.ZodString;
+    writable: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    writable?: boolean | undefined;
+    path: string;
+    }, {
+    writable?: boolean | undefined;
+    path: string;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }>, z.ZodFunction<z.ZodTuple<[z.ZodType<Request<RequestInitCfType>, z.ZodTypeDef, Request<RequestInitCfType>>], z.ZodUnknown>, z.ZodUnion<[z.ZodType<Response, z.ZodTypeDef, Response>, z.ZodPromise<z.ZodType<Response, z.ZodTypeDef, Response>>]>>]>>>;
+    outboundService: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
+    network: z.ZodObject<{
+    allow: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    deny: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    tlsOptions: z.ZodOptional<z.ZodObject<{
+    keypair: z.ZodOptional<z.ZodObject<{
+    privateKey: z.ZodOptional<z.ZodString>;
+    certificateChain: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }>>;
+    requireClientCerts: z.ZodOptional<z.ZodBoolean>;
+    trustBrowserCas: z.ZodOptional<z.ZodBoolean>;
+    trustedCertificates: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    minVersion: z.ZodOptional<z.ZodNativeEnum<TlsOptions_Version>>;
+    cipherList: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }>>;
+    }, "strip", z.ZodTypeAny, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }>, z.ZodObject<{
+    external: z.ZodType<ExternalServer, z.ZodTypeDef, ExternalServer>;
+    }, "strip", z.ZodTypeAny, {
+    external: ExternalServer;
+    }, {
+    external: ExternalServer;
+    }>, z.ZodObject<{
+    disk: z.ZodObject<{
+    path: z.ZodString;
+    writable: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    writable?: boolean | undefined;
+    path: string;
+    }, {
+    writable?: boolean | undefined;
+    path: string;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }>, z.ZodFunction<z.ZodTuple<[z.ZodType<Request<RequestInitCfType>, z.ZodTypeDef, Request<RequestInitCfType>>], z.ZodUnknown>, z.ZodUnion<[z.ZodType<Response, z.ZodTypeDef, Response>, z.ZodPromise<z.ZodType<Response, z.ZodTypeDef, Response>>]>>]>>;
+    fetchMock: z.ZodOptional<z.ZodType<default_2<default_2.Options>, z.ZodTypeDef, default_2<default_2.Options>>>;
+    unsafeEphemeralDurableObjects: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }, {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }>>, ({
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    } & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }) | ({
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    } & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }) | ({
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    } & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }), ({
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    } | {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    } | {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    }) & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }>, z.ZodObject<{
+    host: z.ZodOptional<z.ZodString>;
+    port: z.ZodOptional<z.ZodNumber>;
+    https: z.ZodOptional<z.ZodBoolean>;
+    httpsKey: z.ZodOptional<z.ZodString>;
+    httpsKeyPath: z.ZodOptional<z.ZodString>;
+    httpsCert: z.ZodOptional<z.ZodString>;
+    httpsCertPath: z.ZodOptional<z.ZodString>;
+    inspectorPort: z.ZodOptional<z.ZodNumber>;
+    verbose: z.ZodOptional<z.ZodBoolean>;
+    log: z.ZodOptional<z.ZodType<Log, z.ZodTypeDef, Log>>;
+    timers: z.ZodOptional<z.ZodType<Timers<unknown>, z.ZodTypeDef, Timers<unknown>>>;
+    upstream: z.ZodOptional<z.ZodString>;
+    cf: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString, z.ZodRecord<z.ZodString, z.ZodAny>]>>;
+    liveReload: z.ZodOptional<z.ZodBoolean>;
+    unsafeSourceMapIgnoreSourcePredicate: z.ZodOptional<z.ZodFunction<z.ZodTuple<[z.ZodString], z.ZodUnknown>, z.ZodBoolean>>;
+    }, "strip", z.ZodTypeAny, {
+    host?: string | undefined;
+    port?: number | undefined;
+    cf?: string | boolean | Record<string, any> | undefined;
+    inspectorPort?: number | undefined;
+    verbose?: boolean | undefined;
+    https?: boolean | undefined;
+    httpsKey?: string | undefined;
+    httpsKeyPath?: string | undefined;
+    httpsCert?: string | undefined;
+    httpsCertPath?: string | undefined;
+    log?: Log | undefined;
+    timers?: Timers<unknown> | undefined;
+    upstream?: string | undefined;
+    liveReload?: boolean | undefined;
+    unsafeSourceMapIgnoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined;
+    }, {
+    host?: string | undefined;
+    port?: number | undefined;
+    cf?: string | boolean | Record<string, any> | undefined;
+    inspectorPort?: number | undefined;
+    verbose?: boolean | undefined;
+    https?: boolean | undefined;
+    httpsKey?: string | undefined;
+    httpsKeyPath?: string | undefined;
+    httpsCert?: string | undefined;
+    httpsCertPath?: string | undefined;
+    log?: Log | undefined;
+    timers?: Timers<unknown> | undefined;
+    upstream?: string | undefined;
+    liveReload?: boolean | undefined;
+    unsafeSourceMapIgnoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined;
+    }>>;
+    cache: Plugin<z.ZodObject<{
+    cache: z.ZodOptional<z.ZodBoolean>;
+    cacheWarnUsage: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    cache?: boolean | undefined;
+    cacheWarnUsage?: boolean | undefined;
+    }, {
+    cache?: boolean | undefined;
+    cacheWarnUsage?: boolean | undefined;
+    }>, z.ZodObject<{
+    cachePersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    cachePersist?: string | boolean | undefined;
+    }, {
+    cachePersist?: string | boolean | undefined;
+    }>, CacheGateway>;
+    d1: Plugin<z.ZodObject<{
+    d1Databases: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    }, "strip", z.ZodTypeAny, {
+    d1Databases?: string[] | Record<string, string> | undefined;
+    }, {
+    d1Databases?: string[] | Record<string, string> | undefined;
+    }>, z.ZodObject<{
+    d1Persist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    d1Persist?: string | boolean | undefined;
+    }, {
+    d1Persist?: string | boolean | undefined;
+    }>, D1Gateway>;
+    do: Plugin<z.ZodObject<{
+    durableObjects: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodObject<{
+    className: z.ZodString;
+    scriptName: z.ZodOptional<z.ZodString>;
+    unsafeUniqueKey: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }, {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }>]>>>;
+    }, "strip", z.ZodTypeAny, {
+    durableObjects?: Record<string, string | {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }> | undefined;
+    }, {
+    durableObjects?: Record<string, string | {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }> | undefined;
+    }>, z.ZodObject<{
+    durableObjectsPersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    durableObjectsPersist?: string | boolean | undefined;
+    }, {
+    durableObjectsPersist?: string | boolean | undefined;
+    }>>;
+    kv: Plugin<z.ZodObject<{
+    kvNamespaces: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    sitePath: z.ZodOptional<z.ZodString>;
+    siteInclude: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    siteExclude: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    }, "strip", z.ZodTypeAny, {
+    kvNamespaces?: string[] | Record<string, string> | undefined;
+    sitePath?: string | undefined;
+    siteInclude?: string[] | undefined;
+    siteExclude?: string[] | undefined;
+    }, {
+    kvNamespaces?: string[] | Record<string, string> | undefined;
+    sitePath?: string | undefined;
+    siteInclude?: string[] | undefined;
+    siteExclude?: string[] | undefined;
+    }>, z.ZodObject<{
+    kvPersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    kvPersist?: string | boolean | undefined;
+    }, {
+    kvPersist?: string | boolean | undefined;
+    }>, KVGateway>;
+    queues: Plugin<z.ZodObject<{
+    queueProducers: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    queueConsumers: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodObject<{
+    maxBatchSize: z.ZodOptional<z.ZodNumber>;
+    maxBatchTimeout: z.ZodOptional<z.ZodNumber>;
+    maxRetires: z.ZodOptional<z.ZodNumber>;
+    deadLetterQueue: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }>>, z.ZodArray<z.ZodString, "many">]>>;
+    }, "strip", z.ZodTypeAny, {
+    queueProducers?: string[] | Record<string, string> | undefined;
+    queueConsumers?: string[] | Record<string, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }> | undefined;
+    }, {
+    queueProducers?: string[] | Record<string, string> | undefined;
+    queueConsumers?: string[] | Record<string, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }> | undefined;
+    }>, undefined, QueuesGateway>;
+    r2: Plugin<z.ZodObject<{
+    r2Buckets: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    }, "strip", z.ZodTypeAny, {
+    r2Buckets?: string[] | Record<string, string> | undefined;
+    }, {
+    r2Buckets?: string[] | Record<string, string> | undefined;
+    }>, z.ZodObject<{
+    r2Persist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    r2Persist?: string | boolean | undefined;
+    }, {
+    r2Persist?: string | boolean | undefined;
+    }>, R2Gateway>;
+}>][];
+
+export declare interface PluginBase<Options extends z.ZodType, SharedOptions extends z.ZodType | undefined> {
+    options: Options;
+    getBindings(options: z.infer<Options>, workerIndex: number): Awaitable<Worker_Binding[] | void>;
+    getNodeBindings(options: z.infer<Options>): Awaitable<Record<string, unknown>>;
+    getServices(options: PluginServicesOptions<Options, SharedOptions>): Awaitable<Service[] | void>;
+}
+
+export declare function pluginNamespacePersistWorker(plugin: string, namespace: string, persist: Persistence): Worker;
+
+export declare const PLUGINS: {
+    core: Plugin<z.ZodEffects<z.ZodIntersection<z.ZodUnion<[z.ZodObject<{
+    modules: z.ZodArray<z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    path: z.ZodString;
+    contents: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<Uint8Array, z.ZodTypeDef, Uint8Array>]>>;
+    }, "strip", z.ZodTypeAny, {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }, {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }>, "many">;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    }, {
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    }>, z.ZodObject<{
+    script: z.ZodString;
+    scriptPath: z.ZodOptional<z.ZodString>;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    include: z.ZodArray<z.ZodString, "many">;
+    fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    }, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    }>, z.ZodObject<{
+    scriptPath: z.ZodString;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+    type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+    include: z.ZodArray<z.ZodString, "many">;
+    fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }, {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    }, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    }>]>, z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    compatibilityDate: z.ZodOptional<z.ZodString>;
+    compatibilityFlags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    routes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    bindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<Json, z.ZodTypeDef, Json>>>;
+    wasmBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    textBlobBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    dataBlobBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    serviceBindings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodObject<{
+    network: z.ZodObject<{
+    allow: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    deny: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    tlsOptions: z.ZodOptional<z.ZodObject<{
+    keypair: z.ZodOptional<z.ZodObject<{
+    privateKey: z.ZodOptional<z.ZodString>;
+    certificateChain: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }>>;
+    requireClientCerts: z.ZodOptional<z.ZodBoolean>;
+    trustBrowserCas: z.ZodOptional<z.ZodBoolean>;
+    trustedCertificates: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    minVersion: z.ZodOptional<z.ZodNativeEnum<TlsOptions_Version>>;
+    cipherList: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }>>;
+    }, "strip", z.ZodTypeAny, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }>, z.ZodObject<{
+    external: z.ZodType<ExternalServer, z.ZodTypeDef, ExternalServer>;
+    }, "strip", z.ZodTypeAny, {
+    external: ExternalServer;
+    }, {
+    external: ExternalServer;
+    }>, z.ZodObject<{
+    disk: z.ZodObject<{
+    path: z.ZodString;
+    writable: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    writable?: boolean | undefined;
+    path: string;
+    }, {
+    writable?: boolean | undefined;
+    path: string;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }>, z.ZodFunction<z.ZodTuple<[z.ZodType<Request<RequestInitCfType>, z.ZodTypeDef, Request<RequestInitCfType>>], z.ZodUnknown>, z.ZodUnion<[z.ZodType<Response, z.ZodTypeDef, Response>, z.ZodPromise<z.ZodType<Response, z.ZodTypeDef, Response>>]>>]>>>;
+    outboundService: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
+    network: z.ZodObject<{
+    allow: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    deny: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    tlsOptions: z.ZodOptional<z.ZodObject<{
+    keypair: z.ZodOptional<z.ZodObject<{
+    privateKey: z.ZodOptional<z.ZodString>;
+    certificateChain: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }, {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    }>>;
+    requireClientCerts: z.ZodOptional<z.ZodBoolean>;
+    trustBrowserCas: z.ZodOptional<z.ZodBoolean>;
+    trustedCertificates: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    minVersion: z.ZodOptional<z.ZodNativeEnum<TlsOptions_Version>>;
+    cipherList: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }, {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    }>>;
+    }, "strip", z.ZodTypeAny, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }, {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }, {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    }>, z.ZodObject<{
+    external: z.ZodType<ExternalServer, z.ZodTypeDef, ExternalServer>;
+    }, "strip", z.ZodTypeAny, {
+    external: ExternalServer;
+    }, {
+    external: ExternalServer;
+    }>, z.ZodObject<{
+    disk: z.ZodObject<{
+    path: z.ZodString;
+    writable: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    writable?: boolean | undefined;
+    path: string;
+    }, {
+    writable?: boolean | undefined;
+    path: string;
+    }>;
+    }, "strip", z.ZodTypeAny, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }, {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    }>, z.ZodFunction<z.ZodTuple<[z.ZodType<Request<RequestInitCfType>, z.ZodTypeDef, Request<RequestInitCfType>>], z.ZodUnknown>, z.ZodUnion<[z.ZodType<Response, z.ZodTypeDef, Response>, z.ZodPromise<z.ZodType<Response, z.ZodTypeDef, Response>>]>>]>>;
+    fetchMock: z.ZodOptional<z.ZodType<default_2<default_2.Options>, z.ZodTypeDef, default_2<default_2.Options>>>;
+    unsafeEphemeralDurableObjects: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }, {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }>>, ({
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    } & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }) | ({
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    } & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }) | ({
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    } & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }), ({
+    modulesRoot?: string | undefined;
+    modules: {
+    contents?: string | Uint8Array | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    path: string;
+    }[];
+    } | {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    script: string;
+    } | {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+    fallthrough?: boolean | undefined;
+    type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+    include: string[];
+    }[] | undefined;
+    scriptPath: string;
+    }) & {
+    name?: string | undefined;
+    compatibilityDate?: string | undefined;
+    compatibilityFlags?: string[] | undefined;
+    routes?: string[] | undefined;
+    bindings?: Record<string, Json> | undefined;
+    wasmBindings?: Record<string, string> | undefined;
+    textBlobBindings?: Record<string, string> | undefined;
+    dataBlobBindings?: Record<string, string> | undefined;
+    serviceBindings?: Record<string, string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>)> | undefined;
+    outboundService?: string | {
+    network: {
+    allow?: string[] | undefined;
+    deny?: string[] | undefined;
+    tlsOptions?: {
+    minVersion?: TlsOptions_Version | undefined;
+    keypair?: {
+    privateKey?: string | undefined;
+    certificateChain?: string | undefined;
+    } | undefined;
+    requireClientCerts?: boolean | undefined;
+    trustBrowserCas?: boolean | undefined;
+    trustedCertificates?: string[] | undefined;
+    cipherList?: string | undefined;
+    } | undefined;
+    };
+    } | {
+    external: ExternalServer;
+    } | {
+    disk: {
+    writable?: boolean | undefined;
+    path: string;
+    };
+    } | ((args_0: Request<RequestInitCfType>, ...args_1: unknown[]) => Response | Promise<Response>) | undefined;
+    fetchMock?: default_2<default_2.Options> | undefined;
+    unsafeEphemeralDurableObjects?: boolean | undefined;
+    }>, z.ZodObject<{
+    host: z.ZodOptional<z.ZodString>;
+    port: z.ZodOptional<z.ZodNumber>;
+    https: z.ZodOptional<z.ZodBoolean>;
+    httpsKey: z.ZodOptional<z.ZodString>;
+    httpsKeyPath: z.ZodOptional<z.ZodString>;
+    httpsCert: z.ZodOptional<z.ZodString>;
+    httpsCertPath: z.ZodOptional<z.ZodString>;
+    inspectorPort: z.ZodOptional<z.ZodNumber>;
+    verbose: z.ZodOptional<z.ZodBoolean>;
+    log: z.ZodOptional<z.ZodType<Log, z.ZodTypeDef, Log>>;
+    timers: z.ZodOptional<z.ZodType<Timers<unknown>, z.ZodTypeDef, Timers<unknown>>>;
+    upstream: z.ZodOptional<z.ZodString>;
+    cf: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString, z.ZodRecord<z.ZodString, z.ZodAny>]>>;
+    liveReload: z.ZodOptional<z.ZodBoolean>;
+    unsafeSourceMapIgnoreSourcePredicate: z.ZodOptional<z.ZodFunction<z.ZodTuple<[z.ZodString], z.ZodUnknown>, z.ZodBoolean>>;
+    }, "strip", z.ZodTypeAny, {
+    host?: string | undefined;
+    port?: number | undefined;
+    cf?: string | boolean | Record<string, any> | undefined;
+    inspectorPort?: number | undefined;
+    verbose?: boolean | undefined;
+    https?: boolean | undefined;
+    httpsKey?: string | undefined;
+    httpsKeyPath?: string | undefined;
+    httpsCert?: string | undefined;
+    httpsCertPath?: string | undefined;
+    log?: Log | undefined;
+    timers?: Timers<unknown> | undefined;
+    upstream?: string | undefined;
+    liveReload?: boolean | undefined;
+    unsafeSourceMapIgnoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined;
+    }, {
+    host?: string | undefined;
+    port?: number | undefined;
+    cf?: string | boolean | Record<string, any> | undefined;
+    inspectorPort?: number | undefined;
+    verbose?: boolean | undefined;
+    https?: boolean | undefined;
+    httpsKey?: string | undefined;
+    httpsKeyPath?: string | undefined;
+    httpsCert?: string | undefined;
+    httpsCertPath?: string | undefined;
+    log?: Log | undefined;
+    timers?: Timers<unknown> | undefined;
+    upstream?: string | undefined;
+    liveReload?: boolean | undefined;
+    unsafeSourceMapIgnoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined;
+    }>>;
+    cache: Plugin<z.ZodObject<{
+    cache: z.ZodOptional<z.ZodBoolean>;
+    cacheWarnUsage: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+    cache?: boolean | undefined;
+    cacheWarnUsage?: boolean | undefined;
+    }, {
+    cache?: boolean | undefined;
+    cacheWarnUsage?: boolean | undefined;
+    }>, z.ZodObject<{
+    cachePersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    cachePersist?: string | boolean | undefined;
+    }, {
+    cachePersist?: string | boolean | undefined;
+    }>, CacheGateway>;
+    d1: Plugin<z.ZodObject<{
+    d1Databases: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    }, "strip", z.ZodTypeAny, {
+    d1Databases?: string[] | Record<string, string> | undefined;
+    }, {
+    d1Databases?: string[] | Record<string, string> | undefined;
+    }>, z.ZodObject<{
+    d1Persist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    d1Persist?: string | boolean | undefined;
+    }, {
+    d1Persist?: string | boolean | undefined;
+    }>, D1Gateway>;
+    do: Plugin<z.ZodObject<{
+    durableObjects: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodString, z.ZodObject<{
+    className: z.ZodString;
+    scriptName: z.ZodOptional<z.ZodString>;
+    unsafeUniqueKey: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }, {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }>]>>>;
+    }, "strip", z.ZodTypeAny, {
+    durableObjects?: Record<string, string | {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }> | undefined;
+    }, {
+    durableObjects?: Record<string, string | {
+    scriptName?: string | undefined;
+    unsafeUniqueKey?: string | undefined;
+    className: string;
+    }> | undefined;
+    }>, z.ZodObject<{
+    durableObjectsPersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    durableObjectsPersist?: string | boolean | undefined;
+    }, {
+    durableObjectsPersist?: string | boolean | undefined;
+    }>>;
+    kv: Plugin<z.ZodObject<{
+    kvNamespaces: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    sitePath: z.ZodOptional<z.ZodString>;
+    siteInclude: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    siteExclude: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    }, "strip", z.ZodTypeAny, {
+    kvNamespaces?: string[] | Record<string, string> | undefined;
+    sitePath?: string | undefined;
+    siteInclude?: string[] | undefined;
+    siteExclude?: string[] | undefined;
+    }, {
+    kvNamespaces?: string[] | Record<string, string> | undefined;
+    sitePath?: string | undefined;
+    siteInclude?: string[] | undefined;
+    siteExclude?: string[] | undefined;
+    }>, z.ZodObject<{
+    kvPersist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    kvPersist?: string | boolean | undefined;
+    }, {
+    kvPersist?: string | boolean | undefined;
+    }>, KVGateway>;
+    queues: Plugin<z.ZodObject<{
+    queueProducers: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    queueConsumers: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodObject<{
+    maxBatchSize: z.ZodOptional<z.ZodNumber>;
+    maxBatchTimeout: z.ZodOptional<z.ZodNumber>;
+    maxRetires: z.ZodOptional<z.ZodNumber>;
+    deadLetterQueue: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }>>, z.ZodArray<z.ZodString, "many">]>>;
+    }, "strip", z.ZodTypeAny, {
+    queueProducers?: string[] | Record<string, string> | undefined;
+    queueConsumers?: string[] | Record<string, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }> | undefined;
+    }, {
+    queueProducers?: string[] | Record<string, string> | undefined;
+    queueConsumers?: string[] | Record<string, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+    }> | undefined;
+    }>, undefined, QueuesGateway>;
+    r2: Plugin<z.ZodObject<{
+    r2Buckets: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    }, "strip", z.ZodTypeAny, {
+    r2Buckets?: string[] | Record<string, string> | undefined;
+    }, {
+    r2Buckets?: string[] | Record<string, string> | undefined;
+    }>, z.ZodObject<{
+    r2Persist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+    }, "strip", z.ZodTypeAny, {
+    r2Persist?: string | boolean | undefined;
+    }, {
+    r2Persist?: string | boolean | undefined;
+    }>, R2Gateway>;
+};
+
+export declare type Plugins = typeof PLUGINS;
+
+export declare interface PluginServicesOptions<Options extends z.ZodType, SharedOptions extends z.ZodType | undefined> {
+    log: Log;
+    options: z.infer<Options>;
+    sharedOptions: OptionalZodTypeOf<SharedOptions>;
+    workerBindings: Worker_Binding[];
+    workerIndex: number;
+    additionalModules: Worker_Module[];
+    tmpPath: string;
+    sourceMapRegistry: SourceMapRegistry;
+    durableObjectClassNames: DurableObjectClassNames;
+    queueConsumers: QueueConsumers;
+}
+
+export declare const POST: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare function prefixError(prefix: string, e: any): Error;
+
+export declare function prefixStream(prefix: Uint8Array, stream: ReadableStream<Uint8Array>): ReadableStream<Uint8Array>;
+
+export declare const ProxyAddresses: {
+    readonly GLOBAL: 0;
+    readonly ENV: 1;
+    readonly USER_START: 2;
+};
+
+export declare class ProxyClient {
+    #private;
+    constructor(runtimeEntryURL: URL, dispatchFetch: DispatchFetch);
+    get global(): ServiceWorkerGlobalScope;
+    get env(): Record<string, unknown>;
+    poisonProxies(runtimeEntryURL?: URL): void;
+    dispose(): Promise<void>;
+}
+
+export declare const ProxyOps: {
+    readonly GET: "GET";
+    readonly CALL: "CALL";
+    readonly FREE: "FREE";
+};
+
+export declare const PURGE: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare const PUT: (path: string) => (prototype: Router<any>, key: string | symbol) => void;
+
+export declare interface QueueConsumer extends QueueConsumerOptions {
+    workerName: string;
+    deadLetterConsumer?: QueueConsumer;
+}
+
+export declare type QueueConsumerOptions = z.infer<typeof QueueConsumerOptionsSchema>;
+
+export declare const QueueConsumerOptionsSchema: z.ZodObject<{
+    maxBatchSize: z.ZodOptional<z.ZodNumber>;
+    maxBatchTimeout: z.ZodOptional<z.ZodNumber>;
+    maxRetires: z.ZodOptional<z.ZodNumber>;
+    deadLetterQueue: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+}, {
+    maxBatchSize?: number | undefined;
+    maxBatchTimeout?: number | undefined;
+    maxRetires?: number | undefined;
+    deadLetterQueue?: string | undefined;
+}>;
+
+export declare type QueueConsumers = Map<string, QueueConsumer>;
+
+export declare const QueueContentTypeSchema: z.ZodDefault<z.ZodEnum<["text", "json", "bytes", "v8"]>>;
+
+export declare type QueueEnqueueOn = (queueName: string, consumer: QueueConsumer, messages: (Message | GatewayMessage)[]) => void;
+
+/* Excluded from this release type: _QUEUES_COMPATIBLE_V8_VERSION */
+
+export declare const QUEUES_PLUGIN: Plugin<typeof QueuesOptionsSchema, undefined, QueuesGateway>;
+
+export declare const QUEUES_PLUGIN_NAME = "queues";
+
+export declare class QueuesError extends MiniflareError<QueuesErrorCode> {
+}
+
+export declare type QueuesErrorCode = "ERR_V8_UNSUPPORTED" | "ERR_MULTIPLE_CONSUMERS" | "ERR_DEAD_LETTER_QUEUE_CYCLE";
+
+export declare class QueuesGateway {
+    #private;
+    private readonly log;
+    private readonly timers;
+    private readonly queueName;
+    private readonly dispatchFetch;
+    constructor(log: Log, _storage: Storage, timers: Timers, queueName: string, dispatchFetch: DispatchFetch);
+    enqueue(enqueueOn: QueueEnqueueOn, consumer: QueueConsumer, messages: (Message | GatewayMessage)[]): void;
+}
+
+export declare class QueuesHTTPError extends HttpError {
+}
+
+export declare const QueuesOptionsSchema: z.ZodObject<{
+    queueProducers: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+    queueConsumers: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodObject<{
+        maxBatchSize: z.ZodOptional<z.ZodNumber>;
+        maxBatchTimeout: z.ZodOptional<z.ZodNumber>;
+        maxRetires: z.ZodOptional<z.ZodNumber>;
+        deadLetterQueue: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        maxBatchSize?: number | undefined;
+        maxBatchTimeout?: number | undefined;
+        maxRetires?: number | undefined;
+        deadLetterQueue?: string | undefined;
+    }, {
+        maxBatchSize?: number | undefined;
+        maxBatchTimeout?: number | undefined;
+        maxRetires?: number | undefined;
+        deadLetterQueue?: string | undefined;
+    }>>, z.ZodArray<z.ZodString, "many">]>>;
+}, "strip", z.ZodTypeAny, {
+    queueProducers?: string[] | Record<string, string> | undefined;
+    queueConsumers?: string[] | Record<string, {
+        maxBatchSize?: number | undefined;
+        maxBatchTimeout?: number | undefined;
+        maxRetires?: number | undefined;
+        deadLetterQueue?: string | undefined;
+    }> | undefined;
+}, {
+    queueProducers?: string[] | Record<string, string> | undefined;
+    queueConsumers?: string[] | Record<string, {
+        maxBatchSize?: number | undefined;
+        maxBatchTimeout?: number | undefined;
+        maxRetires?: number | undefined;
+        deadLetterQueue?: string | undefined;
+    }> | undefined;
+}>;
+
+export declare const R2_PLUGIN: Plugin<typeof R2OptionsSchema, typeof R2SharedOptionsSchema, R2Gateway>;
+
+export declare const R2_PLUGIN_NAME = "r2";
+
+export declare const R2AbortMultipartUploadRequestSchema: z.ZodObject<{
+    method: z.ZodLiteral<"abortMultipartUpload">;
+    object: z.ZodString;
+    uploadId: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "abortMultipartUpload";
+    uploadId: string;
+}, {
+    object: string;
+    method: "abortMultipartUpload";
+    uploadId: string;
+}>;
+
+export declare interface R2AbortMultipartUploadResponse {
+}
+
+export declare const R2BindingRequestSchema: z.ZodUnion<[z.ZodObject<{
+    method: z.ZodLiteral<"head">;
+    object: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "head";
+}, {
+    object: string;
+    method: "head";
+}>, z.ZodObject<{
+    method: z.ZodLiteral<"get">;
+    object: z.ZodString;
+    range: z.ZodOptional<z.ZodObject<{
+        offset: z.ZodOptional<z.ZodNumber>;
+        length: z.ZodOptional<z.ZodNumber>;
+        suffix: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    }, {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    }>>;
+    rangeHeader: z.ZodOptional<z.ZodString>;
+    onlyIf: z.ZodOptional<z.ZodObject<{
+        etagMatches: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        etagDoesNotMatch: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        uploadedBefore: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        uploadedAfter: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        secondsGranularity: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    }, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    range?: {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    } | undefined;
+    rangeHeader?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    object: string;
+    method: "get";
+}, {
+    range?: {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    } | undefined;
+    rangeHeader?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    object: string;
+    method: "get";
+}>, z.ZodEffects<z.ZodObject<{
+    method: z.ZodLiteral<"put">;
+    object: z.ZodString;
+    customFields: z.ZodOptional<z.ZodEffects<z.ZodArray<z.ZodObject<{
+        k: z.ZodString;
+        v: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        k: string;
+        v: string;
+    }, {
+        k: string;
+        v: string;
+    }>, "many">, {
+        [k: string]: string;
+    }, {
+        k: string;
+        v: string;
+    }[]>>;
+    httpFields: z.ZodOptional<z.ZodObject<{
+        contentType: z.ZodOptional<z.ZodString>;
+        contentLanguage: z.ZodOptional<z.ZodString>;
+        contentDisposition: z.ZodOptional<z.ZodString>;
+        contentEncoding: z.ZodOptional<z.ZodString>;
+        cacheControl: z.ZodOptional<z.ZodString>;
+        cacheExpiry: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }>>;
+    onlyIf: z.ZodOptional<z.ZodObject<{
+        etagMatches: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        etagDoesNotMatch: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        uploadedBefore: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        uploadedAfter: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        secondsGranularity: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    }, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    }>>;
+    md5: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha1: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha256: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha384: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha512: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+}, "strip", z.ZodTypeAny, {
+    md5?: Buffer | undefined;
+    sha1?: Buffer | undefined;
+    sha256?: Buffer | undefined;
+    sha384?: Buffer | undefined;
+    sha512?: Buffer | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    customFields?: {
+        [k: string]: string;
+    } | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "put";
+}, {
+    md5?: string | undefined;
+    sha1?: string | undefined;
+    sha256?: string | undefined;
+    sha384?: string | undefined;
+    sha512?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "put";
+}>, {
+    method: "put";
+    object: string;
+    customMetadata: {
+        [k: string]: string;
+    } | undefined;
+    httpMetadata: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    onlyIf: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    md5: Buffer | undefined;
+    sha1: Buffer | undefined;
+    sha256: Buffer | undefined;
+    sha384: Buffer | undefined;
+    sha512: Buffer | undefined;
+}, {
+    md5?: string | undefined;
+    sha1?: string | undefined;
+    sha256?: string | undefined;
+    sha384?: string | undefined;
+    sha512?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "put";
+}>, z.ZodEffects<z.ZodObject<{
+    method: z.ZodLiteral<"createMultipartUpload">;
+    object: z.ZodString;
+    customFields: z.ZodOptional<z.ZodEffects<z.ZodArray<z.ZodObject<{
+        k: z.ZodString;
+        v: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        k: string;
+        v: string;
+    }, {
+        k: string;
+        v: string;
+    }>, "many">, {
+        [k: string]: string;
+    }, {
+        k: string;
+        v: string;
+    }[]>>;
+    httpFields: z.ZodOptional<z.ZodObject<{
+        contentType: z.ZodOptional<z.ZodString>;
+        contentLanguage: z.ZodOptional<z.ZodString>;
+        contentDisposition: z.ZodOptional<z.ZodString>;
+        contentEncoding: z.ZodOptional<z.ZodString>;
+        cacheControl: z.ZodOptional<z.ZodString>;
+        cacheExpiry: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    customFields?: {
+        [k: string]: string;
+    } | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "createMultipartUpload";
+}, {
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "createMultipartUpload";
+}>, {
+    method: "createMultipartUpload";
+    object: string;
+    customMetadata: {
+        [k: string]: string;
+    } | undefined;
+    httpMetadata: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+}, {
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "createMultipartUpload";
+}>, z.ZodObject<{
+    method: z.ZodLiteral<"uploadPart">;
+    object: z.ZodString;
+    uploadId: z.ZodString;
+    partNumber: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "uploadPart";
+    uploadId: string;
+    partNumber: number;
+}, {
+    object: string;
+    method: "uploadPart";
+    uploadId: string;
+    partNumber: number;
+}>, z.ZodObject<{
+    method: z.ZodLiteral<"completeMultipartUpload">;
+    object: z.ZodString;
+    uploadId: z.ZodString;
+    parts: z.ZodArray<z.ZodObject<{
+        etag: z.ZodString;
+        part: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        etag: string;
+        part: number;
+    }, {
+        etag: string;
+        part: number;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "completeMultipartUpload";
+    uploadId: string;
+    parts: {
+        etag: string;
+        part: number;
+    }[];
+}, {
+    object: string;
+    method: "completeMultipartUpload";
+    uploadId: string;
+    parts: {
+        etag: string;
+        part: number;
+    }[];
+}>, z.ZodObject<{
+    method: z.ZodLiteral<"abortMultipartUpload">;
+    object: z.ZodString;
+    uploadId: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "abortMultipartUpload";
+    uploadId: string;
+}, {
+    object: string;
+    method: "abortMultipartUpload";
+    uploadId: string;
+}>, z.ZodObject<{
+    method: z.ZodLiteral<"list">;
+    limit: z.ZodOptional<z.ZodNumber>;
+    prefix: z.ZodOptional<z.ZodString>;
+    cursor: z.ZodOptional<z.ZodString>;
+    delimiter: z.ZodOptional<z.ZodString>;
+    startAfter: z.ZodOptional<z.ZodString>;
+    include: z.ZodOptional<z.ZodArray<z.ZodEffects<z.ZodUnion<[z.ZodLiteral<0>, z.ZodLiteral<1>]>, "httpMetadata" | "customMetadata", 0 | 1>, "many">>;
+}, "strip", z.ZodTypeAny, {
+    include?: ("httpMetadata" | "customMetadata")[] | undefined;
+    cursor?: string | undefined;
+    prefix?: string | undefined;
+    limit?: number | undefined;
+    delimiter?: string | undefined;
+    startAfter?: string | undefined;
+    method: "list";
+}, {
+    include?: (0 | 1)[] | undefined;
+    cursor?: string | undefined;
+    prefix?: string | undefined;
+    limit?: number | undefined;
+    delimiter?: string | undefined;
+    startAfter?: string | undefined;
+    method: "list";
+}>, z.ZodIntersection<z.ZodObject<{
+    method: z.ZodLiteral<"delete">;
+}, "strip", z.ZodTypeAny, {
+    method: "delete";
+}, {
+    method: "delete";
+}>, z.ZodUnion<[z.ZodObject<{
+    object: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+}, {
+    object: string;
+}>, z.ZodObject<{
+    objects: z.ZodArray<z.ZodString, "many">;
+}, "strip", z.ZodTypeAny, {
+    objects: string[];
+}, {
+    objects: string[];
+}>]>>]>;
+
+export declare type R2Checksums = z.infer<typeof R2ChecksumsSchema>;
+
+export declare const R2ChecksumsSchema: z.ZodEffects<z.ZodObject<{
+    0: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    1: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    2: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    3: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    4: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+}, "strip", z.ZodTypeAny, {
+    0?: Buffer | undefined;
+    2?: Buffer | undefined;
+    1?: Buffer | undefined;
+    3?: Buffer | undefined;
+    4?: Buffer | undefined;
+}, {
+    0?: string | undefined;
+    2?: string | undefined;
+    1?: string | undefined;
+    3?: string | undefined;
+    4?: string | undefined;
+}>, {
+    md5: Buffer | undefined;
+    sha1: Buffer | undefined;
+    sha256: Buffer | undefined;
+    sha384: Buffer | undefined;
+    sha512: Buffer | undefined;
+}, {
+    0?: string | undefined;
+    2?: string | undefined;
+    1?: string | undefined;
+    3?: string | undefined;
+    4?: string | undefined;
+}>;
+
+export declare const R2CompleteMultipartUploadRequestSchema: z.ZodObject<{
+    method: z.ZodLiteral<"completeMultipartUpload">;
+    object: z.ZodString;
+    uploadId: z.ZodString;
+    parts: z.ZodArray<z.ZodObject<{
+        etag: z.ZodString;
+        part: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        etag: string;
+        part: number;
+    }, {
+        etag: string;
+        part: number;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "completeMultipartUpload";
+    uploadId: string;
+    parts: {
+        etag: string;
+        part: number;
+    }[];
+}, {
+    object: string;
+    method: "completeMultipartUpload";
+    uploadId: string;
+    parts: {
+        etag: string;
+        part: number;
+    }[];
+}>;
+
+export declare type R2CompleteMultipartUploadResponse = R2PutResponse;
+
+export declare type R2Conditional = z.infer<typeof R2ConditionalSchema>;
+
+export declare const R2ConditionalSchema: z.ZodObject<{
+    etagMatches: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+        type: z.ZodLiteral<"strong">;
+        value: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        type: "strong";
+        value: string;
+    }, {
+        type: "strong";
+        value: string;
+    }>, z.ZodObject<{
+        type: z.ZodLiteral<"weak">;
+        value: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        type: "weak";
+        value: string;
+    }, {
+        type: "weak";
+        value: string;
+    }>, z.ZodObject<{
+        type: z.ZodLiteral<"wildcard">;
+    }, "strip", z.ZodTypeAny, {
+        type: "wildcard";
+    }, {
+        type: "wildcard";
+    }>]>, "many">>;
+    etagDoesNotMatch: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+        type: z.ZodLiteral<"strong">;
+        value: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        type: "strong";
+        value: string;
+    }, {
+        type: "strong";
+        value: string;
+    }>, z.ZodObject<{
+        type: z.ZodLiteral<"weak">;
+        value: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        type: "weak";
+        value: string;
+    }, {
+        type: "weak";
+        value: string;
+    }>, z.ZodObject<{
+        type: z.ZodLiteral<"wildcard">;
+    }, "strip", z.ZodTypeAny, {
+        type: "wildcard";
+    }, {
+        type: "wildcard";
+    }>]>, "many">>;
+    uploadedBefore: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+    uploadedAfter: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+    secondsGranularity: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    etagMatches?: ({
+        type: "strong";
+        value: string;
+    } | {
+        type: "weak";
+        value: string;
+    } | {
+        type: "wildcard";
+    })[] | undefined;
+    etagDoesNotMatch?: ({
+        type: "strong";
+        value: string;
+    } | {
+        type: "weak";
+        value: string;
+    } | {
+        type: "wildcard";
+    })[] | undefined;
+    uploadedBefore?: Date | undefined;
+    uploadedAfter?: Date | undefined;
+    secondsGranularity?: boolean | undefined;
+}, {
+    etagMatches?: ({
+        type: "strong";
+        value: string;
+    } | {
+        type: "weak";
+        value: string;
+    } | {
+        type: "wildcard";
+    })[] | undefined;
+    etagDoesNotMatch?: ({
+        type: "strong";
+        value: string;
+    } | {
+        type: "weak";
+        value: string;
+    } | {
+        type: "wildcard";
+    })[] | undefined;
+    uploadedBefore?: number | undefined;
+    uploadedAfter?: number | undefined;
+    secondsGranularity?: boolean | undefined;
+}>;
+
+export declare const R2CreateMultipartUploadRequestSchema: z.ZodEffects<z.ZodObject<{
+    method: z.ZodLiteral<"createMultipartUpload">;
+    object: z.ZodString;
+    customFields: z.ZodOptional<z.ZodEffects<z.ZodArray<z.ZodObject<{
+        k: z.ZodString;
+        v: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        k: string;
+        v: string;
+    }, {
+        k: string;
+        v: string;
+    }>, "many">, {
+        [k: string]: string;
+    }, {
+        k: string;
+        v: string;
+    }[]>>;
+    httpFields: z.ZodOptional<z.ZodObject<{
+        contentType: z.ZodOptional<z.ZodString>;
+        contentLanguage: z.ZodOptional<z.ZodString>;
+        contentDisposition: z.ZodOptional<z.ZodString>;
+        contentEncoding: z.ZodOptional<z.ZodString>;
+        cacheControl: z.ZodOptional<z.ZodString>;
+        cacheExpiry: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    customFields?: {
+        [k: string]: string;
+    } | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "createMultipartUpload";
+}, {
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "createMultipartUpload";
+}>, {
+    method: "createMultipartUpload";
+    object: string;
+    customMetadata: {
+        [k: string]: string;
+    } | undefined;
+    httpMetadata: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+}, {
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "createMultipartUpload";
+}>;
+
+export declare interface R2CreateMultipartUploadResponse {
+    uploadId: string;
+}
+
+export declare const R2DeleteRequestSchema: z.ZodIntersection<z.ZodObject<{
+    method: z.ZodLiteral<"delete">;
+}, "strip", z.ZodTypeAny, {
+    method: "delete";
+}, {
+    method: "delete";
+}>, z.ZodUnion<[z.ZodObject<{
+    object: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+}, {
+    object: string;
+}>, z.ZodObject<{
+    objects: z.ZodArray<z.ZodString, "many">;
+}, "strip", z.ZodTypeAny, {
+    objects: string[];
+}, {
+    objects: string[];
+}>]>>;
+
+export declare interface R2DeleteResponse {
+}
+
+export declare interface R2ErrorResponse {
+    version: number;
+    v4code: number;
+    message: string;
+}
+
+export declare type R2Etag = z.infer<typeof R2EtagSchema>;
+
+export declare const R2EtagMatchSchema: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+    type: z.ZodLiteral<"strong">;
+    value: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    type: "strong";
+    value: string;
+}, {
+    type: "strong";
+    value: string;
+}>, z.ZodObject<{
+    type: z.ZodLiteral<"weak">;
+    value: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    type: "weak";
+    value: string;
+}, {
+    type: "weak";
+    value: string;
+}>, z.ZodObject<{
+    type: z.ZodLiteral<"wildcard">;
+}, "strip", z.ZodTypeAny, {
+    type: "wildcard";
+}, {
+    type: "wildcard";
+}>]>, "many">>;
+
+export declare const R2EtagSchema: z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+    type: z.ZodLiteral<"strong">;
+    value: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    type: "strong";
+    value: string;
+}, {
+    type: "strong";
+    value: string;
+}>, z.ZodObject<{
+    type: z.ZodLiteral<"weak">;
+    value: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    type: "weak";
+    value: string;
+}, {
+    type: "weak";
+    value: string;
+}>, z.ZodObject<{
+    type: z.ZodLiteral<"wildcard">;
+}, "strip", z.ZodTypeAny, {
+    type: "wildcard";
+}, {
+    type: "wildcard";
+}>]>;
+
+export declare class R2Gateway {
+    #private;
+    private readonly log;
+    private readonly timers;
+    /* Excluded from this release type: _MIN_MULTIPART_PART_SIZE */
+    constructor(log: Log, storage: Storage, timers: Timers);
+    head(key: string): Promise<InternalR2Object>;
+    get(key: string, options?: InternalR2GetOptions): Promise<InternalR2ObjectBody | InternalR2Object>;
+    put(key: string, value: ReadableStream<Uint8Array>, valueSize: number, options: InternalR2PutOptions): Promise<InternalR2Object>;
+    delete(keys: string | string[]): Promise<void>;
+    list(opts?: InternalR2ListOptions): Promise<InternalR2Objects>;
+    createMultipartUpload(key: string, opts: InternalR2CreateMultipartUploadOptions): Promise<R2CreateMultipartUploadResponse>;
+    uploadPart(key: string, uploadId: string, partNumber: number, value: ReadableStream<Uint8Array>, valueSize: number): Promise<R2UploadPartResponse>;
+    completeMultipartUpload(key: string, uploadId: string, parts: R2PublishedPart[]): Promise<InternalR2Object>;
+    abortMultipartUpload(key: string, uploadId: string): Promise<void>;
+}
+
+export declare const R2GetRequestSchema: z.ZodObject<{
+    method: z.ZodLiteral<"get">;
+    object: z.ZodString;
+    range: z.ZodOptional<z.ZodObject<{
+        offset: z.ZodOptional<z.ZodNumber>;
+        length: z.ZodOptional<z.ZodNumber>;
+        suffix: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    }, {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    }>>;
+    rangeHeader: z.ZodOptional<z.ZodString>;
+    onlyIf: z.ZodOptional<z.ZodObject<{
+        etagMatches: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        etagDoesNotMatch: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        uploadedBefore: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        uploadedAfter: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        secondsGranularity: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    }, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    range?: {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    } | undefined;
+    rangeHeader?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    object: string;
+    method: "get";
+}, {
+    range?: {
+        length?: number | undefined;
+        offset?: number | undefined;
+        suffix?: number | undefined;
+    } | undefined;
+    rangeHeader?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    object: string;
+    method: "get";
+}>;
+
+export declare type R2GetResponse = R2HeadResponse;
+
+export declare const R2HeadRequestSchema: z.ZodObject<{
+    method: z.ZodLiteral<"head">;
+    object: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "head";
+}, {
+    object: string;
+    method: "head";
+}>;
+
+export declare interface R2HeadResponse {
+    name: string;
+    version: string;
+    size: number;
+    etag: string;
+    uploaded: number;
+    httpFields?: R2HttpFields;
+    customFields?: RawRecord;
+    range?: R2Range;
+    checksums?: RawR2Checksums;
+}
+
+export declare type R2HttpFields = z.infer<typeof R2HttpFieldsSchema>;
+
+export declare const R2HttpFieldsSchema: z.ZodObject<{
+    contentType: z.ZodOptional<z.ZodString>;
+    contentLanguage: z.ZodOptional<z.ZodString>;
+    contentDisposition: z.ZodOptional<z.ZodString>;
+    contentEncoding: z.ZodOptional<z.ZodString>;
+    cacheControl: z.ZodOptional<z.ZodString>;
+    cacheExpiry: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    contentType?: string | undefined;
+    contentLanguage?: string | undefined;
+    contentDisposition?: string | undefined;
+    contentEncoding?: string | undefined;
+    cacheControl?: string | undefined;
+    cacheExpiry?: number | undefined;
+}, {
+    contentType?: string | undefined;
+    contentLanguage?: string | undefined;
+    contentDisposition?: string | undefined;
+    contentEncoding?: string | undefined;
+    cacheControl?: string | undefined;
+    cacheExpiry?: number | undefined;
+}>;
+
+export declare const R2ListRequestSchema: z.ZodObject<{
+    method: z.ZodLiteral<"list">;
+    limit: z.ZodOptional<z.ZodNumber>;
+    prefix: z.ZodOptional<z.ZodString>;
+    cursor: z.ZodOptional<z.ZodString>;
+    delimiter: z.ZodOptional<z.ZodString>;
+    startAfter: z.ZodOptional<z.ZodString>;
+    include: z.ZodOptional<z.ZodArray<z.ZodEffects<z.ZodUnion<[z.ZodLiteral<0>, z.ZodLiteral<1>]>, "httpMetadata" | "customMetadata", 0 | 1>, "many">>;
+}, "strip", z.ZodTypeAny, {
+    include?: ("httpMetadata" | "customMetadata")[] | undefined;
+    cursor?: string | undefined;
+    prefix?: string | undefined;
+    limit?: number | undefined;
+    delimiter?: string | undefined;
+    startAfter?: string | undefined;
+    method: "list";
+}, {
+    include?: (0 | 1)[] | undefined;
+    cursor?: string | undefined;
+    prefix?: string | undefined;
+    limit?: number | undefined;
+    delimiter?: string | undefined;
+    startAfter?: string | undefined;
+    method: "list";
+}>;
+
+export declare interface R2ListResponse {
+    objects: R2HeadResponse[];
+    truncated: boolean;
+    cursor?: string;
+    delimitedPrefixes: string[];
+}
+
+export declare const R2OptionsSchema: z.ZodObject<{
+    r2Buckets: z.ZodOptional<z.ZodUnion<[z.ZodRecord<z.ZodString, z.ZodString>, z.ZodArray<z.ZodString, "many">]>>;
+}, "strip", z.ZodTypeAny, {
+    r2Buckets?: string[] | Record<string, string> | undefined;
+}, {
+    r2Buckets?: string[] | Record<string, string> | undefined;
+}>;
+
+export declare type R2PublishedPart = z.infer<typeof R2PublishedPartSchema>;
+
+export declare const R2PublishedPartSchema: z.ZodObject<{
+    etag: z.ZodString;
+    part: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    etag: string;
+    part: number;
+}, {
+    etag: string;
+    part: number;
+}>;
+
+export declare const R2PutRequestSchema: z.ZodEffects<z.ZodObject<{
+    method: z.ZodLiteral<"put">;
+    object: z.ZodString;
+    customFields: z.ZodOptional<z.ZodEffects<z.ZodArray<z.ZodObject<{
+        k: z.ZodString;
+        v: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        k: string;
+        v: string;
+    }, {
+        k: string;
+        v: string;
+    }>, "many">, {
+        [k: string]: string;
+    }, {
+        k: string;
+        v: string;
+    }[]>>;
+    httpFields: z.ZodOptional<z.ZodObject<{
+        contentType: z.ZodOptional<z.ZodString>;
+        contentLanguage: z.ZodOptional<z.ZodString>;
+        contentDisposition: z.ZodOptional<z.ZodString>;
+        contentEncoding: z.ZodOptional<z.ZodString>;
+        cacheControl: z.ZodOptional<z.ZodString>;
+        cacheExpiry: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }, {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    }>>;
+    onlyIf: z.ZodOptional<z.ZodObject<{
+        etagMatches: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        etagDoesNotMatch: z.ZodOptional<z.ZodArray<z.ZodDiscriminatedUnion<"type", [z.ZodObject<{
+            type: z.ZodLiteral<"strong">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "strong";
+            value: string;
+        }, {
+            type: "strong";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"weak">;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            type: "weak";
+            value: string;
+        }, {
+            type: "weak";
+            value: string;
+        }>, z.ZodObject<{
+            type: z.ZodLiteral<"wildcard">;
+        }, "strip", z.ZodTypeAny, {
+            type: "wildcard";
+        }, {
+            type: "wildcard";
+        }>]>, "many">>;
+        uploadedBefore: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        uploadedAfter: z.ZodOptional<z.ZodEffects<z.ZodNumber, Date, number>>;
+        secondsGranularity: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    }, {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    }>>;
+    md5: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha1: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha256: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha384: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+    sha512: z.ZodOptional<z.ZodEffects<z.ZodString, Buffer, string>>;
+}, "strip", z.ZodTypeAny, {
+    md5?: Buffer | undefined;
+    sha1?: Buffer | undefined;
+    sha256?: Buffer | undefined;
+    sha384?: Buffer | undefined;
+    sha512?: Buffer | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    customFields?: {
+        [k: string]: string;
+    } | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "put";
+}, {
+    md5?: string | undefined;
+    sha1?: string | undefined;
+    sha256?: string | undefined;
+    sha384?: string | undefined;
+    sha512?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "put";
+}>, {
+    method: "put";
+    object: string;
+    customMetadata: {
+        [k: string]: string;
+    } | undefined;
+    httpMetadata: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    onlyIf: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: Date | undefined;
+        uploadedAfter?: Date | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    md5: Buffer | undefined;
+    sha1: Buffer | undefined;
+    sha256: Buffer | undefined;
+    sha384: Buffer | undefined;
+    sha512: Buffer | undefined;
+}, {
+    md5?: string | undefined;
+    sha1?: string | undefined;
+    sha256?: string | undefined;
+    sha384?: string | undefined;
+    sha512?: string | undefined;
+    onlyIf?: {
+        etagMatches?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        etagDoesNotMatch?: ({
+            type: "strong";
+            value: string;
+        } | {
+            type: "weak";
+            value: string;
+        } | {
+            type: "wildcard";
+        })[] | undefined;
+        uploadedBefore?: number | undefined;
+        uploadedAfter?: number | undefined;
+        secondsGranularity?: boolean | undefined;
+    } | undefined;
+    customFields?: {
+        k: string;
+        v: string;
+    }[] | undefined;
+    httpFields?: {
+        contentType?: string | undefined;
+        contentLanguage?: string | undefined;
+        contentDisposition?: string | undefined;
+        contentEncoding?: string | undefined;
+        cacheControl?: string | undefined;
+        cacheExpiry?: number | undefined;
+    } | undefined;
+    object: string;
+    method: "put";
+}>;
+
+export declare type R2PutResponse = R2HeadResponse;
+
+export declare type R2Range = z.infer<typeof R2RangeSchema>;
+
+export declare const R2RangeSchema: z.ZodObject<{
+    offset: z.ZodOptional<z.ZodNumber>;
+    length: z.ZodOptional<z.ZodNumber>;
+    suffix: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    length?: number | undefined;
+    offset?: number | undefined;
+    suffix?: number | undefined;
+}, {
+    length?: number | undefined;
+    offset?: number | undefined;
+    suffix?: number | undefined;
+}>;
+
+export declare const R2SharedOptionsSchema: z.ZodObject<{
+    r2Persist: z.ZodOptional<z.ZodUnion<[z.ZodBoolean, z.ZodString]>>;
+}, "strip", z.ZodTypeAny, {
+    r2Persist?: string | boolean | undefined;
+}, {
+    r2Persist?: string | boolean | undefined;
+}>;
+
+export declare const R2UploadPartRequestSchema: z.ZodObject<{
+    method: z.ZodLiteral<"uploadPart">;
+    object: z.ZodString;
+    uploadId: z.ZodString;
+    partNumber: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    object: string;
+    method: "uploadPart";
+    uploadId: string;
+    partNumber: number;
+}, {
+    object: string;
+    method: "uploadPart";
+    uploadId: string;
+    partNumber: number;
+}>;
+
+export declare interface R2UploadPartResponse {
+    etag: string;
+}
+
+export declare type RangeOptionsFactory<Metadata> = (metadata: Metadata) => {
+    ranges?: InclusiveRange[];
+} & MultipartOptions;
+
+export declare interface RangeSource {
+    readInto(view: Uint8Array, position: number, length: number): Promise<number>;
+    close?(): Promise<void>;
+}
+
+export declare type RawR2Checksums = z.input<typeof R2ChecksumsSchema>;
+
+export declare type RawRecord = z.input<typeof RecordSchema>;
+
+export declare function readPrefix(stream: ReadableStream<Uint8Array>, prefixLength: number): Promise<[prefix: Buffer, rest: ReadableStream<Uint8Array>]>;
+
+export declare const RecordSchema: z.ZodEffects<z.ZodArray<z.ZodObject<{
+    k: z.ZodString;
+    v: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    k: string;
+    v: string;
+}, {
+    k: string;
+    v: string;
+}>, "many">, {
+    [k: string]: string;
+}, {
+    k: string;
+    v: string;
+}[]>;
+
+export declare type ReducerReviver = (value: unknown) => unknown;
+
+export declare type ReducersRevivers = Record<string, ReducerReviver>;
+
+export { ReferrerPolicy }
+
+/* Excluded from this release type: _RemoveTransformEncodingChunkedStream */
+
+export declare type ReplaceWorkersTypes<T> = T extends Request_3 ? Request : T extends Response_3 ? Response : T extends ReadableStream_2 ? ReadableStream : Required<T> extends Required<RequestInit_3> ? RequestInit : T extends Headers_2 ? Headers : T extends Blob_2 ? Blob_3 : T extends AbortSignal_2 ? AbortSignal : T extends Promise<infer P> ? Promise<ReplaceWorkersTypes<P>> : T extends (...args: infer P) => infer R ? (...args: ReplaceWorkersTypes<P>) => ReplaceWorkersTypes<R> : T extends object ? {
+    [K in keyof T]: OverloadReplaceWorkersTypes<T[K]>;
+} : T;
+
+export declare class Request<CfType extends RequestInitCfType = RequestInitCfType> extends Request_2 {
+    [kCf]?: CfType;
+    constructor(input: RequestInfo | Request, init?: RequestInit<CfType>);
+    get cf(): CfType | undefined;
+    /** @ts-expect-error `clone` is actually defined as a method internally */
+    clone(): Request<CfType>;
+}
+
+export { RequestCache }
+
+export { RequestCredentials }
+
+export { RequestDestination }
+
+export { RequestDuplex }
+
+export { RequestInfo }
+
+export declare interface RequestInit<CfType extends RequestInitCfType = RequestInitCfType> extends RequestInit_2 {
+    cf?: CfType;
+}
+
+export declare type RequestInitCfType = Partial<IncomingRequestCfProperties> | RequestInitCfProperties;
+
+export { RequestMode }
+
+export { RequestRedirect }
+
+export declare class Response extends Response_2 {
+    readonly [kWebSocket]: WebSocket | null;
+    static error(): Response;
+    static redirect(url: string | URL, status: ResponseRedirectStatus): Response;
+    static json(data: any, init?: ResponseInit): Response;
+    constructor(body?: BodyInit, init?: ResponseInit);
+    /** @ts-expect-error `status` is actually defined as a getter internally */
+    get status(): number;
+    get webSocket(): WebSocket | null;
+    /** @ts-expect-error `clone` is actually defined as a method internally */
+    clone(): Response;
+}
+
+export declare type ResponseInfo = z.infer<typeof ResponseInfoSchema>;
+
+export declare const ResponseInfoSchema: z.ZodObject<{
+    status: z.ZodNumber;
+    statusText: z.ZodString;
+    method: z.ZodString;
+    url: z.ZodString;
+    time: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    method: string;
+    url: string;
+    status: number;
+    statusText: string;
+    time: number;
+}, {
+    method: string;
+    url: string;
+    status: number;
+    statusText: string;
+    time: number;
+}>;
+
+export declare interface ResponseInit extends ResponseInit_2 {
+    webSocket?: WebSocket | null;
+}
+
+export { ResponseRedirectStatus }
+
+export { ResponseType }
+
+export declare type RouteHandler<Params = unknown> = (req: Request<RequestInitCfProperties>, params: Params, url: URL) => Awaitable<Response>;
+
+export declare abstract class Router<Gateway> {
+    protected readonly log: Log;
+    protected readonly gatewayFactory: GatewayFactory<Gateway>;
+    routes?: Map<string, (readonly [RegExp, string | symbol])[]>;
+    constructor(log: Log, gatewayFactory: GatewayFactory<Gateway>);
+    route(req: Request<RequestInitCfProperties>, url?: URL): Promise<Response | undefined>;
+}
+
+export declare interface RouterConstructor<Gateway> {
+    new (log: Log, gatewayFactory: GatewayFactory<Gateway>): Router<Gateway>;
+}
+
+export declare class RouterError extends MiniflareError<RouterErrorCode> {
+}
+
+export declare type RouterErrorCode = "ERR_QUERY_STRING" | "ERR_INFIX_WILDCARD";
+
+export declare class Runtime {
+    #private;
+    private opts;
+    constructor(opts: RuntimeOptions);
+    updateConfig(configBuffer: Buffer, options?: Abortable & Partial<Pick<RuntimeOptions, "entryPort">>): Promise<number | undefined>;
+    dispose(): Awaitable<void>;
+}
+
+export declare interface RuntimeOptions {
+    entryHost: string;
+    entryPort: number;
+    loopbackPort: number;
+    inspectorPort?: number;
+    verbose?: boolean;
+}
+
+export declare function sanitisePath(unsafe: string): string;
+
+export declare function secondsToMillis(seconds: number): number;
+
+export declare interface SerialisableMatcherRegExps {
+    include: string[];
+    exclude: string[];
+}
+
+export declare function serialiseRegExps(matcher: MatcherRegExps): SerialisableMatcherRegExps;
+
+export declare function serializeConfig(config: Config): Buffer;
+
+export declare type Service = {
+    name?: string;
+} & ({
+    worker?: Worker;
+} | {
+    network?: Network;
+} | {
+    external?: ExternalServer;
+} | {
+    disk?: DiskDirectory;
+});
+
+export declare const SERVICE_ENTRY: string;
+
+export declare const SERVICE_LOOPBACK = "loopback";
+
+export declare interface ServiceDesignator {
+    name?: string;
+    entrypoint?: string;
+}
+
+export declare type SharedOptions = z.infer<typeof CORE_PLUGIN.sharedOptions> & z.infer<typeof CACHE_PLUGIN.sharedOptions> & z.infer<typeof D1_PLUGIN.sharedOptions> & z.infer<typeof DURABLE_OBJECTS_PLUGIN.sharedOptions> & z.infer<typeof KV_PLUGIN.sharedOptions> & z.infer<typeof R2_PLUGIN.sharedOptions>;
+
+export declare type Socket = {
+    name?: string;
+    address?: string;
+    service?: ServiceDesignator;
+} & ({
+    http?: HttpOptions;
+} | {
+    https?: Socket_Https;
+});
+
+export declare const SOCKET_ENTRY = "entry";
+
+export declare interface Socket_Https {
+    options?: HttpOptions;
+    tlsOptions?: TlsOptions;
+}
+
+export declare class SourceMapRegistry {
+    #private;
+    private readonly log;
+    private readonly loopbackPort;
+    private readonly ignoreSourcePredicate?;
+    static PATHNAME_PREFIX: string;
+    constructor(log: Log, loopbackPort: number, ignoreSourcePredicate?: ((args_0: string, ...args_1: unknown[]) => boolean) | undefined);
+    register(script: string, scriptPath: string): string;
+    get(url: URL): Promise<Response | undefined>;
+}
+
+export declare type SourceOptions = z.infer<typeof SourceOptionsSchema>;
+
+export declare const SourceOptionsSchema: z.ZodUnion<[z.ZodObject<{
+    modules: z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+        path: z.ZodString;
+        contents: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodType<Uint8Array, z.ZodTypeDef, Uint8Array>]>>;
+    }, "strip", z.ZodTypeAny, {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }, {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }>, "many">;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    modulesRoot?: string | undefined;
+    modules: {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }[];
+}, {
+    modulesRoot?: string | undefined;
+    modules: {
+        contents?: string | Uint8Array | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        path: string;
+    }[];
+}>, z.ZodObject<{
+    script: z.ZodString;
+    scriptPath: z.ZodOptional<z.ZodString>;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+        include: z.ZodArray<z.ZodString, "many">;
+        fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    script: string;
+}, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    scriptPath?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    script: string;
+}>, z.ZodObject<{
+    scriptPath: z.ZodString;
+    modules: z.ZodOptional<z.ZodBoolean>;
+    modulesRules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<["ESModule", "CommonJS", "NodeJsCompatModule", "Text", "Data", "CompiledWasm"]>;
+        include: z.ZodArray<z.ZodString, "many">;
+        fallthrough: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }, {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }>, "many">>;
+    modulesRoot: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    scriptPath: string;
+}, {
+    modules?: boolean | undefined;
+    modulesRoot?: string | undefined;
+    modulesRules?: {
+        fallthrough?: boolean | undefined;
+        type: "ESModule" | "CommonJS" | "NodeJsCompatModule" | "Text" | "Data" | "CompiledWasm";
+        include: string[];
+    }[] | undefined;
+    scriptPath: string;
+}>]>;
+
+export declare const SQL_SCHEMA = "\nCREATE TABLE IF NOT EXISTS _mf_objects (\n    key TEXT PRIMARY KEY,\n    blob_id TEXT,\n    version TEXT NOT NULL,\n    size INTEGER NOT NULL,\n    etag TEXT NOT NULL,\n    uploaded INTEGER NOT NULL,\n    checksums TEXT NOT NULL,\n    http_metadata TEXT NOT NULL,\n    custom_metadata TEXT NOT NULL\n);\nCREATE TABLE IF NOT EXISTS _mf_multipart_uploads (\n    upload_id TEXT PRIMARY KEY,\n    key TEXT NOT NULL,\n    http_metadata TEXT NOT NULL,\n    custom_metadata TEXT NOT NULL,\n    state TINYINT DEFAULT 0 NOT NULL\n);\nCREATE TABLE IF NOT EXISTS _mf_multipart_parts (\n    upload_id TEXT NOT NULL REFERENCES _mf_multipart_uploads(upload_id),\n    part_number INTEGER NOT NULL,\n    blob_id TEXT NOT NULL,\n    size INTEGER NOT NULL,\n    etag TEXT NOT NULL,\n    checksum_md5 TEXT NOT NULL,\n    object_key TEXT REFERENCES _mf_objects(key) DEFERRABLE INITIALLY DEFERRED,\n    PRIMARY KEY (upload_id, part_number)\n);\n";
+
+export declare interface Storage {
+    db: TypedDatabase;
+    blob: BlobStore;
+}
+
+export declare interface StringifiedWithStream<RS> {
+    value: string;
+    unbufferedStream?: RS;
+}
+
+export declare function stringifyWithStreams<RS>(impl: PlatformImpl<RS>, value: unknown, reducers: ReducersRevivers, allowUnbufferedStream: boolean): StringifiedWithStream<RS> | Promise<StringifiedWithStream<RS>>;
+
+export declare const structuredSerializableReducers: ReducersRevivers;
+
+export declare const structuredSerializableRevivers: ReducersRevivers;
+
+export { supportedCompatibilityDate }
+
+/* Excluded from this release type: _testR2Conditional */
+
+export declare function testRegExps(matcher: MatcherRegExps, value: string): boolean;
+
+export declare interface Timers<TimeoutHandle = unknown> {
+    now(): number;
+    setTimeout<Args extends any[]>(closure: (...args: Args) => Awaitable<unknown>, delay: number, ...args: Args): TimeoutHandle;
+    clearTimeout(handle: TimeoutHandle): void;
+    queueMicrotask(closure: () => Awaitable<unknown>): void;
+}
+
+export declare interface TlsOptions {
+    keypair?: TlsOptions_Keypair;
+    requireClientCerts?: boolean;
+    trustBrowserCas?: boolean;
+    trustedCertificates?: string[];
+    minVersion?: TlsOptions_Version;
+    cipherList?: string;
+}
+
+export declare interface TlsOptions_Keypair {
+    privateKey?: string;
+    certificateChain?: string;
+}
+
+export declare enum TlsOptions_Version {
+    GOOD_DEFAULT = 0,
+    SSL3 = 1,
+    TLS1DOT0 = 2,
+    TLS1DOT1 = 3,
+    TLS1DOT2 = 4,
+    TLS1DOT3 = 5
+}
+
+export declare function _transformsForContentEncoding(encoding?: string): Transform[];
+
+export declare type TypedDatabase = Omit<Database, "prepare"> & {
+    prepare<Params = unknown[], SingleResult = unknown>(source: string): Params extends any[] ? TypedStatement<Params, SingleResult> : TypedStatement<[Params], SingleResult>;
+};
+
+export declare type TypedEventListener<E extends Event> = ((e: E) => void) | {
+    handleEvent(e: E): void;
+};
+
+export declare class TypedEventTarget<EventMap extends Record<string, Event>> extends EventTarget {
+    addEventListener<Type extends keyof EventMap>(type: Type, listener: TypedEventListener<EventMap[Type]> | null, options?: AddEventListenerOptions | boolean): void;
+    removeEventListener<Type extends keyof EventMap>(type: Type, listener: TypedEventListener<EventMap[Type]> | null, options?: EventListenerOptions | boolean): void;
+    dispatchEvent(event: ValueOf<EventMap>): boolean;
+}
+
+export declare type TypedStatement<Params extends any[] = unknown[], SingleResult = unknown> = Omit<Statement<Params>, "get" | "all" | "iterate"> & {
+    get(...params: Params): SingleResult | undefined;
+    all(...params: Params): SingleResult[];
+    iterate(...params: Params): IterableIterator<SingleResult>;
+};
+
+export declare type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+
+export declare function unwrapBYOBRequest(controller: ReadableByteStreamController): ValidReadableStreamBYOBRequest;
+
+export declare function validateGetOptions(key: string, options?: KVGatewayGetOptions): void;
+
+export declare function validateListOptions(options: KVGatewayListOptions): void;
+
+export declare type ValidReadableStreamBYOBRequest = Omit<ReadableStreamBYOBRequest, "view"> & {
+    readonly view: Uint8Array;
+};
+
+export declare type ValueOf<T> = T[keyof T];
+
+export declare function viewToArray(view: ArrayBufferView): Uint8Array;
+
+export declare function viewToBuffer(view: ArrayBufferView): ArrayBuffer;
+
+export declare type Void = typeof kVoid;
+
+export declare class WaitGroup {
+    private counter;
+    private resolveQueue;
+    add(): void;
+    done(): void;
+    wait(): Promise<void>;
+}
+
+export declare class WebSocket extends TypedEventTarget<WebSocketEventMap> {
+    #private;
+    static readonly READY_STATE_CONNECTING = 0;
+    static readonly READY_STATE_OPEN = 1;
+    static readonly READY_STATE_CLOSING = 2;
+    static readonly READY_STATE_CLOSED = 3;
+    [kPair]?: WebSocket;
+    [kAccepted]: boolean;
+    [kCoupled]: boolean;
+    [kClosedOutgoing]: boolean;
+    [kClosedIncoming]: boolean;
+    get readyState(): number;
+    accept(): void;
+    send(message: ArrayBuffer | string): void;
+    [kSend](message: ArrayBuffer | string): void;
+    close(code?: number, reason?: string): void;
+    [kClose](code?: number, reason?: string): void;
+    [kError](error?: Error): void;
+}
+
+export declare type WebSocketEventMap = {
+    message: MessageEvent;
+    close: CloseEvent;
+    error: ErrorEvent;
+};
+
+export declare type WebSocketPair = {
+    0: WebSocket;
+    1: WebSocket;
+};
+
+export declare const WebSocketPair: new () => WebSocketPair;
+
+export declare type Worker = ({
+    modules?: Worker_Module[];
+} | {
+    serviceWorkerScript?: string;
+} | {
+    inherit?: string;
+}) & {
+    compatibilityDate?: string;
+    compatibilityFlags?: string[];
+    bindings?: Worker_Binding[];
+    globalOutbound?: ServiceDesignator;
+    cacheApiOutbound?: ServiceDesignator;
+    durableObjectNamespaces?: Worker_DurableObjectNamespace[];
+    durableObjectUniqueKeyModifier?: string;
+    durableObjectStorage?: Worker_DurableObjectStorage;
+};
+
+export declare type Worker_Binding = {
+    name?: string;
+} & ({
+    parameter?: Worker_Binding_Parameter;
+} | {
+    text?: string;
+} | {
+    data?: Uint8Array;
+} | {
+    json?: string;
+} | {
+    wasmModule?: Uint8Array;
+} | {
+    cryptoKey?: Worker_Binding_CryptoKey;
+} | {
+    service?: ServiceDesignator;
+} | {
+    durableObjectNamespace?: Worker_Binding_DurableObjectNamespaceDesignator;
+} | {
+    kvNamespace?: ServiceDesignator;
+} | {
+    r2Bucket?: ServiceDesignator;
+} | {
+    r2Admin?: ServiceDesignator;
+} | {
+    wrapped?: Worker_Binding_WrappedBinding;
+} | {
+    queue?: ServiceDesignator;
+} | {
+    fromEnvironment?: string;
+} | {
+    analyticsEngine?: ServiceDesignator;
+});
+
+export declare type Worker_Binding_CryptoKey = ({
+    raw?: Uint8Array;
+} | {
+    hex?: string;
+} | {
+    base64?: string;
+} | {
+    pkcs8?: string;
+} | {
+    spki?: string;
+} | {
+    jwk?: string;
+}) & {
+    algorithm?: Worker_Binding_CryptoKey_Algorithm;
+    extractable?: boolean;
+    usages?: Worker_Binding_CryptoKey_Usage[];
+};
+
+export declare type Worker_Binding_CryptoKey_Algorithm = {
+    name?: string;
+} | {
+    json?: string;
+};
+
+export declare enum Worker_Binding_CryptoKey_Usage {
+    ENCRYPT = 0,
+    DECRYPT = 1,
+    SIGN = 2,
+    VERIFY = 3,
+    DERIVE_KEY = 4,
+    DERIVE_BITS = 5,
+    WRAP_KEY = 6,
+    UNWRAP_KEY = 7
+}
+
+export declare type Worker_Binding_DurableObjectNamespaceDesignator = {
+    className?: string;
+    serviceName?: string;
+};
+
+export declare interface Worker_Binding_Parameter {
+    type?: Worker_Binding_Type;
+    optional?: boolean;
+}
+
+export declare const WORKER_BINDING_SERVICE_LOOPBACK: Worker_Binding;
+
+export declare type Worker_Binding_Type = {
+    text?: Void;
+} | {
+    data?: Void;
+} | {
+    json?: Void;
+} | {
+    wasm?: Void;
+} | {
+    cryptoKey?: Worker_Binding_CryptoKey_Usage[];
+} | {
+    service?: Void;
+} | {
+    durableObjectNamespace: Void;
+} | {
+    kvNamespace?: Void;
+} | {
+    r2Bucket?: Void;
+} | {
+    r2Admin?: Void;
+} | {
+    queue?: Void;
+} | {
+    analyticsEngine?: Void;
+};
+
+export declare interface Worker_Binding_WrappedBinding {
+    moduleName?: string;
+    entrypoint?: string;
+    innerBindings?: Worker_Binding[];
+}
+
+export declare type Worker_DurableObjectNamespace = {
+    className?: string;
+} & ({
+    uniqueKey?: string;
+} | {
+    ephemeralLocal?: Void;
+});
+
+export declare type Worker_DurableObjectStorage = {
+    none?: Void;
+} | {
+    inMemory?: Void;
+} | {
+    localDisk?: string;
+};
+
+export declare type Worker_Module = {
+    name: string;
+} & ({
+    esModule?: string;
+} | {
+    commonJsModule?: string;
+} | {
+    text?: string;
+} | {
+    data?: Uint8Array;
+} | {
+    wasm?: Uint8Array;
+} | {
+    json?: string;
+} | {
+    nodeJsCompatModule?: string;
+});
+
+export declare type WorkerOptions = z.infer<typeof CORE_PLUGIN.options> & z.infer<typeof CACHE_PLUGIN.options> & z.infer<typeof D1_PLUGIN.options> & z.infer<typeof DURABLE_OBJECTS_PLUGIN.options> & z.infer<typeof KV_PLUGIN.options> & z.infer<typeof QUEUES_PLUGIN.options> & z.infer<typeof R2_PLUGIN.options>;
+
+export declare interface WorkerRoute {
+    target: string;
+    route: string;
+    specificity: number;
+    protocol?: string;
+    allowHostnamePrefix: boolean;
+    hostname: string;
+    path: string;
+    allowPathSuffix: boolean;
+}
+
+export declare function zAwaitable<T extends z.ZodTypeAny>(type: T): z.ZodUnion<[T, z.ZodPromise<T>]>;
+
+export { }
