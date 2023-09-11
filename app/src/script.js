@@ -264,12 +264,7 @@ async function loadMemoryEntryOptions() {
 }
 
 async function wipeStorageAndRestartApp() {
-  let keys = await Preferences.keys();
-  console.log(keys)
-  keys.keys.forEach(async key => {
-    await Preferences.remove(key);
-  });
-
+  SecureStorage.clear()
   document.location.href = 'index.html';
 }
 
