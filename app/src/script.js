@@ -203,8 +203,17 @@ async function updatePlanView() {
       },
       responseType: "json"
     }).then(async response => {
-      response.data.forEach(entry => {
-        cardContainer.appendChild(createCardItem(entry))
+      response.data.forEach(async entry => {
+
+        //apply Filters
+        let klassenstufe = await SecureStorage.getItem("klassenstufe");
+        let klassenbuchstabe = await SecureStorage.getItem("klassenbuchstabe");
+
+        if (entry.Klasse.includes(klassenstufe) && entry.Klasse.includes(klassenbuchstabe)) {
+          cardContainer.appendChild(createCardItem(entry)); //render Card
+        }
+
+        
       });
       app.dialog.close();
     }).catch(_error => {
@@ -246,6 +255,14 @@ async function loadSchoolSelect() {
   }
 }
 
+async function saveFilterConfig() {
+  let klassenstufe = document.getElementById("filter-klassenstufe").value;
+  let klassenbuchstabe = document.getElementById("filter-klassenbuchstabe").value;
+
+  await SecureStorage.setItem("klassenstufe", klassenstufe);
+  await SecureStorage.setItem("klassenbuchstabe", klassenbuchstabe);
+}
+
 async function loadMemoryEntryOptions() {
   let serverURL = (await SecureStorage.getItem("serverURL"));
   if (!serverURL) {
@@ -281,6 +298,7 @@ document.getElementById("closeSettingsScreenButton").addEventListener("click", c
 document.getElementById("loginButton").addEventListener("click", loginButton);
 document.getElementById("reloadPlanDataButton").addEventListener("click", updatePlanView);
 document.getElementById("resetAppButton").addEventListener("click", wipeStorageAndRestartApp);
+document.getElementById("saveFilterSettingsButton").addEventListener("click", saveFilterConfig);
 
 
 //Buttons on startpage

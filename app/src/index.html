@@ -66,7 +66,12 @@
     </div>
 
     <div id="view-filter" class="view tab">
-      <!-- Filter page -->
+      <div class="navbar">
+        <div class="navbar-bg"></div>
+        <div class="navbar-inner sliding">
+          <div class="title">Filter</div>
+        </div>
+      </div>
       <div class="page" data-name="filter">
         <!-- Top Navbar -->
 
@@ -75,9 +80,54 @@
           <!-- Text area and input field -->
           <div class="list no-hairlines-md">
             <ul>
+              <li class="item-content item-input item-input-with-value">
+                <div class="item-inner">
+                  <div class="item-title item-label">Klassenstufe</div>
+                  <div class="item-input-wrap input-dropdown-wrap">
+                    <select class="input-with-value" id="filter-klassenstufe">
+                      <option value="">Alle</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="E">E-Phase</option>
+                      <option value="Q">Q-Phase</option>
+                    </select>
+                  </div>
+                </div>
+              </li>
+              <li class="item-content item-input item-input-with-value">
+                <div class="item-inner">
+                  <div class="item-title item-label">Klasse</div>
+                  <div class="item-input-wrap input-dropdown-wrap">
+                    <select class="input-with-value" id="filter-klassenbuchstabe">
+                      <option value="">Alle</option>
+                      <option value="a">a</option>
+                      <option value="b">b</option>
+                      <option value="c">c</option>
+                      <option value="d">d</option>
+                      <option value="e">e</option>
+                      <option value="f">f</option>
+                      <option value="g">g</option>
+                      <option value="h">h</option>
+                      <option value="i">i</option>
+                      <option value="j">j</option>
+                      <option value="k">k</option>
+                      <option value="1/2">1/2</option>
+                      <option value="3/4">3/4</option>
+                    </select>
+                  </div>
+                </div>
+              </li>
               <li class="item-content">
                 <div class="item-inner">
-                  <strong>Comming soon!</strong>
+                  <button id="saveFilterSettingsButton" class="button button-fill button-outline">Speichern</button>
                 </div>
               </li>
             </ul>
