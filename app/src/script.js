@@ -1,4 +1,3 @@
-import Fuse from 'fuse.js';
 import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
 import { CapacitorHttp } from '@capacitor/core';
