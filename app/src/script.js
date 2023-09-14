@@ -264,6 +264,7 @@ async function loadMemoryEntryOptions() {
   document.getElementById("login-username").value = username;
   document.getElementById("login-instance").value = serverURL;
   document.getElementById("login-password").value = "";
+  document.getElementById("login-autologin").checked = Boolean(await SecureStorage.getItem("autologin"));
 }
 
 async function wipeStorageAndRestartApp() {
