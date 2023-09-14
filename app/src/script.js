@@ -166,7 +166,7 @@ function createCardItem(data) {
 
   let keys = Object.keys(data);
   keys.forEach(key => {
-    if (data[key] && !(["Tag_en", "_hervorgehoben", "Tag", "Stunde", "Fach", "Art", "Klasse"].includes(key))) {
+    if (data[key] && !(["Tag_en", "_hervorgehoben", "Tag", "Stunde", "Fach", "Art", "Klasse", "_sprechend"].includes(key))) {
       addRow(`${key.replace("_", " ")}:`, data[key])
     }
   });
@@ -213,7 +213,7 @@ async function updatePlanView() {
           cardContainer.appendChild(createCardItem(entry)); //render Card
         }
 
-        
+
       });
       app.dialog.close();
     }).catch(_error => {
@@ -325,9 +325,9 @@ async function init() {
   } else {
     let autologin = await SecureStorage.getItem("autologin");
     let serverURL = await SecureStorage.getItem("serverURL");
-    let password =  await SecureStorage.getItem("password");
-    let username =  await SecureStorage.getItem("username");
-    let schoolid =  await SecureStorage.getItem("schoolid");
+    let password = await SecureStorage.getItem("password");
+    let username = await SecureStorage.getItem("username");
+    let schoolid = await SecureStorage.getItem("schoolid");
 
     if (autologin && serverURL && username && password && schoolid) {
       auth(serverURL, username, password, schoolid).then(() => {
