@@ -7,7 +7,7 @@ import { Browser } from '@capacitor/browser';
 const REQUEST_TIMEOUT = 2500;
 
 // Initialize app
-var app = new Framework7({
+const app = new Framework7({
   root: '#app',
   name: 'SPH-Plan',
   id: 'io.github.sphplan',
@@ -208,7 +208,7 @@ async function updatePlanView() {
         cardContainer.appendChild(createCardItem(entry))
       });
       app.dialog.close();
-    }).catch(error => {
+    }).catch(_error => {
       app.dialog.close();
       app.toast.create({ text: 'Netzwerkfehler!' }).open();
     })
