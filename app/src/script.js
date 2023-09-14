@@ -218,6 +218,7 @@ async function updatePlanView() {
 }
 
 var schoolSelectAlreadyLoaded = false;
+
 async function loadSchoolSelect() {
   if (!schoolSelectAlreadyLoaded) {
     schoolSelectAlreadyLoaded = true;
@@ -227,16 +228,19 @@ async function loadSchoolSelect() {
       schools = schools.concat(landkreis.Schulen);
     });
 
-    let fuse = new Fuse(schools, {
-      keys: ["Id", "Name", "Ort"]
-    })
-
     app.autocomplete.create({
       inputEl: '#login-schoolid',
       openIn: 'dropdown',
       source: async (query, render) => {
-        let items = fuse.search(query, { limit: 10 });
-        items = items.map((item) => `${item.item["Id"]} - ${item.item["Name"]} - ${item.item["Ort"]}`);
+        query = query.toLowerCase(); // Convert the query to lowercase for case-insensitive search
+        let items = schools.filter((item) => {
+          const id = item["Id"].toLowerCase();
+          const name = item["Name"].toLowerCase();
+          const ort = item["Ort"].toLowerCase();
+          return id.includes(query) || name.includes(query) || ort.includes(query);
+        }).slice(0, 7); // Limit the number of results to 7
+
+        items = items.map((item) => `${item["Id"]} - ${item["Name"]} - ${item["Ort"]}`);
         render(items);
       }
     });
