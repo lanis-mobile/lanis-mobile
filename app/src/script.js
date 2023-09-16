@@ -26,36 +26,13 @@ function closeSettingsScreen() {
   app.loginScreen.close('#settings-screen');
 }
 
-//returns whether the user has a valid session or not
-//TODO fix >temporary solution<
-async function isLoggedIn() {
-  const client = new SPHClient();
-
-  let sid_cookie_string = await SecureStorage.getItem("sid_cookie_string");
-  let schoolid = await SecureStorage.getItem("schoolid");
-
-  try {
-    let isLoggedIn = Boolean(JSON.stringify(await client.getVplan(sid_cookie_string, schoolid, new Date())))
-    if (isLoggedIn) {
-      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
-      return true;
-    } else {
-      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      return false;
-    }
-  } catch (err) {
-    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-    return false;
-  }
-}
-
 async function auth(username, password, schoolid) {
   app.dialog.preloader("authenticating...");
 
   let client = new SPHClient();
   client.login(username, password, schoolid)
-    .then(async sid_cookie_string => {
-      await SecureStorage.setItem("sid_cookie_string", sid_cookie_string);
+    .then(async cookieHeader => {
+      await SecureStorage.setItem("cookieHeader", cookieHeader);
 
       app.dialog.close();
       app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
@@ -64,9 +41,10 @@ async function auth(username, password, schoolid) {
       closeSettingsScreen()
       updatePlanView();
     })
-    .catch(error => {
+    .catch(_error => {
       app.dialog.close();
       app.toast.create({ text: 'Login Failed: unknown error' }).open();
+      alert(_error)
       document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
     })
 
@@ -155,7 +133,7 @@ function createCardItem(data) {
 }
 
 async function updatePlanView() {
-  const sid_cookie_string = (await SecureStorage.getItem("sid_cookie_string"));
+  const cookieHeader = (await SecureStorage.getItem("cookieHeader"));
   const schoolid = (await SecureStorage.getItem("schoolid"));
 
   let klassenstufe = await SecureStorage.getItem("klassenstufe");
@@ -164,13 +142,13 @@ async function updatePlanView() {
 
   let cardContainer = document.getElementById("cardContainer");
 
-  if (sid_cookie_string && schoolid) {
+  if (cookieHeader && schoolid) {
     app.dialog.preloader('Lade Plan...');
     cardContainer.innerHTML = ``;
 
     const client = new SPHClient();
 
-    let data = await client.getAllVplanData(sid_cookie_string);
+    let data = await client.getAllVplanData(cookieHeader);
 
     try {
       data.forEach(entry => {
@@ -186,15 +164,12 @@ async function updatePlanView() {
 
       app.dialog.close();
     } catch (err) {
-      alert(err)
+      throw err;
     }
-
-
-
-
   } else {
     app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
     app.dialog.close();
+    throw new Error("not logged in.");
   }
 }
 
@@ -298,32 +273,25 @@ async function init() {
     app.tab.show(tabId);
   });
 
-
   loadSettingsEntryOptions();
   loadFilterConfig();
 
-  let loggedIn = await isLoggedIn();
-  console.log(`user logged in: ${loggedIn}`)
-  if (loggedIn) {
-    updatePlanView();
-  } else {
-    let autologin = await SecureStorage.getItem("autologin");
-    let password = await SecureStorage.getItem("password");
-    let username = await SecureStorage.getItem("username");
-    let schoolid = await SecureStorage.getItem("schoolid");
+  let autologin = await SecureStorage.getItem("autologin");
+  let password = await SecureStorage.getItem("password");
+  let username = await SecureStorage.getItem("username");
+  let schoolid = await SecureStorage.getItem("schoolid");
 
-    if (autologin && username && password && schoolid) {
-      auth(username, password, schoolid).then(() => {
-        updatePlanView();
-      }).catch(error => {
-        console.log(error);
-        app.toast.create({ text: 'Login Failed' }).open();
-        openSettingsScreen();
-      });
-    } else {
+  if (autologin && username && password && schoolid) {
+    auth(username, password, schoolid).then(() => {
+      updatePlanView();
+    }).catch(error => {
+      console.log(error);
+      app.toast.create({ text: 'Login Failed' }).open();
       openSettingsScreen();
-      app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
-    }
+    });
+  } else {
+    openSettingsScreen();
+    app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
   }
 }
 
