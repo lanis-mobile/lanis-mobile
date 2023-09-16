@@ -109,12 +109,13 @@ async function auth(serverURL, username, password, schoolid) {
 async function loginButton() {
   
   try {
-    let username = document.getElementById("login-username").value;
-    let password = document.getElementById("login-password").value;
-    let schoolid_raw = document.getElementById("login-schoolid").value;
-    let schoolid = schoolid_raw.match(/^(\d+)/)[0];
-    let serverURL = (document.getElementById("login-instance").value).match(/^(https:\/\/[a-zA-Z0-9.-]+)(:\d+)?/)[0];
-    let autologin = document.getElementById("login-autologin").checked;
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+    const schoolid_raw = document.getElementById("login-schoolid").value;
+    const schoolid = schoolid_raw.match(/^(\d+)/)[0];
+    const serverURL = (document.getElementById("login-instance").value).match(/^(https:\/\/[a-zA-Z0-9.-]+)(:\d+)?/)[0];
+    const autologin = document.getElementById("login-autologin").checked;
+
 
     if (autologin) {
       await SecureStorage.setItem("password", password);
