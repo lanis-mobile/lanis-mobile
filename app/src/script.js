@@ -18,7 +18,7 @@ const app = new Framework7({
 });
 
 function openSettingsScreen() {
-  loadMemoryEntryOptions();
+  loadSettingsEntryOptions();
   loadSchoolSelect();
 
   app.loginScreen.open('#settings-screen');
@@ -27,7 +27,6 @@ function openSettingsScreen() {
 function closeSettingsScreen() {
   app.loginScreen.close('#settings-screen');
 }
-
 
 //returns whether the user has a valid session or not
 async function isLoggedIn() {
@@ -208,11 +207,16 @@ async function updatePlanView() {
         //apply Filters
         let klassenstufe = await SecureStorage.getItem("klassenstufe");
         let klassenbuchstabe = await SecureStorage.getItem("klassenbuchstabe");
+        let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
 
-        if (entry.Klasse.includes(klassenstufe) && entry.Klasse.includes(klassenbuchstabe)) {
-          cardContainer.appendChild(createCardItem(entry)); //render Card
+        let teacherFilter = true;
+        if (lehrerfilter) {
+          teacherFilter = (entry.Lehrer == lehrerfilter || entry.Vertreter == lehrerfilter || entry.Lehrerkuerzel == lehrerfilter || entry.Vertreterkuerzel == lehrerfilter)
         }
 
+        if (entry.Klasse.includes(klassenstufe) && entry.Klasse.includes(klassenbuchstabe) && teacherFilter) {
+          cardContainer.appendChild(createCardItem(entry)); //render Card
+        }
 
       });
       app.dialog.close();
@@ -258,12 +262,26 @@ async function loadSchoolSelect() {
 async function saveFilterConfig() {
   let klassenstufe = document.getElementById("filter-klassenstufe").value;
   let klassenbuchstabe = document.getElementById("filter-klassenbuchstabe").value;
+  let lehrerfilter = document.getElementById("filter-lehrer").value;
 
   await SecureStorage.setItem("klassenstufe", klassenstufe);
   await SecureStorage.setItem("klassenbuchstabe", klassenbuchstabe);
+  await SecureStorage.setItem("lehrerfilter", lehrerfilter);
+
+  document.getElementById("link_vertretungsplan").click();
+  updatePlanView();
 }
 
-async function loadMemoryEntryOptions() {
+async function loadFilterConfig() {
+  document.getElementById("filter-klassenstufe").value =  await SecureStorage.getItem("klassenstufe");
+  document.getElementById("filter-klassenbuchstabe").value = await SecureStorage.getItem("klassenbuchstabe");
+  let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+  if (lehrerfilter) {
+    document.getElementById("filter-lehrer-li").classList.add("item-input-with-value");
+  }
+}
+
+async function loadSettingsEntryOptions() {
   let serverURL = (await SecureStorage.getItem("serverURL"));
   if (!serverURL) {
     serverURL = "https://production.sphvertretungsplan.alessioc42.workers.dev";
@@ -317,7 +335,9 @@ app.on('tabShow', function (tabEl) {
 
 
 async function init() {
-  loadMemoryEntryOptions();
+  loadSettingsEntryOptions();
+  loadFilterConfig();
+
   let loggedIn = await isLoggedIn();
   console.log(`user logged in: ${loggedIn}`)
   if (loggedIn) {

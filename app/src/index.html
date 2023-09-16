@@ -17,7 +17,7 @@
   <div class="views tabs safe-areas">
     <div class="toolbar tabbar tabbar-labels toolbar-bottom">
       <div class="toolbar-inner">
-        <a href="#view-plan" class="tab-link">
+        <a href="#view-plan" class="tab-link" id="link_vertretungsplan">
           <span class="tabbar-label">Vertretungsplan</span>
         </a>
         <a href="#view-filter" class="tab-link">
@@ -122,6 +122,15 @@
                       <option value="1/2">1/2</option>
                       <option value="3/4">3/4</option>
                     </select>
+                  </div>
+                </div>
+              </li>
+              <li class="item-content item-input" id="filter-lehrer-li">
+                <div class="item-inner">
+                  <div class="item-title item-floating-label">Lehrer Kürzel</div>
+                  <div class="item-input-wrap">
+                    <input type="text" id="filter-lehrer" value="" />
+                    <span class="input-clear-button"></span>
                   </div>
                 </div>
               </li>
