@@ -4,9 +4,7 @@ import { CapacitorHttp } from '@capacitor/core';
 export class SPHClient {
     cookies = {};
 
-    constructor() {
-
-    }
+    constructor() {}
 
     async login(username, password, schoolid) {
         this.cookies = {};

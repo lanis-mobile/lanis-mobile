@@ -60,32 +60,32 @@ async function isLoggedIn() {
 }
 
 async function auth(username, password, schoolid) {
+  alert("starting login");
   app.dialog.preloader("authenticating...");
 
   let client = new SPHClient();
-
   client.login(username, password, schoolid)
-    .then(async sid => {
-      await SecureStorage.setItem("sid", sid);
+  .then(async sid => {
+    alert(sid);
+    await SecureStorage.setItem("sid", sid);
 
-      app.dialog.close();
-      app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
-      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
+    app.dialog.close();
+    app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
+    document.getElementById("loginInformationLabel").innerText = "eingeloggt";
 
-      closeSettingsScreen()
-      updatePlanView();
-    })
-    .catch(error => {
-      app.dialog.close();
-      app.toast.create({ text: 'Login Failed: unknown error' }).open();
-      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      alert("error: " + error)
-    })
+    closeSettingsScreen()
+    updatePlanView();
+  })
+  .catch(error => {
+    app.dialog.close();
+    app.toast.create({ text: 'Login Failed: unknown error' }).open();
+    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
+    alert("error: "+error)
+  })
 
 }
 
 async function loginButton() {
-
   try {
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
@@ -107,19 +107,14 @@ async function loginButton() {
     await SecureStorage.setItem("schoolid_raw", schoolid_raw);
     await SecureStorage.setItem("schoolid", schoolid);
     await SecureStorage.setItem("username", username);
-
-    await (new SPHClient()).login(username, password, schoolid);
+    
+    await auth(username, password, schoolid);
   } catch (err) {
     alert(err);
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
 
-  auth(username, password, schoolid);
-
-
-  console.log(serverURL);
-
-
+  
 }
 
 function createCardItem(data) {
@@ -337,6 +332,7 @@ async function init() {
     updatePlanView();
   } else {
     let autologin = await SecureStorage.getItem("autologin");
+    let serverURL = await SecureStorage.getItem("serverURL");
     let password = await SecureStorage.getItem("password");
     let username = await SecureStorage.getItem("username");
     let schoolid = await SecureStorage.getItem("schoolid");
