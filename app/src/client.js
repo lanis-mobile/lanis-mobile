@@ -4,7 +4,7 @@ import { CapacitorHttp } from '@capacitor/core';
 export class SPHClient {
     cookies = {};
 
-    constructor() {}
+    constructor() { }
 
     async login(username, password, schoolid) {
         this.cookies = {};
@@ -45,39 +45,56 @@ export class SPHClient {
 
         this.parseSetCookieHeader(String(response3.headers["set-cookie"]));
         if (this.cookies.sid) {
-            return this.cookies.sid.value;
+            return this.getCookieHeader();
         } else {
             throw new Error("Error while authenticating!");
         }
     }
 
-    async getVplan(sid, schoolid, date) {
+    async getVplan(cookieHeader, date) {
         date = date.toLocaleDateString("en-CH");
-
-        let response = await CapacitorHttp.post({
-            url: `https://start.schulportal.hessen.de/vertretungsplan.php?ganzerPlan=true&tag=${date}`,
-            params: {
-                tag: date,
-                ganzerPlan: "true"
-            },
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                cookie: `sph-login-upstream=4;schulportal_lastschool=${this.schoolID} +"; i=${schoolid}; sid=${sid}`
-            },
-            data: `tag=${date}&ganzerPlan=true`
-        });
-        return JSON.parse(response.data);
+    
+        try {
+            const response = await CapacitorHttp.post({
+                url: `https://start.schulportal.hessen.de/vertretungsplan.php`,
+                params: {
+                    tag: date,
+                    ganzerPlan: "true"
+                },
+                headers: {
+                    "Accept": "*/*",
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-origin",
+                    "cookie": cookieHeader
+                },
+                webFetchExtra: {
+                    credentials: "include",
+                    referrer: "https://start.schulportal.hessen.de/vertretungsplan.php",
+                    mode: "cors"
+                },
+                data: `tag=${date}&ganzerPlan=true`,
+            });
+    
+            return JSON.parse(response.data);
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async getVplanDates(sid, schoolid) {
+    async getVplanDates(cookieHeader) {
         let response = await CapacitorHttp.get({
             url: "https://start.schulportal.hessen.de/vertretungsplan.php",
+            disableRedirects: true,
             webFetchExtra: { mode: 'no-cors' },
             headers: {
+                Host: "start.schulportal.hessen.de",
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                cookie: `sph-login-upstream=4;schulportal_lastschool=${this.schoolID} +"; i=${schoolid}; sid=${sid}`
+                Cookie: cookieHeader
             }
         });
+
         let text = response.data;
 
         let datePattern = /data-tag="(\d{2})\.(\d{2})\.(\d{4})"/g;
@@ -98,6 +115,21 @@ export class SPHClient {
 
         return uniqueDates;
     }
+
+    async getAllVplanData(cookieHeader) {
+        const dates = await this.getVplanDates(cookieHeader);
+        const fetchPromises = [];
+
+        dates.forEach(date => {
+            fetchPromises.push(
+                this.getVplan(cookieHeader, date)
+            );
+        });
+
+        const plans = await Promise.all(fetchPromises);
+        return [].concat(...plans);
+    }
+
 
     parseSetCookieHeader(setCookieHeader) {
         const cookiesArray = setCookieHeader.split(",");

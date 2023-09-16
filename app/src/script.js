@@ -1,10 +1,8 @@
 import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
-import { CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { SPHClient } from './client';
 
-const REQUEST_TIMEOUT = 2500;
 
 const app = new Framework7({
   root: '#app',
@@ -29,59 +27,48 @@ function closeSettingsScreen() {
 }
 
 //returns whether the user has a valid session or not
+//TODO fix >temporary solution<
 async function isLoggedIn() {
-  const serverURL = (await SecureStorage.getItem("serverURL"));
-  const sid = (await SecureStorage.getItem("sid"));
+  const client = new SPHClient();
 
-  if (serverURL && sid) {
-    let response = await CapacitorHttp.get({
-      url: `${serverURL}/api/isValidSession`,
-      params: {
-        sid: sid
-      },
-      responseType: "text",
-      connectTimeout: REQUEST_TIMEOUT
-    }).catch(_error => {
-      app.toast.create({ text: 'Error calling the server!' }).open();
-      document.getElementById("loginInformationLabel").innerText = "keine Verbindung";
-    });
+  let sid_cookie_string = await SecureStorage.getItem("sid_cookie_string");
+  let schoolid = await SecureStorage.getItem("schoolid");
 
-    if (response.status == 200) {
+  try {
+    let isLoggedIn = Boolean(JSON.stringify(await client.getVplan(sid_cookie_string, schoolid, new Date())))
+    if (isLoggedIn) {
       document.getElementById("loginInformationLabel").innerText = "eingeloggt";
       return true;
     } else {
       document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
       return false;
     }
-  } else {
+  } catch (err) {
     document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
     return false;
   }
 }
 
 async function auth(username, password, schoolid) {
-  alert("starting login");
   app.dialog.preloader("authenticating...");
 
   let client = new SPHClient();
   client.login(username, password, schoolid)
-  .then(async sid => {
-    alert(sid);
-    await SecureStorage.setItem("sid", sid);
+    .then(async sid_cookie_string => {
+      await SecureStorage.setItem("sid_cookie_string", sid_cookie_string);
 
-    app.dialog.close();
-    app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
-    document.getElementById("loginInformationLabel").innerText = "eingeloggt";
+      app.dialog.close();
+      app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
+      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
 
-    closeSettingsScreen()
-    updatePlanView();
-  })
-  .catch(error => {
-    app.dialog.close();
-    app.toast.create({ text: 'Login Failed: unknown error' }).open();
-    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-    alert("error: "+error)
-  })
+      closeSettingsScreen()
+      updatePlanView();
+    })
+    .catch(error => {
+      app.dialog.close();
+      app.toast.create({ text: 'Login Failed: unknown error' }).open();
+      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
+    })
 
 }
 
@@ -91,7 +78,6 @@ async function loginButton() {
     const password = document.getElementById("login-password").value;
     const schoolid_raw = document.getElementById("login-schoolid").value;
     const schoolid = schoolid_raw.match(/^(\d+)/)[0];
-    const serverURL = (document.getElementById("login-instance").value).match(/^(https:\/\/[a-zA-Z0-9.-]+)(:\d+)?/)[0];
     const autologin = document.getElementById("login-autologin").checked;
 
 
@@ -103,18 +89,16 @@ async function loginButton() {
       await SecureStorage.setItem("autologin", "");
     }
 
-    await SecureStorage.setItem("serverURL", serverURL);
     await SecureStorage.setItem("schoolid_raw", schoolid_raw);
     await SecureStorage.setItem("schoolid", schoolid);
     await SecureStorage.setItem("username", username);
-    
+
     await auth(username, password, schoolid);
   } catch (err) {
-    alert(err);
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
 
-  
+
 }
 
 function createCardItem(data) {
@@ -171,30 +155,25 @@ function createCardItem(data) {
 }
 
 async function updatePlanView() {
-  const serverURL = (await SecureStorage.getItem("serverURL"));
-  const sid = (await SecureStorage.getItem("sid"));
+  const sid_cookie_string = (await SecureStorage.getItem("sid_cookie_string"));
   const schoolid = (await SecureStorage.getItem("schoolid"));
-  if (serverURL && sid && schoolid) {
+
+  let klassenstufe = await SecureStorage.getItem("klassenstufe");
+  let klassenbuchstabe = await SecureStorage.getItem("klassenbuchstabe");
+  let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+
+  let cardContainer = document.getElementById("cardContainer");
+
+  if (sid_cookie_string && schoolid) {
     app.dialog.preloader('Lade Plan...');
-    var cardContainer = document.getElementById("cardContainer");
     cardContainer.innerHTML = ``;
 
-    CapacitorHttp.get({
-      url: `${serverURL}/api/plan`,
-      params: {
-        sid: sid,
-        schoolid: schoolid,
-        connectTimeout: REQUEST_TIMEOUT
-      },
-      responseType: "json"
-    }).then(async response => {
-      response.data.forEach(async entry => {
+    const client = new SPHClient();
 
-        //apply Filters
-        let klassenstufe = await SecureStorage.getItem("klassenstufe");
-        let klassenbuchstabe = await SecureStorage.getItem("klassenbuchstabe");
-        let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+    let data = await client.getAllVplanData(sid_cookie_string);
 
+    try {
+      data.forEach(entry => {
         let teacherFilter = true;
         if (lehrerfilter) {
           teacherFilter = (entry.Lehrer == lehrerfilter || entry.Vertreter == lehrerfilter || entry.Lehrerkuerzel == lehrerfilter || entry.Vertreterkuerzel == lehrerfilter)
@@ -203,15 +182,19 @@ async function updatePlanView() {
         if (entry.Klasse.includes(klassenstufe) && entry.Klasse.includes(klassenbuchstabe) && teacherFilter) {
           cardContainer.appendChild(createCardItem(entry)); //render Card
         }
-
       });
+
       app.dialog.close();
-    }).catch(_error => {
-      app.dialog.close();
-      app.toast.create({ text: 'Netzwerkfehler!' }).open();
-    })
+    } catch (err) {
+      alert(err)
+    }
+
+
+
+
   } else {
     app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
+    app.dialog.close();
   }
 }
 
@@ -268,12 +251,6 @@ async function loadFilterConfig() {
 }
 
 async function loadSettingsEntryOptions() {
-  let serverURL = (await SecureStorage.getItem("serverURL"));
-  if (!serverURL) {
-    serverURL = "https://production.sphvertretungsplan.alessioc42.workers.dev";
-  }
-  document.getElementById("login-instance-li").classList.add("item-input-with-value");
-
   let username = (await SecureStorage.getItem("username"));
   if (username) {
     document.getElementById("login-username-li").classList.add("item-input-with-value");
@@ -283,7 +260,6 @@ async function loadSettingsEntryOptions() {
 
   document.getElementById("login-schoolid").value = (await SecureStorage.getItem("schoolid_raw"));
   document.getElementById("login-username").value = username;
-  document.getElementById("login-instance").value = serverURL;
   document.getElementById("login-password").value = "";
   document.getElementById("login-autologin").checked = Boolean(await SecureStorage.getItem("autologin"));
 }
@@ -332,7 +308,6 @@ async function init() {
     updatePlanView();
   } else {
     let autologin = await SecureStorage.getItem("autologin");
-    let serverURL = await SecureStorage.getItem("serverURL");
     let password = await SecureStorage.getItem("password");
     let username = await SecureStorage.getItem("username");
     let schoolid = await SecureStorage.getItem("schoolid");
