@@ -12,7 +12,7 @@ Aktuell ist die App zwar funktionsfähig, es sind aber einige Features noch nich
 
 Zum Ausprobieren kann diese Server-Instanz verwendet werden:
 
-<a href="https://github.com/alessioC42/SPH-vertretungsplan/releases/download/v.0.1.0/sphvertretungsplan.apk">APK download</a>
+<a href="[https://github.com/alessioC42/SPH-vertretungsplan/releases/download/v0.2.0/sphvertretungsplan.apk)">APK download</a>
 
 ## Diese App soll 2 probleme Lösen:
 
