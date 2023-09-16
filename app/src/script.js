@@ -5,7 +5,6 @@ import { Browser } from '@capacitor/browser';
 
 const REQUEST_TIMEOUT = 2500;
 
-// Initialize app
 const app = new Framework7({
   root: '#app',
   name: 'SPH-Plan',
@@ -108,27 +107,37 @@ async function auth(serverURL, username, password, schoolid) {
 }
 
 async function loginButton() {
-  let username = document.getElementById("login-username").value;
-  let password = document.getElementById("login-password").value;
-  let schoolid_raw = document.getElementById("login-schoolid").value
-  let schoolid = schoolid_raw.match(/^(\d+)/)[0];
-  let serverURL = (document.getElementById("login-instance").value).match(/^(https?:\/\/[a-zA-Z0-9.-]+)(:\d+)?/)[0];
-  let autologin = document.getElementById("login-autologin").checked;
+  
+  try {
+    let username = document.getElementById("login-username").value;
+    let password = document.getElementById("login-password").value;
+    let schoolid_raw = document.getElementById("login-schoolid").value;
+    let schoolid = schoolid_raw.match(/^(\d+)/)[0];
+    let serverURL = (document.getElementById("login-instance").value).match(/^(https:\/\/[a-zA-Z0-9.-]+)(:\d+)?/)[0];
+    let autologin = document.getElementById("login-autologin").checked;
 
-  if (autologin) {
-    await SecureStorage.setItem("password", password);
-    await SecureStorage.setItem("autologin", "true");
-  } else {
-    await SecureStorage.setItem("password", "");
-    await SecureStorage.setItem("autologin", "");
+    if (autologin) {
+      await SecureStorage.setItem("password", password);
+      await SecureStorage.setItem("autologin", "true");
+    } else {
+      await SecureStorage.setItem("password", "");
+      await SecureStorage.setItem("autologin", "");
+    }
+  
+    await SecureStorage.setItem("serverURL", serverURL);
+    await SecureStorage.setItem("schoolid_raw", schoolid_raw);
+    await SecureStorage.setItem("schoolid", schoolid);
+    await SecureStorage.setItem("username", username);
+  } catch (err) {
+    app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
-
-  await SecureStorage.setItem("serverURL", serverURL);
-  await SecureStorage.setItem("schoolid_raw", schoolid_raw);
-  await SecureStorage.setItem("schoolid", schoolid);
-  await SecureStorage.setItem("username", username);
-
+  
   auth(serverURL, username, password, schoolid);
+  
+
+  console.log(serverURL);
+
+  
 }
 
 function createCardItem(data) {
@@ -273,7 +282,7 @@ async function saveFilterConfig() {
 }
 
 async function loadFilterConfig() {
-  document.getElementById("filter-klassenstufe").value =  await SecureStorage.getItem("klassenstufe");
+  document.getElementById("filter-klassenstufe").value = await SecureStorage.getItem("klassenstufe");
   document.getElementById("filter-klassenbuchstabe").value = await SecureStorage.getItem("klassenbuchstabe");
   let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
   if (lehrerfilter) {
@@ -311,30 +320,32 @@ async function openInBrowser(url) {
   await Browser.open({ url: url });
 }
 
-document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
-document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
-document.getElementById("loginButton").addEventListener("click", loginButton);
-document.getElementById("reloadPlanDataButton").addEventListener("click", updatePlanView);
-document.getElementById("resetAppButton").addEventListener("click", wipeStorageAndRestartApp);
-document.getElementById("saveFilterSettingsButton").addEventListener("click", saveFilterConfig);
-
-
-//Buttons on startpage
-document.getElementById("browserOpenBugreport").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues") });
-document.getElementById("browserOpenFeatureRequest").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues") });
-document.getElementById("browserOpenLatestrelease").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest") });
-document.getElementById("browserOpenGitHubPage").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan") });
-
-
-app.tab.show('#instanceConfigTab');
-// Event-Handling für das Umschalten zwischen Tabs
-app.on('tabShow', function (tabEl) {
-  var tabId = tabEl.id;
-  app.tab.show(tabId);
-});
 
 
 async function init() {
+  document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
+  document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
+  document.getElementById("loginButton").addEventListener("click", loginButton);
+  document.getElementById("reloadPlanDataButton").addEventListener("click", updatePlanView);
+  document.getElementById("resetAppButton").addEventListener("click", wipeStorageAndRestartApp);
+  document.getElementById("saveFilterSettingsButton").addEventListener("click", saveFilterConfig);
+
+
+  //Buttons on startpage
+  document.getElementById("browserOpenBugreport").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues") });
+  document.getElementById("browserOpenFeatureRequest").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues") });
+  document.getElementById("browserOpenLatestrelease").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest") });
+  document.getElementById("browserOpenGitHubPage").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan") });
+
+
+  app.tab.show('#instanceConfigTab');
+  // Event-Handling für das Umschalten zwischen Tabs
+  app.on('tabShow', function (tabEl) {
+    var tabId = tabEl.id;
+    app.tab.show(tabId);
+  });
+
+
   loadSettingsEntryOptions();
   loadFilterConfig();
 
