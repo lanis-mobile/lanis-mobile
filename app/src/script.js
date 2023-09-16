@@ -2,6 +2,7 @@ import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
 import { CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { SPHClient } from './client';
 
 const REQUEST_TIMEOUT = 2500;
 
@@ -58,56 +59,33 @@ async function isLoggedIn() {
   }
 }
 
-async function auth(serverURL, username, password, schoolid) {
+async function auth(username, password, schoolid) {
   app.dialog.preloader("authenticating...");
 
-  try {
-    CapacitorHttp.get({
-      url: `${serverURL}/api/login`,
-      params: {
-        username: username,
-        password: password,
-        schoolid: schoolid
-      },
-      responseType: "text",
-      connectTimeout: REQUEST_TIMEOUT
-    }).then(async response => {
+  let client = new SPHClient();
+
+  client.login(username, password, schoolid)
+    .then(async sid => {
+      await SecureStorage.setItem("sid", sid);
+
       app.dialog.close();
-      if (response.status == 200) {
-        let sid = await response.data;
-        console.log(sid);
-        await SecureStorage.setItem("sid", sid);
-        app.toast.create({ text: 'logged in!' }).open()
+      app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
+      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
 
-        console.log(await SecureStorage.getItem("sid"));
-        closeSettingsScreen()
-        updatePlanView();
-
-        document.getElementById("loginInformationLabel").innerText = "eingeloggt";
-
-      } else if (response.status == 500) {
-        app.toast.create({ text: 'login failed!' }).open();
-        document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      } else {
-        app.toast.create({ text: 'login failed: unknown error' }).open();
-        document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      }
-    }).catch(error => {
-      console.error(error);
+      closeSettingsScreen()
+      updatePlanView();
+    })
+    .catch(error => {
       app.dialog.close();
       app.toast.create({ text: 'Login Failed: unknown error' }).open();
       document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-    });
+      alert("error: " + error)
+    })
 
-  } catch (err) {
-    app.dialog.close();
-    app.toast.create({ text: 'Login Failed: unknown error' }).open();
-    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-  }
 }
 
 async function loginButton() {
-  
+
   try {
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
@@ -124,21 +102,24 @@ async function loginButton() {
       await SecureStorage.setItem("password", "");
       await SecureStorage.setItem("autologin", "");
     }
-  
+
     await SecureStorage.setItem("serverURL", serverURL);
     await SecureStorage.setItem("schoolid_raw", schoolid_raw);
     await SecureStorage.setItem("schoolid", schoolid);
     await SecureStorage.setItem("username", username);
+
+    await (new SPHClient()).login(username, password, schoolid);
   } catch (err) {
+    alert(err);
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
-  
-  auth(serverURL, username, password, schoolid);
-  
+
+  auth(username, password, schoolid);
+
 
   console.log(serverURL);
 
-  
+
 }
 
 function createCardItem(data) {
@@ -356,13 +337,12 @@ async function init() {
     updatePlanView();
   } else {
     let autologin = await SecureStorage.getItem("autologin");
-    let serverURL = await SecureStorage.getItem("serverURL");
     let password = await SecureStorage.getItem("password");
     let username = await SecureStorage.getItem("username");
     let schoolid = await SecureStorage.getItem("schoolid");
 
-    if (autologin && serverURL && username && password && schoolid) {
-      auth(serverURL, username, password, schoolid).then(() => {
+    if (autologin && username && password && schoolid) {
+      auth(username, password, schoolid).then(() => {
         updatePlanView();
       }).catch(error => {
         console.log(error);
