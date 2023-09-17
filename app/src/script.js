@@ -29,25 +29,22 @@ function closeSettingsScreen() {
 async function auth(username, password, schoolid) {
   app.dialog.preloader("authenticating...");
 
-  let client = new SPHClient();
-  client.login(username, password, schoolid)
-    .then(async cookieHeader => {
-      await SecureStorage.setItem("cookieHeader", cookieHeader);
+  try {
+    let client = new SPHClient();
+    let cookieHeader = await client.login(username, password, schoolid)
 
-      app.dialog.close();
-      app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
-      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
+    await SecureStorage.setItem("cookieHeader", cookieHeader);
 
-      closeSettingsScreen()
-      updatePlanView();
-    })
-    .catch(_error => {
-      app.dialog.close();
-      app.toast.create({ text: 'Login Failed: unknown error' }).open();
-      alert(_error)
-      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-    })
+    app.dialog.close();
+    app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
+    document.getElementById("loginInformationLabel").innerText = "eingeloggt";
 
+  } catch (_error) {
+    app.dialog.close();
+    app.toast.create({ text: 'Login Failed: unknown error' }).open();
+    alert(_error)
+    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
+  }
 }
 
 async function loginButton() {
@@ -72,6 +69,8 @@ async function loginButton() {
     await SecureStorage.setItem("username", username);
 
     await auth(username, password, schoolid);
+    closeSettingsScreen();
+    await updatePlanView();
   } catch (err) {
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
@@ -132,23 +131,27 @@ function createCardItem(data) {
   return listItem;
 }
 
+function ifUndefinedEmptyString(obj){
+  if(!obj) {return ""} else return obj;
+}
+
 async function updatePlanView() {
   const cookieHeader = (await SecureStorage.getItem("cookieHeader"));
-  const schoolid = (await SecureStorage.getItem("schoolid"));
 
-  let klassenstufe = await SecureStorage.getItem("klassenstufe");
-  let klassenbuchstabe = await SecureStorage.getItem("klassenbuchstabe");
-  let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+  let klassenstufe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenstufe"));
+  let klassenbuchstabe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenbuchstabe"));
+  let lehrerfilter = ifUndefinedEmptyString(await SecureStorage.getItem("lehrerfilter"));
 
   let cardContainer = document.getElementById("cardContainer");
 
-  if (cookieHeader && schoolid) {
+  if (cookieHeader) {
     app.dialog.preloader('Lade Plan...');
     cardContainer.innerHTML = ``;
 
     const client = new SPHClient();
 
     let data = await client.getAllVplanData(cookieHeader);
+
 
     try {
       data.forEach(entry => {
@@ -217,9 +220,9 @@ async function saveFilterConfig() {
 }
 
 async function loadFilterConfig() {
-  document.getElementById("filter-klassenstufe").value = await SecureStorage.getItem("klassenstufe");
-  document.getElementById("filter-klassenbuchstabe").value = await SecureStorage.getItem("klassenbuchstabe");
-  let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+  document.getElementById("filter-klassenstufe").value = ifUndefinedEmptyString(await SecureStorage.getItem("klassenstufe"));
+  document.getElementById("filter-klassenbuchstabe").value = ifUndefinedEmptyString(await SecureStorage.getItem("klassenbuchstabe"));
+  let lehrerfilter = ifUndefinedEmptyString(await SecureStorage.getItem("lehrerfilter"));
   if (lehrerfilter) {
     document.getElementById("filter-lehrer-li").classList.add("item-input-with-value");
   }
