@@ -239,6 +239,7 @@ async function loadSettingsEntryOptions() {
   document.getElementById("login-schoolid").value = (await SecureStorage.getItem("schoolid_raw"));
   document.getElementById("login-username").value = username;
   document.getElementById("login-password").value = "";
+  document.getElementById("login-password-li").classList.remove("item-input-with-value");
   document.getElementById("login-autologin").checked = Boolean(await SecureStorage.getItem("autologin"));
 }
 
