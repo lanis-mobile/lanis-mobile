@@ -2,6 +2,8 @@ import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
 import { Browser } from '@capacitor/browser';
 import { SPHClient } from './client';
+import { getPermissions, createNotificationsFromPlanData } from './notifications';
+import { filter } from './filterplan';
 
 
 const app = new Framework7({
@@ -136,46 +138,30 @@ function ifUndefinedEmptyString(obj){
 }
 
 async function updatePlanView() {
-  const cookieHeader = (await SecureStorage.getItem("cookieHeader"));
-
-  let klassenstufe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenstufe"));
-  let klassenbuchstabe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenbuchstabe"));
-  let lehrerfilter = ifUndefinedEmptyString(await SecureStorage.getItem("lehrerfilter"));
+  const cookieHeader = await SecureStorage.getItem("cookieHeader");
 
   let cardContainer = document.getElementById("cardContainer");
 
   if (cookieHeader) {
-    app.dialog.preloader('Lade Plan...');
-    cardContainer.innerHTML = ``;
-
-    const client = new SPHClient();
-
-    let data = await client.getAllVplanData(cookieHeader);
-
-
-    try {
-      data.forEach(entry => {
-        let teacherFilter = true;
-        if (lehrerfilter) {
-          teacherFilter = (entry.Lehrer == lehrerfilter || entry.Vertreter == lehrerfilter || entry.Lehrerkuerzel == lehrerfilter || entry.Vertreterkuerzel == lehrerfilter)
-        }
-
-        if (entry.Klasse.includes(klassenstufe) && entry.Klasse.includes(klassenbuchstabe) && teacherFilter) {
-          cardContainer.appendChild(createCardItem(entry)); //render Card
-        }
-      });
-
-      app.dialog.close();
-    } catch (err) {
-      throw err;
-    }
+      app.dialog.preloader('Lade Plan...');
+      cardContainer.innerHTML = ``;
+      const client = new SPHClient();
+      let data = await client.getAllVplanData(cookieHeader);
+      try {
+          const filteredData = await filter(data);
+          filteredData.forEach(entry => {
+              cardContainer.appendChild(createCardItem(entry)); // render Card
+          });
+          app.dialog.close();
+      } catch (err) {
+          throw err;
+      }
   } else {
-    app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
-    app.dialog.close();
-    throw new Error("not logged in.");
+      app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
+      app.dialog.close();
+      throw new Error("not logged in.");
   }
 }
-
 var schoolSelectAlreadyLoaded = false;
 
 async function loadSchoolSelect() {
@@ -297,6 +283,8 @@ async function init() {
     openSettingsScreen();
     app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
   }
+
+  await getPermissions();
 }
 
 init();

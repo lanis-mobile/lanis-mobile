@@ -11,7 +11,8 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "b": "vite build && npx cap sync"
+    "b": "vite build && npx cap sync",
+    "android": "vite build && npx cap sync && npx cap run android"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^4.0.0",
