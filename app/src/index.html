@@ -159,13 +159,11 @@
         </div>
         <div class="list no-hairlines-md">
           <ul>
-            <li class="item-content item-input item-input-with-value"  id="login-instance-li">
+            <li class="item-content item-input" id="login-schoolid-li">
               <div class="item-inner">
-                <div class="item-title item-floating-label">Instanz (Server)</div>
+                <div class="item-title item-label">Schule</div>
                 <div class="item-input-wrap">
-                  <input type="text" name="serverURL" id="login-instance" value="https://production.sphvertretungsplan.alessioc42.workers.dev"
-                    placeholder="https://production.sphvertretungsplan.alessioc42.workers.dev" />
-                  <span class="input-clear-button"></span>
+                  <input type="text" placeholder="suche nach deiner Schule..." id="login-schoolid" />
                 </div>
               </div>
             </li>
@@ -187,17 +185,9 @@
                 </div>
               </div>
             </li>
-            <li class="item-content item-input" id="login-schoolid-li">
-              <div class="item-inner">
-                <div class="item-title item-label">Schule</div>
-                <div class="item-input-wrap">
-                  <input type="text" placeholder="suche nach deiner Schule..." id="login-schoolid" />
-                </div>
-              </div>
-            </li>
             <li class="item-content">
               <div class="item-inner">
-                Angemeldet bleiben? (Auto-Login)
+                automatisch Anmelden?
                 <label class="toggle">
                   <!-- Toggle input -->
                   <input type="checkbox" id="login-autologin"/>

@@ -1,9 +1,8 @@
 import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
-import { CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { SPHClient } from './client';
 
-const REQUEST_TIMEOUT = 2500;
 
 const app = new Framework7({
   root: '#app',
@@ -27,93 +26,33 @@ function closeSettingsScreen() {
   app.loginScreen.close('#settings-screen');
 }
 
-//returns whether the user has a valid session or not
-async function isLoggedIn() {
-  const serverURL = (await SecureStorage.getItem("serverURL"));
-  const sid = (await SecureStorage.getItem("sid"));
-
-  if (serverURL && sid) {
-    let response = await CapacitorHttp.get({
-      url: `${serverURL}/api/isValidSession`,
-      params: {
-        sid: sid
-      },
-      responseType: "text",
-      connectTimeout: REQUEST_TIMEOUT
-    }).catch(_error => {
-      app.toast.create({ text: 'Error calling the server!' }).open();
-      document.getElementById("loginInformationLabel").innerText = "keine Verbindung";
-    });
-
-    if (response.status == 200) {
-      document.getElementById("loginInformationLabel").innerText = "eingeloggt";
-      return true;
-    } else {
-      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      return false;
-    }
-  } else {
-    document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-    return false;
-  }
-}
-
-async function auth(serverURL, username, password, schoolid) {
+async function auth(username, password, schoolid) {
   app.dialog.preloader("authenticating...");
 
   try {
-    CapacitorHttp.get({
-      url: `${serverURL}/api/login`,
-      params: {
-        username: username,
-        password: password,
-        schoolid: schoolid
-      },
-      responseType: "text",
-      connectTimeout: REQUEST_TIMEOUT
-    }).then(async response => {
-      app.dialog.close();
-      if (response.status == 200) {
-        let sid = await response.data;
-        console.log(sid);
-        await SecureStorage.setItem("sid", sid);
-        app.toast.create({ text: 'logged in!' }).open()
+    let client = new SPHClient();
+    let cookieHeader = await client.login(username, password, schoolid)
 
-        console.log(await SecureStorage.getItem("sid"));
-        closeSettingsScreen()
-        updatePlanView();
+    await SecureStorage.setItem("cookieHeader", cookieHeader);
 
-        document.getElementById("loginInformationLabel").innerText = "eingeloggt";
+    app.dialog.close();
+    app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
+    document.getElementById("loginInformationLabel").innerText = "eingeloggt";
 
-      } else if (response.status == 500) {
-        app.toast.create({ text: 'login failed!' }).open();
-        document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      } else {
-        app.toast.create({ text: 'login failed: unknown error' }).open();
-        document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-      }
-    }).catch(error => {
-      console.error(error);
-      app.dialog.close();
-      app.toast.create({ text: 'Login Failed: unknown error' }).open();
-      document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
-    });
-
-  } catch (err) {
+  } catch (_error) {
     app.dialog.close();
     app.toast.create({ text: 'Login Failed: unknown error' }).open();
+    alert(_error)
     document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
   }
 }
 
 async function loginButton() {
-  
   try {
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
     const schoolid_raw = document.getElementById("login-schoolid").value;
     const schoolid = schoolid_raw.match(/^(\d+)/)[0];
-    const serverURL = (document.getElementById("login-instance").value).match(/^(https:\/\/[a-zA-Z0-9.-]+)(:\d+)?/)[0];
     const autologin = document.getElementById("login-autologin").checked;
 
 
@@ -124,21 +63,19 @@ async function loginButton() {
       await SecureStorage.setItem("password", "");
       await SecureStorage.setItem("autologin", "");
     }
-  
-    await SecureStorage.setItem("serverURL", serverURL);
+
     await SecureStorage.setItem("schoolid_raw", schoolid_raw);
     await SecureStorage.setItem("schoolid", schoolid);
     await SecureStorage.setItem("username", username);
+
+    await auth(username, password, schoolid);
+    closeSettingsScreen();
+    await updatePlanView();
   } catch (err) {
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
-  
-  auth(serverURL, username, password, schoolid);
-  
 
-  console.log(serverURL);
 
-  
 }
 
 function createCardItem(data) {
@@ -194,31 +131,30 @@ function createCardItem(data) {
   return listItem;
 }
 
+function ifUndefinedEmptyString(obj){
+  if(!obj) {return ""} else return obj;
+}
+
 async function updatePlanView() {
-  const serverURL = (await SecureStorage.getItem("serverURL"));
-  const sid = (await SecureStorage.getItem("sid"));
-  const schoolid = (await SecureStorage.getItem("schoolid"));
-  if (serverURL && sid && schoolid) {
+  const cookieHeader = (await SecureStorage.getItem("cookieHeader"));
+
+  let klassenstufe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenstufe"));
+  let klassenbuchstabe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenbuchstabe"));
+  let lehrerfilter = ifUndefinedEmptyString(await SecureStorage.getItem("lehrerfilter"));
+
+  let cardContainer = document.getElementById("cardContainer");
+
+  if (cookieHeader) {
     app.dialog.preloader('Lade Plan...');
-    var cardContainer = document.getElementById("cardContainer");
     cardContainer.innerHTML = ``;
 
-    CapacitorHttp.get({
-      url: `${serverURL}/api/plan`,
-      params: {
-        sid: sid,
-        schoolid: schoolid,
-        connectTimeout: REQUEST_TIMEOUT
-      },
-      responseType: "json"
-    }).then(async response => {
-      response.data.forEach(async entry => {
+    const client = new SPHClient();
 
-        //apply Filters
-        let klassenstufe = await SecureStorage.getItem("klassenstufe");
-        let klassenbuchstabe = await SecureStorage.getItem("klassenbuchstabe");
-        let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+    let data = await client.getAllVplanData(cookieHeader);
 
+
+    try {
+      data.forEach(entry => {
         let teacherFilter = true;
         if (lehrerfilter) {
           teacherFilter = (entry.Lehrer == lehrerfilter || entry.Vertreter == lehrerfilter || entry.Lehrerkuerzel == lehrerfilter || entry.Vertreterkuerzel == lehrerfilter)
@@ -227,15 +163,16 @@ async function updatePlanView() {
         if (entry.Klasse.includes(klassenstufe) && entry.Klasse.includes(klassenbuchstabe) && teacherFilter) {
           cardContainer.appendChild(createCardItem(entry)); //render Card
         }
-
       });
+
       app.dialog.close();
-    }).catch(_error => {
-      app.dialog.close();
-      app.toast.create({ text: 'Netzwerkfehler!' }).open();
-    })
+    } catch (err) {
+      throw err;
+    }
   } else {
     app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
+    app.dialog.close();
+    throw new Error("not logged in.");
   }
 }
 
@@ -283,21 +220,15 @@ async function saveFilterConfig() {
 }
 
 async function loadFilterConfig() {
-  document.getElementById("filter-klassenstufe").value = await SecureStorage.getItem("klassenstufe");
-  document.getElementById("filter-klassenbuchstabe").value = await SecureStorage.getItem("klassenbuchstabe");
-  let lehrerfilter = await SecureStorage.getItem("lehrerfilter");
+  document.getElementById("filter-klassenstufe").value = ifUndefinedEmptyString(await SecureStorage.getItem("klassenstufe"));
+  document.getElementById("filter-klassenbuchstabe").value = ifUndefinedEmptyString(await SecureStorage.getItem("klassenbuchstabe"));
+  let lehrerfilter = ifUndefinedEmptyString(await SecureStorage.getItem("lehrerfilter"));
   if (lehrerfilter) {
     document.getElementById("filter-lehrer-li").classList.add("item-input-with-value");
   }
 }
 
 async function loadSettingsEntryOptions() {
-  let serverURL = (await SecureStorage.getItem("serverURL"));
-  if (!serverURL) {
-    serverURL = "https://production.sphvertretungsplan.alessioc42.workers.dev";
-  }
-  document.getElementById("login-instance-li").classList.add("item-input-with-value");
-
   let username = (await SecureStorage.getItem("username"));
   if (username) {
     document.getElementById("login-username-li").classList.add("item-input-with-value");
@@ -307,8 +238,8 @@ async function loadSettingsEntryOptions() {
 
   document.getElementById("login-schoolid").value = (await SecureStorage.getItem("schoolid_raw"));
   document.getElementById("login-username").value = username;
-  document.getElementById("login-instance").value = serverURL;
   document.getElementById("login-password").value = "";
+  document.getElementById("login-password-li").classList.remove("item-input-with-value");
   document.getElementById("login-autologin").checked = Boolean(await SecureStorage.getItem("autologin"));
 }
 
@@ -346,33 +277,25 @@ async function init() {
     app.tab.show(tabId);
   });
 
-
   loadSettingsEntryOptions();
   loadFilterConfig();
 
-  let loggedIn = await isLoggedIn();
-  console.log(`user logged in: ${loggedIn}`)
-  if (loggedIn) {
-    updatePlanView();
-  } else {
-    let autologin = await SecureStorage.getItem("autologin");
-    let serverURL = await SecureStorage.getItem("serverURL");
-    let password = await SecureStorage.getItem("password");
-    let username = await SecureStorage.getItem("username");
-    let schoolid = await SecureStorage.getItem("schoolid");
+  let autologin = await SecureStorage.getItem("autologin");
+  let password = await SecureStorage.getItem("password");
+  let username = await SecureStorage.getItem("username");
+  let schoolid = await SecureStorage.getItem("schoolid");
 
-    if (autologin && serverURL && username && password && schoolid) {
-      auth(serverURL, username, password, schoolid).then(() => {
-        updatePlanView();
-      }).catch(error => {
-        console.log(error);
-        app.toast.create({ text: 'Login Failed' }).open();
-        openSettingsScreen();
-      });
-    } else {
+  if (autologin && username && password && schoolid) {
+    auth(username, password, schoolid).then(() => {
+      updatePlanView();
+    }).catch(error => {
+      console.log(error);
+      app.toast.create({ text: 'Login Failed' }).open();
       openSettingsScreen();
-      app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
-    }
+    });
+  } else {
+    openSettingsScreen();
+    app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
   }
 }
 
