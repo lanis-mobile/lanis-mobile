@@ -85,7 +85,7 @@
                   <div class="item-title item-label">Klassenstufe</div>
                   <div class="item-input-wrap input-dropdown-wrap">
                     <select class="input-with-value" id="filter-klassenstufe">
-                      <option value="">Alle</option>
+                      <option value="" selected>Alle</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
@@ -107,7 +107,7 @@
                   <div class="item-title item-label">Klasse</div>
                   <div class="item-input-wrap input-dropdown-wrap">
                     <select class="input-with-value" id="filter-klassenbuchstabe">
-                      <option value="">Alle</option>
+                      <option value="" selected>Alle</option>
                       <option value="a">a</option>
                       <option value="b">b</option>
                       <option value="c">c</option>
@@ -159,13 +159,11 @@
         </div>
         <div class="list no-hairlines-md">
           <ul>
-            <li class="item-content item-input item-input-with-value"  id="login-instance-li">
+            <li class="item-content item-input" id="login-schoolid-li">
               <div class="item-inner">
-                <div class="item-title item-floating-label">Instanz (Server)</div>
+                <div class="item-title item-label">Schule</div>
                 <div class="item-input-wrap">
-                  <input type="text" name="serverURL" id="login-instance" value="https://production.sphvertretungsplan.alessioc42.workers.dev"
-                    placeholder="https://production.sphvertretungsplan.alessioc42.workers.dev" />
-                  <span class="input-clear-button"></span>
+                  <input type="text" placeholder="suche nach deiner Schule..." id="login-schoolid" />
                 </div>
               </div>
             </li>
@@ -187,28 +185,15 @@
                 </div>
               </div>
             </li>
-            <li class="item-content item-input" id="login-schoolid-li">
-              <div class="item-inner">
-                <div class="item-title item-label">Schule</div>
-                <div class="item-input-wrap">
-                  <input type="text" placeholder="suche nach deiner Schule..." id="login-schoolid" />
-                </div>
-              </div>
-            </li>
             <li class="item-content">
               <div class="item-inner">
-                Angemeldet bleiben? (Auto-Login)
+                automatisch Anmelden?
                 <label class="toggle">
                   <!-- Toggle input -->
                   <input type="checkbox" id="login-autologin"/>
                   <!-- Toggle icon -->
                   <span class="toggle-icon"></span>
                 </label>
-              </div>
-            </li>
-            <li class="item-content">
-              <div class="item-inner">
-                <i>Einstellungen werden nur bei einem Login gespeichert.</i>
               </div>
             </li>
             <li class="item-content">
@@ -224,8 +209,7 @@
             <li class="item-content">
               <div class="item-inner">
                 <i>Auf dem Server werden keine Daten gespeichert. Der Server stellt lediglich eine Verbindung zu den
-                  Lanis-Servern her. Der Wechsel der Instanz ist nicht mit einer Abmeldung verbunden. <br>Um alle Daten
-                  auf diesem Gerät bezüglich der Lanis Aktivität zu löschen, klicken Sie auf diese Schaltfläche.</i>
+                  Lanis-Servern her. Um alle Daten auf diesem Gerät bezüglich der Lanis Aktivität zu löschen, klicken Sie auf diese Schaltfläche.</i>
               </div>
             </li>
             <li class="item-content">
