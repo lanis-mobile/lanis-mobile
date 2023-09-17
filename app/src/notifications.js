@@ -8,7 +8,7 @@ import { SecureStorage } from '@aparajita/capacitor-secure-storage';
 let counter = 0;
 
 
-export async function getPermissions() {
+export async function getMessagePermissions() {
     let permissionsState = await LocalNotifications.checkPermissions();
 
     switch (permissionsState.display) {

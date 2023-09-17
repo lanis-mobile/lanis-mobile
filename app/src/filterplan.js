@@ -1,9 +1,9 @@
 import { SecureStorage } from "@aparajita/capacitor-secure-storage";
 
-function ifUndefinedEmptyString(obj){
-    if(!obj) {return ""} else return obj;
-  }
-  
+function ifUndefinedEmptyString(obj) {
+    if (!obj) { return "" } else return obj;
+}
+
 
 export async function filter(data) {
     const klassenstufe = ifUndefinedEmptyString(await SecureStorage.getItem("klassenstufe"));

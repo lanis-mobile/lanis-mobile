@@ -17,6 +17,7 @@
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^4.0.0",
     "@capacitor/android": "^5.4.0",
+    "@capacitor/background-runner": "^1.0.5",
     "@capacitor/browser": "^5.0.6",
     "@capacitor/core": "latest",
     "@capacitor/local-notifications": "^5.0.6",

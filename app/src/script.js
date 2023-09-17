@@ -2,9 +2,8 @@ import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
 import { Browser } from '@capacitor/browser';
 import { SPHClient } from './client';
-import { getPermissions, createNotificationsFromPlanData } from './notifications';
+import { getMessagePermissions } from './notifications';
 import { filter } from './filterplan';
-
 
 const app = new Framework7({
   root: '#app',
@@ -133,8 +132,8 @@ function createCardItem(data) {
   return listItem;
 }
 
-function ifUndefinedEmptyString(obj){
-  if(!obj) {return ""} else return obj;
+function ifUndefinedEmptyString(obj) {
+  if (!obj) { return "" } else return obj;
 }
 
 async function updatePlanView() {
@@ -143,23 +142,23 @@ async function updatePlanView() {
   let cardContainer = document.getElementById("cardContainer");
 
   if (cookieHeader) {
-      app.dialog.preloader('Lade Plan...');
-      cardContainer.innerHTML = ``;
-      const client = new SPHClient();
-      let data = await client.getAllVplanData(cookieHeader);
-      try {
-          const filteredData = await filter(data);
-          filteredData.forEach(entry => {
-              cardContainer.appendChild(createCardItem(entry)); // render Card
-          });
-          app.dialog.close();
-      } catch (err) {
-          throw err;
-      }
-  } else {
-      app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
+    app.dialog.preloader('Lade Plan...');
+    cardContainer.innerHTML = ``;
+    const client = new SPHClient();
+    let data = await client.getAllVplanData(cookieHeader);
+    try {
+      const filteredData = await filter(data);
+      filteredData.forEach(entry => {
+        cardContainer.appendChild(createCardItem(entry)); // render Card
+      });
       app.dialog.close();
-      throw new Error("not logged in.");
+    } catch (err) {
+      throw err;
+    }
+  } else {
+    app.toast.create({ text: 'Du bist nicht eingeloggt!' }).open();
+    app.dialog.close();
+    throw new Error("not logged in.");
   }
 }
 var schoolSelectAlreadyLoaded = false;
@@ -238,8 +237,6 @@ async function openInBrowser(url) {
   await Browser.open({ url: url });
 }
 
-
-
 async function init() {
   document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
   document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
@@ -284,7 +281,9 @@ async function init() {
     app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
   }
 
-  await getPermissions();
+  await SecureStorage.setItem("useBackgroundFetch", "true");
+  await getMessagePermissions();
+
 }
 
 init();

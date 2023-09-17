@@ -15,6 +15,14 @@
     },
     "PushNotifications": {
       "presentationOptions": ["badge"]
+    },
+    "BackgroundRunner": {
+      "label": "io.github.sphplan.pushmessages",
+      "src": "src/background.js",
+      "event": "updateVplanMessages",
+      "repeat": true,
+      "interval": 15,
+      "autoStart": true
     }
   }
 }
