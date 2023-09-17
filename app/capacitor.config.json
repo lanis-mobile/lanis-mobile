@@ -12,6 +12,9 @@
     },
     "CapacitorHttp": {
       "enabled": true
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge"]
     }
   }
 }

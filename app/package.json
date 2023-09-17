@@ -15,14 +15,16 @@
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^4.0.0",
-    "@capacitor/android": "^5.3.0",
+    "@capacitor/android": "^5.4.0",
     "@capacitor/browser": "^5.0.6",
     "@capacitor/core": "latest",
     "@capacitor/local-notifications": "^5.0.6",
     "@capacitor/preferences": "^5.0.6",
     "@capacitor/splash-screen": "latest",
     "framework7": "^8.3.0",
-    "framework7-icons": "^5.0.5"
+    "framework7-icons": "^5.0.5",
+    "install": "^0.13.0",
+    "npm": "^10.1.0"
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
