@@ -53,7 +53,7 @@ export class SPHClient {
 
     async getVplan(cookieHeader, date) {
         date = date.toLocaleDateString("en-CH");
-    
+
         try {
             const response = await CapacitorHttp.post({
                 url: `https://start.schulportal.hessen.de/vertretungsplan.php`,
@@ -76,7 +76,7 @@ export class SPHClient {
                 },
                 data: `tag=${date}&ganzerPlan=true`,
             });
-    
+
             return JSON.parse(response.data);
         } catch (error) {
             throw error;

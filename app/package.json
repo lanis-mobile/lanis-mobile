@@ -1,7 +1,7 @@
 {
-  "name": "capacitor-app",
+  "name": "sphplan",
   "version": "1.0.0",
-  "description": "An Amazing Capacitor App",
+  "description": "An app to download the representation plan data from the SPH hesse",
   "main": "index.js",
   "keywords": [
     "capacitor",
@@ -11,11 +11,12 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "b": "vite build && npx cap sync"
+    "b": "vite build && npx cap sync",
+    "android": "vite build && npx cap sync && npx cap run android"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^4.0.0",
-    "@capacitor/android": "^5.3.0",
+    "@capacitor/android": "^5.4.0",
     "@capacitor/browser": "^5.0.6",
     "@capacitor/core": "latest",
     "@capacitor/local-notifications": "^5.0.6",
