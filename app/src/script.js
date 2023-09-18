@@ -1,9 +1,10 @@
-import schoolData from './schools.json';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
 import { Browser } from '@capacitor/browser';
+
 import { SPHClient } from './client';
-import { getMessagePermissions } from './notifications';
+import { getMessagePermissions, createNotificationsFromPlanData } from './notifications';
 import { filter } from './filterplan';
+import schoolData from './schools.json';
 
 const app = new Framework7({
   root: '#app',
@@ -283,7 +284,6 @@ async function init() {
 
   await SecureStorage.setItem("useBackgroundFetch", "true");
   await getMessagePermissions();
-
 }
 
 init();
