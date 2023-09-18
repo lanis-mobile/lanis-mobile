@@ -4,9 +4,7 @@
 ## <a href="https://github.com/alessioC42/SPH-vertretungsplan/releases/latest">download APK</a>
 
 ## preview
-<video width="320" height="240" controls>
-  <source src="showcase/vid.mp4" type="video/mp4">
-</video>
+showcase/vid.mp4
 
 ## Datenschutz und Verschlüsselung
 Alle daten sind Verschlüsselt auf dem Gerät gespeichert. Jegliche kommunikation geschieht direkt mit den Lanis-Servern. Das Passwort muss auch nicht zwangsläufig gespeichert werden. (auto-login)
