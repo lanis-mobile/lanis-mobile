@@ -11,7 +11,8 @@ https://github.com/alessioC42/SPH-vertretungsplan/assets/84250128/b12490e3-e68f-
 Alle daten sind Verschlüsselt auf dem Gerät gespeichert. Jegliche kommunikation geschieht direkt mit den Lanis-Servern. Das Passwort muss auch nicht zwangsläufig gespeichert werden. (auto-login)
 
 ## Motivation
-- Ich wollte schon immer eine schnellere Methode zum anzeigen des Vertretungsplans haben. 
+- Ich wollte schon immer eine schnellere Methode zum anzeigen des Vertretungsplans haben.
+- der Filter von Lanis Funktioniert nicht wirklich. Vor allem nicht, wenn verschiedene Kurse in einem Unerricht sind. 
 - Capacitorjs lernen
 - Flex
 
