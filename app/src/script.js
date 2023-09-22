@@ -44,6 +44,7 @@ async function auth(username, password, schoolid) {
   } catch (_error) {
     app.dialog.close();
     app.toast.create({ text: 'Login Failed: unknown error' }).open();
+    alert(_error)
     document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
   }
 }
@@ -71,7 +72,7 @@ async function loginButton() {
 
     await auth(username, password, schoolid);
     closeSettingsScreen();
-    await updatePlanView(false);
+    await updatePlanView();
   } catch (err) {
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
   }
@@ -136,7 +137,7 @@ function ifUndefinedEmptyString(obj) {
   if (!obj) { return "" } else return obj;
 }
 
-async function updatePlanView(repeat=true) {
+async function updatePlanView() {
   const cookieHeader = await SecureStorage.getItem("cookieHeader");
 
   let cardContainer = document.getElementById("cardContainer");
@@ -145,17 +146,14 @@ async function updatePlanView(repeat=true) {
     app.dialog.preloader('Lade Plan...');
     cardContainer.innerHTML = ``;
     const client = new SPHClient();
+    let data = await client.getAllVplanData(cookieHeader);
     try {
-      let data = await client.getAllVplanData(cookieHeader);
       const filteredData = await filter(data);
       filteredData.forEach(entry => {
         cardContainer.appendChild(createCardItem(entry)); // render Card
       });
       app.dialog.close();
     } catch (err) {
-      if (repeat) {
-        loginButton();
-      }
       throw err;
     }
   } else {
@@ -204,7 +202,7 @@ async function saveFilterConfig() {
   await SecureStorage.setItem("lehrerfilter", lehrerfilter);
 
   document.getElementById("link_vertretungsplan").click();
-  updatePlanView(false);
+  updatePlanView();
 }
 
 async function loadFilterConfig() {
@@ -244,7 +242,7 @@ async function init() {
   document.getElementById("openSettingsScreenButton").addEventListener("click", openSettingsScreen);
   document.getElementById("closeSettingsScreenButton").addEventListener("click", closeSettingsScreen);
   document.getElementById("loginButton").addEventListener("click", loginButton);
-  document.getElementById("reloadPlanDataButton").addEventListener("click", () => {updatePlanView(false)});
+  document.getElementById("reloadPlanDataButton").addEventListener("click", updatePlanView);
   document.getElementById("resetAppButton").addEventListener("click", wipeStorageAndRestartApp);
   document.getElementById("saveFilterSettingsButton").addEventListener("click", saveFilterConfig);
 
@@ -273,7 +271,7 @@ async function init() {
 
   if (autologin && username && password && schoolid) {
     auth(username, password, schoolid).then(() => {
-      updatePlanView(false);
+      updatePlanView();
     }).catch(error => {
       console.log(error);
       app.toast.create({ text: 'Login Failed' }).open();
