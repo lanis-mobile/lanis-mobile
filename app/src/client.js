@@ -7,6 +7,7 @@ export class SPHClient {
     constructor() { }
 
     async login(username, password, schoolid) {
+        this.cookies = null;
         this.cookies = {};
         let response1 = await CapacitorHttp.post({
             url: `https://login.schulportal.hessen.de/?i=${schoolid}`,
@@ -111,6 +112,10 @@ export class SPHClient {
             if (!uniqueDates.some((date) => date.getTime() === extractedDate.getTime())) {
                 uniqueDates.push(extractedDate);
             }
+        }
+
+        if (uniqueDates.length === 0) {
+            throw new Error("No valid Dates Found or not Authenticated!");
         }
 
         return uniqueDates;

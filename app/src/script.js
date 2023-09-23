@@ -1,8 +1,9 @@
 import { SecureStorage } from '@aparajita/capacitor-secure-storage'
 import { Browser } from '@capacitor/browser';
+import { App } from '@capacitor/app';
 
 import { SPHClient } from './client';
-import { getMessagePermissions, createNotificationsFromPlanData } from './notifications';
+import { getMessagePermissions } from './notifications';
 import { filter } from './filterplan';
 import schoolData from './schools.json';
 
@@ -18,10 +19,11 @@ const app = new Framework7({
 });
 
 function openSettingsScreen() {
-  loadSettingsEntryOptions();
-  loadSchoolSelect();
-
-  app.loginScreen.open('#settings-screen');
+  loadSettingsEntryOptions().then(() => {
+    loadSchoolSelect().then(()=> {
+      app.loginScreen.open('#settings-screen');
+    })
+  })
 }
 
 function closeSettingsScreen() {
@@ -41,11 +43,11 @@ async function auth(username, password, schoolid) {
     app.toast.create({ text: 'Authentifizierung erfolgreich!' }).open();
     document.getElementById("loginInformationLabel").innerText = "eingeloggt";
 
-  } catch (_error) {
+  } catch (error) {
     app.dialog.close();
     app.toast.create({ text: 'Login Failed: unknown error' }).open();
-    alert(_error)
     document.getElementById("loginInformationLabel").innerText = "nicht eingeloggt";
+    throw new Error(error)
   }
 }
 
@@ -55,7 +57,7 @@ async function loginButton() {
     const password = document.getElementById("login-password").value;
     const schoolid_raw = document.getElementById("login-schoolid").value;
     const schoolid = schoolid_raw.match(/^(\d+)/)[0];
-    const autologin = document.getElementById("login-autologin").checked;
+    const autologin = "S"+String(document.getElementById("login-autologin").checked);
 
 
     if (autologin) {
@@ -75,9 +77,8 @@ async function loginButton() {
     await updatePlanView();
   } catch (err) {
     app.toast.create({ text: 'Fehler in den Login Daten' }).open();
+    await App.exitApp();
   }
-
-
 }
 
 function createCardItem(data) {
@@ -137,23 +138,49 @@ function ifUndefinedEmptyString(obj) {
   if (!obj) { return "" } else return obj;
 }
 
-async function updatePlanView() {
+async function updatePlanView(secondTry=false) {
   const cookieHeader = await SecureStorage.getItem("cookieHeader");
 
   let cardContainer = document.getElementById("cardContainer");
 
   if (cookieHeader) {
     app.dialog.preloader('Lade Plan...');
-    cardContainer.innerHTML = ``;
-    const client = new SPHClient();
-    let data = await client.getAllVplanData(cookieHeader);
     try {
+      cardContainer.innerHTML = ``;
+      const client = new SPHClient();
+      let data = await client.getAllVplanData(cookieHeader);
+
       const filteredData = await filter(data);
       filteredData.forEach(entry => {
         cardContainer.appendChild(createCardItem(entry)); // render Card
       });
       app.dialog.close();
     } catch (err) {
+      app.dialog.close();
+      //try to log in and fetch again
+      if (!secondTry) {
+        app.toast.create({ text: 'Sitzung abgelaufen: versuche Benutzer anzumelden!' }).open();
+
+        let autologin = await SecureStorage.getItem("autologin");
+        let password = await SecureStorage.getItem("password");
+        let username = await SecureStorage.getItem("username");
+        let schoolid = await SecureStorage.getItem("schoolid");
+
+        if (autologin && username && password && schoolid) {
+          try {
+            await auth(username, password, schoolid);
+            await updatePlanView(true);
+          } catch (_err) {
+            alert(_err);
+            app.toast.create({ text: 'Fehler bei der Anmeldung!' }).open();
+            openSettingsScreen();
+          }
+        } else {
+          app.toast.create({ text: 'Automatische anmeldung nicht Aktiviert. Bitte logge dich ein!' }).open();
+        }
+      } else {
+        app.toast.create({ text: 'Fehler bei der Anmeldung!' }).open();
+      }
       throw err;
     }
   } else {
@@ -162,7 +189,7 @@ async function updatePlanView() {
     throw new Error("not logged in.");
   }
 }
-var schoolSelectAlreadyLoaded = false;
+let schoolSelectAlreadyLoaded = false;
 
 async function loadSchoolSelect() {
   if (!schoolSelectAlreadyLoaded) {
@@ -202,7 +229,7 @@ async function saveFilterConfig() {
   await SecureStorage.setItem("lehrerfilter", lehrerfilter);
 
   document.getElementById("link_vertretungsplan").click();
-  updatePlanView();
+  await updatePlanView();
 }
 
 async function loadFilterConfig() {
@@ -222,16 +249,23 @@ async function loadSettingsEntryOptions() {
     document.getElementById("login-username-li").classList.remove("item-input-with-value");
   }
 
+  let autoLoginText = await SecureStorage.getItem("autologin");
+  if (!autoLoginText) {
+    document.getElementById("login-autologin").checked = true;
+  } else {
+    document.getElementById("login-autologin").checked = (autoLoginText === "Strue");
+  }
+
   document.getElementById("login-schoolid").value = (await SecureStorage.getItem("schoolid_raw"));
   document.getElementById("login-username").value = username;
   document.getElementById("login-password").value = "";
   document.getElementById("login-password-li").classList.remove("item-input-with-value");
-  document.getElementById("login-autologin").checked = Boolean(await SecureStorage.getItem("autologin"));
 }
 
 async function wipeStorageAndRestartApp() {
-  SecureStorage.clear()
-  document.location.href = 'index.html';
+  await SecureStorage.clear();
+  await App.removeAllListeners();
+  await App.exitApp();
 }
 
 async function openInBrowser(url) {
@@ -250,40 +284,32 @@ async function init() {
   //Buttons on startpage
   document.getElementById("browserOpenBugreport").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues") });
   document.getElementById("browserOpenFeatureRequest").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/issues") });
-  document.getElementById("browserOpenLatestrelease").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest") });
+  document.getElementById("browserOpenLatestRelease").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest") });
   document.getElementById("browserOpenGitHubPage").addEventListener("click", () => { openInBrowser("https://github.com/alessioC42/SPH-vertretungsplan") });
 
 
   app.tab.show('#instanceConfigTab');
   // Event-Handling für das Umschalten zwischen Tabs
   app.on('tabShow', function (tabEl) {
-    var tabId = tabEl.id;
-    app.tab.show(tabId);
+    app.tab.show(tabEl.id);
   });
 
-  loadSettingsEntryOptions();
-  loadFilterConfig();
+  await loadSettingsEntryOptions();
+  await loadFilterConfig();
 
   let autologin = await SecureStorage.getItem("autologin");
-  let password = await SecureStorage.getItem("password");
-  let username = await SecureStorage.getItem("username");
-  let schoolid = await SecureStorage.getItem("schoolid");
 
-  if (autologin && username && password && schoolid) {
-    auth(username, password, schoolid).then(() => {
-      updatePlanView();
-    }).catch(error => {
-      console.log(error);
-      app.toast.create({ text: 'Login Failed' }).open();
-      openSettingsScreen();
-    });
+  if (autologin) {
+    await updatePlanView();
   } else {
     openSettingsScreen();
     app.toast.create({ text: 'Du musst dich mit deinem LANIS account Anmelden, um diese App zu verwenden!' }).open()
   }
 
   await SecureStorage.setItem("useBackgroundFetch", "true");
-  await getMessagePermissions();
+
+  //Unused due to bad interval refresh support
+  //await getMessagePermissions();
 }
 
 init();
