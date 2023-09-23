@@ -1,6 +1,4 @@
 # SPH-Vertretungsplan
-#### stable v1.0.0
-
 ## <a href="https://github.com/alessioC42/SPH-vertretungsplan/releases/latest">download APK</a>
 
 ## preview
