@@ -17,7 +17,8 @@ class App extends StatelessWidget {
       title: appTitle,
       home: const MyHomePage(title: appTitle),
       theme: ThemeData(
-          useMaterial3: true
+        useMaterial3: true,
+        inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
       )
     );
   }
@@ -45,12 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      int realIndex = index-1;
-      if (realIndex == -1) {
-        _selectedIndex = index-1;
-      } else {
-        _selectedIndex = index;
-      }
+      _selectedIndex = index;
     });
   }
 
