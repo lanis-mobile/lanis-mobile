@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/settings.dart';
-import 'package:sph_plan/vertretungsplan.dart';
+import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/view/settings/settings.dart';
+import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
 void main() {
   runApp(const App());
@@ -36,8 +37,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle = TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold
+  );
   static const List<Widget> _widgetOptions = <Widget>[
     SettingsScreen(),
     VertretungsplanAnsicht(),
@@ -86,12 +89,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         _onItemTapped(0);
                         Navigator.pop(context);
                       },
-                      child: Icon(Icons.settings),
+                      child: const Icon(Icons.manage_accounts),
                     ),
                   ),
                 ],
-              )
-
+              ),
             ),
             ListTile(
               title: const Text('Vertretungsplan'),
