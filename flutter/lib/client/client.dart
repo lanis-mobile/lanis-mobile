@@ -104,7 +104,7 @@ class SPHclient {
 
       for (RegExpMatch match in matches) {
         int day = int.parse(match.group(1) ?? "00");
-        int month = int.parse(match.group(2) ?? "00") - 1;
+        int month = int.parse(match.group(2) ?? "00");
         int year = int.parse(match.group(3) ?? "00");
         DateTime extractedDate = DateTime(year, month, day);
 
@@ -112,7 +112,6 @@ class SPHclient {
 
         if (!uniqueDates.any((date) => date == dateString)) {
           uniqueDates.add(dateString);
-          debugPrint(dateString);
         }
       }
 
@@ -131,8 +130,25 @@ class SPHclient {
 
   }
 
-
   Future<dynamic> getFullVplan() async {
+    try {
+      var dates = await getVplanDates();
 
+      List fullPlan = [];
+
+      for (String date in dates) {
+        var planForDate = await getVplan(date);
+        if (planForDate is int) {
+          return planForDate;
+        } else {
+          fullPlan.addAll(List.from(planForDate));
+        }
+      }
+
+      return fullPlan;
+    } catch (e) {
+      return -4;
+      //unknown error;
+    }
   }
 }

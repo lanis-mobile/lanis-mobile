@@ -67,6 +67,6 @@ void login(String username, String password, String schoolID) async {
   final client = SPHclient(username, password, int.parse(schoolID));
   await client.login();
   debugPrint("Logged in");
-  var num = await client.getVplanDates();
-  debugPrint(jsonEncode(num));
+  var result = await client.getFullVplan();
+  debugPrint(jsonEncode(result));
 }
