@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:dart_date/dart_date.dart';
 import 'package:flutter/cupertino.dart';
 
 class SPHclient {
@@ -89,5 +89,50 @@ class SPHclient {
       return -4;
       //unknown error;
     }
+  }
+
+  Future<dynamic> getVplanDates() async {
+    try {
+      final response = await dio.get('https://start.schulportal.hessen.de/vertretungsplan.php');
+
+      String text = response.toString();
+
+      RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
+      Iterable<RegExpMatch> matches = datePattern.allMatches(text);
+
+      var uniqueDates = [];
+
+      for (RegExpMatch match in matches) {
+        int day = int.parse(match.group(1) ?? "00");
+        int month = int.parse(match.group(2) ?? "00") - 1;
+        int year = int.parse(match.group(3) ?? "00");
+        DateTime extractedDate = DateTime(year, month, day);
+
+        String dateString = extractedDate.format("dd.MM.yyyy");
+
+        if (!uniqueDates.any((date) => date == dateString)) {
+          uniqueDates.add(dateString);
+          debugPrint(dateString);
+        }
+      }
+
+      if (uniqueDates.isEmpty) {
+        return [];
+      }
+
+      return uniqueDates;
+    } on SocketException {
+      return -3;
+      //network error
+    } catch (e) {
+      return -4;
+      //unknown error;
+    }
+
+  }
+
+
+  Future<dynamic> getFullVplan() async {
+
   }
 }

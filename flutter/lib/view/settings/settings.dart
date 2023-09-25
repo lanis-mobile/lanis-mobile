@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
 
@@ -62,7 +64,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 void login(String username, String password, String schoolID) async {
-  final client = SPHclient(username, password, 5182);
+  final client = SPHclient(username, password, int.parse(schoolID));
   await client.login();
-  debugPrint("no errors?");
+  debugPrint("Logged in");
+  var num = await client.getVplanDates();
+  debugPrint(jsonEncode(num));
 }
