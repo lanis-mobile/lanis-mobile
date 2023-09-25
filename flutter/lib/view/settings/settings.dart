@@ -17,7 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double padding = 8.0;
+    double padding = 10.0;
     const subHeaderStyle = TextStyle(
       fontSize: 24,
     );
@@ -64,9 +64,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 void login(String username, String password, String schoolID) async {
-  final client = SPHclient(username, password, int.parse(schoolID));
-  await client.login();
-  debugPrint("Logged in");
+  final client = SPHclient();
+  await client.overwriteCredits(username, password, schoolID);
+
+  //var code = await client.login();
+  //debugPrint("Login status: ${client.statusCodes[code]}");
   var result = await client.getFullVplan();
   debugPrint(jsonEncode(result));
 }
