@@ -8,6 +8,14 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 
 class SPHclient {
+  final statusCodes = {
+    "0": "No errors",
+    "-1": "Wrong credits",
+    "-2": "no username or password or schoolID defined",
+    "-3": "network error",
+    "-4": "unknown error"
+  };
+
   String username = "";
   String password = "";
   int schoolID = 5182;
@@ -50,21 +58,16 @@ class SPHclient {
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
           return 0;
-          //login successful
         } else {
           return -1;
-          //wrong credits
         }
       } else {
         return -2;
-        //no username or password or schoolID defined.
       }
     } on SocketException {
       return -3;
-      //network error
     } catch (e) {
       return -4;
-      //unknown error;
     }
   }
 

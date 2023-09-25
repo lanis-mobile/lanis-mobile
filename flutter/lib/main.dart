@@ -37,10 +37,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 2;
-  static const TextStyle optionStyle = TextStyle(
-      fontSize: 30,
-      fontWeight: FontWeight.bold
-  );
+
   static const List<Widget> _widgetOptions = <Widget>[
     VertretungsplanAnsicht(),
     Text("About page einrichten"),
