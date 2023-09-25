@@ -36,15 +36,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
   static const TextStyle optionStyle = TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold
   );
   static const List<Widget> _widgetOptions = <Widget>[
-    SettingsScreen(),
     VertretungsplanAnsicht(),
-    Text("About page einrichten")
+    Text("About page einrichten"),
+    SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     alignment: Alignment.bottomRight,
                     child:                   FloatingActionButton(
                       onPressed: () {
-                        _onItemTapped(0);
+                        _onItemTapped(2);
                         Navigator.pop(context);
                       },
                       child: const Icon(Icons.manage_accounts),
@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
               title: const Text('Vertretungsplan'),
               selected: _selectedIndex == 0,
               onTap: () {
-                _onItemTapped(1);
+                _onItemTapped(0);
                 Navigator.pop(context);
               },
             ),
@@ -108,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 // Update the state of the app
-                _onItemTapped(2);
+                _onItemTapped(1);
                 // Then close the drawer
                 Navigator.pop(context);
               },
