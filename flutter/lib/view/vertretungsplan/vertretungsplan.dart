@@ -115,7 +115,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         itemCount: cards.length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
-            padding: EdgeInsets.all(padding),
+            padding: EdgeInsets.only(left: padding, right: padding, bottom: padding),
             child: Card(
               child: ListTile(
                 title: Text(cards[index].title,
