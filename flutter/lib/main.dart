@@ -4,11 +4,15 @@ import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
 void main() {
-  runApp(const App());
+  runApp(App());
+  client.prepareDio();
+  client.loadCreditsFromStorage();
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final SPHclient client = SPHclient();
+
+  App({super.key});
 
   static const appTitle = 'SPH';
 
@@ -16,7 +20,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: appTitle,
-      home: const MyHomePage(title: appTitle),
+      home: MyHomePage(client, title: appTitle),
       theme: ThemeData(
         useMaterial3: true,
         inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
@@ -27,22 +31,29 @@ class App extends StatelessWidget {
 
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  final SPHclient client;
+
+
+  const MyHomePage(this.client, {super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _HomePage();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePage extends State<MyHomePage> {
+  SPHclient get client => widget.client;
+
   int _selectedIndex = 2;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    VertretungsplanAnsicht(),
-    Text("About page einrichten"),
-    SettingsScreen(),
-  ];
+  static List<Widget> _widgetOptions(SPHclient client) {
+    return <Widget>[
+      VertretungsplanAnsicht(),
+      const Text("About page einrichten"),
+      SettingsScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -55,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: Center(
-        child: _widgetOptions[_selectedIndex],
+        child: _widgetOptions(client)[_selectedIndex],
       ),
       drawer: Drawer(
         child: ListView(

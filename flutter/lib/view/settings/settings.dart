@@ -1,19 +1,28 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/client.dart';
+
+import '../../client/client.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+
+  const SettingsScreen({super.key});
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+
   final _schoolController = TextEditingController();
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  void login(String username, String password, String schoolID) async {
+    await client.overwriteCredits(username, password, schoolID);
+    var loginCode = await client.login();
+
+    debugPrint(loginCode.toString());
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +30,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     const subHeaderStyle = TextStyle(
       fontSize: 24,
     );
-
     return Scaffold(
       body: Column(
         children: [
@@ -61,14 +69,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-}
-
-void login(String username, String password, String schoolID) async {
-  final client = SPHclient();
-  await client.overwriteCredits(username, password, schoolID);
-
-  //var code = await client.login();
-  //debugPrint("Login status: ${client.statusCodes[code]}");
-  var result = await client.getFullVplan();
-  debugPrint(jsonEncode(result));
 }

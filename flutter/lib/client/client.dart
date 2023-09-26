@@ -5,6 +5,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -28,20 +29,23 @@ class SPHclient {
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
     encryptedSharedPreferences: true,
   );
-  SPHclient() {
-    getApplicationDocumentsDirectory().then((appDocDir){
-      final String appDocPath = appDocDir.path;
-      dio.interceptors.add(CookieManager(PersistCookieJar(
-        storage: FileStorage("$appDocPath/.cookies/")
-      )));
-    });
 
+  SPHclient();
+
+  Future<void> prepareDio() async {
+      final Directory appDocDir = await getApplicationCacheDirectory();
+      final String appDocPath = appDocDir.path;
+      debugPrint("APPDOCPATH: ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> $appDocPath");
+      final jar = PersistCookieJar(
+        ignoreExpires: true,
+        storage: FileStorage("$appDocPath/cookies")
+      );
+      dio.interceptors.add(CookieManager(jar));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
-
-    loadCreditsFromStorage();
   }
+
 
   Future<void> overwriteCredits(String username, String password, String schoolID) async {
     this.username = username;
@@ -53,7 +57,7 @@ class SPHclient {
     await storage.write(key: "schoolID", value: schoolID, aOptions: _getAndroidOptions());
   }
 
-  void loadCreditsFromStorage() async {
+  Future<void> loadCreditsFromStorage() async {
     username = await storage.read(key: "username", aOptions: _getAndroidOptions()) ?? "";
     password = await storage.read(key: "password", aOptions: _getAndroidOptions()) ?? "";
     schoolID = await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ?? "";
@@ -97,7 +101,10 @@ class SPHclient {
       }
     } on SocketException {
       return -3;
+    } on DioException {
+      return -3;
     } catch (e) {
+      debugPrint(e.toString());
       return -4;
     }
   }
@@ -130,6 +137,7 @@ class SPHclient {
       final response = await dio.get('https://start.schulportal.hessen.de/vertretungsplan.php');
 
       String text = response.toString();
+      debugPrint(text);
 
       RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
       Iterable<RegExpMatch> matches = datePattern.allMatches(text);
@@ -169,9 +177,11 @@ class SPHclient {
       var dates = await getVplanDates();
 
       List fullPlan = [];
+      debugPrint("vplanDate: $dates");
 
       for (String date in dates) {
         var planForDate = await getVplan(date);
+        debugPrint(planForDate.toString());
         if (planForDate is int) {
           return planForDate;
         } else {
@@ -186,3 +196,5 @@ class SPHclient {
     }
   }
 }
+
+SPHclient client = SPHclient();
