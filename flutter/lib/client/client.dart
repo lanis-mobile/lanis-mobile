@@ -9,7 +9,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class SPHclient {
   final statusCodes = {
     0: "No errors",
@@ -27,48 +26,63 @@ class SPHclient {
   final dio = Dio();
 
   final storage = const FlutterSecureStorage();
+
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+        encryptedSharedPreferences: true,
+      );
 
   SPHclient();
 
   Future<void> prepareDio() async {
-      final Directory appDocDir = await getApplicationCacheDirectory();
-      final String appDocPath = appDocDir.path;
-      debugPrint("APPDOCPATH: ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> $appDocPath");
-      final jar = PersistCookieJar(
-        ignoreExpires: true,
-        storage: FileStorage("$appDocPath/cookies")
-      );
-      dio.interceptors.add(CookieManager(jar));
+    final Directory appDocDir = await getApplicationCacheDirectory();
+    final String appDocPath = appDocDir.path;
+    debugPrint(
+        "APPDOCPATH: ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> $appDocPath");
+    final jar = PersistCookieJar(
+        ignoreExpires: true, storage: FileStorage("$appDocPath/cookies"));
+    dio.interceptors.add(CookieManager(jar));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
   }
 
-
-  Future<void> overwriteCredits(String username, String password, String schoolID) async {
+  Future<void> overwriteCredits(
+      String username, String password, String schoolID) async {
     this.username = username;
     this.password = password;
     this.schoolID = schoolID;
 
-    await storage.write(key: "username", value: username, aOptions: _getAndroidOptions());
-    await storage.write(key: "password", value: password, aOptions: _getAndroidOptions());
-    await storage.write(key: "schoolID", value: schoolID, aOptions: _getAndroidOptions());
+    await storage.write(
+        key: "username", value: username, aOptions: _getAndroidOptions());
+    await storage.write(
+        key: "password", value: password, aOptions: _getAndroidOptions());
+    await storage.write(
+        key: "schoolID", value: schoolID, aOptions: _getAndroidOptions());
   }
 
   Future<void> loadCreditsFromStorage() async {
-    username = await storage.read(key: "username", aOptions: _getAndroidOptions()) ?? "";
-    password = await storage.read(key: "password", aOptions: _getAndroidOptions()) ?? "";
-    schoolID = await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ?? "";
+    username =
+        await storage.read(key: "username", aOptions: _getAndroidOptions()) ??
+            "";
+    password =
+        await storage.read(key: "password", aOptions: _getAndroidOptions()) ??
+            "";
+    schoolID =
+        await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
+            "";
   }
 
   Future<dynamic> getCredits() async {
     return {
-      "username": await storage.read(key: "username", aOptions: _getAndroidOptions()) ?? "",
-      "password": await storage.read(key: "password", aOptions: _getAndroidOptions()) ?? "",
-      "schoolID": await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ?? ""
+      "username":
+          await storage.read(key: "username", aOptions: _getAndroidOptions()) ??
+              "",
+      "password":
+          await storage.read(key: "password", aOptions: _getAndroidOptions()) ??
+              "",
+      "schoolID":
+          await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
+              ""
     };
   }
 
@@ -76,7 +90,7 @@ class SPHclient {
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
     try {
-      if (username!="" && password!=""&&schoolID!="") {
+      if (username != "" && password != "" && schoolID != "") {
         final response1 = await dio.post(
             "https://login.schulportal.hessen.de/?i=$schoolID",
             queryParameters: {
@@ -116,13 +130,16 @@ class SPHclient {
           "https://start.schulportal.hessen.de/vertretungsplan.php",
           queryParameters: {"tag": date, "ganzerPlan": "true"},
           data: 'tag=$date&ganzerPlan=true',
-          options: Options(headers: {
-            "Accept": "*/*",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-          }, ));
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+                  "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+            },
+          ));
       return jsonDecode(response.toString());
     } on SocketException {
       return -3;
@@ -135,7 +152,8 @@ class SPHclient {
 
   Future<dynamic> getVplanDates() async {
     try {
-      final response = await dio.get('https://start.schulportal.hessen.de/vertretungsplan.php');
+      final response = await dio
+          .get('https://start.schulportal.hessen.de/vertretungsplan.php');
 
       String text = response.toString();
 
@@ -166,7 +184,6 @@ class SPHclient {
 
         return uniqueDates;
       }
-
     } on SocketException {
       return -3;
       //network error
@@ -197,6 +214,18 @@ class SPHclient {
     } catch (e) {
       return -4;
       //unknown error;
+    }
+  }
+
+  Future<bool> isAuth() async {
+    //   Fetching the vPlan on an expired Date. This ensures, that the user is
+    //   authenticated and when he is there will be an minimal response
+    final response = await getVplan("26.09.23"); //some expired date
+
+    if (response is List) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
