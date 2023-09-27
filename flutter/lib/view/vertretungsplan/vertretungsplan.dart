@@ -17,94 +17,104 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   final random = Random();
 
-  _VertretungsplanAnsichtState(){
+  _VertretungsplanAnsichtState() {
     refreshPlan();
   }
 
   List<CardInfo> cards = [
     CardInfo(
-      title: "Alle Angaben ohne Gewähr!",
+      title: const Text("Alle Angaben ohne Gewähr!"),
       body: const Text("Auch die besten technischen Systeme machen Fehler!"),
-      footer: "",
+      footer: const Text(""),
     ),
   ];
 
-  void showSnackbar(String text, {seconds=1, milliseconds=0}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-        duration: Duration(seconds: seconds, milliseconds: milliseconds),
-      ),
-    );
+  void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(text),
+          duration: Duration(seconds: seconds, milliseconds: milliseconds),
+        ),
+      );
+    }
   }
 
   Future<void> refreshPlan({secondTry = false}) async {
-    showSnackbar("Lade Plan herunter...", milliseconds: 250);
+    if (mounted) {
+      showSnackbar("Lade Plan herunter...", milliseconds: 250);
+    }
+
     final vPlan = await client.getFullVplan();
     debugPrint(vPlan.toString());
-    if (vPlan is int) {
-      if (!secondTry) {
-        showSnackbar("Melde Benutzer an...");
-        await client.loadCreditsFromStorage();
-        await client.login();
-        await refreshPlan(secondTry: true);
-      } else {
-        showSnackbar(client.statusCodes[vPlan] ?? "Unbekannter Fehler");
-      }
-    } else {
-      // filter and render cards
-      final filteredPlan = await filter(vPlan);
 
-      setState(() {
-        cards.clear();
-
-        final List<String> keysNotRender = [
-          "Tag",
-          "Tag_en",
-          "Klasse",
-          "Stunde",
-          "_sprechend",
-          "_hervorgehoben",
-          "Art"
-        ];
-
-        for (final entry in filteredPlan) {
-          List<Widget> chips = [];
-          entry.forEach((key, value) {
-            if (!keysNotRender.contains(key) && value != null && value != "") {
-              final randomColor = Color.fromRGBO(
-                random.nextInt(64) + 192,
-                random.nextInt(64) + 192,
-                random.nextInt(64) + 192,
-                1,
-              );
-
-              chips.add(Padding(
-                padding: const EdgeInsets.only(right: 3),
-                child: Chip(
-                  label: Text(
-                    "$key: $value",
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  labelPadding: const EdgeInsets.all(1),
-                  padding: const EdgeInsets.all(1),
-                  backgroundColor: randomColor,
-                ),
-              ));
-            }
-          });
-
-          cards.add(CardInfo(
-            title:
-                "${entry["Klasse"]} | Stunde ${entry['Stunde']} | ${entry['Art']}",
-            body: Wrap(
-              spacing: 0,
-              children: chips,
-            ),
-            footer: formatDateString(entry["Tag_en"], entry["Tag"]),
-          ));
+    if (mounted) {
+      if (vPlan is int) {
+        if (!secondTry) {
+          showSnackbar("Melde Benutzer an...");
+          await client.loadCreditsFromStorage();
+          await client.login();
+          await refreshPlan(secondTry: true);
+        } else {
+          showSnackbar(client.statusCodes[vPlan] ?? "Unbekannter Fehler");
         }
-      });
+      } else {
+        // filter and render cards
+        final filteredPlan = await filter(vPlan);
+
+        setState(() {
+          cards.clear();
+
+          final List<String> keysNotRender = [
+            "Tag",
+            "Tag_en",
+            "Klasse",
+            "Stunde",
+            "_sprechend",
+            "_hervorgehoben",
+            "Art"
+          ];
+
+          for (final entry in filteredPlan) {
+            List<Widget> chips = [];
+            entry.forEach((key, value) {
+              if (!keysNotRender.contains(key) &&
+                  value != null &&
+                  value != "") {
+                final randomColor = Color.fromRGBO(
+                  random.nextInt(64) + 192,
+                  random.nextInt(64) + 192,
+                  random.nextInt(64) + 192,
+                  1,
+                );
+
+                chips.add(Padding(
+                  padding: const EdgeInsets.only(right: 3),
+                  child: Chip(
+                    label: Text(
+                      "$key: $value",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    labelPadding: const EdgeInsets.all(1),
+                    padding: const EdgeInsets.all(1),
+                    backgroundColor: randomColor,
+                  ),
+                ));
+              }
+            });
+
+            cards.add(CardInfo(
+              title: Text(
+                  "${entry["Klasse"]} | Stunde ${entry['Stunde']} | ${entry['Art']}"),
+              body: Wrap(
+                spacing: 0,
+                children: chips,
+              ),
+              footer: Text(formatDateString(entry["Tag_en"], entry["Tag"])),
+            ));
+          }
+        });
+      }
     }
   }
 
@@ -115,16 +125,16 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         itemCount: cards.length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
-            padding: EdgeInsets.only(left: padding, right: padding, bottom: padding),
+            padding:
+                EdgeInsets.only(left: padding, right: padding, bottom: padding),
             child: Card(
               child: ListTile(
-                title: Text(cards[index].title,
-                    style: const TextStyle(fontSize: 20)),
+                title: cards[index].title,
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     cards[index].body,
-                    Text(cards[index].footer),
+                    cards[index].footer,
                   ],
                 ),
               ),
@@ -161,9 +171,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 }
 
 class CardInfo {
-  final String title;
+  final Widget title;
   final Widget body;
-  final String footer;
+  final Widget footer;
 
   CardInfo({
     required this.title,
