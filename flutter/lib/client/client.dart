@@ -16,7 +16,8 @@ class SPHclient {
     -1: "Wrong credits",
     -2: "no username or password or schoolID defined",
     -3: "network error",
-    -4: "unknown error"
+    -4: "unknown error",
+    -5: "Not authenticated"
   };
 
   String username = "";
@@ -137,31 +138,35 @@ class SPHclient {
       final response = await dio.get('https://start.schulportal.hessen.de/vertretungsplan.php');
 
       String text = response.toString();
-      debugPrint(text);
 
-      RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
-      Iterable<RegExpMatch> matches = datePattern.allMatches(text);
+      if (text.contains("Fehler - Schulportal Hessen - ")) {
+        return -5;
+      } else {
+        RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
+        Iterable<RegExpMatch> matches = datePattern.allMatches(text);
 
-      var uniqueDates = [];
+        var uniqueDates = [];
 
-      for (RegExpMatch match in matches) {
-        int day = int.parse(match.group(1) ?? "00");
-        int month = int.parse(match.group(2) ?? "00");
-        int year = int.parse(match.group(3) ?? "00");
-        DateTime extractedDate = DateTime(year, month, day);
+        for (RegExpMatch match in matches) {
+          int day = int.parse(match.group(1) ?? "00");
+          int month = int.parse(match.group(2) ?? "00");
+          int year = int.parse(match.group(3) ?? "00");
+          DateTime extractedDate = DateTime(year, month, day);
 
-        String dateString = extractedDate.format("dd.MM.yyyy");
+          String dateString = extractedDate.format("dd.MM.yyyy");
 
-        if (!uniqueDates.any((date) => date == dateString)) {
-          uniqueDates.add(dateString);
+          if (!uniqueDates.any((date) => date == dateString)) {
+            uniqueDates.add(dateString);
+          }
         }
+
+        if (uniqueDates.isEmpty) {
+          return [];
+        }
+
+        return uniqueDates;
       }
 
-      if (uniqueDates.isEmpty) {
-        return [];
-      }
-
-      return uniqueDates;
     } on SocketException {
       return -3;
       //network error
@@ -169,7 +174,6 @@ class SPHclient {
       return -4;
       //unknown error;
     }
-
   }
 
   Future<dynamic> getFullVplan() async {
