@@ -45,13 +45,13 @@ class MyHomePage extends StatefulWidget {
 class _HomePage extends State<MyHomePage> {
   SPHclient get client => widget.client;
 
-  int _selectedIndex = 2;
+  int _selectedIndex = 0;
 
   static List<Widget> _widgetOptions(SPHclient client) {
     return <Widget>[
-      VertretungsplanAnsicht(),
+      const VertretungsplanAnsicht(),
       const Text("About page einrichten"),
-      SettingsScreen(),
+      const SettingsScreen(),
     ];
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../client/client.dart';
-import 'filterplan.dart';
+import 'filterlogic.dart';
 import 'dart:math';
+
+import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {
   const VertretungsplanAnsicht({super.key});
@@ -37,8 +39,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   }
 
   Future<void> refreshPlan({secondTry = false}) async {
-    await setFilter("", "", "");
-
     showSnackbar("Lade Plan herunter...", milliseconds: 250);
     final vPlan = await client.getFullVplan();
     debugPrint(vPlan.toString());
@@ -137,8 +137,11 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         children: [
           FloatingActionButton(
             onPressed: () {
-              // Show a Snackbar when the button is pressed
-              showSnackbar("Filter button pressed");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => filterPlan()),
+              );
+              debugPrint("HERE I AM, ROCK YOU LIKE A HURRICANE");
             },
             heroTag: null,
             child: const Icon(Icons.filter_alt),
