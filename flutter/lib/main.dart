@@ -19,20 +19,18 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: appTitle,
-      home: MyHomePage(client, title: appTitle),
-      theme: ThemeData(
-        useMaterial3: true,
-        inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
-      )
-    );
+        title: appTitle,
+        home: MyHomePage(client, title: appTitle),
+        theme: ThemeData(
+          useMaterial3: true,
+          inputDecorationTheme:
+              const InputDecorationTheme(border: OutlineInputBorder()),
+        ));
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
   final SPHclient client;
-
 
   const MyHomePage(this.client, {super.key, required this.title});
 
@@ -46,6 +44,9 @@ class _HomePage extends State<MyHomePage> {
   SPHclient get client => widget.client;
 
   int _selectedIndex = 0;
+
+  String userName = "user.name";
+  String schoolName = "Example City School";
 
   static List<Widget> _widgetOptions(SPHclient client) {
     return <Widget>[
@@ -73,31 +74,51 @@ class _HomePage extends State<MyHomePage> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-
               decoration: const BoxDecoration(
                 color: Colors.blueAccent,
+                image: DecorationImage(
+                  image: AssetImage("lib/assets/blackboard_backgroud.jpg"),
+                  fit: BoxFit.cover,
+                ),
               ),
               child: Stack(
                 children: [
-                  const Align(
-                    alignment: Alignment.topLeft,
-                    child: Column(
-                      children: [
-                        Text("Alessio Caputo", style: TextStyle(
-                          fontSize: 32
-                        )),
-                        Text("Max-Planck-Schule")
-                      ],
-                    )
-                  ),
                   Align(
-                    alignment: Alignment.bottomRight,
-                    child:                   FloatingActionButton(
+                    alignment: Alignment.topRight,
+                    child: FloatingActionButton(
                       onPressed: () {
                         _onItemTapped(2);
                         Navigator.pop(context);
                       },
                       child: const Icon(Icons.manage_accounts),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(schoolName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.black,
+                            shadows: [
+                              Shadow(color: Colors.white, blurRadius: 30)
+                            ],
+                          ),
+                        ),
+                        Text(userName,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            color: Colors.black,
+                            shadows: [
+                              Shadow(color: Colors.white, blurRadius: 30)
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -127,4 +148,3 @@ class _HomePage extends State<MyHomePage> {
     );
   }
 }
-

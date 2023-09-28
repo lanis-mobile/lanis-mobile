@@ -12,6 +12,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
 
+  _SettingsScreenState(){
+    loadCredits();
+  }
+
   final _schoolController = TextEditingController();
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -23,6 +27,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     debugPrint(loginCode.toString());
   }
 
+  void loadCredits() async {
+    await client.loadCreditsFromStorage();
+    var credits = await client.getCredits();
+
+    _userController.text = credits["username"];
+    _passwordController.text = credits["password"];
+    _schoolController.text = credits["schoolID"];
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -22,7 +22,8 @@ Future<List> filter(list) async {
            (item["Vertreter"]?.contains(lehrerKuerzel) == true ||
             item["Lehrer"]?.contains(lehrerKuerzel) == true ||
             item["Lehrerkuerzel"]?.contains(lehrerKuerzel) == true ||
-            item["Vertreterkuerzel"]?.contains(lehrerKuerzel) == true)) {
+            item["Vertreterkuerzel"]?.contains(lehrerKuerzel) == true)
+    ) {
       result.add(item);
     }
   }

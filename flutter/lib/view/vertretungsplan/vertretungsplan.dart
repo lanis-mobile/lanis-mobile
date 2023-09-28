@@ -31,6 +31,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
     if (mounted) {
+      // Hide the current SnackBar if one is already visible.
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(text),
@@ -72,45 +75,70 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             "Stunde",
             "_sprechend",
             "_hervorgehoben",
-            "Art"
+            "Art",
+            "Fach"
           ];
 
           for (final entry in filteredPlan) {
-            List<Widget> chips = [];
-            entry.forEach((key, value) {
-              if (!keysNotRender.contains(key) &&
-                  value != null &&
-                  value != "") {
-                final randomColor = Color.fromRGBO(
-                  random.nextInt(64) + 192,
-                  random.nextInt(64) + 192,
-                  random.nextInt(64) + 192,
-                  1,
-                );
+            List<Widget> cardBody = [];
 
-                chips.add(Padding(
-                  padding: const EdgeInsets.only(right: 3),
-                  child: Chip(
-                    label: Text(
-                      "$key: $value",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    labelPadding: const EdgeInsets.all(1),
-                    padding: const EdgeInsets.all(1),
-                    backgroundColor: randomColor,
-                  ),
-                ));
+            String hinweis = "";
+            entry.forEach((key, value) {
+              if ((!keysNotRender.contains(key) &&
+                  value != null &&
+                  value != "")) {
+                if (key != "Hinweis") {
+                  cardBody.add(Padding(
+                      padding: const EdgeInsets.only(right: 30, left: 30),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [Text("$key:"), Text(value)],
+                      )));
+                } else {
+                  hinweis = value;
+                }
               }
             });
 
+            if (hinweis != "") {
+              cardBody.add(Padding(
+                padding: const EdgeInsets.only(right: 30, left: 30),
+                child: Text("Hinweis:  $hinweis"),
+              ));
+            }
+
             cards.add(CardInfo(
-              title: Text(
-                  "${entry["Klasse"]} | Stunde ${entry['Stunde']} | ${entry['Art']}"),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Stunde ${entry['Stunde']}",
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                  Text(entry["Klasse"]),
+                  Text(
+                    entry['Art'],
+                    style: const TextStyle(fontSize: 22),
+                  )
+                ],
+              ),
               body: Wrap(
                 spacing: 0,
-                children: chips,
+                children: cardBody,
               ),
-              footer: Text(formatDateString(entry["Tag_en"], entry["Tag"])),
+              footer: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    formatDateString(entry["Tag_en"], entry["Tag"]),
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    entry["Fach"] ?? "",
+                    style: const TextStyle(fontSize: 18),
+                  )
+                ],
+              ),
             ));
           }
         });
@@ -146,12 +174,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => filterPlan()),
               );
-              debugPrint("HERE I AM, ROCK YOU LIKE A HURRICANE");
+              await refreshPlan();
             },
             heroTag: null,
             child: const Icon(Icons.filter_alt),

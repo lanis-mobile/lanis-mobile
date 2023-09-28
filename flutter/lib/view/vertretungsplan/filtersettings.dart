@@ -45,8 +45,8 @@ class filterPlan extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(padding),
             child: ElevatedButton(
-              onPressed: () {
-                setFilter(_klassenStufeController.text, _klassenController.text, _lehrerKuerzelController.text).then((_){
+              onPressed: () async {
+                  await setFilter(_klassenStufeController.text, _klassenController.text, _lehrerKuerzelController.text).then((_){
                   Navigator.pop(context);
                 });
               },
