@@ -54,12 +54,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _schoolController.text = credits["schoolID"];
   }
 
+  void checkAuth() async {
+    setState(() {
+      spinnerSize = 100;
+      loginStatusText = "Überprüfe authentifizierung...";
+    });
+    await client.loadCreditsFromStorage();
+    bool isAuth = await client.isAuth();
+    setState(() {
+      spinnerSize = 0;
+      if (isAuth) {
+        loginStatusText = "Eingeloggt.";
+      } else {
+        loginStatusText = "Nicht Eingeloggt oder Offline";
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkAuth();
+  }
+
   @override
   Widget build(BuildContext context) {
     double padding = 10.0;
-    const subHeaderStyle = TextStyle(
-      fontSize: 24,
-    );
     return Scaffold(
       body: Column(
         children: [
@@ -97,8 +117,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: const Text('Login'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    //TODO: Implement this shit
+                  onPressed: () async {
+                    await client.deleteAllSettings();
+                    setState(() {
+                      _schoolController.text = "";
+                      _userController.text = "";
+                      _passwordController.text = "";
+                      loginStatusText = "Nicht Eingeloggt | Reset erfolgreich";
+                    });
                   },
                   child: const Text('App zurücksetzen'),
                 )

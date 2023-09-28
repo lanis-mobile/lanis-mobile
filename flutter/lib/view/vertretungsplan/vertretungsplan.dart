@@ -24,13 +24,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
     refreshPlan();
   }
 
-  List<CardInfo> cards = [
-    CardInfo(
-      title: const Text("Alle Angaben ohne Gewähr!"),
-      body: const Text("Auch die besten technischen Systeme machen Fehler!"),
-      footer: const Text(""),
-    ),
-  ];
+  List<CardInfo> cards = [];
 
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
     if (mounted) {

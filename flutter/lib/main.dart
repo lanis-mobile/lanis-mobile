@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/view/about/about.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
@@ -51,7 +52,7 @@ class _HomePage extends State<MyHomePage> {
   static List<Widget> _widgetOptions(SPHclient client) {
     return <Widget>[
       const VertretungsplanAnsicht(),
-      const Text("About page einrichten"),
+      const AboutScreen(),
       const SettingsScreen(),
     ];
   }

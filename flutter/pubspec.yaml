@@ -37,6 +37,7 @@ dependencies:
   path_provider: ^2.1.1
   intl: ^0.18.1
   flutter_spinkit: ^5.2.0
+  url_launcher: ^6.1.14
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +64,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - lib/assets/blackboard_backgroud.jpg
+    - lib/assets/qrcode.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

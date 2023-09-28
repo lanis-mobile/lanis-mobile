@@ -15,7 +15,7 @@ class SPHclient {
     -1: "Wrong credits",
     -2: "no username or password or schoolID defined",
     -3: "network error",
-    -4: "unknown error",
+    -4: "unknown error, are you logged in?",
     -5: "Not authenticated"
   };
 
@@ -23,6 +23,7 @@ class SPHclient {
   String password = "";
   String schoolID = "";
   String schoolName = "";
+  late PersistCookieJar jar;
 
   final dio = Dio();
 
@@ -32,12 +33,10 @@ class SPHclient {
         encryptedSharedPreferences: true,
       );
 
-  SPHclient();
-
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
     final String appDocPath = appDocDir.path;
-    final jar = PersistCookieJar(
+    jar = PersistCookieJar(
         ignoreExpires: true, storage: FileStorage("$appDocPath/cookies"));
     dio.interceptors.add(CookieManager(jar));
     dio.options.followRedirects = false;
@@ -93,6 +92,7 @@ class SPHclient {
   }
 
   Future<int> login() async {
+    jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
     try {
@@ -227,13 +227,18 @@ class SPHclient {
   }
 
   Future<bool> isAuth() async {
-    //   Fetching the vPlan on an expired Date. This ensures, that the user is
-    //   authenticated and when he is there will be an minimal response
-    final response = await getVplan("26.09.23"); //some expired date
-
-    if (response is List) {
-      return true;
-    } else {
+    try {
+      final response = await dio.get("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
+      String responseText = response.data.toString();
+      debugPrint(responseText);
+      if (responseText.contains("Fehler - Schulportal Hessen") || username.isEmpty || password.isEmpty || schoolID.isEmpty) {
+        return false;
+      } else if (responseText.contains(username)) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
       return false;
     }
   }
@@ -241,6 +246,11 @@ class SPHclient {
   Future<dynamic> getSchoolInfo(String schoolID) async {
     final response = await dio.get("https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=5182");
     return jsonDecode(response.data.toString());
+  }
+
+  Future<void> deleteAllSettings() async {
+    jar.deleteAll();
+    storage.deleteAll(aOptions: _getAndroidOptions());
   }
 }
 
