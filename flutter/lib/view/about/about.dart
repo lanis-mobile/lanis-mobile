@@ -25,21 +25,24 @@ class _AboutScreenState extends State<AboutScreen> {
             leading: const Icon(Icons.add_comment),
             title: const Text('Feature Request / Bug report'),
             onTap: () {
-              launchUrl(Uri.parse("https://github.com/alessioC42/SPH-vertretungsplan/issues/new/choose"));
+              launchUrl(Uri.parse(
+                  "https://github.com/alessioC42/SPH-vertretungsplan/issues/new/choose"));
             },
           ),
           ListTile(
             leading: const Icon(Icons.update),
             title: const Text('Last Release'),
             onTap: () {
-              launchUrl(Uri.parse("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest"));
+              launchUrl(Uri.parse(
+                  "https://github.com/alessioC42/SPH-vertretungsplan/releases/latest"));
             },
           ),
           ListTile(
             leading: const Icon(Icons.code),
             title: const Text('GitHub Repository'),
             onTap: () {
-              launchUrl(Uri.parse("https://github.com/alessioC42/SPH-vertretungsplan"));
+              launchUrl(Uri.parse(
+                  "https://github.com/alessioC42/SPH-vertretungsplan"));
             },
           ),
         ],

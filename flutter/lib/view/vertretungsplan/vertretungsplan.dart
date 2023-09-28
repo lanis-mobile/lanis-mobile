@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import '../../client/client.dart';
-import 'filterlogic.dart';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import '../../client/client.dart';
+import 'filterlogic.dart';
 import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {

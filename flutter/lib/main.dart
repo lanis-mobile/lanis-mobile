@@ -67,11 +67,11 @@ class _HomePage extends State<MyHomePage> {
 
   void loadUserData() {
     client.loadCreditsFromStorage().then((_) => {
-      setState(() {
-        userName = client.username;
-        schoolName = client.schoolName;
-      })
-    });
+          setState(() {
+            userName = client.username;
+            schoolName = client.schoolName;
+          })
+        });
   }
 
   @override

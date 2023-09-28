@@ -4,7 +4,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../client/client.dart';
 
 class SettingsScreen extends StatefulWidget {
-
   const SettingsScreen({super.key});
 
   @override
@@ -12,8 +11,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-
-  _SettingsScreenState(){
+  _SettingsScreenState() {
     loadCredits();
   }
 
@@ -23,7 +21,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   double spinnerSize = 0;
   String loginStatusText = "";
-
 
   void login(String username, String password, String schoolID) async {
     setState(() {
@@ -87,14 +84,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             padding: EdgeInsets.all(padding),
             child: TextFormField(
               controller: _schoolController,
-              decoration: const InputDecoration(labelText: 'Schulnummer (eg 5182)'),
+              decoration:
+                  const InputDecoration(labelText: 'Schulnummer (eg 5182)'),
             ),
           ),
           Padding(
             padding: EdgeInsets.all(padding),
             child: TextFormField(
               controller: _userController,
-              decoration: const InputDecoration(labelText: 'Benutzername (user.name)'),
+              decoration:
+                  const InputDecoration(labelText: 'Benutzername (user.name)'),
             ),
           ),
           Padding(
@@ -112,7 +111,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    login(_userController.text, _passwordController.text, _schoolController.text);
+                    login(_userController.text, _passwordController.text,
+                        _schoolController.text);
                   },
                   child: const Text('Login'),
                 ),

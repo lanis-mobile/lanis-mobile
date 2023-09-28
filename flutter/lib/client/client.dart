@@ -85,8 +85,8 @@ class SPHclient {
       "schoolID":
           await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
               "",
-      "schoolName":
-      await storage.read(key: "schoolName", aOptions: _getAndroidOptions()) ??
+      "schoolName": await storage.read(
+              key: "schoolName", aOptions: _getAndroidOptions()) ??
           ""
     };
   }
@@ -116,7 +116,9 @@ class SPHclient {
 
           schoolName = (await getSchoolInfo(schoolID))["Name"];
           await storage.write(
-              key: "schoolName", value: schoolName, aOptions: _getAndroidOptions());
+              key: "schoolName",
+              value: schoolName,
+              aOptions: _getAndroidOptions());
 
           return 0;
         } else {
@@ -228,10 +230,14 @@ class SPHclient {
 
   Future<bool> isAuth() async {
     try {
-      final response = await dio.get("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
+      final response = await dio.get(
+          "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
       String responseText = response.data.toString();
       debugPrint(responseText);
-      if (responseText.contains("Fehler - Schulportal Hessen") || username.isEmpty || password.isEmpty || schoolID.isEmpty) {
+      if (responseText.contains("Fehler - Schulportal Hessen") ||
+          username.isEmpty ||
+          password.isEmpty ||
+          schoolID.isEmpty) {
         return false;
       } else if (responseText.contains(username)) {
         return true;
@@ -244,7 +250,8 @@ class SPHclient {
   }
 
   Future<dynamic> getSchoolInfo(String schoolID) async {
-    final response = await dio.get("https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=5182");
+    final response = await dio.get(
+        "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=5182");
     return jsonDecode(response.data.toString());
   }
 
