@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../client/client.dart';
 import 'filterlogic.dart';
 import 'dart:math';
@@ -17,7 +18,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   final random = Random();
 
-  _VertretungsplanAnsichtState() {
+  @override
+  void initState() {
+    super.initState();
     refreshPlan();
   }
 
@@ -45,12 +48,20 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   Future<void> refreshPlan({secondTry = false}) async {
     if (mounted) {
-      showSnackbar("Lade Plan herunter...", milliseconds: 250);
-    }
+      //preloader
+      setState(() {
+        cards = [
+          CardInfo(
+              title: const Text("Lade Plan..."),
+              body: const SpinKitDancingSquare(
+                size: 150,
+                color: Colors.black,
+              ),
+              footer: const Text(""))
+        ];
+      });
 
-    final vPlan = await client.getFullVplan();
-
-    if (mounted) {
+      final vPlan = await client.getFullVplan();
       if (vPlan is int) {
         if (!secondTry) {
           showSnackbar("Melde Benutzer an...");

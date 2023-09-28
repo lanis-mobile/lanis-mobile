@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../client/client.dart';
 
@@ -20,11 +21,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  double spinnerSize = 0;
+  String loginStatusText = "";
+
+
   void login(String username, String password, String schoolID) async {
+    setState(() {
+      spinnerSize = 100;
+      loginStatusText = "Melde Benutzer an...";
+    });
     await client.overwriteCredits(username, password, schoolID);
     var loginCode = await client.login();
 
-    debugPrint(loginCode.toString());
+    debugPrint("Login statuscode: ${loginCode.toString()}");
+
+    setState(() {
+      spinnerSize = 0;
+      if (loginCode == 0) {
+        loginStatusText = "Anmeldung erfolgreich!";
+      } else {
+        loginStatusText = "Anmeldung fehlgeschlagen!\nFehlercode: $loginCode";
+      }
+    });
   }
 
   void loadCredits() async {
@@ -45,7 +63,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: Column(
         children: [
-          const Text("Account", style: subHeaderStyle),
           Padding(
             padding: EdgeInsets.all(padding),
             child: TextFormField(
@@ -70,13 +87,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Padding(
             padding: EdgeInsets.all(padding),
-            child: ElevatedButton(
-              onPressed: () {
-                login(_userController.text, _passwordController.text, _schoolController.text);
-              },
-              child: const Text('Login'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    login(_userController.text, _passwordController.text, _schoolController.text);
+                  },
+                  child: const Text('Login'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    //TODO: Implement this shit
+                  },
+                  child: const Text('App zurücksetzen'),
+                )
+              ],
             ),
           ),
+          SpinKitDancingSquare(
+            size: spinnerSize,
+            color: Colors.black,
+          ),
+          Text(loginStatusText)
         ],
       ),
     );

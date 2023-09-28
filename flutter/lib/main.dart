@@ -59,7 +59,24 @@ class _HomePage extends State<MyHomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      userName = client.username;
+      loadUserData();
     });
+  }
+
+  void loadUserData() {
+    client.loadCreditsFromStorage().then((_) => {
+      setState(() {
+        userName = client.username;
+        schoolName = client.schoolName;
+      })
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
   }
 
   @override
@@ -99,7 +116,8 @@ class _HomePage extends State<MyHomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(schoolName,
+                        Text(
+                          schoolName,
                           style: const TextStyle(
                             fontSize: 18,
                             fontStyle: FontStyle.italic,
@@ -109,7 +127,8 @@ class _HomePage extends State<MyHomePage> {
                             ],
                           ),
                         ),
-                        Text(userName,
+                        Text(
+                          userName,
                           style: const TextStyle(
                             fontSize: 32,
                             color: Colors.black,

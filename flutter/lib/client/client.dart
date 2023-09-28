@@ -21,7 +21,8 @@ class SPHclient {
 
   String username = "";
   String password = "";
-  String schoolID = "5182";
+  String schoolID = "";
+  String schoolName = "";
 
   final dio = Dio();
 
@@ -68,6 +69,10 @@ class SPHclient {
     schoolID =
         await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
             "";
+
+    schoolName =
+        await storage.read(key: "schoolName", aOptions: _getAndroidOptions()) ??
+            "";
   }
 
   Future<dynamic> getCredits() async {
@@ -80,7 +85,10 @@ class SPHclient {
               "",
       "schoolID":
           await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
-              ""
+              "",
+      "schoolName":
+      await storage.read(key: "schoolName", aOptions: _getAndroidOptions()) ??
+          ""
     };
   }
 
@@ -105,6 +113,11 @@ class SPHclient {
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
+
+          schoolName = (await getSchoolInfo(schoolID))["Name"];
+          await storage.write(
+              key: "schoolName", value: schoolName, aOptions: _getAndroidOptions());
+
           return 0;
         } else {
           return -1;
@@ -223,6 +236,11 @@ class SPHclient {
     } else {
       return false;
     }
+  }
+
+  Future<dynamic> getSchoolInfo(String schoolID) async {
+    final response = await dio.get("https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=5182");
+    return jsonDecode(response.data.toString());
   }
 }
 
