@@ -3,13 +3,22 @@ import 'package:flutter/material.dart';
 import 'filterlogic.dart';
 
 class filterPlan extends StatelessWidget {
-  filterPlan({super.key});
+  filterPlan({super.key}) {
+    loadConfiguration();
+  }
 
 
   final _klassenStufeController = TextEditingController();
   final _klassenController = TextEditingController();
   final _lehrerKuerzelController = TextEditingController();
 
+  void loadConfiguration() async {
+    final filterQueries = await getFilter();
+
+    _klassenStufeController.text = filterQueries["klassenStufe"];
+    _klassenController.text = filterQueries["klasse"];
+    _lehrerKuerzelController.text = filterQueries["lehrerKuerzel"];
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -36,8 +36,6 @@ class SPHclient {
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
     final String appDocPath = appDocDir.path;
-    debugPrint(
-        "APPDOCPATH: ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> $appDocPath");
     final jar = PersistCookieJar(
         ignoreExpires: true, storage: FileStorage("$appDocPath/cookies"));
     dio.interceptors.add(CookieManager(jar));
@@ -198,11 +196,9 @@ class SPHclient {
       var dates = await getVplanDates();
 
       List fullPlan = [];
-      debugPrint("vplanDate: $dates");
 
       for (String date in dates) {
         var planForDate = await getVplan(date);
-        debugPrint(planForDate.toString());
         if (planForDate is int) {
           return planForDate;
         } else {

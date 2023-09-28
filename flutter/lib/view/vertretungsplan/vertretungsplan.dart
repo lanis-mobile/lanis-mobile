@@ -49,7 +49,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
     }
 
     final vPlan = await client.getFullVplan();
-    debugPrint(vPlan.toString());
 
     if (mounted) {
       if (vPlan is int) {
