@@ -11,7 +11,6 @@ class AboutScreen extends StatefulWidget {
 class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
-    double padding = 10.0;
     return Scaffold(
       body: ListView(
         children: <Widget>[
@@ -23,15 +22,8 @@ class _AboutScreenState extends State<AboutScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.bug_report),
-            title: const Text('Report a Bug'),
-            onTap: () {
-              // Navigate to the bug report URL
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.add_comment),
-            title: const Text('Feature Request'),
+            title: const Text('Feature Request / Bug report'),
             onTap: () {
               launchUrl(Uri.parse("https://github.com/alessioC42/SPH-vertretungsplan/issues/new/choose"));
             },
@@ -40,7 +32,7 @@ class _AboutScreenState extends State<AboutScreen> {
             leading: const Icon(Icons.update),
             title: const Text('Last Release'),
             onTap: () {
-              launchUrl(Uri.parse("https://github.com/alessioC42/SPH-vertretungsplan/issues/new/choose"));
+              launchUrl(Uri.parse("https://github.com/alessioC42/SPH-vertretungsplan/releases/latest"));
             },
           ),
           ListTile(
