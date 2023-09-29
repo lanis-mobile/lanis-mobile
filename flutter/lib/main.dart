@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/about/about.dart';
+import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
 void main() {
-  runApp(App());
+  runApp(const App());
   client.prepareDio();
   client.loadCreditsFromStorage();
 }
 
 class App extends StatelessWidget {
-  final SPHclient client = SPHclient();
-
-  App({super.key});
+  const App({super.key});
 
   static const appTitle = 'SPH';
 
@@ -21,7 +20,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: appTitle,
-        home: MyHomePage(client, title: appTitle),
+        home: const MyHomePage(title: appTitle),
         theme: ThemeData(
           useMaterial3: true,
           inputDecorationTheme:
@@ -31,9 +30,8 @@ class App extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  final SPHclient client;
 
-  const MyHomePage(this.client, {super.key, required this.title});
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
@@ -42,16 +40,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<MyHomePage> {
-  SPHclient get client => widget.client;
 
   int _selectedIndex = 0;
 
   String userName = "user.name";
   String schoolName = "Example City School";
 
-  static List<Widget> _widgetOptions(SPHclient client) {
+  static List<Widget> _widgetOptions() {
     return <Widget>[
       const VertretungsplanAnsicht(),
+      const CalendarAnsicht(),
       const AboutScreen(),
       const SettingsScreen(),
     ];
@@ -85,7 +83,7 @@ class _HomePage extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: Center(
-        child: _widgetOptions(client)[_selectedIndex],
+        child: _widgetOptions()[_selectedIndex],
       ),
       drawer: Drawer(
         child: ListView(
@@ -105,7 +103,7 @@ class _HomePage extends State<MyHomePage> {
                     alignment: Alignment.topRight,
                     child: FloatingActionButton(
                       onPressed: () {
-                        _onItemTapped(2);
+                        _onItemTapped(3);
                         Navigator.pop(context);
                       },
                       child: const Icon(Icons.manage_accounts),
@@ -153,11 +151,19 @@ class _HomePage extends State<MyHomePage> {
               },
             ),
             ListTile(
-              title: const Text('Über SPHplan'),
+              title: const Text('Kalender'),
               selected: _selectedIndex == 1,
               onTap: () {
-                // Update the state of the app
                 _onItemTapped(1);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Über SPHplan'),
+              selected: _selectedIndex == 2,
+              onTap: () {
+                // Update the state of the app
+                _onItemTapped(2);
                 // Then close the drawer
                 Navigator.pop(context);
               },

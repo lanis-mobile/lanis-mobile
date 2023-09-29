@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'filterlogic.dart';
 
-class filterPlan extends StatelessWidget {
-  filterPlan({super.key}) {
+class FilterPlan extends StatelessWidget {
+  FilterPlan({super.key}) {
     loadConfiguration();
   }
 

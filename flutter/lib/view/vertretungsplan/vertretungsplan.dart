@@ -117,14 +117,14 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Stunde ${entry['Stunde']}",
+                    entry['Art'],
                     style: const TextStyle(fontSize: 22),
                   ),
                   Text(entry["Klasse"]),
                   Text(
-                    entry['Art'],
+                    entry['Stunde'],
                     style: const TextStyle(fontSize: 22),
-                  )
+                  ),
                 ],
               ),
               body: Wrap(
@@ -182,7 +182,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             onPressed: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => filterPlan()),
+                MaterialPageRoute(builder: (context) => FilterPlan()),
               );
               await refreshPlan();
             },
