@@ -11,8 +11,6 @@ class CalendarAnsicht extends StatefulWidget {
   _CalendarAnsichtState createState() => _CalendarAnsichtState();
 }
 
-DateTime get _now => DateTime.now();
-
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
   List<Event> events = [];
 
