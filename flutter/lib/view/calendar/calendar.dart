@@ -74,35 +74,86 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   }
 
   void loadEvents(String startDate, String endDate) async {
-    try {
-      await client.getCalendar(startDate, endDate).then((data){
-        events.clear();
-        for (var event in data) {
-          iterateOverDateRange(event["Anfang"], event["Ende"], (date) {
-            events.add(Event(
-              child: Card(
-                  child: ListTile(
-                    title: Text(event["title"]),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(event.toString()),
-                      ],
-                    ),
-                  )),
-              dateTime: CalendarDateTime(
-                  year: date.year,
-                  month: date.month,
-                  day: date.day,
-                  calendarType: CalendarType.GREGORIAN),
-            ));
-          });
-        }
-      });
+    await client.getCalendar(startDate, endDate).then((data) {
+      events.clear();
 
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+      final List<String> keysNotRender = [
+        "Anfang",
+        "Ende",
+        "title",
+        "Institution",
+        "Id",
+        "FremdUID",
+        "LetzteAenderung",
+        "Verantwortlich",
+        "category",
+        "start",
+        "end"
+      ];
+
+      for (final event in data) {
+        List<Widget> cardBody = [];
+
+        String description = "";
+        event.forEach((key, value) {
+          if ((!keysNotRender.contains(key) &&
+              value != null &&
+              value != "")) {
+            if (key != "description") {
+              cardBody.add(Padding(
+                  padding: const EdgeInsets.only(right: 30, left: 30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text("${key.toString()}:"), Text(value.toString())],
+                  )));
+            } else {
+              description = value;
+            }
+          }
+        });
+
+        if (description != "") {
+          cardBody.add(Padding(
+              padding: const EdgeInsets.only(right: 30, left: 30, top: 5, bottom: 5),
+              child: Text("$description")
+            )
+          );
+        }
+
+        cardBody.add(Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(event["Anfang"]),
+            Text(event["Ende"])
+          ],
+        ));
+
+        final card = Card(
+            child: ListTile(
+                title: Text(event["title"]),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      children: cardBody,
+                    )
+                  ],
+                )
+            )
+        );
+
+        iterateOverDateRange(event["Anfang"], event["Ende"], (date) {
+          events.add(Event(
+            child: card,
+            dateTime: CalendarDateTime(
+                year: date.year,
+                month: date.month,
+                day: date.day,
+                calendarType: CalendarType.GREGORIAN),
+          ));
+        });
+      }
+    });
   }
 
   @override
@@ -110,13 +161,16 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     return EventCalendar(
       calendarType: CalendarType.GREGORIAN,
       calendarOptions:
-          CalendarOptions(toggleViewType: true, viewType: ViewType.DAILY),
+          CalendarOptions(
+              toggleViewType: true,
+              viewType: ViewType.DAILY,
+          ),
       calendarLanguage: 'en',
       onMonthChanged: onChange,
       onDateTimeReset: onChange,
       onChangeDateTime: onChange,
       eventOptions: EventOptions(
-        emptyText: "Keine Daten!",
+        emptyText: "Keine Einträge",
       ),
       events: events,
     );
