@@ -19,10 +19,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   void initState() {
     super.initState();
 
-    setState(() {
-      DateTime time = DateTime.now();
-      onChange(CalendarDateTime(year: time.year, month: time.month, day: time.day, calendarType: CalendarType.GREGORIAN));
-    });
+    DateTime time = DateTime.now();
+    onChange(CalendarDateTime(year: time.year, month: time.month, day: time.day, calendarType: CalendarType.GREGORIAN));
   }
 
   void iterateOverDateRange(
@@ -38,7 +36,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     }
   }
 
-  void onChange(CalendarDateTime dateTime) {
+  Future<void> onChange(CalendarDateTime dateTime) async {
     /*
     IMPORTANT: https://github.com/novaday-co/flutter_event_calendar/issues/42
      */
@@ -70,10 +68,10 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
     debugPrint("$startDateTime - $endDateTime");
 
-    loadEvents(startDateTime, endDateTime);
+    await loadEvents(startDateTime, endDateTime);
   }
 
-  void loadEvents(String startDate, String endDate) async {
+  Future<void> loadEvents(String startDate, String endDate) async {
     await client.getCalendar(startDate, endDate).then((data) {
       events.clear();
 
@@ -115,7 +113,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         if (description != "") {
           cardBody.add(Padding(
               padding: const EdgeInsets.only(right: 30, left: 30, top: 5, bottom: 5),
-              child: Text("$description")
+              child: Text(description)
             )
           );
         }
@@ -158,6 +156,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("EVENTS: "+events.length.toString());
     return EventCalendar(
       calendarType: CalendarType.GREGORIAN,
       calendarOptions:
