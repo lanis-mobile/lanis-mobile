@@ -7,39 +7,51 @@ import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
 void main() {
-  runApp(const App());
+  runApp(App());
   client.prepareDio();
   client.loadFromStorage();
 }
 
-class App extends StatelessWidget {
-  const App({super.key});
+class App extends StatefulWidget {
+  App({Key? key}) : super(key: key);
 
-  static const appTitle = 'SPH';
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  String _appTitle = 'SPH - Vertretungsplan';
+
+  void updateTitle(String newTitle) {
+    setState(() {
+      _appTitle = newTitle;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: appTitle,
-        home: const MyHomePage(title: appTitle),
+        title: _appTitle,
+        home: HomePage(title: _appTitle, updateTitle: updateTitle),
         theme: ThemeData(
           useMaterial3: true,
           inputDecorationTheme:
-              const InputDecorationTheme(border: OutlineInputBorder()),
+          const InputDecorationTheme(border: OutlineInputBorder()),
         ));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
+class HomePage extends StatefulWidget {
   final String title;
+  final Function(String) updateTitle;
+
+  const HomePage({Key? key, required this.title, required this.updateTitle}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _HomePage();
+  State<HomePage> createState() => _HomePage();
 }
 
-class _HomePage extends State<MyHomePage> {
+class _HomePage extends State<HomePage> {
   int _selectedIndex = 0;
 
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
@@ -49,14 +61,15 @@ class _HomePage extends State<MyHomePage> {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
-      const AboutScreen(),
       const UserdataAnsicht(),
+      const AboutScreen(),
       const SettingsScreen(),
     ];
   }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index, String title) {
     setState(() {
+      widget.updateTitle("SPH - $title");
       _selectedIndex = index;
       userName = client.username;
       loadUserData();
@@ -104,7 +117,7 @@ class _HomePage extends State<MyHomePage> {
                     child: FloatingActionButton(
                       onPressed: () {
 
-                        _onItemTapped(4);
+                        _onItemTapped(4, "Einstellungen");
                         Navigator.pop(context);
                       },
                       child: const Icon(Icons.manage_accounts),
@@ -147,7 +160,7 @@ class _HomePage extends State<MyHomePage> {
               title: const Text('Vertretungsplan'),
               selected: _selectedIndex == 0,
               onTap: () {
-                _onItemTapped(0);
+                _onItemTapped(0, "Vertretungsplan");
                 Navigator.pop(context);
               },
             ),
@@ -155,7 +168,7 @@ class _HomePage extends State<MyHomePage> {
               title: const Text('Kalender'),
               selected: _selectedIndex == 1,
               onTap: () {
-                _onItemTapped(1);
+                _onItemTapped(1, "Kalender");
                 Navigator.pop(context);
               },
             ),
@@ -164,7 +177,7 @@ class _HomePage extends State<MyHomePage> {
               selected: _selectedIndex == 2,
               onTap: () {
                 // Update the state of the app
-                _onItemTapped(2);
+                _onItemTapped(2, "Benutzerdaten");
                 // Then close the drawer
                 Navigator.pop(context);
               },
@@ -174,7 +187,7 @@ class _HomePage extends State<MyHomePage> {
               selected: _selectedIndex == 3,
               onTap: () {
                 // Update the state of the app
-                _onItemTapped(3);
+                _onItemTapped(3, "Über SPHplan");
                 // Then close the drawer
                 Navigator.pop(context);
               },

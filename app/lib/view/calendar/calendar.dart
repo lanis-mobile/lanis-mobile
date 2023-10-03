@@ -26,7 +26,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         calendarType: CalendarType.GREGORIAN));
 
     //TODO Better fix for start showing not working
-    Future.delayed(const Duration(milliseconds: 250), () {setState(() {});});
+    Future.delayed(const Duration(milliseconds: 500), () {setState(() {});});
   }
 
   void iterateOverDateRange(
