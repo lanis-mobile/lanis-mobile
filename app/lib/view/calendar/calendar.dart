@@ -77,8 +77,17 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     await loadEvents(startDateTime, endDateTime);
   }
 
-  Future<void> loadEvents(String startDate, String endDate) async {
-    await client.getCalendar(startDate, endDate).then((data) {
+  Future<void> loadEvents(String startDate, String endDate, {secondTry= false}) async {
+
+    final data = await client.getCalendar(startDate, endDate);
+
+    if (data is int) {
+      if (!secondTry) {
+        await client.loadFromStorage();
+        await client.login();
+        await loadEvents(startDate, endDate, secondTry: true);
+      }
+    } else {
       events.clear();
 
       final List<String> keysNotRender = [
@@ -120,7 +129,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         if (description != "") {
           cardBody.add(Padding(
               padding:
-                  const EdgeInsets.only(right: 30, left: 30, top: 5, bottom: 5),
+              const EdgeInsets.only(right: 30, left: 30, top: 5, bottom: 5),
               child: Text(description)));
         }
 
@@ -152,25 +161,27 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
           ));
         });
       }
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return EventCalendar(
-      calendarType: CalendarType.GREGORIAN,
-      calendarOptions: CalendarOptions(
-        toggleViewType: true,
-        viewType: ViewType.DAILY,
-      ),
-      calendarLanguage: 'en',
-      onMonthChanged: onChange,
-      onDateTimeReset: onChange,
-      onChangeDateTime: onChange,
-      eventOptions: EventOptions(
-        emptyText: "Keine Einträge",
-      ),
-      events: events,
+    return Scaffold(
+      body: EventCalendar(
+        calendarType: CalendarType.GREGORIAN,
+        calendarOptions: CalendarOptions(
+          toggleViewType: true,
+          viewType: ViewType.DAILY,
+        ),
+        calendarLanguage: 'en',
+        onMonthChanged: onChange,
+        onDateTimeReset: onChange,
+        onChangeDateTime: onChange,
+        eventOptions: EventOptions(
+          emptyText: "Keine Einträge",
+        ),
+        events: events,
+      )
     );
   }
 }

@@ -7,16 +7,16 @@ import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
 void main() {
-  runApp(App());
+  runApp(const App());
   client.prepareDio();
   client.loadFromStorage();
 }
 
 class App extends StatefulWidget {
-  App({Key? key}) : super(key: key);
+  const App({Key? key}) : super(key: key);
 
   @override
-  _AppState createState() => _AppState();
+  State<StatefulWidget> createState() => _AppState();
 }
 
 class _AppState extends State<App> {

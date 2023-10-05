@@ -56,8 +56,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         ];
       });
 
-      await client.fetchUserData();
-
       final vPlan = await client.getFullVplan();
 
       if (vPlan is int) {
