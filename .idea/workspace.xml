@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eaba5597-9aba-4f5e-ae16-d7e6c6fbe543" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="eaba5597-9aba-4f5e-ae16-d7e6c6fbe543" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,7 +49,7 @@
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
     "js.last.introduce.type": "LET",
-    "last_opened_file_path": "/home/alessio/Documents/GitHub/SPH-vertretungsplan/flutter",
+    "last_opened_file_path": "/home/alessio/Documents/GitHub/SPH-vertretungsplan/app",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -112,6 +110,7 @@
       <workItem from="1695483941818" duration="24000" />
       <workItem from="1695929370212" duration="404000" />
       <workItem from="1695990641649" duration="178000" />
+      <workItem from="1696603582415" duration="53000" />
     </task>
     <task id="LOCAL-00001" summary="Bug Fix and Optimisation">
       <option name="closed" value="true" />
