@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/about/about.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
@@ -8,54 +9,80 @@ import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 
 void main() {
   runApp(const App());
-  client.prepareDio();
-  client.loadFromStorage();
 }
 
-class App extends StatefulWidget {
+class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  String _appTitle = 'SPH - Vertretungsplan';
-
-  void updateTitle(String newTitle) {
-    setState(() {
-      _appTitle = newTitle;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: _appTitle,
-        home: HomePage(title: _appTitle, updateTitle: updateTitle),
-        theme: ThemeData(
-          useMaterial3: true,
-          inputDecorationTheme:
-          const InputDecorationTheme(border: OutlineInputBorder()),
-        ));
+      title: 'SPH - Vertretungsplan',
+      home: const HomePage(),
+      theme: ThemeData(
+        useMaterial3: true,
+        inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+      ),
+    );
   }
 }
 
 class HomePage extends StatefulWidget {
-  final String title;
-  final Function(String) updateTitle;
-
-  const HomePage({Key? key, required this.title, required this.updateTitle}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePage();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePage extends State<HomePage> {
+class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _performLogin();
+    });
+  }
+
+  Future<void> _performLogin() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            title: Text('Anmeldung läuft...'),
+            content: SpinKitCubeGrid(
+              color: Colors.black,
+              size: 30,
+            ),
+          );
+        });
+
+    // Replace this with your actual authentication logic
+    await client.loadFromStorage();
+    await client.prepareDio();
+    int loginCode = await client.login();
+    debugPrint(loginCode.toString());
+    if (loginCode != 0) {
+      _selectedIndex = 4;
+    } else {
+      userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
+      schoolName = client.schoolName;
+    }
+    _completeLogin();
+  }
+
+  void _completeLogin() {
+    Navigator.of(context).pop(); // Close the dialog
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   static List<Widget> _widgetOptions() {
     return <Widget>[
@@ -69,7 +96,6 @@ class _HomePage extends State<HomePage> {
 
   void _onItemTapped(int index, String title) {
     setState(() {
-      widget.updateTitle("SPH - $title");
       _selectedIndex = index;
       userName = client.username;
       loadUserData();
@@ -78,23 +104,26 @@ class _HomePage extends State<HomePage> {
 
   void loadUserData() {
     setState(() {
-      client.loadFromStorage().then((_){
-        userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
-        schoolName = client.schoolName;
-      });
+      userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
+      schoolName = client.schoolName;
     });
   }
 
   @override
-  void initState() {
-    super.initState();
-    loadUserData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+    return _isLoading ? const LoadingScreen() : Scaffold(
+      appBar: AppBar(
+          title: const Text("SPH"),
+        actions: <IconButton>[
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Einstellungen',
+            onPressed: () {
+              _onItemTapped(4, "Einstellungen");
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: _widgetOptions()[_selectedIndex],
       ),
@@ -110,47 +139,24 @@ class _HomePage extends State<HomePage> {
                   fit: BoxFit.cover,
                 ),
               ),
-              child: Stack(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: FloatingActionButton(
-                      onPressed: () {
-
-                        _onItemTapped(4, "Einstellungen");
-                        Navigator.pop(context);
-                      },
-                      child: const Icon(Icons.manage_accounts),
+                  Text(
+                    schoolName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.black,
+                      shadows: [Shadow(color: Colors.white, blurRadius: 30)],
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          schoolName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontStyle: FontStyle.italic,
-                            color: Colors.black,
-                            shadows: [
-                              Shadow(color: Colors.white, blurRadius: 30)
-                            ],
-                          ),
-                        ),
-                        Text(
-                          userName,
-                          style: const TextStyle(
-                            fontSize: 32,
-                            color: Colors.black,
-                            shadows: [
-                              Shadow(color: Colors.white, blurRadius: 30)
-                            ],
-                          ),
-                        ),
-                      ],
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      color: Colors.black,
+                      shadows: [Shadow(color: Colors.white, blurRadius: 30)],
                     ),
                   ),
                 ],
@@ -176,9 +182,7 @@ class _HomePage extends State<HomePage> {
               title: const Text('Benutzerdaten'),
               selected: _selectedIndex == 2,
               onTap: () {
-                // Update the state of the app
                 _onItemTapped(2, "Benutzerdaten");
-                // Then close the drawer
                 Navigator.pop(context);
               },
             ),
@@ -186,15 +190,26 @@ class _HomePage extends State<HomePage> {
               title: const Text('Über SPHplan'),
               selected: _selectedIndex == 3,
               onTap: () {
-                // Update the state of the app
                 _onItemTapped(3, "Über SPHplan");
-                // Then close the drawer
                 Navigator.pop(context);
               },
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+        child: CircularProgressIndicator(),
+        )
     );
   }
 }
