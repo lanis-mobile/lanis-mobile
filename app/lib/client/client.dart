@@ -98,6 +98,7 @@ class SPHclient {
   }
 
   Future<int> login() async {
+    debugPrint((await getLoginURL()).toString());
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -146,6 +147,44 @@ class SPHclient {
       return -3;
     } catch (e) {
       debugPrint(e.toString());
+      return -4;
+    }
+  }
+
+  Future<dynamic> getLoginURL() async {
+    final dioHttp = Dio();
+    final cookieJar = CookieJar();
+    dioHttp.interceptors.add(CookieManager(cookieJar));
+    dioHttp.options.followRedirects = false;
+    dioHttp.options.validateStatus =
+        (status) => status != null && (status == 200 || status == 302);
+
+    try {
+      if (username != "" && password != "" && schoolID != "") {
+        final response1 = await dioHttp.post(
+            "https://login.schulportal.hessen.de/?i=$schoolID",
+            queryParameters: {
+              "user": '$schoolID.$username',
+              "user2": username,
+              "password": password
+            },
+            options: Options(contentType: "application/x-www-form-urlencoded"));
+        if (response1.headers.value(HttpHeaders.locationHeader) != null) {
+          //credits are valid
+          final response2 =
+          await dioHttp.get("https://connect.schulportal.hessen.de");
+
+          String location2 =
+              response2.headers.value(HttpHeaders.locationHeader) ?? "";
+
+          return location2;
+        } else {
+          return -1;
+        }
+      } else {
+        return -2;
+      }
+    } catch (e) {
       return -4;
     }
   }
