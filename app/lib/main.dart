@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _performLogin();
     });
   }
@@ -206,7 +206,7 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         body: Center(
         child: CircularProgressIndicator(),
         )

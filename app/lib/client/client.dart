@@ -326,6 +326,13 @@ class SPHclient {
     }
   }
 
+  Future<void> saveUserData(data) async {
+    await storage.write(
+        key: "userData",
+        value: jsonEncode(data),
+        aOptions: _getAndroidOptions());
+  }
+
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
     storage.deleteAll(aOptions: _getAndroidOptions());

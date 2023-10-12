@@ -44,6 +44,7 @@ dependencies:
   flutter_event_calendar: ^1.0.0
   html: ^0.15.4
   flutter_launcher_icons: ^0.13.1
+  dropdown_search: ^5.0.6
 
 flutter_launcher_icons:
   android: true

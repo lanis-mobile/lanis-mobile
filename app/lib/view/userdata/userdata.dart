@@ -14,20 +14,23 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
 
   List<ListTile> userDataListTiles = [];
 
-  dynamic userData = client.userData;
-
   @override
   void initState() {
     super.initState();
     loadUserData();
   }
 
+  Future<void> refreshUserData() async {
+    var userData = await client.fetchUserData();
+    client.userData = userData;
+    await client.saveUserData(userData);
+    loadUserData();
+  }
 
-
-  Future<void> loadUserData() async {
+  void loadUserData() {
     setState(() {
       userDataListTiles.clear();
-      userData.forEach((final String key, final value) {
+      (client.userData ?? []).forEach((key, value) {
         userDataListTiles.add(ListTile(
           title: Text(value),
           subtitle: Text(key),
@@ -46,7 +49,7 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: loadUserData,
+            onPressed: refreshUserData,
             child: const Icon(Icons.refresh),
           ),
         ],
