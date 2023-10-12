@@ -276,7 +276,6 @@ class SPHclient {
       final response = await dio.get(
           "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
       String responseText = response.data.toString();
-      debugPrint(responseText);
       if (responseText.contains("Fehler - Schulportal Hessen") ||
           username.isEmpty ||
           password.isEmpty ||
@@ -336,6 +335,36 @@ class SPHclient {
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
     storage.deleteAll(aOptions: _getAndroidOptions());
+  }
+
+  Future<dynamic> getMeinUnterrichtOverview() async {
+    final response = await dio.get(
+        "https://start.schulportal.hessen.de/meinunterricht.php");
+    var document = parse(response.data);
+    var schoolClasses = document.querySelectorAll("tr.printable");
+    var result = [];
+
+    for (var schoolClass in schoolClasses) {
+      var teacher = schoolClass.getElementsByClassName("teacher")[0];
+
+      result.add({
+        "name": schoolClass.querySelector(".name")?.text,
+        "teacher": {
+          "short": teacher.getElementsByClassName("btn btn-primary dropdown-toggle btn-xs")[0].text,
+          "name": teacher.getElementsByClassName("dropdown-menu")[0].text
+        },
+        "thema": {
+          "title": schoolClass.getElementsByClassName("thema")[0].text,
+          "date": schoolClass.getElementsByClassName("datum")[0].text
+        },
+        "data": {
+          "entry": schoolClass.attributes["data-entry"],
+          "book": schoolClass.attributes["data-entry"]
+        }
+      });
+    }
+
+    debugPrint(result.toString());
   }
 }
 
