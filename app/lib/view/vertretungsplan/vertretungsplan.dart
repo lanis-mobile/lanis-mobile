@@ -58,87 +58,90 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
       });
 
       final vPlan = await client.getFullVplan();
+      if (vPlan is int) {
+        showSnackbar(client.statusCodes[vPlan]??"Unbekannter Fehler");
+      } else {
+        // filter and render cards
+        final filteredPlan = await filter(vPlan);
 
-      // filter and render cards
-      final filteredPlan = await filter(vPlan);
+        setState(() {
+          cards.clear();
 
-      setState(() {
-        cards.clear();
+          final List<String> keysNotRender = [
+            "Tag",
+            "Tag_en",
+            "Klasse",
+            "Stunde",
+            "_sprechend",
+            "_hervorgehoben",
+            "Art",
+            "Fach"
+          ];
 
-        final List<String> keysNotRender = [
-          "Tag",
-          "Tag_en",
-          "Klasse",
-          "Stunde",
-          "_sprechend",
-          "_hervorgehoben",
-          "Art",
-          "Fach"
-        ];
+          for (final entry in filteredPlan) {
+            List<Widget> cardBody = [];
 
-        for (final entry in filteredPlan) {
-          List<Widget> cardBody = [];
-
-          String hinweis = "";
-          entry.forEach((key, value) {
-            if ((!keysNotRender.contains(key) &&
-                value != null &&
-                value != "")) {
-              if (key != "Hinweis") {
-                cardBody.add(Padding(
-                    padding: const EdgeInsets.only(right: 30, left: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text("$key:"), Text(value)],
-                    )));
-              } else {
-                hinweis = value;
+            String hinweis = "";
+            entry.forEach((key, value) {
+              if ((!keysNotRender.contains(key) &&
+                  value != null &&
+                  value != "")) {
+                if (key != "Hinweis") {
+                  cardBody.add(Padding(
+                      padding: const EdgeInsets.only(right: 30, left: 30),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [Text("$key:"), Text(value)],
+                      )));
+                } else {
+                  hinweis = value;
+                }
               }
-            }
-          });
+            });
 
-          if (hinweis != "") {
-            cardBody.add(Padding(
-              padding: const EdgeInsets.only(right: 30, left: 30),
-              child: Text("Hinweis:  $hinweis"),
+            if (hinweis != "") {
+              cardBody.add(Padding(
+                padding: const EdgeInsets.only(right: 30, left: 30),
+                child: Text("Hinweis:  $hinweis"),
+              ));
+            }
+
+            cards.add(CardInfo(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    entry['Art'],
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                  Text(entry["Klasse"]),
+                  Text(
+                    entry['Stunde'],
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                ],
+              ),
+              body: Wrap(
+                spacing: 0,
+                children: cardBody,
+              ),
+              footer: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    formatDateString(entry["Tag_en"], entry["Tag"]),
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    entry["Fach"] ?? "",
+                    style: const TextStyle(fontSize: 18),
+                  )
+                ],
+              ),
             ));
           }
-
-          cards.add(CardInfo(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  entry['Art'],
-                  style: const TextStyle(fontSize: 22),
-                ),
-                Text(entry["Klasse"]),
-                Text(
-                  entry['Stunde'],
-                  style: const TextStyle(fontSize: 22),
-                ),
-              ],
-            ),
-            body: Wrap(
-              spacing: 0,
-              children: cardBody,
-            ),
-            footer: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  formatDateString(entry["Tag_en"], entry["Tag"]),
-                  style: const TextStyle(fontSize: 18),
-                ),
-                Text(
-                  entry["Fach"] ?? "",
-                  style: const TextStyle(fontSize: 18),
-                )
-              ],
-            ),
-          ));
-        }
-      });
+        });
+      }
     }
   }
 
