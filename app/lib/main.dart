@@ -6,6 +6,7 @@ import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const App());
@@ -192,6 +193,27 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 _onItemTapped(3, "Über SPHplan");
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Im Browser Öffnen'),
+              selected: _selectedIndex == -1,
+              onTap: () {
+                client.getLoginURL().then((response) {
+                  if (response is String) {
+                    launchUrl(Uri.parse(response));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(client.statusCodes[response]??"Unbekannter Fehler!"),
+                      duration: const Duration(seconds: 1),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ));
+                }
+                  Navigator.pop(context);
+                });
               },
             ),
           ],

@@ -98,7 +98,6 @@ class SPHclient {
   }
 
   Future<int> login() async {
-    debugPrint((await getLoginURL()).toString());
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
