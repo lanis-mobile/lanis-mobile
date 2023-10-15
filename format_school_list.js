@@ -2,15 +2,16 @@
  * Usage: node format.js > data.json
  */
 
-//https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist
-const data = require("./exporteur.json");
+fetch("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist").then(data => {
+    data.json().then(data => {
+        let result = [];
 
-let result = {};
+        data.forEach(elem => {
+            elem.Schulen.forEach(schule => {
+                result.push(`${schule.Name} - ${schule.Ort} (${schule.Id})`);
+            })
+        });
 
-data.forEach(elem => {
-    elem.Schulen.forEach(schule => {
-        result[schule.Id] = `${schule.Name} - ${schule.Ort}`;
+        console.log(JSON.stringify(result));
     })
-});
-
-console.log(JSON.stringify(result));
+})

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 import '../../client/client.dart';
 
@@ -15,19 +18,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     loadCredits();
   }
 
-  final _schoolController = TextEditingController();
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
 
   double spinnerSize = 0;
   String loginStatusText = "";
+  List schoolList = ["Error: Not able to load schools."];
+  String dropDownSelectedItem = "Max-Planck-Schule - Rüsselsheim (5182)";
 
   void login(String username, String password, String schoolID) async {
     setState(() {
       spinnerSize = 100;
       loginStatusText = "Melde Benutzer an...";
     });
-    await client.overwriteCredits(username, password, schoolID);
+    await client.overwriteCredits(username, password, schoolID, dropDownSelectedItem);
     var loginCode = await client.login();
 
     debugPrint("Login statuscode: ${loginCode.toString()}");
@@ -48,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     _userController.text = credits["username"];
     _passwordController.text = credits["password"];
-    _schoolController.text = credits["schoolID"];
+    dropDownSelectedItem = await client.getSchoolIDHelperString();
   }
 
   void checkAuth() async {
@@ -68,9 +72,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  void loadSchoolList() {
+    DefaultAssetBundle.of(context).loadString("lib/assets/school_list.json").then((String str) {
+      debugPrint(str);
+      setState(() {
+        schoolList = jsonDecode(str);
+      });
+
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    loadSchoolList();
     checkAuth();
   }
 
@@ -82,11 +97,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Padding(
             padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _schoolController,
-              decoration:
-                  const InputDecoration(labelText: 'Schulnummer (eg 5182)'),
-            ),
+            child: DropdownSearch(
+              popupProps: const PopupProps.menu(
+                showSearchBox: true,
+                searchDelay: Duration(milliseconds: 200)
+              ),
+              items: schoolList,
+              dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  labelText: "Schule auswählen"
+                )
+              ),
+              selectedItem: dropDownSelectedItem,
+              onChanged: (value){
+                dropDownSelectedItem = value;
+
+              }
+            )
           ),
           Padding(
             padding: EdgeInsets.all(padding),
@@ -111,8 +138,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    login(_userController.text, _passwordController.text,
-                        _schoolController.text);
+                    login(
+                        _userController.text,
+                        _passwordController.text,
+                        extractNumber(dropDownSelectedItem)
+                    );
                   },
                   child: const Text('Login'),
                 ),
@@ -120,7 +150,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () async {
                     await client.deleteAllSettings();
                     setState(() {
-                      _schoolController.text = "";
                       _userController.text = "";
                       _passwordController.text = "";
                       loginStatusText = "Nicht Eingeloggt | Reset erfolgreich";
@@ -140,4 +169,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+}
+
+String extractNumber(str){
+  RegExp numberPattern = RegExp(r'\((\d+)\)');
+
+  Match match = numberPattern.firstMatch(str) as Match;
+  return match.group(1)!;
 }
