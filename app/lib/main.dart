@@ -36,7 +36,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 3;
+  int _selectedIndex = 0;
 
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
     await client.prepareDio();
     int loginCode = await client.login();
     if (loginCode != 0) {
-      //if this is executed "openSettingsScreen" should be executed.
+      _selectedIndex = 3;
       _completeLogin();
       openSettingsScreen();
     } else {
