@@ -36,7 +36,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 3;
 
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
@@ -68,14 +68,24 @@ class _HomePageState extends State<HomePage> {
     await client.loadFromStorage();
     await client.prepareDio();
     int loginCode = await client.login();
-    debugPrint(loginCode.toString());
     if (loginCode != 0) {
-      _selectedIndex = 4;
+      //if this is executed "openSettingsScreen" should be executed.
+      _completeLogin();
+      openSettingsScreen();
     } else {
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
+      _completeLogin();
     }
-    _completeLogin();
+  }
+
+  void openSettingsScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    ).then((result){
+      _onItemTapped(0, "");
+    });
   }
 
   void _completeLogin() {
@@ -91,15 +101,14 @@ class _HomePageState extends State<HomePage> {
       const CalendarAnsicht(),
       const UserdataAnsicht(),
       const AboutScreen(),
-      const SettingsScreen(),
     ];
   }
 
   void _onItemTapped(int index, String title) {
     setState(() {
+      loadUserData();
       _selectedIndex = index;
       userName = client.username;
-      loadUserData();
     });
   }
 
@@ -119,9 +128,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Einstellungen',
-            onPressed: () {
-              _onItemTapped(4, "Einstellungen");
-            },
+            onPressed: openSettingsScreen,
           ),
         ],
       ),

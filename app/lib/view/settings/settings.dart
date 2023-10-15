@@ -40,6 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       spinnerSize = 0;
       if (loginCode == 0) {
         loginStatusText = "Anmeldung erfolgreich!";
+        Navigator.pop(context);
       } else {
         loginStatusText = "Anmeldung fehlgeschlagen!\nFehlercode: $loginCode";
       }
@@ -74,7 +75,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void loadSchoolList() {
     DefaultAssetBundle.of(context).loadString("lib/assets/school_list.json").then((String str) {
-      debugPrint(str);
       setState(() {
         schoolList = jsonDecode(str);
       });
@@ -93,6 +93,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     double padding = 10.0;
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Account Einstellungen"),
+      ),
       body: Column(
         children: [
           Padding(

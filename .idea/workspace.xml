@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eaba5597-9aba-4f5e-ae16-d7e6c6fbe543" name="Changes" comment="add school list for school search">
-      <change beforePath="$PROJECT_DIR$/.idea/SPH-vertretungsplan.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/SPH-vertretungsplan.iml" afterDir="false" />
+    <list default="true" id="eaba5597-9aba-4f5e-ae16-d7e6c6fbe543" name="Changes" comment="school search for Login implemented">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/assets/school_list.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/assets/school_list.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/client/client.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/client/client.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/main.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/view/settings/settings.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/view/settings/settings.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/app/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/format_school_list.js" beforeDir="false" afterPath="$PROJECT_DIR$/format_school_list.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,6 +74,12 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="debug linux" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/app/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -100,7 +102,7 @@
       <workItem from="1697225869443" duration="407000" />
       <workItem from="1697226288994" duration="162000" />
       <workItem from="1697226458543" duration="145000" />
-      <workItem from="1697301942216" duration="4368000" />
+      <workItem from="1697301942216" duration="6791000" />
     </task>
     <task id="LOCAL-00001" summary="Bug Fix and Optimisation">
       <option name="closed" value="true" />
@@ -134,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1697303173242</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="school search for Login implemented">
+      <option name="closed" value="true" />
+      <created>1697359913615</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1697359913615</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -156,6 +166,7 @@
     <MESSAGE value="Delete unimportant version 1 capacitorJS stuff" />
     <MESSAGE value="Update README.md" />
     <MESSAGE value="add school list for school search" />
-    <option name="LAST_COMMIT_MESSAGE" value="add school list for school search" />
+    <MESSAGE value="school search for Login implemented" />
+    <option name="LAST_COMMIT_MESSAGE" value="school search for Login implemented" />
   </component>
 </project>
