@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sph_plan/client/client.dart';
@@ -7,9 +8,26 @@ import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
-void main() {
+import 'background_service/service.dart';
+
+main() async {
+  // Be sure to add this line if initialize() call happens before runApp()
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await AndroidAlarmManager.initialize();
+
   runApp(const App());
+
+  int duration = 20;
+  await AndroidAlarmManager.periodic(
+      Duration(minutes: duration),
+      0,
+      backgroundFetchService,
+      rescheduleOnReboot: true,
+      wakeup: true
+  );
 }
 
 class App extends StatelessWidget {
