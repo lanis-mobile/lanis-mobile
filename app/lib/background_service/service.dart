@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:workmanager/workmanager.dart';
 import 'dart:math';
 
 import '../client/client.dart';
-import '../view/vertretungsplan/filterlogic.dart' as filterLogic;
+import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
 
 AndroidOptions _getAndroidOptions() => const AndroidOptions(
   encryptedSharedPreferences: true,
@@ -25,7 +26,18 @@ final List<String> keysNotRender = [
 ];
 
 @pragma('vm:entry-point')
-void backgroundFetchService() async {
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      await performBackgroundFetch();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return Future.value(true);
+  });
+}
+
+Future<void> performBackgroundFetch() async {
   var client = SPHclient();
   await client.prepareDio();
   await client.loadFromStorage();
@@ -33,7 +45,7 @@ void backgroundFetchService() async {
   if (loginCode == 0) {
     final vPlan = await client.getFullVplan();
     if (vPlan is! int) {
-      final filteredPlan = await filterLogic.filter(vPlan);
+      final filteredPlan = await filter_logic.filter(vPlan);
 
       for (final entry in filteredPlan) {
         // Check if the message with the given UUID has been sent before
@@ -87,14 +99,14 @@ String generateUUID(String input) {
 
 Future<void> markMessageAsSent(String entryUUID) async {
   // Read the existing JSON from secure storage
-  String jsonString = await filterLogic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
+  String jsonString = await filter_logic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
   Map<String, dynamic> storageMap = json.decode(jsonString);
 
   // Save the entryUUID to the JSON with the current timestamp
   storageMap[entryUUID] = DateTime.now().toIso8601String();
 
   // Save the updated JSON back to secure storage
-  await filterLogic.storage.write(
+  await filter_logic.storage.write(
     key: 'background-service-notifications',
     value: json.encode(storageMap),
       aOptions: _getAndroidOptions()
@@ -104,7 +116,7 @@ Future<void> markMessageAsSent(String entryUUID) async {
 Future<bool> isMessageAlreadySent(String entryUUID) async {
   // Read the existing JSON from secure storage
   String jsonString =
-      await filterLogic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
+      await filter_logic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
   Map<String, dynamic> storageMap = json.decode(jsonString);
 
   debugPrint(jsonString);

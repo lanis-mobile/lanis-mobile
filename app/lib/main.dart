@@ -8,26 +8,20 @@ import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:workmanager/workmanager.dart';
 
-import 'background_service/service.dart';
+import 'background_service/service.dart' as background_service;
 
-main() async {
-  // Be sure to add this line if initialize() call happens before runApp()
+main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await AndroidAlarmManager.initialize();
+  Workmanager().initialize(
+      background_service.callbackDispatcher,
+      isInDebugMode: true
+  );
+  Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
 
   runApp(const App());
-
-  int duration = 20;
-  await AndroidAlarmManager.periodic(
-      Duration(minutes: duration),
-      0,
-      backgroundFetchService,
-      rescheduleOnReboot: true,
-      wakeup: true
-  );
 }
 
 class App extends StatelessWidget {
