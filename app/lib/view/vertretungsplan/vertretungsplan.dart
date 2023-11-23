@@ -155,26 +155,29 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: cards.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-            padding:
-                EdgeInsets.only(left: padding, right: padding, bottom: padding),
-            child: Card(
-              child: ListTile(
-                title: cards[index].title,
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    cards[index].body,
-                    cards[index].footer,
-                  ],
+      body: RefreshIndicator(
+        onRefresh: refreshPlan,
+        child: ListView.builder(
+          itemCount: cards.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Padding(
+              padding:
+              EdgeInsets.only(left: padding, right: padding, bottom: padding),
+              child: Card(
+                child: ListTile(
+                  title: cards[index].title,
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      cards[index].body,
+                      cards[index].footer,
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
