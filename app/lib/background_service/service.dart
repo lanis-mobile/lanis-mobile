@@ -47,30 +47,21 @@ Future<void> performBackgroundFetch() async {
     if (vPlan is! int) {
       final filteredPlan = await filter_logic.filter(vPlan);
 
+      String messageBody = "";
+
       for (final entry in filteredPlan) {
-        // Check if the message with the given UUID has been sent before
-        String entryJson = json.encode(entry);
-        String entryUUID = generateUUID(entryJson);
-        bool isMessageSent = await isMessageAlreadySent(entryUUID);
+        messageBody += "${entry["Stunde"]} Stunde - ${entry["Art"]} - ${entry["Fach"]} - ${entry["Lehrer"]} - ${filter_logic.formatDateString(entry["Tag_en"], entry["Tag"])}\n";
+      }
 
-        if (!isMessageSent) {
-          String textBody = "";
+      if (messageBody != "") {
+        final messageUUID = generateUUID(messageBody);
 
-          entry.forEach((key, value) {
-            if ((!keysNotRender.contains(key) && value != null && value != "")) {
-              textBody += "$key: $value \n";
-            }
-          });
+        messageBody += "Letztes Update erhalten: ${DateFormat.Hm().format(DateTime.now())}";
 
-          textBody += "abgerufen: ${DateFormat().format(DateTime.now())}" ;
-
-          sendMessage(
-              "${entry["Stunde"]} Stunde - ${entry["Art"]} - ${entry["Fach"]} - ${entry["Lehrer"]} - ${entry["Tag"]}",
-              textBody,
-              id: random.nextInt(65535)); // I dont care, if IDs are the same. (0.0000023%)
-
-          // Mark the message as sent
-          await markMessageAsSent(entryUUID);
+        if (!(await isMessageAlreadySent(messageUUID))) {
+          await sendMessage("${filteredPlan.length} Einträge im Vertretungsplan",
+              messageBody);
+          await markMessageAsSent(messageUUID);
         }
       }
     }
@@ -84,6 +75,7 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
       importance: Importance.high,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
+      ongoing: true, //make notification persistent
       icon: "@mipmap/ic_launcher");
   var platformDetails = NotificationDetails(android: androidDetails);
   await FlutterLocalNotificationsPlugin()
@@ -93,38 +85,20 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
 String generateUUID(String input) {
   // Use a hash function (MD5) to generate a unique identifier for the message
   final uuid = md5.convert(utf8.encode(input)).toString();
-  debugPrint("UUID: $uuid");
   return uuid;
 }
 
-Future<void> markMessageAsSent(String entryUUID) async {
-  // Read the existing JSON from secure storage
-  String jsonString = await filter_logic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
-  Map<String, dynamic> storageMap = json.decode(jsonString);
-
-  // Save the entryUUID to the JSON with the current timestamp
-  storageMap[entryUUID] = DateTime.now().toIso8601String();
-
-  // Save the updated JSON back to secure storage
+Future<void> markMessageAsSent(String uuid) async {
   await filter_logic.storage.write(
     key: 'background-service-notifications',
-    value: json.encode(storageMap),
+    value: uuid,
       aOptions: _getAndroidOptions()
   );
 }
 
-Future<bool> isMessageAlreadySent(String entryUUID) async {
+Future<bool> isMessageAlreadySent(String uuid) async {
   // Read the existing JSON from secure storage
-  String jsonString =
+  String storageValue =
       await filter_logic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
-  Map<String, dynamic> storageMap = json.decode(jsonString);
-
-  debugPrint(jsonString);
-
-  // Check if the entryUUID exists in the JSON
-  if (storageMap[entryUUID]?.isNotEmpty ?? false) {
-    return true;
-  } else {
-    return false;
-  }
+  return storageValue == uuid;
 }
