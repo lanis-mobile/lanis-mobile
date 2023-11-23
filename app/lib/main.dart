@@ -17,7 +17,7 @@ main() {
 
   Workmanager().initialize(
       background_service.callbackDispatcher,
-      isInDebugMode: true
+      isInDebugMode: false
   );
   Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
 
