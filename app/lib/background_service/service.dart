@@ -5,7 +5,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
-import 'dart:math';
 
 import '../client/client.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
@@ -14,7 +13,6 @@ AndroidOptions _getAndroidOptions() => const AndroidOptions(
   encryptedSharedPreferences: true,
 );
 
-Random random = Random();
 
 final List<String> keysNotRender = [
   "Tag_en",

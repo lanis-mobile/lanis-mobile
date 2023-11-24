@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/about/about.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
@@ -12,14 +13,20 @@ import 'package:workmanager/workmanager.dart';
 
 import 'background_service/service.dart' as background_service;
 
-main() {
+main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Workmanager().initialize(
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+
+  await Workmanager().initialize(
       background_service.callbackDispatcher,
       isInDebugMode: false
   );
-  Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
+  await Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
 
   runApp(const App());
 }
