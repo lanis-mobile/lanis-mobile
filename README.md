@@ -5,7 +5,7 @@
 
 - [x] Login
 - [x] Vertretungsplan
-- [ ] Vertretungsplan Push benachrichtigungen
+- [x] Vertretungsplan Push benachrichtigungen
 - [x] Schulkalender
 - [x] Lanis eingeloggt im browser öffnen
 - [x] Benutzerdaten
