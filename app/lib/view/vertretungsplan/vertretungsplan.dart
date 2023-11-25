@@ -110,15 +110,13 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (entry['Art'] == Null) ...[
-                    Text(
-                      entry['Art'],
-                      style: const TextStyle(fontSize: 22),
-                    )
-                  ],
-                  Text(entry["Klasse"]),
                   Text(
-                    entry['Stunde'],
+                    entry['Art'] ?? "",
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                  Text(entry["Klasse"] ?? ""),
+                  Text(
+                    entry['Stunde'] ?? "",
                     style: const TextStyle(fontSize: 22),
                   ),
                 ],
