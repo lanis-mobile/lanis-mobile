@@ -337,7 +337,7 @@ class SPHclient {
 
   Future<dynamic> getSchoolInfo(String schoolID) async {
     final response = await dio.get(
-        "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=5182");
+        "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=$schoolID");
     return jsonDecode(response.data.toString());
   }
 
