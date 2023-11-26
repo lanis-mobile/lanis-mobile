@@ -59,7 +59,16 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
       final vPlan = await client.getFullVplan();
       if (vPlan is int) {
-        showSnackbar(client.statusCodes[vPlan]??"Unbekannter Fehler");
+        showSnackbar(client.statusCodes[vPlan] ?? "Unbekannter Fehler");
+        if (!secondTry) {
+          showSnackbar("versuche Benutzer Anzumelden");
+          int loginCode = await client.login();
+          if (loginCode == 0) {
+            refreshPlan(secondTry: true);
+          } else {
+            showSnackbar(client.statusCodes[loginCode] ?? "Unbekannter Fehler");
+          }
+        }
       } else {
         // filter and render cards
         final filteredPlan = await filter(vPlan);
