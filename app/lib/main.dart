@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/themes/dark_theme.dart';
+import 'package:sph_plan/themes/light_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
@@ -39,10 +41,9 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'SPH - Vertretungsplan',
       home: const HomePage(),
-      theme: ThemeData(
-        useMaterial3: true,
-        inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
     );
   }
 }
