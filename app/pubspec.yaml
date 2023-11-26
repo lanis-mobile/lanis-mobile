@@ -38,10 +38,8 @@ dependencies:
   intl: ^0.18.1
   flutter_spinkit: ^5.2.0
   url_launcher: ^6.1.14
-  calendar_view: ^1.0.4
   cookie_jar: ^4.0.8
   dio: ^5.3.3
-  flutter_event_calendar: ^1.0.0
   html: ^0.15.4
   flutter_launcher_icons: ^0.13.1
   dropdown_search: ^5.0.6
@@ -49,6 +47,7 @@ dependencies:
   crypto: ^3.0.3
   workmanager: ^0.5.2
   permission_handler: ^11.0.1
+  table_calendar: ^3.0.9
 
 
 flutter_launcher_icons:
