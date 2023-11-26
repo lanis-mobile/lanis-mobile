@@ -116,7 +116,10 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                       style: const TextStyle(fontSize: 22),
                     )
                   ],
-                  Text(entry["Klasse"] ?? ""),
+                  Text(
+                      entry["Klasse"] ?? "",
+                      style: TextStyle(fontSize: (entry['Art'] != null) ? null : 22) //highlight "Klasse" when there is not "Art" information
+                  ),
                   Text(
                     entry['Stunde'] ?? "",
                     style: const TextStyle(fontSize: 22),
