@@ -157,9 +157,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
           //card to render always on bottom
           cards.add(CardInfo(
-            title: const Text("keine weiteren Einträge", style: TextStyle(fontSize: 22)),
-            body: const Text("Alle Angaben ohne gewähr! Die Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab!"),
-            footer: const Text("alessioC42")
+            title: const Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
+            body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab."),
+            footer: const Text("")
           ));
         });
       }
