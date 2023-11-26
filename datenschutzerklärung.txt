@@ -1,0 +1,21 @@
+Hier ist eine aktualisierte Version Ihrer Datenschutzerklärung:
+
+Datenschutzerklärung für die Anwendung “Vertretungsplan SPH”
+
+
+[Allgemeine Informationen]
+Die Anwendung “Vertretungsplan SPH” (im Folgenden “die Anwendung”) speichert keine Benutzerdaten auf externen Servern. Jegliche Kommunikation, die durch die Nutzung der Anwendung entsteht, findet direkt mit den Servern des Schulportals Hessen statt. Es ist wichtig zu beachten, dass dieses Projekt nicht Teil der offiziellen Lanis Suite ist und in keiner Verbindung zu deren Entwicklern steht.
+
+[Datenspeicherung und -sicherheit]
+Die Anwendung speichert bestimmte Benutzerinformationen, die für die Funktion der Anwendung notwendig sind. Diese Informationen werden verschlüsselt und in einem durch den Android Keystore gesicherten Speicher abgelegt. Die gespeicherten Informationen umfassen:
+ - Name der Schule oder Schulnummer
+ - Login-Name
+ - Login-Passwort
+ Die Speicherung dieser Informationen ist notwendig, um eine automatische Anmeldung am Schulportal Hessen zu ermöglichen. Benutzer können ihre gespeicherten Daten (mit Ausnahme des Passworts) innerhalb der Anwendung einsehen. Darüber hinaus kann der gesamte Speicher der Anwendung innerhalb der Anwendung einfach zurückgesetzt und somit alle Daten gelöscht werden.
+
+[Datenübertragung]
+Es findet keine Übertragung von Daten an Drittanbieter statt. Die Kommunikation der Anwendung beschränkt sich ausschließlich auf das Schulportal Hessen.
+
+[Kommunikationssicherheit]
+Die Kommunikation mit den Lanis-Servern erfolgt ausschließlich über eine verschlüsselte HTTPS-Verbindung, um die Sicherheit und Privatsphäre der Benutzer zu gewährleisten.
+
