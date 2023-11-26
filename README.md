@@ -21,9 +21,7 @@ Alle daten sind Verschlüsselt auf dem Gerät gespeichert. Jegliche kommunikatio
 - Flex
 
 ## Google Play?
-Vielleicht. 
-
-(Wenn du zugang zu der Google play console hast, dann sag bescheit ;D)
+Bald.
 
 ## Mitarbeit
-Gerne. Mach ein "Issue" auf und wir schauen dann mal.
+Gerne. Mach ein "Issue" auf oder mach direkt eine PR.
