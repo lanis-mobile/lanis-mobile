@@ -6,11 +6,9 @@ import 'package:sph_plan/themes/light_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
-import 'package:sph_plan/view/about/about.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
-import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -99,9 +97,9 @@ class _HomePageState extends State<HomePage> {
     await client.prepareDio();
     int loginCode = await client.login();
     if (loginCode != 0) {
-      _selectedIndex = 3;
+      _selectedIndex = 0;
       _completeLogin();
-      openSettingsScreen();
+      openLoginScreen();
     } else {
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
@@ -113,6 +111,15 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    ).then((result){
+      _onItemTapped(0, "");
+    });
+  }
+
+  void openLoginScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
     ).then((result){
       _onItemTapped(0, "");
     });

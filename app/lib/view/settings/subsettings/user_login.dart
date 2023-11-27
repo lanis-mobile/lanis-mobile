@@ -96,7 +96,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       appBar: AppBar(
         title: const Text("Account Einstellungen"),
       ),
-      body: Column(
+      body: ListView(
         children: [
           Padding(
             padding: EdgeInsets.all(padding),
@@ -167,7 +167,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             size: spinnerSize,
             color: Colors.black,
           ),
-          Text(loginStatusText)
+         Center(
+           child:  Text(loginStatusText),
+         )
         ],
       ),
     );

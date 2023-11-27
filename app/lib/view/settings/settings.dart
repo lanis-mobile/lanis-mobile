@@ -1,8 +1,8 @@
 import 'package:sph_plan/view/about/about.dart';
+import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/userdata/userdata.dart';
 
 import 'subsettings/user_login.dart';
-import 'subsettings/supported_features.dart';
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -47,7 +47,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.landscape_rounded),
             title: const Text('App Aussehen'),
             onTap: () {
-              launchUrl(Uri.parse("https://github.com/alessioC42"));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AppearanceSettingsScreen()),
+              );
             },
           ),
           ListTile(
