@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 class NotificationsSettingsScreen extends StatefulWidget {
   const NotificationsSettingsScreen({Key? key}) : super(key: key);
@@ -12,6 +14,8 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
   bool _enableNotifications = true;
   int _notificationInterval = 15;
 
+  bool _notificationPermissionGranted = false;
+
   Future<void> applySettings() async {
     await globalStorage.write(key: "settings-push-service-on", value: _enableNotifications.toString());
     await globalStorage.write(key: "settings-push-service-interval", value: _notificationInterval.toString());
@@ -20,6 +24,8 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
   Future<void> loadSettingsVariables() async {
     _enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
     _notificationInterval = int.parse(await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+
+    _notificationPermissionGranted = await Permission.notification.isGranted;
   }
 
   @override
@@ -66,6 +72,18 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
               });
             },
           ),
+          SwitchListTile(
+            title: const Text('Systemberechtigung für Benachrichtigungen'),
+            value: _notificationPermissionGranted,
+            onChanged: (bool? value) async {
+              if (!_notificationPermissionGranted) {
+                PermissionStatus status = await Permission.notification.request();
+                setState(() {
+                  _notificationPermissionGranted =  status.isGranted;
+                });
+              }
+            },
+          ),
           const ListTile(
             leading: Icon(Icons.info),
             title: Text("Information"),
@@ -78,12 +96,18 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
               onPressed: () {
                 applySettings();
 
+                String message = "Ein Neustart der Anwendung ist erforderlich, um Änderungen zu übernehmen.";
+
+                if (!_notificationPermissionGranted) {
+                  message = "Es gibt ein Problem mit der Berechtigung für Benachrichtigungen! SPH kann keine Benachrichtigungen versenden.";
+                }
+
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return const AlertDialog(
-                        title: Text("App Neustart erforderlich"),
-                        content: Text("Ein Neustart der Anwendung ist erforderlich, um Änderungen zu übernehmen."),
+                      return AlertDialog(
+                        title: const Text("App Neustart erforderlich"),
+                        content: Text(message),
                       );
                     }
                 );
