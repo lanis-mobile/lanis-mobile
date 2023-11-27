@@ -6,9 +6,9 @@ import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
+import 'package:sph_plan/client/storage.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -28,13 +28,7 @@ class SPHclient {
   late PersistCookieJar jar;
 
   final dio = Dio();
-
-  final storage = const FlutterSecureStorage();
-
-  AndroidOptions _getAndroidOptions() => const AndroidOptions(
-        encryptedSharedPreferences: true,
-      );
-
+  
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
     final String appDocPath = appDocDir.path;
@@ -52,53 +46,53 @@ class SPHclient {
     this.password = password;
     this.schoolID = schoolID;
 
-    await storage.write(
-        key: "username", value: username, aOptions: _getAndroidOptions());
-    await storage.write(
-        key: "password", value: password, aOptions: _getAndroidOptions());
-    await storage.write(
-        key: "schoolID", value: schoolID, aOptions: _getAndroidOptions());
-    await storage.write(
-        key: "schoolIDHelper", value: schoolIDHelper, aOptions: _getAndroidOptions());
+    await globalStorage.write(
+        key: "username", value: username);
+    await globalStorage.write(
+        key: "password", value: password);
+    await globalStorage.write(
+        key: "schoolID", value: schoolID);
+    await globalStorage.write(
+        key: "schoolIDHelper", value: schoolIDHelper);
   }
 
   Future<String> getSchoolIDHelperString() async {
-    return await storage.read(key: "schoolIDHelper", aOptions: _getAndroidOptions()) ?? "Max-Planck-Schule - Rüsselsheim (5182)";
+    return await globalStorage.read(key: "schoolIDHelper") ?? "Max-Planck-Schule - Rüsselsheim (5182)";
   }
 
   Future<void> loadFromStorage() async {
     username =
-        await storage.read(key: "username", aOptions: _getAndroidOptions()) ??
+        await globalStorage.read(key: "username") ??
             "";
     password =
-        await storage.read(key: "password", aOptions: _getAndroidOptions()) ??
+        await globalStorage.read(key: "password") ??
             "";
     schoolID =
-        await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
+        await globalStorage.read(key: "schoolID") ??
             "";
 
     schoolName =
-        await storage.read(key: "schoolName", aOptions: _getAndroidOptions()) ??
+        await globalStorage.read(key: "schoolName") ??
             "";
 
     userData =
-        jsonDecode(await storage.read(key: "userData", aOptions: _getAndroidOptions()) ??
+        jsonDecode(await globalStorage.read(key: "userData") ??
             "{}");
   }
 
   Future<dynamic> getCredits() async {
     return {
       "username":
-          await storage.read(key: "username", aOptions: _getAndroidOptions()) ??
+          await globalStorage.read(key: "username") ??
               "",
       "password":
-          await storage.read(key: "password", aOptions: _getAndroidOptions()) ??
+          await globalStorage.read(key: "password") ??
               "",
       "schoolID":
-          await storage.read(key: "schoolID", aOptions: _getAndroidOptions()) ??
+          await globalStorage.read(key: "schoolID") ??
               "",
-      "schoolName": await storage.read(
-              key: "schoolName", aOptions: _getAndroidOptions()) ??
+      "schoolName": await globalStorage.read(
+              key: "schoolName") ??
           ""
     };
   }
@@ -127,17 +121,15 @@ class SPHclient {
           await dio.get(location2);
 
           schoolName = (await getSchoolInfo(schoolID))["Name"];
-          await storage.write(
+          await globalStorage.write(
               key: "schoolName",
-              value: schoolName,
-              aOptions: _getAndroidOptions());
+              value: schoolName);
 
           userData = await fetchUserData();
 
-          await storage.write(
+          await globalStorage.write(
               key: "userData",
-              value: jsonEncode(userData),
-              aOptions: _getAndroidOptions());
+              value: jsonEncode(userData));
 
           return 0;
         } else {
@@ -370,15 +362,15 @@ class SPHclient {
   }
 
   Future<void> saveUserData(data) async {
-    await storage.write(
+    await globalStorage.write(
         key: "userData",
-        value: jsonEncode(data),
-        aOptions: _getAndroidOptions());
+        value: jsonEncode(data)
+    );
   }
 
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
-    storage.deleteAll(aOptions: _getAndroidOptions());
+    globalStorage.deleteAll();
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {

@@ -2,16 +2,12 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../client/client.dart';
+import '../client/storage.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
-
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-  encryptedSharedPreferences: true,
-);
 
 
 final List<String> keysNotRender = [
@@ -87,16 +83,15 @@ String generateUUID(String input) {
 }
 
 Future<void> markMessageAsSent(String uuid) async {
-  await filter_logic.storage.write(
+  await globalStorage.write(
     key: 'background-service-notifications',
-    value: uuid,
-      aOptions: _getAndroidOptions()
+    value: uuid
   );
 }
 
 Future<bool> isMessageAlreadySent(String uuid) async {
   // Read the existing JSON from secure storage
   String storageValue =
-      await filter_logic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
+      await globalStorage.read(key: 'background-service-notifications') ?? '{}';
   return storageValue == uuid;
 }

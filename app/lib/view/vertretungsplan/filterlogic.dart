@@ -1,21 +1,18 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 
-const storage = FlutterSecureStorage();
+import '../../client/storage.dart';
 
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-      encryptedSharedPreferences: true,
-    );
+
 
 Future<List> filter(list) async {
-  var klassenStufe = await storage.read(
-          key: "filter-klassenStufe", aOptions: _getAndroidOptions()) ??
+  var klassenStufe = await globalStorage.read(
+          key: "filter-klassenStufe") ??
       RegExp(r'.*');
-  var klasse = await storage.read(
-          key: "filter-klasse", aOptions: _getAndroidOptions()) ??
+  var klasse = await globalStorage.read(
+          key: "filter-klasse") ??
       RegExp(r'.*');
-  var lehrerKuerzel = await storage.read(
-          key: "filter-lehrerKuerzel", aOptions: _getAndroidOptions()) ??
+  var lehrerKuerzel = await globalStorage.read(
+          key: "filter-lehrerKuerzel") ??
       RegExp(r'.*');
 
   var result = [];
@@ -36,28 +33,28 @@ Future<List> filter(list) async {
 
 Future<void> setFilter(
     String klassenStufe, String klasse, String lehrerKuerzel) async {
-  await storage.write(
+  await globalStorage.write(
       key: "filter-klassenStufe",
-      value: klassenStufe,
-      aOptions: _getAndroidOptions());
-  await storage.write(
-      key: "filter-klasse", value: klasse, aOptions: _getAndroidOptions());
-  await storage.write(
+      value: klassenStufe
+  );
+  await globalStorage.write(
+      key: "filter-klasse", value: klasse);
+  await globalStorage.write(
       key: "filter-lehrerKuerzel",
-      value: lehrerKuerzel,
-      aOptions: _getAndroidOptions());
+      value: lehrerKuerzel
+  );
 }
 
 dynamic getFilter() async {
   return {
-    "klassenStufe": await storage.read(
-            key: "filter-klassenStufe", aOptions: _getAndroidOptions()) ??
+    "klassenStufe": await globalStorage.read(
+            key: "filter-klassenStufe") ??
         "",
-    "klasse": await storage.read(
-            key: "filter-klasse", aOptions: _getAndroidOptions()) ??
+    "klasse": await globalStorage.read(
+            key: "filter-klasse") ??
         "",
-    "lehrerKuerzel": await storage.read(
-            key: "filter-lehrerKuerzel", aOptions: _getAndroidOptions()) ??
+    "lehrerKuerzel": await globalStorage.read(
+            key: "filter-lehrerKuerzel") ??
         ""
   };
 }
