@@ -48,6 +48,8 @@ dependencies:
   workmanager: ^0.5.2
   permission_handler: ^11.0.1
   table_calendar: ^3.0.9
+  adaptive_theme: ^3.4.1
+  package_info_plus: ^4.2.0
 
 
 flutter_launcher_icons:

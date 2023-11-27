@@ -1,10 +1,11 @@
-import 'dart:convert';
+import 'package:sph_plan/view/about/about.dart';
+import 'package:sph_plan/view/userdata/userdata.dart';
+
+import 'subsettings/user_login.dart';
+import 'subsettings/supported_features.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:dropdown_search/dropdown_search.dart';
-
-import '../../client/client.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,169 +15,60 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  _SettingsScreenState() {
-    loadCredits();
-  }
-
-  final _userController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  double spinnerSize = 0;
-  String loginStatusText = "";
-  List schoolList = ["Error: Not able to load schools."];
-  String dropDownSelectedItem = "Max-Planck-Schule - Rüsselsheim (5182)";
-
-  void login(String username, String password, String schoolID) async {
-    setState(() {
-      spinnerSize = 100;
-      loginStatusText = "Melde Benutzer an...";
-    });
-    await client.overwriteCredits(username, password, schoolID, dropDownSelectedItem);
-    var loginCode = await client.login();
-
-    debugPrint("Login statuscode: ${loginCode.toString()}");
-
-    setState(() {
-      spinnerSize = 0;
-      if (loginCode == 0) {
-        loginStatusText = "Anmeldung erfolgreich!";
-        Navigator.pop(context);
-      } else {
-        loginStatusText = "Anmeldung fehlgeschlagen!\nFehlercode: $loginCode";
-      }
-    });
-  }
-
-  void loadCredits() async {
-    await client.loadFromStorage();
-    var credits = await client.getCredits();
-
-    _userController.text = credits["username"];
-    _passwordController.text = credits["password"];
-    dropDownSelectedItem = await client.getSchoolIDHelperString();
-  }
-
-  void checkAuth() async {
-    setState(() {
-      spinnerSize = 100;
-      loginStatusText = "Überprüfe authentifizierung...";
-    });
-    await client.loadFromStorage();
-    bool isAuth = await client.isAuth();
-    setState(() {
-      spinnerSize = 0;
-      if (isAuth) {
-        loginStatusText = "Eingeloggt.";
-      } else {
-        loginStatusText = "Nicht Eingeloggt oder Offline";
-      }
-    });
-  }
-
-  void loadSchoolList() {
-    DefaultAssetBundle.of(context).loadString("lib/assets/school_list.json").then((String str) {
-      setState(() {
-        schoolList = jsonDecode(str);
-      });
-
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadSchoolList();
-    checkAuth();
-  }
-
   @override
   Widget build(BuildContext context) {
-    double padding = 10.0;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Account Einstellungen"),
+        title: const Text("Einstellungen"),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: DropdownSearch(
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-                searchDelay: Duration(milliseconds: 200)
-              ),
-              items: schoolList,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: "Schule auswählen"
-                )
-              ),
-              selectedItem: dropDownSelectedItem,
-              onChanged: (value){
-                dropDownSelectedItem = value;
-
-              }
-            )
+      body: ListView(
+        children: <Widget>[
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Account Einstellungen'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
+              );
+            },
           ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _userController,
-              decoration:
-                  const InputDecoration(labelText: 'Benutzername (user.name)'),
-            ),
+          ListTile(
+            leading: const Icon(Icons.person_pin),
+            title: const Text('Benutzerdaten'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserdataAnsicht()),
+              );
+            },
           ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Passwort'),
-              obscureText: true,
-            ),
+          ListTile(
+            leading: const Icon(Icons.landscape_rounded),
+            title: const Text('App Aussehen'),
+            onTap: () {
+              launchUrl(Uri.parse("https://github.com/alessioC42"));
+            },
           ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    login(
-                        _userController.text,
-                        _passwordController.text,
-                        extractNumber(dropDownSelectedItem)
-                    );
-                  },
-                  child: const Text('Login'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await client.deleteAllSettings();
-                    setState(() {
-                      _userController.text = "";
-                      _passwordController.text = "";
-                      loginStatusText = "Nicht Eingeloggt | Reset erfolgreich";
-                    });
-                  },
-                  child: const Text('App zurücksetzen'),
-                )
-              ],
-            ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Benachrichtigungen'),
+            onTap: () {
+              launchUrl(Uri.parse("https://github.com/alessioC42"));
+            },
           ),
-          SpinKitDancingSquare(
-            size: spinnerSize,
-            color: Colors.black,
+          ListTile(
+            leading: const Icon(Icons.qr_code_outlined),
+            title: const Text('Über die App'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
           ),
-          Text(loginStatusText)
         ],
       ),
     );
   }
-}
-
-String extractNumber(str){
-  RegExp numberPattern = RegExp(r'\((\d+)\)');
-
-  Match match = numberPattern.firstMatch(str) as Match;
-  return match.group(1)!;
 }

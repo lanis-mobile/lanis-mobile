@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/main.dart';
 
 import '../../client/client.dart';
 
@@ -42,6 +43,9 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Benutzerdaten"),
+      ),
       body: ListView(
         children: userDataListTiles,
       ),

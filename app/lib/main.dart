@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
@@ -8,6 +9,7 @@ import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/about/about.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/settings/settings.dart';
+import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/userdata/userdata.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,20 +32,28 @@ main() async {
   );
   await Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
 
-  runApp(const App());
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+
+  runApp(App(savedThemeMode: savedThemeMode,));
 }
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  final AdaptiveThemeMode? savedThemeMode;
+
+  const App({Key? key, this.savedThemeMode}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SPH - Vertretungsplan',
-      home: const HomePage(),
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
+    return AdaptiveTheme(
+        light: lightTheme,
+        dark: darkTheme,
+        initial: savedThemeMode ?? AdaptiveThemeMode.system,
+        builder: (theme, darkTheme) => MaterialApp(
+          title: 'SPH - Vertretungsplan',
+          theme: theme,
+          darkTheme: darkTheme,
+          home: const HomePage(),
+        ),
     );
   }
 }
@@ -119,8 +129,6 @@ class _HomePageState extends State<HomePage> {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
-      const UserdataAnsicht(),
-      const AboutScreen(),
     ];
   }
 
@@ -203,22 +211,6 @@ class _HomePageState extends State<HomePage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1, "Kalender");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Benutzerdaten'),
-              selected: _selectedIndex == 2,
-              onTap: () {
-                _onItemTapped(2, "Benutzerdaten");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Über SPHplan'),
-              selected: _selectedIndex == 3,
-              onTap: () {
-                _onItemTapped(3, "Über SPHplan");
                 Navigator.pop(context);
               },
             ),
