@@ -103,13 +103,13 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
                 }
 
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text("App Neustart erforderlich"),
-                        content: Text(message),
-                      );
-                    }
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("App Neustart erforderlich"),
+                      content: Text(message),
+                    );
+                  }
                 );
               },
               child: const Text("Änderungen Speichern"),

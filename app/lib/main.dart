@@ -1,5 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -16,17 +17,29 @@ import 'background_service/service.dart' as background_service;
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Permission.notification.isDenied.then((value) {
+  PermissionStatus? notificationsPermissionStatus;
+
+  await Permission.notification.isDenied.then((value) async {
     if (value) {
-      Permission.notification.request();
+      notificationsPermissionStatus = await Permission.notification.request();
     }
   });
 
-  await Workmanager().initialize(
-      background_service.callbackDispatcher,
-      isInDebugMode: false
-  );
-  await Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
+  bool enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
+  int notificationInterval = int.parse(await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+
+  await Workmanager().cancelAll();
+  if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted && enableNotifications) {
+    await Workmanager().initialize(
+        background_service.callbackDispatcher,
+        isInDebugMode: false
+    );
+    await Workmanager().registerPeriodicTask(
+        "sphplanfetchservice-alessioc42-github-io",
+        "sphVertretungsplanUpdateService",
+      frequency: Duration(minutes: notificationInterval)
+    );
+  }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
