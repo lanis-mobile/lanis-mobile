@@ -12,7 +12,6 @@ import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
-
 import 'background_service/service.dart' as background_service;
 
 main() async {
