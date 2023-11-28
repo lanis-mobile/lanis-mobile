@@ -4,3 +4,4 @@ app/*.map
 app/.DS_Store
 app/.sourcemaps
 app/dist/
+.idea/*
