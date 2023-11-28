@@ -32,7 +32,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       loginStatusText = "Melde Benutzer an...";
     });
     await client.overwriteCredits(username, password, schoolID, dropDownSelectedItem);
-    var loginCode = await client.login();
+    var loginCode = await client.login(userLogin: true);
 
     debugPrint("Login statuscode: ${loginCode.toString()}");
 

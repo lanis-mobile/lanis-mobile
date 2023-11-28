@@ -1,7 +1,8 @@
-import 'package:sph_plan/view/about/about.dart';
+import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
+import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
-import 'package:sph_plan/view/userdata/userdata.dart';
+import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
 import 'subsettings/user_login.dart';
 
@@ -40,6 +41,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UserdataAnsicht()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.landscape_rounded),
+            title: const Text('Unterstützung für deine Schule'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SupportedFeaturesOverviewScreen()),
               );
             },
           ),

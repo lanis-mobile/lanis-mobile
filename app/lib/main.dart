@@ -189,7 +189,7 @@ class _HomePageState extends State<HomePage> {
               decoration: const BoxDecoration(
                 color: Colors.blueAccent,
                 image: DecorationImage(
-                  image: AssetImage("lib/assets/blackboard_backgroud.jpg"),
+                  image: AssetImage("lib/assets/blackboard_background.jpg"),
                   fit: BoxFit.cover,
                 ),
               ),

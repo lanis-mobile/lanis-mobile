@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/main.dart';
 
-import '../../client/client.dart';
+import 'package:sph_plan/client/client.dart';
 
 class UserdataAnsicht extends StatefulWidget {
   const UserdataAnsicht({super.key});
@@ -21,13 +20,6 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
     loadUserData();
   }
 
-  Future<void> refreshUserData() async {
-    var userData = await client.fetchUserData();
-    client.userData = userData;
-    await client.saveUserData(userData);
-    loadUserData();
-  }
-
   void loadUserData() {
     setState(() {
       userDataListTiles.clear();
@@ -37,6 +29,11 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
           subtitle: Text(key),
         ));
       });
+      userDataListTiles.add(const ListTile(
+        leading: Icon(Icons.info),
+        title: Text("Information"),
+        subtitle: Text("Alle Benutzerdaten sind auf den Lanis-servern gespeichert."),
+      ));
     });
   }
 
@@ -48,15 +45,6 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
       ),
       body: ListView(
         children: userDataListTiles,
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: refreshUserData,
-            child: const Icon(Icons.refresh),
-          ),
-        ],
       ),
     );
   }

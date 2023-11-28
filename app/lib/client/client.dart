@@ -12,12 +12,12 @@ import 'package:sph_plan/client/storage.dart';
 
 class SPHclient {
   final statusCodes = {
-    0: "No errors",
-    -1: "Wrong credits",
-    -2: "no username or password or schoolID defined",
-    -3: "network error",
-    -4: "unknown error, are you logged in?",
-    -5: "Not authenticated"
+     0: "Alles supper Brudi!",
+    -1: "Falsche Anmeldedaten",
+    -2: "Nicht alle Anmeldedaten angegeben",
+    -3: "Netzwerkfehler",
+    -4: "Unbekannter Fehler! Bist du eingeloggt?",
+    -5: "Keine Erlaubnis"
   };
 
   String username = "";
@@ -25,6 +25,7 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   dynamic userData = {};
+  List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
 
   final dio = Dio();
@@ -78,6 +79,10 @@ class SPHclient {
     userData =
         jsonDecode(await globalStorage.read(key: "userData") ??
             "{}");
+
+    supportedApps =
+        jsonDecode(await globalStorage.read(key: "supportedApps") ??
+            "{}");
   }
 
   Future<dynamic> getCredits() async {
@@ -97,7 +102,7 @@ class SPHclient {
     };
   }
 
-  Future<int> login() async {
+  Future<int> login({userLogin = false}) async {
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -119,17 +124,10 @@ class SPHclient {
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
-
-          schoolName = (await getSchoolInfo(schoolID))["Name"];
-          await globalStorage.write(
-              key: "schoolName",
-              value: schoolName);
-
-          userData = await fetchUserData();
-
-          await globalStorage.write(
-              key: "userData",
-              value: jsonEncode(userData));
+          
+          if (userLogin) {
+            await fetchRedundantData();
+          }
 
           return 0;
         } else {
@@ -146,6 +144,24 @@ class SPHclient {
       debugPrint(e.toString());
       return -4;
     }
+  }
+
+  Future<void> fetchRedundantData() async {
+    schoolName = (await getSchoolInfo(schoolID))["Name"];
+    await globalStorage.write(
+        key: "schoolName",
+        value: schoolName);
+
+    userData = await fetchUserData();
+    supportedApps = await getSupportedApps();
+
+    await globalStorage.write(
+        key: "userData",
+        value: jsonEncode(userData));
+
+    await globalStorage.write(
+        key: "supportedApps",
+        value: jsonEncode(supportedApps));
   }
 
   Future<dynamic> getLoginURL() async {
@@ -331,6 +347,21 @@ class SPHclient {
     final response = await dio.get(
         "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=$schoolID");
     return jsonDecode(response.data.toString());
+  }
+
+  Future<dynamic> getSupportedApps() async {
+    final response = await dio.get(
+        "https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps");
+    return jsonDecode(response.data.toString())["entrys"];
+  }
+
+  bool doesSupportFeature(String featureName) {
+    for (var app in supportedApps) {
+      if (app["Name"] == featureName) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<dynamic> fetchUserData() async {
