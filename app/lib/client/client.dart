@@ -82,7 +82,7 @@ class SPHclient {
 
     supportedApps =
         jsonDecode(await globalStorage.read(key: "supportedApps") ??
-            "{}");
+            "[]");
   }
 
   Future<dynamic> getCredits() async {

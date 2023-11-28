@@ -14,23 +14,24 @@ class AccountSettingsScreen extends StatefulWidget {
 }
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  _AccountSettingsScreenState() {
-    loadCredits();
-  }
-
   final _userController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool isLoginButtonEnabled = true;
+
+
   double spinnerSize = 0;
   String loginStatusText = "";
-  List schoolList = ["Error: Not able to load schools."];
+  List schoolList = ["Error: Not able to load schools. Use school id instead!"];
   String dropDownSelectedItem = "Max-Planck-Schule - Rüsselsheim (5182)";
 
   void login(String username, String password, String schoolID) async {
     setState(() {
       spinnerSize = 100;
       loginStatusText = "Melde Benutzer an...";
+      isLoginButtonEnabled = false; // Disable Button
     });
+
     await client.overwriteCredits(username, password, schoolID, dropDownSelectedItem);
     var loginCode = await client.login(userLogin: true);
 
@@ -40,9 +41,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       spinnerSize = 0;
       if (loginCode == 0) {
         loginStatusText = "Anmeldung erfolgreich!";
+        isLoginButtonEnabled = false;
         Navigator.pop(context);
       } else {
         loginStatusText = "Anmeldung fehlgeschlagen!\nFehlercode: $loginCode";
+        isLoginButtonEnabled = true;
       }
     });
   }
@@ -60,6 +63,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     setState(() {
       spinnerSize = 100;
       loginStatusText = "Überprüfe authentifizierung...";
+      isLoginButtonEnabled = false;
     });
     await client.loadFromStorage();
     bool isAuth = await client.isAuth();
@@ -67,8 +71,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       spinnerSize = 0;
       if (isAuth) {
         loginStatusText = "Eingeloggt.";
+        isLoginButtonEnabled = false;
       } else {
         loginStatusText = "Nicht Eingeloggt oder Offline";
+        isLoginButtonEnabled = true;
       }
     });
   }
@@ -85,6 +91,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   @override
   void initState() {
     super.initState();
+    loadCredits();
     loadSchoolList();
     checkAuth();
   }
@@ -136,31 +143,17 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           ),
           Padding(
             padding: EdgeInsets.all(padding),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    login(
-                        _userController.text,
-                        _passwordController.text,
-                        extractNumber(dropDownSelectedItem)
-                    );
-                  },
-                  child: const Text('Login'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await client.deleteAllSettings();
-                    setState(() {
-                      _userController.text = "";
-                      _passwordController.text = "";
-                      loginStatusText = "Nicht Eingeloggt | Reset erfolgreich";
-                    });
-                  },
-                  child: const Text('App zurücksetzen'),
-                )
-              ],
+            child: ElevatedButton(
+              onPressed: isLoginButtonEnabled
+                  ? () {
+                login(
+                  _userController.text,
+                  _passwordController.text,
+                  extractNumber(dropDownSelectedItem),
+                );
+              }
+                  : null, // Set onPressed to null when button is disabled
+              child: const Text('Login'),
             ),
           ),
           SpinKitDancingSquare(
@@ -182,3 +175,4 @@ String extractNumber(str){
   Match match = numberPattern.firstMatch(str) as Match;
   return match.group(1)!;
 }
+

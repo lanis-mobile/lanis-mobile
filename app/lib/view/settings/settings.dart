@@ -5,6 +5,7 @@ import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
 import 'subsettings/user_login.dart';
+import '../../client/client.dart';
 
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const AccountSettingsScreen()),
               );
             },
           ),
@@ -40,17 +42,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const UserdataAnsicht()),
+                MaterialPageRoute(
+                    builder: (context) => const UserdataAnsicht()),
               );
             },
           ),
           ListTile(
-            leading: const Icon(Icons.landscape_rounded),
+            leading: const Icon(Icons.apps),
             title: const Text('Unterstützung für deine Schule'),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SupportedFeaturesOverviewScreen()),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const SupportedFeaturesOverviewScreen()),
               );
             },
           ),
@@ -60,7 +65,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AppearanceSettingsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const AppearanceSettingsScreen()),
               );
             },
           ),
@@ -70,7 +76,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationsSettingsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const NotificationsSettingsScreen()),
               );
             },
           ),
@@ -83,6 +90,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
             },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('App Zurücksetzen | Ausloggen'),
+            onTap: () => showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Wirklich zurücksetzen?'),
+                content: const Text('Alle Einstellungen werden Gelöscht.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Abbrechen'),
+                    child: const Text('Abbrechen'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      client.deleteAllSettings().then((_) {
+                        Navigator.pop(context, 'OK');
+                        Navigator.push(
+                          context,
+                            MaterialPageRoute(
+                                builder: (context) => const AccountSettingsScreen()
+                            )
+                        );
+                      });
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
