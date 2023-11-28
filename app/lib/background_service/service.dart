@@ -63,13 +63,15 @@ Future<void> performBackgroundFetch() async {
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
+  bool ongoingMessage = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "true") == "true";
+
   var androidDetails = AndroidNotificationDetails(
       'io.github.alessioc42.sphplan', 'SPH-Vertretungsplan',
       channelDescription: "Benachrichtigungen über den Vertretungsplan",
       importance: Importance.high,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
-      ongoing: true, //make notification persistent
+      ongoing: ongoingMessage,
       icon: "@mipmap/ic_launcher");
   var platformDetails = NotificationDetails(android: androidDetails);
   await FlutterLocalNotificationsPlugin()

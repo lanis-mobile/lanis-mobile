@@ -13,17 +13,19 @@ class NotificationsSettingsScreen extends StatefulWidget {
 class _NotificationsSettingsScreenState extends State<NotificationsSettingsScreen> {
   bool _enableNotifications = true;
   int _notificationInterval = 15;
-
+  bool _notificationsAreOngoing = true;
   bool _notificationPermissionGranted = false;
 
   Future<void> applySettings() async {
     await globalStorage.write(key: "settings-push-service-on", value: _enableNotifications.toString());
     await globalStorage.write(key: "settings-push-service-interval", value: _notificationInterval.toString());
+    await globalStorage.write(key: "settings-push-service-notifications-ongoing", value: _notificationsAreOngoing.toString());
   }
 
   Future<void> loadSettingsVariables() async {
     _enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
     _notificationInterval = int.parse(await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+    _notificationsAreOngoing = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "true") == "true";
 
     _notificationPermissionGranted = await Permission.notification.isGranted;
   }
@@ -37,6 +39,7 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
         // Set the state after loading the variables
         _enableNotifications = _enableNotifications;
         _notificationInterval = _notificationInterval;
+        _notificationsAreOngoing = _notificationsAreOngoing;
       });
     });
   }
@@ -58,6 +61,15 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
               });
             },
           ),
+          SwitchListTile(
+            title: const Text('Anhaltende Benachrichtigung'),
+            value: _notificationsAreOngoing,
+            onChanged: _enableNotifications ? (bool? value) {
+              setState(() {
+                _notificationsAreOngoing = value!;
+              });
+            } : null,
+          ),
           ListTile(
             title: const Text('Update-intervall'),
             trailing: Text('$_notificationInterval min', style: const TextStyle(fontSize: 14)),
@@ -66,11 +78,11 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
             value: _notificationInterval.toDouble(),
             min: 15,
             max: 180,
-            onChanged: (double value) {
+            onChanged: _enableNotifications ? (double value) {
               setState(() {
                 _notificationInterval = value.toInt(); // Umwandlung zu int
               });
-            },
+            } : null,
           ),
           SwitchListTile(
             title: const Text('Systemberechtigung für Benachrichtigungen'),

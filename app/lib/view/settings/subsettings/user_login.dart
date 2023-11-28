@@ -80,7 +80,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   }
 
   void loadSchoolList() {
-    DefaultAssetBundle.of(context).loadString("lib/assets/school_list.json").then((String str) {
+    DefaultAssetBundle.of(context).loadString("assets/school_list.json").then((String str) {
       setState(() {
         schoolList = jsonDecode(str);
       });
