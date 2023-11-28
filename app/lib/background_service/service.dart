@@ -44,7 +44,17 @@ Future<void> performBackgroundFetch() async {
       String messageBody = "";
 
       for (final entry in filteredPlan) {
-        messageBody += "${entry["Stunde"]} Stunde - ${entry["Art"]} - ${entry["Fach"]} - ${entry["Lehrer"]} - ${filter_logic.formatDateString(entry["Tag_en"], entry["Tag"])}\n";
+        final day = wochenTag(entry["Tag_en"]);
+        final hour = entry["Stunde"] ?? "";
+        final type = entry["Art"] ?? "";
+        final subject = entry["Fach"] ?? "";
+        final teacher = entry["Lehrer"] ?? "";
+        final classInfo = entry["Klasse"] ?? "";
+
+        // Concatenate non-null values with separator "-"
+        final entryText = [day, hour, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
+
+        messageBody += "$entryText\n";
       }
 
       if (messageBody != "") {
@@ -96,4 +106,15 @@ Future<bool> isMessageAlreadySent(String uuid) async {
   String storageValue =
       await globalStorage.read(key: 'background-service-notifications') ?? '{}';
   return storageValue == uuid;
+}
+
+String wochenTag(String dateEn) {
+  DateFormat eingabeFormat = DateFormat('yyyy-MM-dd');
+  DateTime zielDatum = eingabeFormat.parse(dateEn);
+
+  // Wochentag auf Deutsch
+  var wochentagFormat = DateFormat.EEEE('de_DE');
+  String wochentag = wochentagFormat.format(zielDatum);
+
+  return wochentag.substring(0, 2);
 }
