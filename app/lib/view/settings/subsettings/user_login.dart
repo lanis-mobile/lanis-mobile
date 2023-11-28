@@ -99,72 +99,87 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     double padding = 10.0;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Account Einstellungen"),
-      ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: DropdownSearch(
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-                searchDelay: Duration(milliseconds: 200)
-              ),
-              items: schoolList,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: "Schule auswählen"
-                )
-              ),
-              selectedItem: dropDownSelectedItem,
-              onChanged: (value){
-                dropDownSelectedItem = value;
+    return WillPopScope(
+        onWillPop: () async => !isLoginButtonEnabled,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("SPH Login"),
+              automaticallyImplyLeading: false
+          ),
+          body: ListView(
+            children: [
+              Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: DropdownSearch(
+                      popupProps: const PopupProps.menu(
+                          showSearchBox: true,
+                          searchDelay: Duration(milliseconds: 200)
+                      ),
+                      items: schoolList,
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                              labelText: "Schule auswählen"
+                          )
+                      ),
+                      selectedItem: dropDownSelectedItem,
+                      onChanged: (value){
+                        dropDownSelectedItem = value;
 
-              }
-            )
-          ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _userController,
-              decoration:
+                      }
+                  )
+              ),
+              Padding(
+                padding: EdgeInsets.all(padding),
+                child: TextFormField(
+                  controller: _userController,
+                  decoration:
                   const InputDecoration(labelText: 'Benutzername (user.name)'),
-            ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(padding),
+                child: TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Passwort'),
+                  obscureText: true,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(padding),
+                child: ElevatedButton(
+                  onPressed: isLoginButtonEnabled
+                      ? () {
+                    login(
+                      _userController.text,
+                      _passwordController.text,
+                      extractNumber(dropDownSelectedItem),
+                    );
+                  }
+                      : null, // Set onPressed to null when button is disabled
+                  child: const Text('Login'),
+                ),
+              ),
+              SpinKitDancingSquare(
+                size: spinnerSize,
+                color: Colors.black,
+              ),
+              Center(
+                child:  Text(loginStatusText),
+              ),
+              const SizedBox(height: 10,),
+              const ListTile(
+                leading: Icon(Icons.info),
+                title: Text("Information"),
+                subtitle: Text("Melde dich mit deinen Lanis/Schulportal/Moodle-Logindaten an. Jegliche Daten werden ausschließlich lokal gespeichert."),
+              ),
+              const ListTile(
+                leading: Icon(Icons.info),
+                title: Text("Disclaimer"),
+                subtitle: Text("Diese Software steht in keinerlei Verbindung zu den Entwicklern des SPH. Es besteht keine Garantie oder Gewährleistung."),
+              )
+            ],
           ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Passwort'),
-              obscureText: true,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: ElevatedButton(
-              onPressed: isLoginButtonEnabled
-                  ? () {
-                login(
-                  _userController.text,
-                  _passwordController.text,
-                  extractNumber(dropDownSelectedItem),
-                );
-              }
-                  : null, // Set onPressed to null when button is disabled
-              child: const Text('Login'),
-            ),
-          ),
-          SpinKitDancingSquare(
-            size: spinnerSize,
-            color: Colors.black,
-          ),
-         Center(
-           child:  Text(loginStatusText),
-         )
-        ],
-      ),
+        ),
     );
   }
 }
