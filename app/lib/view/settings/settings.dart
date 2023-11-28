@@ -1,10 +1,13 @@
-import 'dart:convert';
+import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/notifications.dart';
+import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
+import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
+import 'package:sph_plan/view/settings/subsettings/userdata.dart';
+
+import 'subsettings/user_login.dart';
+import '../../client/client.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:dropdown_search/dropdown_search.dart';
-
-import '../../client/client.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,169 +17,113 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  _SettingsScreenState() {
-    loadCredits();
-  }
-
-  final _userController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  double spinnerSize = 0;
-  String loginStatusText = "";
-  List schoolList = ["Error: Not able to load schools."];
-  String dropDownSelectedItem = "Max-Planck-Schule - Rüsselsheim (5182)";
-
-  void login(String username, String password, String schoolID) async {
-    setState(() {
-      spinnerSize = 100;
-      loginStatusText = "Melde Benutzer an...";
-    });
-    await client.overwriteCredits(username, password, schoolID, dropDownSelectedItem);
-    var loginCode = await client.login();
-
-    debugPrint("Login statuscode: ${loginCode.toString()}");
-
-    setState(() {
-      spinnerSize = 0;
-      if (loginCode == 0) {
-        loginStatusText = "Anmeldung erfolgreich!";
-        Navigator.pop(context);
-      } else {
-        loginStatusText = "Anmeldung fehlgeschlagen!\nFehlercode: $loginCode";
-      }
-    });
-  }
-
-  void loadCredits() async {
-    await client.loadFromStorage();
-    var credits = await client.getCredits();
-
-    _userController.text = credits["username"];
-    _passwordController.text = credits["password"];
-    dropDownSelectedItem = await client.getSchoolIDHelperString();
-  }
-
-  void checkAuth() async {
-    setState(() {
-      spinnerSize = 100;
-      loginStatusText = "Überprüfe authentifizierung...";
-    });
-    await client.loadFromStorage();
-    bool isAuth = await client.isAuth();
-    setState(() {
-      spinnerSize = 0;
-      if (isAuth) {
-        loginStatusText = "Eingeloggt.";
-      } else {
-        loginStatusText = "Nicht Eingeloggt oder Offline";
-      }
-    });
-  }
-
-  void loadSchoolList() {
-    DefaultAssetBundle.of(context).loadString("lib/assets/school_list.json").then((String str) {
-      setState(() {
-        schoolList = jsonDecode(str);
-      });
-
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadSchoolList();
-    checkAuth();
-  }
-
   @override
   Widget build(BuildContext context) {
-    double padding = 10.0;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Account Einstellungen"),
+        title: const Text("Einstellungen"),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: DropdownSearch(
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-                searchDelay: Duration(milliseconds: 200)
+      body: ListView(
+        children: <Widget>[
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Account Einstellungen'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const AccountSettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_pin),
+            title: const Text('Benutzerdaten'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const UserdataAnsicht()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.apps),
+            title: const Text('Unterstützung für deine Schule'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const SupportedFeaturesOverviewScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.landscape_rounded),
+            title: const Text('App Aussehen'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const AppearanceSettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Benachrichtigungen'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const NotificationsSettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.qr_code_outlined),
+            title: const Text('Über die App'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('App Zurücksetzen | Ausloggen'),
+            onTap: () => showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Wirklich zurücksetzen?'),
+                content: const Text('Alle Einstellungen werden Gelöscht.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Abbrechen'),
+                    child: const Text('Abbrechen'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      client.deleteAllSettings().then((_) {
+                        Navigator.pop(context, 'OK');
+                        Navigator.push(
+                          context,
+                            MaterialPageRoute(
+                                builder: (context) => const AccountSettingsScreen()
+                            )
+                        );
+                      });
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-              items: schoolList,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: "Schule auswählen"
-                )
-              ),
-              selectedItem: dropDownSelectedItem,
-              onChanged: (value){
-                dropDownSelectedItem = value;
-
-              }
-            )
-          ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _userController,
-              decoration:
-                  const InputDecoration(labelText: 'Benutzername (user.name)'),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Passwort'),
-              obscureText: true,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(padding),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    login(
-                        _userController.text,
-                        _passwordController.text,
-                        extractNumber(dropDownSelectedItem)
-                    );
-                  },
-                  child: const Text('Login'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await client.deleteAllSettings();
-                    setState(() {
-                      _userController.text = "";
-                      _passwordController.text = "";
-                      loginStatusText = "Nicht Eingeloggt | Reset erfolgreich";
-                    });
-                  },
-                  child: const Text('App zurücksetzen'),
-                )
-              ],
-            ),
-          ),
-          SpinKitDancingSquare(
-            size: spinnerSize,
-            color: Colors.black,
-          ),
-          Text(loginStatusText)
         ],
       ),
     );
   }
-}
-
-String extractNumber(str){
-  RegExp numberPattern = RegExp(r'\((\d+)\)');
-
-  Match match = numberPattern.firstMatch(str) as Match;
-  return match.group(1)!;
 }

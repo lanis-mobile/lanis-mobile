@@ -1,49 +1,68 @@
-import 'package:flutter/foundation.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
-import 'package:sph_plan/view/about/about.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/settings/settings.dart';
-import 'package:sph_plan/view/userdata/userdata.dart';
+import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
-
 import 'background_service/service.dart' as background_service;
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Permission.notification.isDenied.then((value) {
+  PermissionStatus? notificationsPermissionStatus;
+
+  await Permission.notification.isDenied.then((value) async {
     if (value) {
-      Permission.notification.request();
+      notificationsPermissionStatus = await Permission.notification.request();
     }
   });
 
-  await Workmanager().initialize(
-      background_service.callbackDispatcher,
-      isInDebugMode: false
-  );
-  await Workmanager().registerPeriodicTask("sphplanfetchservice-alessioc42-github-io", "sphVertretungsplanUpdateService");
+  bool enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
+  int notificationInterval = int.parse(await globalStorage.read(key: "settings-push-service-interval") ?? "15");
 
-  runApp(const App());
+  await Workmanager().cancelAll();
+  if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted && enableNotifications) {
+    await Workmanager().initialize(
+        background_service.callbackDispatcher,
+        isInDebugMode: false
+    );
+    await Workmanager().registerPeriodicTask(
+        "sphplanfetchservice-alessioc42-github-io",
+        "sphVertretungsplanUpdateService",
+      frequency: Duration(minutes: notificationInterval)
+    );
+  }
+
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+
+  runApp(App(savedThemeMode: savedThemeMode,));
 }
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  final AdaptiveThemeMode? savedThemeMode;
+
+  const App({Key? key, this.savedThemeMode}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SPH - Vertretungsplan',
-      home: const HomePage(),
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
+    return AdaptiveTheme(
+        light: lightTheme,
+        dark: darkTheme,
+        initial: savedThemeMode ?? AdaptiveThemeMode.system,
+        builder: (theme, darkTheme) => MaterialApp(
+          title: 'SPH - Vertretungsplan',
+          theme: theme,
+          darkTheme: darkTheme,
+          home: const HomePage(),
+        ),
     );
   }
 }
@@ -89,9 +108,9 @@ class _HomePageState extends State<HomePage> {
     await client.prepareDio();
     int loginCode = await client.login();
     if (loginCode != 0) {
-      _selectedIndex = 3;
+      _selectedIndex = 0;
       _completeLogin();
-      openSettingsScreen();
+      openLoginScreen();
     } else {
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
@@ -108,6 +127,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void openLoginScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
+    ).then((result){
+      _onItemTapped(0, "");
+    });
+  }
+
   void _completeLogin() {
     Navigator.of(context).pop(); // Close the dialog
     setState(() {
@@ -119,8 +147,6 @@ class _HomePageState extends State<HomePage> {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
-      const UserdataAnsicht(),
-      const AboutScreen(),
     ];
   }
 
@@ -163,7 +189,7 @@ class _HomePageState extends State<HomePage> {
               decoration: const BoxDecoration(
                 color: Colors.blueAccent,
                 image: DecorationImage(
-                  image: AssetImage("lib/assets/blackboard_backgroud.jpg"),
+                  image: AssetImage("assets/blackboard_background.jpg"),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -203,22 +229,6 @@ class _HomePageState extends State<HomePage> {
               selected: _selectedIndex == 1,
               onTap: () {
                 _onItemTapped(1, "Kalender");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Benutzerdaten'),
-              selected: _selectedIndex == 2,
-              onTap: () {
-                _onItemTapped(2, "Benutzerdaten");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Über SPHplan'),
-              selected: _selectedIndex == 3,
-              onTap: () {
-                _onItemTapped(3, "Über SPHplan");
                 Navigator.pop(context);
               },
             ),

@@ -48,13 +48,15 @@ dependencies:
   workmanager: ^0.5.2
   permission_handler: ^11.0.1
   table_calendar: ^3.0.9
+  adaptive_theme: ^3.4.1
+  package_info_plus: ^4.2.0
 
 
 flutter_launcher_icons:
   android: true
-  image_path: "lib/assets/icon.png"
+  image_path: "assets/icon.png"
   adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "lib/assets/icon.png"
+  adaptive_icon_foreground: "assets/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
 
 dev_dependencies:
@@ -81,8 +83,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - lib/assets/blackboard_backgroud.jpg
-    - lib/assets/school_list.json
+    - assets/blackboard_background.jpg
+    - assets/school_list.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

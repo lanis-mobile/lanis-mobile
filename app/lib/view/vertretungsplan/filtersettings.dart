@@ -27,7 +27,7 @@ class FilterPlan extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Filter anpassen'),
         ),
-        body: Column(
+        body: ListView(
           children: [
             Padding(
               padding: EdgeInsets.all(padding),
@@ -69,3 +69,5 @@ class FilterPlan extends StatelessWidget {
         ));
   }
 }
+
+

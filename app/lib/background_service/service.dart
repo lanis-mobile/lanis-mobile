@@ -2,16 +2,12 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../client/client.dart';
+import '../client/storage.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
-
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-  encryptedSharedPreferences: true,
-);
 
 
 final List<String> keysNotRender = [
@@ -48,7 +44,16 @@ Future<void> performBackgroundFetch() async {
       String messageBody = "";
 
       for (final entry in filteredPlan) {
-        messageBody += "${entry["Stunde"]} Stunde - ${entry["Art"]} - ${entry["Fach"]} - ${entry["Lehrer"]} - ${filter_logic.formatDateString(entry["Tag_en"], entry["Tag"])}\n";
+        final time = "${wochenTag(entry["Tag_en"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
+        final type = entry["Art"] ?? "";
+        final subject = entry["Fach"] ?? "";
+        final teacher = entry["Lehrer"] ?? "";
+        final classInfo = entry["Klasse"] ?? "";
+
+        // Concatenate non-null values with separator "-"
+        final entryText = [time, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
+
+        messageBody += "$entryText\n";
       }
 
       if (messageBody != "") {
@@ -67,13 +72,15 @@ Future<void> performBackgroundFetch() async {
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
+  bool ongoingMessage = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "true") == "true";
+
   var androidDetails = AndroidNotificationDetails(
       'io.github.alessioc42.sphplan', 'SPH-Vertretungsplan',
       channelDescription: "Benachrichtigungen über den Vertretungsplan",
       importance: Importance.high,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
-      ongoing: true, //make notification persistent
+      ongoing: ongoingMessage,
       icon: "@mipmap/ic_launcher");
   var platformDetails = NotificationDetails(android: androidDetails);
   await FlutterLocalNotificationsPlugin()
@@ -87,16 +94,26 @@ String generateUUID(String input) {
 }
 
 Future<void> markMessageAsSent(String uuid) async {
-  await filter_logic.storage.write(
+  await globalStorage.write(
     key: 'background-service-notifications',
-    value: uuid,
-      aOptions: _getAndroidOptions()
+    value: uuid
   );
 }
 
 Future<bool> isMessageAlreadySent(String uuid) async {
   // Read the existing JSON from secure storage
   String storageValue =
-      await filter_logic.storage.read(key: 'background-service-notifications', aOptions: _getAndroidOptions()) ?? '{}';
+      await globalStorage.read(key: 'background-service-notifications') ?? '{}';
   return storageValue == uuid;
+}
+
+String wochenTag(String dateEn) {
+  DateFormat eingabeFormat = DateFormat('yyyy-MM-dd');
+  DateTime zielDatum = eingabeFormat.parse(dateEn);
+
+  // Wochentag auf Deutsch
+  var wochentagFormat = DateFormat.EEEE('de_DE');
+  String wochentag = wochentagFormat.format(zielDatum);
+
+  return wochentag.substring(0, 2);
 }
