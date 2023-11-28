@@ -44,15 +44,14 @@ Future<void> performBackgroundFetch() async {
       String messageBody = "";
 
       for (final entry in filteredPlan) {
-        final day = wochenTag(entry["Tag_en"]);
-        final hour = entry["Stunde"] ?? "";
+        final time = "${wochenTag(entry["Tag_en"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
         final type = entry["Art"] ?? "";
         final subject = entry["Fach"] ?? "";
         final teacher = entry["Lehrer"] ?? "";
         final classInfo = entry["Klasse"] ?? "";
 
         // Concatenate non-null values with separator "-"
-        final entryText = [day, hour, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
+        final entryText = [time, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
 
         messageBody += "$entryText\n";
       }
