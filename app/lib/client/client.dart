@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/client/cryptor.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -27,6 +28,7 @@ class SPHclient {
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
+  late Cryptor cryptor;
 
   final dio = Dio();
   
@@ -103,6 +105,8 @@ class SPHclient {
   }
 
   Future<int> login({userLogin = false}) async {
+    cryptor = cryptor = Cryptor(dio);
+
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -432,6 +436,21 @@ class SPHclient {
     }
 
     debugPrint(result.toString());
+  }
+
+  Future<bool> authenticateWithLanisEncryption() async {
+    return await cryptor.authenticate();
+  }
+
+  bool getEncryptionAuthStatus() {
+    return cryptor.authenticated;
+  }
+
+  String getEncryptionKey() {
+    if (cryptor.authenticated) {
+      return cryptor.key.base64;
+    }
+    return "";
   }
 }
 
