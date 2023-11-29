@@ -12,6 +12,9 @@ fetch("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist").the
             })
         });
 
+        // Sort the result array alphabetically
+        result.sort();
+
         console.log(JSON.stringify(result));
     })
 })

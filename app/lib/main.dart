@@ -103,7 +103,6 @@ class _HomePageState extends State<HomePage> {
           );
         });
 
-    // Replace this with your actual authentication logic
     await client.loadFromStorage();
     await client.prepareDio();
     int loginCode = await client.login();

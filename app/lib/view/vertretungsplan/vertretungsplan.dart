@@ -16,8 +16,15 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   double padding = 10.0;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   final random = Random();
+
+  final CardInfo lastCard = CardInfo(
+      title: const Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
+      body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab."),
+      footer: const Text("")
+  );
 
   @override
   void initState() {
@@ -43,20 +50,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   Future<void> refreshPlan({secondTry = false}) async {
     if (mounted) {
-      //preloader
-      setState(() {
-        cards = [
-          CardInfo(
-              title: const Text("Lade Plan..."),
-              body: const SpinKitRing(
-                size: 80,
-                color: Colors.black,
-              ),
-              footer: const Text("")
-          )
-        ];
-      });
-
       final vPlan = await client.getFullVplan();
       if (vPlan is int) {
         showSnackbar(client.statusCodes[vPlan] ?? "Unbekannter Fehler");
@@ -156,11 +149,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
           }
 
           //card to render always on bottom
-          cards.add(CardInfo(
-            title: const Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
-            body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab."),
-            footer: const Text("")
-          ));
+          cards.add(lastCard);
         });
       }
     }
@@ -170,8 +159,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
+        key: _refreshIndicatorKey,
         onRefresh: refreshPlan,
-        child: ListView.builder(
+        child: cards.isNotEmpty ? ListView.builder(
           itemCount: cards.length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
@@ -191,29 +181,43 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
               ),
             );
           },
+        ) : ListView(
+          children: const [Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(50),
+                    child: Text(
+                        "Ziehe nach unten um den Plan zur Aktualisieren",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22)
+                    ),
+                  ),
+                  Icon(Icons.keyboard_double_arrow_down, size: 60,),
+                ],
+              )
+          ),],
+        )
         ),
-      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => FilterPlan()),
-              );
-              await refreshPlan();
-            },
+            onPressed: () => _refreshIndicatorKey.currentState?.show(),
             heroTag: null,
-            child: const Icon(Icons.filter_alt),
+            child: const Icon(Icons.refresh),
           ),
           const SizedBox(
             height: 10,
           ),
           FloatingActionButton(
-            onPressed: refreshPlan,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FilterPlan()),
+            ),
             heroTag: null,
-            child: const Icon(Icons.refresh),
+            child: const Icon(Icons.filter_alt),
           ),
         ],
       ),
