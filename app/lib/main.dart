@@ -215,25 +215,30 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            ListTile(
-              title: const Text('Vertretungsplan'),
-              selected: _selectedIndex == 0,
-              onTap: () {
-                _onItemTapped(0, "Vertretungsplan");
-                Navigator.pop(context);
-              },
+            Visibility(
+              visible: client.doesSupportFeature("Vertretungsplan"),
+              child: ListTile(
+                title: const Text('Vertretungsplan'),
+                selected: _selectedIndex == 0,
+                onTap: () {
+                  _onItemTapped(0, "Vertretungsplan");
+                  Navigator.pop(context);
+                },
+              )
+            ),
+            Visibility(
+              visible: client.doesSupportFeature("Kalender"),
+              child: ListTile(
+                title: const Text('Kalender'),
+                selected: _selectedIndex == 1,
+                onTap: () {
+                  _onItemTapped(1, "Kalender");
+                  Navigator.pop(context);
+                },
+              )
             ),
             ListTile(
-              title: const Text('Kalender'),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                _onItemTapped(1, "Kalender");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Im Browser Öffnen'),
-              selected: _selectedIndex == -1,
+              title: const Text('Schulportal öffnen'),
               onTap: () {
                 client.getLoginURL().then((response) {
                   if (response is String) {
@@ -252,6 +257,15 @@ class _HomePageState extends State<HomePage> {
                 });
               },
             ),
+            Visibility(
+              visible: false, // client.doesSupportFeature("SchulMoodle")
+              child: ListTile(
+                title: const Text("SchulMoodle öffnen"),
+                onTap: (){
+                  //todo add support for moodle direct login
+                },
+              )
+            )
           ],
         ),
       ),
