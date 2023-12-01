@@ -8,7 +8,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
-import 'package:sph_plan/view/debug/debug.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
@@ -115,6 +114,7 @@ class _HomePageState extends State<HomePage> {
     } else {
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
+      await client.startLanisEncryption();
       _completeLogin();
     }
   }
@@ -123,15 +123,6 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
-    ).then((result){
-      _onItemTapped(0, "");
-    });
-  }
-
-  void openDebugScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const DebugScreen()),
     ).then((result){
       _onItemTapped(0, "");
     });
@@ -181,13 +172,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
           title: const Text("SPH"),
         actions: <IconButton>[
-          if (kReleaseMode == false) ...[
-            IconButton(
-              icon: const Icon(Icons.bug_report),
-              tooltip: 'Debug',
-              onPressed: openDebugScreen,
-            ),
-          ],
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Einstellungen',

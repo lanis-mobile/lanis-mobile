@@ -1,5 +1,6 @@
 // Useful for working with bytes (Uint8List).
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -19,43 +20,49 @@ class Cryptor {
   late final Dio dio;
   Cryptor(this.dio);
 
-  Future<RSAPublicKey> getPublicKey() async {
-    final response = await dio.post(
-      "https://start.schulportal.hessen.de/ajax.php",
-      queryParameters: {"f": "rsaPublicKey"},
-      options: Options(
-        headers: {
-          "Accept": "*/*",
-          "Content-Type":
-          "application/x-www-form-urlencoded; charset=UTF-8",
-          "Sec-Fetch-Dest": "empty",
-          "Sec-Fetch-Mode": "cors",
-          "Sec-Fetch-Site": "same-origin",
-        },
-      ),
-    );
-
-    return encrypt.RSAKeyParser().parse(jsonDecode(response.toString())["publickey"]) as RSAPublicKey;
+  Future<RSAPublicKey?> getPublicKey() async {
+    try {
+      final response = await dio.post(
+        "https://start.schulportal.hessen.de/ajax.php",
+        queryParameters: {"f": "rsaPublicKey"},
+        options: Options(
+          headers: {
+            "Accept": "*/*",
+            "Content-Type":
+            "application/x-www-form-urlencoded; charset=UTF-8",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+          },
+        ),
+      );
+      return encrypt.RSAKeyParser().parse(jsonDecode(response.toString())["publickey"]) as RSAPublicKey;
+    } on (SocketException, DioException) {
+      return null;
+    }
   }
 
-  Future<String> handshake(String encryptedKey) async {
-    final response = await dio.post(
-      "https://start.schulportal.hessen.de/ajax.php",
-      queryParameters: {"f": "rsaHandshake", "s": Random().nextInt(2000)},
-      data: {"key": encryptedKey},
-      options: Options(
-        headers: {
-          "Accept": "*/*",
-          "Content-Type":
-          "application/x-www-form-urlencoded; charset=UTF-8",
-          "Sec-Fetch-Dest": "empty",
-          "Sec-Fetch-Mode": "cors",
-          "Sec-Fetch-Site": "same-origin",
-        },
-      ),
-    );
-
-    return jsonDecode(response.toString())["challenge"];
+  Future<String?> handshake(String encryptedKey) async {
+    try {
+      final response = await dio.post(
+        "https://start.schulportal.hessen.de/ajax.php",
+        queryParameters: {"f": "rsaHandshake", "s": Random().nextInt(2000)},
+        data: {"key": encryptedKey},
+        options: Options(
+          headers: {
+            "Accept": "*/*",
+            "Content-Type":
+            "application/x-www-form-urlencoded; charset=UTF-8",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+          },
+        ),
+      );
+      return jsonDecode(response.toString())["challenge"];
+    } on (SocketException, DioException) {
+      return null;
+    }
   }
 
   encrypt.Key generateKey() {
@@ -81,7 +88,8 @@ class Cryptor {
     return base64.encode(decryptedChallenge) == base64.encode(key.bytes);
   }
 
-  // This is a dart implementation of OpenSSL's EVP_BytesToKey.
+  // Lanis uses jCryption, a old unmaintained js encryption library, which uses CryptoJS.
+  // This is a dart implementation of OpenSSL's EVP_BytesToKey, which CryptoJS uses.
   // https://www.openssl.org/docs/man3.1/man3/EVP_BytesToKey.html
   // NOTE: This is deprecated and should only be used for compatibility.
   // https://gist.github.com/suehok/dfc4a6989537e4a3ba4058669289737f
@@ -126,19 +134,31 @@ class Cryptor {
     return aes.decryptBytes(encryptedData, iv: derivedIV);
   }
 
-  Future<bool> authenticate() async {
+  // Use this to start allowing Lanis to return encrypted messages.
+  Future<int> start() async {
     key = generateKey();
 
-    final encryptedKey = encryptKey(await getPublicKey());
+    final publicKey = await getPublicKey();
+
+    if (publicKey == null) {
+      return -3;
+    }
+
+    final encryptedKey = encryptKey(publicKey);
 
     final challenge = await handshake(base64.encode(encryptedKey));
+
+    if (challenge == null) {
+      return -3;
+    }
 
     final equal = checkForEqualEncryption(base64.decode(challenge));
 
     if (equal) {
       authenticated = true;
+      return 0;
     }
 
-    return equal;
+    return -6;
   }
 }
