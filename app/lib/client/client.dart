@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dart_date/dart_date.dart';
@@ -128,11 +129,11 @@ class SPHclient {
           await dio.get(location2);
           
           if (userLogin) {
-            int encryptionStatusName = await startLanisEncryption();
-            debugPrint("Encryption connected with status code: $encryptionStatusName");
-
             await fetchRedundantData();
           }
+
+          int encryptionStatusName = await startLanisEncryption();
+          debugPrint("Encryption connected with status code: $encryptionStatusName");
 
           return 0;
         } else {
@@ -410,16 +411,22 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
+    var result = {
+      "current_entrys": []
+    };
+
+
     final response = await dio.get(
         "https://start.schulportal.hessen.de/meinunterricht.php");
     var document = parse(response.data);
-    var schoolClasses = document.querySelectorAll("tr.printable");
-    var result = [];
 
+
+    //Aktuelle Einträge
+    var schoolClasses = document.querySelectorAll("tr.printable");
     for (var schoolClass in schoolClasses) {
       var teacher = schoolClass.getElementsByClassName("teacher")[0];
 
-      result.add({
+      result["current_entrys"]?.add({
         "name": schoolClass.querySelector(".name")?.text,
         "teacher": {
           "short": teacher.getElementsByClassName("btn btn-primary dropdown-toggle btn-xs")[0].text,
@@ -436,7 +443,10 @@ class SPHclient {
       });
     }
 
-    debugPrint(result.toString());
+    var val = document.getElementById("anwesend")?.getElementsByTagName("encoded")[0].text;
+
+    debugPrint("encrypted: $val");
+    debugPrint("decrypted: ${cryptor.decryptString(val!)}");
   }
 
   Future<int> startLanisEncryption() async {

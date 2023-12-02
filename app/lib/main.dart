@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
+import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
@@ -147,6 +148,7 @@ class _HomePageState extends State<HomePage> {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
+      const MeinUnterrichtAnsicht()
     ];
   }
 
@@ -237,6 +239,17 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pop(context);
                 },
               )
+            ),
+            Visibility(
+                visible: client.doesSupportFeature("mein Unterricht"),
+                child: ListTile(
+                  title: const Text('mein Unterricht'),
+                  selected: _selectedIndex == 2,
+                  onTap: () {
+                    _onItemTapped(2, "mein Unterricht");
+                    Navigator.pop(context);
+                  },
+                )
             ),
             ListTile(
               title: const Text('Schulportal öffnen'),

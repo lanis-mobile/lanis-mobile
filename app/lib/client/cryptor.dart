@@ -161,4 +161,8 @@ class Cryptor {
 
     return -6;
   }
+
+  String decryptString(String encryptedString) {
+    return base64.encode(decrypt(base64.decode(encryptedString)));
+  }
 }
