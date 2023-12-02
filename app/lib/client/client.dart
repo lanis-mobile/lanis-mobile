@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/client/cryptor.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -17,7 +18,8 @@ class SPHclient {
     -2: "Nicht alle Anmeldedaten angegeben",
     -3: "Netzwerkfehler",
     -4: "Unbekannter Fehler! Bist du eingeloggt?",
-    -5: "Keine Erlaubnis"
+    -5: "Keine Erlaubnis",
+    -6: "Verschlüsselungsüberprüfung fehlgeschlagen"
   };
 
   String username = "";
@@ -27,9 +29,9 @@ class SPHclient {
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
-
   final dio = Dio();
-  
+  late Cryptor cryptor = Cryptor(dio);
+
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
     final String appDocPath = appDocDir.path;
@@ -126,6 +128,9 @@ class SPHclient {
           await dio.get(location2);
           
           if (userLogin) {
+            int encryptionStatusName = await startLanisEncryption();
+            debugPrint("Encryption connected with status code: $encryptionStatusName");
+
             await fetchRedundantData();
           }
 
@@ -432,6 +437,14 @@ class SPHclient {
     }
 
     debugPrint(result.toString());
+  }
+
+  Future<int> startLanisEncryption() async {
+    return await cryptor.start();
+  }
+
+  bool getEncryptionAuthStatus() {
+    return cryptor.authenticated;
   }
 }
 
