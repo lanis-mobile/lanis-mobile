@@ -128,11 +128,11 @@ class SPHclient {
           await dio.get(location2);
           
           if (userLogin) {
-            int encryptionStatusName = await startLanisEncryption();
-            debugPrint("Encryption connected with status code: $encryptionStatusName");
-
             await fetchRedundantData();
           }
+
+          int encryptionStatusName = await startLanisEncryption();
+          debugPrint("Encryption connected with status code: $encryptionStatusName");
 
           return 0;
         } else {
