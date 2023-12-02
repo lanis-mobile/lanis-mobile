@@ -439,6 +439,42 @@ class SPHclient {
     debugPrint(result.toString());
   }
 
+  Future<dynamic> getConversationsOverview() async {
+    try {
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          data: {"a": "headers", "getType": "visibleOnly", "last": "0"},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          ));
+
+      final Map<String, dynamic> encryptedJSON = jsonDecode(response.toString());
+
+      final String? decryptedConversations = cryptor.decryptString(encryptedJSON["rows"]);
+
+      if (decryptedConversations == null) {
+        return -4;
+        // unknown error (encrypted isn't salted)
+      }
+
+      return jsonDecode(decryptedConversations);
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
+    } catch (e) {
+      return -4;
+      // unknown error
+    }
+  }
+
   Future<int> startLanisEncryption() async {
     return await cryptor.start();
   }
