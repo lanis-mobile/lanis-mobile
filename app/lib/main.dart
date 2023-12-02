@@ -114,7 +114,6 @@ class _HomePageState extends State<HomePage> {
     } else {
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
-      await client.startLanisEncryption();
       _completeLogin();
     }
   }
