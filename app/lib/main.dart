@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
 
     await client.loadFromStorage();
     await client.prepareDio();
-    int loginCode = await client.login();
+    int loginCode = await client.login(startEncryption: true);
     if (loginCode != 0) {
       _selectedIndex = 0;
       _completeLogin();

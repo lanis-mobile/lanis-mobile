@@ -105,7 +105,7 @@ class SPHclient {
     };
   }
 
-  Future<int> login({userLogin = false}) async {
+  Future<int> login({userLogin = false, startEncryption = false}) async {
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -132,8 +132,10 @@ class SPHclient {
             await fetchRedundantData();
           }
 
-          int encryptionStatusName = await startLanisEncryption();
-          debugPrint("Encryption connected with status code: $encryptionStatusName");
+          if (startEncryption) {
+            int encryptionStatusName = await startLanisEncryption();
+            debugPrint("Encryption connected with status code: $encryptionStatusName");
+          }
 
           return 0;
         } else {
@@ -412,13 +414,15 @@ class SPHclient {
 
   Future<dynamic> getMeinUnterrichtOverview() async {
     var result = {
-      "current_entrys": []
+      "aktuell": [],
+      "anwesenheiten": []
     };
 
 
     final response = await dio.get(
         "https://start.schulportal.hessen.de/meinunterricht.php");
-    var document = parse(response.data);
+    var encryptedHTML = cryptor.decryptEncodedTags(response.data);
+    var document = parse(encryptedHTML);
 
 
     //Aktuelle Einträge
@@ -443,10 +447,38 @@ class SPHclient {
       });
     }
 
-    var val = document.getElementById("anwesend")?.getElementsByTagName("encoded")[0].text;
 
-    debugPrint("encrypted: $val");
-    debugPrint("decrypted: ${cryptor.decryptString(val!)}");
+    //Anwesenheiten
+    var anwesendDOM = document.getElementById("anwesend");
+    (){
+      var thead = anwesendDOM?.querySelector("thead>tr");
+      var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
+
+      var keys = [];
+      thead?.children.forEach((element) => keys.add(element.text));
+
+      tbody?.forEach((elem) {
+        var textElements = [];
+        for (var element in elem.children) {
+          element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+          textElements.add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
+        }
+
+        var rowEntry = {};
+
+        for (int i = 0; i < keys.length; i++) {
+          var key = keys[i];
+          var value = textElements[i];
+
+          rowEntry[key] = value;
+        }
+
+        result["anwesenheiten"]?.add(rowEntry);
+        debugPrint(rowEntry.toString());
+      });
+
+    }();
+
   }
 
   Future<int> startLanisEncryption() async {

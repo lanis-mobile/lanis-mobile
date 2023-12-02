@@ -33,7 +33,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     });
 
     await client.overwriteCredits(username, password, schoolID, dropDownSelectedItem);
-    var loginCode = await client.login(userLogin: true);
+    var loginCode = await client.login(userLogin: true, startEncryption: true);
 
     debugPrint("Login statuscode: ${loginCode.toString()}");
 
