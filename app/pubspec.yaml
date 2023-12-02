@@ -44,13 +44,12 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   dropdown_search: ^5.0.6
   flutter_local_notifications: ^16.1.0
+  crypto: ^3.0.3
   workmanager: ^0.5.2
   permission_handler: ^11.0.1
   table_calendar: ^3.0.9
   adaptive_theme: ^3.4.1
   package_info_plus: ^4.2.0
-  encrypt: ^5.0.3
-  pointycastle: ^3.7.3
 
 
 flutter_launcher_icons:
