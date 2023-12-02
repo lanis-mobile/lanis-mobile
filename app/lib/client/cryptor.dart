@@ -85,7 +85,7 @@ class Cryptor {
 
   bool checkForEqualEncryption(Uint8List challenge) {
     final decryptedChallenge = decrypt(challenge);
-    return base64.encode(decryptedChallenge) == base64.encode(key.bytes);
+    return base64.encode(decryptedChallenge!) == base64.encode(key.bytes);
   }
 
   // Lanis uses jCryption, a old unmaintained js encryption library, which uses CryptoJS.
@@ -116,10 +116,13 @@ class Cryptor {
     return concatenatedHashes;
   }
 
-  List<int> decrypt(Uint8List encryptedDataWithSalt) {
+  List<int>? decrypt(Uint8List encryptedDataWithSalt) {
     final encryptedData = encrypt.Encrypted.fromBase64(base64.encode(encryptedDataWithSalt.sublist(16)));
 
-    // 0 to 8 is "Salted__" in ASCII.
+    // 0 to 8 is "Salted__" in ASCII. If this doesn't exists then something is wrong.
+    if ("Salted__" != utf8.decode(encryptedDataWithSalt.sublist(0, 8))) {
+      return null;
+    }
 
     final salt = encryptedDataWithSalt.sublist(8, 16);
 
@@ -132,6 +135,17 @@ class Cryptor {
     final aes = encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
     
     return aes.decryptBytes(encryptedData, iv: derivedIV);
+  }
+
+  // Use this to get a readable string for humans™. If you get null then something is wrong.
+  String? decryptString(String encryptedData) {
+    final decryptedBytes = decrypt(base64.decode(encryptedData));
+
+    if (decryptedBytes != null) {
+      return utf8.decode(decryptedBytes);
+    }
+
+    return null;
   }
 
   // Use this to start allowing Lanis to return encrypted messages.
