@@ -13,9 +13,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
   int _currentIndex = 0;
 
   @override
-  void initState() {
+  void initState() async {
     super.initState();
-    client.getMeinUnterrichtOverview();
+    //client.getMeinUnterrichtOverview();
   }
 
   Widget _buildBody() {

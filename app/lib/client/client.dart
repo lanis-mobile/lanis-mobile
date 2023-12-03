@@ -413,76 +413,99 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
-    var result = {
-      "aktuell": [],
-      "anwesenheiten": []
-    };
+    try {
+      var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
+      final response = await dio
+          .get("https://start.schulportal.hessen.de/meinunterricht.php");
+      var encryptedHTML = cryptor.decryptEncodedTags(response.data);
+      var document = parse(encryptedHTML);
 
-    final response = await dio.get(
-        "https://start.schulportal.hessen.de/meinunterricht.php");
-    var encryptedHTML = cryptor.decryptEncodedTags(response.data);
-    var document = parse(encryptedHTML);
+      //Aktuelle Einträge
+      () {
+        var schoolClasses = document.querySelectorAll("tr.printable");
+        for (var schoolClass in schoolClasses) {
+          var teacher = schoolClass.getElementsByClassName("teacher")[0];
 
-
-    //Aktuelle Einträge
-    var schoolClasses = document.querySelectorAll("tr.printable");
-    for (var schoolClass in schoolClasses) {
-      var teacher = schoolClass.getElementsByClassName("teacher")[0];
-
-      result["current_entrys"]?.add({
-        "name": schoolClass.querySelector(".name")?.text,
-        "teacher": {
-          "short": teacher.getElementsByClassName("btn btn-primary dropdown-toggle btn-xs")[0].text,
-          "name": teacher.getElementsByClassName("dropdown-menu")[0].text
-        },
-        "thema": {
-          "title": schoolClass.getElementsByClassName("thema")[0].text,
-          "date": schoolClass.getElementsByClassName("datum")[0].text
-        },
-        "data": {
-          "entry": schoolClass.attributes["data-entry"],
-          "book": schoolClass.attributes["data-entry"]
+          result["current_entrys"]?.add({
+            "name": schoolClass.querySelector(".name")?.text,
+            "teacher": {
+              "short": teacher
+                  .getElementsByClassName(
+                      "btn btn-primary dropdown-toggle btn-xs")[0]
+                  .text,
+              "name": teacher.getElementsByClassName("dropdown-menu")[0].text
+            },
+            "thema": {
+              "title": schoolClass.getElementsByClassName("thema")[0].text,
+              "date": schoolClass.getElementsByClassName("datum")[0].text
+            },
+            "data": {
+              "entry": schoolClass.attributes["data-entry"],
+              "book": schoolClass.attributes["data-entry"]
+            }
+          });
         }
-      });
+      }();
+
+      //Anwesenheiten
+      var anwesendDOM = document.getElementById("anwesend");
+      () {
+        var thead = anwesendDOM?.querySelector("thead>tr");
+        var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
+
+        var keys = [];
+        thead?.children.forEach((element) => keys.add(element.text));
+
+        tbody?.forEach((elem) {
+          var textElements = [];
+          for (var element in elem.children) {
+            element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+            textElements
+                .add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
+          }
+
+          var rowEntry = {};
+
+          for (int i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var value = textElements[i];
+
+            rowEntry[key] = value;
+          }
+
+          //get url of course
+          var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
+          rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
+
+          result["anwesenheiten"]?.add(rowEntry);
+        });
+      }();
+
+      //Kursmappen
+      var kursmappenDOM = document.getElementById("mappen");
+      () {
+        var parsedMappen = [];
+
+        var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
+
+        for (var mappe in mappen!) {
+          parsedMappen.add({
+            "title": mappe.getElementsByTagName("h2")[0].text,
+            "teacher": mappe
+                .querySelector("div.btn-group>button")
+                ?.attributes["title"],
+            "_courseURL":
+                mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
+          });
+        }
+        result["kursmappen"] = parsedMappen;
+      }();
+
+      return result;
+    } catch (e) {
+      return -4;
     }
-
-
-    //Anwesenheiten
-    var anwesendDOM = document.getElementById("anwesend");
-    (){
-      var thead = anwesendDOM?.querySelector("thead>tr");
-      var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
-
-      var keys = [];
-      thead?.children.forEach((element) => keys.add(element.text));
-
-      tbody?.forEach((elem) {
-        var textElements = [];
-        for (var element in elem.children) {
-          element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
-          textElements.add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
-        }
-
-        var rowEntry = {};
-
-        for (int i = 0; i < keys.length; i++) {
-          var key = keys[i];
-          var value = textElements[i];
-
-          rowEntry[key] = value;
-        }
-
-        //get url of course
-        var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
-
-
-        result["anwesenheiten"]?.add(rowEntry);
-        debugPrint(rowEntry.toString());
-      });
-
-    }();
-
   }
 
   Future<int> startLanisEncryption() async {
