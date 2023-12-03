@@ -473,6 +473,10 @@ class SPHclient {
           rowEntry[key] = value;
         }
 
+        //get url of course
+        var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
+
+
         result["anwesenheiten"]?.add(rowEntry);
         debugPrint(rowEntry.toString());
       });
