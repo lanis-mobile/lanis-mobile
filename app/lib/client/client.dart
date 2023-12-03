@@ -19,7 +19,8 @@ class SPHclient {
     -3: "Netzwerkfehler",
     -4: "Unbekannter Fehler! Bist du eingeloggt?",
     -5: "Keine Erlaubnis",
-    -6: "Verschlüsselungsüberprüfung fehlgeschlagen"
+    -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
+    -7: "Unbekannter Fehler! Antwort war nicht salted."
   };
 
   String username = "";
@@ -461,7 +462,7 @@ class SPHclient {
       final String? decryptedConversations = cryptor.decryptString(encryptedJSON["rows"]);
 
       if (decryptedConversations == null) {
-        return -4;
+        return -7;
         // unknown error (encrypted isn't salted)
       }
 
@@ -472,6 +473,43 @@ class SPHclient {
     } catch (e) {
       return -4;
       // unknown error
+    }
+  }
+
+  Future<dynamic> getSingleConversation(String uniqueID) async {
+    try {
+      final encryptedUniqueID = cryptor.encryptString(uniqueID);
+      print("encrypted: $encryptedUniqueID");
+
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          queryParameters: {"a": "read", "msg": uniqueID},
+          data: {"a": "read", "uniqid": encryptedUniqueID},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          ));
+
+      final Map<String, dynamic> encryptedJSON = jsonDecode(response.toString());
+
+      final String? decryptedConversations = cryptor.decryptString(encryptedJSON["message"]);
+
+      if (decryptedConversations == null) {
+        return -7;
+        // unknown error (encrypted isn't salted)
+      }
+
+      return jsonDecode(decryptedConversations);
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
     }
   }
 

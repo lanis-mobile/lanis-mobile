@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/view/conversations/detailed_conversation.dart';
 
 import '../../client/client.dart';
 
@@ -11,12 +12,6 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
   double padding = 10.0;
-
-  final CardInfo lastCard = CardInfo(
-      title: const Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 21)),
-      body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab."),
-      footer: const Text("")
-  );
 
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
     if (mounted) {
@@ -32,135 +27,140 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
     }
   }
 
-  Future<List<CardInfo>?> getConversationOverview() async {
-    final conversations = await client
-        .getConversationsOverview();
-    if (conversations is int) {
-      showSnackbar(client.statusCodes[conversations] ?? "Unbekannter Fehler");
-      return null;
-      // TODO: ADD SECOND TRY
-    } else {
-      // TODO: ADD FILTER
+  // Borrowed from vertretungsplan.dart
+  Widget infoCard = const ListTile(
+    title: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          flex: 3,
+          child: Text(
+            "Keine weiteren Einträge!",
+            style: TextStyle(fontSize: 21),
+          ),
+        ),
+      ],
+    ),
+    subtitle: Text(
+      "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab.",
+    ),
+  );
 
-      List<CardInfo> cards = [];
-
-      for (final conversation in conversations) {
-        cards.add(
-            CardInfo(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      flex: 3,
-                      child: Text(
-                        conversation["Betreff"] ?? "",
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 21),
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        conversation["kuerzel"] ?? "",
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 17),
-                      ),
-                    ),
-                  ],
-                ),
-                footer: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      conversation["Datum"] ?? "", // TODO: maybe convert the date later
-                    )
-                  ],
-                )
-            )
-        );
-      }
-
-      cards.add(lastCard);
-
-      return cards;
-    }
+  Widget getConversationWidget(Map<String, dynamic> conversation) {
+    return ListTile(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            flex: 3,
+            child: Text(
+              conversation["Betreff"] ?? "",
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 21),
+            ),
+          ),
+          Flexible(
+            child: Text(
+              conversation["kuerzel"] ?? "",
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 17),
+            ),
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                conversation["Datum"] ??
+                    "", // TODO: maybe convert the date later
+              )
+            ],
+          ),
+        ],
+      ),
+    );
   }
+
+  final Future<dynamic> _getConversationOverview =
+  client.getConversationsOverview();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-        future: getConversationOverview(),
+        future: _getConversationOverview,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.waiting) {
-            // Error content
-            if (snapshot.data == null) {
-              return const Center(
+            // If a error happened
+            if (snapshot.data is int) {
+              return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.warning, size: 60,),
-                      Padding(
+                      const Icon(
+                        Icons.warning,
+                        size: 60,
+                      ),
+                      const Padding(
                         padding: EdgeInsets.all(50),
                         child: Text(
                             "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 22)
-                        ),
+                            style: TextStyle(fontSize: 22)),
                       ),
+                      Text(
+                          "Problem: ${client.statusCodes[snapshot.data] ??
+                              "Unbekannter Fehler"}")
                     ],
-                  )
-              );
+                  ));
             }
-            // Content
+
+            // Successful content
             return ListView.builder(
-              itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding:
-                    EdgeInsets.only(left: padding, right: padding, bottom: padding),
-                    child: Card(
-                      child: InkWell(
+              itemCount: snapshot.data.length + 1,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                      left: padding, right: padding, bottom: padding),
+                  child: Card(
+                    child: InkWell(
                         onTap: () {
-                          showSnackbar("Lanis hat Gnade mit dir.");
+                          if (index == snapshot.data.length) {
+                            showSnackbar("(:");
+                          } else {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        DetailedConversationAnsicht(
+                                          uniqueID: snapshot.data[index]
+                                          ["Uniquid"], // nice typo Lanis
+                                          title: snapshot.data[index]
+                                          ["Betreff"],
+                                        )));
+                          }
                         },
-                        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: ListTile(
-                          title: snapshot.data![index].title,
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (snapshot.data![index].body != null) ...[snapshot.data![index].body!],
-                              snapshot.data![index].footer,
-                            ],
-                          ),
-                        ),
-                      )
-                    ),
-                  );
-                }
+                        customBorder: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        child: index == snapshot.data.length
+                            ? infoCard
+                            : getConversationWidget(snapshot.data[index])),
+                  ),
+                );
+              },
             );
           }
           // Waiting content
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            )
-          );
+              body: Center(
+                child: CircularProgressIndicator(),
+              ));
         },
       ),
     );
   }
-}
-
-// Borrowed from vertretungsplan.dart
-class CardInfo {
-  final Widget title;
-  final Widget footer;
-  final Widget? body;
-
-  CardInfo({
-    required this.title,
-    required this.footer,
-    this.body
-  });
 }

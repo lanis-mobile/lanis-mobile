@@ -116,6 +116,24 @@ class Cryptor {
     return concatenatedHashes;
   }
 
+  String encryptString(String decryptedData) {
+    final salt = encrypt.SecureRandom(8).bytes;
+
+    final derivedKeyAndIV = bytesToKeys(salt);
+
+    final derivedKey = encrypt.Key(derivedKeyAndIV.sublist(0, 32));
+    final derivedIV = encrypt.IV(derivedKeyAndIV.sublist(32, 48));
+
+    // CBC mode isn't the best anymore.
+    final aes = encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: "PKCS7"));
+
+    final encryptedData = aes.encrypt(decryptedData, iv: derivedIV).bytes;
+
+    final finalEncrypted = utf8.encode("Salted__") + salt + encryptedData;
+
+    return base64.encode(finalEncrypted);
+  }
+
   List<int>? decrypt(Uint8List encryptedDataWithSalt) {
     final encryptedData = encrypt.Encrypted.fromBase64(base64.encode(encryptedDataWithSalt.sublist(16)));
 
@@ -133,7 +151,7 @@ class Cryptor {
 
     // CBC mode isn't the best anymore.
     final aes = encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
-    
+
     return aes.decryptBytes(encryptedData, iv: derivedIV);
   }
 
