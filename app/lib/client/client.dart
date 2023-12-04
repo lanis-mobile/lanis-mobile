@@ -427,7 +427,7 @@ class SPHclient {
         for (var schoolClass in schoolClasses) {
           var teacher = schoolClass.getElementsByClassName("teacher")[0];
 
-          result["current_entrys"]?.add({
+          result["aktuell"]?.add({
             "name": schoolClass.querySelector(".name")?.text,
             "teacher": {
               "short": teacher
