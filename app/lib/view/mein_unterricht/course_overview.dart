@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../../client/client.dart';
 
@@ -13,8 +15,7 @@ class CourseOverviewAnsicht extends StatefulWidget {
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   int _currentIndex = 0;
   bool loading = false;
-  String gURL = "";
-  dynamic data = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": []};
+  dynamic data = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": [], "name":["Lade..."]};
 
   @override
   void initState() {
@@ -24,8 +25,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
 
   Future<void> _loadData() async {
     String url = widget.dataFetchURL;
-    //load data
-    gURL = url;
+    debugPrint(url);
+    data = await client.getMeinUnterrichtCourseView(url);
 
     loading = false;
     setState(() {});
@@ -34,15 +35,29 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   Widget _buildBody() {
     switch (_currentIndex) {
       case 0: // historie
-        return Text(gURL);
+        return ListView.builder(
+          itemCount: data["historie"].length,
+          itemBuilder: (context, index){
+            return Card(
+              child: ListTile(
+                title: Text(data["historie"][index]["title"]),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data["historie"][index]["markup"] ?? ""),
+                    Text(data["historie"][index]["presence"], style: const TextStyle(fontWeight: FontWeight.bold),),
+                    Text(data["historie"][index]["time"], style: const TextStyle(fontStyle: FontStyle.italic),)
+                  ],
+                ),
+              ),
+            );
+          });
       case 1: // leistungen
-        return Text(gURL);
-      case 2: // leistungskontrollen
-        return Text(gURL);
-      case 3: // Anwesenheiten
-        return Text(gURL);
+        return Text("nothing");
+      case 2: //anwesenheiten
+        return Text("nothing²");
       default:
-        return Text(gURL);
+        return const Text("nothing³");
     }
   }
 
@@ -57,7 +72,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     return Scaffold(
       body: _buildBody(),
       appBar: AppBar(
-        title: Text("kursname"),
+        title: Text(data["name"][0]),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

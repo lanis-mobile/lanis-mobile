@@ -514,6 +514,54 @@ class SPHclient {
     }
   }
 
+  Future<dynamic> getMeinUnterrichtCourseView(String url) async {
+    try {
+      var result = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": [], "name": ["name"]};
+
+      final response = await dio
+          .get("https://start.schulportal.hessen.de/$url");
+      var encryptedHTML = cryptor.decryptEncodedTags(response.data);
+      var document = parse(encryptedHTML);
+
+      //course name
+      var heading = document.getElementById("content")?.querySelector("h1");
+      heading?.children[0].innerHtml = "";
+      result["name"] = [heading?.text.replaceAll("\n", "").replaceAll("  ", "")];
+
+      //historie
+      (){
+        var historySection = document.getElementById("history");
+        var tableRows = historySection?.querySelectorAll("table>tbody>tr");
+
+        tableRows?.forEach((tableRow) {
+          tableRow.children[2].querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+
+          List<String> markups = [];
+
+          tableRow.children[1].querySelectorAll("span.markup").forEach((element) {
+            String text = element.text;
+            if (text.startsWith(" ")) {
+              markups.add(text.substring(1));
+            } else {
+              markups.add(text);
+            }
+
+          });
+
+          result["historie"]?.add({
+            "time": tableRow.children[0].text.replaceAll(" ", "").replaceAll("\n", " "),
+            "title": tableRow.children[1].querySelector("big>b")?.text,
+            "markup": markups.join("\n\n"),
+            "presence": tableRow.children[2].text.replaceAll("\n", "").replaceAll("  ", "")
+          });
+        });
+      }();
+      return result;
+    } catch (e) {
+      return -4;
+    }
+  }
+  
   Future<int> startLanisEncryption() async {
     return await cryptor.start();
   }
