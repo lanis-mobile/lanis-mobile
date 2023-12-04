@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import '../../client/client.dart';
+import 'course_overview.dart';
 
 class MeinUnterrichtAnsicht extends StatefulWidget {
   const MeinUnterrichtAnsicht({Key? key}) : super(key: key);
@@ -22,9 +21,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
   }
 
   Future<void> _loadData() async {
-    debugPrint("loading data...");
     data = await client.getMeinUnterrichtOverview();
-    debugPrint(jsonEncode(data["anwesenheiten"]));
     loading = false;
     setState(() {});
   }
@@ -52,6 +49,12 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
                     ),
                   ],
                 ),
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["aktuell"][index]["_courseURL"],)),
+                  );
+                },
               ),
             );
           },
@@ -64,6 +67,12 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
               child: ListTile(
                 title: Text(data["kursmappen"][index]["title"]),
                 subtitle: Text(data["kursmappen"][index]["teacher"]),
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["kursmappen"][index]["_courseURL"],)),
+                  );
+                },
               ),
             );
           },
@@ -96,6 +105,12 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: rowChildren,
                 ),
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["anwesenheiten"][index]["_courseURL"],)),
+                  );
+                },
               ),
             );
           },

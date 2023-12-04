@@ -443,7 +443,8 @@ class SPHclient {
             "data": {
               "entry": schoolClass.attributes["data-entry"],
               "book": schoolClass.attributes["data-entry"]
-            }
+            },
+            "_courseURL": schoolClass.querySelector("td>h3>a")?.attributes["href"]
           });
         }
       }();
@@ -459,10 +460,15 @@ class SPHclient {
 
         tbody?.forEach((elem) {
           var textElements = [];
-          for (var element in elem.children) {
+          for (var i = 0; i< elem.children.length;i++) {
+            var element = elem.children[i];
             element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
-            textElements
-                .add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
+
+            if (keys[i] != "Kurs") {
+              textElements.add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
+            } else {
+              textElements.add(element.text);
+            }
           }
 
           var rowEntry = {};
