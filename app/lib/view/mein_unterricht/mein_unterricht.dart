@@ -12,6 +12,7 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
   int _currentIndex = 0;
+  bool loading = true;
   dynamic data = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
   @override
@@ -24,16 +25,11 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
     debugPrint("loading data...");
     data = await client.getMeinUnterrichtOverview();
     debugPrint(jsonEncode(data["anwesenheiten"]));
+    loading = false;
     setState(() {});
   }
 
   Widget _buildBody() {
-    if (data["aktuell"] == [] && data["anwesenheiten"] == [] && data["kursmappen"] == []) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
     switch (_currentIndex) {
       case 0: // Aktuelle Einträge
         return ListView.builder(
@@ -111,6 +107,12 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Scaffold(
       body: _buildBody(),
       bottomNavigationBar: BottomNavigationBar(
