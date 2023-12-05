@@ -130,24 +130,27 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
 
     return Scaffold(
       body: _buildBody(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (int index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.list),
+            selectedIcon: Icon(Icons.list_outlined),
             label: 'Aktuelle Einträge',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
+          NavigationDestination(
+            icon: Icon(Icons.folder_copy),
+            selectedIcon: Icon(Icons.folder_copy_outlined),
             label: 'Kursmappen',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.calendar_today),
+            selectedIcon: Icon(Icons.calendar_today_outlined),
             label: 'Anwesenheiten',
           ),
         ],

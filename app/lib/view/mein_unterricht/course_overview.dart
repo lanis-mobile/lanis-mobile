@@ -76,24 +76,27 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       appBar: AppBar(
         title: Text(data["name"][0]),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.history),
+            selectedIcon: Icon(Icons.history_outlined),
             label: 'Historie',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star_border),
+          NavigationDestination(
+            icon: Icon(Icons.star),
+            selectedIcon: Icon(Icons.star_outline),
             label: 'Leistungen',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.list),
+            selectedIcon: Icon(Icons.list_outlined),
             label: 'Anwesenheiten',
           )
         ],
