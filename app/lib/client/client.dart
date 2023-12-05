@@ -413,115 +413,158 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
+    var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
+
+    final response = await dio
+        .get("https://start.schulportal.hessen.de/meinunterricht.php");
+    var encryptedHTML = cryptor.decryptEncodedTags(response.data);
+    var document = parse(encryptedHTML);
+
+    //Aktuelle Einträge
+        () {
+      var schoolClasses = document.querySelectorAll("tr.printable");
+      for (var schoolClass in schoolClasses) {
+        var teacher = schoolClass.getElementsByClassName("teacher")[0];
+
+        result["aktuell"]?.add({
+          "name": schoolClass
+              .querySelector(".name")
+              ?.text,
+          "teacher": {
+            "short": teacher
+                .getElementsByClassName(
+                "btn btn-primary dropdown-toggle btn-xs")[0]
+                .text,
+            "name": teacher.getElementsByClassName("dropdown-menu")[0].text
+          },
+          "thema": {
+            "title": schoolClass.getElementsByClassName("thema")[0].text,
+            "date": schoolClass.getElementsByClassName("datum")[0].text
+          },
+          "data": {
+            "entry": schoolClass.attributes["data-entry"],
+            "book": schoolClass.attributes["data-entry"]
+          },
+          "_courseURL": schoolClass
+              .querySelector("td>h3>a")
+              ?.attributes["href"]
+        });
+      }
+    }();
+
+    //Anwesenheiten
+    var anwesendDOM = document.getElementById("anwesend");
+        () {
+      var thead = anwesendDOM?.querySelector("thead>tr");
+      var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
+
+      var keys = [];
+      thead?.children.forEach((element) => keys.add(element.text));
+
+      tbody?.forEach((elem) {
+        var textElements = [];
+        for (var i = 0; i < elem.children.length; i++) {
+          var element = elem.children[i];
+          element
+              .querySelector("div.hidden.hidden_encoded")
+              ?.innerHtml = "";
+
+          if (keys[i] != "Kurs") {
+            textElements.add(
+                element.text.replaceAll(" ", "").replaceAll("\n", ""));
+          } else {
+            textElements.add(element.text);
+          }
+        }
+
+        var rowEntry = {};
+
+        for (int i = 0; i < keys.length; i++) {
+          var key = keys[i];
+          var value = textElements[i];
+
+          rowEntry[key] = value;
+        }
+
+        //get url of course
+        var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
+        rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
+
+        result["anwesenheiten"]?.add(rowEntry);
+      });
+    }();
+
+    //Kursmappen
+    var kursmappenDOM = document.getElementById("mappen");
+        () {
+      var parsedMappen = [];
+
+      var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
+
+      for (var mappe in mappen!) {
+        parsedMappen.add({
+          "title": mappe.getElementsByTagName("h2")[0].text,
+          "teacher": mappe
+              .querySelector("div.btn-group>button")
+              ?.attributes["title"],
+          "_courseURL":
+          mappe
+              .querySelector("a.btn.btn-primary")
+              ?.attributes["href"]
+        });
+      }
+      result["kursmappen"] = parsedMappen;
+    }();
+    return result;
+
+  }
+
+  Future<dynamic> getMeinUnterrichtCourseView(String url) async {
     try {
-      var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
+      var result = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": [], "name": ["name"]};
 
       final response = await dio
-          .get("https://start.schulportal.hessen.de/meinunterricht.php");
+          .get("https://start.schulportal.hessen.de/$url");
       var encryptedHTML = cryptor.decryptEncodedTags(response.data);
       var document = parse(encryptedHTML);
 
-      //Aktuelle Einträge
-          () {
-        var schoolClasses = document.querySelectorAll("tr.printable");
-        for (var schoolClass in schoolClasses) {
-          var teacher = schoolClass.getElementsByClassName("teacher")[0];
+      //course name
+      var heading = document.getElementById("content")?.querySelector("h1");
+      heading?.children[0].innerHtml = "";
+      result["name"] = [heading?.text.replaceAll("\n", "").replaceAll("  ", "")];
 
-          result["aktuell"]?.add({
-            "name": schoolClass
-                .querySelector(".name")
-                ?.text,
-            "teacher": {
-              "short": teacher
-                  .getElementsByClassName(
-                  "btn btn-primary dropdown-toggle btn-xs")[0]
-                  .text,
-              "name": teacher.getElementsByClassName("dropdown-menu")[0].text
-            },
-            "thema": {
-              "title": schoolClass.getElementsByClassName("thema")[0].text,
-              "date": schoolClass.getElementsByClassName("datum")[0].text
-            },
-            "data": {
-              "entry": schoolClass.attributes["data-entry"],
-              "book": schoolClass.attributes["data-entry"]
-            },
-            "_courseURL": schoolClass
-                .querySelector("td>h3>a")
-                ?.attributes["href"]
-          });
-        }
-      }();
+      //historie
+          (){
+        var historySection = document.getElementById("history");
+        var tableRows = historySection?.querySelectorAll("table>tbody>tr");
 
-      //Anwesenheiten
-      var anwesendDOM = document.getElementById("anwesend");
-          () {
-        var thead = anwesendDOM?.querySelector("thead>tr");
-        var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
+        tableRows?.forEach((tableRow) {
+          tableRow.children[2].querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
 
-        var keys = [];
-        thead?.children.forEach((element) => keys.add(element.text));
+          List<String> markups = [];
 
-        tbody?.forEach((elem) {
-          var textElements = [];
-          for (var i = 0; i < elem.children.length; i++) {
-            var element = elem.children[i];
-            element
-                .querySelector("div.hidden.hidden_encoded")
-                ?.innerHtml = "";
-
-            if (keys[i] != "Kurs") {
-              textElements.add(
-                  element.text.replaceAll(" ", "").replaceAll("\n", ""));
+          tableRow.children[1].querySelectorAll("span.markup").forEach((element) {
+            String text = element.text;
+            if (text.startsWith(" ")) {
+              markups.add(text.substring(1));
             } else {
-              textElements.add(element.text);
+              markups.add(text);
             }
-          }
+          });
 
-          var rowEntry = {};
-
-          for (int i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            var value = textElements[i];
-
-            rowEntry[key] = value;
-          }
-
-          //get url of course
-          var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
-          rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
-
-          result["anwesenheiten"]?.add(rowEntry);
+          result["historie"]?.add({
+            "time": tableRow.children[0].text.replaceAll(" ", "").replaceAll("\n", " "),
+            "title": tableRow.children[1].querySelector("big>b")?.text,
+            "markup": markups.join("\n\n"),
+            "presence": tableRow.children[2].text.replaceAll("\n", "").replaceAll("  ", "")
+          });
         });
       }();
-
-      //Kursmappen
-      var kursmappenDOM = document.getElementById("mappen");
-          () {
-        var parsedMappen = [];
-
-        var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
-
-        for (var mappe in mappen!) {
-          parsedMappen.add({
-            "title": mappe.getElementsByTagName("h2")[0].text,
-            "teacher": mappe
-                .querySelector("div.btn-group>button")
-                ?.attributes["title"],
-            "_courseURL":
-            mappe
-                .querySelector("a.btn.btn-primary")
-                ?.attributes["href"]
-          });
-        }
-        result["kursmappen"] = parsedMappen;
-      }();
       return result;
-    }catch (e) {
+    } catch (e) {
       return -4;
     }
   }
-
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
     try {

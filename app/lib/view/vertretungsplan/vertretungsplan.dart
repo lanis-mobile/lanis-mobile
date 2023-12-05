@@ -55,7 +55,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         showSnackbar(client.statusCodes[vPlan] ?? "Unbekannter Fehler");
         if (!secondTry) {
           showSnackbar("versuche Benutzer Anzumelden");
-          int loginCode = await client.login();
+          int loginCode = await client.login(startEncryption: true);
           if (loginCode == 0) {
             refreshPlan(secondTry: true);
           } else {
