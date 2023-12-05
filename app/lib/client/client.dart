@@ -534,7 +534,7 @@ class SPHclient {
       result["name"] = [heading?.text.replaceAll("\n", "").replaceAll("  ", "")];
 
       //historie
-          (){
+      (){
         var historySection = document.getElementById("history");
         var tableRows = historySection?.querySelectorAll("table>tbody>tr");
 
@@ -560,8 +560,27 @@ class SPHclient {
           });
         });
       }();
+      
+      //anwesenheiten
+      (){
+        var presenceSection = document.getElementById("attendanceTable");
+        var tableRows = presenceSection?.querySelectorAll("table>tbody>tr");
 
+        tableRows?.forEach((row) {
+          var encodedElements = row.getElementsByClassName("hidden_encoded");
+          for (var e in encodedElements) {
+            e.innerHtml = "";
+          }
 
+          result["anwesenheiten"]?.add({
+            "type": row.children[0].text,
+            "count": row.children[1].text
+          });
+        });
+      }();
+
+      debugPrint(result["anwesenheiten"].toString());
+      
       return result;
     } catch (e) {
       return -4;

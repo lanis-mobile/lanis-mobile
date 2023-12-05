@@ -25,7 +25,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
 
   Future<void> _loadData() async {
     String url = widget.dataFetchURL;
-    debugPrint(url);
     data = await client.getMeinUnterrichtCourseView(url);
 
     loading = false;
