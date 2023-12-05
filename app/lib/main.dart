@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
+import 'package:sph_plan/view/conversations/conversations.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
@@ -107,7 +108,7 @@ class _HomePageState extends State<HomePage> {
 
     await client.loadFromStorage();
     await client.prepareDio();
-    int loginCode = await client.login(startEncryption: true);
+    int loginCode = await client.login();
     if (loginCode != 0) {
       _selectedIndex = 0;
       _completeLogin();
@@ -148,6 +149,7 @@ class _HomePageState extends State<HomePage> {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
+      const ConversationsAnsicht(),
       const MeinUnterrichtAnsicht()
     ];
   }
@@ -241,12 +243,23 @@ class _HomePageState extends State<HomePage> {
               )
             ),
             Visibility(
+                visible: client.doesSupportFeature("Nachrichten - Beta-Version"),
+                child: ListTile(
+                  title: const Text('Nachrichten'),
+                  selected: _selectedIndex == 2,
+                  onTap: () {
+                    _onItemTapped(2, "Nachrichten");
+                    Navigator.pop(context);
+                  },
+                )
+            ),
+            Visibility(
                 visible: client.doesSupportFeature("mein Unterricht"),
                 child: ListTile(
                   title: const Text('mein Unterricht'),
-                  selected: _selectedIndex == 2,
+                  selected: _selectedIndex == 3,
                   onTap: () {
-                    _onItemTapped(2, "mein Unterricht");
+                    _onItemTapped(3, "mein Unterricht");
                     Navigator.pop(context);
                   },
                 )

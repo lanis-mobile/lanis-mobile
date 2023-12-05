@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dart_date/dart_date.dart';
@@ -20,7 +19,8 @@ class SPHclient {
     -3: "Netzwerkfehler",
     -4: "Unbekannter Fehler! Bist du eingeloggt?",
     -5: "Keine Erlaubnis",
-    -6: "Verschlüsselungsüberprüfung fehlgeschlagen"
+    -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
+    -7: "Unbekannter Fehler! Antwort war nicht salted."
   };
 
   String username = "";
@@ -422,17 +422,19 @@ class SPHclient {
       var document = parse(encryptedHTML);
 
       //Aktuelle Einträge
-      () {
+          () {
         var schoolClasses = document.querySelectorAll("tr.printable");
         for (var schoolClass in schoolClasses) {
           var teacher = schoolClass.getElementsByClassName("teacher")[0];
 
           result["aktuell"]?.add({
-            "name": schoolClass.querySelector(".name")?.text,
+            "name": schoolClass
+                .querySelector(".name")
+                ?.text,
             "teacher": {
               "short": teacher
                   .getElementsByClassName(
-                      "btn btn-primary dropdown-toggle btn-xs")[0]
+                  "btn btn-primary dropdown-toggle btn-xs")[0]
                   .text,
               "name": teacher.getElementsByClassName("dropdown-menu")[0].text
             },
@@ -444,14 +446,16 @@ class SPHclient {
               "entry": schoolClass.attributes["data-entry"],
               "book": schoolClass.attributes["data-entry"]
             },
-            "_courseURL": schoolClass.querySelector("td>h3>a")?.attributes["href"]
+            "_courseURL": schoolClass
+                .querySelector("td>h3>a")
+                ?.attributes["href"]
           });
         }
       }();
 
       //Anwesenheiten
       var anwesendDOM = document.getElementById("anwesend");
-      () {
+          () {
         var thead = anwesendDOM?.querySelector("thead>tr");
         var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
@@ -460,12 +464,15 @@ class SPHclient {
 
         tbody?.forEach((elem) {
           var textElements = [];
-          for (var i = 0; i< elem.children.length;i++) {
+          for (var i = 0; i < elem.children.length; i++) {
             var element = elem.children[i];
-            element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+            element
+                .querySelector("div.hidden.hidden_encoded")
+                ?.innerHtml = "";
 
             if (keys[i] != "Kurs") {
-              textElements.add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
+              textElements.add(
+                  element.text.replaceAll(" ", "").replaceAll("\n", ""));
             } else {
               textElements.add(element.text);
             }
@@ -490,7 +497,7 @@ class SPHclient {
 
       //Kursmappen
       var kursmappenDOM = document.getElementById("mappen");
-      () {
+          () {
         var parsedMappen = [];
 
         var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
@@ -502,66 +509,93 @@ class SPHclient {
                 .querySelector("div.btn-group>button")
                 ?.attributes["title"],
             "_courseURL":
-                mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
+            mappe
+                .querySelector("a.btn.btn-primary")
+                ?.attributes["href"]
           });
         }
         result["kursmappen"] = parsedMappen;
       }();
-
       return result;
-    } catch (e) {
+    }catch (e) {
       return -4;
     }
   }
 
-  Future<dynamic> getMeinUnterrichtCourseView(String url) async {
+
+  Future<dynamic> getConversationsOverview(bool invisible) async {
     try {
-      var result = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": [], "name": ["name"]};
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          data: {"a": "headers", "getType": invisible ? "unvisibleOnly" : "visibleOnly", "last": "0"},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          ));
 
-      final response = await dio
-          .get("https://start.schulportal.hessen.de/$url");
-      var encryptedHTML = cryptor.decryptEncodedTags(response.data);
-      var document = parse(encryptedHTML);
+      final Map<String, dynamic> encryptedJSON = jsonDecode(response.toString());
 
-      //course name
-      var heading = document.getElementById("content")?.querySelector("h1");
-      heading?.children[0].innerHtml = "";
-      result["name"] = [heading?.text.replaceAll("\n", "").replaceAll("  ", "")];
+      final String? decryptedConversations = cryptor.decryptString(encryptedJSON["rows"]);
 
-      //historie
-      (){
-        var historySection = document.getElementById("history");
-        var tableRows = historySection?.querySelectorAll("table>tbody>tr");
+      if (decryptedConversations == null) {
+        return -7;
+        // unknown error (encrypted isn't salted)
+      }
 
-        tableRows?.forEach((tableRow) {
-          tableRow.children[2].querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
-
-          List<String> markups = [];
-
-          tableRow.children[1].querySelectorAll("span.markup").forEach((element) {
-            String text = element.text;
-            if (text.startsWith(" ")) {
-              markups.add(text.substring(1));
-            } else {
-              markups.add(text);
-            }
-
-          });
-
-          result["historie"]?.add({
-            "time": tableRow.children[0].text.replaceAll(" ", "").replaceAll("\n", " "),
-            "title": tableRow.children[1].querySelector("big>b")?.text,
-            "markup": markups.join("\n\n"),
-            "presence": tableRow.children[2].text.replaceAll("\n", "").replaceAll("  ", "")
-          });
-        });
-      }();
-      return result;
+      return jsonDecode(decryptedConversations);
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
     } catch (e) {
       return -4;
+      // unknown error
     }
   }
-  
+
+
+  Future<dynamic> getSingleConversation(String uniqueID) async {
+    try {
+      final encryptedUniqueID = cryptor.encryptString(uniqueID);
+
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          queryParameters: {"a": "read", "msg": uniqueID},
+          data: {"a": "read", "uniqid": encryptedUniqueID},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          ));
+
+      final Map<String, dynamic> encryptedJSON = jsonDecode(response.toString());
+
+      final String? decryptedConversations = cryptor.decryptString(encryptedJSON["message"]);
+
+      if (decryptedConversations == null) {
+        return -7;
+        // unknown error (encrypted isn't salted)
+      }
+
+      return jsonDecode(decryptedConversations);
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
+    }
+  }
+
   Future<int> startLanisEncryption() async {
     return await cryptor.start();
   }
