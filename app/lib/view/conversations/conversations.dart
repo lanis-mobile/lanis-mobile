@@ -11,7 +11,8 @@ class ConversationsAnsicht extends StatefulWidget {
 }
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
-  double padding = 10.0;
+  int currentPageIndex = 0;
+  static const double padding = 10.0;
 
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
     if (mounted) {
@@ -43,6 +44,24 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
     ),
     subtitle: Text(
       "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab.",
+    ),
+  );
+
+  Widget infoCardInvisibility = const ListTile(
+    title: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          flex: 3,
+          child: Text(
+            "Hinweis",
+            style: TextStyle(fontSize: 21),
+          ),
+        ),
+      ],
+    ),
+    subtitle: Text(
+      "Du kannst auf Lanis Unterhaltungen ausblenden. Diese Unterhaltungen löschen sich automatisch nach einer Zeit, aber werden wieder eingeblendet, wenn sie aktiv werden.",
     ),
   );
 
@@ -82,41 +101,48 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
           ),
         ],
       ),
+      leading: conversation["unread"] != null && conversation["unread"] == 1
+          ? const Icon(Icons.notification_important)
+          : null,
     );
   }
 
-  final Future<dynamic> _getConversationOverview =
-  client.getConversationsOverview();
+  final Future<dynamic> _getVisibleConversationOverview =
+      client.getConversationsOverview(false);
+
+  final Future<dynamic> _getInvisibleConversationOverview =
+      client.getConversationsOverview(true);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-        future: _getConversationOverview,
+        future: currentPageIndex == 0
+            ? _getVisibleConversationOverview
+            : _getInvisibleConversationOverview,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.waiting) {
             // If a error happened
             if (snapshot.data is int) {
               return Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.warning,
-                        size: 60,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(50),
-                        child: Text(
-                            "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 22)),
-                      ),
-                      Text(
-                          "Problem: ${client.statusCodes[snapshot.data] ??
-                              "Unbekannter Fehler"}")
-                    ],
-                  ));
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.warning,
+                    size: 60,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(50),
+                    child: Text(
+                        "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22)),
+                  ),
+                  Text(
+                      "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
+                ],
+              ));
             }
 
             // Successful content
@@ -124,7 +150,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
               itemCount: snapshot.data.length + 1,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: EdgeInsets.only(
+                  padding: const EdgeInsets.only(
                       left: padding, right: padding, bottom: padding),
                   child: Card(
                     child: InkWell(
@@ -138,16 +164,18 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
                                     builder: (context) =>
                                         DetailedConversationAnsicht(
                                           uniqueID: snapshot.data[index]
-                                          ["Uniquid"], // nice typo Lanis
+                                              ["Uniquid"], // nice typo Lanis
                                           title: snapshot.data[index]
-                                          ["Betreff"],
+                                              ["Betreff"],
                                         )));
                           }
                         },
                         customBorder: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         child: index == snapshot.data.length
-                            ? infoCard
+                            ? currentPageIndex == 0
+                                ? infoCard
+                                : infoCardInvisibility
                             : getConversationWidget(snapshot.data[index])),
                   ),
                 );
@@ -157,9 +185,24 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
           // Waiting content
           return const Scaffold(
               body: Center(
-                child: CircularProgressIndicator(),
-              ));
+            child: CircularProgressIndicator(),
+          ));
         },
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
+        selectedIndex: currentPageIndex,
+        destinations: const [
+          NavigationDestination(
+              icon: Icon(Icons.visibility), label: "Eingeblendete Nachrichten"),
+          NavigationDestination(
+              icon: Icon(Icons.visibility_off),
+              label: "Ausgeblendete Nachrichten")
+        ],
       ),
     );
   }

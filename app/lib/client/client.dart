@@ -440,11 +440,11 @@ class SPHclient {
     debugPrint(result.toString());
   }
 
-  Future<dynamic> getConversationsOverview() async {
+  Future<dynamic> getConversationsOverview(bool invisible) async {
     try {
       final response =
       await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-          data: {"a": "headers", "getType": "visibleOnly", "last": "0"},
+          data: {"a": "headers", "getType": invisible ? "unvisibleOnly" : "visibleOnly", "last": "0"},
           options: Options(
             headers: {
               "Accept": "*/*",

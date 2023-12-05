@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import '../../client/client.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailedConversationAnsicht extends StatefulWidget {
   final String uniqueID;
@@ -18,6 +20,20 @@ class _DetailedConversationAnsichtState
     extends State<DetailedConversationAnsicht> {
   late final Future<dynamic> _getSingleConversation;
 
+  void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
+    if (mounted) {
+      // Hide the current SnackBar if one is already visible.
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(text),
+          duration: Duration(seconds: seconds, milliseconds: milliseconds),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -26,8 +42,11 @@ class _DetailedConversationAnsichtState
 
   Widget getConversationWidget(
       Map<String, dynamic> conversation, bool rootMessage) {
-    final contentParser = parse(conversation["Inhalt"]);
-    final content = contentParser.body!.text;
+    final contentParsed = parse(conversation["Inhalt"]);
+    final content = contentParsed.body!.text;
+
+    final usernameParsed = parse(conversation["username"]);
+    final username = usernameParsed.querySelector("span")?.text ?? conversation["username"];
 
     return Padding(
       padding: const EdgeInsets.only(left: 12.0, right: 12.0),
@@ -37,15 +56,15 @@ class _DetailedConversationAnsichtState
             padding: const EdgeInsets.only(bottom: 4.0, top: 8.0),
             child: Row(
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(right: 4.0),
+                Padding(
+                  padding: const EdgeInsets.only(right: 4.0),
                   child: Icon(
-                    Icons.person,
+                    username == " , " ? Icons.person_off : Icons.person,
                     size: 18,
                   ),
                 ),
                 Text(
-                  conversation["username"],
+                  username == " , " ? "Kein Name" : username,
                   style: Theme.of(context).textTheme.labelSmall,
                 )
               ],
@@ -74,9 +93,15 @@ class _DetailedConversationAnsichtState
               children: [
                 Flexible(
                   flex: 10,
-                  child: Text(
-                    content,
+                  child: Linkify(
+                    onOpen: (link) async {
+                      if (!await launchUrl(Uri.parse(link.url))) {
+                        showSnackbar('${link.url} konnte nicht geöffnet werden.');
+                      }
+                    },
+                    text: content,
                     style: Theme.of(context).textTheme.bodyMedium,
+                    linkStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.primary),
                   ),
                 )
               ],
