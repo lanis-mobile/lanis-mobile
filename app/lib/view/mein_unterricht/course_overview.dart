@@ -44,7 +44,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(data["historie"][index]["markup"] ?? ""),
+                    Visibility(
+                        visible: data["historie"][index]["markup"] != "",
+                        child: Text(data["historie"][index]["markup"])
+                    ),
                     Text(data["historie"][index]["presence"], style: const TextStyle(fontWeight: FontWeight.bold),),
                     Text(data["historie"][index]["time"], style: const TextStyle(fontStyle: FontStyle.italic),)
                   ],
