@@ -435,7 +435,7 @@ class SPHclient {
                 .getElementsByClassName(
                 "btn btn-primary dropdown-toggle btn-xs")[0]
                 .text,
-            "name": teacher.getElementsByClassName("dropdown-menu")[0].text
+            "name": teacher.querySelector("ul>li>a>i.fa")?.parent?.text
           },
           "thema": {
             "title": schoolClass.getElementsByClassName("thema")[0].text,
@@ -560,6 +560,8 @@ class SPHclient {
           });
         });
       }();
+
+
       return result;
     } catch (e) {
       return -4;
