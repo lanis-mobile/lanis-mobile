@@ -11,9 +11,10 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 
 
 final List<String> supportedApps = [
+  "Nachrichten - Beta-Version",
   "Vertretungsplan",
   "Kalender",
-  "Logout"
+  "Logout",
 ];
 
 

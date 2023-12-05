@@ -51,6 +51,7 @@ dependencies:
   package_info_plus: ^4.2.0
   encrypt: ^5.0.3
   pointycastle: ^3.7.3
+  flutter_linkify: ^6.0.0
 
 
 flutter_launcher_icons:
