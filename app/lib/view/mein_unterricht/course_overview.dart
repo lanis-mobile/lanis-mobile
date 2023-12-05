@@ -13,6 +13,8 @@ class CourseOverviewAnsicht extends StatefulWidget {
 }
 
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
+  final double padding = 10.0;
+
   int _currentIndex = 0;
   bool loading = false;
   dynamic data = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": [], "name":["Lade..."]};
@@ -37,19 +39,22 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
         return ListView.builder(
           itemCount: data["historie"].length,
           itemBuilder: (context, index){
-            return Card(
-              child: ListTile(
-                title: Text(data["historie"][index]["title"]),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Visibility(
-                        visible: data["historie"][index]["markup"] != "",
-                        child: Text(data["historie"][index]["markup"])
-                    ),
-                    Text(data["historie"][index]["presence"], style: const TextStyle(fontWeight: FontWeight.bold),),
-                    Text(data["historie"][index]["time"], style: const TextStyle(fontStyle: FontStyle.italic),)
-                  ],
+            return Padding(
+              padding: EdgeInsets.only(left: padding, right: padding, bottom: padding),
+              child: Card(
+                child: ListTile(
+                  title: Text(data["historie"][index]["title"]),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Visibility(
+                          visible: data["historie"][index]["markup"] != "",
+                          child: Text(data["historie"][index]["markup"])
+                      ),
+                      Text(data["historie"][index]["presence"], style: const TextStyle(fontWeight: FontWeight.bold),),
+                      Text(data["historie"][index]["time"], style: const TextStyle(fontStyle: FontStyle.italic),)
+                    ],
+                  ),
                 ),
               ),
             );

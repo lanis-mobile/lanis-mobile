@@ -10,6 +10,8 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 }
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
+  final double padding = 10.0;
+
   int _currentIndex = 0;
   bool loading = true;
   dynamic data = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
@@ -32,30 +34,34 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
         return ListView.builder(
           itemCount: data["aktuell"].length,
           itemBuilder: (BuildContext context, int index) {
-            return Card(
-              child: ListTile(
-                title: Text(data["aktuell"][index]["name"]),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Thema: ${data["aktuell"][index]["thema"]["title"]}"),
-                    //TODO implement "inhalt" and "hausaufgaben"
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Padding(
+                padding:
+                EdgeInsets.only(left: padding, right: padding, bottom: padding),
+                child: Card(
+                  child: ListTile(
+                    title: Text(data["aktuell"][index]["name"]),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("${data["aktuell"][index]["teacher"]["short"]}-${data["aktuell"][index]["teacher"]["name"]}"),
-                        Text(data["aktuell"][index]["thema"]["date"])
+                        Text("Thema: ${data["aktuell"][index]["thema"]["title"]}"),
+                        //TODO implement "inhalt" and "hausaufgaben"
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("${data["aktuell"][index]["teacher"]["short"]}-${data["aktuell"][index]["teacher"]["name"]}"),
+                            Text(data["aktuell"][index]["thema"]["date"])
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
-                onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["aktuell"][index]["_courseURL"],)),
-                  );
-                },
-              ),
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["aktuell"][index]["_courseURL"],)),
+                      );
+                    },
+                  ),
+                )
             );
           },
         );
@@ -63,17 +69,21 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
         return ListView.builder(
           itemCount: data["kursmappen"].length,
           itemBuilder: (BuildContext context, int index) {
-            return Card(
-              child: ListTile(
-                title: Text(data["kursmappen"][index]["title"]),
-                subtitle: Text(data["kursmappen"][index]["teacher"]),
-                onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["kursmappen"][index]["_courseURL"],)),
-                  );
-                },
-              ),
+            return Padding(
+              padding:
+              EdgeInsets.only(left: padding, right: padding, bottom: padding),
+              child: Card(
+                child: ListTile(
+                  title: Text(data["kursmappen"][index]["title"]),
+                  subtitle: Text(data["kursmappen"][index]["teacher"]),
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["kursmappen"][index]["_courseURL"],)),
+                    );
+                  },
+                ),
+              )
             );
           },
         );
@@ -98,20 +108,23 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
               }
             });
 
-            return Card(
-              child: ListTile(
-                title: Text(data["anwesenheiten"][index]["Kurs"]),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: rowChildren,
+            return Padding(
+              padding: EdgeInsets.only(left: padding, right: padding, bottom: padding),
+              child: Card(
+                child: ListTile(
+                  title: Text(data["anwesenheiten"][index]["Kurs"]),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: rowChildren,
+                  ),
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["anwesenheiten"][index]["_courseURL"],)),
+                    );
+                  },
                 ),
-                onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CourseOverviewAnsicht(dataFetchURL: data["anwesenheiten"][index]["_courseURL"],)),
-                  );
-                },
-              ),
+              )
             );
           },
         );
