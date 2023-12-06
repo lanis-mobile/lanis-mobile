@@ -101,13 +101,13 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
             data["anwesenheiten"][index].forEach((key, value){
               if (!keysNotRender.contains(key) && value != "") {
                 rowChildren.add(
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("$key:"),
-                        Text(value)
-                      ],
-                    )
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("$key:"),
+                      Text(value)
+                    ],
+                  )
                 );
               }
             });

@@ -13,7 +13,7 @@ import 'package:sph_plan/client/cryptor.dart';
 
 class SPHclient {
   final statusCodes = {
-     0: "Alles supper Brudi!",
+    0: "Alles supper Brudi!",
     -1: "Falsche Anmeldedaten",
     -2: "Nicht alle Anmeldedaten angegeben",
     -3: "Netzwerkfehler",
@@ -44,64 +44,42 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
   }
 
-  Future<void> overwriteCredits(
-      String username, String password, String schoolID, String schoolIDHelper) async {
+  Future<void> overwriteCredits(String username, String password,
+      String schoolID, String schoolIDHelper) async {
     this.username = username;
     this.password = password;
     this.schoolID = schoolID;
 
-    await globalStorage.write(
-        key: "username", value: username);
-    await globalStorage.write(
-        key: "password", value: password);
-    await globalStorage.write(
-        key: "schoolID", value: schoolID);
-    await globalStorage.write(
-        key: "schoolIDHelper", value: schoolIDHelper);
+    await globalStorage.write(key: "username", value: username);
+    await globalStorage.write(key: "password", value: password);
+    await globalStorage.write(key: "schoolID", value: schoolID);
+    await globalStorage.write(key: "schoolIDHelper", value: schoolIDHelper);
   }
 
   Future<String> getSchoolIDHelperString() async {
-    return await globalStorage.read(key: "schoolIDHelper") ?? "Max-Planck-Schule - Rüsselsheim (5182)";
+    return await globalStorage.read(key: "schoolIDHelper") ??
+        "Max-Planck-Schule - Rüsselsheim (5182)";
   }
 
   Future<void> loadFromStorage() async {
-    username =
-        await globalStorage.read(key: "username") ??
-            "";
-    password =
-        await globalStorage.read(key: "password") ??
-            "";
-    schoolID =
-        await globalStorage.read(key: "schoolID") ??
-            "";
+    username = await globalStorage.read(key: "username") ?? "";
+    password = await globalStorage.read(key: "password") ?? "";
+    schoolID = await globalStorage.read(key: "schoolID") ?? "";
 
-    schoolName =
-        await globalStorage.read(key: "schoolName") ??
-            "";
+    schoolName = await globalStorage.read(key: "schoolName") ?? "";
 
-    userData =
-        jsonDecode(await globalStorage.read(key: "userData") ??
-            "{}");
+    userData = jsonDecode(await globalStorage.read(key: "userData") ?? "{}");
 
     supportedApps =
-        jsonDecode(await globalStorage.read(key: "supportedApps") ??
-            "[]");
+        jsonDecode(await globalStorage.read(key: "supportedApps") ?? "[]");
   }
 
   Future<dynamic> getCredits() async {
     return {
-      "username":
-          await globalStorage.read(key: "username") ??
-              "",
-      "password":
-          await globalStorage.read(key: "password") ??
-              "",
-      "schoolID":
-          await globalStorage.read(key: "schoolID") ??
-              "",
-      "schoolName": await globalStorage.read(
-              key: "schoolName") ??
-          ""
+      "username": await globalStorage.read(key: "username") ?? "",
+      "password": await globalStorage.read(key: "password") ?? "",
+      "schoolID": await globalStorage.read(key: "schoolID") ?? "",
+      "schoolName": await globalStorage.read(key: "schoolName") ?? ""
     };
   }
 
@@ -127,14 +105,15 @@ class SPHclient {
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
-          
+
           if (userLogin) {
             await fetchRedundantData();
           }
 
           if (startEncryption) {
             int encryptionStatusName = await startLanisEncryption();
-            debugPrint("Encryption connected with status code: $encryptionStatusName");
+            debugPrint(
+                "Encryption connected with status code: $encryptionStatusName");
           }
 
           return 0;
@@ -156,20 +135,15 @@ class SPHclient {
 
   Future<void> fetchRedundantData() async {
     schoolName = (await getSchoolInfo(schoolID))["Name"];
-    await globalStorage.write(
-        key: "schoolName",
-        value: schoolName);
+    await globalStorage.write(key: "schoolName", value: schoolName);
 
     userData = await fetchUserData();
     supportedApps = await getSupportedApps();
 
-    await globalStorage.write(
-        key: "userData",
-        value: jsonEncode(userData));
+    await globalStorage.write(key: "userData", value: jsonEncode(userData));
 
     await globalStorage.write(
-        key: "supportedApps",
-        value: jsonEncode(supportedApps));
+        key: "supportedApps", value: jsonEncode(supportedApps));
   }
 
   Future<dynamic> getLoginURL() async {
@@ -193,7 +167,7 @@ class SPHclient {
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
           //credits are valid
           final response2 =
-          await dioHttp.get("https://connect.schulportal.hessen.de");
+              await dioHttp.get("https://connect.schulportal.hessen.de");
 
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
@@ -401,10 +375,7 @@ class SPHclient {
   }
 
   Future<void> saveUserData(data) async {
-    await globalStorage.write(
-        key: "userData",
-        value: jsonEncode(data)
-    );
+    await globalStorage.write(key: "userData", value: jsonEncode(data));
   }
 
   Future<void> deleteAllSettings() async {
@@ -415,25 +386,23 @@ class SPHclient {
   Future<dynamic> getMeinUnterrichtOverview() async {
     var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
-    final response = await dio
-        .get("https://start.schulportal.hessen.de/meinunterricht.php");
+    final response =
+        await dio.get("https://start.schulportal.hessen.de/meinunterricht.php");
     var encryptedHTML = cryptor.decryptEncodedTags(response.data);
     var document = parse(encryptedHTML);
 
     //Aktuelle Einträge
-        () {
+    () {
       var schoolClasses = document.querySelectorAll("tr.printable");
       for (var schoolClass in schoolClasses) {
         var teacher = schoolClass.getElementsByClassName("teacher")[0];
 
         result["aktuell"]?.add({
-          "name": schoolClass
-              .querySelector(".name")
-              ?.text,
+          "name": schoolClass.querySelector(".name")?.text,
           "teacher": {
             "short": teacher
                 .getElementsByClassName(
-                "btn btn-primary dropdown-toggle btn-xs")[0]
+                    "btn btn-primary dropdown-toggle btn-xs")[0]
                 .text,
             "name": teacher.querySelector("ul>li>a>i.fa")?.parent?.text
           },
@@ -445,16 +414,14 @@ class SPHclient {
             "entry": schoolClass.attributes["data-entry"],
             "book": schoolClass.attributes["data-entry"]
           },
-          "_courseURL": schoolClass
-              .querySelector("td>h3>a")
-              ?.attributes["href"]
+          "_courseURL": schoolClass.querySelector("td>h3>a")?.attributes["href"]
         });
       }
     }();
 
     //Anwesenheiten
     var anwesendDOM = document.getElementById("anwesend");
-        () {
+    () {
       var thead = anwesendDOM?.querySelector("thead>tr");
       var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
@@ -465,13 +432,11 @@ class SPHclient {
         var textElements = [];
         for (var i = 0; i < elem.children.length; i++) {
           var element = elem.children[i];
-          element
-              .querySelector("div.hidden.hidden_encoded")
-              ?.innerHtml = "";
+          element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
 
           if (keys[i] != "Kurs") {
-            textElements.add(
-                element.text.replaceAll(" ", "").replaceAll("\n", ""));
+            textElements
+                .add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
           } else {
             textElements.add(element.text);
           }
@@ -496,7 +461,7 @@ class SPHclient {
 
     //Kursmappen
     var kursmappenDOM = document.getElementById("mappen");
-        () {
+    () {
       var parsedMappen = [];
 
       var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
@@ -504,46 +469,54 @@ class SPHclient {
       for (var mappe in mappen!) {
         parsedMappen.add({
           "title": mappe.getElementsByTagName("h2")[0].text,
-          "teacher": mappe
-              .querySelector("div.btn-group>button")
-              ?.attributes["title"],
+          "teacher":
+              mappe.querySelector("div.btn-group>button")?.attributes["title"],
           "_courseURL":
-          mappe
-              .querySelector("a.btn.btn-primary")
-              ?.attributes["href"]
+              mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
         });
       }
       result["kursmappen"] = parsedMappen;
     }();
     return result;
-
   }
 
   Future<dynamic> getMeinUnterrichtCourseView(String url) async {
     try {
-      var result = {"historie": [], "leistungen": [], "leistungskontrollen": [], "anwesenheiten": [], "name": ["name"]};
+      var result = {
+        "historie": [],
+        "leistungen": [],
+        "leistungskontrollen": [],
+        "anwesenheiten": [],
+        "name": ["name"]
+      };
 
-      final response = await dio
-          .get("https://start.schulportal.hessen.de/$url");
+      final response =
+          await dio.get("https://start.schulportal.hessen.de/$url");
       var encryptedHTML = cryptor.decryptEncodedTags(response.data);
       var document = parse(encryptedHTML);
 
       //course name
       var heading = document.getElementById("content")?.querySelector("h1");
       heading?.children[0].innerHtml = "";
-      result["name"] = [heading?.text.replaceAll("\n", "").replaceAll("  ", "")];
+      result["name"] = [
+        heading?.text.replaceAll("\n", "").replaceAll("  ", "")
+      ];
 
       //historie
-      (){
+      () {
         var historySection = document.getElementById("history");
         var tableRows = historySection?.querySelectorAll("table>tbody>tr");
 
         tableRows?.forEach((tableRow) {
-          tableRow.children[2].querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+          tableRow.children[2]
+              .querySelector("div.hidden.hidden_encoded")
+              ?.innerHtml = "";
 
           List<String> markups = [];
 
-          tableRow.children[1].querySelectorAll("span.markup").forEach((element) {
+          tableRow.children[1]
+              .querySelectorAll("span.markup")
+              .forEach((element) {
             String text = element.text;
             if (text.startsWith(" ")) {
               markups.add(text.substring(1));
@@ -553,16 +526,20 @@ class SPHclient {
           });
 
           result["historie"]?.add({
-            "time": tableRow.children[0].text.replaceAll(" ", "").replaceAll("\n", " "),
+            "time": tableRow.children[0].text
+                .replaceAll(" ", "")
+                .replaceAll("\n", " "),
             "title": tableRow.children[1].querySelector("big>b")?.text,
             "markup": markups.join("\n\n"),
-            "presence": tableRow.children[2].text.replaceAll("\n", "").replaceAll("  ", "")
+            "presence": tableRow.children[2].text
+                .replaceAll("\n", "")
+                .replaceAll("  ", "")
           });
         });
       }();
-      
+
       //anwesenheiten
-      (){
+      () {
         var presenceSection = document.getElementById("attendanceTable");
         var tableRows = presenceSection?.querySelectorAll("table>tbody>tr");
 
@@ -572,9 +549,28 @@ class SPHclient {
             e.innerHtml = "";
           }
 
-          result["anwesenheiten"]?.add({
-            "type": row.children[0].text,
-            "count": row.children[1].text
+          result["anwesenheiten"]?.add(
+              {"type": row.children[0].text, "count": row.children[1].text});
+        });
+      }();
+
+      //leistungen
+      () {
+        var marksSection = document.getElementById("marks");
+        var tableRows = marksSection?.querySelectorAll("table>tbody>tr");
+
+        tableRows?.forEach((row) {
+          var encodedElements = row.getElementsByClassName("hidden_encoded");
+          for (var e in encodedElements) {
+            e.innerHtml = "";
+          }
+
+          result["leistungen"]?.add({
+            "Name":
+                row.children[0].text.replaceAll("\n", "").replaceAll("  ", ""),
+            "Datum":
+                row.children[1].text.replaceAll("\n", "").replaceAll("  ", ""),
+            "Note": row.children[2].text
           });
         });
       }();
@@ -588,23 +584,29 @@ class SPHclient {
   Future<dynamic> getConversationsOverview(bool invisible) async {
     try {
       final response =
-      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-          data: {"a": "headers", "getType": invisible ? "unvisibleOnly" : "visibleOnly", "last": "0"},
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-              "X-Requested-With": "XMLHttpRequest",
-            },
-          ));
+          await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+              data: {
+                "a": "headers",
+                "getType": invisible ? "unvisibleOnly" : "visibleOnly",
+                "last": "0"
+              },
+              options: Options(
+                headers: {
+                  "Accept": "*/*",
+                  "Content-Type":
+                      "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Sec-Fetch-Dest": "empty",
+                  "Sec-Fetch-Mode": "cors",
+                  "Sec-Fetch-Site": "same-origin",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              ));
 
-      final Map<String, dynamic> encryptedJSON = jsonDecode(response.toString());
+      final Map<String, dynamic> encryptedJSON =
+          jsonDecode(response.toString());
 
-      final String? decryptedConversations = cryptor.decryptString(encryptedJSON["rows"]);
+      final String? decryptedConversations =
+          cryptor.decryptString(encryptedJSON["rows"]);
 
       if (decryptedConversations == null) {
         return -7;
@@ -621,30 +623,31 @@ class SPHclient {
     }
   }
 
-
   Future<dynamic> getSingleConversation(String uniqueID) async {
     try {
       final encryptedUniqueID = cryptor.encryptString(uniqueID);
 
       final response =
-      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-          queryParameters: {"a": "read", "msg": uniqueID},
-          data: {"a": "read", "uniqid": encryptedUniqueID},
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-              "X-Requested-With": "XMLHttpRequest",
-            },
-          ));
+          await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+              queryParameters: {"a": "read", "msg": uniqueID},
+              data: {"a": "read", "uniqid": encryptedUniqueID},
+              options: Options(
+                headers: {
+                  "Accept": "*/*",
+                  "Content-Type":
+                      "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Sec-Fetch-Dest": "empty",
+                  "Sec-Fetch-Mode": "cors",
+                  "Sec-Fetch-Site": "same-origin",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              ));
 
-      final Map<String, dynamic> encryptedJSON = jsonDecode(response.toString());
+      final Map<String, dynamic> encryptedJSON =
+          jsonDecode(response.toString());
 
-      final String? decryptedConversations = cryptor.decryptString(encryptedJSON["message"]);
+      final String? decryptedConversations =
+          cryptor.decryptString(encryptedJSON["message"]);
 
       if (decryptedConversations == null) {
         return -7;
