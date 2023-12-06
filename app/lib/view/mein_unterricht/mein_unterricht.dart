@@ -23,9 +23,13 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
   }
 
   Future<void> _loadData() async {
+    setState(() {
+      loading = true;
+    });
     data = await client.getMeinUnterrichtOverview();
-    loading = false;
-    setState(() {});
+    setState(() {
+      loading = false;
+    });
   }
 
   Widget _buildBody() {
@@ -143,6 +147,10 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
 
     return Scaffold(
       body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _loadData,
+        child: const Icon(Icons.refresh),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (int index) {
