@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import '../../client/client.dart';
 
@@ -108,7 +106,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 })
             : noDataScreen;
       case 2: //anwesenheiten
-        return data["anwesenheiten"].lenght != 0
+        return data["anwesenheiten"].length != 0
             ? ListView.builder(
                 itemCount: data["anwesenheiten"].length,
                 itemBuilder: (context, index) {
