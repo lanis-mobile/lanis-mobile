@@ -31,7 +31,7 @@ class SPHclient {
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
   final dio = Dio();
-  late Cryptor cryptor = Cryptor(dio);
+  late Cryptor cryptor = Cryptor();
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
@@ -513,7 +513,7 @@ class SPHclient {
   }
 
   Future<int> startLanisEncryption() async {
-    return await cryptor.start();
+    return await cryptor.start(dio);
   }
 
   bool getEncryptionAuthStatus() {
