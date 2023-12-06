@@ -579,8 +579,6 @@ class SPHclient {
         });
       }();
 
-      debugPrint(result["anwesenheiten"].toString());
-      
       return result;
     } catch (e) {
       return -4;

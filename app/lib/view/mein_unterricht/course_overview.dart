@@ -62,7 +62,15 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       case 1: // leistungen
         return Text("nothing");
       case 2: //anwesenheiten
-        return Text("nothing²");
+        return ListView.builder(
+          itemCount: data["anwesenheiten"].length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(data["anwesenheiten"][index]["count"]),
+              subtitle: Text(data["anwesenheiten"][index]["type"]),
+            );
+          },
+        );
       default:
         return const Text("nothing³");
     }
