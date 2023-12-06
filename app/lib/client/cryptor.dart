@@ -16,9 +16,7 @@ class Cryptor {
   static const int passphraseSize = 46; // 184 bits like Lanis Passphrase
   late encrypt.Key key; // authenticate()
   bool authenticated = false;
-
-  late final Dio dio;
-  Cryptor(this.dio);
+  late Dio dio;
 
   Future<RSAPublicKey?> getPublicKey() async {
     try {
@@ -167,7 +165,9 @@ class Cryptor {
   }
 
   // Use this to start allowing Lanis to return encrypted messages.
-  Future<int> start() async {
+  Future<int> start(Dio dioClient) async {
+    dio = dioClient;
+
     key = generateKey();
 
     final publicKey = await getPublicKey();
