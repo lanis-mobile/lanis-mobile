@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../client/client.dart';
@@ -29,7 +30,10 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   @override
   void initState() {
     super.initState();
-    refreshPlan();
+      SchedulerBinding.instance.addPostFrameCallback((_){
+        _refreshIndicatorKey.currentState?.show();
+      }
+    );
   }
 
   List<CardInfo> cards = [];
