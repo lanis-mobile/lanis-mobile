@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/conversations/conversations.dart';
+import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
@@ -149,6 +150,7 @@ class _HomePageState extends State<HomePage> {
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
       const ConversationsAnsicht(),
+      const MeinUnterrichtAnsicht()
     ];
   }
 
@@ -247,6 +249,17 @@ class _HomePageState extends State<HomePage> {
                   selected: _selectedIndex == 2,
                   onTap: () {
                     _onItemTapped(2, "Nachrichten");
+                    Navigator.pop(context);
+                  },
+                )
+            ),
+            Visibility(
+                visible: client.doesSupportFeature("mein Unterricht"),
+                child: ListTile(
+                  title: const Text('mein Unterricht'),
+                  selected: _selectedIndex == 3,
+                  onTap: () {
+                    _onItemTapped(3, "mein Unterricht");
                     Navigator.pop(context);
                   },
                 )

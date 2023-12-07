@@ -15,7 +15,7 @@ class VertretungsplanAnsicht extends StatefulWidget {
 }
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
-  double padding = 10.0;
+  final double padding = 10.0;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   final random = Random();

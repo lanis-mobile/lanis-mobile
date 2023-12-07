@@ -4,14 +4,15 @@ class Storage {
   final storage = const FlutterSecureStorage();
 
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+        encryptedSharedPreferences: true,
+      );
 
   Future<void> write({required String key, required String value}) {
-    return storage.write(key: key, value: value, aOptions: _getAndroidOptions());
+    return storage.write(
+        key: key, value: value, aOptions: _getAndroidOptions());
   }
 
-  Future<String?> read({   required String key}){
+  Future<String?> read({required String key}) {
     return storage.read(key: key, aOptions: _getAndroidOptions());
   }
 
