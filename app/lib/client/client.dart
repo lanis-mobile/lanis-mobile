@@ -574,7 +574,7 @@ class SPHclient {
       }();
 
       //leistungskontrollen
-      (){
+      () {
         var examSection = document.getElementById("klausuren");
         var lists = examSection?.children;
 

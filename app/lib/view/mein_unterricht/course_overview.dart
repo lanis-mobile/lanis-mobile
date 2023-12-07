@@ -146,8 +146,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20.0)),
                         ),
-                      )
-                  );
+                      ));
                 },
               )
             : noDataScreen;

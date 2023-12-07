@@ -185,7 +185,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
           // Waiting content
           return const Scaffold(
               body: Center(
-              child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(),
           ));
         },
       ),

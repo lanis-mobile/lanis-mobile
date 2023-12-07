@@ -26,15 +26,15 @@ class Cryptor {
         options: Options(
           headers: {
             "Accept": "*/*",
-            "Content-Type":
-            "application/x-www-form-urlencoded; charset=UTF-8",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
           },
         ),
       );
-      return encrypt.RSAKeyParser().parse(jsonDecode(response.toString())["publickey"]) as RSAPublicKey;
+      return encrypt.RSAKeyParser()
+          .parse(jsonDecode(response.toString())["publickey"]) as RSAPublicKey;
     } on (SocketException, DioException) {
       return null;
     }
@@ -49,8 +49,7 @@ class Cryptor {
         options: Options(
           headers: {
             "Accept": "*/*",
-            "Content-Type":
-            "application/x-www-form-urlencoded; charset=UTF-8",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
@@ -77,7 +76,8 @@ class Cryptor {
   }
 
   Uint8List encryptKey(RSAPublicKey publicKey) {
-    final rsa = encrypt.RSA(publicKey: publicKey, encoding: encrypt.RSAEncoding.PKCS1);
+    final rsa =
+        encrypt.RSA(publicKey: publicKey, encoding: encrypt.RSAEncoding.PKCS1);
     return rsa.encrypt(key.bytes).bytes;
   }
 
@@ -99,11 +99,9 @@ class Cryptor {
 
     while (!enoughBytesForKey) {
       if (currentHash.isNotEmpty) {
-        preHash = Uint8List.fromList(
-            currentHash + key.bytes + salt);
+        preHash = Uint8List.fromList(currentHash + key.bytes + salt);
       } else {
-        preHash = Uint8List.fromList(
-            key.bytes + salt);
+        preHash = Uint8List.fromList(key.bytes + salt);
       }
 
       currentHash = md5.convert(preHash).bytes as Uint8List;
@@ -123,7 +121,8 @@ class Cryptor {
     final derivedIV = encrypt.IV(derivedKeyAndIV.sublist(32, 48));
 
     // CBC mode isn't the best anymore.
-    final aes = encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: "PKCS7"));
+    final aes = encrypt.Encrypter(
+        encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: "PKCS7"));
 
     final encryptedData = aes.encrypt(decryptedData, iv: derivedIV).bytes;
 
@@ -133,7 +132,8 @@ class Cryptor {
   }
 
   List<int>? decrypt(Uint8List encryptedDataWithSalt) {
-    final encryptedData = encrypt.Encrypted.fromBase64(base64.encode(encryptedDataWithSalt.sublist(16)));
+    final encryptedData = encrypt.Encrypted.fromBase64(
+        base64.encode(encryptedDataWithSalt.sublist(16)));
 
     // 0 to 8 is "Salted__" in ASCII. If this doesn't exists then something is wrong.
     if ("Salted__" != utf8.decode(encryptedDataWithSalt.sublist(0, 8))) {
@@ -148,7 +148,8 @@ class Cryptor {
     final derivedIV = encrypt.IV(derivedKeyAndIV.sublist(32, 48));
 
     // CBC mode isn't the best anymore.
-    final aes = encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
+    final aes =
+        encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
 
     return aes.decryptBytes(encryptedData, iv: derivedIV);
   }
@@ -182,7 +183,6 @@ class Cryptor {
 
     return replacedHtml;
   }
-
 
   // Use this to start allowing Lanis to return encrypted messages.
   Future<int> start(Dio dioClient) async {

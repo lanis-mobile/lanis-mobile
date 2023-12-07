@@ -46,7 +46,8 @@ class _DetailedConversationAnsichtState
     final content = contentParsed.body!.text;
 
     final usernameParsed = parse(conversation["username"]);
-    final username = usernameParsed.querySelector("span")?.text ?? conversation["username"];
+    final username =
+        usernameParsed.querySelector("span")?.text ?? conversation["username"];
 
     return Padding(
       padding: const EdgeInsets.only(left: 12.0, right: 12.0),
@@ -96,12 +97,16 @@ class _DetailedConversationAnsichtState
                   child: Linkify(
                     onOpen: (link) async {
                       if (!await launchUrl(Uri.parse(link.url))) {
-                        showSnackbar('${link.url} konnte nicht geöffnet werden.');
+                        showSnackbar(
+                            '${link.url} konnte nicht geöffnet werden.');
                       }
                     },
                     text: content,
                     style: Theme.of(context).textTheme.bodyMedium,
-                    linkStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.primary),
+                    linkStyle: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: Theme.of(context).colorScheme.primary),
                   ),
                 )
               ],
