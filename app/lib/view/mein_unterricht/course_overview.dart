@@ -92,37 +92,61 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       case 1: // leistungen
         return data["leistungen"].length != 0
             ? ListView.builder(
-          itemCount: data["leistungen"].length,
-          itemBuilder: (context, index) {
-            return Card(
-                child: ListTile(
-                  title: Text(data["leistungen"][index]["Name"]),
-                  subtitle: Text(data["leistungen"][index]["Datum"]),
-                  trailing: Text(
-                    data["leistungen"][index]["Note"],
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 20.0),
-                  ),
-                ),
-              );
-          },
-        )
-
+                itemCount: data["leistungen"].length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        left: padding, right: padding, bottom: padding),
+                    child: Card(
+                      child: ListTile(
+                        title: Text(data["leistungen"][index]["Name"]),
+                        subtitle: Text(data["leistungen"][index]["Datum"]),
+                        trailing: Text(
+                          data["leistungen"][index]["Note"],
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20.0),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
             : noDataScreen;
       case 2: //Leistungskontrollen
-        return noDataScreen;
+        return data["leistungskontrollen"].length != 0
+            ? ListView.builder(
+                itemCount: data["leistungskontrollen"].length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                      padding: EdgeInsets.only(
+                          left: padding, right: padding, bottom: padding),
+                      child: Card(
+                          child: ListTile(
+                        title:
+                            Text(data["leistungskontrollen"][index]["title"]),
+                        subtitle: Text(
+                          data["leistungskontrollen"][index]["value"],
+                        ),
+                      )));
+                },
+              )
+            : noDataScreen;
       case 3: //anwesenheiten
         return data["anwesenheiten"].length != 0
             ? ListView.builder(
                 itemCount: data["anwesenheiten"].length,
                 itemBuilder: (context, index) {
-                  return Card(
-                    child: ListTile(
-                      title: Text(data["anwesenheiten"][index]["type"]),
-                      trailing: Text(data["anwesenheiten"][index]["count"],
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20.0)),
-                    ),
+                  return Padding(
+                      padding: EdgeInsets.only(
+                          left: padding, right: padding, bottom: padding),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(data["anwesenheiten"][index]["type"]),
+                          trailing: Text(data["anwesenheiten"][index]["count"],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20.0)),
+                        ),
+                      )
                   );
                 },
               )
@@ -166,8 +190,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
           NavigationDestination(
               icon: Icon(Icons.draw),
               selectedIcon: Icon(Icons.draw_outlined),
-              label: "Klausuren"
-          ),
+              label: "Klausuren"),
           NavigationDestination(
             icon: Icon(Icons.list),
             selectedIcon: Icon(Icons.list_outlined),
