@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
@@ -71,7 +73,20 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                             Visibility(
                                 visible:
                                     data["historie"][index]["markup"] != "",
-                                child: Text(data["historie"][index]["markup"])),
+                                child: Linkify(
+                                  onOpen: (link) async {
+                                    if (!await launchUrl(Uri.parse(link.url))) {
+                                      debugPrint("${link.url} konnte nicht geöffnet werden.");
+                                    }
+                                  },
+                                  text: data["historie"][index]["markup"],
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  linkStyle: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(color: Theme.of(context).colorScheme.primary),
+                                ),
+                            ),
                             Text(
                               data["historie"][index]["presence"],
                               style:
