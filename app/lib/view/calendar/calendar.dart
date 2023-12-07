@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
 
@@ -124,6 +126,37 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     }
   }
 
+  String? _parseValue(String weird, String key) {
+    if (weird == "true") {
+      return "Ja";
+    } else if (weird == "false") {
+      return "Nein"; // Nein ich will nicht mehr
+    } else if (key == "Lerngruppe") { // TODO: Link with Lerngruppe
+      RegExp exp = RegExp(r"(?<={Name: )(.*)(?=,)");
+      return exp.firstMatch(weird)?.group(0);
+    } else {
+      return toBeginningOfSentenceCase(weird)!;
+    }
+  }
+
+  String _parseKey(String weird) {
+    if (weird.substring(0, 2) == "Oe") {
+      return weird.replaceFirst(RegExp(r'Oe'), "Ö");
+    } else if (weird == "allDay") {
+      return "Ganzer Tag";
+    } else {
+      return toBeginningOfSentenceCase(weird)!;
+    }
+  }
+
+  String _parseContent(String weird) {
+    if (weird.contains(RegExp("<br \/>"))) { // why lanis ):
+      return weird.replaceAll(RegExp("<br \/>"), "");
+    } else {
+      return weird;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -189,7 +222,9 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                           "Verantwortlich",
                           "category",
                           "start",
-                          "end"
+                          "_Tool", // Used by Lanis "extensions" like Lerngruppe
+                          "_Toolurls",
+                          "end",
                         ];
 
                         String description = "";
@@ -201,8 +236,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("${key.toString()}:"),
-                                      Text(value.toString())
+                                      Text("${_parseKey(key)}:"),
+                                      Text(_parseValue(value.toString(), key) ?? "Keine Daten")
                                     ],
                                   )));
                             } else {
@@ -211,7 +246,19 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                           }
                         });
                         if (description != "") {
-                          cardBody.add(Text("\n$description"));
+                          cardBody.add(Linkify(
+                            onOpen: (link) async {
+                              if (!await launchUrl(Uri.parse(link.url))) {
+                                debugPrint("${link.url} konnte nicht geöffnet werden.");
+                              }
+                            },
+                            text: "\n${_parseContent(description)}",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            linkStyle: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(color: Theme.of(context).colorScheme.primary),
+                          ),);
                         }
 
                         showDialog(
