@@ -58,6 +58,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
                         ),
                       ],
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     onTap: (){
                       Navigator.push(
                         context,
@@ -80,6 +83,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
                 child: ListTile(
                   title: Text(data["kursmappen"][index]["title"]),
                   subtitle: Text(data["kursmappen"][index]["teacher"]),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onTap: (){
                     Navigator.push(
                       context,
@@ -120,6 +126,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: rowChildren,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   onTap: (){
                     Navigator.push(

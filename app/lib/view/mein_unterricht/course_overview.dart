@@ -92,42 +92,43 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       case 1: // leistungen
         return data["leistungen"].length != 0
             ? ListView.builder(
-                itemCount: data["leistungen"].length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(data["leistungen"][index]["Name"]),
-                    subtitle: Text(data["leistungen"][index]["Datum"]),
-                    trailing: Text(
-                      data["leistungen"][index]["Note"],
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 20.0),
-                    ),
-                  );
-                })
+          itemCount: data["leistungen"].length,
+          itemBuilder: (context, index) {
+            return Card(
+                child: ListTile(
+                  title: Text(data["leistungen"][index]["Name"]),
+                  subtitle: Text(data["leistungen"][index]["Datum"]),
+                  trailing: Text(
+                    data["leistungen"][index]["Note"],
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20.0),
+                  ),
+                ),
+              );
+          },
+        )
+
             : noDataScreen;
       case 2: //Leistungskontrollen
-        return ListView.builder(
-          itemBuilder: (context, index){
-              return const Text("hello");
-            },
-          itemCount: 12,
-        );
+        return noDataScreen;
       case 3: //anwesenheiten
         return data["anwesenheiten"].length != 0
             ? ListView.builder(
                 itemCount: data["anwesenheiten"].length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(data["anwesenheiten"][index]["type"]),
-                    trailing: Text(data["anwesenheiten"][index]["count"],
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20.0)),
+                  return Card(
+                    child: ListTile(
+                      title: Text(data["anwesenheiten"][index]["type"]),
+                      trailing: Text(data["anwesenheiten"][index]["count"],
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20.0)),
+                    ),
                   );
                 },
               )
             : noDataScreen;
       default:
-        return Text("das hätte nicht passieren sollen!");
+        return const Text("das hätte nicht passieren sollen!");
     }
   }
 
