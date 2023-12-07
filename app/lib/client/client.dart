@@ -600,6 +600,7 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
+    debugPrint("Get new conversation data. Invisible: $invisible.");
     try {
       final response =
           await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
