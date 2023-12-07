@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       loadUserData();
       _selectedIndex = index;
-      userName = client.username;
+      userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
     });
   }
 
