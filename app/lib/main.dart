@@ -254,7 +254,7 @@ class _HomePageState extends State<HomePage> {
                 )
             ),
             Visibility(
-                visible: client.doesSupportFeature("mein Unterricht"),
+                visible: client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht"),
                 child: ListTile(
                   title: const Text('mein Unterricht'),
                   selected: _selectedIndex == 3,

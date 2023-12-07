@@ -13,6 +13,8 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 final List<String> supportedApps = [
   "Nachrichten - Beta-Version",
   "Vertretungsplan",
+  "Mein Unterricht",
+  "mein Unterricht", //apparently some schools write this in lower case. Lanis is dumb
   "Kalender",
   "Logout",
 ];
