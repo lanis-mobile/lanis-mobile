@@ -83,7 +83,7 @@ class SPHclient {
     };
   }
 
-  Future<int> login({userLogin = false, startEncryption = false}) async {
+  Future<int> login({userLogin = false}) async {
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -110,11 +110,9 @@ class SPHclient {
             await fetchRedundantData();
           }
 
-          if (startEncryption) {
-            int encryptionStatusName = await startLanisEncryption();
-            debugPrint(
-                "Encryption connected with status code: $encryptionStatusName");
-          }
+          int encryptionStatusName = await startLanisEncryption();
+          debugPrint(
+              "Encryption connected with status code: $encryptionStatusName");
 
           return 0;
         } else {

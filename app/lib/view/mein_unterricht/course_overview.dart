@@ -105,7 +105,14 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   );
                 })
             : noDataScreen;
-      case 2: //anwesenheiten
+      case 2: //Leistungskontrollen
+        return ListView.builder(
+          itemBuilder: (context, index){
+              return const Text("hello");
+            },
+          itemCount: 12,
+        );
+      case 3: //anwesenheiten
         return data["anwesenheiten"].length != 0
             ? ListView.builder(
                 itemCount: data["anwesenheiten"].length,
@@ -120,7 +127,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
               )
             : noDataScreen;
       default:
-        return const Text("nothing³");
+        return Text("das hätte nicht passieren sollen!");
     }
   }
 
@@ -154,6 +161,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
             icon: Icon(Icons.star),
             selectedIcon: Icon(Icons.star_outline),
             label: 'Leistungen',
+          ),
+          NavigationDestination(
+              icon: Icon(Icons.draw),
+              selectedIcon: Icon(Icons.draw_outlined),
+              label: "Klausuren"
           ),
           NavigationDestination(
             icon: Icon(Icons.list),
