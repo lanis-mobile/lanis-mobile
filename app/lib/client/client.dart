@@ -579,9 +579,16 @@ class SPHclient {
         var lists = examSection?.children;
 
         lists?.forEach((element) {
+          String exams = "";
+
+          element.querySelectorAll("ul li").forEach((element) {
+            var exam = element.text.trim().split("                                                                                                    ");
+            exams += "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}\n";
+          });
+
           result["leistungskontrollen"]?.add({
-            "title": element.querySelector("h1,h2,h3,h4,h5,h6")?.text,
-            "value": element.querySelector("ul")?.text ?? "Keine Daten!"
+            "title": element.querySelector("h1,h2,h3,h4,h5,h6")?.text.trim(),
+            "value": exams == "" ? "Keine Daten!" : exams
           });
         });
       }();
