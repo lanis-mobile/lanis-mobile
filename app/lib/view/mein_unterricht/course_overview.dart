@@ -34,12 +34,22 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    String url = widget.dataFetchURL;
-    data = await client.getMeinUnterrichtCourseView(url);
+  Future<void> _loadData({secondTry= false}) async {
+    try {
+      if (secondTry) {
+        await client.login();
+      }
 
-    loading = false;
-    setState(() {});
+      String url = widget.dataFetchURL;
+      data = await client.getMeinUnterrichtCourseView(url);
+
+      loading = false;
+      setState(() {});
+    } catch (e) {
+      if (!secondTry) {
+        _loadData(secondTry: true);
+      }
+    }
   }
 
   final Widget noDataScreen = const Center(
