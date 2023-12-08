@@ -34,10 +34,24 @@ class _DetailedConversationAnsichtState
     }
   }
 
+  Future<dynamic> fetchConversation({secondTry= false}) async {
+    try {
+      if (secondTry) {
+        await client.login();
+      }
+
+      return client.getSingleConversation(widget.uniqueID);
+    } catch (e) {
+      if (!secondTry) {
+        fetchConversation(secondTry: true);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _getSingleConversation = client.getSingleConversation(widget.uniqueID);
+    _getSingleConversation = fetchConversation();
   }
 
   Widget getConversationWidget(

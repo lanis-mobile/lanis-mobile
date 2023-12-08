@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:sph_plan/client/client.dart';
 
@@ -26,13 +27,13 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
       (client.userData ?? []).forEach((key, value) {
         userDataListTiles.add(ListTile(
           title: Text(value),
-          subtitle: Text(key),
+          subtitle: Text(toBeginningOfSentenceCase(key)!),
         ));
       });
       userDataListTiles.add(const ListTile(
         leading: Icon(Icons.info),
         title: Text("Information"),
-        subtitle: Text("Alle Benutzerdaten sind auf den Lanis-servern gespeichert."),
+        subtitle: Text("Alle Benutzerdaten sind auf den Lanis-Servern gespeichert."),
       ));
     });
   }
