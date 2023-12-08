@@ -36,14 +36,14 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
     setState(() {
       featureListListTiles.clear();
 
-      client.supportedApps.forEach((value) {
+      for (var value in client.supportedApps) {
         featureListListTiles.add(ListTile(
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),
           title: Text(value["Name"]),
           subtitle: Text(supportedApps.contains(value["Name"]) ? "Unterstützt": "nicht Unterstützt"),
         ));
-      });
+      }
 
       featureListListTiles.add(ListTile(
         leading: const Icon(Icons.lock),
