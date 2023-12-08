@@ -13,7 +13,7 @@ class NotificationsSettingsScreen extends StatefulWidget {
 class _NotificationsSettingsScreenState extends State<NotificationsSettingsScreen> {
   bool _enableNotifications = true;
   int _notificationInterval = 15;
-  bool _notificationsAreOngoing = true;
+  bool _notificationsAreOngoing = false;
   bool _notificationPermissionGranted = false;
 
   Future<void> applySettings() async {
@@ -25,7 +25,7 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
   Future<void> loadSettingsVariables() async {
     _enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
     _notificationInterval = int.parse(await globalStorage.read(key: "settings-push-service-interval") ?? "15");
-    _notificationsAreOngoing = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "true") == "true";
+    _notificationsAreOngoing = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "false") == "true";
 
     _notificationPermissionGranted = await Permission.notification.isGranted;
   }
