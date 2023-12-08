@@ -358,8 +358,8 @@ class SPHclient {
 
       var rows = userDataTableBody.querySelectorAll("tr");
       for (var row in rows) {
-        var key = row.children[0].innerHtml;
-        var value = row.children[1].text;
+        var key = row.children[0].text.trim();
+        var value = row.children[1].text.trim();
 
         key = (key.substring(0, key.length - 1)).toLowerCase();
 
@@ -396,17 +396,17 @@ class SPHclient {
         var teacher = schoolClass.getElementsByClassName("teacher")[0];
 
         result["aktuell"]?.add({
-          "name": schoolClass.querySelector(".name")?.text,
+          "name": schoolClass.querySelector(".name")?.text.trim(),
           "teacher": {
             "short": teacher
                 .getElementsByClassName(
                     "btn btn-primary dropdown-toggle btn-xs")[0]
-                .text,
-            "name": teacher.querySelector("ul>li>a>i.fa")?.parent?.text
+                .text.trim(),
+            "name": teacher.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
           },
           "thema": {
-            "title": schoolClass.getElementsByClassName("thema")[0].text,
-            "date": schoolClass.getElementsByClassName("datum")[0].text
+            "title": schoolClass.getElementsByClassName("thema")[0].text.trim(),
+            "date": schoolClass.getElementsByClassName("datum")[0].text.trim()
           },
           "data": {
             "entry": schoolClass.attributes["data-entry"],
@@ -424,7 +424,7 @@ class SPHclient {
       var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
       var keys = [];
-      thead?.children.forEach((element) => keys.add(element.text));
+      thead?.children.forEach((element) => keys.add(element.text.trim()));
 
       tbody?.forEach((elem) {
         var textElements = [];
@@ -434,9 +434,9 @@ class SPHclient {
 
           if (keys[i] != "Kurs") {
             textElements
-                .add(element.text.replaceAll(" ", "").replaceAll("\n", ""));
+                .add(element.text.trim());
           } else {
-            textElements.add(element.text);
+            textElements.add(element.text.trim());
           }
         }
 
@@ -466,7 +466,7 @@ class SPHclient {
 
       for (var mappe in mappen!) {
         parsedMappen.add({
-          "title": mappe.getElementsByTagName("h2")[0].text,
+          "title": mappe.getElementsByTagName("h2")[0].text.trim(),
           "teacher":
               mappe.querySelector("div.btn-group>button")?.attributes["title"],
           "_courseURL":
@@ -497,7 +497,7 @@ class SPHclient {
       var heading = document.getElementById("content")?.querySelector("h1");
       heading?.children[0].innerHtml = "";
       result["name"] = [
-        heading?.text.replaceAll("\n", "").replaceAll("  ", "")
+        heading?.text.trim()
       ];
 
       //historie
@@ -515,7 +515,7 @@ class SPHclient {
           tableRow.children[1]
               .querySelectorAll("span.markup")
               .forEach((element) {
-            String text = element.text;
+            String text = element.text.trim();
             if (text.startsWith(" ")) {
               markups.add(text.substring(1));
             } else {
@@ -524,14 +524,10 @@ class SPHclient {
           });
 
           result["historie"]?.add({
-            "time": tableRow.children[0].text
-                .replaceAll(" ", "")
-                .replaceAll("\n", " "),
-            "title": tableRow.children[1].querySelector("big>b")?.text,
+            "time": tableRow.children[0].text.trim().replaceAll("  ", "").replaceAll("\n", " ").replaceAll("  ", " "),
+            "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
             "markup": markups.join("\n\n"),
-            "presence": tableRow.children[2].text
-                .replaceAll("\n", "")
-                .replaceAll("  ", "")
+            "presence": tableRow.children[2].text.trim()
           });
         });
       }();
@@ -548,7 +544,7 @@ class SPHclient {
           }
 
           result["anwesenheiten"]?.add(
-              {"type": row.children[0].text, "count": row.children[1].text});
+              {"type": row.children[0].text.trim(), "count": row.children[1].text.trim()});
         });
       }();
 
@@ -565,10 +561,10 @@ class SPHclient {
 
           result["leistungen"]?.add({
             "Name":
-                row.children[0].text.replaceAll("\n", "").replaceAll("  ", ""),
+                row.children[0].text.trim(),
             "Datum":
-                row.children[1].text.replaceAll("\n", "").replaceAll("  ", ""),
-            "Note": row.children[2].text
+                row.children[1].text.trim(),
+            "Note": row.children[2].text.trim()
           });
         });
       }();

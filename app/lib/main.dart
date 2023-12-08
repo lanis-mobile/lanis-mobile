@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
@@ -158,7 +157,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       loadUserData();
       _selectedIndex = index;
-      userName = client.username;
+      userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
     });
   }
 
@@ -254,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                 )
             ),
             Visibility(
-                visible: client.doesSupportFeature("mein Unterricht"),
+                visible: client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht"),
                 child: ListTile(
                   title: const Text('mein Unterricht'),
                   selected: _selectedIndex == 3,

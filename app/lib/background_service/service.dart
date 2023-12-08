@@ -72,7 +72,7 @@ Future<void> performBackgroundFetch() async {
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
-  bool ongoingMessage = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "true") == "true";
+  bool ongoingMessage = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "false") == "true";
 
   var androidDetails = AndroidNotificationDetails(
       'io.github.alessioc42.sphplan', 'SPH-Vertretungsplan',

@@ -22,14 +22,25 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    setState(() {
-      loading = true;
-    });
-    data = await client.getMeinUnterrichtOverview();
-    setState(() {
-      loading = false;
-    });
+  Future<void> _loadData({secondTry= false}) async {
+    try {
+      setState(() {
+        loading = true;
+      });
+      if (secondTry) {
+        await client.login();
+      }
+
+      data = await client.getMeinUnterrichtOverview();
+
+      setState(() {
+        loading = false;
+      });
+    } catch (e) {
+      if (!secondTry) {
+        _loadData(secondTry: true);
+      }
+    }
   }
 
   Widget _buildBody() {
