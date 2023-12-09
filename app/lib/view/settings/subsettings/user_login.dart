@@ -44,7 +44,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         isLoginButtonEnabled = false;
         Navigator.pop(context);
       } else {
-        loginStatusText = "Anmeldung fehlgeschlagen!\nFehlercode: $loginCode";
+        loginStatusText = "Anmeldung fehlgeschlagen!\nFehler: ${client.statusCodes[loginCode]} ($loginCode)";
         isLoginButtonEnabled = true;
       }
     });

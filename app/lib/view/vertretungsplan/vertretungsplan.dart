@@ -52,7 +52,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   }
 
   Future<void> refreshPlan({secondTry = false}) async {
-    print("refresh");
     if (mounted) {
       final vPlan = await client.getFullVplan();
       if (vPlan is int) {

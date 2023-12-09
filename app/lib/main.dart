@@ -82,6 +82,7 @@ class _HomePageState extends State<HomePage> {
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
   bool _isLoading = true;
+  String _currentTitle = "Vertretungsplan";
 
   @override
   void initState() {
@@ -157,6 +158,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       loadUserData();
       _selectedIndex = index;
+      _currentTitle = title;
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
     });
   }
@@ -172,7 +174,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return _isLoading ? const LoadingScreen() : Scaffold(
       appBar: AppBar(
-          title: const Text("SPH"),
+          title: Text(_currentTitle == "" ? "Vertretungsplan" : _currentTitle), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
         actions: <IconButton>[
           IconButton(
             icon: const Icon(Icons.settings),
@@ -222,6 +224,7 @@ class _HomePageState extends State<HomePage> {
             Visibility(
               visible: client.doesSupportFeature("Vertretungsplan"),
               child: ListTile(
+                leading: const Icon(Icons.person),
                 title: const Text('Vertretungsplan'),
                 selected: _selectedIndex == 0,
                 onTap: () {
@@ -233,6 +236,7 @@ class _HomePageState extends State<HomePage> {
             Visibility(
               visible: client.doesSupportFeature("Kalender"),
               child: ListTile(
+                leading: const Icon(Icons.calendar_month),
                 title: const Text('Kalender'),
                 selected: _selectedIndex == 1,
                 onTap: () {
@@ -244,6 +248,7 @@ class _HomePageState extends State<HomePage> {
             Visibility(
                 visible: client.doesSupportFeature("Nachrichten - Beta-Version"),
                 child: ListTile(
+                  leading: const Icon(Icons.forum),
                   title: const Text('Nachrichten'),
                   selected: _selectedIndex == 2,
                   onTap: () {
@@ -255,15 +260,17 @@ class _HomePageState extends State<HomePage> {
             Visibility(
                 visible: client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht"),
                 child: ListTile(
-                  title: const Text('mein Unterricht'),
+                  leading: const Icon(Icons.school),
+                  title: const Text('Mein Unterricht'),
                   selected: _selectedIndex == 3,
                   onTap: () {
-                    _onItemTapped(3, "mein Unterricht");
+                    _onItemTapped(3, "Mein Unterricht");
                     Navigator.pop(context);
                   },
                 )
             ),
             ListTile(
+              leading: const Icon(Icons.open_in_new),
               title: const Text('Schulportal öffnen'),
               onTap: () {
                 client.getLoginURL().then((response) {
