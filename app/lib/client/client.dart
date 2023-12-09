@@ -238,6 +238,34 @@ class SPHclient {
     }
   }
 
+  Future<dynamic> getEvent(String id) async {
+    try {
+      final response = await dio.post(
+          "https://start.schulportal.hessen.de/kalender.php",
+          data: {
+            "f": "getEvent",
+            "id": id,
+          },
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+            },
+          ));
+      return jsonDecode(response.toString());
+    } on SocketException {
+      return -3;
+      //network error
+    } catch (e) {
+      return -4;
+      //unknown error
+    }
+  }
+
   Future<dynamic> getVplanDates() async {
     try {
       final response = await dio

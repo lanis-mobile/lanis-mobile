@@ -1,6 +1,9 @@
+import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
 
@@ -37,28 +40,51 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
   }
 
-  void performEventsRequest() {
-    DateTime currentDate = DateTime.now();
-    DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
-    DateTime oneYearLater = currentDate.add(const Duration(days: 365));
+  void performEventsRequest({secondTry = false}) async {
+    try {
+      if (secondTry) {
+        await client.login();
+      }
 
-    final formatter = DateFormat('yyyy-MM-dd');
+      DateTime currentDate = DateTime.now();
+      DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
+      DateTime oneYearLater = currentDate.add(const Duration(days: 365));
 
-    client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)).then((calendar) {
-      List<Event> updatedEventList = [];
+      final formatter = DateFormat('yyyy-MM-dd');
 
-      calendar.forEach((event) {
-        updatedEventList.add(Event(event["title"], event, parseDateString(event["Anfang"]), parseDateString(event["Ende"])));
+      client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)).then((calendar) {
+        List<Event> updatedEventList = [];
+
+        calendar.forEach((event) {
+          updatedEventList.add(Event(event["title"], event, parseDateString(event["Anfang"]), parseDateString(event["Ende"])));
+        });
+
+        // Set the state with the updated event list
+        setState(() {
+          eventList = updatedEventList;
+          _selectedEvents.value = _getEventsForDay(_selectedDay!);
+        });
       });
-
-      // Set the state with the updated event list
-      setState(() {
-        eventList = updatedEventList;
-        _selectedEvents.value = _getEventsForDay(_selectedDay!);
-      });
-    });
+    } catch (e) {
+      if(!secondTry) {
+        performEventsRequest(secondTry: true);
+      }
+    }
   }
 
+  Future<dynamic> fetchEvent(String id, {secondTry = false}) async {
+    try {
+      if (secondTry) {
+        await client.login();
+      }
+
+      return await client.getEvent(id);
+    } catch (e) {
+      if(!secondTry) {
+        performEventsRequest(secondTry: true);
+      }
+    }
+  }
 
   List<Event> _getEventsForDay(DateTime day) {
     List<Event> validEvents = [];
@@ -124,6 +150,301 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     }
   }
 
+  Widget getEvent(Event calendarData) {
+    return AlertDialog(
+      content: FutureBuilder(
+        future: fetchEvent(calendarData.data["Id"]),
+        builder: (context, snapshot) {
+          // Waiting content
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        calendarData.title,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    )
+                  ],
+                ),
+                const CircularProgressIndicator()
+              ],
+            );
+          }
+
+          String date = "";
+
+          String startTime = calendarData.startTime.format("E d MMM y", "de_DE");
+          String endTime = calendarData.endTime.format("E d MMM y", "de_DE");
+
+          if (calendarData.data["allDay"] == true) {
+            if (startTime == endTime) {
+              date += startTime;
+            }
+            else {
+              date += "$startTime bis $endTime";
+            }
+          } else {
+            if (startTime == endTime) {
+              date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("H:mm", "de_DE")}";
+            } else {
+              date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:mm", "de_DE")}";
+            }
+          }
+
+          // Error content (Same as successful content but without snapshot.data and with an error alert)
+          if (snapshot.data is int) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        calendarData.title,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    )
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                  child: Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(right: 6.0),
+                        child: Icon(Icons.access_time_filled, size: 21),
+                      ),
+                      Flexible(
+                        child: Text(
+                            date,
+                            style: Theme.of(context).textTheme.bodyMedium
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                if (calendarData.data["Ort"] != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
+                    child: Row(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(right: 6.0),
+                          child: Icon(Icons.place, size: 21),
+                        ),
+                        Text(
+                            calendarData.data["Ort"],
+                            style: Theme.of(context).textTheme.bodyMedium
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+                if (calendarData.data["Lerngruppe"] != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
+                    child: Row(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(right: 6.0),
+                          child: Icon(Icons.school, size: 21),
+                        ),
+                        Flexible(
+                          child: Text(
+                              calendarData.data["Lerngruppe"]["Name"],
+                              style: Theme.of(context).textTheme.bodyMedium
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+                if (calendarData.data["description"] != null && calendarData.data["description"] != "") ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                    child: Linkify(
+                      onOpen: (link) async {
+                        if (!await launchUrl(Uri.parse(link.url))) {
+                          debugPrint("${link.url} konnte nicht geöffnet werden.");
+                        }
+                      },
+                      text: calendarData.data["description"],
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      linkStyle: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ListTile(
+                    leading: const Icon(Icons.error),
+                    title: const Text("Ein Fehler ist passsiert!"),
+                    subtitle: Text("Bitte kontaktiere einen Entwickler. Fehler: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"} (${snapshot.data} )"),
+                    tileColor: Colors.red[500],
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(14)),
+                    ),
+                  ),
+                )
+              ],
+            );
+          }
+
+          String targetGroup = "";
+
+          if (snapshot.data["properties"] != null && snapshot.data["properties"]["zielgruppen"] != null) {
+            Map<String, dynamic> data = snapshot.data["properties"]["zielgruppen"];
+
+            data.forEach((key, value) {
+              if (key == "-sus") {
+                targetGroup += "${value.replaceAll(RegExp(r"amp;"), "")}";
+                return;
+              }
+              targetGroup += "$value, ";
+            });
+          }
+
+          // Successful content
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (snapshot.data["properties"] != null && snapshot.data["properties"]["verantwortlich"] != null && snapshot.data["properties"]["verantwortlich"] != "") ...[
+                    const Padding(
+                      padding: EdgeInsets.only(right: 4.0),
+                      child: Icon(
+                        Icons.person,
+                        size: 18,
+                      ),
+                    ),
+                    Text(
+                      snapshot.data["properties"]["verantwortlich"],
+                      style: Theme.of(context).textTheme.labelSmall,
+                    )
+                  ]
+                ],
+              ),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      calendarData.title,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  )
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(right: 6.0),
+                      child: Icon(Icons.access_time_filled, size: 21),
+                    ),
+                    Flexible(
+                      child: Text(
+                          date,
+                          style: Theme.of(context).textTheme.bodyMedium
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              if (calendarData.data["Ort"] != null) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(right: 6.0),
+                        child: Icon(Icons.place, size: 21),
+                      ),
+                      Text(
+                          calendarData.data["Ort"],
+                          style: Theme.of(context).textTheme.bodyMedium
+                      )
+                    ],
+                  ),
+                ),
+              ],
+              if (snapshot.data["properties"] != null && snapshot.data["properties"]["zielgruppen"] != null) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(right: 6.0),
+                        child: Icon(Icons.group, size: 21),
+                      ),
+                      Flexible(
+                        child: Text(
+                            targetGroup,
+                            style: Theme.of(context).textTheme.bodyMedium
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+              if (calendarData.data["Lerngruppe"] != null) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(right: 6.0),
+                        child: Icon(Icons.school, size: 21),
+                      ),
+                      Flexible(
+                        child: Text(
+                            calendarData.data["Lerngruppe"]["Name"],
+                            style: Theme.of(context).textTheme.bodyMedium
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+              if (calendarData.data["description"] != null && calendarData.data["description"] != "") ...[
+                Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                  child: Linkify(
+                    onOpen: (link) async {
+                      if (!await launchUrl(Uri.parse(link.url))) {
+                        debugPrint("${link.url} konnte nicht geöffnet werden.");
+                      }
+                    },
+                    text: calendarData.data["description"].replaceAll(RegExp(r"<br />"), ""),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    linkStyle: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: Theme.of(context).colorScheme.primary),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -175,55 +496,10 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                     ),
                     child: ListTile(
                       onTap: () {
-
-                        List<Widget> cardBody = [];
-
-                        final List<String> keysNotRender = [
-                          "Anfang",
-                          "Ende",
-                          "title",
-                          "Institution",
-                          "Id",
-                          "FremdUID",
-                          "LetzteAenderung",
-                          "Verantwortlich",
-                          "category",
-                          "start",
-                          "end"
-                        ];
-
-                        String description = "";
-                        value[index].data.forEach((key, value) {
-                          if ((!keysNotRender.contains(key) && value != null && value != "")) {
-                            if (key != "description") {
-                              cardBody.add(Padding(
-                                  padding: const EdgeInsets.only(right: 1, left: 1),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text("${key.toString()}:"),
-                                      Text(value.toString())
-                                    ],
-                                  )));
-                            } else {
-                              description = value;
-                            }
-                          }
-                        });
-                        if (description != "") {
-                          cardBody.add(Text("\n$description"));
-                        }
-
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text(value[index].title),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: cardBody,
-                                ),
-                              );
+                              return getEvent(value[index]);
                             }
                           );
                       },
