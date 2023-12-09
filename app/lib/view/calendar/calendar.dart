@@ -317,6 +317,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (snapshot.data["properties"] != null && snapshot.data["properties"]["verantwortlich"] != null && snapshot.data["properties"]["verantwortlich"] != "") ...[
                     const Padding(
@@ -346,6 +347,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Padding(
                       padding: EdgeInsets.only(right: 6.0),
@@ -364,6 +366,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6.0),
@@ -401,6 +404,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6.0),
