@@ -52,6 +52,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   }
 
   Future<void> refreshPlan({secondTry = false}) async {
+    print("refresh");
     if (mounted) {
       final vPlan = await client.getFullVplan();
       if (vPlan is int) {
@@ -218,10 +219,13 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             height: 10,
           ),
           FloatingActionButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => FilterPlan()),
-            ),
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => FilterPlan()))
+                  .then((_) => setState(() {
+                _refreshIndicatorKey.currentState?.show();
+              }));
+            },
             heroTag: null,
             child: const Icon(Icons.filter_alt),
           ),

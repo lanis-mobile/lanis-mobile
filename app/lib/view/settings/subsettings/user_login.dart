@@ -99,12 +99,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     double padding = 10.0;
-    return WillPopScope(
-        onWillPop: () async => !isLoginButtonEnabled,
+    return PopScope(
+        canPop: !isLoginButtonEnabled,
         child: Scaffold(
           appBar: AppBar(
             title: const Text("SPH Login"),
-              automaticallyImplyLeading: false
+              automaticallyImplyLeading: !isLoginButtonEnabled
           ),
           body: ListView(
             children: [
