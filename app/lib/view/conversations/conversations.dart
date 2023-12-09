@@ -120,24 +120,34 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
   dynamic invisibleConversations;
 
   // Get new conversation data and cache it.
-  Future<dynamic> fetchConversations() async {
-    if (currentPageIndex == 0) {
-      if (forceNewData) {
-        visibleConversations = await client.getConversationsOverview(false);
-      } else {
-        visibleConversations ??= await client.getConversationsOverview(false);
-        forceNewData = true; // Default is true because pulling down and FAB force refreshes data, only switching between tabs uses cached.
+  Future<dynamic> fetchConversations({secondTry= false}) async {
+    try {
+      if (secondTry) {
+        await client.login();
       }
-      return visibleConversations;
-    }
-    else {
-      if (forceNewData) {
-        invisibleConversations = await client.getConversationsOverview(true);
-      } else {
-        invisibleConversations ??= await client.getConversationsOverview(true);
-        forceNewData = true;
+
+      if (currentPageIndex == 0) {
+        if (forceNewData) {
+          visibleConversations = await client.getConversationsOverview(false);
+        } else {
+          visibleConversations ??= await client.getConversationsOverview(false);
+          forceNewData = true; // Default is true because pulling down and FAB force refreshes data, only switching between tabs uses cached.
+        }
+        return visibleConversations;
       }
-      return invisibleConversations;
+      else {
+        if (forceNewData) {
+          invisibleConversations = await client.getConversationsOverview(true);
+        } else {
+          invisibleConversations ??= await client.getConversationsOverview(true);
+          forceNewData = true;
+        }
+        return invisibleConversations;
+      }
+    } catch (e) {
+      if (!secondTry) {
+        fetchConversations(secondTry: true);
+      }
     }
   }
 

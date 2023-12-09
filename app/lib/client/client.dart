@@ -605,10 +605,15 @@ class SPHclient {
         lists?.forEach((element) {
           String exams = "";
 
-          element.querySelectorAll("ul li").forEach((element) {
+          final elements = element.querySelectorAll("ul li");
+
+          for (var element in elements) {
             var exam = element.text.trim().split("                                                                                                    ");
-            exams += "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}\n";
-          });
+            exams += "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}";
+            if (element != elements.last) {
+              exams += "\n";
+            }
+          }
 
           result["leistungskontrollen"]?.add({
             "title": element.querySelector("h1,h2,h3,h4,h5,h6")?.text.trim(),
