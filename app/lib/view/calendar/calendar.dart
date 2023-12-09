@@ -381,6 +381,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(right: 6.0),
