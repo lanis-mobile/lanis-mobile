@@ -23,6 +23,12 @@ Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
     <a href="screenshots/Screenshot_1702114119.png">
       <img src="screenshots/Screenshot_1702114119.png" width="250" >
     </a>
+    <a href="screenshots/Conversations_Overview.png">
+      <img src="screenshots/Conversations_Overview.png" width="250" >
+    </a>
+    <a href="screenshots/Conversation_Details.png">
+      <img src="screenshots/Conversation_Details.png" width="250" >
+    </a>
   </p>
 </details>
 
