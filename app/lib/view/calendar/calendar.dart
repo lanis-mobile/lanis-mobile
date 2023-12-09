@@ -189,9 +189,9 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
             }
           } else {
             if (startTime == endTime) {
-              date += "${calendarData.startTime.format("E d MMM y H:m", "de_DE")} bis ${calendarData.endTime.format("H:m", "de_DE")}";
+              date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("H:mm", "de_DE")}";
             } else {
-              date += "${calendarData.startTime.format("E d MMM y H:m", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:m", "de_DE")}";
+              date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:mm", "de_DE")}";
             }
           }
 
