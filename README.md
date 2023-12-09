@@ -6,22 +6,22 @@ Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
   <summary>Screenshots</summary>
   <p align="center">
     <a href="screenshots/Screenshot_1702113982.png">
-      <img src="screenshots/Screenshot_1702113982.png" width="150" >
+      <img src="screenshots/Screenshot_1702113982.png" width="250" >
     </a>
     <a href="screenshots/Screenshot_1702114019.png">
-      <img src="screenshots/Screenshot_1702114019.png" width="150" >
+      <img src="screenshots/Screenshot_1702114019.png" width="250" >
     </a>
     <a href="screenshots/Screenshot_1702114051.png">
-      <img src="screenshots/Screenshot_1702114051.png" width="150" >
+      <img src="screenshots/Screenshot_1702114051.png" width="250" >
     </a>
     <a href="screenshots/Screenshot_1702114070.png">
-      <img src="screenshots/Screenshot_1702114070.png" width="150" >
+      <img src="screenshots/Screenshot_1702114070.png" width="250" >
     </a>
     <a href="screenshots/Screenshot_1702114093.png">
-      <img src="screenshots/Screenshot_1702114093.png" width="150" >
+      <img src="screenshots/Screenshot_1702114093.png" width="250" >
     </a>
     <a href="screenshots/Screenshot_1702114119.png">
-      <img src="screenshots/Screenshot_1702114119.png" width="150" >
+      <img src="screenshots/Screenshot_1702114119.png" width="250" >
     </a>
   </p>
 </details>
