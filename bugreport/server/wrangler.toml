@@ -1,4 +1,4 @@
-name = "server"
+name = "sph-bugreport-service"
 main = "src/index.ts"
 compatibility_date = "2023-12-06"
 

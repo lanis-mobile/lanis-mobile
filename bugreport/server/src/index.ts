@@ -4,36 +4,43 @@ export interface Env {
 
 export default {
 	async fetch(request: Request, env: Env) {
-		const { pathname, searchParams } = new URL(request.url);
+		const { pathname } = new URL(request.url);
+		const requestBody = await request.text();
 
 		const hasPermission = async () => {
-			const access_token = searchParams.get("access_token");
+			const { access_token } = JSON.parse(requestBody);
 			const query = "SELECT * FROM Developers WHERE access_token=?";
 			const results = (await env.DB.prepare(query).bind(access_token).all()).results;
 			return results.length !== 0;
 		};
 
 		const formatDate = () => {
-			// Use a proper method to format dates
 			return new Date().toISOString();
 		};
 
 		if (pathname === "/api/add") {
+			const {
+				username,
+				report,
+				contact_information,
+				device_data,
+			} = JSON.parse(requestBody);
+
 			const query =
 				"INSERT INTO Reports (username, report, contact_information, device_data, time_stamp) VALUES (?, ?, ?, ?, ?)";
 			const params = [
-				searchParams.get("username"),
-				searchParams.get("report"),
-				searchParams.get("contact_information"),
-				searchParams.get("device_data"),
+				username,
+				report,
+				contact_information,
+				device_data,
 				formatDate(),
 			];
 
-			const { results } = await env.DB.prepare(query).bind(params).run();
+			const { results } = await env.DB.prepare(query).bind(...params).run();
 			return Response.json(results ?? "Ok");
 		} else if (pathname === "/api/del") {
 			if (await hasPermission()) {
-				const id = parseInt(searchParams.get("id") ?? "-1");
+				const { id } = JSON.parse(requestBody);
 				const query = "DELETE FROM Reports WHERE id=?";
 				await env.DB.prepare(query).bind(id).run();
 				return new Response("Entry with ID was deleted.");
