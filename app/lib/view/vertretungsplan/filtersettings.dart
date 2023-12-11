@@ -65,6 +65,15 @@ class FilterPlan extends StatelessWidget {
                 child: const Text('Anwenden'),
               ),
             ),
+            const Padding(
+              padding: EdgeInsets.only(right: 10.0, left: 10.0, top: 20.0),
+              child: Card(
+                child: ListTile(
+                  title: Text("Hinweis", style: TextStyle(fontSize: 22),),
+                  subtitle: Text("Da manche Schulen nicht in der Lage sind einen richtigen Vertretungsplan zu machen, kannst du bestimmte Einträge, die eigentlich für dich bestimmt sind, nicht mit der Suche finden, da sie nicht die Klasse oder den Lehrer angeben. Beschwere dich bei deiner Schule."),
+                ),
+              ),
+            ),
           ],
         ));
   }
