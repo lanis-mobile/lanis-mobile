@@ -82,7 +82,13 @@ class _HomePageState extends State<HomePage> {
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
   bool _isLoading = true;
-  String _currentTitle = "Vertretungsplan";
+  static const List<String> titles = [
+    "Vertretungsplan",
+    "Kalender",
+    "Nachrichten",
+    "Mein Unterricht",
+    "Schulportal Hessen"
+  ];
 
   @override
   void initState() {
@@ -125,7 +131,7 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
     ).then((result){
-      _onItemTapped(0, "");
+      _onItemTapped(0);
     });
   }
 
@@ -134,7 +140,7 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
     ).then((result){
-      _onItemTapped(0, "");
+      _onItemTapped(0);
     });
   }
 
@@ -154,12 +160,31 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
-  void _onItemTapped(int index, String title) {
+  void _onItemTapped(int index) {
     setState(() {
       loadUserData();
       _selectedIndex = index;
-      _currentTitle = title;
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
+
+      if (_selectedIndex == 4) {
+        client.getLoginURL().then((response) {
+          if (response is String) {
+            launchUrl(Uri.parse(response));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  client.statusCodes[response] ?? "Unbekannter Fehler!"),
+              duration: const Duration(seconds: 1),
+              action: SnackBarAction(
+                label: 'ACTION',
+                onPressed: () {},
+              ),
+            ));
+          }
+        });
+      }
+
+      Navigator.pop(context);
     });
   }
 
@@ -174,7 +199,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return _isLoading ? const LoadingScreen() : Scaffold(
       appBar: AppBar(
-          title: Text(_currentTitle == "" ? "Vertretungsplan" : _currentTitle), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
+          title: Text(titles[_selectedIndex]), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
         actions: <IconButton>[
           IconButton(
             icon: const Icon(Icons.settings),
@@ -186,121 +211,40 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         child: _widgetOptions()[_selectedIndex],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.blueAccent,
-                image: DecorationImage(
-                  image: AssetImage("assets/blackboard_background.jpg"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    schoolName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.black,
-                      shadows: [Shadow(color: Colors.white, blurRadius: 30)],
-                    ),
-                  ),
-                  Text(
-                    userName,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      color: Colors.black,
-                      shadows: [Shadow(color: Colors.white, blurRadius: 30)],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Visibility(
-              visible: client.doesSupportFeature("Vertretungsplan"),
-              child: ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Vertretungsplan'),
-                selected: _selectedIndex == 0,
-                onTap: () {
-                  _onItemTapped(0, "Vertretungsplan");
-                  Navigator.pop(context);
-                },
-              )
-            ),
-            Visibility(
-              visible: client.doesSupportFeature("Kalender"),
-              child: ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: const Text('Kalender'),
-                selected: _selectedIndex == 1,
-                onTap: () {
-                  _onItemTapped(1, "Kalender");
-                  Navigator.pop(context);
-                },
-              )
-            ),
-            Visibility(
-                visible: client.doesSupportFeature("Nachrichten - Beta-Version"),
-                child: ListTile(
-                  leading: const Icon(Icons.forum),
-                  title: const Text('Nachrichten'),
-                  selected: _selectedIndex == 2,
-                  onTap: () {
-                    _onItemTapped(2, "Nachrichten");
-                    Navigator.pop(context);
-                  },
-                )
-            ),
-            Visibility(
-                visible: client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht"),
-                child: ListTile(
-                  leading: const Icon(Icons.school),
-                  title: const Text('Mein Unterricht'),
-                  selected: _selectedIndex == 3,
-                  onTap: () {
-                    _onItemTapped(3, "Mein Unterricht");
-                    Navigator.pop(context);
-                  },
-                )
-            ),
-            ListTile(
-              leading: const Icon(Icons.open_in_new),
-              title: const Text('Schulportal öffnen'),
-              onTap: () {
-                client.getLoginURL().then((response) {
-                  if (response is String) {
-                    launchUrl(Uri.parse(response));
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(client.statusCodes[response]??"Unbekannter Fehler!"),
-                      duration: const Duration(seconds: 1),
-                      action: SnackBarAction(
-                        label: 'ACTION',
-                        onPressed: () { },
-                      ),
-                    ));
-                }
-                  Navigator.pop(context);
-                });
-              },
-            ),
-            Visibility(
-              visible: false, // client.doesSupportFeature("SchulMoodle")
-              child: ListTile(
-                title: const Text("SchulMoodle öffnen"),
-                onTap: (){
-                  //todo add support for moodle direct login
-                },
-              )
-            )
-          ],
-        ),
+      drawer: NavigationDrawer(
+        onDestinationSelected: _onItemTapped,
+        selectedIndex: _selectedIndex,
+        children: [
+          NavigationDrawerDestination(
+            enabled: client.doesSupportFeature("Vertretungsplan"),
+            icon: const Icon(Icons.group),
+            selectedIcon: const Icon(Icons.group_outlined),
+            label: const Text('Vertretungsplan'),
+          ),
+          NavigationDrawerDestination(
+            enabled: client.doesSupportFeature("Kalender"),
+            icon: const Icon(Icons.calendar_today),
+            selectedIcon: const Icon(Icons.calendar_today_outlined),
+            label: const Text('Kalender'),
+          ),
+          NavigationDrawerDestination(
+            enabled: client.doesSupportFeature("Nachrichten - Beta-Version"),
+            icon: const Icon(Icons.forum),
+            selectedIcon: const Icon(Icons.forum_outlined),
+            label: const Text('Nachrichten'),
+          ),
+          NavigationDrawerDestination(
+            enabled: client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht"),
+            icon: const Icon(Icons.school),
+            selectedIcon: const Icon(Icons.school_outlined),
+            label: const Text('Mein Unterricht'),
+          ),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.open_in_new),
+            selectedIcon: Icon(Icons.open_in_new_outlined),
+            label: Text('Im Browser öffnen'),
+          ),
+        ],
       ),
     );
   }
