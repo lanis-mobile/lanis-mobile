@@ -208,6 +208,13 @@ Future<dynamic> generateBugReport() async {
     meinUnterrichtKurse = ["No support."];
   }
 
+  //nachrichten beta-version
+  late dynamic visibleMessages;
+  late dynamic firstSingleMessage;
+  if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+    visibleMessages = await client.getConversationsOverview(false);
+    firstSingleMessage = await client.getSingleConversation(visibleMessages[0]["Uniquid"]); // Single Conversations have more possible dict keys.
+  }
 
   return {
     "app": (await PackageInfo.fromPlatform()).data,
@@ -227,13 +234,18 @@ Future<dynamic> generateBugReport() async {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
       },
-      //TODO: add conversations
+      "nachrichten": client.doesSupportFeature("Nachrichten - Beta-Version") ? {
+        "eingeblendete": visibleMessages,
+        "ausgeblendete": await client.getConversationsOverview(true),
+        "erste_detaillierte_nachricht": firstSingleMessage
+      } : "No support"
     }
   };
 }
 
 Future<int> sendToServer(String bugDescription, String contactInformation, bool sendMetaData) async {
   debugPrint("sending to server...");
+
   const apiEndpointLocation = "https://sph-bugreport-service.alessioc42.workers.dev/api/add";
 
   String deviceData = "none";
