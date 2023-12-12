@@ -98,7 +98,7 @@ class _HomePageState extends State<HomePage> {
   String schoolName = client.schoolName;
   bool _isLoading = true;
 
-  static List<Widget> appletScreens() {
+  static List<Widget> featureScreens() {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
     ).then((result){
-      openApplet(selectedFeature);
+      openFeature(selectedFeature);
     });
   }
 
@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
     ).then((result){
-      openApplet(Feature.substitutions);
+      openFeature(Feature.substitutions);
     });
   }
 
@@ -180,14 +180,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // Open specified applet without popping the navigator.
-  void openApplet(Feature currentApplet) {
+  // Open specified feature without popping the navigator.
+  void openFeature(Feature currentFeature) {
     setState(() {
       loadUserData();
 
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
 
-      switch (currentApplet) {
+      switch (currentFeature) {
         case (Feature.lanisBrowser):
           openLanisInBrowser();
           break;
@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
           openSettingsScreen();
           break;
         default:
-          selectedFeature = currentApplet;
+          selectedFeature = currentFeature;
           break;
       }
     });
@@ -204,7 +204,7 @@ class _HomePageState extends State<HomePage> {
   // Only used by NavigationDrawer
   void onNavigationItemTapped(int index) {
     Navigator.pop(context);
-    openApplet(Feature.values[index]);
+    openFeature(Feature.values[index]);
   }
 
   @override
@@ -214,7 +214,7 @@ class _HomePageState extends State<HomePage> {
           title: Text(selectedFeature.value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
       ),
       body: Center(
-        child: appletScreens()[selectedFeature.index],
+        child: featureScreens()[selectedFeature.index],
       ),
       drawer: NavigationDrawer(
         onDestinationSelected: onNavigationItemTapped,
