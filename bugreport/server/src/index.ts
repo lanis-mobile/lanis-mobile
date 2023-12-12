@@ -37,24 +37,38 @@ export default {
 			];
 
 			const { results } = await env.DB.prepare(query).bind(...params).run();
-			return Response.json(results ?? "Ok");
+			return Response.json(results ?? "Ok", {headers: { "Access-Control-Allow-Origin": "*" }});
 		} else if (pathname === "/api/del") {
 			if (await hasPermission()) {
 				const id = searchParams.get("id");
 				const query = "DELETE FROM Reports WHERE id=?";
 				await env.DB.prepare(query).bind(id).run();
-				return new Response("Entry with ID was deleted.");
+				return new Response("Entry with ID was deleted.", {headers: { "Access-Control-Allow-Origin": "*" }});
 			}
 		} else if (pathname === "/api/all") {
 			if (await hasPermission()) {
-				const query = "SELECT * FROM Reports";
+				const query = "SELECT id, username, report, time_stamp, contact_information FROM Reports";
 				const { results } = await env.DB.prepare(query).all();
-				return Response.json(results);
+				return Response.json(results, {headers: { "Access-Control-Allow-Origin": "*" }});
 			} else {
-				return new Response("No permission to access the data!");
+				return new Response("No permission to access the data!", {headers: { "Access-Control-Allow-Origin": "*" }});
+			}
+		} else if (pathname === "/api/device_data") {
+			if (await hasPermission()) {
+				const query = "SELECT device_data FROM Reports WHERE id=?;";
+				const { results } = await env.DB.prepare(query).bind(parseInt(searchParams.get("id") ?? "-1")).all();
+				let returnData;
+				try {
+					returnData = JSON.parse(<string>results[0].device_data ?? "{}");
+				} catch (_e) {
+					returnData = {".": "The user did not supply information"};
+				}
+				return Response.json(returnData, {headers: { "Access-Control-Allow-Origin": "*" }});
+			} else {
+				return new Response("No permission to access the data!", {headers: { "Access-Control-Allow-Origin": "*" }});
 			}
 		}
 
-		return new Response("Why are you here?\nMaybe you want to take a look at https://github.com/alessioc42/SPH-vertretungsplan and contribute");
+		return new Response("Why are you here?\nMaybe you want to take a look at https://github.com/alessioc42/SPH-vertretungsplan and contribute", {headers: { "Access-Control-Allow-Origin": "*" }});
 	},
 };
