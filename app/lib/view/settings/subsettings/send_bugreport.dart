@@ -40,7 +40,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Bugreport senden"),
+        title: const Text("Fehlerbericht senden"),
       ),
       body: Form(
         key: _formKey,
@@ -61,7 +61,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
                 decoration: const InputDecoration(
                   labelText: "Beschreibe den Bug",
                   alignLabelWithHint: true,
-                  hintText: "Hier kannst du deinen Bug beschreiben...\n - Beschreibe den Bug... \n - Was hast du erwartet?\n - Was ist passiert?\n - Könnte es sich um ein Schulspezifisches Problem handeln?",
+                  hintText: "Hier kannst du deinen Bug beschreiben...\n - Sei so genau wie möglich \n - Was hast du erwartet?\n - Was ist passiert?\n - Könnte es sich um ein Schulspezifisches Problem handeln?",
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -94,7 +94,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
             ),
             SwitchListTile(
                 title: const Text("Metadaten Senden"),
-                subtitle: const Text("Dies beinhaltet in der Regel sensible Informationen über deine Schule und deine Kurse. Eventuell auch Informationen über dich als Person. In den meisten Fällen ist diese Information notwendig, um den Fehler reproduzieren zu können. Dein Passwort wird nicht mit den Entwicklern geteilt."),
+                subtitle: const Text("Dies beinhaltet in der Regel sensible Informationen über deine Schule und deine Kurse. Eventuell auch Informationen über dich als Person. In den meisten Fällen sind diese Informationen notwendig, um den Fehler reproduzieren zu können. Dein Passwort wird nicht mit den Entwicklern geteilt."),
                 value: sendMetadata,
                 onChanged: (state) {
                   setState(() {
@@ -170,7 +170,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
                     );
                   }
                 },
-                child: const Text("Bugreport senden."),
+                child: const Text("Fehlerbericht senden."),
               ),
             ),
             const ListTile(
@@ -266,7 +266,7 @@ void showSendingDialog(BuildContext context) {
     barrierDismissible: false,
     builder: (BuildContext context) {
       return const AlertDialog(
-        title: Text('Sende Bugreport...'),
+        title: Text('Sende Fehlerbericht...'),
         content: Center(
           heightFactor: 1,
           child: CircularProgressIndicator(),
