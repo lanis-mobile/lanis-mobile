@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 
@@ -37,7 +36,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
         children: [
           const ListTile(
             title: Text("Danke, dass du aktiv zur Entwicklung der App beiträgst!"),
-            subtitle: Text("Es ist schwierig, eine APP für alle Schulen zu erstellen."),
+            subtitle: Text("Es ist schwierig, eine APP für alle Schulen zu entwickeln."),
           ),
           Padding(
             padding:
@@ -82,14 +81,48 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
           Padding(
             padding: EdgeInsets.only(left: padding, right: padding, top: padding),
             child: ElevatedButton(
-                onPressed: () async{
-                  await sendToServer(
-                    bugDescriptionController.text,
-                    contactInformationController.text,
-                    sendMetadata
-                  );
-                },
-                child: const Text("Bugreport senden.")
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Wirklich senden?'),
+                      content: const Text(
+                        'Wenn du auf "OK" klickst, werden deine Informationen an die Entwickler gesendet. Diese Aktion kann nicht rückgängig gemacht werden.',
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'Cancel');
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'OK');
+                            showSendingDialog(context);
+
+                            sendToServer(
+                              bugDescriptionController.text,
+                              contactInformationController.text,
+                              sendMetadata,
+                            ).then((result) {
+                              Navigator.pop(context); // Dismiss loading dialog
+                              // Handle result, e.g., show success message
+                            }).catchError((error) {
+                              Navigator.pop(context); // Dismiss loading dialog
+                              print('Error sending bug report: $error');
+                              // Handle error, e.g., show error message
+                            });
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text("Bugreport senden."),
             ),
           ),
           const ListTile(
@@ -171,4 +204,20 @@ Future<int> sendToServer(String bugDescription, String contactInformation, bool 
   } else {
     return -4;
   }
+}
+
+void showSendingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const AlertDialog(
+        title: Text('Sende Bugreport...'),
+        content: Center(
+          heightFactor: 1,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    },
+  );
 }
