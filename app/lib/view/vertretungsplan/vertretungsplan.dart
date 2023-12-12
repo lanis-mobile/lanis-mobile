@@ -22,7 +22,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   final CardInfo lastCard = CardInfo(
       title: const Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
-      body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Manche Einträge könne auch merkwürdig aussehen, da deine Schule möglicherweise zu dumm ist, um einen richtigen Vertretungsplan zu machen."),
+      body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Manche Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig eingegeben hat."),
       footer: const Text("")
   );
 
@@ -94,7 +94,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                   value != null &&
                   value != "")) {
                 if (key != "Hinweis") {
-                  if (key != "Lehrer" && value != "---") { // for dumb schools
+                  if (value != "---") { // when teacher (or any key) is '---'
                     cardBody.add(Padding(
                         padding: const EdgeInsets.only(right: 30, left: 30),
                         child: Row(
@@ -128,7 +128,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                   ],
                   Flexible(
                       child: Text(
-                      entry["Klasse"] ?? "Klasse nicht angegeben", // for dumb schools
+                      entry["Klasse"] ?? "Klasse nicht angegeben",
                       style: TextStyle(fontSize: (entry['Art'] != null) ? null : 22) //highlight "Klasse" when there is no "Art" information
                     )
                   )

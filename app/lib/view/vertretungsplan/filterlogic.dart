@@ -3,33 +3,33 @@ import 'package:intl/intl.dart';
 import '../../client/storage.dart';
 
 Future<List> filter(list) async {
+
+  final String? klassenStufeStorage = await globalStorage.read(key: "filter-klassenStufe");
   late Pattern klassenStufe;
 
-  if (await globalStorage.read(key: "filter-klassenStufe") == null ||
-      await globalStorage.read(key: "filter-klassenStufe") == "") {
+  if (klassenStufeStorage == null || klassenStufeStorage == "") {
     klassenStufe = RegExp(r'.*');
   } else {
     klassenStufe =
-        RegExp((await globalStorage.read(key: "filter-klassenStufe"))!);
+        RegExp(klassenStufeStorage);
   }
 
+  final String? klasseStorage = await globalStorage.read(key: "filter-klasse");
   late Pattern klasse;
 
-  if (await globalStorage.read(key: "filter-klasse") == null ||
-      await globalStorage.read(key: "filter-klasse") == "") {
+  if (klasseStorage == null || klasseStorage == "") {
     klasse = RegExp(r'.*');
   } else {
-    klasse = RegExp((await globalStorage.read(key: "filter-klasse"))!);
+    klasse = RegExp(klasseStorage);
   }
 
+  final String? lehrerKuerzelStorage = await globalStorage.read(key: "filter-lehrerKuerzel");
   late Pattern lehrerKuerzel;
 
-  if (await globalStorage.read(key: "filter-lehrerKuerzel") == null ||
-      await globalStorage.read(key: "filter-lehrerKuerzel") == "") {
+  if (lehrerKuerzelStorage == null || lehrerKuerzelStorage == "") {
     lehrerKuerzel = RegExp(r'.*');
   } else {
-    lehrerKuerzel =
-        RegExp((await globalStorage.read(key: "filter-lehrerKuerzel"))!);
+    lehrerKuerzel = RegExp(lehrerKuerzelStorage);
   }
 
   var result = [];
