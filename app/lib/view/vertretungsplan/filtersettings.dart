@@ -65,6 +65,15 @@ class FilterPlan extends StatelessWidget {
                 child: const Text('Anwenden'),
               ),
             ),
+            Padding(
+              padding: EdgeInsets.all(padding),
+              child: const Card(
+                child: ListTile(
+                  title: Text("Hinweis", style: TextStyle(fontSize: 22),),
+                  subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
+                ),
+              ),
+            ),
           ],
         ));
   }
