@@ -186,8 +186,8 @@ class SPHclient {
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/vertretungsplan.php",
-          queryParameters: {"tag": date, "ganzerPlan": "true"},
-          data: 'tag=$date&ganzerPlan=true',
+          queryParameters: {"a": "my"},
+          data: {"tag": date, "ganzerPlan": "true"},
           options: Options(
             headers: {
               "Accept": "*/*",

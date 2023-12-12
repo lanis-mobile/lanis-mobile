@@ -22,7 +22,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   final CardInfo lastCard = CardInfo(
       title: const Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
-      body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab."),
+      body: const Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Manche Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig eingegeben hat."),
       footer: const Text("")
   );
 
@@ -80,7 +80,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             "_sprechend",
             "_hervorgehoben",
             "Art",
-            "Fach"
+            "Fach",
+            "Lehrerkuerzel",
+            "Vertreterkuerzel"
           ];
 
           for (final entry in filteredPlan) {
@@ -92,12 +94,14 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                   value != null &&
                   value != "")) {
                 if (key != "Hinweis") {
-                  cardBody.add(Padding(
-                      padding: const EdgeInsets.only(right: 30, left: 30),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text("$key:"), Text(value)],
-                      )));
+                  if (value != "---") { // when teacher (or any key) is '---'
+                    cardBody.add(Padding(
+                        padding: const EdgeInsets.only(right: 30, left: 30),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [Text("$key:"), Text(value)],
+                        )));
+                  }
                 } else {
                   hinweis = value;
                 }
@@ -110,9 +114,10 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                 child: Text("Hinweis:  $hinweis"),
               ));
             }
-
+            
             cards.add(CardInfo(
               title: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (entry['Art'] != null) ...[
@@ -123,8 +128,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                   ],
                   Flexible(
                       child: Text(
-                      entry["Klasse"] ?? "",
-                      style: TextStyle(fontSize: (entry['Art'] != null) ? null : 22) //highlight "Klasse" when there is not "Art" information
+                      entry["Klasse"] ?? "Klasse nicht angegeben",
+                      style: TextStyle(fontSize: (entry['Art'] != null) ? null : 22) //highlight "Klasse" when there is no "Art" information
                     )
                   )
                   ,
