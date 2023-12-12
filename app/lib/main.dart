@@ -14,6 +14,7 @@ import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'background_service/service.dart' as background_service;
 
 main() async {
@@ -76,82 +77,28 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+
+enum Feature {
+  substitutions("Vertretungsplan"),
+  calendar("Kalendar"),
+  conversations("Nachrichten"),
+  lessons("Mein Unterricht"),
+  lanisBrowser(null),
+  settings(null),
+  reportBug("Fehlerbericht senden");
+
+  const Feature(this.value);
+  final String? value;
+}
+
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  Feature selectedFeature = Feature.substitutions;
 
   String userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
   bool _isLoading = true;
-  static const List<String> titles = [
-    "Vertretungsplan",
-    "Kalender",
-    "Nachrichten",
-    "Mein Unterricht",
-    "Schulportal Hessen"
-  ];
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _performLogin();
-    });
-  }
-
-  Future<void> _performLogin() async {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const AlertDialog(
-            title: Text('Anmeldung läuft...'),
-            content: SpinKitCubeGrid(
-              color: Colors.black,
-              size: 30,
-            ),
-          );
-        });
-
-    await client.loadFromStorage();
-    await client.prepareDio();
-    int loginCode = await client.login();
-    if (loginCode != 0) {
-      _selectedIndex = 0;
-      _completeLogin();
-      openLoginScreen();
-    } else {
-      userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
-      schoolName = client.schoolName;
-      _completeLogin();
-    }
-  }
-
-  void openSettingsScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SettingsScreen()),
-    ).then((result){
-      _onItemTapped(0);
-    });
-  }
-
-  void openLoginScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
-    ).then((result){
-      _onItemTapped(0);
-    });
-  }
-
-  void _completeLogin() {
-    Navigator.of(context).pop(); // Close the dialog
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  static List<Widget> _widgetOptions() {
+  static List<Widget> appletScreens() {
     return <Widget>[
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
@@ -160,31 +107,69 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      loadUserData();
-      _selectedIndex = index;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      performLogin();
+    });
+  }
+
+  Future<void> performLogin() async {
+    await client.loadFromStorage();
+    await client.prepareDio();
+    int loginCode = await client.login();
+    if (loginCode != 0) {
+      selectedFeature = Feature.substitutions;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      openLoginScreen();
+    } else {
       userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
+      schoolName = client.schoolName;
 
-      if (_selectedIndex == 4) {
-        client.getLoginURL().then((response) {
-          if (response is String) {
-            launchUrl(Uri.parse(response));
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  client.statusCodes[response] ?? "Unbekannter Fehler!"),
-              duration: const Duration(seconds: 1),
-              action: SnackBarAction(
-                label: 'ACTION',
-                onPressed: () {},
-              ),
-            ));
-          }
-        });
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void openSettingsScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    ).then((result){
+      openApplet(selectedFeature);
+    });
+  }
+
+  void openLoginScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
+    ).then((result){
+      openApplet(Feature.substitutions);
+    });
+  }
+
+  void openLanisInBrowser() {
+    client.getLoginURL().then((response) {
+      if (response is String) {
+        launchUrl(Uri.parse(response));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              client.statusCodes[response] ?? "Unbekannter Fehler!"),
+          duration: const Duration(seconds: 1),
+          action: SnackBarAction(
+            label: 'ACTION',
+            onPressed: () {},
+          ),
+        ));
       }
-
-      Navigator.pop(context);
     });
   }
 
@@ -195,25 +180,45 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Open specified applet without popping the navigator.
+  void openApplet(Feature currentApplet) {
+    setState(() {
+      loadUserData();
+
+      userName = "${client.userData["nachname"]??""}, ${client.userData["vorname"] ?? ""}";
+
+      switch (currentApplet) {
+        case (Feature.lanisBrowser):
+          openLanisInBrowser();
+          break;
+        case (Feature.settings):
+          openSettingsScreen();
+          break;
+        default:
+          selectedFeature = currentApplet;
+          break;
+      }
+    });
+  }
+
+  // Only used by NavigationDrawer
+  void onNavigationItemTapped(int index) {
+    Navigator.pop(context);
+    openApplet(Feature.values[index]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return _isLoading ? const LoadingScreen() : Scaffold(
       appBar: AppBar(
-          title: Text(titles[_selectedIndex]), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
-        actions: <IconButton>[
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Einstellungen',
-            onPressed: openSettingsScreen,
-          ),
-        ],
+          title: Text(selectedFeature.value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
       ),
       body: Center(
-        child: _widgetOptions()[_selectedIndex],
+        child: appletScreens()[selectedFeature.index],
       ),
       drawer: NavigationDrawer(
-        onDestinationSelected: _onItemTapped,
-        selectedIndex: _selectedIndex,
+        onDestinationSelected: onNavigationItemTapped,
+        selectedIndex: selectedFeature.index,
         children: [
           NavigationDrawerDestination(
             enabled: client.doesSupportFeature("Vertretungsplan"),
@@ -241,8 +246,18 @@ class _HomePageState extends State<HomePage> {
           ),
           const NavigationDrawerDestination(
             icon: Icon(Icons.open_in_new),
-            selectedIcon: Icon(Icons.open_in_new_outlined),
             label: Text('Im Browser öffnen'),
+          ),
+          const Divider(),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.settings),
+            label: Text('Einstellungen'),
+          ),
+          const NavigationDrawerDestination(
+            enabled: false,
+            icon: Icon(Icons.bug_report),
+            selectedIcon: Icon(Icons.bug_report_outlined),
+            label: Text('Fehlerbericht senden'),
           ),
         ],
       ),
@@ -255,10 +270,48 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-        body: Center(
-        child: CircularProgressIndicator(),
-        )
+    return Scaffold(
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FutureBuilder(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "SPH-Vertretungsplan ${snapshot.data?.version}",
+                          style: Theme.of(context).textTheme.labelSmall,
+                        )
+                      ],
+                    );
+                  }
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                      "Willkommen zurück!\nBitte warte kurz.\n",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text("Auf Gnade des Schulportals hoffen..."), // TODO: CHANGING STATUS MESSAGE
+                  Padding(
+                    padding: EdgeInsets.only(left: 16, right: 28.0, bottom: 28.0, top: 28.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ],
+              ),
+            ],
+          )
+        ),
     );
   }
 }
