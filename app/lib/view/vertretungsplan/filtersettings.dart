@@ -70,7 +70,7 @@ class FilterPlan extends StatelessWidget {
               child: const Card(
                 child: ListTile(
                   title: Text("Hinweis", style: TextStyle(fontSize: 22),),
-                  subtitle: Text("Da manche Schulen ihre Vertretungsplan-Einträge nicht vollständig eingeben, kannst du bestimmte Einträge, die eigentlich für dich bestimmt sind, nicht mit der Suche finden, da sie nicht die Klasse oder den Lehrer angeben. Beschwere dich bei deiner Schule."),
+                  subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
                 ),
               ),
             ),
