@@ -4,11 +4,11 @@ export interface Env {
 
 export default {
 	async fetch(request: Request, env: Env) {
-		const { pathname } = new URL(request.url);
+		const { pathname, searchParams } = new URL(request.url);
 		const requestBody = await request.text();
 
 		const hasPermission = async () => {
-			const { access_token } = JSON.parse(requestBody);
+			const access_token = searchParams.get("access_token");
 			const query = "SELECT * FROM Developers WHERE access_token=?";
 			const results = (await env.DB.prepare(query).bind(access_token).all()).results;
 			return results.length !== 0;
@@ -40,7 +40,7 @@ export default {
 			return Response.json(results ?? "Ok");
 		} else if (pathname === "/api/del") {
 			if (await hasPermission()) {
-				const { id } = JSON.parse(requestBody);
+				const id = searchParams.get("id");
 				const query = "DELETE FROM Reports WHERE id=?";
 				await env.DB.prepare(query).bind(id).run();
 				return new Response("Entry with ID was deleted.");

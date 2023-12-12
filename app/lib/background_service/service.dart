@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
@@ -89,7 +89,7 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
 
 String generateUUID(String input) {
   // Use a hash function (MD5) to generate a unique identifier for the message
-  final uuid = md5.convert(utf8.encode(input)).toString();
+  final uuid = crypto.md5.convert(utf8.encode(input)).toString();
   return uuid;
 }
 

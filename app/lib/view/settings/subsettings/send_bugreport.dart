@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 
@@ -27,6 +26,14 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
     super.initState();
   }
 
+  void clearInputs() {
+    setState(() {
+      bugDescriptionController.text = "";
+      contactInformationController.text = "";
+      sendMetadata = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +44,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
         children: [
           const ListTile(
             title: Text("Danke, dass du aktiv zur Entwicklung der App beiträgst!"),
-            subtitle: Text("Es ist schwierig, eine APP für alle Schulen zu erstellen."),
+            subtitle: Text("Es ist schwierig, eine APP für alle Schulen zu entwickeln."),
           ),
           Padding(
             padding:
@@ -82,14 +89,70 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
           Padding(
             padding: EdgeInsets.only(left: padding, right: padding, top: padding),
             child: ElevatedButton(
-                onPressed: () async{
-                  await sendToServer(
-                    bugDescriptionController.text,
-                    contactInformationController.text,
-                    sendMetadata
-                  );
-                },
-                child: const Text("Bugreport senden.")
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context_) {
+                    return AlertDialog(
+                      title: const Text('Wirklich senden?'),
+                      content: const Text(
+                        'Wenn du auf "OK" klickst, werden deine Informationen an die Entwickler gesendet. Diese Aktion kann nicht rückgängig gemacht werden.',
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context_, 'Cancel');
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context_, 'OK');
+                            showSendingDialog(context);
+
+                            sendToServer(
+                              bugDescriptionController.text,
+                              contactInformationController.text,
+                              sendMetadata,
+                            ).then((result) {
+                              Navigator.pop(context);
+                              if (result == 0) {
+                                showDialog(context: context, builder: (context) => AlertDialog(
+                                  title: const Text("Erfolg!"),
+                                  content: const Text("Der Fehlerbericht wurde Gesendet."),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, "OK"),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ));
+                                clearInputs();
+                              } else {
+                                showDialog(context: context, builder: (context) => AlertDialog(
+                                  title: const Text("Unbekannter Fehler!"),
+                                  content: const Text("Der Fehlerbericht wurde nicht Gesendet."),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, "OK"),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ));
+                              }
+                            }).catchError((error) {
+                              Navigator.pop(context);
+                              debugPrint('Error sending bug report: $error');
+                            });
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text("Bugreport senden."),
             ),
           ),
           const ListTile(
@@ -171,4 +234,20 @@ Future<int> sendToServer(String bugDescription, String contactInformation, bool 
   } else {
     return -4;
   }
+}
+
+void showSendingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const AlertDialog(
+        title: Text('Sende Bugreport...'),
+        content: Center(
+          heightFactor: 1,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    },
+  );
 }
