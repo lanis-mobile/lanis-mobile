@@ -2,29 +2,54 @@ import 'package:intl/intl.dart';
 
 import '../../client/storage.dart';
 
-
-
 Future<List> filter(list) async {
-  var klassenStufe = await globalStorage.read(
-          key: "filter-klassenStufe") ??
-      RegExp(r'.*');
-  var klasse = await globalStorage.read(
-          key: "filter-klasse") ??
-      RegExp(r'.*');
-  var lehrerKuerzel = await globalStorage.read(
-          key: "filter-lehrerKuerzel") ??
-      RegExp(r'.*');
+
+  final String? klassenStufeStorage = await globalStorage.read(key: "filter-klassenStufe");
+  late Pattern klassenStufe;
+
+  if (klassenStufeStorage == null || klassenStufeStorage == "") {
+    klassenStufe = RegExp(r'.*');
+  } else {
+    klassenStufe =
+        RegExp(klassenStufeStorage);
+  }
+
+  final String? klasseStorage = await globalStorage.read(key: "filter-klasse");
+  late Pattern klasse;
+
+  if (klasseStorage == null || klasseStorage == "") {
+    klasse = RegExp(r'.*');
+  } else {
+    klasse = RegExp(klasseStorage);
+  }
+
+  final String? lehrerKuerzelStorage = await globalStorage.read(key: "filter-lehrerKuerzel");
+  late Pattern lehrerKuerzel;
+
+  if (lehrerKuerzelStorage == null || lehrerKuerzelStorage == "") {
+    lehrerKuerzel = RegExp(r'.*');
+  } else {
+    lehrerKuerzel = RegExp(lehrerKuerzelStorage);
+  }
 
   var result = [];
 
   for (var item in list) {
-    if (item["Klasse"]?.contains(klasse) == true &&
-        item["Klasse"]?.contains(klassenStufe) == true &&
-        (item["Vertreter"]?.contains(lehrerKuerzel) == true ||
-            item["Lehrer"]?.contains(lehrerKuerzel) == true ||
-            item["Lehrerkuerzel"]?.contains(lehrerKuerzel) == true ||
-            item["Vertreterkuerzel"]?.contains(lehrerKuerzel) == true)) {
-      result.add(item);
+    var itemKlasse = item["Klasse"] ?? "";
+    if (itemKlasse.contains(klasse) == true &&
+        itemKlasse.contains(klassenStufe) == true) {
+
+      var itemVertreter = item["Vertreter"] ?? "";
+      var itemLehrer = item["Lehrer"] ?? "";
+      var itemLehrerkuerzel = item["Lehrerkuerzel"] ?? "";
+      var itemVertreterkuerzel = item["Vertreterkuerzel"] ?? "";
+
+      if (itemVertreter.contains(lehrerKuerzel) == true ||
+          itemLehrer.contains(lehrerKuerzel) == true ||
+          itemLehrerkuerzel.contains(lehrerKuerzel) == true ||
+          itemVertreterkuerzel.contains(lehrerKuerzel) == true) {
+        result.add(item);
+      }
     }
   }
 
@@ -33,29 +58,16 @@ Future<List> filter(list) async {
 
 Future<void> setFilter(
     String klassenStufe, String klasse, String lehrerKuerzel) async {
-  await globalStorage.write(
-      key: "filter-klassenStufe",
-      value: klassenStufe
-  );
-  await globalStorage.write(
-      key: "filter-klasse", value: klasse);
-  await globalStorage.write(
-      key: "filter-lehrerKuerzel",
-      value: lehrerKuerzel
-  );
+  await globalStorage.write(key: "filter-klassenStufe", value: klassenStufe);
+  await globalStorage.write(key: "filter-klasse", value: klasse);
+  await globalStorage.write(key: "filter-lehrerKuerzel", value: lehrerKuerzel);
 }
 
 dynamic getFilter() async {
   return {
-    "klassenStufe": await globalStorage.read(
-            key: "filter-klassenStufe") ??
-        "",
-    "klasse": await globalStorage.read(
-            key: "filter-klasse") ??
-        "",
-    "lehrerKuerzel": await globalStorage.read(
-            key: "filter-lehrerKuerzel") ??
-        ""
+    "klassenStufe": await globalStorage.read(key: "filter-klassenStufe") ?? "",
+    "klasse": await globalStorage.read(key: "filter-klasse") ?? "",
+    "lehrerKuerzel": await globalStorage.read(key: "filter-lehrerKuerzel") ?? ""
   };
 }
 
