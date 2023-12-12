@@ -193,14 +193,21 @@ Future<dynamic> generateBugReport() async {
   DateTime oneYearLater = currentDate.add(const Duration(days: 365));
   final formatter = DateFormat('yyyy-MM-dd');
 
+
   //mein_unterricht
-  final meinUnterricht = await client.getMeinUnterrichtOverview();
+  dynamic meinUnterricht;
   List<dynamic> meinUnterrichtKurse = [];
-  meinUnterricht["kursmappen"]?.forEach((kurs) async {
-    meinUnterrichtKurse.add(
-      (await client.getMeinUnterrichtCourseView(kurs["_courseURL"]))
-    );
-  });
+  if (client.doesSupportFeature("Kalender")) {
+    meinUnterricht = await client.getMeinUnterrichtOverview();
+    meinUnterricht["kursmappen"]?.forEach((kurs) async {
+      meinUnterrichtKurse.add(
+          (await client.getMeinUnterrichtCourseView(kurs["_courseURL"]))
+      );
+    });
+  } else {
+    meinUnterrichtKurse = ["No support."];
+  }
+
 
   return {
     "app": (await PackageInfo.fromPlatform()).data,
@@ -214,8 +221,8 @@ Future<dynamic> generateBugReport() async {
       "userdata": await client.fetchUserData()
     },
     "data": {
-      "vertretungsplan": await client.getFullVplan() ?? "Error",
-      "kalender": await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? "Error",
+      "vertretungsplan": client.doesSupportFeature("Vertretungsplan") ? await client.getFullVplan() ?? "Error" : "No support",
+      "kalender": client.doesSupportFeature("Kalender") ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? "Error" : "No support",
       "mein_unterricht": {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
