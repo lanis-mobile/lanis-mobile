@@ -209,9 +209,21 @@ Future<dynamic> generateBugReport() async {
 
   //nachrichten beta-version
   late dynamic visibleMessages;
+  late dynamic invisibleMessages;
   late dynamic firstSingleMessage;
   if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
     visibleMessages = await client.getConversationsOverview(false);
+
+    for (var element in visibleMessages) {
+      element.remove("empf");
+    }
+
+    invisibleMessages = await client.getConversationsOverview(true);
+
+    for (var element in invisibleMessages) {
+      element.remove("empf");
+    }
+
     firstSingleMessage = await client.getSingleConversation(visibleMessages[0]["Uniquid"]); // Single Conversations have more possible dict keys.
   }
 
