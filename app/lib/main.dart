@@ -151,10 +151,6 @@ class _HomePageState extends State<HomePage> {
     if (loginCode == -1  || loginCode == -2) {
       selectedFeature = Feature.substitutions;
 
-      setState(() {
-        isLoading = false;
-      });
-
       openLoginScreen();
     } else if (loginCode <= -3) {
       statusController.add(Status.errorLogin);
@@ -184,6 +180,10 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
     ).then((result) {
+      setState(() {
+        isLoading = false;
+      });
+
       openFeature(Feature.substitutions);
     });
   }
