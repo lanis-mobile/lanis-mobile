@@ -27,12 +27,20 @@ export default {
 			} = JSON.parse(requestBody);
 
 			const query =
-				"INSERT INTO Reports (username, report, contact_information, device_data, time_stamp) VALUES (?, ?, ?, ?, ?)";
+				"INSERT INTO Reports (username, report, contact_information, userinfo, vertretungsplan, kalender, mein_unterricht, nachrichten, time_stamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			const params = [
 				username,
 				report,
 				contact_information,
-				device_data,
+				JSON.stringify({
+					"app": device_data.app ?? [],
+					"school": device_data.school ?? [],
+					"user": device_data.user ?? []
+				}),
+				JSON.stringify(device_data.applets["vertretungsplan"] ?? []),
+				JSON.stringify(device_data.applets["kalender"] ?? []),
+				JSON.stringify(device_data.applets["mein_unterricht"] ?? []),
+				JSON.stringify(device_data.applets["nachrichten"] ?? []),
 				formatDate(),
 			];
 
@@ -55,15 +63,23 @@ export default {
 			}
 		} else if (pathname === "/api/device_data") {
 			if (await hasPermission()) {
-				const query = "SELECT device_data FROM Reports WHERE id=?;";
+				const query = "SELECT vertretungsplan, kalender, mein_unterricht, nachrichten ,userinfo FROM Reports WHERE id=?;";
 				const { results } = await env.DB.prepare(query).bind(parseInt(searchParams.get("id") ?? "-1")).all();
-				let returnData;
-				try {
-					returnData = JSON.parse(<string>results[0].device_data ?? "{}");
-				} catch (_e) {
-					returnData = {".": "The user did not supply information"};
+
+				if (results[0]) {
+					return Response.json(
+						{
+							"userinfo": JSON.parse(<string>results[0]["userinfo"] ?? "[]"),
+							"vertretungsplan": JSON.parse(<string>results[0]["vertretungsplan"] ?? "[]"),
+							"kalender": JSON.parse(<string>results[0]["kalender"] ?? "[]"),
+							"mein_unterricht": JSON.parse(<string>results[0]["mein_unterricht"] ?? "[]"),
+							"nachrichten": JSON.parse(<string>results[0]["nachrichten"] ?? "[]"),
+						},
+						{headers: { "Access-Control-Allow-Origin": "*" }}
+					);
+				} else {
+					return new Response("No data with that ID!", {headers: { "Access-Control-Allow-Origin": "*" }});
 				}
-				return Response.json(returnData, {headers: { "Access-Control-Allow-Origin": "*" }});
 			} else {
 				return new Response("No permission to access the data!", {headers: { "Access-Control-Allow-Origin": "*" }});
 			}

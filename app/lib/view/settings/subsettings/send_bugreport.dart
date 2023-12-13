@@ -186,7 +186,6 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
 }
 
 Future<dynamic> generateBugReport() async {
-  debugPrint("Working on it...");
   //calendar date selection
   DateTime currentDate = DateTime.now();
   DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
@@ -195,8 +194,8 @@ Future<dynamic> generateBugReport() async {
 
 
   //mein_unterricht
-  dynamic meinUnterricht;
-  List<dynamic> meinUnterrichtKurse = [];
+  late dynamic meinUnterricht;
+  late List<dynamic> meinUnterrichtKurse = [];
   if (client.doesSupportFeature("Kalender")) {
     meinUnterricht = await client.getMeinUnterrichtOverview();
     meinUnterricht["kursmappen"]?.forEach((kurs) async {
@@ -227,9 +226,9 @@ Future<dynamic> generateBugReport() async {
       "username": client.username,
       "userdata": await client.fetchUserData()
     },
-    "data": {
-      "vertretungsplan": client.doesSupportFeature("Vertretungsplan") ? await client.getFullVplan() ?? "Error" : "No support",
-      "kalender": client.doesSupportFeature("Kalender") ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? "Error" : "No support",
+    "applets": {
+      "vertretungsplan": client.doesSupportFeature("Vertretungsplan") ? await client.getFullVplan() ?? [] : [],
+      "kalender": client.doesSupportFeature("Kalender") ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
       "mein_unterricht": {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
@@ -238,20 +237,18 @@ Future<dynamic> generateBugReport() async {
         "eingeblendete": visibleMessages,
         "ausgeblendete": await client.getConversationsOverview(true),
         "erste_detaillierte_nachricht": firstSingleMessage
-      } : "No support"
+      } : []
     }
   };
 }
 
 Future<int> sendToServer(String bugDescription, String contactInformation, bool sendMetaData) async {
-  debugPrint("sending to server...");
-
   const apiEndpointLocation = "https://sph-bugreport-service.alessioc42.workers.dev/api/add";
 
-  String deviceData = "none";
+  late dynamic deviceData = {"applets":[]};
   if (sendMetaData) {
     try {
-      deviceData = jsonEncode((await generateBugReport()) ?? '["Error loading data!"]');
+      deviceData = ((await generateBugReport()) ?? '["Error loading data!"]');
     } catch (e) {
       deviceData = e.toString();
     }
@@ -275,6 +272,7 @@ Future<int> sendToServer(String bugDescription, String contactInformation, bool 
   } on (SocketException,) {
     return -3;
   } catch (e) {
+    debugPrint(e.toString());
     return -4;
   }
 }
