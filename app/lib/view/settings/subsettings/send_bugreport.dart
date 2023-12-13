@@ -247,7 +247,7 @@ Future<dynamic> generateBugReport() async {
       },
       "nachrichten": client.doesSupportFeature("Nachrichten - Beta-Version") ? {
         "eingeblendete": visibleMessages,
-        "ausgeblendete": await client.getConversationsOverview(true),
+        "ausgeblendete": invisibleMessages,
         "erste_detaillierte_nachricht": firstSingleMessage
       } : []
     }
