@@ -2,7 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
 class AppearanceSettingsScreen extends StatefulWidget {
-  const AppearanceSettingsScreen({Key? key}) : super(key: key);
+  const AppearanceSettingsScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => _AppearanceSettingsScreenState();
