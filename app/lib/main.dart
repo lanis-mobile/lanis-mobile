@@ -278,7 +278,13 @@ class _HomePageState extends State<HomePage> {
                           imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                           child: ColorFiltered(
                             colorFilter: ColorFilter.mode(imageColor, BlendMode.srcOver),
-                            child: Image.file(File(client.schoolImage)),
+                            child: AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: Image.file(
+                                File(client.schoolImage),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
                       ),
