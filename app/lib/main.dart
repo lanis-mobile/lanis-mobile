@@ -12,6 +12,7 @@ import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/conversations/conversations.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
+import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -125,7 +126,7 @@ class _HomePageState extends State<HomePage> {
       const VertretungsplanAnsicht(),
       const CalendarAnsicht(),
       const ConversationsAnsicht(),
-      const MeinUnterrichtAnsicht()
+      const MeinUnterrichtAnsicht(),
     ];
   }
 
@@ -166,14 +167,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void openSettingsScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SettingsScreen()),
-    ).then((result) {
-      openFeature(selectedFeature);
-    });
-  }
 
   void openLoginScreen() {
     Navigator.push(
@@ -226,7 +219,20 @@ class _HomePageState extends State<HomePage> {
           openLanisInBrowser();
           break;
         case (Feature.settings):
-          openSettingsScreen();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingsScreen()),
+          ).then((result) {
+            openFeature(selectedFeature);
+          });
+          break;
+        case (Feature.reportBug):
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const BugReportScreen()),
+          ).then((result) {
+            openFeature(selectedFeature);
+          });
           break;
         default:
           selectedFeature = currentFeature;
@@ -293,7 +299,7 @@ class _HomePageState extends State<HomePage> {
                   label: Text('Einstellungen'),
                 ),
                 const NavigationDrawerDestination(
-                  enabled: false,
+                  enabled: true,
                   icon: Icon(Icons.bug_report),
                   selectedIcon: Icon(Icons.bug_report_outlined),
                   label: Text('Fehlerbericht senden'),
