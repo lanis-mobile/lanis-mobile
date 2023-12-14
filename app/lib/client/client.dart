@@ -52,7 +52,7 @@ class SPHclient {
     this.schoolID = schoolID;
 
     await globalStorage.write(key: "username", value: username);
-    await globalStorage.write(key: "password", value: password);
+    await globalStorage.write(key: "password", value: password, secure: true);
     await globalStorage.write(key: "schoolID", value: schoolID);
     await globalStorage.write(key: "schoolIDHelper", value: schoolIDHelper);
   }
@@ -64,7 +64,7 @@ class SPHclient {
 
   Future<void> loadFromStorage() async {
     username = await globalStorage.read(key: "username") ?? "";
-    password = await globalStorage.read(key: "password") ?? "";
+    password = await globalStorage.read(key: "password", secure: true) ?? "";
     schoolID = await globalStorage.read(key: "schoolID") ?? "";
 
     schoolName = await globalStorage.read(key: "schoolName") ?? "";
@@ -78,7 +78,7 @@ class SPHclient {
   Future<dynamic> getCredits() async {
     return {
       "username": await globalStorage.read(key: "username") ?? "",
-      "password": await globalStorage.read(key: "password") ?? "",
+      "password": await globalStorage.read(key: "password", secure: true) ?? "",
       "schoolID": await globalStorage.read(key: "schoolID") ?? "",
       "schoolName": await globalStorage.read(key: "schoolName") ?? ""
     };

@@ -4,7 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 
 class NotificationsSettingsScreen extends StatefulWidget {
-  const NotificationsSettingsScreen({Key? key}) : super(key: key);
+  const NotificationsSettingsScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => _NotificationsSettingsScreenState();

@@ -6,7 +6,7 @@ import 'package:sph_plan/view/conversations/detailed_conversation.dart';
 import '../../client/client.dart';
 
 class ConversationsAnsicht extends StatefulWidget {
-  const ConversationsAnsicht({Key? key}) : super(key: key);
+  const ConversationsAnsicht({super.key});
 
   @override
   State<StatefulWidget> createState() => _ConversationsAnsichtState();
