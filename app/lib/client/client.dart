@@ -6,6 +6,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
@@ -565,7 +566,6 @@ class SPHclient {
                 "url": "$baseURL&f=$filename",
               });
             }
-            debugPrint(files.toString());
           }
 
           result["historie"]?.add({
@@ -688,6 +688,60 @@ class SPHclient {
       // unknown error
     }
   }
+
+  String generateUniqueHash(String source) {
+    var bytes = utf8.encode(source);
+    var digest = sha256.convert(bytes);
+
+    var shortHash = digest.toString().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').substring(0, 6);
+
+    return shortHash;
+  }
+
+  Future<String> downloadFile(String url, String filename) async {
+    try {
+      var tempDir = await getTemporaryDirectory();
+
+      // To ensure unique file names, we store each file in a folder
+      // with a hashed value of the download URL.
+      // It is necessary for a teacher to upload files with unique file names.
+      String urlHash = generateUniqueHash(url);
+
+      String folderPath = "${tempDir.path}/$urlHash";
+      String savePath = "$folderPath/$filename";
+
+      // Check if the folder exists, create it if not
+      Directory folder = Directory(folderPath);
+      if (!folder.existsSync()) {
+        folder.createSync(recursive: true);
+      }
+
+      // Check if the file already exists
+      File existingFile = File(savePath);
+      if (existingFile.existsSync()) {
+        return savePath;
+      }
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+          followRedirects: false,
+        ),
+      );
+
+      File file = File(savePath);
+      var raf = file.openSync(mode: FileMode.write);
+      raf.writeFromSync(response.data);
+      await raf.close();
+
+      return savePath;
+    } catch (e) {
+      debugPrint(e.toString());
+      return "";
+    }
+  }
+
 
   Future<dynamic> getSingleConversation(String uniqueID) async {
     try {
