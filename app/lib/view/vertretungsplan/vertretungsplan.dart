@@ -69,6 +69,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         // filter and render cards
         final filteredPlan = await filter(vPlan);
 
+        if (!mounted) return;
+
         setState(() {
           cards.clear();
 

@@ -5,16 +5,17 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../client/client.dart';
+import '../../client/client.dart';
 
-class SendBugReportAnsicht extends StatefulWidget {
-  const SendBugReportAnsicht({super.key});
+class BugReportScreen extends StatefulWidget {
+  final String? generatedMessage;
+  const BugReportScreen({super.key, this.generatedMessage});
 
   @override
-  State<StatefulWidget> createState() => _SendBugReportAnsichtState();
+  State<StatefulWidget> createState() => _BugReportScreenState();
 }
 
-class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
+class _BugReportScreenState extends State<BugReportScreen> {
   double padding = 10.0;
 
   TextEditingController bugDescriptionController = TextEditingController();
@@ -24,6 +25,7 @@ class _SendBugReportAnsichtState extends State<SendBugReportAnsicht> {
 
   @override
   void initState() {
+    bugDescriptionController.text = widget.generatedMessage ?? "";
     super.initState();
   }
 

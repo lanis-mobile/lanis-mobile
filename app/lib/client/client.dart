@@ -28,6 +28,7 @@ class SPHclient {
   String password = "";
   String schoolID = "";
   String schoolName = "";
+  String schoolImage = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
@@ -66,6 +67,8 @@ class SPHclient {
     username = await globalStorage.read(key: "username") ?? "";
     password = await globalStorage.read(key: "password", secure: true) ?? "";
     schoolID = await globalStorage.read(key: "schoolID") ?? "";
+
+    schoolImage = await globalStorage.read(key: "schoolImage") ?? "";
 
     schoolName = await globalStorage.read(key: "schoolName") ?? "";
 
@@ -133,7 +136,12 @@ class SPHclient {
   }
 
   Future<void> fetchRedundantData() async {
-    schoolName = (await getSchoolInfo(schoolID))["Name"];
+    final schoolInfo = await getSchoolInfo(schoolID);
+
+    schoolImage = await getSchoolImage(schoolInfo["bgimg"]["sm"]["url"]);
+    await globalStorage.write(key: "schoolImage", value: schoolImage);
+
+    schoolName = schoolInfo["Name"];
     await globalStorage.write(key: "schoolName", value: schoolName);
 
     userData = await fetchUserData();
@@ -143,6 +151,44 @@ class SPHclient {
 
     await globalStorage.write(
         key: "supportedApps", value: jsonEncode(supportedApps));
+  }
+
+  Future<String> getSchoolImage(String url) async {
+    try {
+      final Directory dir = await getApplicationDocumentsDirectory();
+
+      String savePath = "${dir.path}/school.jpg";
+
+      Directory folder = Directory(dir.path);
+      if (!(await folder.exists())) {
+        await folder.create(recursive: true);
+      }
+
+      File existingFile = File(savePath);
+      if (await existingFile.exists()) {
+        return savePath;
+      }
+
+      await dio.download(
+        url,
+        savePath,
+        options: Options(
+          responseType: ResponseType.bytes,
+          followRedirects: true,
+          headers: {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+          },
+        ),
+      );
+
+      return savePath;
+    } catch (e) {
+      debugPrint(e.toString());
+      return "";
+    }
   }
 
   Future<dynamic> getLoginURL() async {
