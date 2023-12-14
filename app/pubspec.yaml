@@ -52,6 +52,7 @@ dependencies:
   encrypt: ^5.0.3
   pointycastle: ^3.7.3
   flutter_linkify: ^6.0.0
+  crypto: ^3.0.3
   google_fonts: ^6.1.0
 
 

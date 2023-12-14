@@ -1,5 +1,6 @@
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
+import 'package:sph_plan/view/settings/subsettings/send_bugreport.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
@@ -79,6 +80,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const NotificationsSettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.bug_report),
+            title: const Text('Fehlerbericht senden'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SendBugReportAnsicht()),
               );
             },
           ),

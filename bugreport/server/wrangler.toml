@@ -1,0 +1,8 @@
+name = "sph-bugreport-service"
+main = "src/index.ts"
+compatibility_date = "2023-12-06"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "reports"
+database_id = "8d8f8a33-ccf4-4818-ae5f-7ae2d369185b"
