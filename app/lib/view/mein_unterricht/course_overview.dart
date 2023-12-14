@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
 
@@ -71,6 +72,45 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
             ? ListView.builder(
                 itemCount: data["historie"].length,
                 itemBuilder: (context, index) {
+                  List<ActionChip> files = [];
+                  data["historie"][index]["files"].forEach((file) {
+                    files.add(ActionChip(
+                      label: Text(file["filename"]),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Download... ${file['filesize']}"),
+                                content: const Center(
+                                  heightFactor: 1.1,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            });
+                        client.downloadFile(file["url"], file["filename"]).then((filepath) {
+                          Navigator.of(context).pop();
+
+                          if (filepath == "") {
+                            showDialog(context: context, builder: (context) => AlertDialog(
+                              title: const Text("Fehler!"),
+                              content: Text("Beim Download der Datei ${file["filename"]} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                              actions: [TextButton(
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),],
+                            ));
+                          } else {
+                            OpenFile.open(filepath);
+                          }
+                        });
+                      },
+                    ));
+                  });
+
                   return Padding(
                     padding: EdgeInsets.only(
                         left: padding, right: padding, bottom: padding),
@@ -106,6 +146,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                               data["historie"][index]["time"],
                               style:
                                   const TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                            Wrap(
+                              spacing: 8,
+                              children: files,
                             )
                           ],
                         ),
