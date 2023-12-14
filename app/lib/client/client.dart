@@ -551,11 +551,29 @@ class SPHclient {
             }
           });
 
+          List files = [];
+          if (tableRow.outerHtml.contains("file")) {
+            String baseURL = "https://start.schulportal.hessen.de/";
+            baseURL += tableRow.children[1].querySelector("div.alert.alert-info>a")!.attributes["href"]!;
+            baseURL = baseURL.replaceAll("&b=zip", "");
+
+            for (var fileDiv in tableRow.getElementsByClassName("files")[0].children) {
+              String? filename = fileDiv.attributes["data-file"];
+              files.add({
+                "filename": filename,
+                "filesize": fileDiv.querySelector("a>small")?.text,
+                "url": "$baseURL&f=$filename",
+              });
+            }
+            debugPrint(files.toString());
+          }
+
           result["historie"]?.add({
             "time": tableRow.children[0].text.trim().replaceAll("  ", "").replaceAll("\n", " ").replaceAll("  ", " "),
             "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
             "markup": markups.join("\n\n"),
-            "presence": tableRow.children[2].text.trim()
+            "presence": tableRow.children[2].text.trim(),
+            "files": files
           });
         });
       }();
