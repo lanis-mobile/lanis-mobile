@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:ui';
+import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
@@ -136,6 +137,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       performLogin();
     });
+
     super.initState();
   }
 
@@ -249,6 +251,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final Color imageColor = Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+    final Color textColor = imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+
     return isLoading
         ? loadingScreen()
         : Scaffold(
@@ -263,6 +268,44 @@ class _HomePageState extends State<HomePage> {
               onDestinationSelected: onNavigationItemTapped,
               selectedIndex: selectedFeature.index,
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      ClipRRect(
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                          child: ColorFiltered(
+                            colorFilter: ColorFilter.mode(imageColor, BlendMode.srcOver),
+                            child: Image.file(File(client.schoolImage)),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              schoolName,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: textColor
+                              ),
+                            ),
+                            Text(
+                              userName,
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: textColor
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
                 NavigationDrawerDestination(
                   enabled: client.doesSupportFeature("Vertretungsplan"),
                   icon: const Icon(Icons.group),
