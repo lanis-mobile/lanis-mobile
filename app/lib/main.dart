@@ -415,7 +415,14 @@ class _HomePageState extends State<HomePage> {
                                   Row(
                                     children: [
                                       FilledButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => BugReportScreen(generatedMessage: "AUTOMATISCH GENERIERT:\nLogin Page: ${status.data.message}\n$errorCode: ${client.statusCodes[errorCode]}\n\nMehr Details von dir:\n")),
+                                            ).then((result) {
+                                              openFeature(selectedFeature);
+                                            });
+                                          },
                                           child: const Text("Fehlerbericht senden")
                                       ),
                                       Padding(

@@ -9,7 +9,8 @@ import 'package:intl/intl.dart';
 import '../../client/client.dart';
 
 class BugReportScreen extends StatefulWidget {
-  const BugReportScreen({super.key});
+  final String? generatedMessage;
+  const BugReportScreen({super.key, this.generatedMessage});
 
   @override
   State<StatefulWidget> createState() => _BugReportScreenState();
@@ -25,6 +26,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
 
   @override
   void initState() {
+    bugDescriptionController.text = widget.generatedMessage ?? "";
     super.initState();
   }
 
