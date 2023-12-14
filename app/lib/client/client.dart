@@ -408,6 +408,20 @@ class SPHclient {
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
     globalStorage.deleteAll();
+
+    var tempDir = await getTemporaryDirectory();
+    await deleteSubfoldersAndFiles(tempDir);
+  }
+
+  Future<void> deleteSubfoldersAndFiles(Directory directory) async {
+    await for (var entity in directory.list()) {
+      if (entity is File) {
+        await entity.delete(recursive: true);
+      } else if (entity is Directory) {
+        await deleteSubfoldersAndFiles(entity);
+        await entity.delete(recursive: true);
+      }
+    }
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
