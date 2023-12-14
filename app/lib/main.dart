@@ -51,7 +51,7 @@ main() async {
 class App extends StatelessWidget {
   final AdaptiveThemeMode? savedThemeMode;
 
-  const App({Key? key, this.savedThemeMode}) : super(key: key);
+  const App({super.key, this.savedThemeMode});
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +70,7 @@ class App extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -307,7 +307,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({Key? key}) : super(key: key);
+  const LoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

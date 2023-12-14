@@ -7,8 +7,7 @@ import '../../client/client.dart';
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL; // Add the dataFetchURL property
 
-  const CourseOverviewAnsicht({Key? key, required this.dataFetchURL})
-      : super(key: key);
+  const CourseOverviewAnsicht({super.key, required this.dataFetchURL});
 
   @override
   State<StatefulWidget> createState() => _CourseOverviewAnsichtState();

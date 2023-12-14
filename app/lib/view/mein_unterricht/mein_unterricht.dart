@@ -3,7 +3,7 @@ import '../../client/client.dart';
 import 'course_overview.dart';
 
 class MeinUnterrichtAnsicht extends StatefulWidget {
-  const MeinUnterrichtAnsicht({Key? key}) : super(key: key);
+  const MeinUnterrichtAnsicht({super.key});
 
   @override
   State<StatefulWidget> createState() => _MeinUnterrichtAnsichtState();
