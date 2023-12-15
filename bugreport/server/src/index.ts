@@ -85,6 +85,6 @@ export default {
 			}
 		}
 
-		return new Response("Why are you here?\nMaybe you want to take a look at https://github.com/alessioc42/SPH-vertretungsplan and contribute", {headers: { "Access-Control-Allow-Origin": "*" }});
+		return new Response("Why are you here?\nMaybe you want to take a look at https://github.com/alessioc42/lanis-mobile and contribute", {headers: { "Access-Control-Allow-Origin": "*" }});
 	},
 };

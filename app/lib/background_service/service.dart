@@ -75,7 +75,7 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
   bool ongoingMessage = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "false") == "true";
 
   var androidDetails = AndroidNotificationDetails(
-      'io.github.alessioc42.sphplan', 'SPH-Vertretungsplan',
+      'io.github.alessioc42.sphplan', 'lanis-mobile',
       channelDescription: "Benachrichtigungen über den Vertretungsplan",
       importance: Importance.high,
       priority: Priority.high,

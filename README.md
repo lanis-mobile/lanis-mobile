@@ -1,10 +1,10 @@
-# SPH-Vertretungsplan
-## <a href="https://github.com/alessioC42/SPH-vertretungsplan/releases/latest">download APK</a>
+# Lanis Mobile
+## <a href="https://github.com/alessioC42/lanis-mobile/releases/latest"><div style="text-align: center;"><img src="app/assets/icon.png" width="30%" style="border-radius: 25%"><br>download APK</div></a>
 Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
 
 <details>
   <summary>Screenshots</summary>
-  <p align="center">
+<div style="text-align: center;">
     <a href="screenshots/Screenshot_1702113982.png">
       <img src="screenshots/Screenshot_1702113982.png" width="250" >
     </a>
@@ -29,7 +29,7 @@ Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
     <a href="screenshots/Conversation_Details.png">
       <img src="screenshots/Conversation_Details.png" width="250" >
     </a>
-  </p>
+</div>
 </details>
 
 

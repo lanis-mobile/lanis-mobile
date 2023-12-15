@@ -12,8 +12,8 @@ class ConversationsAnsicht extends StatefulWidget {
   State<StatefulWidget> createState() => _ConversationsAnsichtState();
 }
 
-class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
-  int currentPageIndex = 0;
+class _ConversationsAnsichtState extends State<ConversationsAnsicht>
+    with TickerProviderStateMixin {
   static const double padding = 10.0;
 
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
@@ -109,40 +109,45 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
     );
   }
 
-  bool forceNewData = true;
-
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  final GlobalKey<RefreshIndicatorState> _refreshVisibleKey =
       GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshInvisibleKey =
+  GlobalKey<RefreshIndicatorState>();
 
-  late StreamController _streamController;
+  late final StreamController _visibleController;
+  late final StreamController _invisibleController;
+
+  late final Stream _visibleStream;
+  late final Stream _invisibleStream;
+
+  late TabController _tabController;
 
   dynamic visibleConversations;
   dynamic invisibleConversations;
 
+  bool force = true;
+
   // Get new conversation data and cache it.
-  Future<dynamic> fetchConversations({secondTry= false}) async {
+  Future<void> fetchConversations({bool secondTry = false, bool visible = true}) async {
     try {
       if (secondTry) {
         await client.login();
       }
 
-      if (currentPageIndex == 0) {
-        if (forceNewData) {
-          visibleConversations = await client.getConversationsOverview(false);
-        } else {
-          visibleConversations ??= await client.getConversationsOverview(false);
-          forceNewData = true; // Default is true because pulling down and FAB force refreshes data, only switching between tabs uses cached.
-        }
-        return visibleConversations;
+      if ((visibleConversations == null || force == true) && visible == true) {
+        visibleConversations = await client.getConversationsOverview(false);
+        _visibleController.add(visibleConversations);
+      } else if (visible == true) {
+        _visibleController.add(visibleConversations);
+        force = true;
       }
-      else {
-        if (forceNewData) {
-          invisibleConversations = await client.getConversationsOverview(true);
-        } else {
-          invisibleConversations ??= await client.getConversationsOverview(true);
-          forceNewData = true;
-        }
-        return invisibleConversations;
+
+      if ((invisibleConversations == null || force == true) && visible == false) {
+        invisibleConversations = await client.getConversationsOverview(true);
+        _invisibleController.add(invisibleConversations);
+      } else if (visible == false) {
+        _invisibleController.add(invisibleConversations);
+        force = true;
       }
     } catch (e) {
       if (!secondTry) {
@@ -151,129 +156,183 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
     }
   }
 
-  // For initState()
-  void loadConversations() async {
-    final conversations = await fetchConversations();
-    _streamController.add(conversations);
-  }
-
-  // For RefreshIndicator()
-  Future<void> refreshConversations() async {
-    final conversations = await fetchConversations();
-    _streamController.add(conversations);
-  }
-
   @override
   void initState() {
-    _streamController = StreamController();
-    loadConversations();
+    _visibleController = StreamController();
+    _invisibleController = StreamController();
+
+    _visibleStream = _visibleController.stream.asBroadcastStream();
+    _invisibleStream = _invisibleController.stream.asBroadcastStream();
+
+    _tabController = TabController(length: 2, vsync: this);
+
+    _tabController.addListener(() {
+      force = false;
+      if (_tabController.index == 0) {
+        fetchConversations();
+      } else {
+        fetchConversations(visible: false);
+      }
+    });
+
+    fetchConversations();
     super.initState();
+  }
+
+  Widget _listView(BuildContext context, snapshot) {
+    return ListView.builder(
+      itemCount: snapshot.data.length + 1,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(
+              left: padding, right: padding, bottom: padding),
+          child: Card(
+            child: InkWell(
+                onTap: () {
+                  if (index == snapshot.data.length) {
+                    showSnackbar("(:");
+                  } else {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                DetailedConversationAnsicht(
+                                  uniqueID: snapshot.data[index]
+                                  ["Uniquid"], // nice typo Lanis
+                                  title: snapshot.data[index]
+                                  ["Betreff"],
+                                )));
+                  }
+                },
+                customBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: index == snapshot.data.length
+                    ? _tabController.index == 0
+                    ? infoCard
+                    : infoCardInvisibility
+                    : getConversationWidget(snapshot.data[index])),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
-        stream: _streamController.stream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.waiting) {
-            // If a error happened
-            if (snapshot.data is int) {
-              return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.warning,
-                        size: 60,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(50),
-                        child: Text(
-                            "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 22)),
-                      ),
-                      Text(
-                          "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
-                    ],
-                  ));
-            }
-
-            // Successful content
-            return RefreshIndicator(
-              key: _refreshIndicatorKey,
-              onRefresh: refreshConversations,
-              child: ListView.builder(
-                itemCount: snapshot.data.length + 1,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                        left: padding, right: padding, bottom: padding),
-                    child: Card(
-                      child: InkWell(
-                          onTap: () {
-                            if (index == snapshot.data.length) {
-                              showSnackbar("(:");
-                            } else {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          DetailedConversationAnsicht(
-                                            uniqueID: snapshot.data[index]
-                                            ["Uniquid"], // nice typo Lanis
-                                            title: snapshot.data[index]
-                                            ["Betreff"],
-                                          )));
-                            }
-                          },
-                          customBorder: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          child: index == snapshot.data.length
-                              ? currentPageIndex == 0
-                              ? infoCard
-                              : infoCardInvisibility
-                              : getConversationWidget(snapshot.data[index])),
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-
-          // Waiting content
-          return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ));
-        },
-      ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (index) {
-          setState(() {
-            // Do not force new data
-            forceNewData = false;
-            currentPageIndex = index;
-            _refreshIndicatorKey.currentState?.show();
-          });
-        },
-        selectedIndex: currentPageIndex,
-        destinations: const [
-          NavigationDestination(
-            label: "Eingeblendete Nachrichten",
+      appBar: TabBar(
+        controller: _tabController,
+        tabs: const [
+          Tab(
+            text: "Eingeblendete Nachrichten",
             icon: Icon(Icons.visibility),
-            selectedIcon: Icon(Icons.visibility_outlined),
           ),
-          NavigationDestination(
-              label: "Ausgeblendete Nachrichten",
+          Tab(
+              text: "Ausgeblendete Nachrichten",
               icon: Icon(Icons.visibility_off),
-              selectedIcon: Icon(Icons.visibility_off_outlined))
+          )
+        ],
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          StreamBuilder(
+              stream: _visibleStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.waiting) {
+                  // If a error happened
+                  if (snapshot.data is int) {
+                    return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.warning,
+                              size: 60,
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.all(50),
+                              child: Text(
+                                  "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 22)),
+                            ),
+                            Text(
+                                "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
+                          ],
+                        ));
+                  }
+
+                  // Successful content
+                  return RefreshIndicator(
+                      key: _refreshVisibleKey,
+                      onRefresh: () async {
+                        await fetchConversations();
+                      },
+                      child: _listView(context, snapshot),
+                  );
+                }
+
+                // Waiting content
+                return const Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                ));
+              }
+          ),
+          StreamBuilder(
+              stream: _invisibleStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.waiting) {
+                  // If a error happened
+                  if (snapshot.data is int) {
+                    return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.warning,
+                              size: 60,
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.all(50),
+                              child: Text(
+                                  "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 22)),
+                            ),
+                            Text(
+                                "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
+                          ],
+                        ));
+                  }
+
+                  // Successful content
+                  return RefreshIndicator(
+                    key: _refreshInvisibleKey,
+                    onRefresh: () async {
+                      await fetchConversations(visible: false);
+                    },
+                    child: _listView(context, snapshot),
+                  );
+                }
+
+                // Waiting content
+                return const Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ));
+              }
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _refreshIndicatorKey.currentState?.show();
+          if (_tabController.index == 0) {
+            _refreshVisibleKey.currentState?.show();
+          } else {
+            _refreshInvisibleKey.currentState?.show();
+          }
         },
         heroTag: null,
         child: const Icon(Icons.refresh),

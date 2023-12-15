@@ -68,7 +68,7 @@ class App extends StatelessWidget {
       dark: darkTheme,
       initial: savedThemeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) => MaterialApp(
-        title: 'SPH - Vertretungsplan',
+        title: 'lanis mobile',
         theme: theme,
         darkTheme: darkTheme,
         home: const HomePage(),
@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
     int loginCode = await client.login();
 
     statusController.add(Status.finalize);
-    if (loginCode == -1  || loginCode == -2) {
+    if (loginCode == -1 || loginCode == -2) {
       selectedFeature = Feature.substitutions;
 
       openLoginScreen();
@@ -168,7 +168,6 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
-
 
   void openLoginScreen() {
     Navigator.push(
@@ -251,8 +250,28 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final Color imageColor = Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
-    final Color textColor = imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+    final Color imageColor =
+        Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+    final Color textColor =
+        imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+
+    List<int?> bottomNavbarNavigationTranslation = [];
+
+    int helpIndex = 0;
+    for (var supported in [
+      client.doesSupportFeature("Vertretungsplan"),
+      client.doesSupportFeature("Kalender"),
+      client.doesSupportFeature("Nachrichten - Beta-Version"),
+      client.doesSupportFeature("Mein Unterricht") ||
+          client.doesSupportFeature("mein Unterricht")
+    ]) {
+      if (supported) {
+        bottomNavbarNavigationTranslation.add(helpIndex);
+        helpIndex += 1;
+      } else {
+        bottomNavbarNavigationTranslation.add(null);
+      }
+    }
 
     return isLoading
         ? loadingScreen()
@@ -263,6 +282,39 @@ class _HomePageState extends State<HomePage> {
             ),
             body: Center(
               child: featureScreens()[selectedFeature.index],
+            ),
+            bottomNavigationBar: NavigationBar(
+              selectedIndex:
+                  bottomNavbarNavigationTranslation[selectedFeature.index]!,
+              onDestinationSelected: (index) => openFeature(Feature
+                  .values[bottomNavbarNavigationTranslation.indexOf(index)]),
+              destinations: [
+                if (client.doesSupportFeature("Vertretungsplan"))
+                  const NavigationDestination(
+                    icon: Icon(Icons.group),
+                    selectedIcon: Icon(Icons.group_outlined),
+                    label: 'Vertretungsplan',
+                  ),
+                if (client.doesSupportFeature("Kalender"))
+                  const NavigationDestination(
+                    icon: Icon(Icons.calendar_today),
+                    selectedIcon: Icon(Icons.calendar_today_outlined),
+                    label: 'Kalender',
+                  ),
+                if (client.doesSupportFeature("Nachrichten - Beta-Version"))
+                  const NavigationDestination(
+                    icon: Icon(Icons.forum),
+                    selectedIcon: Icon(Icons.forum_outlined),
+                    label: 'Nachrichten',
+                  ),
+                if (client.doesSupportFeature("Mein Unterricht") ||
+                    client.doesSupportFeature("mein Unterricht"))
+                  const NavigationDestination(
+                    icon: Icon(Icons.school),
+                    selectedIcon: Icon(Icons.school_outlined),
+                    label: 'Mein Unterricht',
+                  ),
+              ],
             ),
             drawer: NavigationDrawer(
               onDestinationSelected: onNavigationItemTapped,
@@ -277,7 +329,8 @@ class _HomePageState extends State<HomePage> {
                         child: ImageFiltered(
                           imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                           child: ColorFiltered(
-                            colorFilter: ColorFilter.mode(imageColor, BlendMode.srcOver),
+                            colorFilter:
+                                ColorFilter.mode(imageColor, BlendMode.srcOver),
                             child: AspectRatio(
                               aspectRatio: 16 / 9,
                               child: Image.file(
@@ -295,16 +348,19 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Text(
                               schoolName,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: textColor
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(color: textColor),
                             ),
                             Text(
                               userName,
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: textColor
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: textColor),
                             )
                           ],
                         ),
@@ -371,7 +427,7 @@ class _HomePageState extends State<HomePage> {
                         future: PackageInfo.fromPlatform(),
                         builder: (context, packageInfo) {
                           return Text(
-                            "SPH-Vertretungsplan ${packageInfo.data?.version}",
+                            "lanis-mobile ${packageInfo.data?.version}",
                             style: Theme.of(context).textTheme.labelSmall,
                           );
                         }),
@@ -399,20 +455,21 @@ class _HomePageState extends State<HomePage> {
                                 Row(
                                   children: [
                                     (status.data == null
-                                        ? -1
-                                        : status.data.index) <=
-                                        Status.loadUserData.index
+                                                ? -1
+                                                : status.data.index) <=
+                                            Status.loadUserData.index
                                         ? const Center(
-                                      child: SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    )
+                                            child: SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          )
                                         : const Icon(
-                                      Icons.check,
-                                      size: 20,
-                                    ),
+                                            Icons.check,
+                                            size: 20,
+                                          ),
                                     Padding(
                                       padding: const EdgeInsets.only(left: 8),
                                       child: Text(
@@ -429,18 +486,22 @@ class _HomePageState extends State<HomePage> {
                                   child: Row(
                                     children: [
                                       (status.data == null
-                                          ? -1
-                                          : status.data.index) <=
-                                          Status.login.index
+                                                  ? -1
+                                                  : status.data.index) <=
+                                              Status.login.index
                                           ? const Center(
-                                        child: SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child:
-                                          CircularProgressIndicator(),
-                                        ),
-                                      )
-                                          : status.data == Status.errorLogin ? const Icon(Icons.error, size: 20) : const Icon(Icons.check, size: 20),
+                                              child: SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
+                                            )
+                                          : status.data == Status.errorLogin
+                                              ? const Icon(Icons.error,
+                                                  size: 20)
+                                              : const Icon(Icons.check,
+                                                  size: 20),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 8),
                                         child: Text(
@@ -467,21 +528,25 @@ class _HomePageState extends State<HomePage> {
                                           onPressed: () {
                                             Navigator.push(
                                               context,
-                                              MaterialPageRoute(builder: (context) => BugReportScreen(generatedMessage: "AUTOMATISCH GENERIERT:\nLogin Page: ${status.data.message}\n$errorCode: ${client.statusCodes[errorCode]}\n\nMehr Details von dir:\n")),
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BugReportScreen(
+                                                          generatedMessage:
+                                                              "AUTOMATISCH GENERIERT:\nLogin Page: ${status.data.message}\n$errorCode: ${client.statusCodes[errorCode]}\n\nMehr Details von dir:\n")),
                                             ).then((result) {
                                               openFeature(selectedFeature);
                                             });
                                           },
-                                          child: const Text("Fehlerbericht senden")
-                                      ),
+                                          child: const Text(
+                                              "Fehlerbericht senden")),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 8),
                                         child: OutlinedButton(
                                             onPressed: () async {
                                               await performLogin();
                                             },
-                                            child: const Text("Erneut versuchen")
-                                        ),
+                                            child:
+                                                const Text("Erneut versuchen")),
                                       )
                                     ],
                                   ),
@@ -504,7 +569,9 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 12, right: 28.0, bottom: 28.0, top: 28.0),
-                          child: status.data == (Status.errorLogin) ? const Icon(Icons.error, size: 30) : const CircularProgressIndicator(),
+                          child: status.data == (Status.errorLogin)
+                              ? const Icon(Icons.error, size: 30)
+                              : const CircularProgressIndicator(),
                         ),
                       ],
                     ),
