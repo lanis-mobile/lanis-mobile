@@ -68,7 +68,7 @@ class App extends StatelessWidget {
       dark: darkTheme,
       initial: savedThemeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) => MaterialApp(
-        title: 'SPH - Vertretungsplan',
+        title: 'lanis mobile',
         theme: theme,
         darkTheme: darkTheme,
         home: const HomePage(),

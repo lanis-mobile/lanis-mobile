@@ -103,7 +103,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         canPop: !isLoginButtonEnabled,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text("SPH Login"),
+            title: const Text("lanis login"),
               automaticallyImplyLeading: !isLoginButtonEnabled
           ),
           body: ListView(
