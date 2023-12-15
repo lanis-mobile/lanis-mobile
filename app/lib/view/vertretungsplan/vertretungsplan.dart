@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:sph_plan/client/fetcher.dart';
 
 import '../../client/client.dart';
 import 'filterlogic.dart';
@@ -29,10 +29,11 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   @override
   void initState() {
     super.initState();
-      SchedulerBinding.instance.addPostFrameCallback((_){
+      /*SchedulerBinding.instance.addPostFrameCallback((_){
         _refreshIndicatorKey.currentState?.show();
       }
-    );
+    );*/
+      client.substitutionsFetcher.fetchData();
   }
 
   List<CardInfo> cards = [];
@@ -51,23 +52,22 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
     }
   }
 
-  Future<void> refreshPlan({secondTry = false}) async {
+  Future<void> refreshPlan(substitutionData, {secondTry = false}) async {
     if (mounted) {
-      final vPlan = await client.getFullVplan();
-      if (vPlan is int) {
-        showSnackbar(client.statusCodes[vPlan] ?? "Unbekannter Fehler");
+      if (substitutionData is int) {
+        showSnackbar(client.statusCodes[substitutionData] ?? "Unbekannter Fehler");
         if (!secondTry) {
           showSnackbar("versuche Benutzer Anzumelden");
           int loginCode = await client.login();
           if (loginCode == 0) {
-            refreshPlan(secondTry: true);
+            refreshPlan(substitutionData, secondTry: true);
           } else {
             showSnackbar(client.statusCodes[loginCode] ?? "Unbekannter Fehler");
           }
         }
       } else {
         // filter and render cards
-        final filteredPlan = await filter(vPlan);
+        final filteredPlan = await filter(substitutionData);
 
         if (!mounted) return;
 
@@ -171,48 +171,59 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: refreshPlan,
-        child: cards.isNotEmpty ? ListView.builder(
-          itemCount: cards.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding:
-              EdgeInsets.only(left: padding, right: padding, bottom: padding),
-              child: Card(
-                child: ListTile(
-                  title: cards[index].title,
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      cards[index].body,
-                      cards[index].footer,
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ) : ListView(
-          children: const [Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(50),
-                    child: Text(
-                        "Ziehe nach unten um den Plan zur Aktualisieren",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 22)
+      body: StreamBuilder<FetcherResponse>(
+        stream: client.substitutionsFetcher.stream,
+        builder: (context, snapshot) {
+          if (snapshot.data?.status == FetcherStatus.done) {
+            refreshPlan(snapshot.data?.data);
+          }
+
+          return RefreshIndicator(
+            key: _refreshIndicatorKey,
+            onRefresh: () async {
+              client.substitutionsFetcher.fetchData(forceRefresh: true);
+            },
+            child: cards.isNotEmpty ? ListView.builder(
+              itemCount: cards.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding:
+                  EdgeInsets.only(left: padding, right: padding, bottom: padding),
+                  child: Card(
+                    child: ListTile(
+                      title: cards[index].title,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          cards[index].body,
+                          cards[index].footer,
+                        ],
+                      ),
                     ),
                   ),
-                  Icon(Icons.keyboard_double_arrow_down, size: 60,),
-                ],
-              )
-          ),],
-        )
-        ),
+                );
+              },
+            ) : ListView(
+              children: const [Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(50),
+                        child: Text(
+                            "Ziehe nach unten um den Plan zur Aktualisieren",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 22)
+                        ),
+                      ),
+                      Icon(Icons.keyboard_double_arrow_down, size: 60,),
+                    ],
+                  )
+              ),],
+            )
+            );
+        }
+      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -226,10 +237,11 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
           ),
           FloatingActionButton(
             onPressed: () {
+              client.substitutionsFetcher.fetchData();
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => FilterPlan()))
                   .then((_) => setState(() {
-                _refreshIndicatorKey.currentState?.show();
+                client.substitutionsFetcher.fetchData();
               }));
             },
             heroTag: null,

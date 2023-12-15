@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
+import 'package:sph_plan/client/fetcher.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -34,6 +35,8 @@ class SPHclient {
   late PersistCookieJar jar;
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
+
+  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
