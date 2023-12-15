@@ -121,7 +121,6 @@ class _HomePageState extends State<HomePage> {
   // For status messages
   late final StreamController statusController;
   late int errorCode;
-  List<int?> bottomNavbarNavigationTranslation = [];
 
   static List<Widget> featureScreens() {
     return <Widget>[
@@ -138,22 +137,6 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       performLogin();
     });
-
-    int helpIndex = 0;
-    for (var supported in [
-      client.doesSupportFeature("Vertretungsplan"),
-      client.doesSupportFeature("Kalender"),
-      client.doesSupportFeature("Nachrichten - Beta-Version"),
-      client.doesSupportFeature("Mein Unterricht") ||
-          client.doesSupportFeature("mein Unterricht")
-    ]) {
-      if (supported) {
-        bottomNavbarNavigationTranslation.add(helpIndex);
-        helpIndex += 1;
-      } else {
-        bottomNavbarNavigationTranslation.add(null);
-      }
-    }
 
     super.initState();
   }
@@ -272,11 +255,30 @@ class _HomePageState extends State<HomePage> {
     final Color textColor =
         imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
 
+    List<int?> bottomNavbarNavigationTranslation = [];
+
+    int helpIndex = 0;
+    for (var supported in [
+      client.doesSupportFeature("Vertretungsplan"),
+      client.doesSupportFeature("Kalender"),
+      client.doesSupportFeature("Nachrichten - Beta-Version"),
+      client.doesSupportFeature("Mein Unterricht") ||
+          client.doesSupportFeature("mein Unterricht")
+    ]) {
+      if (supported) {
+        bottomNavbarNavigationTranslation.add(helpIndex);
+        helpIndex += 1;
+      } else {
+        bottomNavbarNavigationTranslation.add(null);
+      }
+    }
+
     return isLoading
         ? loadingScreen()
         : Scaffold(
             appBar: AppBar(
-              title: Text(selectedFeature.value!),
+              title: Text(selectedFeature
+                  .value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
             ),
             body: Center(
               child: featureScreens()[selectedFeature.index],
