@@ -1,5 +1,5 @@
 # Lanis Mobile
-## <a href="https://github.com/alessioC42/SPH-vertretungsplan/releases/latest"><div style="text-align: center;"><img src="app/assets/icon.png" width="30%" style="border-radius: 25%"><br>download APK</div></a>
+## <a href="https://github.com/alessioC42/lanis-mobile/releases/latest"><div style="text-align: center;"><img src="app/assets/icon.png" width="30%" style="border-radius: 25%"><br>download APK</div></a>
 Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
 
 <details>
