@@ -31,7 +31,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Über SPH-Vertretungsplan")
+        title: const Text("Über Lanis-Mobile")
       ),
       body: ListView(
         children: <Widget>[
@@ -51,10 +51,10 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.add_comment),
-            title: const Text('Feature Request / Bug report'),
+            title: const Text('Feature Request'),
             onTap: () {
               launchUrl(Uri.parse(
-                  "https://github.com/alessioC42/SPH-vertretungsplan/issues/new/choose"));
+                  "https://github.com/alessioC42/lanis-mobile/issues/new/choose"));
             },
           ),
           ListTile(
@@ -62,7 +62,7 @@ class _AboutScreenState extends State<AboutScreen> {
             title: const Text('Last Release'),
             onTap: () {
               launchUrl(Uri.parse(
-                  "https://github.com/alessioC42/SPH-vertretungsplan/releases/latest"));
+                  "https://github.com/alessioC42/lanis-mobile/releases/latest"));
             },
           ),
           ListTile(
@@ -70,7 +70,7 @@ class _AboutScreenState extends State<AboutScreen> {
             title: const Text('GitHub Repository'),
             onTap: () {
               launchUrl(Uri.parse(
-                  "https://github.com/alessioC42/SPH-vertretungsplan"));
+                  "https://github.com/alessioC42/lanis-mobile"));
             },
           ),
           ListTile(

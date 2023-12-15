@@ -427,7 +427,7 @@ class _HomePageState extends State<HomePage> {
                         future: PackageInfo.fromPlatform(),
                         builder: (context, packageInfo) {
                           return Text(
-                            "SPH-Vertretungsplan ${packageInfo.data?.version}",
+                            "lanis-mobile ${packageInfo.data?.version}",
                             style: Theme.of(context).textTheme.labelSmall,
                           );
                         }),
