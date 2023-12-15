@@ -264,6 +264,38 @@ class _HomePageState extends State<HomePage> {
             body: Center(
               child: featureScreens()[selectedFeature.index],
             ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: selectedFeature.index,
+        onDestinationSelected: (index) => openFeature(Feature.values[index]),
+        destinations: [
+          NavigationDestination(
+            enabled: client.doesSupportFeature("Vertretungsplan"),
+            icon: const Icon(Icons.group),
+            selectedIcon: const Icon(Icons.group_outlined),
+            label: 'Vertretungsplan',
+          ),
+          NavigationDestination(
+            enabled: client.doesSupportFeature("Kalender"),
+            icon: const Icon(Icons.calendar_today),
+            selectedIcon: const Icon(Icons.calendar_today_outlined),
+            label: 'Kalender',
+          ),
+          NavigationDestination(
+            enabled:
+                  client.doesSupportFeature("Nachrichten - Beta-Version"),
+            icon: const Icon(Icons.forum),
+            selectedIcon: const Icon(Icons.forum_outlined),
+            label: 'Nachrichten',
+          ),
+          NavigationDestination(
+            enabled: client.doesSupportFeature("Mein Unterricht") ||
+                client.doesSupportFeature("mein Unterricht"),
+            icon: const Icon(Icons.school),
+            selectedIcon: const Icon(Icons.school_outlined),
+            label: 'Mein Unterricht',
+          ),
+        ],
+      ),
             drawer: NavigationDrawer(
               onDestinationSelected: onNavigationItemTapped,
               selectedIndex: selectedFeature.index,
