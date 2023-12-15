@@ -20,6 +20,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<Event> eventList = [];
+  bool _loading = false; // Added variable to track loading state
 
   @override
   void dispose() {
@@ -29,14 +30,20 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   @override
   void initState() {
-    performEventsRequest();
     super.initState();
 
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
+
+    // Fetch events on page load
+    performEventsRequest();
   }
 
-  void performEventsRequest({secondTry = false}) async {
+  Future<void> performEventsRequest({secondTry = false}) async {
+    setState(() {
+      _loading = true; // Set loading state to true
+    });
+
     try {
       if (secondTry) {
         await client.login();
@@ -59,14 +66,19 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         setState(() {
           eventList = updatedEventList;
           _selectedEvents.value = _getEventsForDay(_selectedDay!);
+          _loading = false;
         });
       });
     } catch (e) {
       if(!secondTry) {
         performEventsRequest(secondTry: true);
+        setState(() {
+          _loading = false;
+        });
       }
     }
   }
+
 
   Future<dynamic> fetchEvent(String id, {secondTry = false}) async {
     try {
@@ -414,7 +426,9 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return _loading
+      ? const Center(child: CircularProgressIndicator(),)
+      : Column(
       children: [
         TableCalendar<Event>(
           firstDay: DateTime.utc(2020),
