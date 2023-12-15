@@ -12,7 +12,8 @@ class ConversationsAnsicht extends StatefulWidget {
   State<StatefulWidget> createState() => _ConversationsAnsichtState();
 }
 
-class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
+class _ConversationsAnsichtState extends State<ConversationsAnsicht>
+    with TickerProviderStateMixin {
   int currentPageIndex = 0;
   static const double padding = 10.0;
 
@@ -115,12 +116,13 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
       GlobalKey<RefreshIndicatorState>();
 
   late StreamController _streamController;
+  late TabController _tabController;
 
   dynamic visibleConversations;
   dynamic invisibleConversations;
 
   // Get new conversation data and cache it.
-  Future<dynamic> fetchConversations({secondTry= false}) async {
+  Future<dynamic> fetchConversations({secondTry = false}) async {
     try {
       if (secondTry) {
         await client.login();
@@ -131,15 +133,16 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
           visibleConversations = await client.getConversationsOverview(false);
         } else {
           visibleConversations ??= await client.getConversationsOverview(false);
-          forceNewData = true; // Default is true because pulling down and FAB force refreshes data, only switching between tabs uses cached.
+          forceNewData =
+              true; // Default is true because pulling down and FAB force refreshes data, only switching between tabs uses cached.
         }
         return visibleConversations;
-      }
-      else {
+      } else {
         if (forceNewData) {
           invisibleConversations = await client.getConversationsOverview(true);
         } else {
-          invisibleConversations ??= await client.getConversationsOverview(true);
+          invisibleConversations ??=
+              await client.getConversationsOverview(true);
           forceNewData = true;
         }
         return invisibleConversations;
@@ -166,6 +169,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
   @override
   void initState() {
     _streamController = StreamController();
+    _tabController = TabController(length: 2, vsync: this);
     loadConversations();
     super.initState();
   }
@@ -173,6 +177,27 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: TabBar(
+        controller: _tabController,
+        tabs: const [
+          Tab(
+            text: "Eingeblendete Nachrichten",
+            icon: Icon(Icons.visibility),
+          ),
+          Tab(
+              text: "Ausgeblendete Nachrichten",
+              icon: Icon(Icons.visibility_off),
+          )
+        ],
+        onTap: (selected) {
+          setState(() {
+            // Do not force new data
+            forceNewData = false;
+            currentPageIndex = selected;
+            _refreshIndicatorKey.currentState?.show();
+          });
+        },
+      ),
       body: StreamBuilder(
         stream: _streamController.stream,
         builder: (context, snapshot) {
@@ -181,23 +206,23 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
             if (snapshot.data is int) {
               return Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.warning,
-                        size: 60,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(50),
-                        child: Text(
-                            "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 22)),
-                      ),
-                      Text(
-                          "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
-                    ],
-                  ));
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.warning,
+                    size: 60,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(50),
+                    child: Text(
+                        "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22)),
+                  ),
+                  Text(
+                      "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
+                ],
+              ));
             }
 
             // Successful content
@@ -222,9 +247,9 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
                                       builder: (context) =>
                                           DetailedConversationAnsicht(
                                             uniqueID: snapshot.data[index]
-                                            ["Uniquid"], // nice typo Lanis
+                                                ["Uniquid"], // nice typo Lanis
                                             title: snapshot.data[index]
-                                            ["Betreff"],
+                                                ["Betreff"],
                                           )));
                             }
                           },
@@ -232,8 +257,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
                               borderRadius: BorderRadius.circular(12)),
                           child: index == snapshot.data.length
                               ? currentPageIndex == 0
-                              ? infoCard
-                              : infoCardInvisibility
+                                  ? infoCard
+                                  : infoCardInvisibility
                               : getConversationWidget(snapshot.data[index])),
                     ),
                   );
@@ -245,31 +270,9 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht> {
           // Waiting content
           return const Scaffold(
               body: Center(
-                child: CircularProgressIndicator(),
-              ));
+            child: CircularProgressIndicator(),
+          ));
         },
-      ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (index) {
-          setState(() {
-            // Do not force new data
-            forceNewData = false;
-            currentPageIndex = index;
-            _refreshIndicatorKey.currentState?.show();
-          });
-        },
-        selectedIndex: currentPageIndex,
-        destinations: const [
-          NavigationDestination(
-            label: "Eingeblendete Nachrichten",
-            icon: Icon(Icons.visibility),
-            selectedIcon: Icon(Icons.visibility_outlined),
-          ),
-          NavigationDestination(
-              label: "Ausgeblendete Nachrichten",
-              icon: Icon(Icons.visibility_off),
-              selectedIcon: Icon(Icons.visibility_off_outlined))
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
