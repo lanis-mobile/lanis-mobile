@@ -73,7 +73,8 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
       ongoing: ongoingMessage,
-  );
+      icon: "@drawable/ic_launcher"
+      );
   var platformDetails = NotificationDetails(android: androidDetails);
   await FlutterLocalNotificationsPlugin()
       .show(id, title, message, platformDetails);
