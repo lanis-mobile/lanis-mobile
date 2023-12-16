@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:sph_plan/client/fetcher.dart';
 
 import '../../client/client.dart';
+import '../bug_report/send_bugreport.dart';
 import '../settings/subsettings/user_login.dart';
 import 'filterlogic.dart';
 import 'filtersettings.dart';
@@ -144,14 +145,45 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                                 size: 60,
                               ),
                               const Padding(
-                                padding: EdgeInsets.all(50),
+                                padding: EdgeInsets.all(35),
                                 child: Text(
-                                    "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
+                                    "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(fontSize: 22)),
                               ),
                               Text(
-                                  "Problem: ${client.statusCodes[snapshot.data?.content] ?? "Unbekannter Fehler"}")
+                                  "Problem: ${client.statusCodes[snapshot.data?.content] ?? "Unbekannter Fehler"}"
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 35),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    FilledButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    BugReportScreen(
+                                                        generatedMessage:
+                                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist beim Vertretungsplan aufgetreten:\n${snapshot.data?.content}: ${client.statusCodes[snapshot.data?.content]}\n\nMehr Details von dir:\n")),
+                                          );
+                                        },
+                                        child: const Text(
+                                            "Fehlerbericht senden")),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: OutlinedButton(
+                                          onPressed: () async {
+                                            client.substitutionsFetcher.fetchData(forceRefresh: true);
+                                          },
+                                          child:
+                                          const Text("Erneut versuchen")),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         )
