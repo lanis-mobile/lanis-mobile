@@ -36,7 +36,7 @@ class SPHclient {
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
 
-  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
+  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(seconds: 30));
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();

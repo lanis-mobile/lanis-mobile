@@ -18,22 +18,23 @@ class FetcherResponse {
 }
 
 abstract class Fetcher {
-  late final BehaviorSubject<FetcherResponse> _controller = BehaviorSubject();
+  final BehaviorSubject<FetcherResponse> _controller = BehaviorSubject();
+  late Timer timer;
   late Duration validCacheDuration;
-  DateTime _lastFetchTime = DateTime.fromMillisecondsSinceEpoch(0);
   bool _isEmpty = true;
 
   ValueStream<FetcherResponse> get stream => _controller.stream;
 
-  Fetcher(this.validCacheDuration);
+  Fetcher(this.validCacheDuration) {
+    Timer.periodic(validCacheDuration, (timer) {
+      fetchData(forceRefresh: true);
+    });
+  }
 
   void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
   
   void fetchData({forceRefresh = false}) {
-
-    bool shouldRefresh = _isEmpty || _lastFetchTime.isBefore(DateTime.now().subtract(validCacheDuration)) || forceRefresh;
-
-    if (shouldRefresh) {
+    if (_isEmpty || forceRefresh) {
       _addResponse(FetcherResponse(status: FetcherStatus.fetching));
 
       _get().then((data) {
@@ -41,7 +42,6 @@ abstract class Fetcher {
           _addResponse(FetcherResponse(status: FetcherStatus.error, data: data));
         }
         _addResponse(FetcherResponse(status: FetcherStatus.done, data: data));
-        _lastFetchTime = DateTime.now();
         _isEmpty = false;
       });
       return;
@@ -59,3 +59,7 @@ class SubstitutionsFetcher extends Fetcher {
     return client.getFullVplan();
   }
 }
+
+//TODO: CALENDAR
+//TODO: CONVERSATIONS
+//TODO: MEIN UNTERRICHT

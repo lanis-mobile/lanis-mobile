@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
@@ -102,6 +103,8 @@ enum Status {
   loadUserData("Lade Benutzerdaten..."),
   login("Einloggen..."),
   errorLogin("Beim Einloggen ist ein Fehler passiert!"),
+  substitution("Vertretungen laden..."),
+  errorSubstitution("Beim Laden des Vp entstand ein Fehler!"),
   finalize("Finalisieren...");
 
   const Status(this.message);
@@ -150,23 +153,39 @@ class _HomePageState extends State<HomePage> {
     statusController.add(Status.login);
     int loginCode = await client.login();
 
-    statusController.add(Status.finalize);
     if (loginCode == -1 || loginCode == -2) {
       selectedFeature = Feature.substitutions;
 
       openLoginScreen();
+
+      return;
     } else if (loginCode <= -3) {
       statusController.add(Status.errorLogin);
       errorCode = loginCode;
+
+      return;
     } else {
       userName =
           "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
 
-      setState(() {
-        isLoading = false;
+      statusController.add(Status.substitution);
+      client.substitutionsFetcher.fetchData(forceRefresh: true);
+      client.substitutionsFetcher.stream.listen((event) {
+        if (event.status == FetcherStatus.done) {
+          statusController.add(Status.finalize);
+        } else if (event.status == FetcherStatus.error) {
+          statusController.add(Status.errorSubstitution);
+          errorCode = event.data;
+
+          return;
+        }
       });
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void openLoginScreen() {
@@ -514,10 +533,43 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                 ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Row(
+                                    children: [
+                                      (status.data == null
+                                          ? -1
+                                          : status.data.index) <=
+                                          Status.substitution.index
+                                          ? const Center(
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child:
+                                          CircularProgressIndicator(),
+                                        ),
+                                      )
+                                          : status.data == Status.errorSubstitution
+                                          ? const Icon(Icons.error,
+                                          size: 20)
+                                          : const Icon(Icons.check,
+                                          size: 20),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8),
+                                        child: Text(
+                                          "Vertretungsplan",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          if (status.data == (Status.errorLogin)) ...[
+                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution) ...[
                             Padding(
                               padding: const EdgeInsets.only(top: 20),
                               child: Column(
@@ -569,7 +621,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 12, right: 28.0, bottom: 28.0, top: 28.0),
-                          child: status.data == (Status.errorLogin)
+                          child: status.data == Status.errorLogin || status.data == Status.errorSubstitution
                               ? const Icon(Icons.error, size: 30)
                               : const CircularProgressIndicator(),
                         ),

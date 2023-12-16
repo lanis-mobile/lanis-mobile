@@ -17,6 +17,7 @@ class VertretungsplanAnsicht extends StatefulWidget {
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   final double padding = 10.0;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  late final Stream<FetcherResponse> _stream;
 
   final random = Random();
 
@@ -33,7 +34,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         _refreshIndicatorKey.currentState?.show();
       }
     );*/
-      client.substitutionsFetcher.fetchData();
+      //client.substitutionsFetcher.fetchData();
+    _stream = client.substitutionsFetcher.stream;
   }
 
   List<CardInfo> cards = [];
@@ -172,7 +174,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<FetcherResponse>(
-        stream: client.substitutionsFetcher.stream,
+        stream: _stream,
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.done) {
             refreshPlan(snapshot.data?.data);
