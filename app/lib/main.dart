@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
@@ -16,6 +15,7 @@ import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
+import 'package:sph_plan/view/vertretungsplan/filterlogic.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -106,7 +106,9 @@ enum Status {
   substitution("Vertretungen laden..."),
   errorSubstitution("Beim Laden des Vp entstand ein Fehler!"),
   meinUnterricht("Mein Unterricht laden..."),
-  errorMeinUnterricht("Beim Laden von MU enstand ein Fehler!"),
+  errorMeinUnterricht("Beim Laden von MU entstand ein Fehler!"),
+  conversations("Nachrichten laden..."),
+  errorConversations("Beim Laden der Nachrichten entstand ein Fehler"),
   finalize("Finalisieren...");
 
   const Status(this.message);
@@ -171,36 +173,52 @@ class _HomePageState extends State<HomePage> {
           "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
 
+      // This is horrible. (it was even more horrible before)
+
+      // Substitutions
       statusController.add(Status.substitution);
-      client.substitutionsFetcher.fetchData(forceRefresh: true);
-      client.substitutionsFetcher.stream.listen((event) {
-        if (event.status == FetcherStatus.done) {
-          statusController.add(Status.finalize);
-        } else if (event.status == FetcherStatus.error) {
-          statusController.add(Status.errorSubstitution);
-          errorCode = event.content;
+      final substitutions = await client.getFullVplan();
 
-          return;
-        }
-      });
+      if (substitutions is int) {
+        statusController.add(Status.errorSubstitution);
+        errorCode = substitutions;
+        return;
+      } else {
+        client.substitutionsFetcher.addData(await filter(substitutions));
 
-      statusController.add(Status.meinUnterricht);
-      client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
-      client.meinUnterrichtFetcher.stream.listen((event) {
-        if (event.status == FetcherStatus.done) {
-          statusController.add(Status.finalize);
-        } else if (event.status == FetcherStatus.error) {
+        // Mein Unterricht
+        statusController.add(Status.meinUnterricht);
+        final meinUnterricht = await client.getMeinUnterrichtOverview();
+
+        if (meinUnterricht is int) {
           statusController.add(Status.errorMeinUnterricht);
-          errorCode = event.content;
-
+          errorCode = meinUnterricht;
           return;
-        }
-      });
-    }
+        } else {
+          client.meinUnterrichtFetcher.addData(meinUnterricht);
 
-    setState(() {
-      isLoading = false;
-    });
+          // Conversations
+          statusController.add(Status.conversations);
+          final visibleConversations = await client.getConversationsOverview(false);
+          final invisibleConversations = await client.getConversationsOverview(true);
+
+          if (visibleConversations is int || invisibleConversations is int) {
+            statusController.add(Status.errorConversations);
+            errorCode = invisibleConversations;
+            return;
+          } else {
+            client.visibleConversationsFetcher.addData(visibleConversations);
+            client.invisibleConversationsFetcher.addData(invisibleConversations);
+
+            // Finalize
+            statusController.add(Status.finalize);
+            setState(() {
+              isLoading = false;
+            });
+          }
+        }
+      }
+    }
   }
 
   void openLoginScreen() {
@@ -615,11 +633,44 @@ class _HomePageState extends State<HomePage> {
                                       ],
                                     ),
                                   ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Row(
+                                      children: [
+                                        (status.data == null
+                                            ? -1
+                                            : status.data.index) <=
+                                            Status.conversations.index
+                                            ? const Center(
+                                          child: SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child:
+                                            CircularProgressIndicator(),
+                                          ),
+                                        )
+                                            : status.data == Status.errorConversations
+                                            ? const Icon(Icons.error,
+                                            size: 20)
+                                            : const Icon(Icons.check,
+                                            size: 20),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8),
+                                          child: Text(
+                                            "Nachrichten",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ]
                               ],
                             ),
                           ),
-                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht) ...[
+                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations) ...[
                             Padding(
                               padding: const EdgeInsets.only(top: 20),
                               child: Column(
@@ -671,7 +722,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 12, right: 28.0, bottom: 28.0, top: 28.0),
-                          child: status.data == Status.errorLogin || status.data == Status.errorSubstitution
+                          child: status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations
                               ? const Icon(Icons.error, size: 30)
                               : const CircularProgressIndicator(),
                         ),

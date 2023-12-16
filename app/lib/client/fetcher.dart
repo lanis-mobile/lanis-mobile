@@ -34,6 +34,12 @@ abstract class Fetcher {
   }
 
   void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
+
+  // Should only be used for main.dart, please use fetchData.
+  void addData(dynamic data) {
+    _addResponse(FetcherResponse(status: FetcherStatus.done, content: data));
+    _isEmpty = false;
+  }
   
   void fetchData({forceRefresh = false, secondTry = false}) {
     if (_isEmpty || forceRefresh) {
@@ -88,6 +94,22 @@ class MeinUnterrichtFetcher extends Fetcher {
   }
 }
 
+class VisibleConversationsFetcher extends Fetcher {
+  VisibleConversationsFetcher(super.validCacheDuration);
+
+  @override
+  Future<dynamic> _get() {
+    return client.getConversationsOverview(false);
+  }
+}
+
+class InvisibleConversationsFetcher extends Fetcher {
+  InvisibleConversationsFetcher(super.validCacheDuration);
+
+  @override
+  Future<dynamic> _get() {
+    return client.getConversationsOverview(true);
+  }
+}
+
 //TODO: CALENDAR
-//TODO: CONVERSATIONS
-//TODO: MEIN UNTERRICHT

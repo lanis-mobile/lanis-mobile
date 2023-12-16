@@ -39,6 +39,8 @@ class SPHclient {
 
   final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
   final MeinUnterrichtFetcher meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
+  final VisibleConversationsFetcher visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 15));
+  final InvisibleConversationsFetcher invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
