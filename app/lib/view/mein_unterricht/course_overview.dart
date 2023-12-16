@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:html/parser.dart';
 import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
@@ -211,7 +212,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       child: Card(
                         child: ListTile(
                           title: Text(data["anwesenheiten"][index]["type"]),
-                          trailing: Text(data["anwesenheiten"][index]["count"],
+                          subtitle: Text(parseString(data["anwesenheiten"][index]["count"])["brackets"]!),
+                          trailing: Text(parseString(data["anwesenheiten"][index]["count"])["before"]!,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20.0)),
                         ),
@@ -268,4 +270,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       ),
     );
   }
+}
+
+Map<String, String> parseString(String input) {
+  RegExp regex = RegExp(r'(\d+)\s*(?:\(([^)]*)\))?');
+  RegExpMatch? match = regex.firstMatch(input);
+
+  if (match != null) {
+    String before = match.group(1) ?? "";
+    String brackets = match.group(2) ?? "";
+    return {"before": before, "brackets": brackets};
+  }
+
+  return {"before": "", "brackets": ""};
 }
