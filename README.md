@@ -1,5 +1,11 @@
 # Lanis Mobile
-## <a href="https://github.com/alessioC42/lanis-mobile/releases/latest"><div style="text-align: center;"><img src="app/assets/icon.png" width="30%" style="border-radius: 25%"><br>download APK</div></a>
+<p align="center">
+<a href="https://github.com/alessioC42/lanis-mobile/releases/latest">
+<img src="app/assets/icon.png" width="30%" style="border-radius: 25%">
+  <br>
+  download APK
+</a>
+</p>
 Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
 
 <details>
