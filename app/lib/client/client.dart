@@ -36,7 +36,7 @@ class SPHclient {
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
 
-  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(seconds: 30));
+  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
@@ -233,6 +233,8 @@ class SPHclient {
   }
 
   Future<dynamic> getVplan(String date) async {
+    debugPrint("Trying to get substitution plan");
+
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/vertretungsplan.php",
@@ -250,9 +252,11 @@ class SPHclient {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
+      debugPrint("Substitution plan error: -3");
       return -3;
       //network error
     } catch (e) {
+      debugPrint("Substitution plan error: -4");
       return -4;
       //unknown error;
     }

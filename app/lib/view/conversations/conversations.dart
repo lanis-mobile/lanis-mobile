@@ -181,7 +181,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
 
   Widget _listView(BuildContext context, snapshot) {
     return ListView.builder(
-      itemCount: snapshot.data.length + 1,
+      itemCount: snapshot.content.length + 1,
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.only(
@@ -189,7 +189,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
           child: Card(
             child: InkWell(
                 onTap: () {
-                  if (index == snapshot.data.length) {
+                  if (index == snapshot.content.length) {
                     showSnackbar("(:");
                   } else {
                     Navigator.push(
@@ -197,20 +197,20 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                         MaterialPageRoute(
                             builder: (context) =>
                                 DetailedConversationAnsicht(
-                                  uniqueID: snapshot.data[index]
+                                  uniqueID: snapshot.content[index]
                                   ["Uniquid"], // nice typo Lanis
-                                  title: snapshot.data[index]
+                                  title: snapshot.content[index]
                                   ["Betreff"],
                                 )));
                   }
                 },
                 customBorder: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
-                child: index == snapshot.data.length
+                child: index == snapshot.content.length
                     ? _tabController.index == 0
                     ? infoCard
                     : infoCardInvisibility
-                    : getConversationWidget(snapshot.data[index])),
+                    : getConversationWidget(snapshot.content[index])),
           ),
         );
       },

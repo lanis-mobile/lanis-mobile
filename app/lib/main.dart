@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
           statusController.add(Status.finalize);
         } else if (event.status == FetcherStatus.error) {
           statusController.add(Status.errorSubstitution);
-          errorCode = event.data;
+          errorCode = event.content;
 
           return;
         }
