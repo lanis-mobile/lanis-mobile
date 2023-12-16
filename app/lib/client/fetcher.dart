@@ -69,13 +69,22 @@ class SubstitutionsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() async {
-    final dynamic substitutionPlan = await client.getFullVplan();
+    final dynamic substitutionPlan = client.getFullVplan();
 
     if (substitutionPlan is! int) {
-      return filterlogic.filter(substitutionPlan);
+      return filterlogic.filter(await substitutionPlan);
     } else {
       return substitutionPlan;
     }
+  }
+}
+
+class MeinUnterrichtFetcher extends Fetcher {
+  MeinUnterrichtFetcher(super.validCacheDuration);
+
+  @override
+  Future<dynamic> _get() {
+    return client.getMeinUnterrichtOverview();
   }
 }
 

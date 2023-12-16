@@ -30,6 +30,7 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
+  bool fullLoad = true;
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
@@ -37,6 +38,7 @@ class SPHclient {
   late Cryptor cryptor = Cryptor();
 
   final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
+  final MeinUnterrichtFetcher meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
@@ -79,6 +81,10 @@ class SPHclient {
 
     supportedApps =
         jsonDecode(await globalStorage.read(key: "supportedApps") ?? "[]");
+
+    final fullLoadCheck = await globalStorage.read(key: "fullLoad");
+
+    fullLoad = fullLoadCheck == null ? true : fullLoadCheck as bool;
   }
 
   Future<dynamic> getCredits() async {
@@ -478,6 +484,8 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
+    debugPrint("Get Mein Unterricht overview");
+
     var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
     final response =
@@ -571,6 +579,8 @@ class SPHclient {
       }
       result["kursmappen"] = parsedMappen;
     }();
+
+    debugPrint("Successfully got Mein Unterricht.");
     return result;
   }
 

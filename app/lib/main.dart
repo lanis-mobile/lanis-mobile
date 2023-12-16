@@ -105,6 +105,8 @@ enum Status {
   errorLogin("Beim Einloggen ist ein Fehler passiert!"),
   substitution("Vertretungen laden..."),
   errorSubstitution("Beim Laden des Vp entstand ein Fehler!"),
+  meinUnterricht("Mein Unterricht laden..."),
+  errorMeinUnterricht("Beim Laden von MU enstand ein Fehler!"),
   finalize("Finalisieren...");
 
   const Status(this.message);
@@ -176,6 +178,19 @@ class _HomePageState extends State<HomePage> {
           statusController.add(Status.finalize);
         } else if (event.status == FetcherStatus.error) {
           statusController.add(Status.errorSubstitution);
+          errorCode = event.content;
+
+          return;
+        }
+      });
+
+      statusController.add(Status.meinUnterricht);
+      client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
+      client.meinUnterrichtFetcher.stream.listen((event) {
+        if (event.status == FetcherStatus.done) {
+          statusController.add(Status.finalize);
+        } else if (event.status == FetcherStatus.error) {
+          statusController.add(Status.errorMeinUnterricht);
           errorCode = event.content;
 
           return;
@@ -566,10 +581,45 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                 ),
+                                if (client.fullLoad) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Row(
+                                      children: [
+                                        (status.data == null
+                                            ? -1
+                                            : status.data.index) <=
+                                            Status.meinUnterricht.index
+                                            ? const Center(
+                                          child: SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child:
+                                            CircularProgressIndicator(),
+                                          ),
+                                        )
+                                            : status.data == Status.errorMeinUnterricht
+                                            ? const Icon(Icons.error,
+                                            size: 20)
+                                            : const Icon(Icons.check,
+                                            size: 20),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8),
+                                          child: Text(
+                                            "Mein Unterricht",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ]
                               ],
                             ),
                           ),
-                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution) ...[
+                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht) ...[
                             Padding(
                               padding: const EdgeInsets.only(top: 20),
                               child: Column(
@@ -605,7 +655,7 @@ class _HomePageState extends State<HomePage> {
                                 ],
                               ),
                             ),
-                          ]
+                          ],
                         ],
                       ),
                     ),
