@@ -108,7 +108,7 @@ class SPHclient {
   }
 
   Future<void> loadFromStorage() async {
-    loadMode = await globalStorage.read(key: "loadMode") ?? "full";
+    loadMode = await globalStorage.read(key: "loadMode") ?? "fast";
 
     username = await globalStorage.read(key: "username") ?? "";
     password = await globalStorage.read(key: "password", secure: true) ?? "";
