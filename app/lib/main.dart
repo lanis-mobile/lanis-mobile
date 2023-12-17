@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
 
     statusController.add(Status.finalize);
     if (loginCode == -1 || loginCode == -2) {
-      selectedFeature = defaultFeature;
+      selectedFeature = getDefaultFeature();
 
       openLoginScreen();
     } else if (loginCode <= -3) {
@@ -182,8 +182,7 @@ class _HomePageState extends State<HomePage> {
       });
     }
     setState(() {
-      defaultFeature = getDefaultFeature();
-      selectedFeature = defaultFeature;
+      selectedFeature = getDefaultFeature();
     });
   }
 
