@@ -220,7 +220,9 @@ class _HomePageState extends State<HomePage> {
       client.prepareFetchers();
 
       if (client.loadMode == "fast") {
-        await fetchFeature([[Status.substitution, Status.errorSubstitution, client.substitutionsFetcher]]);
+        if (client.doesSupportFeature("Vertretungsplan")) {
+          await fetchFeature([[Status.substitution, Status.errorSubstitution, client.substitutionsFetcher]]);
+        }
 
         statusController.add(Status.finalize);
         setState(() {
