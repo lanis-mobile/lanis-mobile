@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
@@ -108,7 +109,9 @@ enum Status {
   meinUnterricht("Mein Unterricht laden..."),
   errorMeinUnterricht("Beim Laden von MU entstand ein Fehler!"),
   conversations("Nachrichten laden..."),
-  errorConversations("Beim Laden der Nachrichten entstand ein Fehler"),
+  errorConversations("Beim Laden der Nachrichten entstand ein Fehler!"),
+  calendar("Kalender laden..."),
+  errorCalendar("Beim Laden des Kalenders entstand ein Fehler!"),
   finalize("Finalisieren...");
 
   const Status(this.message);
@@ -210,11 +213,30 @@ class _HomePageState extends State<HomePage> {
             client.visibleConversationsFetcher.addData(visibleConversations);
             client.invisibleConversationsFetcher.addData(invisibleConversations);
 
-            // Finalize
-            statusController.add(Status.finalize);
-            setState(() {
-              isLoading = false;
-            });
+            // Calendar
+            statusController.add(Status.calendar);
+
+            DateTime currentDate = DateTime.now();
+            DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
+            DateTime oneYearLater = currentDate.add(const Duration(days: 365));
+
+            final formatter = DateFormat('yyyy-MM-dd');
+
+            final calendar = await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+
+            if (calendar is int) {
+              statusController.add(Status.errorCalendar);
+              errorCode = calendar;
+              return;
+            } else {
+              client.calendarFetcher.addData(calendar);
+
+              // Finalize
+              statusController.add(Status.finalize);
+              setState(() {
+                isLoading = false;
+              });
+            }
           }
         }
       }
@@ -666,11 +688,44 @@ class _HomePageState extends State<HomePage> {
                                       ],
                                     ),
                                   ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Row(
+                                      children: [
+                                        (status.data == null
+                                            ? -1
+                                            : status.data.index) <=
+                                            Status.calendar.index
+                                            ? const Center(
+                                          child: SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child:
+                                            CircularProgressIndicator(),
+                                          ),
+                                        )
+                                            : status.data == Status.errorCalendar
+                                            ? const Icon(Icons.error,
+                                            size: 20)
+                                            : const Icon(Icons.check,
+                                            size: 20),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8),
+                                          child: Text(
+                                            "Kalender",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ]
                               ],
                             ),
                           ),
-                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations) ...[
+                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations || status.data == Status.errorCalendar) ...[
                             Padding(
                               padding: const EdgeInsets.only(top: 20),
                               child: Column(
@@ -722,7 +777,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 12, right: 28.0, bottom: 28.0, top: 28.0),
-                          child: status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations
+                          child: status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations || status.data == Status.errorCalendar
                               ? const Icon(Icons.error, size: 30)
                               : const CircularProgressIndicator(),
                         ),

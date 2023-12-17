@@ -245,11 +245,11 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         controller: _tabController,
         tabs: const [
           Tab(
-            text: "Eingeblendete Nachrichten",
+            text: "Eingeblendet",
             icon: Icon(Icons.visibility),
           ),
           Tab(
-              text: "Ausgeblendete Nachrichten",
+              text: "Ausgeblendet",
               icon: Icon(Icons.visibility_off),
           )
         ],

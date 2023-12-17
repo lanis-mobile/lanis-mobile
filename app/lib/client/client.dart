@@ -41,6 +41,7 @@ class SPHclient {
   final MeinUnterrichtFetcher meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
   final VisibleConversationsFetcher visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 15));
   final InvisibleConversationsFetcher invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
+  final CalendarFetcher calendarFetcher = CalendarFetcher(const Duration(days: 69));
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
@@ -271,6 +272,8 @@ class SPHclient {
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
+    debugPrint("Trying to get calendar...");
+
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/kalender.php",
@@ -292,9 +295,11 @@ class SPHclient {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
+      debugPrint("Calendar: -3");
       return -3;
       //network error
     } catch (e) {
+      debugPrint("Calendar: -4");
       return -4;
       //unknown error
     }

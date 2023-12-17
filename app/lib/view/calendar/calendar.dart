@@ -1,12 +1,12 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:sph_plan/client/fetcher.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
-
+import '../bug_report/send_bugreport.dart';
 class CalendarAnsicht extends StatefulWidget {
   const CalendarAnsicht({super.key});
 
@@ -16,11 +16,14 @@ class CalendarAnsicht extends StatefulWidget {
 
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
   late final ValueNotifier<List<Event>> _selectedEvents;
+
+  final GlobalKey<RefreshIndicatorState> _errorIndicatorKey =
+  GlobalKey<RefreshIndicatorState>();
+
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<Event> eventList = [];
-  bool _loading = false; // Added variable to track loading state
 
   @override
   void dispose() {
@@ -35,50 +38,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
 
-    // Fetch events on page load
-    performEventsRequest();
+    client.calendarFetcher.fetchData();
   }
-
-  Future<void> performEventsRequest({secondTry = false}) async {
-    setState(() {
-      _loading = true; // Set loading state to true
-    });
-
-    try {
-      if (secondTry) {
-        await client.login();
-      }
-
-      DateTime currentDate = DateTime.now();
-      DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
-      DateTime oneYearLater = currentDate.add(const Duration(days: 365));
-
-      final formatter = DateFormat('yyyy-MM-dd');
-
-      client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)).then((calendar) {
-        List<Event> updatedEventList = [];
-
-        calendar.forEach((event) {
-          updatedEventList.add(Event(event["title"], event, parseDateString(event["Anfang"]), parseDateString(event["Ende"])));
-        });
-
-        // Set the state with the updated event list
-        setState(() {
-          eventList = updatedEventList;
-          _selectedEvents.value = _getEventsForDay(_selectedDay!);
-          _loading = false;
-        });
-      });
-    } catch (e) {
-      if(!secondTry) {
-        performEventsRequest(secondTry: true);
-        setState(() {
-          _loading = false;
-        });
-      }
-    }
-  }
-
 
   Future<dynamic> fetchEvent(String id, {secondTry = false}) async {
     try {
@@ -89,7 +50,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       return await client.getEvent(id);
     } catch (e) {
       if(!secondTry) {
-        performEventsRequest(secondTry: true);
+        fetchEvent(id, secondTry: true);
       }
     }
   }
@@ -424,71 +385,152 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     );
   }
 
+  Widget errorView(BuildContext context, FetcherResponse? response) {
+    return RefreshIndicator(
+      key: _errorIndicatorKey,
+      onRefresh: () async {
+        client.calendarFetcher.fetchData(forceRefresh: true);
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.warning,
+                  size: 60,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(35),
+                  child: Text(
+                      "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 22)),
+                ),
+                Text(
+                    "Problem: ${client.statusCodes[response!.content] ?? "Unbekannter Fehler"}"),
+                Padding(
+                  padding: const EdgeInsets.only(top: 35),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FilledButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BugReportScreen(
+                                      generatedMessage:
+                                      "AUTOMATISCH GENERIERT:\nEin Fehler ist beim Kalender aufgetreten:\n${response.content}: ${client.statusCodes[response.content]}\n\nMehr Details von dir:\n")),
+                            );
+                          },
+                          child:
+                          const Text("Fehlerbericht senden")),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: OutlinedButton(
+                            onPressed: () async {
+                              client.calendarFetcher.fetchData(forceRefresh: true);
+                            },
+                            child: const Text("Erneut versuchen")),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return _loading
-      ? const Center(child: CircularProgressIndicator(),)
-      : Column(
-      children: [
-        TableCalendar<Event>(
-          firstDay: DateTime.utc(2020),
-          lastDay: DateTime.utc(2030),
-          focusedDay: _focusedDay,
-          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          calendarFormat: _calendarFormat,
-          eventLoader: _getEventsForDay,
-          startingDayOfWeek: StartingDayOfWeek.monday,
-          calendarStyle: const CalendarStyle(
-            // Use `CalendarStyle` to customize the UI
-            outsideDaysVisible: false,
-          ),
-          onDaySelected: _onDaySelected,
-          onFormatChanged: (format) {
-            if (_calendarFormat != format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            }
-          },
-          onPageChanged: (focusedDay) {
-            _focusedDay = focusedDay;
-          },
-        ),
-        const SizedBox(height: 8.0),
-        Expanded(
-          child: ValueListenableBuilder<List<Event>>(
-            valueListenable: _selectedEvents,
-            builder: (context, value, _) {
-              return ListView.builder(
-                itemCount: value.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 4.0,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: ListTile(
-                      onTap: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return getEvent(value[index]);
-                            }
-                          );
-                      },
-                      title: Text('${value[index]}'),
-                    ),
-                  );
+    return StreamBuilder<FetcherResponse>(
+      stream: client.calendarFetcher.stream,
+      builder: (context, snapshot) {
+        if (snapshot.data?.status == FetcherStatus.error) {
+          return errorView(context, snapshot.data);
+        } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          List<Event> updatedEventList = [];
+
+          snapshot.data?.content.forEach((event) {
+            updatedEventList.add(Event(event["title"], event, parseDateString(event["Anfang"]), parseDateString(event["Ende"])));
+          });
+
+          eventList = updatedEventList;
+          _selectedEvents.value = _getEventsForDay(_selectedDay!);
+
+          return Column(
+            children: [
+              TableCalendar<Event>(
+                firstDay: DateTime.utc(2020),
+                lastDay: DateTime.utc(2030),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                calendarFormat: _calendarFormat,
+                eventLoader: _getEventsForDay,
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                calendarStyle: const CalendarStyle(
+                  // Use `CalendarStyle` to customize the UI
+                  outsideDaysVisible: false,
+                ),
+                onDaySelected: _onDaySelected,
+                onFormatChanged: (format) {
+                  if (_calendarFormat != format) {
+                    setState(() {
+                      _calendarFormat = format;
+                    });
+                  }
                 },
-              );
-            },
-          ),
-        ),
-      ],
+                onPageChanged: (focusedDay) {
+                  _focusedDay = focusedDay;
+                },
+              ),
+              const SizedBox(height: 8.0),
+              Expanded(
+                child: ValueListenableBuilder<List<Event>>(
+                  valueListenable: _selectedEvents,
+                  builder: (context, value, _) {
+                    return ListView.builder(
+                      itemCount: value.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 4.0,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: ListTile(
+                            onTap: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return getEvent(value[index]);
+                                  }
+                              );
+                            },
+                            title: Text('${value[index]}'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+      }
     );
   }
 }
