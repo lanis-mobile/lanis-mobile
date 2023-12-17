@@ -46,8 +46,6 @@ class SPHclient {
   late final CalendarFetcher calendarFetcher;
 
   void prepareFetchers() {
-    print("sdfsdf");
-
     if (client.loadMode == "full") {
       if (client.doesSupportFeature("Vertretungsplan")) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));

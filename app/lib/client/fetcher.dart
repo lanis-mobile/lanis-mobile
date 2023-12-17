@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
@@ -100,7 +99,7 @@ class VisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getConversationsOverview(false);
+    return client.getVisibleConversationOverview();
   }
 }
 
@@ -109,7 +108,7 @@ class InvisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getConversationsOverview(true);
+    return client.getInvisibleConversationOverview();
   }
 }
 
@@ -118,12 +117,6 @@ class CalendarFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    DateTime currentDate = DateTime.now();
-    DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
-    DateTime oneYearLater = currentDate.add(const Duration(days: 365));
-
-    final formatter = DateFormat('yyyy-MM-dd');
-
-    return client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+    return client.getCurrentCalendar();
   }
 }
