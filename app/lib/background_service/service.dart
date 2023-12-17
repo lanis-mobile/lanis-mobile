@@ -10,15 +10,6 @@ import '../client/storage.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
 
 
-final List<String> keysNotRender = [
-  "Tag_en",
-  "Stunde",
-  "_sprechend",
-  "_hervorgehoben",
-  "Art",
-  "Fach"
-];
-
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -77,11 +68,13 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
   var androidDetails = AndroidNotificationDetails(
       'io.github.alessioc42.sphplan', 'lanis-mobile',
       channelDescription: "Benachrichtigungen über den Vertretungsplan",
+
       importance: Importance.high,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
       ongoing: ongoingMessage,
-      icon: "@mipmap/ic_launcher");
+      icon: "@drawable/ic_launcher"
+      );
   var platformDetails = NotificationDetails(android: androidDetails);
   await FlutterLocalNotificationsPlugin()
       .show(id, title, message, platformDetails);
