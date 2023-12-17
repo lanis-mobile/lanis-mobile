@@ -201,9 +201,9 @@ class _HomePageState extends State<HomePage> {
     statusController.add(Status.login);
     int loginCode = await client.login();
 
-    if (loginCode == -1 || loginCode == -2) {
-      selectedFeature = getDefaultFeature();
+    selectedFeature = getDefaultFeature();
 
+    if (loginCode == -1 || loginCode == -2) {
       openLoginScreen();
 
       return;
@@ -273,9 +273,6 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }
-    setState(() {
-      selectedFeature = getDefaultFeature();
-    });
   }
 
   void openLoginScreen() {
