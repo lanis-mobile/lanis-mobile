@@ -203,6 +203,8 @@ class _HomePageState extends State<HomePage> {
 
     selectedFeature = getDefaultFeature();
 
+    client.prepareFetchers();
+
     if (loginCode == -1 || loginCode == -2) {
       openLoginScreen();
 
@@ -216,8 +218,6 @@ class _HomePageState extends State<HomePage> {
       userName =
           "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
-
-      client.prepareFetchers();
 
       if (client.loadMode == "fast") {
         if (client.doesSupportFeature("Vertretungsplan")) {
