@@ -7,10 +7,12 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
+import 'package:sph_plan/client/fetcher.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -21,7 +23,9 @@ class SPHclient {
     -4: "Unbekannter Fehler! Bist du eingeloggt?",
     -5: "Keine Erlaubnis",
     -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
-    -7: "Unbekannter Fehler! Antwort war nicht salted."
+    -7: "Unbekannter Fehler! Antwort war nicht salted.",
+    -8: "Nicht unterstützt!",
+    -9: "Kein Internet."
   };
 
   String username = "";
@@ -29,11 +33,51 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
+  String loadMode = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
+
+  late final SubstitutionsFetcher substitutionsFetcher;
+  late final MeinUnterrichtFetcher meinUnterrichtFetcher;
+  late final VisibleConversationsFetcher visibleConversationsFetcher;
+  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
+  late final CalendarFetcher calendarFetcher;
+
+  void prepareFetchers() {
+    if (client.loadMode == "full") {
+      if (client.doesSupportFeature("Vertretungsplan")) {
+        substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
+
+      }
+      if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
+        meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
+      }
+      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+        visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 15));
+        invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
+      }
+      if (client.doesSupportFeature("Kalender")) {
+        calendarFetcher = CalendarFetcher(null);
+      }
+    } else {
+      if (client.doesSupportFeature("Vertretungsplan")) {
+        substitutionsFetcher = SubstitutionsFetcher(null);
+      }
+      if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
+        meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
+      }
+      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+        visibleConversationsFetcher = VisibleConversationsFetcher(null);
+        invisibleConversationsFetcher = InvisibleConversationsFetcher(null);
+      }
+      if (client.doesSupportFeature("Kalender")) {
+        calendarFetcher = CalendarFetcher(null);
+      }
+    }
+  }
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
@@ -64,6 +108,8 @@ class SPHclient {
   }
 
   Future<void> loadFromStorage() async {
+    loadMode = await globalStorage.read(key: "loadMode") ?? "fast";
+
     username = await globalStorage.read(key: "username") ?? "";
     password = await globalStorage.read(key: "password", secure: true) ?? "";
     schoolID = await globalStorage.read(key: "schoolID") ?? "";
@@ -88,6 +134,10 @@ class SPHclient {
   }
 
   Future<int> login({userLogin = false}) async {
+    if (!(await InternetConnectionChecker().hasConnection)) {
+      return -9;
+    }
+
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -230,6 +280,8 @@ class SPHclient {
   }
 
   Future<dynamic> getVplan(String date) async {
+    debugPrint("Trying to get substitution plan");
+
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/vertretungsplan.php",
@@ -247,15 +299,23 @@ class SPHclient {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
+      debugPrint("Substitution plan error: -3");
       return -3;
       //network error
     } catch (e) {
+      debugPrint("Substitution plan error: -4");
       return -4;
       //unknown error;
     }
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
+    if (!client.doesSupportFeature("Kalender")) {
+      return -8;
+    }
+
+    debugPrint("Trying to get calendar...");
+
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/kalender.php",
@@ -277,9 +337,11 @@ class SPHclient {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
+      debugPrint("Calendar: -3");
       return -3;
       //network error
     } catch (e) {
+      debugPrint("Calendar: -4");
       return -4;
       //unknown error
     }
@@ -357,6 +419,10 @@ class SPHclient {
   }
 
   Future<dynamic> getFullVplan() async {
+    if (!client.doesSupportFeature("Vertretungsplan")) {
+      return -8;
+    }
+    
     try {
       var dates = await getVplanDates();
 
@@ -471,6 +537,12 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
+    if (!(client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht"))) {
+      return -8;
+    }
+    
+    debugPrint("Get Mein Unterricht overview");
+
     var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
     final response =
@@ -564,6 +636,8 @@ class SPHclient {
       }
       result["kursmappen"] = parsedMappen;
     }();
+
+    debugPrint("Successfully got Mein Unterricht.");
     return result;
   }
 
@@ -707,6 +781,10 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
+    if (!client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      return -8;
+    }
+
     debugPrint("Get new conversation data. Invisible: $invisible.");
     try {
       final response =

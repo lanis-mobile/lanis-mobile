@@ -1,6 +1,6 @@
 import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
-import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
@@ -80,6 +80,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const NotificationsSettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.speed),
+            title: const Text('Lademodus'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoadModeScreen()),
               );
             },
           ),
