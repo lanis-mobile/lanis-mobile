@@ -38,7 +38,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
 
-    client.calendarFetcher.fetchData();
+    client.calendarFetcher?.fetchData();
   }
 
   Future<dynamic> fetchEvent(String id, {secondTry = false}) async {
@@ -389,7 +389,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     return RefreshIndicator(
       key: _calErrorIndicatorKey0,
       onRefresh: () async {
-        client.calendarFetcher.fetchData(forceRefresh: true);
+        client.calendarFetcher?.fetchData(forceRefresh: true);
       },
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -433,7 +433,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                         padding: const EdgeInsets.only(left: 8),
                         child: OutlinedButton(
                             onPressed: () async {
-                              client.calendarFetcher.fetchData(forceRefresh: true);
+                              client.calendarFetcher?.fetchData(forceRefresh: true);
                             },
                             child: const Text("Erneut versuchen")),
                       )
@@ -451,7 +451,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<FetcherResponse>(
-      stream: client.calendarFetcher.stream,
+      stream: client.calendarFetcher?.stream,
       builder: (context, snapshot) {
         if (snapshot.data?.status == FetcherStatus.error) {
           return errorView(context, snapshot.data);

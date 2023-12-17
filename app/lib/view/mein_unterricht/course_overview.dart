@@ -67,6 +67,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   );
 
   Widget _buildBody() {
+    if (data is int && data < 0) {
+      return noDataScreen;
+    }
+
     switch (_currentIndex) {
       case 0: // historie
         return data["historie"].length != 0
@@ -231,6 +235,25 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     if (loading) {
       return const Center(
         child: CircularProgressIndicator(),
+      );
+    }
+    String appBarTitle;
+    if (data is int && data < 0) {
+      return Scaffold(
+        appBar: AppBar(title: Text("Fehler"),),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error,
+                size: 60,
+              ),
+              Text("Vielleicht bis du Offline?")
+            ],
+          ),
+        ),
       );
     }
 
