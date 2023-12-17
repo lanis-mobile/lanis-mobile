@@ -1,0 +1,1 @@
+<p><i>lanis-mobile</i> is an Android application to display the substitution plan of a school (+other elements of the SPH) in the Lanis system.</p><p><b>Data protection:</b> All data is stored encrypted on the device. All communication takes place directly with the Lanis servers. Sensitive data (such as grades, attendance, etc.) is protected by end-to-end encryption.</p>
