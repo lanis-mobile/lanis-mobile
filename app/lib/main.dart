@@ -110,13 +110,27 @@ enum Status {
 }
 
 class _HomePageState extends State<HomePage> {
-  Feature selectedFeature = Feature.substitutions;
+  late Feature defaultFeature;
+  late Feature selectedFeature;
 
   String userName =
       "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
   String schoolName = client.schoolName;
 
   bool isLoading = true;
+
+  Feature getDefaultFeature() {
+    if (client.doesSupportFeature("Vertretungsplan")) {
+      return Feature.substitutions;
+    } else if (client.doesSupportFeature("Kalender")) {
+      return Feature.calendar;
+    } else if (client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht")) {
+      return Feature.lessons;
+    } else {
+      return Feature.conversations;
+    }
+  }
+
 
   // For status messages
   late final StreamController statusController;
@@ -152,7 +166,7 @@ class _HomePageState extends State<HomePage> {
 
     statusController.add(Status.finalize);
     if (loginCode == -1 || loginCode == -2) {
-      selectedFeature = Feature.substitutions;
+      selectedFeature = defaultFeature;
 
       openLoginScreen();
     } else if (loginCode <= -3) {
@@ -167,6 +181,10 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }
+    setState(() {
+      defaultFeature = getDefaultFeature();
+      selectedFeature = defaultFeature;
+    });
   }
 
   void openLoginScreen() {
