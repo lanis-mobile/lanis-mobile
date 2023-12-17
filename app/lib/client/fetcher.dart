@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
@@ -22,27 +24,33 @@ class FetcherResponse {
 abstract class Fetcher {
   final BehaviorSubject<FetcherResponse> _controller = BehaviorSubject();
   late Timer timer;
-  late Duration validCacheDuration;
-  bool _isEmpty = true;
+  late Duration? validCacheDuration;
+  bool isEmpty = true;
 
   ValueStream<FetcherResponse> get stream => _controller.stream;
 
   Fetcher(this.validCacheDuration) {
-    Timer.periodic(validCacheDuration, (timer) {
-      fetchData(forceRefresh: true);
-    });
+    if (validCacheDuration != null) {
+      Timer.periodic(validCacheDuration!, (timer) async {
+        if (await InternetConnectionChecker().hasConnection) {
+          await fetchData(forceRefresh: true);
+        }
+      });
+    }
   }
 
   void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
-
-  // Should only be used for main.dart, please use fetchData.
-  void addData(dynamic data) {
-    _addResponse(FetcherResponse(status: FetcherStatus.done, content: data));
-    _isEmpty = false;
-  }
   
-  void fetchData({forceRefresh = false, secondTry = false}) {
-    if (_isEmpty || forceRefresh) {
+  Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
+    if (!(await InternetConnectionChecker().hasConnection)) {
+      if (isEmpty) {
+        _addResponse(FetcherResponse(status: FetcherStatus.error, content: -9));
+      }
+
+      return;
+    }
+
+    if (isEmpty || forceRefresh) {
       _addResponse(FetcherResponse(status: FetcherStatus.fetching));
 
       _get().then((data) async {
@@ -61,9 +69,9 @@ abstract class Fetcher {
           return;
         }
         _addResponse(FetcherResponse(status: FetcherStatus.done, content: data));
-        _isEmpty = false;
+        isEmpty = false;
+        return;
       });
-      return;
     }
   }
 
@@ -99,7 +107,7 @@ class VisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getVisibleConversationOverview();
+    return client.getConversationsOverview(false);
   }
 }
 
@@ -108,7 +116,7 @@ class InvisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getInvisibleConversationOverview();
+    return client.getConversationsOverview(true);
   }
 }
 
@@ -117,6 +125,12 @@ class CalendarFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getCurrentCalendar();
+    DateTime currentDate = DateTime.now();
+    DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
+    DateTime oneYearLater = currentDate.add(const Duration(days: 365));
+
+    final formatter = DateFormat('yyyy-MM-dd');
+
+    return client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
   }
 }

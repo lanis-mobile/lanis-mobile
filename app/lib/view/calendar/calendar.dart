@@ -17,7 +17,7 @@ class CalendarAnsicht extends StatefulWidget {
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
   late final ValueNotifier<List<Event>> _selectedEvents;
 
-  final GlobalKey<RefreshIndicatorState> _errorIndicatorKey =
+  final GlobalKey<RefreshIndicatorState> _calErrorIndicatorKey0 =
   GlobalKey<RefreshIndicatorState>();
 
   CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -387,7 +387,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   Widget errorView(BuildContext context, FetcherResponse? response) {
     return RefreshIndicator(
-      key: _errorIndicatorKey,
+      key: _calErrorIndicatorKey0,
       onRefresh: () async {
         client.calendarFetcher.fetchData(forceRefresh: true);
       },

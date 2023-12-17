@@ -17,7 +17,7 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   final double padding = 12.0;
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  final GlobalKey<RefreshIndicatorState> _vpRefreshIndicatorKey0 =
       GlobalKey<RefreshIndicatorState>();
 
   @override
@@ -126,7 +126,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             }
 
             return RefreshIndicator(
-                key: _refreshIndicatorKey,
+                key: _vpRefreshIndicatorKey0,
                 onRefresh: () async {
                   client.substitutionsFetcher.fetchData(forceRefresh: true);
                 },
@@ -224,7 +224,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () => _refreshIndicatorKey.currentState?.show(),
+            onPressed: () => _vpRefreshIndicatorKey0.currentState?.show(),
             heroTag: "RefreshSubstitutions",
             child: const Icon(Icons.refresh),
           ),

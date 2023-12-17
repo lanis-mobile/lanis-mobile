@@ -57,6 +57,7 @@ dependencies:
   open_file: ^3.3.2
   shared_preferences: ^2.2.2
   rxdart: ^0.27.7
+  internet_connection_checker: ^1.0.0+1
 
 
 flutter_launcher_icons:

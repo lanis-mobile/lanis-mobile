@@ -7,7 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
-import 'package:intl/intl.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
@@ -24,7 +24,8 @@ class SPHclient {
     -5: "Keine Erlaubnis",
     -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
     -7: "Unbekannter Fehler! Antwort war nicht salted.",
-    -8: "Nicht unterstützt!"
+    -8: "Nicht unterstützt!",
+    -9: "Kein Internet."
   };
 
   String username = "";
@@ -59,21 +60,21 @@ class SPHclient {
         invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
       }
       if (client.doesSupportFeature("Kalender")) {
-        calendarFetcher = CalendarFetcher(const Duration(days: 69));
+        calendarFetcher = CalendarFetcher(null);
       }
     } else {
       if (client.doesSupportFeature("Vertretungsplan")) {
-        substitutionsFetcher = SubstitutionsFetcher(const Duration(days: 69));
+        substitutionsFetcher = SubstitutionsFetcher(null);
       }
       if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
-        meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(days: 69));
+        meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
       if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
-        visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(days: 69));
-        invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(days: 69));
+        visibleConversationsFetcher = VisibleConversationsFetcher(null);
+        invisibleConversationsFetcher = InvisibleConversationsFetcher(null);
       }
       if (client.doesSupportFeature("Kalender")) {
-        calendarFetcher = CalendarFetcher(const Duration(days: 69));
+        calendarFetcher = CalendarFetcher(null);
       }
     }
   }
@@ -133,6 +134,10 @@ class SPHclient {
   }
 
   Future<int> login({userLogin = false}) async {
+    if (!(await InternetConnectionChecker().hasConnection)) {
+      return -9;
+    }
+
     jar.deleteAll();
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -340,16 +345,6 @@ class SPHclient {
       return -4;
       //unknown error
     }
-  }
-
-  Future<dynamic> getCurrentCalendar() {
-    DateTime currentDate = DateTime.now();
-    DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
-    DateTime oneYearLater = currentDate.add(const Duration(days: 365));
-
-    final formatter = DateFormat('yyyy-MM-dd');
-
-    return getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
   }
 
   Future<dynamic> getEvent(String id) async {
@@ -830,14 +825,6 @@ class SPHclient {
       return -4;
       // unknown error
     }
-  }
-
-  Future<dynamic> getVisibleConversationOverview() {
-    return getConversationsOverview(false);
-  }
-
-  Future<dynamic> getInvisibleConversationOverview() {
-    return getConversationsOverview(true);
   }
 
   String generateUniqueHash(String source) {

@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes/dark_theme.dart';
 import 'package:sph_plan/themes/light_theme.dart';
@@ -150,27 +152,26 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  // We also could use maps for better readability but I am lazy.
   Future<void> fetchFeature(List<dynamic> features) async {
     // 0: status loading
     // 1: status error
-    // 2: function
-    // 3: fetcher
+    // 2: fetcher
 
     for (dynamic feature in features) {
-      if (feature == null) {
-        continue;
-      }
-
       statusController.add(feature[0]);
 
-      var content = await feature[2]();
+      await feature[2].fetchData(forceRefresh: true);
 
-      if (content is int) {
-        statusController.add(feature[1]);
-        errorCode = content;
-        return;
-      } else {
-        feature[3].addData(content);
+      await for (dynamic data in feature[2].stream) {
+        if (data.status == FetcherStatus.error) {
+          statusController.add(feature[1]);
+          errorCode = data.content;
+          return;
+        } else if (data.status == FetcherStatus.done) {
+          statusController.add(feature[0]);
+          break;
+        }
       }
     }
 
@@ -220,7 +221,6 @@ class _HomePageState extends State<HomePage> {
         features.add([
           Status.substitution,
           Status.errorSubstitution,
-          client.getFullVplan,
           client.substitutionsFetcher
         ]);
       }
@@ -229,7 +229,6 @@ class _HomePageState extends State<HomePage> {
         features.add([
           Status.meinUnterricht,
           Status.errorMeinUnterricht,
-          client.getMeinUnterrichtOverview,
           client.meinUnterrichtFetcher
         ]);
       }
@@ -237,13 +236,11 @@ class _HomePageState extends State<HomePage> {
         features.add([
           Status.conversations,
           Status.errorConversations,
-          client.getVisibleConversationOverview,
           client.visibleConversationsFetcher
         ]);
         features.add([
           Status.conversations,
           Status.errorConversations,
-          client.getInvisibleConversationOverview,
           client.invisibleConversationsFetcher
         ]);
       }
@@ -251,7 +248,6 @@ class _HomePageState extends State<HomePage> {
         features.add([
           Status.calendar,
           Status.errorCalendar,
-          client.getCurrentCalendar,
           client.calendarFetcher
         ]);
       }
@@ -371,143 +367,167 @@ class _HomePageState extends State<HomePage> {
 
     return isLoading
         ? loadingScreen()
-        : Scaffold(
-            appBar: AppBar(
-              title: Text(selectedFeature
-                  .value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
-            ),
-            body: Center(
-              child: featureScreens()[selectedFeature.index],
-            ),
-            bottomNavigationBar: NavigationBar(
-              selectedIndex:
-                  bottomNavbarNavigationTranslation[selectedFeature.index]!,
-              onDestinationSelected: (index) => openFeature(Feature
-                  .values[bottomNavbarNavigationTranslation.indexOf(index)]),
-              destinations: [
-                if (client.doesSupportFeature("Vertretungsplan"))
-                  const NavigationDestination(
-                    icon: Icon(Icons.group),
-                    selectedIcon: Icon(Icons.group_outlined),
-                    label: 'Vertretungsplan',
-                  ),
-                if (client.doesSupportFeature("Kalender"))
-                  const NavigationDestination(
-                    icon: Icon(Icons.calendar_today),
-                    selectedIcon: Icon(Icons.calendar_today_outlined),
-                    label: 'Kalender',
-                  ),
-                if (client.doesSupportFeature("Nachrichten - Beta-Version"))
-                  const NavigationDestination(
-                    icon: Icon(Icons.forum),
-                    selectedIcon: Icon(Icons.forum_outlined),
-                    label: 'Nachrichten',
-                  ),
-                if (client.doesSupportFeature("Mein Unterricht") ||
-                    client.doesSupportFeature("mein Unterricht"))
-                  const NavigationDestination(
-                    icon: Icon(Icons.school),
-                    selectedIcon: Icon(Icons.school_outlined),
-                    label: 'Mein Unterricht',
-                  ),
-              ],
-            ),
-            drawer: NavigationDrawer(
-              onDestinationSelected: onNavigationItemTapped,
-              selectedIndex: selectedFeature.index,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      ClipRRect(
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                          child: ColorFiltered(
-                            colorFilter:
-                                ColorFilter.mode(imageColor, BlendMode.srcOver),
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: Image.file(
-                                File(client.schoolImage),
-                                fit: BoxFit.cover,
+        : StreamBuilder<InternetConnectionStatus>(
+          stream: InternetConnectionChecker().onStatusChange,
+          builder: (context, network) {
+            return Scaffold(
+                appBar: AppBar(
+                  title: Text(selectedFeature
+                      .value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
+                  bottom: network.data == InternetConnectionStatus.disconnected ? PreferredSize(
+                    preferredSize: const Size.fromHeight(40),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: Icon(Icons.signal_wifi_off),
+                          ),
+                          Text(
+                            "Kein Internet! Geladene Daten sind noch aufrufbar!",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ) : null,
+                ),
+                body: Center(
+                  child: featureScreens()[selectedFeature.index],
+                ),
+                bottomNavigationBar: NavigationBar(
+                  selectedIndex:
+                      bottomNavbarNavigationTranslation[selectedFeature.index]!,
+                  onDestinationSelected: (index) => openFeature(Feature
+                      .values[bottomNavbarNavigationTranslation.indexOf(index)]),
+                  destinations: [
+                    if (client.doesSupportFeature("Vertretungsplan"))
+                      const NavigationDestination(
+                        icon: Icon(Icons.group),
+                        selectedIcon: Icon(Icons.group_outlined),
+                        label: 'Vertretungsplan',
+                      ),
+                    if (client.doesSupportFeature("Kalender"))
+                      const NavigationDestination(
+                        icon: Icon(Icons.calendar_today),
+                        selectedIcon: Icon(Icons.calendar_today_outlined),
+                        label: 'Kalender',
+                      ),
+                    if (client.doesSupportFeature("Nachrichten - Beta-Version"))
+                      const NavigationDestination(
+                        icon: Icon(Icons.forum),
+                        selectedIcon: Icon(Icons.forum_outlined),
+                        label: 'Nachrichten',
+                      ),
+                    if (client.doesSupportFeature("Mein Unterricht") ||
+                        client.doesSupportFeature("mein Unterricht"))
+                      const NavigationDestination(
+                        icon: Icon(Icons.school),
+                        selectedIcon: Icon(Icons.school_outlined),
+                        label: 'Mein Unterricht',
+                      ),
+                  ],
+                ),
+                drawer: NavigationDrawer(
+                  onDestinationSelected: onNavigationItemTapped,
+                  selectedIndex: selectedFeature.index,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          ClipRRect(
+                            child: ImageFiltered(
+                              imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                              child: ColorFiltered(
+                                colorFilter:
+                                    ColorFilter.mode(imageColor, BlendMode.srcOver),
+                                child: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: Image.file(
+                                    File(client.schoolImage),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              schoolName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(color: textColor),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 24.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  schoolName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(color: textColor),
+                                ),
+                                Text(
+                                  userName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: textColor),
+                                )
+                              ],
                             ),
-                            Text(
-                              userName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: textColor),
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                          )
+                        ],
+                      ),
+                    ),
+                    NavigationDrawerDestination(
+                      enabled: client.doesSupportFeature("Vertretungsplan"),
+                      icon: const Icon(Icons.group),
+                      selectedIcon: const Icon(Icons.group_outlined),
+                      label: const Text('Vertretungsplan'),
+                    ),
+                    NavigationDrawerDestination(
+                      enabled: client.doesSupportFeature("Kalender"),
+                      icon: const Icon(Icons.calendar_today),
+                      selectedIcon: const Icon(Icons.calendar_today_outlined),
+                      label: const Text('Kalender'),
+                    ),
+                    NavigationDrawerDestination(
+                      enabled:
+                          client.doesSupportFeature("Nachrichten - Beta-Version"),
+                      icon: const Icon(Icons.forum),
+                      selectedIcon: const Icon(Icons.forum_outlined),
+                      label: const Text('Nachrichten'),
+                    ),
+                    NavigationDrawerDestination(
+                      enabled: client.doesSupportFeature("Mein Unterricht") ||
+                          client.doesSupportFeature("mein Unterricht"),
+                      icon: const Icon(Icons.school),
+                      selectedIcon: const Icon(Icons.school_outlined),
+                      label: const Text('Mein Unterricht'),
+                    ),
+                    const NavigationDrawerDestination(
+                      icon: Icon(Icons.open_in_new),
+                      label: Text('Im Browser öffnen'),
+                    ),
+                    const Divider(),
+                    const NavigationDrawerDestination(
+                      icon: Icon(Icons.settings),
+                      label: Text('Einstellungen'),
+                    ),
+                    const NavigationDrawerDestination(
+                      enabled: true,
+                      icon: Icon(Icons.bug_report),
+                      selectedIcon: Icon(Icons.bug_report_outlined),
+                      label: Text('Fehlerbericht senden'),
+                    ),
+                  ],
                 ),
-                NavigationDrawerDestination(
-                  enabled: client.doesSupportFeature("Vertretungsplan"),
-                  icon: const Icon(Icons.group),
-                  selectedIcon: const Icon(Icons.group_outlined),
-                  label: const Text('Vertretungsplan'),
-                ),
-                NavigationDrawerDestination(
-                  enabled: client.doesSupportFeature("Kalender"),
-                  icon: const Icon(Icons.calendar_today),
-                  selectedIcon: const Icon(Icons.calendar_today_outlined),
-                  label: const Text('Kalender'),
-                ),
-                NavigationDrawerDestination(
-                  enabled:
-                      client.doesSupportFeature("Nachrichten - Beta-Version"),
-                  icon: const Icon(Icons.forum),
-                  selectedIcon: const Icon(Icons.forum_outlined),
-                  label: const Text('Nachrichten'),
-                ),
-                NavigationDrawerDestination(
-                  enabled: client.doesSupportFeature("Mein Unterricht") ||
-                      client.doesSupportFeature("mein Unterricht"),
-                  icon: const Icon(Icons.school),
-                  selectedIcon: const Icon(Icons.school_outlined),
-                  label: const Text('Mein Unterricht'),
-                ),
-                const NavigationDrawerDestination(
-                  icon: Icon(Icons.open_in_new),
-                  label: Text('Im Browser öffnen'),
-                ),
-                const Divider(),
-                const NavigationDrawerDestination(
-                  icon: Icon(Icons.settings),
-                  label: Text('Einstellungen'),
-                ),
-                const NavigationDrawerDestination(
-                  enabled: true,
-                  icon: Icon(Icons.bug_report),
-                  selectedIcon: Icon(Icons.bug_report_outlined),
-                  label: Text('Fehlerbericht senden'),
-                ),
-              ],
-            ),
-          );
+              );
+          }
+        );
   }
 
   Widget getIcon(Status? status, Status normal, Status error, String name) {
@@ -554,7 +574,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Willkommen zurück!",
+                            (status.data == Status.errorLogin) && (errorCode == -9) ? "Kein Internet!" : "Willkommen zurück!",
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                           Row(

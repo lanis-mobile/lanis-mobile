@@ -18,7 +18,11 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   final double padding = 8.0;
   late TabController _tabController;
 
-  final GlobalKey<RefreshIndicatorState> _errorIndicatorKey =
+  final GlobalKey<RefreshIndicatorState> _mErrorIndicatorKey0 =
+  GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _mErrorIndicatorKey1 =
+  GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _mErrorIndicatorKey2 =
   GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _currentIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
@@ -182,9 +186,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     );
   }
 
-  Widget errorView(BuildContext context, FetcherResponse? response) {
+  Widget errorView(BuildContext context, FetcherResponse? response, GlobalKey key) {
     return RefreshIndicator(
-      key: _errorIndicatorKey,
+      key: key,
       onRefresh: () async {
         client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
       },
@@ -280,9 +284,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                   controller: _tabController,
                   children: [
                     if (snapshot.data?.status == FetcherStatus.error) ...[
-                      errorView(context, snapshot.data),
-                      errorView(context, snapshot.data),
-                      errorView(context, snapshot.data),
+                      errorView(context, snapshot.data, _mErrorIndicatorKey0),
+                      errorView(context, snapshot.data, _mErrorIndicatorKey1),
+                      errorView(context, snapshot.data, _mErrorIndicatorKey2),
                     ]
                     else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) ...[
                       const Center(child: CircularProgressIndicator()),
@@ -307,7 +311,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
           FloatingActionButton(
             onPressed: () {
               // Only visible key is refreshed, so it's ok.
-              _errorIndicatorKey.currentState?.show();
+              _mErrorIndicatorKey0.currentState?.show();
+              _mErrorIndicatorKey1.currentState?.show();
+              _mErrorIndicatorKey2.currentState?.show();
               _currentIndicatorKey.currentState?.show();
               _coursesIndicatorKey.currentState?.show();
               _presenceIndicatorKey.currentState?.show();

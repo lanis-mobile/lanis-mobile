@@ -20,7 +20,9 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
       GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _refreshInvisibleKey =
   GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _errorIndicatorKey =
+  final GlobalKey<RefreshIndicatorState> _cErrorIndicatorKey0 =
+  GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _cErrorIndicatorKey1 =
   GlobalKey<RefreshIndicatorState>();
 
   dynamic visibleConversations;
@@ -175,9 +177,9 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     );
   }
 
-  Widget errorView(BuildContext context, FetcherResponse? response, Fetcher fetcher) {
+  Widget errorView(BuildContext context, FetcherResponse? response, Fetcher fetcher, GlobalKey key) {
     return RefreshIndicator(
-      key: _errorIndicatorKey,
+      key: key,
       onRefresh: () async {
         fetcher.fetchData(forceRefresh: true);
       },
@@ -261,7 +263,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: client.visibleConversationsFetcher.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return errorView(context, snapshot.data, client.visibleConversationsFetcher);
+                  return errorView(context, snapshot.data, client.visibleConversationsFetcher, _cErrorIndicatorKey0);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
@@ -273,7 +275,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: client.invisibleConversationsFetcher.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return errorView(context, snapshot.data, client.invisibleConversationsFetcher);
+                  return errorView(context, snapshot.data, client.invisibleConversationsFetcher, _cErrorIndicatorKey1);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
@@ -287,7 +289,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         onPressed: () {
           _refreshVisibleKey.currentState?.show();
           _refreshInvisibleKey.currentState?.show();
-          _errorIndicatorKey.currentState?.show();
+          _cErrorIndicatorKey0.currentState?.show();
+          _cErrorIndicatorKey1.currentState?.show();
         },
         heroTag: "RefreshConversations",
         child: const Icon(Icons.refresh),
