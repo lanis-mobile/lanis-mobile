@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
@@ -22,7 +23,8 @@ class SPHclient {
     -4: "Unbekannter Fehler! Bist du eingeloggt?",
     -5: "Keine Erlaubnis",
     -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
-    -7: "Unbekannter Fehler! Antwort war nicht salted."
+    -7: "Unbekannter Fehler! Antwort war nicht salted.",
+    -8: "Nicht unterstützt!"
   };
 
   String username = "";
@@ -30,18 +32,53 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
-  bool fullLoad = true;
+  String loadMode = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late PersistCookieJar jar;
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
 
-  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
-  final MeinUnterrichtFetcher meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
-  final VisibleConversationsFetcher visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 15));
-  final InvisibleConversationsFetcher invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
-  final CalendarFetcher calendarFetcher = CalendarFetcher(const Duration(days: 69));
+  late final SubstitutionsFetcher substitutionsFetcher;
+  late final MeinUnterrichtFetcher meinUnterrichtFetcher;
+  late final VisibleConversationsFetcher visibleConversationsFetcher;
+  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
+  late final CalendarFetcher calendarFetcher;
+
+  void prepareFetchers() {
+    print("sdfsdf");
+
+    if (client.loadMode == "full") {
+      if (client.doesSupportFeature("Vertretungsplan")) {
+        substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
+
+      }
+      if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
+        meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
+      }
+      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+        visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 15));
+        invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
+      }
+      if (client.doesSupportFeature("Kalender")) {
+        calendarFetcher = CalendarFetcher(const Duration(days: 69));
+      }
+    } else {
+      if (client.doesSupportFeature("Vertretungsplan")) {
+        substitutionsFetcher = SubstitutionsFetcher(const Duration(days: 69));
+      }
+      if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
+        meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(days: 69));
+      }
+      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+        visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(days: 69));
+        invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(days: 69));
+      }
+      if (client.doesSupportFeature("Kalender")) {
+        calendarFetcher = CalendarFetcher(const Duration(days: 69));
+      }
+    }
+  }
 
   Future<void> prepareDio() async {
     final Directory appDocDir = await getApplicationCacheDirectory();
@@ -72,6 +109,8 @@ class SPHclient {
   }
 
   Future<void> loadFromStorage() async {
+    loadMode = await globalStorage.read(key: "loadMode") ?? "full";
+
     username = await globalStorage.read(key: "username") ?? "";
     password = await globalStorage.read(key: "password", secure: true) ?? "";
     schoolID = await globalStorage.read(key: "schoolID") ?? "";
@@ -84,10 +123,6 @@ class SPHclient {
 
     supportedApps =
         jsonDecode(await globalStorage.read(key: "supportedApps") ?? "[]");
-
-    final fullLoadCheck = await globalStorage.read(key: "fullLoad");
-
-    fullLoad = fullLoadCheck == null ? true : fullLoadCheck as bool;
   }
 
   Future<dynamic> getCredits() async {
@@ -272,6 +307,10 @@ class SPHclient {
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
+    if (!client.doesSupportFeature("Kalender")) {
+      return -8;
+    }
+
     debugPrint("Trying to get calendar...");
 
     try {
@@ -303,6 +342,16 @@ class SPHclient {
       return -4;
       //unknown error
     }
+  }
+
+  Future<dynamic> getCurrentCalendar() {
+    DateTime currentDate = DateTime.now();
+    DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
+    DateTime oneYearLater = currentDate.add(const Duration(days: 365));
+
+    final formatter = DateFormat('yyyy-MM-dd');
+
+    return getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
   }
 
   Future<dynamic> getEvent(String id) async {
@@ -377,6 +426,10 @@ class SPHclient {
   }
 
   Future<dynamic> getFullVplan() async {
+    if (!client.doesSupportFeature("Vertretungsplan")) {
+      return -8;
+    }
+    
     try {
       var dates = await getVplanDates();
 
@@ -491,6 +544,10 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
+    if (!(client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht"))) {
+      return -8;
+    }
+    
     debugPrint("Get Mein Unterricht overview");
 
     var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
@@ -731,6 +788,10 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
+    if (!client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      return -8;
+    }
+
     debugPrint("Get new conversation data. Invisible: $invisible.");
     try {
       final response =
@@ -771,6 +832,14 @@ class SPHclient {
       return -4;
       // unknown error
     }
+  }
+
+  Future<dynamic> getVisibleConversationOverview() {
+    return getConversationsOverview(false);
+  }
+
+  Future<dynamic> getInvisibleConversationOverview() {
+    return getConversationsOverview(true);
   }
 
   String generateUniqueHash(String source) {

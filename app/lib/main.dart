@@ -16,7 +16,6 @@ import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/settings/subsettings/user_login.dart';
-import 'package:sph_plan/view/vertretungsplan/filterlogic.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -151,6 +150,33 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  Future<void> fetchFeature(List<dynamic> features) async {
+    // 0: status loading
+    // 1: status error
+    // 2: function
+    // 3: fetcher
+
+    for (dynamic feature in features) {
+      if (feature == null) {
+        continue;
+      }
+
+      statusController.add(feature[0]);
+
+      var content = await feature[2]();
+
+      if (content is int) {
+        statusController.add(feature[1]);
+        errorCode = content;
+        return;
+      } else {
+        feature[3].addData(content);
+      }
+    }
+
+    return;
+  }
+
   Future<void> performLogin() async {
     statusController.add(Status.loadUserData);
     await client.loadFromStorage();
@@ -176,70 +202,66 @@ class _HomePageState extends State<HomePage> {
           "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
       schoolName = client.schoolName;
 
+      client.prepareFetchers();
+
+      if (client.loadMode == "fast") {
+        statusController.add(Status.finalize);
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
       // This is horrible. (it was even more horrible before)
 
-      // Substitutions
-      statusController.add(Status.substitution);
-      final substitutions = await client.getFullVplan();
+      final features = [];
 
-      if (substitutions is int) {
-        statusController.add(Status.errorSubstitution);
-        errorCode = substitutions;
-        return;
-      } else {
-        client.substitutionsFetcher.addData(await filter(substitutions));
-
-        // Mein Unterricht
-        statusController.add(Status.meinUnterricht);
-        final meinUnterricht = await client.getMeinUnterrichtOverview();
-
-        if (meinUnterricht is int) {
-          statusController.add(Status.errorMeinUnterricht);
-          errorCode = meinUnterricht;
-          return;
-        } else {
-          client.meinUnterrichtFetcher.addData(meinUnterricht);
-
-          // Conversations
-          statusController.add(Status.conversations);
-          final visibleConversations = await client.getConversationsOverview(false);
-          final invisibleConversations = await client.getConversationsOverview(true);
-
-          if (visibleConversations is int || invisibleConversations is int) {
-            statusController.add(Status.errorConversations);
-            errorCode = invisibleConversations;
-            return;
-          } else {
-            client.visibleConversationsFetcher.addData(visibleConversations);
-            client.invisibleConversationsFetcher.addData(invisibleConversations);
-
-            // Calendar
-            statusController.add(Status.calendar);
-
-            DateTime currentDate = DateTime.now();
-            DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
-            DateTime oneYearLater = currentDate.add(const Duration(days: 365));
-
-            final formatter = DateFormat('yyyy-MM-dd');
-
-            final calendar = await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
-
-            if (calendar is int) {
-              statusController.add(Status.errorCalendar);
-              errorCode = calendar;
-              return;
-            } else {
-              client.calendarFetcher.addData(calendar);
-
-              // Finalize
-              statusController.add(Status.finalize);
-              setState(() {
-                isLoading = false;
-              });
-            }
-          }
-        }
+      if (client.doesSupportFeature("Vertretungsplan")) {
+        features.add([
+          Status.substitution,
+          Status.errorSubstitution,
+          client.getFullVplan,
+          client.substitutionsFetcher
+        ]);
       }
+      if (client.doesSupportFeature("Mein Unterricht") ||
+          client.doesSupportFeature("mein Unterricht")) {
+        features.add([
+          Status.meinUnterricht,
+          Status.errorMeinUnterricht,
+          client.getMeinUnterrichtOverview,
+          client.meinUnterrichtFetcher
+        ]);
+      }
+      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+        features.add([
+          Status.conversations,
+          Status.errorConversations,
+          client.getVisibleConversationOverview,
+          client.visibleConversationsFetcher
+        ]);
+        features.add([
+          Status.conversations,
+          Status.errorConversations,
+          client.getInvisibleConversationOverview,
+          client.invisibleConversationsFetcher
+        ]);
+      }
+      if (client.doesSupportFeature("Kalender")) {
+        features.add([
+          Status.calendar,
+          Status.errorCalendar,
+          client.getCurrentCalendar,
+          client.calendarFetcher
+        ]);
+      }
+
+      await fetchFeature(features);
+
+      statusController.add(Status.finalize);
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -488,6 +510,27 @@ class _HomePageState extends State<HomePage> {
           );
   }
 
+  Widget getIcon(Status? status, Status normal, Status error, String name) {
+    int currentStatus = status == null ? -1 : status.index;
+
+    if (!(client.doesSupportFeature(name) || client.doesSupportFeature(toBeginningOfSentenceCase(name)!))) {
+      return const Icon(Icons.not_interested);
+    } else if (currentStatus <= normal.index) {
+      return const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child:
+            CircularProgressIndicator(),
+          )
+      );
+    } else if (status == error) {
+      return const Icon(Icons.error, size: 20);
+    } else {
+      return const Icon(Icons.check, size: 20);
+    }
+  }
+
   Widget loadingScreen() {
     return Scaffold(
       body: SafeArea(
@@ -592,23 +635,7 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.only(top: 16),
                                   child: Row(
                                     children: [
-                                      (status.data == null
-                                          ? -1
-                                          : status.data.index) <=
-                                          Status.substitution.index
-                                          ? const Center(
-                                        child: SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child:
-                                          CircularProgressIndicator(),
-                                        ),
-                                      )
-                                          : status.data == Status.errorSubstitution
-                                          ? const Icon(Icons.error,
-                                          size: 20)
-                                          : const Icon(Icons.check,
-                                          size: 20),
+                                      getIcon(status.data, Status.substitution, Status.errorSubstitution, "Vertretungsplan"),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 8),
                                         child: Text(
@@ -621,28 +648,12 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                 ),
-                                if (client.fullLoad) ...[
+                                if (client.loadMode == "full") ...[
                                   Padding(
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        (status.data == null
-                                            ? -1
-                                            : status.data.index) <=
-                                            Status.meinUnterricht.index
-                                            ? const Center(
-                                          child: SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child:
-                                            CircularProgressIndicator(),
-                                          ),
-                                        )
-                                            : status.data == Status.errorMeinUnterricht
-                                            ? const Icon(Icons.error,
-                                            size: 20)
-                                            : const Icon(Icons.check,
-                                            size: 20),
+                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, "mein Unterricht"),
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8),
                                           child: Text(
@@ -659,25 +670,10 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        (status.data == null
-                                            ? -1
-                                            : status.data.index) <=
-                                            Status.conversations.index
-                                            ? const Center(
-                                          child: SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child:
-                                            CircularProgressIndicator(),
-                                          ),
-                                        )
-                                            : status.data == Status.errorConversations
-                                            ? const Icon(Icons.error,
-                                            size: 20)
-                                            : const Icon(Icons.check,
-                                            size: 20),
+                                        getIcon(status.data, Status.conversations, Status.errorConversations, "Nachrichten - Beta-Version"),
                                         Padding(
-                                          padding: const EdgeInsets.only(left: 8),
+                                          padding:
+                                              const EdgeInsets.only(left: 8),
                                           child: Text(
                                             "Nachrichten",
                                             style: Theme.of(context)
@@ -692,25 +688,10 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        (status.data == null
-                                            ? -1
-                                            : status.data.index) <=
-                                            Status.calendar.index
-                                            ? const Center(
-                                          child: SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child:
-                                            CircularProgressIndicator(),
-                                          ),
-                                        )
-                                            : status.data == Status.errorCalendar
-                                            ? const Icon(Icons.error,
-                                            size: 20)
-                                            : const Icon(Icons.check,
-                                            size: 20),
+                                        getIcon(status.data, Status.calendar, Status.errorCalendar, "Kalender"),
                                         Padding(
-                                          padding: const EdgeInsets.only(left: 8),
+                                          padding:
+                                              const EdgeInsets.only(left: 8),
                                           child: Text(
                                             "Kalender",
                                             style: Theme.of(context)
@@ -725,7 +706,11 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ),
                           ),
-                          if (status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations || status.data == Status.errorCalendar) ...[
+                          if (status.data == Status.errorLogin ||
+                              status.data == Status.errorSubstitution ||
+                              status.data == Status.errorMeinUnterricht ||
+                              status.data == Status.errorConversations ||
+                              status.data == Status.errorCalendar) ...[
                             Padding(
                               padding: const EdgeInsets.only(top: 20),
                               child: Column(
@@ -777,7 +762,11 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 12, right: 28.0, bottom: 28.0, top: 28.0),
-                          child: status.data == Status.errorLogin || status.data == Status.errorSubstitution || status.data == Status.errorMeinUnterricht || status.data == Status.errorConversations || status.data == Status.errorCalendar
+                          child: status.data == Status.errorLogin ||
+                                  status.data == Status.errorSubstitution ||
+                                  status.data == Status.errorMeinUnterricht ||
+                                  status.data == Status.errorConversations ||
+                                  status.data == Status.errorCalendar
                               ? const Icon(Icons.error, size: 30)
                               : const CircularProgressIndicator(),
                         ),
