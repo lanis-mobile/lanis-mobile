@@ -305,24 +305,6 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
           );
         },
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              // Only visible key is refreshed, so it's ok.
-              _mErrorIndicatorKey0.currentState?.show();
-              _mErrorIndicatorKey1.currentState?.show();
-              _mErrorIndicatorKey2.currentState?.show();
-              _currentIndicatorKey.currentState?.show();
-              _coursesIndicatorKey.currentState?.show();
-              _presenceIndicatorKey.currentState?.show();
-            },
-            heroTag: "RefreshMeinUnterricht",
-            child: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
     );
   }
 }
