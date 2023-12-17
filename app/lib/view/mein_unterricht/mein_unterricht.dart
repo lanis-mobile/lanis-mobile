@@ -35,7 +35,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    client.meinUnterrichtFetcher.fetchData();
+    client.meinUnterrichtFetcher?.fetchData();
   }
 
   @override
@@ -48,7 +48,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: _presenceIndicatorKey,
       onRefresh: () async {
-        client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
+        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
       child: ListView.builder(
         itemCount: presence.length,
@@ -103,7 +103,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: _coursesIndicatorKey,
       onRefresh: () async {
-        client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
+        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
       child: ListView.builder(
         itemCount: courses.length,
@@ -139,7 +139,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: _currentIndicatorKey,
       onRefresh: () async {
-        client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
+        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
       child: ListView.builder(
         itemCount: current.length,
@@ -190,7 +190,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: key,
       onRefresh: () async {
-        client.meinUnterrichtFetcher.fetchData(forceRefresh: true);
+        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -235,7 +235,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                         child: OutlinedButton(
                             onPressed: () async {
                               client.meinUnterrichtFetcher
-                                  .fetchData(forceRefresh: true);
+                                  ?.fetchData(forceRefresh: true);
                             },
                             child: const Text("Erneut versuchen")),
                       )
@@ -254,7 +254,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<FetcherResponse>(
-        stream: client.meinUnterrichtFetcher.stream,
+        stream: client.meinUnterrichtFetcher?.stream,
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error &&
               snapshot.data?.content == -2) {

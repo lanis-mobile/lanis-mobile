@@ -40,40 +40,39 @@ class SPHclient {
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
 
-  late final SubstitutionsFetcher substitutionsFetcher;
-  late final MeinUnterrichtFetcher meinUnterrichtFetcher;
-  late final VisibleConversationsFetcher visibleConversationsFetcher;
-  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
-  late final CalendarFetcher calendarFetcher;
+  SubstitutionsFetcher? substitutionsFetcher;
+  MeinUnterrichtFetcher? meinUnterrichtFetcher;
+  VisibleConversationsFetcher? visibleConversationsFetcher;
+  InvisibleConversationsFetcher? invisibleConversationsFetcher;
+  CalendarFetcher? calendarFetcher;
 
   void prepareFetchers() {
     if (client.loadMode == "full") {
-      if (client.doesSupportFeature("Vertretungsplan")) {
+      if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
-
       }
-      if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
+      if ((client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
       }
       if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
-        visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 15));
-        invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 15));
+        visibleConversationsFetcher ??= VisibleConversationsFetcher(const Duration(minutes: 15));
+        invisibleConversationsFetcher ??= InvisibleConversationsFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature("Kalender")) {
+      if (client.doesSupportFeature("Kalender") && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     } else {
-      if (client.doesSupportFeature("Vertretungsplan")) {
+      if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(null);
       }
-      if (client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) {
+      if ((client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
       if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
-        visibleConversationsFetcher = VisibleConversationsFetcher(null);
-        invisibleConversationsFetcher = InvisibleConversationsFetcher(null);
+        visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
+        invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
       }
-      if (client.doesSupportFeature("Kalender")) {
+      if (client.doesSupportFeature("Kalender") && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     }

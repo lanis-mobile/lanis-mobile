@@ -23,7 +23,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   @override
   void initState() {
     super.initState();
-    client.substitutionsFetcher.fetchData();
+    client.substitutionsFetcher?.fetchData();
   }
 
   Widget noticeWidget() {
@@ -117,7 +117,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<FetcherResponse>(
-          stream: client.substitutionsFetcher.stream,
+          stream: client.substitutionsFetcher?.stream,
           builder: (context, snapshot) {
             if (snapshot.data?.status == FetcherStatus.error && snapshot.data?.content == -2) {
               SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -128,7 +128,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             return RefreshIndicator(
                 key: _vpRefreshIndicatorKey0,
                 onRefresh: () async {
-                  client.substitutionsFetcher.fetchData(forceRefresh: true);
+                  client.substitutionsFetcher?.fetchData(forceRefresh: true);
                 },
                 child: snapshot.data?.status == FetcherStatus.error
                     // Error content, we use CustomScrollView to allow "scroll for refresh"
@@ -176,7 +176,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                                       padding: const EdgeInsets.only(left: 8),
                                       child: OutlinedButton(
                                           onPressed: () async {
-                                            client.substitutionsFetcher.fetchData(forceRefresh: true);
+                                            client.substitutionsFetcher?.fetchData(forceRefresh: true);
                                           },
                                           child:
                                           const Text("Erneut versuchen")),
@@ -234,12 +234,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
           FloatingActionButton(
             heroTag: "FilterSubstitutions",
             onPressed: () {
-              client.substitutionsFetcher.fetchData();
+              client.substitutionsFetcher?.fetchData();
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => FilterPlan()))
                   .then((_) => setState(() {
                         client.substitutionsFetcher
-                            .fetchData(forceRefresh: true);
+                            ?.fetchData(forceRefresh: true);
                       }));
             },
             child: const Icon(Icons.filter_alt),

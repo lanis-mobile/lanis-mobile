@@ -34,8 +34,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
 
-    client.visibleConversationsFetcher.fetchData();
-    client.invisibleConversationsFetcher.fetchData();
+    client.visibleConversationsFetcher?.fetchData();
+    client.invisibleConversationsFetcher?.fetchData();
 
     super.initState();
   }
@@ -260,26 +260,26 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         controller: _tabController,
         children: [
           StreamBuilder(
-              stream: client.visibleConversationsFetcher.stream,
+              stream: client.visibleConversationsFetcher?.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return errorView(context, snapshot.data, client.visibleConversationsFetcher, _cErrorIndicatorKey0);
+                  return errorView(context, snapshot.data, client.visibleConversationsFetcher as Fetcher, _cErrorIndicatorKey0);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, client.visibleConversationsFetcher, _refreshVisibleKey);
+                  return conversationsView(context, snapshot.data?.content, client.visibleConversationsFetcher as Fetcher, _refreshVisibleKey);
                 }
               }
           ),
           StreamBuilder(
-              stream: client.invisibleConversationsFetcher.stream,
+              stream: client.invisibleConversationsFetcher?.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return errorView(context, snapshot.data, client.invisibleConversationsFetcher, _cErrorIndicatorKey1);
+                  return errorView(context, snapshot.data, client.invisibleConversationsFetcher as Fetcher, _cErrorIndicatorKey1);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, client.invisibleConversationsFetcher, _refreshInvisibleKey);
+                  return conversationsView(context, snapshot.data?.content, client.invisibleConversationsFetcher as Fetcher, _refreshInvisibleKey);
                 }
               }
           )
