@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 
 import '../../client/client.dart';
-import '../bug_report/send_bugreport.dart';
+import '../../shared/errorView.dart';
 import '../settings/subsettings/user_login.dart';
-import 'filterlogic.dart';
 import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {
@@ -36,78 +36,121 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
     );
   }
 
-  Widget? getSubstitutionInfo(String key, String? value) {
-    if (value == null || value == "" || value == "---") {
+  bool doesInfoExist(String? info) {
+    var sdfsdf = (info == null || info == "" || info == "---");
+    print(sdfsdf);
+    //print(info);
+    return sdfsdf;
+  }
+
+  Widget? getSubstitutionInfo(String key, String? value, IconData icon) {
+    if (doesInfoExist(value)) {
       return null;
     }
 
     return Padding(
-        padding: const EdgeInsets.only(right: 30, left: 30),
+        padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text("$key:"), Text(value)],
+          children: [
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(icon),
+                ),
+                Text(key, style: Theme.of(context).textTheme.labelLarge,)
+              ],
+            ),
+            Text(value!)]
         ));
   }
 
   Widget getSubstitutionWidget(Map<String, dynamic> substitution) {
     return ListTile(
-      title: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (substitution['Art'] != null) ...[
+      dense: (doesInfoExist(substitution["Vertreter"]) && doesInfoExist(substitution["Lehrer"]) && doesInfoExist(substitution["Raum"]) && doesInfoExist(substitution["Fach"]) && doesInfoExist(substitution["Hinweis"])),
+      title: Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (substitution['Art'] != null) ...[
+              Text(
+                substitution['Art'],
+                style: Theme.of(context).textTheme.titleLarge,
+              )
+            ],
+            Flexible(
+                child: Text(substitution["Klasse"] ?? "Keine Klasse angegeben",
+                    style: (substitution['Art'] != null) ? null : Theme.of(context).textTheme.titleLarge) // highlight "Klasse" when there is no "Art" information
+            ),
             Text(
-              substitution['Art'],
-              style: const TextStyle(fontSize: 22),
-            )
+              substitution['Stunde'] ?? "",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ],
-          Flexible(
-              child: Text(substitution["Klasse"] ?? "Klasse nicht angegeben",
-                  style: TextStyle(
-                      fontSize: (substitution['Art'] != null)
-                          ? null
-                          : 22) // highlight "Klasse" when there is no "Art" information
-                  )),
-          Text(
-            substitution['Stunde'] ?? "",
-            style: const TextStyle(fontSize: 22),
-          ),
-        ],
+        ),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 0,
+          Column(
             children: [
-              getSubstitutionInfo("Vertreter", substitution["Vertreter"]) ??
-                  const SizedBox.shrink(),
-              getSubstitutionInfo("Lehrer", substitution["Lehrer"]) ??
-                  const SizedBox.shrink(),
-              getSubstitutionInfo("Raum", substitution["Raum"]) ??
-                  const SizedBox.shrink(),
-              if (substitution["Hinweis"] != null &&
-                  substitution["Hinweis"] != "") ...[
+              Padding(
+                padding: EdgeInsets.only(top: 0, bottom: (doesInfoExist(substitution["Vertreter"]) && doesInfoExist(substitution["Lehrer"]) && doesInfoExist(substitution["Raum"]) && !doesInfoExist(substitution["Fach"])) ? 12 : 0),
+                child: Column(
+                  children: [
+                    getSubstitutionInfo("Vertreter", substitution["Vertreter"], Icons.person) ??
+                        const SizedBox.shrink(),
+                    getSubstitutionInfo("Lehrer", substitution["Lehrer"], Icons.school) ??
+                        const SizedBox.shrink(),
+                    getSubstitutionInfo("Raum", substitution["Raum"], Icons.room) ??
+                        const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+              if (!doesInfoExist(substitution["Hinweis"])) ...[
                 Padding(
-                  padding: const EdgeInsets.only(right: 30, left: 30),
-                  child: Text("Hinweis: ${substitution["Hinweis"]}"),
+                  padding: EdgeInsets.only(right: 30, left: 30, top: 2, bottom: doesInfoExist(substitution["Fach"]) ? 12 : 0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Icon(Icons.info),
+                          ),
+                          Text("Hinweis", style: Theme.of(context).textTheme.labelLarge,)
+                        ],
+                      ),
+                      Text("${toBeginningOfSentenceCase(substitution["Hinweis"])}")
+                    ],
+                  ),
                 )
               ]
             ],
           ),
-          Row(
+          if (!doesInfoExist(substitution["Fach"])) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  substitution["Fach"],
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ],
+            )
+          ]
+          /*Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 formatDateString(substitution["Tag_en"], substitution["Tag"]),
                 style: const TextStyle(fontSize: 18),
               ),
-              Text(
-                substitution["Fach"] ?? "",
-                style: const TextStyle(fontSize: 18),
-              )
             ],
-          ),
+          ),*/
         ],
       ),
     );
@@ -132,63 +175,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                 },
                 child: snapshot.data?.status == FetcherStatus.error
                     // Error content, we use CustomScrollView to allow "scroll for refresh"
-                    ? CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverFillRemaining(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.warning,
-                                size: 60,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(35),
-                                child: Text(
-                                    "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 22)),
-                              ),
-                              Text(
-                                  "Problem: ${client.statusCodes[snapshot.data?.content] ?? "Unbekannter Fehler"}"
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 35),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FilledButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    BugReportScreen(
-                                                        generatedMessage:
-                                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist beim Vertretungsplan aufgetreten:\n${snapshot.data?.content}: ${client.statusCodes[snapshot.data?.content]}\n\nMehr Details von dir:\n")),
-                                          );
-                                        },
-                                        child: const Text(
-                                            "Fehlerbericht senden")),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 8),
-                                      child: OutlinedButton(
-                                          onPressed: () async {
-                                            client.substitutionsFetcher?.fetchData(forceRefresh: true);
-                                          },
-                                          child:
-                                          const Text("Erneut versuchen")),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )
+                    ? ErrorView(data: snapshot.data?.content)
                     : snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null
                         // Waiting content
                         ? const Center(
@@ -210,7 +197,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                                 }
 
                                 return Padding(
-                                  padding: EdgeInsets.only(bottom: padding),
+                                  padding: EdgeInsets.only(bottom: 8),
                                   child: Card(
                                     child: getSubstitutionWidget(
                                         snapshot.data?.content[index]),
