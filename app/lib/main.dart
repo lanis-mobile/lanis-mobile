@@ -2,7 +2,12 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'firebase_options.dart';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
@@ -24,8 +29,25 @@ import 'package:workmanager/workmanager.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'background_service/service.dart' as background_service;
 
+
+
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FirebaseCrashlytics.instance.setCustomKey('debug', kDebugMode);
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   PermissionStatus? notificationsPermissionStatus;
 
