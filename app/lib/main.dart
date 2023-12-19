@@ -39,15 +39,16 @@ main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  FirebaseCrashlytics.instance.setCustomKey('debug', kDebugMode);
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  if (kDebugMode) {
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   PermissionStatus? notificationsPermissionStatus;
 
@@ -217,6 +218,9 @@ class _HomePageState extends State<HomePage> {
   Future<void> performLogin() async {
     statusController.add(Status.loadUserData);
     await client.loadFromStorage();
+
+    FirebaseCrashlytics.instance.setCustomKey("school", client.schoolID);
+
 
     await client.prepareDio();
 
