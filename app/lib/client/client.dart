@@ -279,7 +279,7 @@ class SPHclient {
   }
 
   Future<dynamic> getVplan(String date) async {
-    debugPrint("Trying to get substitution plan");
+    debugPrint("Trying to get substitution plan for $date");
 
     try {
       final response = await dio.post(
