@@ -121,7 +121,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                         left: padding, right: padding, bottom: padding),
                     child: Card(
                       child: ListTile(
-                        title: Text(data["historie"][index]["title"]),
+                        title: (data["historie"][index]["title"]  != null) ? Text(data["historie"][index]["title"]):null,
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -134,7 +134,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                       debugPrint("${link.url} konnte nicht geöffnet werden.");
                                     }
                                   },
-                                  text: data["historie"][index]["markup"],
+                                  text: data["historie"][index]["markup"] ?? "",
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   linkStyle: Theme.of(context)
                                       .textTheme
@@ -143,12 +143,12 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                 ),
                             ),
                             Text(
-                              data["historie"][index]["presence"],
+                              data["historie"][index]["presence"] ?? "",
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              data["historie"][index]["time"],
+                              data["historie"][index]["time"] ?? "",
                               style:
                                   const TextStyle(fontStyle: FontStyle.italic),
                             ),
@@ -173,10 +173,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                         left: padding, right: padding, bottom: padding),
                     child: Card(
                       child: ListTile(
-                        title: Text(data["leistungen"][index]["Name"]),
-                        subtitle: Text(data["leistungen"][index]["Datum"]),
+                        title: Text(data["leistungen"][index]["Name"] ?? ""),
+                        subtitle: Text(data["leistungen"][index]["Datum"] ?? ""),
                         trailing: Text(
-                          data["leistungen"][index]["Note"],
+                          data["leistungen"][index]["Note"] ?? "",
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20.0),
                         ),
@@ -197,9 +197,9 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       child: Card(
                           child: ListTile(
                         title:
-                            Text(data["leistungskontrollen"][index]["title"]),
+                            Text(data["leistungskontrollen"][index]["title"] ?? ""),
                         subtitle: Text(
-                          data["leistungskontrollen"][index]["value"],
+                          data["leistungskontrollen"][index]["value"] ?? "",
                         ),
                       )));
                 },
@@ -215,7 +215,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           left: padding, right: padding, bottom: padding),
                       child: Card(
                         child: ListTile(
-                          title: Text(data["anwesenheiten"][index]["type"]),
+                          title: Text(data["anwesenheiten"][index]["type"] ?? ""),
                           subtitle: Text(parseString(data["anwesenheiten"][index]["count"])["brackets"]!),
                           trailing: Text(parseString(data["anwesenheiten"][index]["count"])["before"]!,
                               style: const TextStyle(
