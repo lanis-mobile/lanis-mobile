@@ -314,7 +314,7 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
       client.prepareFetchers();
-      openFeature(Feature.substitutions);
+      openFeature(getDefaultFeature());
     });
   }
 
