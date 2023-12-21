@@ -50,7 +50,7 @@ class _LoadModeScreenState extends State<LoadModeScreen> {
             ),
             RadioListTile(
               title: const Text('Nur Vertretungsplan laden'),
-              subtitle: const Text("Ist schneller, aber beim Angucken andere Daten müssen sie zuerst geladen werden, was immer zuerst einen Ladebildschirm zeigt. Nützlich wenn man so schnell wie möglich den Vertretungsplan sehen möchte. Außerdem spart es Daten für dich und Lanis."),
+              subtitle: const Text("Ist schneller, aber beim Angucken anderer Daten müssen sie zuerst geladen werden, was immer zuerst den Ladebildschirm zeigt. Nützlich wenn man so schnell wie möglich den Vertretungsplan sehen möchte. Außerdem spart es Daten für dich und Lanis."),
               value: "fast",
               groupValue: _selectedMode,
               onChanged: (value) {

@@ -52,6 +52,11 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
       ),
       body: ListView(
         children: [
+          const ListTile(
+            leading: Icon(Icons.info),
+            title: Text("Information"),
+            subtitle: Text("Diese Einstellungen haben nur einen Effekt, wenn deine Schule den Vertretungsplan im Lanis-System verwenden."),
+          ),
           SwitchListTile(
             title: const Text('Push Benachrichtigungen'),
             value: _enableNotifications,
