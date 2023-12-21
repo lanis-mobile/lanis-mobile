@@ -112,7 +112,7 @@ class HomePage extends StatefulWidget {
 
 enum Feature {
   substitutions("Vertretungsplan"),
-  calendar("Kalendar"),
+  calendar("Kalender"),
   conversations("Nachrichten"),
   lessons("Mein Unterricht"),
   lanisBrowser(null),
