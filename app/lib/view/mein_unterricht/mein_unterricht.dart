@@ -160,7 +160,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                         MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              "${current[index]["teacher"]["short"] ?? "-"}-${current[index]["teacher"]["name"]??"-"}"),
+                              "${current[index]["teacher"]["name"]??""} (${current[index]["teacher"]["short"] ?? "-"})"),
                           Text(current[index]["thema"]["date"]??"-")
                         ],
                       ),
