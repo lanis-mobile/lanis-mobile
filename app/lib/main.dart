@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'firebase_options.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -76,6 +77,8 @@ main() async {
   }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
+
+  await initializeDateFormatting();
 
   runApp(App(
     savedThemeMode: savedThemeMode,
