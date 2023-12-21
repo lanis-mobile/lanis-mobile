@@ -143,6 +143,7 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
     try {
       if (username != "" && password != "" && schoolID != "") {
+        FirebaseCrashlytics.instance.setCustomKey("school", client.schoolID);
         final response1 = await dio.post(
             "https://login.schulportal.hessen.de/?i=$schoolID",
             queryParameters: {

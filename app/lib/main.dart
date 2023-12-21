@@ -219,9 +219,6 @@ class _HomePageState extends State<HomePage> {
     statusController.add(Status.loadUserData);
     await client.loadFromStorage();
 
-    FirebaseCrashlytics.instance.setCustomKey("school", client.schoolID);
-
-
     await client.prepareDio();
 
     statusController.add(Status.login);
@@ -313,7 +310,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isLoading = false;
       });
-
+      client.prepareFetchers();
       openFeature(Feature.substitutions);
     });
   }
