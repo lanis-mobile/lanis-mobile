@@ -562,20 +562,20 @@ class SPHclient {
     () {
       var schoolClasses = document.querySelectorAll("tr.printable");
       for (var schoolClass in schoolClasses) {
-        var teacher = schoolClass.getElementsByClassName("teacher")[0];
+        var teacher = schoolClass.querySelector(".teacher");
 
         result["aktuell"]?.add({
           "name": schoolClass.querySelector(".name")?.text.trim(),
           "teacher": {
             "short": teacher
-                .getElementsByClassName(
+                ?.getElementsByClassName(
                     "btn btn-primary dropdown-toggle btn-xs")[0]
                 .text.trim(),
-            "name": teacher.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
+            "name": teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
           },
           "thema": {
-            "title": schoolClass.getElementsByClassName("thema")[0].text.trim(),
-            "date": schoolClass.getElementsByClassName("datum")[0].text.trim()
+            "title": schoolClass.querySelector(".thema")?.text.trim(),
+            "date": schoolClass.querySelector(".datum")?.text.trim()
           },
           "data": {
             "entry": schoolClass.attributes["data-entry"],
