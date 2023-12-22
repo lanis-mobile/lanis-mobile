@@ -30,7 +30,13 @@ Future<void> performBackgroundFetch() async {
   if (loginCode == 0) {
     final vPlan = await client.getFullVplan();
     if (vPlan is! int) {
-      final filteredPlan = await filter_logic.filter(vPlan);
+      final List combinedVPlan = [];
+
+      for (List plan in vPlan) {
+        combinedVPlan.add(plan);
+      }
+
+      final filteredPlan = await filter_logic.filter(combinedVPlan);
 
       String messageBody = "";
 
