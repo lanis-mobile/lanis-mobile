@@ -4,8 +4,8 @@ import '../client/client.dart';
 import '../view/bug_report/send_bugreport.dart';
 
 class ErrorView extends StatelessWidget {
-  late final int data;
-  ErrorView({super.key, required this.data});
+  final int data;
+  const ErrorView({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
