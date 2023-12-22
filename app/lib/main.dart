@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:stack_trace/stack_trace.dart';
+
 import 'firebase_options.dart';
 
+import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -117,6 +120,32 @@ Widget errorWidget(FlutterErrorDetails details) {
             padding: const EdgeInsets.only(bottom: 35),
             child: Text("Problem: ${details.exception.toString()}",
               textAlign: TextAlign.center,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 35),
+            child: FilledButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: Trace.from(details.stack!).terse.toString()));
+                },
+                style: ButtonStyle(
+                  overlayColor: MaterialStateProperty.resolveWith((states) {
+                    return Colors.redAccent;
+                  }),
+                  foregroundColor: MaterialStateProperty.resolveWith((states) {
+                    return Colors.white;
+                  }),
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    // If the button is pressed, return green, otherwise blue
+                    if (states.contains(MaterialState.pressed)) {
+                      return Colors.redAccent;
+                    }
+                    return Colors.red;
+                  }),
+                ),
+                child: const Text(
+                    "Fehlerdetails kopieren",
+                )
             ),
           ),
           const Text(
