@@ -6,7 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
-import '../bug_report/send_bugreport.dart';
+import '../../shared/errorView.dart';
 class CalendarAnsicht extends StatefulWidget {
   const CalendarAnsicht({super.key});
 
@@ -385,64 +385,14 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     );
   }
 
-  Widget errorView(BuildContext context, FetcherResponse? response) {
-    return RefreshIndicator(
-      key: _calErrorIndicatorKey0,
-      onRefresh: () async {
-        client.calendarFetcher?.fetchData(forceRefresh: true);
-      },
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverFillRemaining(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.warning,
-                  size: 60,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(35),
-                  child: Text(
-                      "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22)),
-                ),
-                Text(
-                    "Problem: ${client.statusCodes[response!.content] ?? "Unbekannter Fehler"}"),
-                Padding(
-                  padding: const EdgeInsets.only(top: 35),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FilledButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BugReportScreen(
-                                      generatedMessage:
-                                      "AUTOMATISCH GENERIERT:\nEin Fehler ist beim Kalender aufgetreten:\n${response.content}: ${client.statusCodes[response.content]}\n\nMehr Details von dir:\n")),
-                            );
-                          },
-                          child:
-                          const Text("Fehlerbericht senden")),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: OutlinedButton(
-                            onPressed: () async {
-                              client.calendarFetcher?.fetchData(forceRefresh: true);
-                            },
-                            child: const Text("Erneut versuchen")),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          )
+  Widget getEvent2(Event calendarData) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("sdfsdf")
         ],
       ),
     );
@@ -454,7 +404,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       stream: client.calendarFetcher?.stream,
       builder: (context, snapshot) {
         if (snapshot.data?.status == FetcherStatus.error) {
-          return errorView(context, snapshot.data);
+          return ErrorView(data: snapshot.data!.content);
         } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
           return const Center(child: CircularProgressIndicator());
         } else {
@@ -499,36 +449,42 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                   _focusedDay = focusedDay;
                 },
               ),
-              const SizedBox(height: 8.0),
               Expanded(
                 child: ValueListenableBuilder<List<Event>>(
                   valueListenable: _selectedEvents,
                   builder: (context, value, _) {
-                    return ListView.builder(
-                      itemCount: value.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 4.0,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: ListTile(
-                            onTap: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return getEvent(value[index]);
-                                  }
-                              );
-                            },
-                            title: Text('${value[index]}'),
-                          ),
-                        );
-                      },
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: ListView.builder(
+                        itemCount: value.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
+                            child: Card(
+                              child: ListTile(
+                                title: Text('${value[index]}'),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                onTap: () {
+                                  showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) {
+                                        return getEvent2(value[index]);
+                                      }
+                                  );
+                                  /*showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return getEvent(value[index]);
+                                      }
+                                  );*/
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
