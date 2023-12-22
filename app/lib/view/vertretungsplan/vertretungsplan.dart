@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/shared/shared_functions.dart';
 
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
@@ -263,7 +264,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
             _tabController ??= TabController(
                 length: snapshot.data?.content["length"], vsync: this);
 
-            globalKeys = List.generate(snapshot.data?.content["length"], (index) => GlobalKey<RefreshIndicatorState>());
+            globalKeys = generateGlobalKeys(snapshot.data?.content["length"]);
           }
 
           return Column(
