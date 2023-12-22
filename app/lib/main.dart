@@ -32,7 +32,11 @@ import 'background_service/service.dart' as background_service;
 
 
 
-main() async {
+void main() async {
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return errorWidget(details);
+  };
+
   WidgetsFlutterBinding.ensureInitialized();
 
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
@@ -83,6 +87,50 @@ main() async {
   runApp(App(
     savedThemeMode: savedThemeMode,
   ));
+}
+
+Widget errorWidget(FlutterErrorDetails details) {
+  return Container(
+    color: Colors.red.withOpacity(0.1),
+    child: Padding(
+      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 32.0, bottom: 32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.warning,
+            size: 60,
+          ),
+          const Padding(
+            padding: EdgeInsets.all(35),
+            child: Text(
+                "Ups, es ist ein Fehler aufgetreten!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                )
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 35),
+            child: Text("Problem: ${details.exception.toString()}",
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const Text(
+            "Solche Fehler werden normalerweise automatisch an den Entwickler gesendet.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w400
+            ),
+          )
+        ],
+      ),
+    ),
+  );
 }
 
 class App extends StatelessWidget {
