@@ -519,6 +519,7 @@ class _HomePageState extends State<HomePage> {
                   child: featureScreens()[selectedFeature.index],
                 ),
                 bottomNavigationBar: NavigationBar(
+                  labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
                   selectedIndex:
                       bottomNavbarNavigationTranslation[selectedFeature.index]!,
                   onDestinationSelected: (index) => openFeature(Feature
@@ -528,7 +529,7 @@ class _HomePageState extends State<HomePage> {
                       const NavigationDestination(
                         icon: Icon(Icons.group),
                         selectedIcon: Icon(Icons.group_outlined),
-                        label: 'Vertretungsplan',
+                        label: 'Vertretungen',
                       ),
                     if (client.doesSupportFeature("Kalender"))
                       const NavigationDestination(
