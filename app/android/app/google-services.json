@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "80930093602",
+    "project_id": "lanis-mobile",
+    "storage_bucket": "lanis-mobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:80930093602:android:10d52a15b62910d222a87b",
+        "android_client_info": {
+          "package_name": "io.github.alessioc42.sph"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlfi_VHQDYGgb7aO7_kMCQZ1bEOMW60u0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

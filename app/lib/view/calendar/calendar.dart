@@ -470,8 +470,14 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
           return Column(
             children: [
               TableCalendar<Event>(
+                locale: "de_DE",
                 firstDay: DateTime.utc(2020),
                 lastDay: DateTime.utc(2030),
+                availableCalendarFormats: const {
+                  CalendarFormat.month: "Woche",
+                  CalendarFormat.twoWeeks: "Monat",
+                  CalendarFormat.week: "zwei Wochen"
+                },
                 focusedDay: _focusedDay,
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                 calendarFormat: _calendarFormat,

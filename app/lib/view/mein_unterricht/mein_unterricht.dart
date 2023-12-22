@@ -74,7 +74,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                   left: padding, right: padding, bottom: padding),
               child: Card(
                 child: ListTile(
-                  title: Text(presence[index]["Kurs"]),
+                  title: Text(presence[index]["Kurs"] ?? ""),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: rowChildren,
@@ -113,8 +113,8 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                   left: padding, right: padding, bottom: padding),
               child: Card(
                 child: ListTile(
-                  title: Text(courses[index]["title"]),
-                  subtitle: Text(courses[index]["teacher"]),
+                  title: Text(courses[index]["title"] ?? ""),
+                  subtitle: Text(courses[index]["teacher"] ?? ""),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -149,19 +149,19 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                   left: padding, right: padding, bottom: padding),
               child: Card(
                 child: ListTile(
-                  title: Text(current[index]["name"]),
+                  title: Text(current[index]["name"] ?? ""),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                          "Thema: ${current[index]["thema"]["title"]}"),
+                          "Thema: ${current[index]["thema"]["title"] ?? ""}"),
                       Row(
                         mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              "${current[index]["teacher"]["short"]}-${current[index]["teacher"]["name"]}"),
-                          Text(current[index]["thema"]["date"])
+                              "${current[index]["teacher"]["name"]??""} (${current[index]["teacher"]["short"] ?? "-"})"),
+                          Text(current[index]["thema"]["date"]??"-")
                         ],
                       ),
                     ],

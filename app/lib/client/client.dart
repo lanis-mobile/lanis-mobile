@@ -5,6 +5,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -142,6 +143,7 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
     try {
       if (username != "" && password != "" && schoolID != "") {
+        FirebaseCrashlytics.instance.setCustomKey("school", client.schoolID);
         final response1 = await dio.post(
             "https://login.schulportal.hessen.de/?i=$schoolID",
             queryParameters: {
@@ -178,7 +180,8 @@ class SPHclient {
       return -3;
     } on DioException {
       return -3;
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       debugPrint(e.toString());
       return -4;
     }
@@ -234,8 +237,8 @@ class SPHclient {
       );
 
       return savePath;
-    } catch (e) {
-      debugPrint(e.toString());
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return "";
     }
   }
@@ -273,13 +276,14 @@ class SPHclient {
       } else {
         return -2;
       }
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
     }
   }
 
   Future<dynamic> getVplan(String date) async {
-    debugPrint("Trying to get substitution plan");
+    debugPrint("Trying to get substitution plan for $date");
 
     try {
       final response = await dio.post(
@@ -301,8 +305,9 @@ class SPHclient {
       debugPrint("Substitution plan error: -3");
       return -3;
       //network error
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint("Substitution plan error: -4");
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
       //unknown error;
     }
@@ -339,8 +344,9 @@ class SPHclient {
       debugPrint("Calendar: -3");
       return -3;
       //network error
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint("Calendar: -4");
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
       //unknown error
     }
@@ -368,7 +374,8 @@ class SPHclient {
     } on SocketException {
       return -3;
       //network error
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
       //unknown error
     }
@@ -411,7 +418,8 @@ class SPHclient {
     } on SocketException {
       return -3;
       //network error
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
       //unknown error;
     }
@@ -437,7 +445,8 @@ class SPHclient {
       }
 
       return fullPlan;
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
       //unknown error;
     }
@@ -458,7 +467,8 @@ class SPHclient {
       } else {
         return false;
       }
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return false;
     }
   }
@@ -553,20 +563,20 @@ class SPHclient {
     () {
       var schoolClasses = document.querySelectorAll("tr.printable");
       for (var schoolClass in schoolClasses) {
-        var teacher = schoolClass.getElementsByClassName("teacher")[0];
+        var teacher = schoolClass.querySelector(".teacher");
 
         result["aktuell"]?.add({
           "name": schoolClass.querySelector(".name")?.text.trim(),
           "teacher": {
             "short": teacher
-                .getElementsByClassName(
+                ?.getElementsByClassName(
                     "btn btn-primary dropdown-toggle btn-xs")[0]
                 .text.trim(),
-            "name": teacher.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
+            "name": teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
           },
           "thema": {
-            "title": schoolClass.getElementsByClassName("thema")[0].text.trim(),
-            "date": schoolClass.getElementsByClassName("datum")[0].text.trim()
+            "title": schoolClass.querySelector(".thema")?.text.trim(),
+            "date": schoolClass.querySelector(".datum")?.text.trim()
           },
           "data": {
             "entry": schoolClass.attributes["data-entry"],
@@ -774,7 +784,8 @@ class SPHclient {
       }();
 
       return result;
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
     }
   }
@@ -820,7 +831,8 @@ class SPHclient {
     } on (SocketException, DioException) {
       return -3;
       // network error
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return -4;
       // unknown error
     }
@@ -873,8 +885,8 @@ class SPHclient {
       await raf.close();
 
       return savePath;
-    } catch (e) {
-      debugPrint(e.toString());
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
       return "";
     }
   }
