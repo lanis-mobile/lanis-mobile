@@ -15,10 +15,13 @@ class VertretungsplanAnsicht extends StatefulWidget {
   State<StatefulWidget> createState() => _VertretungsplanAnsichtState();
 }
 
-class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
+class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
+    with TickerProviderStateMixin {
   final double padding = 12.0;
-  final GlobalKey<RefreshIndicatorState> _vpRefreshIndicatorKey0 =
-      GlobalKey<RefreshIndicatorState>();
+
+  late final List<GlobalKey<RefreshIndicatorState>> globalKeys;
+
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -28,47 +31,48 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
 
   Widget noticeWidget() {
     return const ListTile(
-      title: Text(
-          "Keine weiteren Einträge!",
-          style: TextStyle(fontSize: 22)
-      ),
-      subtitle: Text("Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Manche Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig eingegeben hat."),
+      title: Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
+      subtitle: Text(
+          "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Manche Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig eingegeben hat."),
     );
   }
 
-  bool doesInfoExist(String? info) {
-    var sdfsdf = (info == null || info == "" || info == "---");
-    print(sdfsdf);
-    //print(info);
-    return sdfsdf;
+  bool doesNoticeExist(String? info) {
+    return (info == null || info == "" || info == "---");
   }
 
   Widget? getSubstitutionInfo(String key, String? value, IconData icon) {
-    if (doesInfoExist(value)) {
+    if (doesNoticeExist(value)) {
       return null;
     }
 
     return Padding(
         padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Icon(icon),
-                ),
-                Text(key, style: Theme.of(context).textTheme.labelLarge,)
-              ],
-            ),
-            Text(value!)]
-        ));
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(icon),
+              ),
+              Text(
+                key,
+                style: Theme.of(context).textTheme.labelLarge,
+              )
+            ],
+          ),
+          Text(value!)
+        ]));
   }
 
   Widget getSubstitutionWidget(Map<String, dynamic> substitution) {
     return ListTile(
-      dense: (doesInfoExist(substitution["Vertreter"]) && doesInfoExist(substitution["Lehrer"]) && doesInfoExist(substitution["Raum"]) && doesInfoExist(substitution["Fach"]) && doesInfoExist(substitution["Hinweis"])),
+      dense: (doesNoticeExist(substitution["Vertreter"]) &&
+          doesNoticeExist(substitution["Lehrer"]) &&
+          doesNoticeExist(substitution["Raum"]) &&
+          doesNoticeExist(substitution["Fach"]) &&
+          doesNoticeExist(substitution["Hinweis"])),
       title: Padding(
         padding: const EdgeInsets.only(top: 2),
         child: Row(
@@ -83,8 +87,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
             ],
             Flexible(
                 child: Text(substitution["Klasse"] ?? "Keine Klasse angegeben",
-                    style: (substitution['Art'] != null) ? null : Theme.of(context).textTheme.titleLarge) // highlight "Klasse" when there is no "Art" information
-            ),
+                    style: (substitution['Art'] != null)
+                        ? null
+                        : Theme.of(context)
+                            .textTheme
+                            .titleLarge) // highlight "Klasse" when there is no "Art" information
+                ),
             Text(
               substitution['Stunde'] ?? "",
               style: Theme.of(context).textTheme.titleLarge,
@@ -98,21 +106,35 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
           Column(
             children: [
               Padding(
-                padding: EdgeInsets.only(top: 0, bottom: (doesInfoExist(substitution["Vertreter"]) && doesInfoExist(substitution["Lehrer"]) && doesInfoExist(substitution["Raum"]) && !doesInfoExist(substitution["Fach"])) ? 12 : 0),
+                padding: EdgeInsets.only(
+                    top: 0,
+                    bottom: (doesNoticeExist(substitution["Vertreter"]) &&
+                            doesNoticeExist(substitution["Lehrer"]) &&
+                            doesNoticeExist(substitution["Raum"]) &&
+                            !doesNoticeExist(substitution["Fach"]))
+                        ? 12
+                        : 0),
                 child: Column(
                   children: [
-                    getSubstitutionInfo("Vertreter", substitution["Vertreter"], Icons.person) ??
+                    getSubstitutionInfo("Vertreter", substitution["Vertreter"],
+                            Icons.person) ??
                         const SizedBox.shrink(),
-                    getSubstitutionInfo("Lehrer", substitution["Lehrer"], Icons.school) ??
+                    getSubstitutionInfo(
+                            "Lehrer", substitution["Lehrer"], Icons.school) ??
                         const SizedBox.shrink(),
-                    getSubstitutionInfo("Raum", substitution["Raum"], Icons.room) ??
+                    getSubstitutionInfo(
+                            "Raum", substitution["Raum"], Icons.room) ??
                         const SizedBox.shrink(),
                   ],
                 ),
               ),
-              if (!doesInfoExist(substitution["Hinweis"])) ...[
+              if (!doesNoticeExist(substitution["Hinweis"])) ...[
                 Padding(
-                  padding: EdgeInsets.only(right: 30, left: 30, top: 2, bottom: doesInfoExist(substitution["Fach"]) ? 12 : 0),
+                  padding: EdgeInsets.only(
+                      right: 30,
+                      left: 30,
+                      top: 2,
+                      bottom: doesNoticeExist(substitution["Fach"]) ? 12 : 0),
                   child: Column(
                     children: [
                       Row(
@@ -121,17 +143,21 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
                             padding: EdgeInsets.only(right: 8.0),
                             child: Icon(Icons.info),
                           ),
-                          Text("Hinweis", style: Theme.of(context).textTheme.labelLarge,)
+                          Text(
+                            "Hinweis",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          )
                         ],
                       ),
-                      Text("${toBeginningOfSentenceCase(substitution["Hinweis"])}")
+                      Text(
+                          "${toBeginningOfSentenceCase(substitution["Hinweis"])}")
                     ],
                   ),
                 )
               ]
             ],
           ),
-          if (!doesInfoExist(substitution["Fach"])) ...[
+          if (!doesNoticeExist(substitution["Fach"])) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -142,76 +168,134 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht> {
               ],
             )
           ]
-          /*Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                formatDateString(substitution["Tag_en"], substitution["Tag"]),
-                style: const TextStyle(fontSize: 18),
-              ),
-            ],
-          ),*/
         ],
       ),
     );
+  }
+
+  List<Widget> getSubstitutionViews(dynamic data) {
+    List<Widget> substitutionViews = [];
+
+    for (int dayIndex = 0; dayIndex < data["length"]; dayIndex++) {
+      final int entriesLength = data["days"][dayIndex]["entries"].length;
+
+      substitutionViews.add(RefreshIndicator(
+        key: globalKeys[dayIndex],
+        onRefresh: () async {
+          client.substitutionsFetcher?.fetchData(forceRefresh: true);
+        },
+        child: Padding(
+          padding: EdgeInsets.only(left: padding, right: padding, top: padding),
+          child: ListView.builder(
+            itemCount: entriesLength + 1,
+            itemBuilder: (context, entryIndex) {
+              if (entryIndex == entriesLength) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: padding),
+                  child: Card(
+                    child: noticeWidget(),
+                  ),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Card(
+                  child: getSubstitutionWidget(
+                      data["days"][dayIndex]["entries"][entryIndex]),
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+    }
+
+    return substitutionViews;
+  }
+
+  List<Widget> getErrorWidgets(dynamic data) {
+    List<Widget> errorWidgets = [];
+
+    for (int i = 0; i < data["length"]; i++) {
+      errorWidgets.add(ErrorView(data: data));
+    }
+
+    return errorWidgets;
+  }
+
+  List<Tab> getTabs(dynamic fullVplan) {
+    List<Tab> tabs = [];
+
+    for (Map day in fullVplan["days"]) {
+      tabs.add(Tab(
+        icon: const Icon(Icons.calendar_today),
+        text: day["date"],
+      ));
+    }
+
+    return tabs;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<FetcherResponse>(
-          stream: client.substitutionsFetcher?.stream,
-          builder: (context, snapshot) {
-            if (snapshot.data?.status == FetcherStatus.error && snapshot.data?.content == -2) {
-              SchedulerBinding.instance.addPostFrameCallback((_) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountSettingsScreen()));
-              });
-            }
+        stream: client.substitutionsFetcher?.stream,
+        builder: (context, snapshot) {
+          if (snapshot.data?.status == FetcherStatus.error &&
+              snapshot.data?.content == -2) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AccountSettingsScreen()));
+            });
+          }
 
-            return RefreshIndicator(
-                key: _vpRefreshIndicatorKey0,
-                onRefresh: () async {
-                  client.substitutionsFetcher?.fetchData(forceRefresh: true);
-                },
-                child: snapshot.data?.status == FetcherStatus.error
-                    // Error content, we use CustomScrollView to allow "scroll for refresh"
-                    ? ErrorView(data: snapshot.data?.content)
-                    : snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null
-                        // Waiting content
-                        ? const Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        // Successful content
-                        : Padding(
-                          padding: EdgeInsets.only(left: padding, right: padding),
-                          child: ListView.builder(
-                              itemCount: snapshot.data?.content.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == snapshot.data?.content.length) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(bottom: padding),
-                                    child: Card(
-                                      child: noticeWidget(),
-                                    ),
-                                  );
-                                }
+          if (snapshot.connectionState == ConnectionState.waiting || snapshot.data?.status == FetcherStatus.fetching) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 8),
-                                  child: Card(
-                                    child: getSubstitutionWidget(
-                                        snapshot.data?.content[index]),
-                                  ),
-                                );
-                              },
-                            ),
-                        ));
-          }),
+          if (_tabController == null) {
+            _tabController ??= TabController(
+                length: snapshot.data?.content["length"], vsync: this);
+
+            globalKeys = List.generate(snapshot.data?.content["length"], (index) => GlobalKey<RefreshIndicatorState>());
+          }
+
+          return Column(
+            children: [
+              TabBar(
+                  controller: _tabController,
+                  tabs: getTabs(snapshot.data?.content)),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    if (snapshot.data?.status == FetcherStatus.error) ...[
+                      ...getErrorWidgets(snapshot.data?.content)
+                    ] else ...[
+                      ...getSubstitutionViews(snapshot.data?.content)
+                    ]
+                  ],
+                ),
+              )
+            ],
+          );
+        },
+      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () => _vpRefreshIndicatorKey0.currentState?.show(),
+            onPressed: () => {
+              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys) {
+                globalKey.currentState?.show()
+              }
+            },
             heroTag: "RefreshSubstitutions",
             child: const Icon(Icons.refresh),
           ),

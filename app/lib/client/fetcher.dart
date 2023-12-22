@@ -86,7 +86,15 @@ class SubstitutionsFetcher extends Fetcher {
     final substitutionPlan = await client.getFullVplan();
 
     if (substitutionPlan is! int) {
-      return Future.value(filterlogic.filter(substitutionPlan));
+      final Map filteredSubstitutionPlan = {"length": 0, "days": []};
+
+      for (int i = 0; i < substitutionPlan["dates"].length; i++) {
+        filteredSubstitutionPlan["days"].add({"date": substitutionPlan["dates"][i], "entries": await filterlogic.filter(substitutionPlan["entries"][i])});
+      }
+
+      filteredSubstitutionPlan["length"] = substitutionPlan["dates"].length;
+
+      return Future.value(filteredSubstitutionPlan);
     } else {
       return Future.value(substitutionPlan);
     }

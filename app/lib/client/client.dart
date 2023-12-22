@@ -433,17 +433,19 @@ class SPHclient {
     try {
       var dates = await getVplanDates();
 
-      List fullPlan = [];
+      final Map fullPlan = {"dates": [], "entries": []};
 
       for (String date in dates) {
-        var planForDate = await getVplan(date);
-        if (planForDate is int) {
-          return planForDate;
-        } else {
-          fullPlan.addAll(List.from(planForDate));
-        }
-      }
+        var plan = await getVplan(date);
 
+        if (plan is int) {
+          return plan;
+        }
+
+        fullPlan["dates"].add(date);
+        fullPlan["entries"].add(List.from(plan));
+
+      }
       return fullPlan;
     } catch (e, stack) {
       FirebaseCrashlytics.instance.recordError(e, stack);
