@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/fetcher.dart';
 
 import '../client/client.dart';
 import '../view/bug_report/send_bugreport.dart';
 
 class ErrorView extends StatelessWidget {
-  final int data;
-  const ErrorView({super.key, required this.data});
+  late final int data;
+  late final Fetcher? fetcher;
+  ErrorView({super.key, required this.data, required this.fetcher});
 
   @override
   Widget build(BuildContext context) {
@@ -49,15 +51,16 @@ class ErrorView extends StatelessWidget {
                         },
                         child: const Text(
                             "Fehlerbericht senden")),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: OutlinedButton(
-                          onPressed: () async {
-                            client.substitutionsFetcher?.fetchData(forceRefresh: true);
-                          },
-                          child:
-                          const Text("Erneut versuchen")),
-                    )
+                    if (fetcher != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: OutlinedButton(
+                            onPressed: () async {
+                              fetcher!.fetchData(forceRefresh: true);
+                            },
+                            child: const Text("Erneut versuchen")),
+                      )
+                    ]
                   ],
                 ),
               ),
