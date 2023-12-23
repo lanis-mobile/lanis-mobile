@@ -5,7 +5,6 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -14,6 +13,8 @@ import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
+
+import '../shared/shared_functions.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -143,7 +144,6 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
     try {
       if (username != "" && password != "" && schoolID != "") {
-        FirebaseCrashlytics.instance.setCustomKey("school", client.schoolID);
         final response1 = await dio.post(
             "https://login.schulportal.hessen.de/?i=$schoolID",
             queryParameters: {
@@ -181,7 +181,7 @@ class SPHclient {
     } on DioException {
       return -3;
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       debugPrint(e.toString());
       return -4;
     }
@@ -238,7 +238,7 @@ class SPHclient {
 
       return savePath;
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return "";
     }
   }
@@ -277,7 +277,7 @@ class SPHclient {
         return -2;
       }
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
     }
   }
@@ -307,7 +307,7 @@ class SPHclient {
       //network error
     } catch (e, stack) {
       debugPrint("Substitution plan error: -4");
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
       //unknown error;
     }
@@ -346,7 +346,7 @@ class SPHclient {
       //network error
     } catch (e, stack) {
       debugPrint("Calendar: -4");
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
       //unknown error
     }
@@ -379,7 +379,7 @@ class SPHclient {
       return -3;
       //network error
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
       //unknown error
     }
@@ -423,7 +423,7 @@ class SPHclient {
       return -3;
       //network error
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
       //unknown error;
     }
@@ -452,7 +452,7 @@ class SPHclient {
       }
       return fullPlan;
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
       //unknown error;
     }
@@ -474,7 +474,7 @@ class SPHclient {
         return false;
       }
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return false;
     }
   }
@@ -791,7 +791,7 @@ class SPHclient {
 
       return result;
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
     }
   }
@@ -838,7 +838,7 @@ class SPHclient {
       return -3;
       // network error
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return -4;
       // unknown error
     }
@@ -892,7 +892,7 @@ class SPHclient {
 
       return savePath;
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      recordError(e, stack);
       return "";
     }
   }
