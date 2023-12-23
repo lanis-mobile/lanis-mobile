@@ -74,7 +74,6 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     return validEvents;
   }
 
-
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
@@ -330,6 +329,15 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                     });
                   }
                 },
+                headerStyle: HeaderStyle(
+                  formatButtonTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary
+                  ),
+                  formatButtonDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(24)
+                  )
+                ),
                 onPageChanged: (focusedDay) {
                   _focusedDay = focusedDay;
                 },
