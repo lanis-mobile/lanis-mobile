@@ -12,7 +12,7 @@ E-Mail: alessioc42.dev@gmail.com
 
 ## Das Schulportal Hessen
 Diese Anwendung steht in keiner Verbindung zu den Entwicklern des Schulportals Hessen.
-Da diese Anwendung versucht, wesentliche Funktionen des Schulportals Hessen umzusetzen, ist auf dessen Datenschutzerklärung zu verweisen:
+Da diese Anwendung im wensentlichen Funktionen des Schulportals "kopiert", ist auf dessen Datenschutzerklärung zu verweisen:
 
 https://info.schulportal.hessen.de/datenschutzerklaerung/
 
