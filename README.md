@@ -52,7 +52,7 @@ Bald im Google Play Store.
 - [x] Lanis eingeloggt im browser öffnen
 - [x] Benutzerdaten
 - [x] Mein Unterricht
-- [x] Nachrichten - Beta Version
+- [x] Nachrichten
 
 
 ## Datenschutz und Verschlüsselung
