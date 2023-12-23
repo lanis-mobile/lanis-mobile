@@ -3,6 +3,7 @@ import 'package:html/parser.dart';
 import '../../client/client.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:marked/marked.dart';
 
 import '../../shared/errorView.dart';
 
@@ -142,6 +143,27 @@ class _DetailedConversationAnsichtState
         ],
       ),
     );
+  }
+
+  String convertLanisSyntax(String lanisStyledText) {
+    final markdown = Markdown.map(
+        {
+          "**": (text, match) => "<bold>$text</bold>",
+          "__": (text, match) => "<underline>$text</underline>",
+          "~~": (text, match) => "<italic>$text</italic>",
+          "--": (text, match) => "<remove>$text</remove>",
+          r"regexp: - .(.*)": (text, match) => "<bullet>$text</bullet>", //wird schon gemacht
+          "`": (text, match) => "<code>$text</code>",
+          r"regexp: _(\d) ": (text, match) => "<subscript>$text</subscript>",
+          r"regexp: _\((\d*)\)": (text, match) => "<subscript>$text</subscript>",
+          r"regexp: \^(\d) ": (text, match) => "<superscript>$text</superscript>",
+          r"regexp: \^\((\d*)\)": (text, match) => "<superscript>$text</superscript>",
+        }
+    );
+
+    print(markdown.apply(lanisStyledText));
+
+    return markdown.apply(lanisStyledText);
   }
 
   @override

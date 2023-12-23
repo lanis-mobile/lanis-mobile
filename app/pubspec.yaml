@@ -61,6 +61,7 @@ dependencies:
   firebase_core: ^2.24.2
   firebase_crashlytics: ^3.4.8
   stack_trace: ^1.11.1
+  marked: ^0.2.5
 
 
 flutter_launcher_icons:
