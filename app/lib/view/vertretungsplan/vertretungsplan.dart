@@ -20,7 +20,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
   final double padding = 12.0;
 
-  late final List<GlobalKey<RefreshIndicatorState>> globalKeys;
+  List<GlobalKey<RefreshIndicatorState>>? globalKeys;
 
   TabController? _tabController;
 
@@ -181,7 +181,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       final int entriesLength = data["days"][dayIndex]["entries"].length;
 
       substitutionViews.add(RefreshIndicator(
-        key: globalKeys[dayIndex],
+        key: globalKeys![dayIndex + 1],
         onRefresh: () async {
           client.substitutionsFetcher?.fetchData(forceRefresh: true);
         },
@@ -260,12 +260,50 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
             );
           }
 
-          if (_tabController == null) {
-            _tabController ??= TabController(
-                length: snapshot.data?.content["length"], vsync: this);
+          // GlobalKeys for RefreshIndicator and Refresh-FAB
+          globalKeys = generateGlobalKeys(snapshot.data?.content["length"] + 1);
 
-            globalKeys = generateGlobalKeys(snapshot.data?.content["length"]);
+          // If there are no entries.
+          if (snapshot.data?.content["length"] == 0) {
+            return RefreshIndicator(
+              key: globalKeys![0],
+              onRefresh: () async {
+                client.substitutionsFetcher?.fetchData(forceRefresh: true);
+              },
+              child: const CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                            Icons.sentiment_dissatisfied,
+                            size: 60
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(35),
+                          child: Text(
+                              "Es gibt keine Vertretungen!",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              )
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            );
           }
+
+          // Vp could have multiple dates, so we need to set it dynamically.
+          _tabController = TabController(
+                length: snapshot.data?.content["length"], vsync: this);
 
           return Column(
             children: [
@@ -293,7 +331,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         children: [
           FloatingActionButton(
             onPressed: () => {
-              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys) {
+              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys!) {
                 globalKey.currentState?.show()
               }
             },
@@ -310,9 +348,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => FilterPlan()))
                   .then((_) => setState(() {
-                        client.substitutionsFetcher
-                            ?.fetchData(forceRefresh: true);
-                      }));
+                client.substitutionsFetcher
+                    ?.fetchData(forceRefresh: true);
+              }));
             },
             child: const Icon(Icons.filter_alt),
           ),
