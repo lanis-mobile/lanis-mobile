@@ -17,9 +17,6 @@ class CalendarAnsicht extends StatefulWidget {
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
   late final ValueNotifier<List<Event>> _selectedEvents;
 
-  final GlobalKey<RefreshIndicatorState> _calErrorIndicatorKey0 =
-  GlobalKey<RefreshIndicatorState>();
-
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -89,311 +86,199 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     }
   }
 
+  bool doesEntryExist(dynamic entry) => entry != null && entry != "";
 
-  Widget getEvent(Event calendarData) {
-    return AlertDialog(
-      content: FutureBuilder(
-        future: fetchEvent(calendarData.data["Id"]),
-        builder: (context, snapshot) {
-          // Waiting content
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+  Widget getEvent(Event calendarData, Map<String, dynamic> singleEventData) {
+    const double iconSize = 24;
+
+    // German-formatted readable date string
+    String date = "";
+
+    String startTime = calendarData.startTime.format("E d MMM y", "de_DE");
+    String endTime = calendarData.endTime.format("E d MMM y", "de_DE");
+
+    if (calendarData.data["allDay"] == true) {
+      if (startTime == endTime) {
+        date += startTime;
+      }
+      else {
+        date += "$startTime bis $endTime";
+      }
+    } else {
+      if (startTime == endTime) {
+        date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("H:mm", "de_DE")}";
+      } else {
+        date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:mm", "de_DE")}";
+      }
+    }
+
+    // For which group (Public, Students & Parents, Teachers) it's targeted for.
+    String targetGroup = "";
+
+    if (doesEntryExist(singleEventData["properties"]) && doesEntryExist(singleEventData["properties"]["zielgruppen"])) {
+      Map<String, dynamic> data = singleEventData["properties"]["zielgruppen"];
+
+      data.forEach((key, value) {
+        if (key == "-sus") {
+          targetGroup += "${value.replaceAll(RegExp(r"amp;"), "")}";
+          return;
+        }
+        targetGroup += "$value, ";
+      });
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                  calendarData.title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            // Responsible (Teacher, Admin, ...)
+            if (doesEntryExist(singleEventData["properties"]) && doesEntryExist(singleEventData["properties"]["verantwortlich"])) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Row(
                   children: [
-                    Flexible(
-                      child: Text(
-                        calendarData.title,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    )
-                  ],
-                ),
-                const CircularProgressIndicator()
-              ],
-            );
-          }
-
-          String date = "";
-
-          String startTime = calendarData.startTime.format("E d MMM y", "de_DE");
-          String endTime = calendarData.endTime.format("E d MMM y", "de_DE");
-
-          if (calendarData.data["allDay"] == true) {
-            if (startTime == endTime) {
-              date += startTime;
-            }
-            else {
-              date += "$startTime bis $endTime";
-            }
-          } else {
-            if (startTime == endTime) {
-              date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("H:mm", "de_DE")}";
-            } else {
-              date += "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:mm", "de_DE")}";
-            }
-          }
-
-          // Error content (Same as successful content but without snapshot.data and with an error alert)
-          if (snapshot.data is int) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        calendarData.title,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    )
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                  child: Row(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 6.0),
-                        child: Icon(Icons.access_time_filled, size: 21),
-                      ),
-                      Flexible(
-                        child: Text(
-                            date,
-                            style: Theme.of(context).textTheme.bodyMedium
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                if (calendarData.data["Ort"] != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
-                    child: Row(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 6.0),
-                          child: Icon(Icons.place, size: 21),
-                        ),
-                        Text(
-                            calendarData.data["Ort"],
-                            style: Theme.of(context).textTheme.bodyMedium
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-                if (calendarData.data["Lerngruppe"] != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
-                    child: Row(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 6.0),
-                          child: Icon(Icons.school, size: 21),
-                        ),
-                        Flexible(
-                          child: Text(
-                              calendarData.data["Lerngruppe"]["Name"],
-                              style: Theme.of(context).textTheme.bodyMedium
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-                if (calendarData.data["description"] != null && calendarData.data["description"] != "") ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                    child: Linkify(
-                      onOpen: (link) async {
-                        if (!await launchUrl(Uri.parse(link.url))) {
-                          debugPrint("${link.url} konnte nicht geöffnet werden.");
-                        }
-                      },
-                      text: calendarData.data["description"],
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      linkStyle: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ),
-                ],
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: ListTile(
-                    leading: const Icon(Icons.error),
-                    title: const Text("Ein Fehler ist passsiert!"),
-                    subtitle: Text("Bitte kontaktiere einen Entwickler. Fehler: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"} (${snapshot.data} )"),
-                    tileColor: Colors.red[500],
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(14)),
-                    ),
-                  ),
-                )
-              ],
-            );
-          }
-
-          String targetGroup = "";
-
-          if (snapshot.data["properties"] != null && snapshot.data["properties"]["zielgruppen"] != null) {
-            Map<String, dynamic> data = snapshot.data["properties"]["zielgruppen"];
-
-            data.forEach((key, value) {
-              if (key == "-sus") {
-                targetGroup += "${value.replaceAll(RegExp(r"amp;"), "")}";
-                return;
-              }
-              targetGroup += "$value, ";
-            });
-          }
-
-          // Successful content
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (snapshot.data["properties"] != null && snapshot.data["properties"]["verantwortlich"] != null && snapshot.data["properties"]["verantwortlich"] != "") ...[
                     const Padding(
-                      padding: EdgeInsets.only(right: 4.0),
+                      padding: EdgeInsets.only(right: 8.0),
                       child: Icon(
                         Icons.person,
-                        size: 18,
+                        size: iconSize,
                       ),
                     ),
                     Text(
-                      snapshot.data["properties"]["verantwortlich"],
-                      style: Theme.of(context).textTheme.labelSmall,
+                      singleEventData["properties"]["verantwortlich"],
+                      style: Theme.of(context).textTheme.labelLarge,
                     )
-                  ]
-                ],
-              ),
-              Row(
+                  ],
+                ),
+              )
+            ],
+            // Time
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
                 children: [
+                  const Padding(
+                    padding: EdgeInsets.only(
+                        right: 8.0
+                    ),
+                    child: Icon(
+                      Icons.access_time_filled,
+                      size: iconSize,
+                    ),
+                  ),
                   Flexible(
                     child: Text(
-                      calendarData.title,
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      date,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   )
                 ],
               ),
+            ),
+            // Place
+            if (doesEntryExist(calendarData.data["Ort"])) ...[
               Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                padding: const EdgeInsets.only(bottom: 4.0),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Padding(
-                      padding: EdgeInsets.only(right: 6.0),
-                      child: Icon(Icons.access_time_filled, size: 21),
+                      padding: EdgeInsets.only(
+                          right: 8.0
+                      ),
+                      child: Icon(
+                          Icons.place,
+                        size: iconSize,
+                      ),
+                    ),
+                    Text(
+                        calendarData.data["Ort"],
+                        style: Theme.of(context).textTheme.labelLarge
+                    )
+                  ],
+                ),
+              ),
+            ],
+            // Target group
+            if (doesEntryExist(singleEventData["properties"]) && doesEntryExist(singleEventData["properties"]["zielgruppen"])) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(
+                          right: 8.0
+                      ),
+                      child: Icon(
+                          Icons.group,
+                        size: iconSize,
+                      ),
                     ),
                     Flexible(
                       child: Text(
-                          date,
-                          style: Theme.of(context).textTheme.bodyMedium
+                          targetGroup,
+                          style: Theme.of(context).textTheme.labelLarge
                       ),
                     )
                   ],
                 ),
               ),
-              if (calendarData.data["Ort"] != null) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 6.0),
-                        child: Icon(Icons.place, size: 21),
-                      ),
-                      Text(
-                          calendarData.data["Ort"],
-                          style: Theme.of(context).textTheme.bodyMedium
-                      )
-                    ],
-                  ),
-                ),
-              ],
-              if (snapshot.data["properties"] != null && snapshot.data["properties"]["zielgruppen"] != null) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 6.0),
-                        child: Icon(Icons.group, size: 21),
-                      ),
-                      Flexible(
-                        child: Text(
-                            targetGroup,
-                            style: Theme.of(context).textTheme.bodyMedium
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-              if (calendarData.data["Lerngruppe"] != null) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 6.0),
-                        child: Icon(Icons.school, size: 21),
-                      ),
-                      Flexible(
-                        child: Text(
-                            calendarData.data["Lerngruppe"]["Name"],
-                            style: Theme.of(context).textTheme.bodyMedium
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-              if (calendarData.data["description"] != null && calendarData.data["description"] != "") ...[
-                Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                  child: Linkify(
-                    onOpen: (link) async {
-                      if (!await launchUrl(Uri.parse(link.url))) {
-                        debugPrint("${link.url} konnte nicht geöffnet werden.");
-                      }
-                    },
-                    text: calendarData.data["description"].replaceAll(RegExp(r"<br />"), ""),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    linkStyle: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: Theme.of(context).colorScheme.primary),
-                  ),
-                ),
-              ],
             ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget getEvent2(Event calendarData) {
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("sdfsdf")
-        ],
+            if (doesEntryExist(calendarData.data["Lerngruppe"])) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(
+                          right: 8.0
+                      ),
+                      child: Icon(
+                          Icons.school,
+                          size: iconSize,
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                          calendarData.data["Lerngruppe"]["Name"],
+                          style: Theme.of(context).textTheme.labelLarge
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+            if (doesEntryExist(calendarData.data["description"])) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Linkify(
+                  onOpen: (link) async {
+                    if (!await launchUrl(Uri.parse(link.url))) {
+                      debugPrint("${link.url} konnte nicht geöffnet werden.");
+                    }
+                  },
+                  text: calendarData.data["description"].replaceAll(RegExp(r"<br />"), ""),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  linkStyle: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: Theme.of(context).colorScheme.primary),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -404,7 +289,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       stream: client.calendarFetcher?.stream,
       builder: (context, snapshot) {
         if (snapshot.data?.status == FetcherStatus.error) {
-          return ErrorView(data: snapshot.data!.content);
+          return ErrorView(data: snapshot.data!.content, fetcher: client.calendarFetcher,);
         } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
           return const Center(child: CircularProgressIndicator());
         } else {
@@ -463,22 +348,35 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                             child: Card(
                               child: ListTile(
                                 title: Text('${value[index]}'),
+                                trailing: const Icon(Icons.arrow_right),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                onTap: () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) {
-                                        return getEvent2(value[index]);
-                                      }
-                                  );
-                                  /*showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return getEvent(value[index]);
-                                      }
-                                  );*/
+                                onTap: () async {
+                                  dynamic singleEvent = await fetchEvent(value[index].data["Id"]);
+
+                                  if (mounted) {
+                                    if (singleEvent == -9) {
+                                      return;
+                                    }
+                                    if (singleEvent is int) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        showDragHandle: true,
+                                        builder: (context) {
+                                          return ErrorView(data: singleEvent, fetcher: null,);
+                                        }
+                                      );
+                                    } else {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          showDragHandle: true,
+                                          builder: (context) {
+                                            return getEvent(value[index], singleEvent);
+                                          }
+                                      );
+                                    }
+                                  }
                                 },
                               ),
                             ),

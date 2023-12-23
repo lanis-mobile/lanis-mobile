@@ -353,6 +353,10 @@ class SPHclient {
   }
 
   Future<dynamic> getEvent(String id) async {
+    if (!(await InternetConnectionChecker().hasConnection)) {
+      return -9;
+    }
+
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/kalender.php",
