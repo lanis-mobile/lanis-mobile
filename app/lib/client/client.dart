@@ -893,7 +893,6 @@ class SPHclient {
     }
   }
 
-
   Future<dynamic> getSingleConversation(String uniqueID) async {
     try {
       final encryptedUniqueID = cryptor.encryptString(uniqueID);

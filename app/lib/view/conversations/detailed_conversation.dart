@@ -4,6 +4,8 @@ import '../../client/client.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../shared/errorView.dart';
+
 class DetailedConversationAnsicht extends StatefulWidget {
   final String uniqueID;
   final String? title;
@@ -154,25 +156,7 @@ class _DetailedConversationAnsichtState
             if (snapshot.connectionState != ConnectionState.waiting) {
               // Error content
               if (snapshot.data is int) {
-                return Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.warning,
-                      size: 60,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(50),
-                      child: Text(
-                          "Es gibt wohl ein Problem, bitte kontaktiere den Entwickler der App!",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 22)),
-                    ),
-                    Text(
-                        "Problem: ${client.statusCodes[snapshot.data] ?? "Unbekannter Fehler"}")
-                  ],
-                ));
+                return ErrorView(data: snapshot.data, fetcher: null,);
               }
               // Successful content
               return ListView.builder(

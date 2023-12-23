@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../client/client.dart';
+import '../client/fetcher.dart';
 import '../view/bug_report/send_bugreport.dart';
 
 class ErrorView extends StatelessWidget {
   late final int data;
-  ErrorView({super.key, required this.data});
+  late final Fetcher? fetcher;
+  ErrorView({super.key, required this.data, required this.fetcher});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +26,9 @@ class ErrorView extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(35),
                 child: Text(
-                    "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
+                    "Es gab wohl ein Problem, bitte sende einen Fehlerbericht!",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 22)),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               ),
               Text(
                   "Problem: ${client.statusCodes[data] ?? "Unbekannter Fehler"}"
@@ -49,15 +51,17 @@ class ErrorView extends StatelessWidget {
                         },
                         child: const Text(
                             "Fehlerbericht senden")),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: OutlinedButton(
-                          onPressed: () async {
-                            client.substitutionsFetcher?.fetchData(forceRefresh: true);
-                          },
-                          child:
-                          const Text("Erneut versuchen")),
-                    )
+                    if (fetcher != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: OutlinedButton(
+                            onPressed: () async {
+                              fetcher!.fetchData(forceRefresh: true);
+                            },
+                            child:
+                            const Text("Erneut versuchen")),
+                      )
+                    ]
                   ],
                 ),
               ),
