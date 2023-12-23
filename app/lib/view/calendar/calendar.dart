@@ -317,9 +317,31 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 calendarFormat: _calendarFormat,
                 eventLoader: _getEventsForDay,
                 startingDayOfWeek: StartingDayOfWeek.monday,
-                calendarStyle: const CalendarStyle(
-                  // Use `CalendarStyle` to customize the UI
+                calendarStyle: CalendarStyle(
                   outsideDaysVisible: false,
+                  defaultDecoration: const BoxDecoration(
+                      shape: BoxShape.circle
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle
+                  ),
+                  selectedTextStyle: TextStyle(
+                    fontSize: 16.0,
+                    color: Theme.of(context).colorScheme.onPrimary
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                  todayTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                    fontSize: 16,
+                  ),
+                  markerDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.inversePrimary
+                  )
                 ),
                 onDaySelected: _onDaySelected,
                 onFormatChanged: (format) {
