@@ -429,9 +429,11 @@ class SPHclient {
     }
   }
 
-  Future<dynamic> getFullVplan() async {
-    if (!client.doesSupportFeature("Vertretungsplan")) {
-      return -8;
+  Future<dynamic> getFullVplan({skipCheck= false}) async {
+    if (!skipCheck) {
+      if (!client.doesSupportFeature("Vertretungsplan")) {
+        return -8;
+      }
     }
     
     try {

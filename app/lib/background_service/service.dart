@@ -28,11 +28,11 @@ Future<void> performBackgroundFetch() async {
   await client.loadFromStorage();
   final loginCode = await client.login();
   if (loginCode == 0) {
-    final vPlan = await client.getFullVplan();
+    final vPlan = await client.getFullVplan(skipCheck: true);
     if (vPlan is! int) {
       final List combinedVPlan = [];
 
-      for (List plan in vPlan) {
+      for (List plan in vPlan["entries"]) {
         combinedVPlan.add(plan);
       }
 
