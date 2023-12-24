@@ -92,7 +92,11 @@ void main() async {
       savedThemeMode: savedThemeMode,
     ));
 
-  }, Countly.recordDartError);
+  }, (obj, stack) {
+    if (!kDebugMode) {
+      Countly.recordDartError(obj, stack);
+    }
+  });
 }
 
 Widget errorWidget(FlutterErrorDetails details) {
@@ -388,7 +392,7 @@ class _HomePageState extends State<HomePage> {
   void openLoginScreen() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
+      MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((result) {
       setState(() {
         isLoading = false;

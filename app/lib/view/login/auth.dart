@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fuzzy/fuzzy.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
@@ -46,21 +45,33 @@ class LoginFormState extends State<LoginForm> {
 
 
   void login(String username, String password, String schoolID) async {
-    showDialog(context: context, builder: (context)=> const AlertDialog(
-      title: Text("Anmeldung"),
-      content: Center(
-        heightFactor: 1.2,
-        child: CircularProgressIndicator(),
-      ),
-    ));
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context)=> const AlertDialog(
+          title: Text("Anmeldung"),
+          content: Center(
+            heightFactor: 1.2,
+            child: CircularProgressIndicator(),
+          ),
+        )
+    );
 
-    await client.overwriteCredits(username, password, schoolID, "5182");
+    await client.overwriteCredits(username, password, schoolID);
     var loginCode = await client.login(userLogin: true);
 
     setState(() {
+      Navigator.pop(context); //pop dialog
       if (loginCode == 0) {
-        Navigator.pop(context); //pop dialog
         Navigator.pop(context); //pop login screen
+      } else {
+        showDialog(
+            context: context,
+            builder: (context)=> AlertDialog(
+              title: const Text("Fehler!"),
+              content: Text(client.statusCodes[loginCode]!),
+            )
+        );
       }
     });
   }

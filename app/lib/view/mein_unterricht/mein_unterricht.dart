@@ -262,7 +262,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const AccountSettingsScreen()));
+                      builder: (context) => const WelcomeLoginScreen()));
             });
           }
 

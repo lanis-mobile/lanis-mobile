@@ -250,7 +250,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const AccountSettingsScreen()));
+                      builder: (context) => const WelcomeLoginScreen()));
             });
           }
 

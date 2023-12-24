@@ -1,19 +1,16 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
-import '../../client/client.dart';
 import 'auth.dart';
 import 'intro_screen_page_view_models.dart';
 
-class AccountSettingsScreen extends StatefulWidget {
-  const AccountSettingsScreen({super.key});
+class WelcomeLoginScreen extends StatefulWidget {
+  const WelcomeLoginScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _AccountSettingsScreenState();
+  State<StatefulWidget> createState() => _WelcomeLoginScreenState();
 }
 
-class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
+class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
 
   String currentPage = "intro";
   List<String> schoolList = [];
