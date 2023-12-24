@@ -28,17 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: <Widget>[
           ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Account Einstellungen'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const AccountSettingsScreen()),
-              );
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.person_pin),
             title: const Text('Benutzerdaten'),
             onTap: () {
