@@ -71,23 +71,23 @@ void main() async {
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
     await initializeDateFormatting();
+    if (!kDebugMode) {
+      const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
+      CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
+      config.enableCrashReporting();
+      await Countly.initWithConfig(config);
 
-    const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
-    CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
-    config.enableCrashReporting();
-    await Countly.initWithConfig(config).then((str) => debugPrint("########################## > $str"));
+      FlutterError.onError = (errorDetails) async {
 
-    FlutterError.onError = (errorDetails) async {
-      if (!kDebugMode) {
-        Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
-      }
+          Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
 
-      debugPrint(errorDetails.exception.toString());
-      debugPrintStack(
-          stackTrace: errorDetails.stack!
-      );
-    };
 
+        debugPrint(errorDetails.exception.toString());
+        debugPrintStack(
+            stackTrace: errorDetails.stack!
+        );
+      };
+    }
     runApp(App(
       savedThemeMode: savedThemeMode,
     ));
