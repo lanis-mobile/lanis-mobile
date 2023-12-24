@@ -70,7 +70,10 @@ class LoginFormState extends State<LoginForm> {
             builder: (context)=> AlertDialog(
               title: const Text("Fehler!"),
               content: Text(client.statusCodes[loginCode]!),
-            )
+              actions: [
+                TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("OK"))
+              ],
+            ),
         );
       }
     });
@@ -114,8 +117,10 @@ class LoginFormState extends State<LoginForm> {
                 ),
                 selectedItem: dropDownSelectedItem,
                 onChanged: (value){
+                  debugPrint("changed!");
                   dropDownSelectedItem = value;
                   selectedSchoolID = extractNumber(value);
+                  debugPrint(selectedSchoolID);
                 },
               items: schoolList,
             ),
