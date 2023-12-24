@@ -5,7 +5,7 @@ import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
-import 'subsettings/user_login.dart';
+import '../login/screen.dart';
 import '../../client/client.dart';
 
 import 'package:flutter/material.dart';
@@ -23,7 +23,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Einstellungen"),
-
       ),
       body: ListView(
         children: <Widget>[

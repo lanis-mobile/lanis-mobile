@@ -42,7 +42,6 @@ dependencies:
   dio: ^5.3.3
   html: ^0.15.4
   flutter_launcher_icons: ^0.13.1
-  dropdown_search: ^5.0.6
   flutter_local_notifications: ^16.1.0
   workmanager: ^0.5.2
   permission_handler: ^11.0.1
@@ -61,7 +60,9 @@ dependencies:
   stack_trace: ^1.11.1
   countly_flutter: ^23.12.0
   introduction_screen: ^3.1.12
-
+  flutter_svg: ^2.0.9
+  dropdown_search: ^5.0.6
+  fuzzy: ^0.5.1
 
 flutter_launcher_icons:
   android: true
@@ -94,8 +95,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/blackboard_background.jpg
-    - assets/school_list.json
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

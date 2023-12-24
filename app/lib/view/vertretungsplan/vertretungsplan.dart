@@ -6,7 +6,7 @@ import 'package:sph_plan/shared/shared_functions.dart';
 
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
-import '../settings/subsettings/user_login.dart';
+import '../login/screen.dart';
 import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {

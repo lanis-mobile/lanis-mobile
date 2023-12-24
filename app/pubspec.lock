@@ -382,6 +382,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.2.0"
+  flutter_svg:
+    dependency: "direct main"
+    description:
+      name: flutter_svg
+      sha256: d39e7f95621fc84376bc0f7d504f05c3a41488c562f4a8ad410569127507402c
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.9"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -392,6 +400,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fuzzy:
+    dependency: "direct main"
+    description:
+      name: fuzzy
+      sha256: af5fbd36f2f8de0663a5b562ef5ca209aea957e81a2f0e97f97475cfbed044ec
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -544,6 +560,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.3"
+  path_parsing:
+    dependency: transitive
+    description:
+      name: path_parsing
+      sha256: e3e67b1629e6f7e8100b367d3db6ba6af4b1f0bb80f64db18ef1fbabd2fa9ccf
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   path_provider:
     dependency: "direct main"
     description:
@@ -789,6 +813,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  stringr:
+    dependency: transitive
+    description:
+      name: stringr
+      sha256: "2846b6811c3cbb34c8937a35e623986e3fbf7203b3bb33ffe7f80e496ea3eff2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   table_calendar:
     dependency: "direct main"
     description:
@@ -909,6 +941,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  vector_graphics:
+    dependency: transitive
+    description:
+      name: vector_graphics
+      sha256: "0f0c746dd2d6254a0057218ff980fc7f5670fd0fcf5e4db38a490d31eed4ad43"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.9+1"
+  vector_graphics_codec:
+    dependency: transitive
+    description:
+      name: vector_graphics_codec
+      sha256: "0edf6d630d1bfd5589114138ed8fada3234deacc37966bec033d3047c29248b7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.9+1"
+  vector_graphics_compiler:
+    dependency: transitive
+    description:
+      name: vector_graphics_compiler
+      sha256: d24333727332d9bd20990f1483af4e09abdb9b1fc7c3db940b56ab5c42790c26
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.9+1"
   vector_math:
     dependency: transitive
     description:

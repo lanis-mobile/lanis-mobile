@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import '../../client/client.dart';
 import '../bug_report/send_bugreport.dart';
-import '../settings/subsettings/user_login.dart';
+import '../login/screen.dart';
 import 'course_overview.dart';
 
 class MeinUnterrichtAnsicht extends StatefulWidget {
