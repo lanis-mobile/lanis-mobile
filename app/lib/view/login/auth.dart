@@ -8,9 +8,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
 
 class LoginForm extends StatefulWidget {
-  final dynamic onSuccess;
+  final Function() afterLogin;
 
-  const LoginForm({super.key, required this.onSuccess});
+  const LoginForm({super.key, required this.afterLogin});
 
   @override
   LoginFormState createState() {
@@ -63,7 +63,7 @@ class LoginFormState extends State<LoginForm> {
     setState(() {
       Navigator.pop(context); //pop dialog
       if (loginCode == 0) {
-        Navigator.pop(context); //pop login screen
+        widget.afterLogin();
       } else {
         showDialog(
             context: context,

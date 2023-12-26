@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:sph_plan/view/login/setup_screen_page_view_models.dart';
 import 'auth.dart';
 import 'intro_screen_page_view_models.dart';
 
@@ -33,8 +34,25 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
           pages: intoScreenPageViewModels
       );
     } else if (currentPage == "login") {
-      return const Scaffold(
-        body: LoginForm(onSuccess: null,),
+      return Scaffold(
+        body: LoginForm(
+          afterLogin: () {
+            setState(() {
+              currentPage = "setup";
+            });
+          },
+        ),
+      );
+    } else if (currentPage == "setup") {
+      return IntroductionScreen(
+          next: const Icon(Icons.arrow_forward),
+          done: const Text("Abschließen"),
+          onDone: () {
+            setState(() {
+              Navigator.pop(context);
+            });
+          },
+          pages: setupScreenPageViewModels
       );
     }
 
