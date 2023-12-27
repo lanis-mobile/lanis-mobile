@@ -6,7 +6,9 @@
   download APK
 </a>
 </p>
-Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
+Bald im Google Play Store.
+
+<a href="https://countly.com/?utm_source=badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/dark.svg" alt="Countly - Product Analytics" /></a>
 
 <details>
   <summary>Screenshots</summary>
@@ -50,16 +52,17 @@ Bald (Voraussichtlich ab dem 23.12.2023) im Google Play Store.
 - [x] Lanis eingeloggt im browser öffnen
 - [x] Benutzerdaten
 - [x] Mein Unterricht
-- [x] Nachrichten - Beta Version
+- [x] Nachrichten
 
 
 ## Datenschutz und Verschlüsselung
 Alle Daten werden verschlüsselt auf dem Gerät gespeichert. Die gesamte Kommunikation erfolgt direkt mit den Lanis-Servern.
 Sensible Daten (wie Noten, Anwesenheiten, etc.) werden durch Ende-zu-Ende-Verschlüsselung geschützt.
 
+Es werden anonyme Daten zur Fehleranalyse erhoben.
 
 ## Mitarbeit
 Dieses Projekt ist stark von Bug-Reports anderer Schulen oder von neuen Mitarbeitern abhängig. Der Grund dafür liegt in
-der modularen Natur, die es äußerst schwierig macht, eine universelle Lanis-App zu erstellen.
+der modularen Natur des Schulportals, die es äußerst schwierig macht, eine universelle Lanis-App zu entwickeln.
 
 Bug-Reports können auch an <a href="mailto:alessioc42.dev@gmail.com">diese</a> E-Mail-Adresse gesendet werden, falls kein Github-Konto vorhanden ist.

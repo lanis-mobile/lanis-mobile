@@ -2,16 +2,14 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+
+import 'package:countly_flutter/countly_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'firebase_options.dart';
-
-import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
@@ -36,60 +34,65 @@ import 'background_service/service.dart' as background_service;
 
 
 void main() async {
+
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return errorWidget(details);
   };
 
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded<Future<void>>(() async {
 
-  // Pass all uncaught "fatal" errors from the framework to Crashlytics
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    WidgetsFlutterBinding.ensureInitialized();
 
-  if (!kDebugMode) {
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
-    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-  }
+    PermissionStatus? notificationsPermissionStatus;
 
-  PermissionStatus? notificationsPermissionStatus;
+    await Permission.notification.isDenied.then((value) async {
+      if (value) {
+        notificationsPermissionStatus = await Permission.notification.request();
+      }
+    });
 
-  await Permission.notification.isDenied.then((value) async {
-    if (value) {
-      notificationsPermissionStatus = await Permission.notification.request();
+    bool enableNotifications =
+        (await globalStorage.read(key: "settings-push-service-on") ?? "true") ==
+            "true";
+    int notificationInterval = int.parse(
+        await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+
+    await Workmanager().cancelAll();
+    if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted &&
+        enableNotifications) {
+      await Workmanager().initialize(background_service.callbackDispatcher,
+          isInDebugMode: false);
+      await Workmanager().registerPeriodicTask(
+          "sphplanfetchservice-alessioc42-github-io",
+          "sphVertretungsplanUpdateService",
+          frequency: Duration(minutes: notificationInterval));
     }
-  });
 
-  bool enableNotifications =
-      (await globalStorage.read(key: "settings-push-service-on") ?? "true") ==
-          "true";
-  int notificationInterval = int.parse(
-      await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+    final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  await Workmanager().cancelAll();
-  if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted &&
-      enableNotifications) {
-    await Workmanager().initialize(background_service.callbackDispatcher,
-        isInDebugMode: false);
-    await Workmanager().registerPeriodicTask(
-        "sphplanfetchservice-alessioc42-github-io",
-        "sphVertretungsplanUpdateService",
-        frequency: Duration(minutes: notificationInterval));
-  }
+    await initializeDateFormatting();
 
-  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+    const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
+    CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
+    config.enableCrashReporting();
+    await Countly.initWithConfig(config).then((str) => debugPrint("########################## > $str"));
 
-  await initializeDateFormatting();
+    FlutterError.onError = (errorDetails) async {
+      if (!kDebugMode) {
+        Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
+      }
 
-  runApp(App(
-    savedThemeMode: savedThemeMode,
-  ));
+      debugPrint(errorDetails.exception.toString());
+      debugPrintStack(
+          stackTrace: errorDetails.stack!
+      );
+    };
+
+    runApp(App(
+      savedThemeMode: savedThemeMode,
+    ));
+
+  }, Countly.recordDartError);
 }
 
 Widget errorWidget(FlutterErrorDetails details) {
