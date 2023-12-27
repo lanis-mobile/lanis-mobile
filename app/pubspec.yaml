@@ -62,6 +62,7 @@ dependencies:
   firebase_crashlytics: ^3.4.8
   stack_trace: ^1.11.1
   marked: ^0.2.5
+  styled_text: ^8.1.0
 
 
 flutter_launcher_icons:
@@ -123,3 +124,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  fonts:
+    - family: Roboto Mono
+      fonts:
+        - asset: fonts/RobotoMono-Regular.ttf

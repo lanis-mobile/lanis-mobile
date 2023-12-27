@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import '../../client/client.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:styled_text/styled_text.dart';
 import 'package:marked/marked.dart';
 
 import '../../shared/errorView.dart';
@@ -109,7 +112,7 @@ class _DetailedConversationAnsichtState
             padding: const EdgeInsets.only(bottom: 4.0),
             child: Row(
               children: [
-                Flexible(
+                /*Flexible(
                   flex: 10,
                   child: Linkify(
                     onOpen: (link) async {
@@ -124,6 +127,84 @@ class _DetailedConversationAnsichtState
                         .textTheme
                         .bodyMedium!
                         .copyWith(color: Theme.of(context).colorScheme.primary),
+                  ),
+                )*/
+                Flexible(
+                  flex: 10,
+                  child: StyledText(
+                    text: convertLanisSyntax("""fett wird zu **fett**
+unterstrichen wird zu __unterstrichen__
+entfernt wird zu --entfernt--
+~~italic~~
+- Aufzählung 1
+- Aufzählung 2
+- Aufzählung 3
+Quellcode wird zu `Quellcasddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddode`
+Datum v1  12.04.2018 
+Datum v1  12.04.18
+Datum v2  (12.04.2018) 
+Datum v2  (12.04.18)
+Uhrzeitenangabe 11:13
+Link https://example.com/
+Linkkürzung https://example.com/abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz
+Email test@example.com
+Zahl sonderfall v1 _1 
+Zahl sonderfall v1 _(1)
+Zahlen sonderfall v1 _(123)
+Zahl sonderfall v2 ^1 
+Zahl sonderfall v2 ^(1)
+Zahlen sonderfall v2 ^(123)"""),
+                    tags: {
+                      "bold": StyledTextTag(
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                      "underline": StyledTextTag(
+                          style: const TextStyle(
+                              decoration: TextDecoration.underline
+                          )
+                      ),
+                      "italic": StyledTextTag(
+                          style: const TextStyle(
+                              fontStyle: FontStyle.italic
+                          )
+                      ),
+                      "remove": StyledTextTag(
+                          style: const TextStyle(
+                              decoration: TextDecoration.lineThrough
+                          )
+                      ),
+                      "code": StyledTextWidgetBuilderTag(
+                          (context, _, textContent) => Container(
+                            padding: const EdgeInsets.only(left: 6.0, right: 6.0, top: 2.5, bottom: 2.5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              color: Theme.of(context).colorScheme.secondary.withOpacity(0.35),
+                            ),
+                            child: Text(
+                              textContent!,
+                              style: const TextStyle(
+                                fontFamily: "Roboto Mono"
+                              ),
+                            ),
+                          )
+                      ),
+                      "subscript": StyledTextTag(
+                        style: const TextStyle(
+                          fontFeatures: [
+                            FontFeature.subscripts()
+                          ]
+                        )
+                      ),
+                      "superscript": StyledTextTag(
+                          style: const TextStyle(
+                              fontFeatures: [
+                                FontFeature.superscripts()
+                              ]
+                          )
+                      )
+                    },
                   ),
                 )
               ],
@@ -152,8 +233,9 @@ class _DetailedConversationAnsichtState
           "__": (text, match) => "<underline>$text</underline>",
           "~~": (text, match) => "<italic>$text</italic>",
           "--": (text, match) => "<remove>$text</remove>",
-          r"regexp: - .(.*)": (text, match) => "<bullet>$text</bullet>", //wird schon gemacht
+          r"regexp: - (.*)": (text, match) => "\u2022 $text", // \u2022 = •
           "`": (text, match) => "<code>$text</code>",
+          "```": (text, match) => "<code>$text</code>",
           r"regexp: _(\d) ": (text, match) => "<subscript>$text</subscript>",
           r"regexp: _\((\d*)\)": (text, match) => "<subscript>$text</subscript>",
           r"regexp: \^(\d) ": (text, match) => "<superscript>$text</superscript>",
