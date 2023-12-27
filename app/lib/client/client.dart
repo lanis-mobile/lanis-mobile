@@ -499,6 +499,8 @@ class SPHclient {
   ];
 
   bool doesSupportFeature(String featureName) {
+    return false;
+
     for (var app in supportedApps) {
       if (app["Name"] == featureName) {
         if ((_onlySupportedByStudents.contains(featureName))) {
