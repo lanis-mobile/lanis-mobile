@@ -63,6 +63,7 @@ dependencies:
   stack_trace: ^1.11.1
   marked: ^0.2.5
   styled_text: ^8.1.0
+  linkify: ^5.0.0
 
 
 flutter_launcher_icons:
