@@ -61,28 +61,21 @@ class _DetailedConversationAnsichtState
   }
 
   final Map<String, StyledTextTagBase> styledTags = {
-    "bold": StyledTextTag(
-        style: const TextStyle(fontWeight: FontWeight.bold)),
+    "bold": StyledTextTag(style: const TextStyle(fontWeight: FontWeight.bold)),
     "underline": StyledTextTag(
-        style: const TextStyle(
-            decoration: TextDecoration.underline)),
-    "italic": StyledTextTag(
-        style: const TextStyle(fontStyle: FontStyle.italic)),
+        style: const TextStyle(decoration: TextDecoration.underline)),
+    "italic":
+        StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
     "remove": StyledTextTag(
-        style: const TextStyle(
-            decoration: TextDecoration.lineThrough)),
-    "code": StyledTextWidgetBuilderTag(
-            (context, _, textContent) => Padding(
+        style: const TextStyle(decoration: TextDecoration.lineThrough)),
+    "code": StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
           padding: const EdgeInsets.only(top: 2, bottom: 2),
           child: Container(
-            padding: const EdgeInsets.only(
-                left: 8.0, right: 8.0, top: 4, bottom: 4),
+            padding:
+                const EdgeInsets.only(left: 8.0, right: 8.0, top: 4, bottom: 4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              color: Theme.of(context)
-                  .colorScheme
-                  .secondary
-                  .withOpacity(0.25),
+              color: Theme.of(context).colorScheme.secondary.withOpacity(0.25),
             ),
             child: Text(
               textContent!,
@@ -93,99 +86,77 @@ class _DetailedConversationAnsichtState
           ),
         )),
     "subscript": StyledTextTag(
-        style: const TextStyle(
-            fontFeatures: [FontFeature.subscripts()])),
+        style: const TextStyle(fontFeatures: [FontFeature.subscripts()])),
     "superscript": StyledTextTag(
-        style: const TextStyle(
-            fontFeatures: [FontFeature.superscripts()])),
-    "date": StyledTextWidgetBuilderTag(
-            (context, _, textContent) => Row(
+        style: const TextStyle(fontFeatures: [FontFeature.superscripts()])),
+    "date": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 2),
-              child: Icon(
-                  Icons.calendar_today,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary
-              ),
+              child: Icon(Icons.calendar_today,
+                  size: 20, color: Theme.of(context).colorScheme.primary),
             ),
             Flexible(
               child: Text(
                 textContent!,
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold
-                ),
+                    fontWeight: FontWeight.bold),
               ),
             )
           ],
-        )
-    ),
-    "time": StyledTextWidgetBuilderTag(
-            (context, _, textContent) => Row(
+        )),
+    "time": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 2),
-              child: Icon(
-                  Icons.access_time_filled,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary
-              ),
+              child: Icon(Icons.access_time_filled,
+                  size: 20, color: Theme.of(context).colorScheme.primary),
             ),
             Flexible(
               child: Text(
                 textContent!,
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold
-                ),
+                    fontWeight: FontWeight.bold),
               ),
             )
           ],
-        )
-    ),
-    "url": StyledTextWidgetBuilderTag(
-            (context, attributes, textContent) => Padding(
+        )),
+    "url": StyledTextWidgetBuilderTag((context, attributes, textContent) =>
+        Padding(
           padding: const EdgeInsets.only(top: 2, bottom: 2),
           child: InkWell(
             onTap: () async {
-              if (!await launchUrl(
-                  Uri.parse(attributes["link"]!))) {
+              if (!await launchUrl(Uri.parse(attributes["link"]!))) {
                 debugPrint(
                     '${attributes["link"]} konnte nicht geöffnet werden.');
               }
             },
             borderRadius: BorderRadius.circular(6),
             child: Container(
-                padding: const EdgeInsets.only(
-                    left: 7, right: 8, top: 2, bottom: 2),
+                padding:
+                    const EdgeInsets.only(left: 7, right: 8, top: 2, bottom: 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withOpacity(0.25),
+                  color:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.25),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding:
-                      const EdgeInsets.only(right: 4),
+                      padding: const EdgeInsets.only(right: 4),
                       child: Icon(Icons.link,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary),
+                          color: Theme.of(context).colorScheme.primary),
                     ),
                     Flexible(
                       child: Text(
                         textContent!,
                         style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary),
+                            color: Theme.of(context).colorScheme.primary),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -194,39 +165,33 @@ class _DetailedConversationAnsichtState
                 )),
           ),
         )),
-    "email": StyledTextWidgetBuilderTag(
-            (context, attributes, textContent) => Padding(
+    "email": StyledTextWidgetBuilderTag((context, attributes, textContent) =>
+        Padding(
           padding: const EdgeInsets.only(top: 2, bottom: 2),
           child: InkWell(
             onTap: () async {
-              if (!await launchUrl(
-                  Uri.parse(attributes["address"]!))) {
+              if (!await launchUrl(Uri.parse(attributes["address"]!))) {
                 debugPrint(
                     '${attributes["address"]} konnte nicht geöffnet werden.');
               }
             },
             borderRadius: BorderRadius.circular(6),
             child: Container(
-                padding: const EdgeInsets.only(
-                    left: 7, right: 8, top: 2, bottom: 2),
+                padding:
+                    const EdgeInsets.only(left: 7, right: 8, top: 2, bottom: 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withOpacity(0.25),
+                  color:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.25),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding:
-                      const EdgeInsets.only(right: 4),
+                      padding: const EdgeInsets.only(right: 4),
                       child: Icon(
                         Icons.email_rounded,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 24,
                       ),
                     ),
@@ -234,9 +199,7 @@ class _DetailedConversationAnsichtState
                       child: Text(
                         textContent!,
                         style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary),
+                            color: Theme.of(context).colorScheme.primary),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -248,21 +211,33 @@ class _DetailedConversationAnsichtState
   };
 
   String convertLanisSyntax(String lanisStyledText) {
-    final lanisToXML = Markdown.map({
-      "**": (text, match) => "<bold>$text</bold>",
-      "__": (text, match) => "<underline>$text</underline>",
-      "~~": (text, match) => "<italic>$text</italic>",
-      "--": (text, match) => "<remove>$text</remove>",
-      r"regexp: - (.*)": (text, match) => "\u2022 $text", // \u2022 = •
-      "`": (text, match) => "<code>$text</code>",
-      "```": (text, match) => "<code>$text</code>",
-      r"regexp: _(\d) ": (text, match) => "<subscript>$text</subscript>",
-      r"regexp: _\((\d*)\)": (text, match) => "<subscript>$text</subscript>",
-      r"regexp: \^(\d) ": (text, match) => "<superscript>$text</superscript>",
-      r"regexp: \^\((\d*)\)": (text, match) =>
-      "<superscript>$text</superscript>",
-      r"regexp: \d{2}\.\d{1,2}\.(\d{4}|\d{2}\b)": (text, match) => "<date>${match.startText}</date>",
-      r"regexp: (\d{2}):(\d{2})": (text, match) => "<time>${match.startText}</time>"
+    final lanisToXML = Markdown({
+      MarkdownPlaceholder.enclosed("**", (text, match) => "<bold>$text</bold>"),
+      MarkdownPlaceholder.enclosed(
+          "__", (text, match) => "<underline>$text</underline>"),
+      MarkdownPlaceholder.enclosed(
+          "~~", (text, match) => "<italic>$text</italic>"),
+      MarkdownPlaceholder.enclosed(
+          "--", (text, match) => "<remove>$text</remove>"),
+      MarkdownPlaceholder.enclosed("`", (text, match) => "<code>$text</code>"),
+      MarkdownPlaceholder.enclosed(
+          "```", (text, match) => "<code>$text</code>"),
+      MarkdownPlaceholder.regexp(r"^- (.*)",
+              (text, match) => "\u2022 $text"),
+      MarkdownPlaceholder.regexp(r"\n- (.*)",
+          (text, match) => "\n\u2022 $text"), // \u2022 = •
+      MarkdownPlaceholder.regexp(
+          r"_(\d) ", (text, match) => "<subscript>$text</subscript>"),
+      MarkdownPlaceholder.regexp(
+          r"_\((\d*)\)", (text, match) => "<subscript>$text</subscript>"),
+      MarkdownPlaceholder.regexp(
+          r"\^(\d) ", (text, match) => "<superscript>$text</superscript>"),
+      MarkdownPlaceholder.regexp(
+          r"\^\((\d*)\)", (text, match) => "<superscript>$text</superscript>"),
+      MarkdownPlaceholder.regexp(r"\d{2}\.\d{1,2}\.(\d{4}|\d{2}\b) ",
+          (text, match) => "<date>${match.startText}</date>"),
+      MarkdownPlaceholder.regexp(r"(\d{2}):(\d{2})",
+          (text, match) => "<time>${match.startText}</time>"),
     });
 
     final List<LinkifyElement> linkifiedElements = linkify(lanisStyledText,
@@ -276,11 +251,13 @@ class _DetailedConversationAnsichtState
         linkifiedText += "<url link='${element.url}'>${element.text}</url>";
       } else if (element is EmailElement) {
         linkifiedText +=
-        "<email address='${element.url}'>${element.text}</email>";
+            "<email address='${element.url}'>${element.text}</email>";
       } else {
         linkifiedText += element.text;
       }
     }
+
+    print(lanisToXML.apply(linkifiedText));
 
     return lanisToXML.apply(linkifiedText);
   }
