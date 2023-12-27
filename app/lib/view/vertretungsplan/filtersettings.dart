@@ -28,24 +28,22 @@ class FilterPlan extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Filter anpassen'),
         ),
-        body: ListView(
+        body: Column(
           children: [
             FilterElements(
               klassenStufeController: _klassenStufeController,
               klassenController: _klassenController,
               lehrerKuerzelController: _lehrerKuerzelController,
-              customWidgets: const [
-                Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: Card(
-                    child: ListTile(
-                      title: Text("Hinweis", style: TextStyle(fontSize: 22),),
-                      subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
-                    ),
-                  ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(padding),
+              child: Card(
+                child: ListTile(
+                  title: Text("Hinweis", style: TextStyle(fontSize: 22),),
+                  subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
                 ),
-              ],
-            )
+              ),
+            ),
           ],
         ));
   }
@@ -56,8 +54,7 @@ class FilterElements extends StatelessWidget {
   final TextEditingController klassenStufeController;
   final TextEditingController klassenController;
   final TextEditingController lehrerKuerzelController;
-  final List<Widget>? customWidgets;
-  FilterElements({super.key, required this.klassenStufeController, required this.klassenController, required this.lehrerKuerzelController, this.customWidgets});
+  FilterElements({super.key, required this.klassenStufeController, required this.klassenController, required this.lehrerKuerzelController});
   Timer? _debounceTimer;
   void _onTypingFinished(String text) {
     if (_debounceTimer != null) {
@@ -100,9 +97,6 @@ class FilterElements extends StatelessWidget {
               decoration: const InputDecoration(
                   labelText: 'Lehrerkürzel (z.B. Abc; XYZ; Müller)')),
         ),
-        if (customWidgets != null) ...[
-          ...?customWidgets
-        ],
       ],
     );
   }
