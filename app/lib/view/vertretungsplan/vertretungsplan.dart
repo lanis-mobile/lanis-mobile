@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
-import 'package:sph_plan/shared/shared_functions.dart';
 
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
@@ -261,7 +260,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           }
 
           // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys = generateGlobalKeys(snapshot.data?.content["length"] + 1);
+          globalKeys = List.generate(snapshot.data?.content["length"] + 1, (index) => GlobalKey<RefreshIndicatorState>());
 
           // If there are no entries.
           if (snapshot.data?.content["length"] == 0) {

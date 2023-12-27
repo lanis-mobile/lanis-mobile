@@ -59,6 +59,9 @@ dependencies:
   rxdart: ^0.27.7
   internet_connection_checker: ^1.0.0+1
   stack_trace: ^1.11.1
+  marked: ^0.2.5
+  styled_text: ^8.1.0
+  linkify: ^5.0.0
   countly_flutter: ^23.12.0
 
 
@@ -121,3 +124,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  fonts:
+    - family: Roboto Mono
+      fonts:
+        - asset: fonts/RobotoMono-Regular.ttf

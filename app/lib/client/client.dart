@@ -899,8 +899,11 @@ class SPHclient {
     }
   }
 
-
   Future<dynamic> getSingleConversation(String uniqueID) async {
+    if (!(await InternetConnectionChecker().hasConnection)) {
+      return -9;
+    }
+
     try {
       final encryptedUniqueID = cryptor.encryptString(uniqueID);
 
