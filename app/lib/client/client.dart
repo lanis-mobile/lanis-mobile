@@ -493,13 +493,29 @@ class SPHclient {
     return jsonDecode(response.data.toString())["entrys"];
   }
 
+  final List<String> _onlySupportedByStudents = [
+    "mein Unterricht",
+    "Mein Unterricht"
+  ];
+
   bool doesSupportFeature(String featureName) {
+    return false;
+
     for (var app in supportedApps) {
       if (app["Name"] == featureName) {
-        return true;
+        if ((_onlySupportedByStudents.contains(featureName))) {
+          return isStudentAccount();
+        } else {
+          return true;
+        }
       }
     }
     return false;
+  }
+
+  bool isStudentAccount() {
+    //todo does not work for every case.
+    return username.contains(".");
   }
 
   Future<dynamic> fetchUserData() async {
