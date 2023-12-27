@@ -222,10 +222,9 @@ class _DetailedConversationAnsichtState
       MarkdownPlaceholder.enclosed("`", (text, match) => "<code>$text</code>"),
       MarkdownPlaceholder.enclosed(
           "```", (text, match) => "<code>$text</code>"),
-      MarkdownPlaceholder.regexp(r"^- (.*)",
-              (text, match) => "\u2022 $text"),
-      MarkdownPlaceholder.regexp(r"\n- (.*)",
-          (text, match) => "\n\u2022 $text"), // \u2022 = •
+      MarkdownPlaceholder.regexp(r"^- (.*)", (text, match) => "\u2022 $text"),
+      MarkdownPlaceholder.regexp(
+          r"\n- (.*)", (text, match) => "\n\u2022 $text"), // \u2022 = •
       MarkdownPlaceholder.regexp(
           r"_(\d) ", (text, match) => "<subscript>$text</subscript>"),
       MarkdownPlaceholder.regexp(
@@ -234,7 +233,7 @@ class _DetailedConversationAnsichtState
           r"\^(\d) ", (text, match) => "<superscript>$text</superscript>"),
       MarkdownPlaceholder.regexp(
           r"\^\((\d*)\)", (text, match) => "<superscript>$text</superscript>"),
-      MarkdownPlaceholder.regexp(r"\d{2}\.\d{1,2}\.(\d{4}|\d{2}\b) ",
+      MarkdownPlaceholder.regexp(r"\d{2}\.\d{1,2}\.(\d{4}|\d{2}\b)",
           (text, match) => "<date>${match.startText}</date>"),
       MarkdownPlaceholder.regexp(r"(\d{2}):(\d{2})",
           (text, match) => "<time>${match.startText}</time>"),
@@ -256,8 +255,6 @@ class _DetailedConversationAnsichtState
         linkifiedText += element.text;
       }
     }
-
-    print(lanisToXML.apply(linkifiedText));
 
     return lanisToXML.apply(linkifiedText);
   }

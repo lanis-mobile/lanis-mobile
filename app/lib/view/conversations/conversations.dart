@@ -135,43 +135,44 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
       onRefresh: () async {
         fetcher.fetchData(forceRefresh: true);
       },
-      child: Padding(
-        padding: const EdgeInsets.only(top: padding, bottom: padding),
-        child: ListView.builder(
-          itemCount: conversations.length + 1,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(
-                  left: padding, right: padding, bottom: 8.0),
-              child: Card(
-                child: InkWell(
-                    onTap: () {
-                      if (index == conversations.length) {
-                        showSnackbar("(:");
-                      } else {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    DetailedConversationAnsicht(
-                                      uniqueID: conversations[index]
-                                      ["Uniquid"], // nice typo Lanis
-                                      title: conversations[index]
-                                      ["Betreff"],
-                                    )));
-                      }
-                    },
-                    customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    child: index == conversations.length
-                        ? _tabController.index == 0
-                        ? infoCard
-                        : infoCardInvisibility
-                        : getConversationWidget(conversations[index])),
-              ),
-            );
-          },
-        ),
+      child: ListView.builder(
+        itemCount: conversations.length + 1,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.only(
+                left: padding,
+                right: padding,
+                bottom: index == conversations.length ? 14 : 8,
+                top: index == 0 ? padding : 0,
+            ),
+            child: Card(
+              child: InkWell(
+                  onTap: () {
+                    if (index == conversations.length) {
+                      showSnackbar("(:");
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  DetailedConversationAnsicht(
+                                    uniqueID: conversations[index]
+                                    ["Uniquid"], // nice typo Lanis
+                                    title: conversations[index]
+                                    ["Betreff"],
+                                  )));
+                    }
+                  },
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: index == conversations.length
+                      ? _tabController.index == 0
+                      ? infoCard
+                      : infoCardInvisibility
+                      : getConversationWidget(conversations[index])),
+            ),
+          );
+        },
       ),
     );
   }
