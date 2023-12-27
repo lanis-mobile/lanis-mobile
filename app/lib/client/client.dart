@@ -512,8 +512,7 @@ class SPHclient {
   }
 
   bool isStudentAccount() {
-    //todo does not work for every case.
-    return username.contains(".");
+    return userData.containsKey("klasse");
   }
 
   Future<dynamic> fetchUserData() async {
