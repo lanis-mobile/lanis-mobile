@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'filterlogic.dart';
 
 class FilterPlan extends StatelessWidget {
+  static const double padding = 10.0;
   FilterPlan({super.key}) {
     loadConfiguration();
   }
@@ -21,62 +24,89 @@ class FilterPlan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double padding = 10.0;
-
     return Scaffold(
         appBar: AppBar(
           title: const Text('Filter anpassen'),
         ),
         body: ListView(
           children: [
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: TextFormField(
-                  controller: _klassenStufeController,
-                  decoration: const InputDecoration(
-                      labelText: 'Klassenstufe (e.g. 7; 8; E; Q)')),
-            ),
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: TextFormField(
-                  controller: _klassenController,
-                  decoration: const InputDecoration(
-                      labelText: 'Klasse (e.g. a; b; c; 1/2; 3/4)')),
-            ),
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: TextFormField(
-                  controller: _lehrerKuerzelController,
-                  decoration: const InputDecoration(
-                      labelText: 'Lehrerkürzel (e.g. Abc; Müller)')),
-            ),
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: ElevatedButton(
-                onPressed: () async {
-                  await setFilter(
-                          _klassenStufeController.text,
-                          _klassenController.text,
-                          _lehrerKuerzelController.text)
-                      .then((_) {
-                    Navigator.pop(context);
-                  });
-                },
-                child: const Text('Anwenden'),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: const Card(
-                child: ListTile(
-                  title: Text("Hinweis", style: TextStyle(fontSize: 22),),
-                  subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
+            FilterElements(
+              klassenStufeController: _klassenStufeController,
+              klassenController: _klassenController,
+              lehrerKuerzelController: _lehrerKuerzelController,
+              customWidgets: const [
+                Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Card(
+                    child: ListTile(
+                      title: Text("Hinweis", style: TextStyle(fontSize: 22),),
+                      subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              ],
+            )
           ],
         ));
   }
 }
+
+class FilterElements extends StatelessWidget {
+  static const double padding = 10.0;
+  final TextEditingController klassenStufeController;
+  final TextEditingController klassenController;
+  final TextEditingController lehrerKuerzelController;
+  final List<Widget>? customWidgets;
+  FilterElements({super.key, required this.klassenStufeController, required this.klassenController, required this.lehrerKuerzelController, this.customWidgets});
+  Timer? _debounceTimer;
+  void _onTypingFinished(String text) {
+    if (_debounceTimer != null) {
+      _debounceTimer!.cancel();
+    }
+
+    _debounceTimer = Timer(const Duration(milliseconds: 1500), () async {
+      await setFilter(
+          klassenStufeController.text,
+          klassenController.text,
+          lehrerKuerzelController.text);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(padding),
+          child: TextFormField(
+              controller: klassenStufeController,
+              onChanged: _onTypingFinished,
+              decoration: const InputDecoration(
+                  labelText: 'Klassenstufe (z.B. 7; 8; E; Q)')),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(padding),
+          child: TextFormField(
+              controller: klassenController,
+              onChanged: _onTypingFinished,
+              decoration: const InputDecoration(
+                  labelText: 'Klasse (z.B. a; b; GA; RA; 1/2; 3/4)')),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(padding),
+          child: TextFormField(
+              controller: lehrerKuerzelController,
+              onChanged: _onTypingFinished,
+              decoration: const InputDecoration(
+                  labelText: 'Lehrerkürzel (z.B. Abc; XYZ; Müller)')),
+        ),
+        if (customWidgets != null) ...[
+          ...?customWidgets
+        ],
+      ],
+    );
+  }
+}
+
 
 

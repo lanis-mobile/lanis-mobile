@@ -143,7 +143,7 @@ class LoginFormState extends State<LoginForm> {
               autocorrect: false,
               obscureText: true,
               decoration: const InputDecoration(
-                  labelText: "passwort",
+                  labelText: "Passwort",
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
