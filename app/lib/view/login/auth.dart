@@ -19,7 +19,7 @@ class LoginForm extends StatefulWidget {
 }
 
 class LoginFormState extends State<LoginForm> {
-  double padding = 10.0;
+  static const double padding = 10.0;
 
 
   final _formKey = GlobalKey<FormState>();
@@ -90,12 +90,14 @@ class LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(padding),
       child: Form(
         key: _formKey,
-        child: ListView(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: padding*5,),
+            const SizedBox(height: padding,),
             const Center(
               child: Column(
                 children: [
@@ -104,7 +106,7 @@ class LoginFormState extends State<LoginForm> {
                 ],
               ),
             ),
-            SizedBox(height: padding,),
+            const SizedBox(height: padding*5,),
             DropdownSearch(
                 popupProps: const PopupProps.menu(
                     showSearchBox: true,
@@ -124,7 +126,7 @@ class LoginFormState extends State<LoginForm> {
                 },
               items: schoolList,
             ),
-            SizedBox(height: padding,),
+            const SizedBox(height: padding,),
             TextFormField(
               controller: usernameController,
               autocorrect: false,
@@ -137,7 +139,7 @@ class LoginFormState extends State<LoginForm> {
                 return null;
               },
             ),
-            SizedBox(height: padding,),
+            const SizedBox(height: padding,),
             TextFormField(
               controller: passwordController,
               autocorrect: false,
@@ -152,6 +154,7 @@ class LoginFormState extends State<LoginForm> {
                 return null;
               },
             ),
+            const SizedBox(height: padding,), // Padding should be used but don't change style of author
             CheckboxListTile(
               value: dseAgree,
               title: RichText(
@@ -161,7 +164,7 @@ class LoginFormState extends State<LoginForm> {
                   children: <TextSpan>[
                     TextSpan(
                       text: 'Datenschutzerklärung',
-                      style: const TextStyle(color: Colors.blue),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
                     ),
@@ -177,7 +180,7 @@ class LoginFormState extends State<LoginForm> {
                 });
               },
             ),
-            SizedBox(height: padding,),
+            const SizedBox(height: padding,),
             ElevatedButton(
               onPressed:dseAgree? () {
                 if (_formKey.currentState!.validate()) {
