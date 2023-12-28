@@ -28,7 +28,7 @@ class FilterPlan extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Filter anpassen'),
         ),
-        body: Column(
+        body: ListView(
           children: [
             FilterElements(
               klassenStufeController: _klassenStufeController,

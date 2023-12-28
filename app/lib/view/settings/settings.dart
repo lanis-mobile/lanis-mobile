@@ -60,17 +60,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Benachrichtigungen'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const NotificationsSettingsScreen()),
-              );
-            },
-          ),
+          if (client.doesSupportFeature("Vertretungsplan")) ...[
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Benachrichtigungen'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NotificationsSettingsScreen()),
+                );
+              },
+            ),
+          ],
           ListTile(
             leading: const Icon(Icons.speed),
             title: const Text('Lademodus'),

@@ -52,7 +52,8 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
               Navigator.pop(context);
             });
           },
-          pages: setupScreenPageViewModels
+          pages: setupScreenPageViewModels,
+          dotsFlex: 2
       );
     }
 

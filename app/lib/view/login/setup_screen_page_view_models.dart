@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
 import '../../client/client.dart';
@@ -13,13 +14,15 @@ import '../vertretungsplan/filtersettings.dart';
 *  - Filter ✓
 *   - Wie Funktioniert er? ✓
 *   - Einrichten ✓
-*  - Benachrichtigungen
-*   - An/Aus
-*   - Zeitintervall
-*  (evtl einfach die normalen einstellungen als Widget laden anstatt zu kopieren?)
+*  - Benachrichtigungen ✓
+*   - An/Aus ✓
+*   - Zeitintervall ✓
+*  (evtl einfach die normalen einstellungen als Widget laden anstatt zu kopieren?) ja ✓✓✓✓✓✓✓✓✓✓✓✓
 * Lademodus:
 *  - selbsterklärend
-* */
+* Aussehen:
+*  - selbsterklärend
+*/
 
 final _klassenStufeController = TextEditingController();
 final _klassenController = TextEditingController();
@@ -35,10 +38,9 @@ List<PageViewModel> setupScreenPageViewModels = [
     PageViewModel(
         image: SvgPicture.asset("assets/undraw/undraw_content_re_33px.svg", height: 175.0),
         title: "Filter- und Vertretungsplanvoraussetzung",
-        body: "Damit du mit dem Filter (und das Anzeigen der Vertretungen) die bestmögliche Erfahrung hast, muss die Schule die Einträge vollständig angeben, z. B. haben manche Schulen nicht die Lehrer der Fächer in ihren Einträgen richtig angegeben und geben stattdessen die Vertretung oder nichts an."
+        body: "Damit du mit dem Filter (und dem Anzeigen der Vertretungen) die bestmögliche Erfahrung hast, muss die Schule die Einträge vollständig angeben, z. B. haben manche Schulen nicht die Lehrer der Fächer in ihren Einträgen richtig angegeben und geben stattdessen die Vertretung oder nichts an."
     ),
     PageViewModel(
-      useScrollView: true,
       image: SvgPicture.asset("assets/undraw/undraw_wireframing_re_q6k6.svg", height: 175.0),
       title: "Beispiele für Einträge",
       bodyWidget: const Column(
@@ -92,13 +94,29 @@ List<PageViewModel> setupScreenPageViewModels = [
         title: "Filtereinstellungen",
         bodyWidget: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             FilterElements(
               klassenStufeController: _klassenStufeController,
               klassenController: _klassenController,
               lehrerKuerzelController: _lehrerKuerzelController,
             )
+          ],
+        )
+    ),
+    PageViewModel(
+        image: SvgPicture.asset("assets/undraw/undraw_new_notifications_re_xpcv.svg", height: 175.0),
+        title: "Benachrichtigungen",
+        body: "Mit Benachrichtigungen weißt du direkt, ob und welche Vertretungen es für dich gibt. Du kannst auch einstellen wie oft die App nach neuen Vertretungen checkt, aber manchmal wird das Checken durch aktivierten Energiesparmodus oder anderen Faktoren verhindert."
+    ),
+    PageViewModel(
+        image: SvgPicture.asset("assets/undraw/undraw_active_options_re_8rj3.svg", height: 175.0),
+        title: "Benachrichtigungseinstellungen",
+        bodyWidget: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            NotificationElements()
           ],
         )
     ),
