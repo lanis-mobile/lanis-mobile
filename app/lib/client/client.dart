@@ -717,7 +717,7 @@ class SPHclient {
           });
 
           List files = [];
-          if (tableRow.outerHtml.contains("file")) {
+          if (tableRow.children[1].querySelector("div.alert.alert-info") != null) {
             String baseURL = "https://start.schulportal.hessen.de/";
             baseURL += tableRow.children[1].querySelector("div.alert.alert-info>a")!.attributes["href"]!;
             baseURL = baseURL.replaceAll("&b=zip", "");
@@ -769,13 +769,15 @@ class SPHclient {
             e.innerHtml = "";
           }
 
-          result["leistungen"]?.add({
-            "Name":
-                row.children[0].text.trim(),
-            "Datum":
-                row.children[1].text.trim(),
-            "Note": row.children[2].text.trim()
-          });
+          if (row.children.length == 3) {
+            result["leistungen"]?.add({
+              "Name":
+              row.children[0].text.trim(),
+              "Datum":
+              row.children[1].text.trim(),
+              "Note": row.children[2].text.trim()
+            });
+          }
         });
       }();
 
@@ -806,6 +808,8 @@ class SPHclient {
 
       return result;
     } catch (e, stack) {
+      debugPrint(e.toString());
+      debugPrint(stack.toString());
       recordError(e, stack);
       return -4;
     }

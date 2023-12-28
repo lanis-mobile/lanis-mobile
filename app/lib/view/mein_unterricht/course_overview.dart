@@ -163,8 +163,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                             ),
                             Text(
                               data["historie"][index]["time"] ?? "",
-                              style:
-                                  const TextStyle(fontStyle: FontStyle.italic),
+                              style: Theme.of(context).textTheme.labelLarge,
                             ),
                             Visibility(
                               visible: files.isNotEmpty,
@@ -189,12 +188,21 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemCount: data["leistungen"].length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(
-                        left: padding, right: padding, bottom: padding),
+                    padding: EdgeInsets.only(
+                      left: padding,
+                      right: padding,
+                      bottom: index == data["leistungen"].length - 1 ? 14 : 8,
+                    ),
                     child: Card(
                       child: ListTile(
-                        title: Text(data["leistungen"][index]["Name"] ?? ""),
-                        subtitle: Text(data["leistungen"][index]["Datum"] ?? ""),
+                        title: Text(
+                            data["leistungen"][index]["Name"] ?? "",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        subtitle: Text(
+                            data["leistungen"][index]["Datum"] ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                         trailing: Text(
                           data["leistungen"][index]["Note"] ?? "",
                           style: const TextStyle(
