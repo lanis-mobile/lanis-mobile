@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import '../../client/client.dart';
-import '../bug_report/send_bugreport.dart';
+import '../../shared/errorView.dart';
 import '../settings/subsettings/user_login.dart';
 import 'course_overview.dart';
 
@@ -15,15 +16,9 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     with TickerProviderStateMixin {
-  final double padding = 8.0;
+  static const double padding = 12.0;
   late TabController _tabController;
 
-  final GlobalKey<RefreshIndicatorState> _mErrorIndicatorKey0 =
-  GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _mErrorIndicatorKey1 =
-  GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _mErrorIndicatorKey2 =
-  GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _currentIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _coursesIndicatorKey =
@@ -64,17 +59,30 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
             if (!keysNotRender.contains(key) && value != "") {
               rowChildren.add(Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [Text("$key:"), Text(value)],
+                children: [
+                  Text(
+                      toBeginningOfSentenceCase("$key:")!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  Text(value)
+                ],
               ));
             }
           });
 
           return Padding(
               padding: EdgeInsets.only(
-                  left: padding, right: padding, bottom: padding),
+                left: padding,
+                right: padding,
+                bottom: index == presence.length - 1 ? 14 : 8,
+                top: index == 0 ? padding : 0,
+              ),
               child: Card(
                 child: ListTile(
-                  title: Text(presence[index]["Kurs"] ?? ""),
+                  title: Text(
+                      presence[index]["Kurs"] ?? "",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: rowChildren,
@@ -110,11 +118,21 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
         itemBuilder: (BuildContext context, int index) {
           return Padding(
               padding: EdgeInsets.only(
-                  left: padding, right: padding, bottom: padding),
+                left: padding,
+                right: padding,
+                bottom: index == courses.length - 1 ? 14 : 8,
+                top: index == 0 ? padding : 0,
+              ),
               child: Card(
                 child: ListTile(
-                  title: Text(courses[index]["title"] ?? ""),
-                  subtitle: Text(courses[index]["teacher"] ?? ""),
+                  title: Text(
+                      courses[index]["title"] ?? "",
+                      style: Theme.of(context).textTheme.titleMedium
+                  ),
+                  subtitle: Text(
+                      courses[index]["teacher"] ?? "",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -146,21 +164,31 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
         itemBuilder: (BuildContext context, int index) {
           return Padding(
               padding: EdgeInsets.only(
-                  left: padding, right: padding, bottom: padding),
+                  left: padding,
+                  right: padding,
+                  bottom: index == current.length - 1 ? 14 : 8,
+                  top: index == 0 ? padding : 0,
+              ),
               child: Card(
                 child: ListTile(
-                  title: Text(current[index]["name"] ?? ""),
+                  title: Text(
+                      current[index]["name"] ?? "",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                          "Thema: ${current[index]["thema"]["title"] ?? ""}"),
+                          "Thema: ${current[index]["thema"]["title"] ?? ""}",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                       Row(
                         mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              "${current[index]["teacher"]["name"]??""} (${current[index]["teacher"]["short"] ?? "-"})"),
+                              "${current[index]["teacher"]["name"]??""} (${current[index]["teacher"]["short"] ?? "-"})",
+                          ),
                           Text(current[index]["thema"]["date"]??"-")
                         ],
                       ),
@@ -182,70 +210,6 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 ),
               ));
         },
-      ),
-    );
-  }
-
-  Widget errorView(BuildContext context, FetcherResponse? response, GlobalKey key) {
-    return RefreshIndicator(
-      key: key,
-      onRefresh: () async {
-        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
-      },
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverFillRemaining(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.warning,
-                  size: 60,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(35),
-                  child: Text(
-                      "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22)),
-                ),
-                Text(
-                    "Problem: ${client.statusCodes[response!.content] ?? "Unbekannter Fehler"}"),
-                Padding(
-                  padding: const EdgeInsets.only(top: 35),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FilledButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BugReportScreen(
-                                      generatedMessage:
-                                      "AUTOMATISCH GENERIERT:\nEin Fehler ist bei Mein Unterricht aufgetreten:\n${response.content}: ${client.statusCodes[response.content]}\n\nMehr Details von dir:\n")),
-                            );
-                          },
-                          child:
-                          const Text("Fehlerbericht senden")),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: OutlinedButton(
-                            onPressed: () async {
-                              client.meinUnterrichtFetcher
-                                  ?.fetchData(forceRefresh: true);
-                            },
-                            child: const Text("Erneut versuchen")),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
       ),
     );
   }
@@ -284,9 +248,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                   controller: _tabController,
                   children: [
                     if (snapshot.data?.status == FetcherStatus.error) ...[
-                      errorView(context, snapshot.data, _mErrorIndicatorKey0),
-                      errorView(context, snapshot.data, _mErrorIndicatorKey1),
-                      errorView(context, snapshot.data, _mErrorIndicatorKey2),
+                      ErrorView(data: snapshot.data!.content, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher,),
+                      ErrorView(data: snapshot.data!.content, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher),
+                      ErrorView(data: snapshot.data!.content, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher)
                     ]
                     else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) ...[
                       const Center(child: CircularProgressIndicator()),

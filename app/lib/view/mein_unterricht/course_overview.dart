@@ -1,10 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:html/parser.dart';
+import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
+import '../../shared/errorView.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL; // Add the dataFetchURL property
@@ -16,7 +17,7 @@ class CourseOverviewAnsicht extends StatefulWidget {
 }
 
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
-  final double padding = 10.0;
+  static const double padding = 10.0;
 
   int _currentIndex = 0;
   bool loading = true;
@@ -118,10 +119,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
 
                   return Padding(
                     padding: EdgeInsets.only(
-                        left: padding, right: padding, bottom: padding),
+                      left: padding,
+                      right: padding,
+                      bottom: index == data["historie"].length - 1 ? 14 : 8,
+                    ),
                     child: Card(
                       child: ListTile(
-                        title: (data["historie"][index]["title"]  != null) ? Text(data["historie"][index]["title"]):null,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        title: (data["historie"][index]["title"]  != null) ? Text(
+                            data["historie"][index]["title"],
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ) : null,
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -142,19 +150,31 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                       .copyWith(color: Theme.of(context).colorScheme.primary),
                                 ),
                             ),
-                            Text(
-                              data["historie"][index]["presence"] ?? "",
-                              style:
+                            Visibility(
+                              visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 2, bottom: 2),
+                                child: Text(
+                                  data["historie"][index]["presence"],
+                                  style:
                                   const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
                             Text(
                               data["historie"][index]["time"] ?? "",
                               style:
                                   const TextStyle(fontStyle: FontStyle.italic),
                             ),
-                            Wrap(
-                              spacing: 8,
-                              children: files,
+                            Visibility(
+                              visible: files.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: padding),
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: files,
+                                ),
+                              ),
                             )
                           ],
                         ),
@@ -169,7 +189,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemCount: data["leistungen"].length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                         left: padding, right: padding, bottom: padding),
                     child: Card(
                       child: ListTile(
@@ -192,14 +212,18 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemCount: data["leistungskontrollen"].length,
                 itemBuilder: (context, index) {
                   return Padding(
-                      padding: EdgeInsets.only(
-                          left: padding, right: padding, bottom: padding),
+                      padding: const EdgeInsets.only(
+                          left: padding, right: padding, bottom: 8),
                       child: Card(
                           child: ListTile(
                         title:
-                            Text(data["leistungskontrollen"][index]["title"] ?? ""),
+                            Text(
+                                data["leistungskontrollen"][index]["title"] ?? "",
+                                    style: Theme.of(context).textTheme.titleMedium,
+                            ),
                         subtitle: Text(
                           data["leistungskontrollen"][index]["value"] ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )));
                 },
@@ -211,11 +235,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemCount: data["anwesenheiten"].length,
                 itemBuilder: (context, index) {
                   return Padding(
-                      padding: EdgeInsets.only(
+                      padding: const EdgeInsets.only(
                           left: padding, right: padding, bottom: padding),
                       child: Card(
                         child: ListTile(
-                          title: Text(data["anwesenheiten"][index]["type"] ?? ""),
+                          title: Text(toBeginningOfSentenceCase(data["anwesenheiten"][index]["type"]) ?? "",),
                           subtitle: Text(parseString(data["anwesenheiten"][index]["count"])["brackets"]!),
                           trailing: Text(parseString(data["anwesenheiten"][index]["count"])["before"]!,
                               style: const TextStyle(
@@ -237,23 +261,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
         child: CircularProgressIndicator(),
       );
     }
-    String appBarTitle;
+
     if (data is int && data < 0) {
       return Scaffold(
-        appBar: AppBar(title: Text("Fehler"),),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error,
-                size: 60,
-              ),
-              Text("Vielleicht bis du Offline?")
-            ],
-          ),
-        ),
+        appBar: AppBar(title: const Text("Fehler"),),
+        body: ErrorView(data: data, name: "einen Kurs", fetcher: null,)
       );
     }
 

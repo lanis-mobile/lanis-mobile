@@ -7,8 +7,8 @@ import '../view/bug_report/send_bugreport.dart';
 class ErrorView extends StatelessWidget {
   late final int data;
   late final Fetcher? fetcher;
-
-  ErrorView({super.key, required this.data, required this.fetcher});
+  late final String name;
+  ErrorView({super.key, required this.data, required this.name, required this.fetcher});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class ErrorView extends StatelessWidget {
                                                   builder: (context) =>
                                                       BugReportScreen(
                                                           generatedMessage:
-                                                              "AUTOMATISCH GENERIERT:\nEin Fehler ist beim Vertretungsplan aufgetreten:\n$data: ${client.statusCodes[data]}\n\nMehr Details von dir:\n")),
+                                                              "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n$data: ${client.statusCodes[data]}\n\nMehr Details von dir:\n")),
                                             );
                                           },
                                           child:
@@ -75,13 +75,12 @@ class ErrorView extends StatelessWidget {
                                 });
                             return;
                           }
-
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => BugReportScreen(
                                     generatedMessage:
-                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist beim Vertretungsplan aufgetreten:\n$data: ${client.statusCodes[data]}\n\nMehr Details von dir:\n")),
+                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n$data: ${client.statusCodes[data]}\n\nMehr Details von dir:\n")),
                           );
                         },
                         child: const Text("Fehlerbericht senden")),

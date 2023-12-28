@@ -200,7 +200,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: client.visibleConversationsFetcher?.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView(data: snapshot.data?.content, fetcher: client.visibleConversationsFetcher);
+                  return ErrorView(data: snapshot.data?.content, name: "Nachrichten", fetcher: client.visibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
@@ -212,7 +212,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: client.invisibleConversationsFetcher?.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView(data: snapshot.data?.content, fetcher: client.invisibleConversationsFetcher);
+                  return ErrorView(data: snapshot.data?.content, name: "Nachrichten", fetcher: client.invisibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {

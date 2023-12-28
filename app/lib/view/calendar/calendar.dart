@@ -288,7 +288,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       stream: client.calendarFetcher?.stream,
       builder: (context, snapshot) {
         if (snapshot.data?.status == FetcherStatus.error) {
-          return ErrorView(data: snapshot.data!.content, fetcher: client.calendarFetcher,);
+          return ErrorView(data: snapshot.data!.content, name: "Kalender", fetcher: client.calendarFetcher,);
         } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
           return const Center(child: CircularProgressIndicator());
         } else {
@@ -394,7 +394,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                         context: context,
                                         showDragHandle: true,
                                         builder: (context) {
-                                          return ErrorView(data: singleEvent, fetcher: null,);
+                                          return ErrorView(data: singleEvent, name: "einem Kalenderereignis", fetcher: null,);
                                         }
                                       );
                                     } else {

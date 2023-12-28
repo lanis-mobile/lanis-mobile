@@ -195,6 +195,7 @@ class _DetailedConversationAnsichtState
               if (snapshot.data is int) {
                 return ErrorView(
                   data: snapshot.data,
+                  name: "einer einzelnen Nachricht",
                   fetcher: null,
                 );
               }
