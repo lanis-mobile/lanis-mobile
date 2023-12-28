@@ -14,16 +14,16 @@ final _klassenController = TextEditingController();
 final _lehrerKuerzelController = TextEditingController();
 
 List<PageViewModel> setupScreenPageViewModels = [
-  if (client.doesSupportFeature("Vertretungsplan")) ...[
+    if (!client.isStudentAccount()) PageViewModel(
+    image: SvgPicture.asset("assets/undraw/undraw_profile_re_4a55.svg", height: 175.0),
+      title: "Lehreraccount",
+      body: "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren."
+    ),
+    if (client.doesSupportFeature("Vertretungsplan")) ...[
     PageViewModel(
         image: SvgPicture.asset("assets/undraw/undraw_filter_re_sa16.svg", height: 175.0),
         title: "Vertretungen filtern",
-        body: "Damit du die Vertretungen, die für dich bestimmt sind, schneller finden kannst, gibt es ein Filter-Feature! Der Filter sucht in den Einträgen nach deiner Klassenstufe, Klasse und Lehrer des Faches."
-    ),
-    PageViewModel(
-        image: SvgPicture.asset("assets/undraw/undraw_content_re_33px.svg", height: 175.0),
-        title: "Filter- und Vertretungsplanvoraussetzung",
-        body: "Damit du mit dem Filter (und dem Anzeigen der Vertretungen) die bestmögliche Erfahrung hast, muss die Schule die Einträge vollständig angeben, z. B. haben manche Schulen nicht die Lehrer der Fächer in ihren Einträgen richtig angegeben und geben stattdessen die Vertretung oder nichts an."
+        body: "Damit du die Vertretungen, die für dich bestimmt sind, schneller finden kannst, gibt es ein Filter-Feature! Der Filter sucht in den Einträgen nach deiner Klassenstufe, Klasse und Lehrer des Faches. Damit du mit dem Filter (und dem Anzeigen der Vertretungen) die bestmögliche Erfahrung hast, muss die Schule die Einträge vollständig angeben, z. B. haben manche Schulen nicht die Lehrer der Fächer in ihren Einträgen richtig angegeben und geben stattdessen die Vertretung oder nichts an."
     ),
     PageViewModel(
       image: SvgPicture.asset("assets/undraw/undraw_wireframing_re_q6k6.svg", height: 175.0),

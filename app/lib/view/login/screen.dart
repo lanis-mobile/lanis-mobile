@@ -48,8 +48,8 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
       );
     } else if (currentPage == "setup") {
       return IntroductionScreen(
-          next: const Icon(Icons.arrow_forward),
           done: const Text("Fertig"),
+          showNextButton: false,
           onDone: () {
             setState(() {
               Navigator.pop(context);
