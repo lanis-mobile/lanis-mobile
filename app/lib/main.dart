@@ -32,7 +32,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'background_service/service.dart' as background_service;
 
 
-
 void main() async {
 
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -493,6 +492,9 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
+    //bottomNavigationBar requires at least 2 entries.
+
+
     return isLoading
         ? loadingScreen()
         : StreamBuilder<InternetConnectionStatus>(
@@ -523,42 +525,52 @@ class _HomePageState extends State<HomePage> {
                   ) : null,
                 ),
                 body: Center(
-                  child: featureScreens()[selectedFeature.index],
+                  child: helpIndex != 0 ? featureScreens()[selectedFeature.index] : Center(
+                    //in case no feature is supported at all just show an open in browser button.
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.disabled_by_default_outlined, size: 150,),
+                        const Padding(padding: EdgeInsets.all(8), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
+                        ElevatedButton(onPressed: openLanisInBrowser, child: const Text("Im browser öffnen"))
+                      ],
+                    ),
+                  ),
                 ),
-                bottomNavigationBar: NavigationBar(
-                  labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-                  selectedIndex:
-                      bottomNavbarNavigationTranslation[selectedFeature.index]!,
-                  onDestinationSelected: (index) => openFeature(Feature
-                      .values[bottomNavbarNavigationTranslation.indexOf(index)]),
-                  destinations: [
-                    if (client.doesSupportFeature("Vertretungsplan"))
-                      const NavigationDestination(
-                        icon: Icon(Icons.group),
-                        selectedIcon: Icon(Icons.group_outlined),
-                        label: 'Vertretungen',
-                      ),
-                    if (client.doesSupportFeature("Kalender"))
-                      const NavigationDestination(
-                        icon: Icon(Icons.calendar_today),
-                        selectedIcon: Icon(Icons.calendar_today_outlined),
-                        label: 'Kalender',
-                      ),
-                    if (client.doesSupportFeature("Nachrichten - Beta-Version"))
-                      const NavigationDestination(
-                        icon: Icon(Icons.forum),
-                        selectedIcon: Icon(Icons.forum_outlined),
-                        label: 'Nachrichten',
-                      ),
-                    if (client.doesSupportFeature("Mein Unterricht") ||
-                        client.doesSupportFeature("mein Unterricht"))
-                      const NavigationDestination(
-                        icon: Icon(Icons.school),
-                        selectedIcon: Icon(Icons.school_outlined),
-                        label: 'Mein Unterricht',
-                      ),
-                  ],
-                ),
+                bottomNavigationBar: helpIndex > 1 ? NavigationBar(
+                   labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+                   selectedIndex:
+                   bottomNavbarNavigationTranslation[selectedFeature.index]!,
+                   onDestinationSelected: (index) => openFeature(Feature
+                       .values[bottomNavbarNavigationTranslation.indexOf(index)]),
+                   destinations: [
+                     if (client.doesSupportFeature("Vertretungsplan"))
+                       const NavigationDestination(
+                         icon: Icon(Icons.group),
+                         selectedIcon: Icon(Icons.group_outlined),
+                         label: 'Vertretungen',
+                       ),
+                     if (client.doesSupportFeature("Kalender"))
+                       const NavigationDestination(
+                         icon: Icon(Icons.calendar_today),
+                         selectedIcon: Icon(Icons.calendar_today_outlined),
+                         label: 'Kalender',
+                       ),
+                     if (client.doesSupportFeature("Nachrichten - Beta-Version"))
+                       const NavigationDestination(
+                         icon: Icon(Icons.forum),
+                         selectedIcon: Icon(Icons.forum_outlined),
+                         label: 'Nachrichten',
+                       ),
+                     if (client.doesSupportFeature("Mein Unterricht") ||
+                         client.doesSupportFeature("mein Unterricht"))
+                       const NavigationDestination(
+                         icon: Icon(Icons.school),
+                         selectedIcon: Icon(Icons.school_outlined),
+                         label: 'Mein Unterricht',
+                       ),
+                   ],
+                 ) : null,
                 drawer: NavigationDrawer(
                   onDestinationSelected: onNavigationItemTapped,
                   selectedIndex: selectedFeature.index,
