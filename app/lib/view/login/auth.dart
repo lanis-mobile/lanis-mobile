@@ -93,116 +93,119 @@ class LoginFormState extends State<LoginForm> {
       padding: const EdgeInsets.all(padding),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: padding,),
-            const Center(
-              child: Column(
-                children: [
-                  Icon(Icons.person, size: 70),
-                  Text("Login", style: TextStyle(fontSize: 35),)
-                ],
-              ),
-            ),
-            const SizedBox(height: padding*5,),
-            DropdownSearch(
-                popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchDelay: Duration(milliseconds: 150)
-                ),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                        labelText: "Schule auswählen"
-                    )
-                ),
-                selectedItem: dropDownSelectedItem,
-                onChanged: (value){
-                  debugPrint("changed!");
-                  dropDownSelectedItem = value;
-                  selectedSchoolID = extractNumber(value);
-                  debugPrint(selectedSchoolID);
-                },
-              items: schoolList,
-            ),
-            const SizedBox(height: padding,),
-            TextFormField(
-              controller: usernameController,
-              autocorrect: false,
-              decoration: const InputDecoration(
-                  labelText: "vorname.nachname (oder Kürzel)"),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Bitte fülle dieses Feld aus';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: padding,),
-            TextFormField(
-              controller: passwordController,
-              autocorrect: false,
-              obscureText: true,
-              decoration: const InputDecoration(
-                  labelText: "Passwort",
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Bitte fülle dieses Feld aus';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: padding,), // Padding should be used but don't change style of author
-            CheckboxListTile(
-              value: dseAgree,
-              title: RichText(
-                text: TextSpan(
-                  text: 'Ich stimme der ',
-                  style: DefaultTextStyle.of(context).style,
-                  children: <TextSpan>[
-                    TextSpan(
-                      text: 'Datenschutzerklärung',
-                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
-                    ),
-                    const TextSpan(
-                      text: ' von lanis-mobile zu.',
-                    ),
-                  ],
-                ),
-              ),
-              onChanged: (val) {
-                setState(() {
-                  dseAgree = val!;
-                });
-              },
-            ),
-            const SizedBox(height: padding,),
-            ElevatedButton(
-              onPressed:dseAgree? () {
-                if (_formKey.currentState!.validate()) {
-                  login(
-                    usernameController.text,
-                    passwordController.text,
-                    selectedSchoolID
-                  );
-                }
-              } : null,
-              child: const Text('Anmelden'),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextButton(
-                    onPressed: () => launchUrl(Uri.parse("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
-                    child: const Text("Passwort zurücksetzen")
+                const SizedBox(height: padding,),
+                const Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.person, size: 70),
+                      Text("Login", style: TextStyle(fontSize: 35),)
+                    ],
+                  ),
+                ),
+                const SizedBox(height: padding*5,),
+                DropdownSearch(
+                    popupProps: const PopupProps.menu(
+                        showSearchBox: true,
+                        searchDelay: Duration(milliseconds: 150)
+                    ),
+                    dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                            labelText: "Schule auswählen"
+                        )
+                    ),
+                    selectedItem: dropDownSelectedItem,
+                    onChanged: (value){
+                      debugPrint("changed!");
+                      dropDownSelectedItem = value;
+                      selectedSchoolID = extractNumber(value);
+                      debugPrint(selectedSchoolID);
+                    },
+                  items: schoolList,
+                ),
+                const SizedBox(height: padding,),
+                TextFormField(
+                  controller: usernameController,
+                  autocorrect: false,
+                  decoration: const InputDecoration(
+                      labelText: "vorname.nachname (oder Kürzel)"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Bitte fülle dieses Feld aus';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: padding,),
+                TextFormField(
+                  controller: passwordController,
+                  autocorrect: false,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                      labelText: "Passwort",
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Bitte fülle dieses Feld aus';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: padding,), // Padding should be used but don't change style of author
+                CheckboxListTile(
+                  value: dseAgree,
+                  title: RichText(
+                    text: TextSpan(
+                      text: 'Ich stimme der ',
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: 'Datenschutzerklärung',
+                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
+                        ),
+                        const TextSpan(
+                          text: ' von lanis-mobile zu.',
+                        ),
+                      ],
+                    ),
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      dseAgree = val!;
+                    });
+                  },
+                ),
+                const SizedBox(height: padding,),
+                ElevatedButton(
+                  onPressed:dseAgree? () {
+                    if (_formKey.currentState!.validate()) {
+                      login(
+                        usernameController.text,
+                        passwordController.text,
+                        selectedSchoolID
+                      );
+                    }
+                  } : null,
+                  child: const Text('Anmelden'),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: () => launchUrl(Uri.parse("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
+                        child: const Text("Passwort zurücksetzen")
+                    )
+                  ],
                 )
               ],
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );
