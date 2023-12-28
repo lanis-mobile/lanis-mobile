@@ -481,7 +481,7 @@ packages:
     source: hosted
     version: "4.8.1"
   linkify:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: linkify
       sha256: "4139ea77f4651ab9c315b577da2dd108d9aa0bd84b5d03d33323f1970c645832"
@@ -496,6 +496,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  marked:
+    dependency: "direct main"
+    description:
+      name: marked
+      sha256: "344e25c8e5c713909f2538995b29ca7dd025f27b0b127483bf9a744b1d1d2f86"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.5"
   matcher:
     dependency: transitive
     description:
@@ -805,6 +813,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  styled_text:
+    dependency: "direct main"
+    description:
+      name: styled_text
+      sha256: fd624172cf629751b4f171dd0ecf9acf02a06df3f8a81bb56c0caa4f1df706c3
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.1.0"
   table_calendar:
     dependency: "direct main"
     description:
@@ -997,6 +1013,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
+  xmlstream:
+    dependency: transitive
+    description:
+      name: xmlstream
+      sha256: cfc14e3f256997897df9481ae630d94c2d85ada5187ebeb868bb1aabc2c977b4
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   yaml:
     dependency: transitive
     description:

@@ -3,7 +3,7 @@ import 'package:sph_plan/view/conversations/detailed_conversation.dart';
 
 import '../../client/client.dart';
 import '../../client/fetcher.dart';
-import '../bug_report/send_bugreport.dart';
+import '../../shared/errorView.dart';
 
 class ConversationsAnsicht extends StatefulWidget {
   const ConversationsAnsicht({super.key});
@@ -19,10 +19,6 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
   final GlobalKey<RefreshIndicatorState> _refreshVisibleKey =
       GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _refreshInvisibleKey =
-  GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _cErrorIndicatorKey0 =
-  GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _cErrorIndicatorKey1 =
   GlobalKey<RefreshIndicatorState>();
 
   dynamic visibleConversations;
@@ -121,7 +117,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             children: [
               Text(
                 conversation["Datum"] ??
-                    "", // TODO: maybe convert the date later
+                    "",
               )
             ],
           ),
@@ -143,8 +139,12 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         itemCount: conversations.length + 1,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(
-                left: padding, right: padding, bottom: padding),
+            padding: EdgeInsets.only(
+                left: padding,
+                right: padding,
+                bottom: index == conversations.length ? 14 : 8,
+                top: index == 0 ? padding : 0,
+            ),
             child: Card(
               child: InkWell(
                   onTap: () {
@@ -177,69 +177,6 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     );
   }
 
-  Widget errorView(BuildContext context, FetcherResponse? response, Fetcher fetcher, GlobalKey key) {
-    return RefreshIndicator(
-      key: key,
-      onRefresh: () async {
-        fetcher.fetchData(forceRefresh: true);
-      },
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverFillRemaining(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.warning,
-                  size: 60,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(35),
-                  child: Text(
-                      "Es gibt wohl ein Problem, bitte sende einen Fehlerbericht!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22)),
-                ),
-                Text(
-                    "Problem: ${client.statusCodes[response!.content] ?? "Unbekannter Fehler"}"),
-                Padding(
-                  padding: const EdgeInsets.only(top: 35),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FilledButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BugReportScreen(
-                                      generatedMessage:
-                                      "AUTOMATISCH GENERIERT:\nEin Fehler ist bei Nachrichten aufgetreten:\n${response.content}: ${client.statusCodes[response.content]}\n\nMehr Details von dir:\n")),
-                            );
-                          },
-                          child:
-                          const Text("Fehlerbericht senden")),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: OutlinedButton(
-                            onPressed: () async {
-                              fetcher.fetchData(forceRefresh: true);
-                            },
-                            child: const Text("Erneut versuchen")),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -263,11 +200,11 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: client.visibleConversationsFetcher?.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return errorView(context, snapshot.data, client.visibleConversationsFetcher as Fetcher, _cErrorIndicatorKey0);
+                  return ErrorView(data: snapshot.data?.content, fetcher: client.visibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, client.visibleConversationsFetcher as Fetcher, _refreshVisibleKey);
+                  return conversationsView(context, snapshot.data?.content, client.visibleConversationsFetcher!, _refreshVisibleKey);
                 }
               }
           ),
@@ -275,11 +212,11 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: client.invisibleConversationsFetcher?.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return errorView(context, snapshot.data, client.invisibleConversationsFetcher as Fetcher, _cErrorIndicatorKey1);
+                  return ErrorView(data: snapshot.data?.content, fetcher: client.invisibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, client.invisibleConversationsFetcher as Fetcher, _refreshInvisibleKey);
+                  return conversationsView(context, snapshot.data?.content, client.invisibleConversationsFetcher!, _refreshInvisibleKey);
                 }
               }
           )
@@ -289,8 +226,6 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         onPressed: () {
           _refreshVisibleKey.currentState?.show();
           _refreshInvisibleKey.currentState?.show();
-          _cErrorIndicatorKey0.currentState?.show();
-          _cErrorIndicatorKey1.currentState?.show();
         },
         heroTag: "RefreshConversations",
         child: const Icon(Icons.refresh),
