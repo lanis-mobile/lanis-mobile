@@ -1,28 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
+import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
 import '../../client/client.dart';
 import '../vertretungsplan/filtersettings.dart';
-
-
-/*
-* todo @kurwjan Build setup screens
-* Vertretungsplan:
-*  - Filter ✓
-*   - Wie Funktioniert er? ✓
-*   - Einrichten ✓
-*  - Benachrichtigungen ✓
-*   - An/Aus ✓
-*   - Zeitintervall ✓
-*  (evtl einfach die normalen einstellungen als Widget laden anstatt zu kopieren?) ja ✓✓✓✓✓✓✓✓✓✓✓✓
-* Lademodus:
-*  - selbsterklärend
-* Aussehen:
-*  - selbsterklärend
-*/
 
 final _klassenStufeController = TextEditingController();
 final _klassenController = TextEditingController();
@@ -68,7 +53,7 @@ List<PageViewModel> setupScreenPageViewModels = [
             }),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 4.0, bottom: 2.0),
+            padding: EdgeInsets.only(top: 8.0, bottom: 2.0),
             child: Text(
               "Beispiel für einen unvollständigen Eintrag",
               style: TextStyle(
@@ -120,10 +105,32 @@ List<PageViewModel> setupScreenPageViewModels = [
           ],
         )
     ),
+    PageViewModel(
+        image: SvgPicture.asset("assets/undraw/undraw_speed_test_re_pe1f.svg", height: 175.0),
+        title: "Lademodus beim Starten der App",
+        bodyWidget: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            LoadModeElements()
+          ],
+        )
+    ),
+    PageViewModel(
+        image: SvgPicture.asset("assets/undraw/undraw_add_color_re_buro.svg", height: 175.0),
+        title: "Aussehen",
+        bodyWidget: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AppearanceElements()
+          ],
+        )
+    ),
   ],
   PageViewModel(
       image: SvgPicture.asset("assets/undraw/undraw_access_account_re_8spm.svg", height: 175.0),
       title: "Du bist jetzt bereit!",
-      body: "Du kannst lanis-mobile jetzt verwenden. Wenn die die App gefällt, kannst du gerne eine Bewertung im Play Store machen."
+      body: "Du kannst lanis-mobile jetzt verwenden. Wenn die App dir gefällt, kannst du gerne eine Bewertung im Play Store machen."
   ),
 ];

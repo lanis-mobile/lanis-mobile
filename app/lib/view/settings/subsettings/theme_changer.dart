@@ -1,14 +1,28 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
-class AppearanceSettingsScreen extends StatefulWidget {
+class AppearanceSettingsScreen extends StatelessWidget {
   const AppearanceSettingsScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _AppearanceSettingsScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("Appearance"),
+        ),
+        body: const AppearanceElements()
+    );
+  }
 }
 
-class _AppearanceSettingsScreenState extends State<AppearanceSettingsScreen> {
+class AppearanceElements extends StatefulWidget {
+  const AppearanceElements({super.key});
+
+  @override
+  State<AppearanceElements> createState() => _AppearanceElementsState();
+}
+
+class _AppearanceElementsState extends State<AppearanceElements> {
   String _selectedTheme = "system"; // Default theme
 
   void _applyTheme(String theme) {
@@ -33,51 +47,47 @@ class _AppearanceSettingsScreenState extends State<AppearanceSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Appearance"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RadioListTile(
-              title: const Text('Light Mode'),
-              value: "light",
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value.toString();
-                  _applyTheme(_selectedTheme);
-                });
-              },
-            ),
-            RadioListTile(
-              title: const Text('Dark Mode'),
-              value: "dark",
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value.toString();
-                  _applyTheme(_selectedTheme);
-                });
-              },
-            ),
-            RadioListTile(
-              title: const Text('System Mode'),
-              value: "system",
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value.toString();
-                  _applyTheme(_selectedTheme);
-                });
-              },
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RadioListTile(
+            title: const Text('Light Mode'),
+            value: "light",
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value.toString();
+                _applyTheme(_selectedTheme);
+              });
+            },
+          ),
+          RadioListTile(
+            title: const Text('Dark Mode'),
+            value: "dark",
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value.toString();
+                _applyTheme(_selectedTheme);
+              });
+            },
+          ),
+          RadioListTile(
+            title: const Text('System Mode'),
+            value: "system",
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value.toString();
+                _applyTheme(_selectedTheme);
+              });
+            },
+          ),
+        ],
       ),
     );
   }
 }
+

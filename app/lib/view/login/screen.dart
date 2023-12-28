@@ -31,6 +31,9 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
               currentPage = "login";
             });
           },
+          dotsDecorator: DotsDecorator(
+              activeColor: Theme.of(context).colorScheme.primary
+          ),
           pages: intoScreenPageViewModels
       );
     } else if (currentPage == "login") {
@@ -46,14 +49,17 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
     } else if (currentPage == "setup") {
       return IntroductionScreen(
           next: const Icon(Icons.arrow_forward),
-          done: const Text("Abschließen"),
+          done: const Text("Fertig"),
           onDone: () {
             setState(() {
               Navigator.pop(context);
             });
           },
           pages: setupScreenPageViewModels,
-          dotsFlex: 2
+          dotsFlex: 2,
+        dotsDecorator: DotsDecorator(
+          activeColor: Theme.of(context).colorScheme.primary
+        ),
       );
     }
 

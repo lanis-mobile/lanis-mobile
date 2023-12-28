@@ -2,16 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
-class NotificationsSettingsScreen extends StatefulWidget {
+class NotificationsSettingsScreen extends StatelessWidget {
   const NotificationsSettingsScreen({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _NotificationsSettingsScreenState();
-}
-
-class _NotificationsSettingsScreenState extends State<NotificationsSettingsScreen> {
-
 
   @override
   Widget build(BuildContext context) {

@@ -49,13 +49,22 @@ class FilterPlan extends StatelessWidget {
   }
 }
 
-class FilterElements extends StatelessWidget {
-  static const double padding = 10.0;
+class FilterElements extends StatefulWidget {
   final TextEditingController klassenStufeController;
   final TextEditingController klassenController;
   final TextEditingController lehrerKuerzelController;
-  FilterElements({super.key, required this.klassenStufeController, required this.klassenController, required this.lehrerKuerzelController});
+  const FilterElements({super.key, required this.klassenStufeController, required this.klassenController, required this.lehrerKuerzelController});
+
+  @override
+  State<FilterElements> createState() => _FilterElementsState();
+}
+
+class _FilterElementsState extends State<FilterElements> {
+  static const double padding = 10.0;
+
   Timer? _debounceTimer;
+
+
   void _onTypingFinished(String text) {
     if (_debounceTimer != null) {
       _debounceTimer!.cancel();
@@ -63,9 +72,9 @@ class FilterElements extends StatelessWidget {
 
     _debounceTimer = Timer(const Duration(milliseconds: 1500), () async {
       await setFilter(
-          klassenStufeController.text,
-          klassenController.text,
-          lehrerKuerzelController.text);
+          widget.klassenStufeController.text,
+          widget.klassenController.text,
+          widget.lehrerKuerzelController.text);
     });
   }
 
@@ -76,7 +85,7 @@ class FilterElements extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(padding),
           child: TextFormField(
-              controller: klassenStufeController,
+              controller: widget.klassenStufeController,
               onChanged: _onTypingFinished,
               decoration: const InputDecoration(
                   labelText: 'Klassenstufe (z.B. 7; 8; E; Q)')),
@@ -84,7 +93,7 @@ class FilterElements extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(padding),
           child: TextFormField(
-              controller: klassenController,
+              controller: widget.klassenController,
               onChanged: _onTypingFinished,
               decoration: const InputDecoration(
                   labelText: 'Klasse (z.B. a; b; GA; RA; 1/2; 3/4)')),
@@ -92,7 +101,7 @@ class FilterElements extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(padding),
           child: TextFormField(
-              controller: lehrerKuerzelController,
+              controller: widget.lehrerKuerzelController,
               onChanged: _onTypingFinished,
               decoration: const InputDecoration(
                   labelText: 'Lehrerkürzel (z.B. Abc; XYZ; Müller)')),
