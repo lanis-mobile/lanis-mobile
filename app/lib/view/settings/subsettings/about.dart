@@ -74,6 +74,15 @@ class _AboutScreenState extends State<AboutScreen> {
             },
           ),
           ListTile(
+              leading: const Icon(Icons.security),
+              title: const Text('Datenschutzerklärung'),
+              onTap: () {
+                launchUrl(Uri.parse(
+                    "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")
+                );
+              }
+          ),
+          ListTile(
             leading: const Icon(Icons.info),
             title: const Text('Open Source Lizenzen'),
             onTap: () {

@@ -24,7 +24,7 @@ import 'package:sph_plan/view/conversations/conversations.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
-import 'package:sph_plan/view/settings/subsettings/user_login.dart';
+import 'package:sph_plan/view/login/screen.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -70,28 +70,32 @@ void main() async {
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
     await initializeDateFormatting();
+    if (!kDebugMode) {
+      const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
+      CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
+      config.enableCrashReporting();
+      await Countly.initWithConfig(config);
 
-    const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
-    CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
-    config.enableCrashReporting();
-    await Countly.initWithConfig(config).then((str) => debugPrint("########################## > $str"));
+      FlutterError.onError = (errorDetails) async {
 
-    FlutterError.onError = (errorDetails) async {
-      if (!kDebugMode) {
-        Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
-      }
+          Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
 
-      debugPrint(errorDetails.exception.toString());
-      debugPrintStack(
-          stackTrace: errorDetails.stack!
-      );
-    };
 
+        debugPrint(errorDetails.exception.toString());
+        debugPrintStack(
+            stackTrace: errorDetails.stack!
+        );
+      };
+    }
     runApp(App(
       savedThemeMode: savedThemeMode,
     ));
 
-  }, Countly.recordDartError);
+  }, (obj, stack) {
+    if (!kDebugMode) {
+      Countly.recordDartError(obj, stack);
+    }
+  });
 }
 
 Widget errorWidget(FlutterErrorDetails details) {
@@ -387,7 +391,7 @@ class _HomePageState extends State<HomePage> {
   void openLoginScreen() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AccountSettingsScreen()),
+      MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((result) {
       setState(() {
         isLoading = false;

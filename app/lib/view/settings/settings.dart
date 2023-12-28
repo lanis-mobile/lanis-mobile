@@ -5,7 +5,7 @@ import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
-import 'subsettings/user_login.dart';
+import '../login/screen.dart';
 import '../../client/client.dart';
 
 import 'package:flutter/material.dart';
@@ -23,21 +23,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Einstellungen"),
-
       ),
       body: ListView(
         children: <Widget>[
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Account Einstellungen'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const AccountSettingsScreen()),
-              );
-            },
-          ),
           ListTile(
             leading: const Icon(Icons.person_pin),
             title: const Text('Benutzerdaten'),
@@ -72,17 +60,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Benachrichtigungen'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const NotificationsSettingsScreen()),
-              );
-            },
-          ),
+          if (client.doesSupportFeature("Vertretungsplan")) ...[
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Benachrichtigungen'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NotificationsSettingsScreen()),
+                );
+              },
+            ),
+          ],
           ListTile(
             leading: const Icon(Icons.speed),
             title: const Text('Lademodus'),
@@ -124,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Navigator.push(
                           context,
                             MaterialPageRoute(
-                                builder: (context) => const AccountSettingsScreen()
+                                builder: (context) => const WelcomeLoginScreen()
                             )
                         );
                       });
