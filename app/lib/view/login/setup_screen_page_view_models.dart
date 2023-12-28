@@ -105,29 +105,29 @@ List<PageViewModel> setupScreenPageViewModels = [
           ],
         )
     ),
-    PageViewModel(
-        image: SvgPicture.asset("assets/undraw/undraw_speed_test_re_pe1f.svg", height: 175.0),
-        title: "Lademodus beim Starten der App",
-        bodyWidget: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            LoadModeElements()
-          ],
-        )
-    ),
-    PageViewModel(
-        image: SvgPicture.asset("assets/undraw/undraw_add_color_re_buro.svg", height: 175.0),
-        title: "Aussehen",
-        bodyWidget: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            AppearanceElements()
-          ],
-        )
-    ),
   ],
+  PageViewModel(
+      image: SvgPicture.asset("assets/undraw/undraw_speed_test_re_pe1f.svg", height: 175.0),
+      title: "Lademodus beim Starten der App",
+      bodyWidget: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          LoadModeElements()
+        ],
+      )
+  ),
+  PageViewModel(
+      image: SvgPicture.asset("assets/undraw/undraw_add_color_re_buro.svg", height: 175.0),
+      title: "Aussehen",
+      bodyWidget: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          AppearanceElements()
+        ],
+      )
+  ),
   PageViewModel(
       image: SvgPicture.asset("assets/undraw/undraw_access_account_re_8spm.svg", height: 175.0),
       title: "Du bist jetzt bereit!",
