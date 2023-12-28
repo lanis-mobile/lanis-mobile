@@ -265,8 +265,13 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Lade..."),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
 
