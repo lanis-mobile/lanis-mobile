@@ -95,8 +95,8 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                       context,
                       MaterialPageRoute(
                           builder: (context) => CourseOverviewAnsicht(
-                            dataFetchURL: presence
-                            [index]["_courseURL"],
+                            dataFetchURL: presence[index]["_courseURL"],
+                            title: presence[index]["Kurs"],
                           )),
                     );
                   },
@@ -141,8 +141,8 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                       context,
                       MaterialPageRoute(
                           builder: (context) => CourseOverviewAnsicht(
-                            dataFetchURL: courses[index]
-                            ["_courseURL"],
+                            dataFetchURL: courses[index]["_courseURL"],
+                            title: courses[index]["title"],
                           )),
                     );
                   },
@@ -202,8 +202,8 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                       context,
                       MaterialPageRoute(
                           builder: (context) => CourseOverviewAnsicht(
-                            dataFetchURL: current[index]
-                            ["_courseURL"],
+                            dataFetchURL: current[index]["_courseURL"],
+                            title: current[index]["name"],
                           )),
                     );
                   },

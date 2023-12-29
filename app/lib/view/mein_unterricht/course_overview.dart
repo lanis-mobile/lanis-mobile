@@ -1,16 +1,14 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
+import '../../shared/styledTextWidget.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL; // Add the dataFetchURL property
-
-  const CourseOverviewAnsicht({super.key, required this.dataFetchURL});
+  final String title;
+  const CourseOverviewAnsicht({super.key, required this.dataFetchURL, required this.title});
 
   @override
   State<StatefulWidget> createState() => _CourseOverviewAnsichtState();
@@ -136,19 +134,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                             Visibility(
                                 visible:
                                     data["historie"][index]["markup"] != "",
-                                child: Linkify(
-                                  onOpen: (link) async {
-                                    if (!await launchUrl(Uri.parse(link.url))) {
-                                      debugPrint("${link.url} konnte nicht geöffnet werden.");
-                                    }
-                                  },
-                                  text: data["historie"][index]["markup"] ?? "",
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  linkStyle: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .copyWith(color: Theme.of(context).colorScheme.primary),
-                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                  child: FormattedText(text: data["historie"][index]["markup"],),
+                                )
                             ),
                             Visibility(
                               visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
@@ -220,8 +209,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemCount: data["leistungskontrollen"].length,
                 itemBuilder: (context, index) {
                   return Padding(
-                      padding: const EdgeInsets.only(
-                          left: padding, right: padding, bottom: 8),
+                      padding: EdgeInsets.only(
+                        left: padding,
+                        right: padding,
+                        bottom: index == data["leistungskontrollen"].length - 1 ? 14 : 8,
+                      ),
                       child: Card(
                           child: ListTile(
                         title:
@@ -242,13 +234,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
             ? ListView.builder(
                 itemCount: data["anwesenheiten"].length,
                 itemBuilder: (context, index) {
+                  final String? subtitleText = parseString(data["anwesenheiten"][index]["count"])["brackets"];
                   return Padding(
-                      padding: const EdgeInsets.only(
-                          left: padding, right: padding, bottom: padding),
+                      padding: EdgeInsets.only(
+                        left: padding,
+                        right: padding,
+                        bottom: index == data["anwesenheiten"].length - 1 ? 14 : 8,
+                      ),
                       child: Card(
                         child: ListTile(
                           title: Text(toBeginningOfSentenceCase(data["anwesenheiten"][index]["type"]) ?? "",),
-                          subtitle: Text(parseString(data["anwesenheiten"][index]["count"])["brackets"]!),
+                          subtitle: subtitleText != null && subtitleText != "" ? Text(subtitleText) : null,
                           trailing: Text(parseString(data["anwesenheiten"][index]["count"])["before"]!,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20.0)),
@@ -267,7 +263,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     if (loading) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Lade..."),
+          title: Text(widget.title),
         ),
         body: const Center(
           child: CircularProgressIndicator(),
@@ -285,7 +281,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     return Scaffold(
       body: _buildBody(),
       appBar: AppBar(
-        title: Text(data["name"][0]),
+        title: Text(widget.title),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
