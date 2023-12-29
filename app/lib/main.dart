@@ -70,7 +70,7 @@ void main() async {
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
     await initializeDateFormatting();
-    if (!kDebugMode) {
+    if (!kDebugMode && (await globalStorage.read(key: "enable-countly")) == "true") {
       const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
       CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
       config.enableCrashReporting();
@@ -91,9 +91,9 @@ void main() async {
       savedThemeMode: savedThemeMode,
     ));
 
-  }, (obj, stack) {
-    if (!kDebugMode) {
-      Countly.recordDartError(obj, stack);
+  }, (obj, stack) async {
+    if (!kDebugMode && await globalStorage.read(key: "enable-countly") == "true") {
+      await Countly.recordDartError(obj, stack);
     }
   });
 }
