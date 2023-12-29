@@ -26,6 +26,20 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   bool enabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    globalStorage.read(key: "enable-countly").then((value) {
+      if (value == null) {
+        globalStorage.write(key: "enable-countly", value: "false");
+        enabled = false;
+      } else {
+        enabled = value == "true";
+      }
+      setState(() {});
+    });
+  }
   
   @override
   Widget build(BuildContext context) {
