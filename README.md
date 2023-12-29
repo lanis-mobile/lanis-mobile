@@ -56,7 +56,7 @@ Android App rund um das Schulportal Hessen. Unterstützung für den Vertretungsp
 Alle Daten werden verschlüsselt auf dem Gerät gespeichert. Die gesamte Kommunikation erfolgt direkt mit den Lanis-Servern.
 Sensible Daten (wie Noten, Anwesenheiten, etc.) werden durch Ende-zu-Ende-Verschlüsselung geschützt.
 
-Es werden anonyme Daten zur Fehleranalyse erhoben.
+Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
 
 ## IOS/IpadOS support
 Bisher hat keiner der Entwickler zugang zu einer Apple-Entwicklungsumgebung. Zudem wäre ein Jährliches Abo von 100USD notwendig, um die App in den Apple App Store zu bringen.
