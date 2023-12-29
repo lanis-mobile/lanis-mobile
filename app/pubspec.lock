@@ -105,11 +105,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.8"
-  countly_flutter:
+  countly_flutter_np:
     dependency: "direct main"
     description:
-      name: countly_flutter
-      sha256: "548dc4333f7f94d6914e444d8c0c70279d3e9f2e1e790dde291f9b30e480591a"
+      name: countly_flutter_np
+      sha256: "80ebf58adbe56276d73ccdd9da135e5df7f4ed50a903180cd2fb1181c61dd04a"
       url: "https://pub.dev"
     source: hosted
     version: "23.12.0"

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:countly_flutter_np/countly_flutter.dart';
 
-import 'package:countly_flutter/countly_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:stack_trace/stack_trace.dart';
