@@ -1,5 +1,5 @@
 # Lanis Mobile
-Android App rund um das Schulportal Hessen. Unterstützung für den Vertretungsplan, "Mein Unterricht", Nachrichten und den Schulkalender mit mehr Geplant. 
+Inoffizielle Android App rund um das Schulportal Hessen. Unterstützung für den Vertretungsplan, "Mein Unterricht", Nachrichten und den Schulkalender mit mehr Geplant. 
 
 <p align="center">
     <img src="https://play-lh.googleusercontent.com/duiSdXGQ-spJ8WA82GsW4eESJYRC55lPW04f1OdmSKVVZrUx5TDEZR5xCrNIW-p4jJw=w416-h235" width="40%" style="border-radius: 25%">
