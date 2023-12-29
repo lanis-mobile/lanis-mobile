@@ -57,11 +57,11 @@ class _BodyState extends State<Body> {
         SwitchListTile(
             value: enabled,
             title: const Text("Anonyme Bugreports senden"),
-            onChanged: (state){
-          setState(() async {
+            onChanged: (state) async {
+          setState(() {
             enabled = state;
-            await globalStorage.write(key: "enable-countly", value: state.toString());
           });
+          await globalStorage.write(key: "enable-countly", value: state.toString());
         }),
       ],
     );
