@@ -1,4 +1,5 @@
 import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/countly_analysis.dart';
 import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
@@ -81,6 +82,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const LoadModeScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.analytics),
+            title: const Text('Countly Bugreports'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const CountlySettingsScreen()),
               );
             },
           ),

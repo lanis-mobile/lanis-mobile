@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
+import '../../client/storage.dart';
 
 class LoginForm extends StatefulWidget {
   final Function() afterLogin;
@@ -28,6 +29,7 @@ class LoginFormState extends State<LoginForm> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool dseAgree = false;
+  bool countlyAgree = true;
 
 
   String selectedSchoolID = "5182";
@@ -179,6 +181,32 @@ class LoginFormState extends State<LoginForm> {
                     setState(() {
                       dseAgree = val!;
                     });
+                  },
+                ),
+                CheckboxListTile(
+                  value: countlyAgree,
+                  title: RichText(
+                    text: TextSpan(
+                      text: 'Anonyme Bugreports mit ',
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: 'Countly',
+                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => launchUrl(Uri.parse("https://countly.com/lite")),
+                        ),
+                        const TextSpan(
+                          text: ' senden',
+                        ),
+                      ],
+                    ),
+                  ),
+                  onChanged: (val) async {
+                    setState(() {
+                      countlyAgree = val!;
+                    });
+                    await globalStorage.write(key: "enable-countly", value: val.toString());
                   },
                 ),
                 const SizedBox(height: padding,),
