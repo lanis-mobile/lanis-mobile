@@ -122,7 +122,126 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       bottom: index == data["historie"].length - 1 ? 14 : 8,
                     ),
                     child: Card(
-                      child: ListTile(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4.0),
+                                            child: Icon(
+                                              Icons.calendar_today,
+                                              size: 15,
+                                            ),
+                                          ),
+                                          Text(
+                                            data["historie"][index]["time"] ?? "",
+                                            style: Theme.of(context).textTheme.labelSmall,
+                                          ),
+                                        ],
+                                      ),
+                                      Visibility(
+                                        visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              data["historie"][index]["presence"],
+                                              style: Theme.of(context).textTheme.labelSmall,
+                                            ),
+                                            const Padding(
+                                              padding: EdgeInsets.only(left: 4.0),
+                                              child: Icon(
+                                                Icons.meeting_room,
+                                                size: 15,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (data["historie"][index]["title"] != null) ...[
+                                  Text(data["historie"][index]["title"],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge),
+                                ],
+                                if (data["historie"][index]["markup"].containsKey("content")) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                    child: FormattedText(text: data["historie"][index]["markup"]["content"],),
+                                  ),
+                                ],
+                                if (data["historie"][index]["markup"].containsKey("homework")) ...[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(12)
+                                    ),
+                                    margin: const EdgeInsets.only(top: 8, bottom: 4),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+                                              child: Row(
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(right: 8),
+                                                    child: Icon(
+                                                      Icons.school,
+                                                      color: Theme.of(context).colorScheme.onPrimary,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "Hausaufgabe",
+                                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        Container(
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context).cardColor.withOpacity(0.85),
+                                              borderRadius: BorderRadius.circular(12)
+                                          ),
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: FormattedText(text: data["historie"][index]["markup"]["homework"],),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                Visibility(
+                                  visible: files.isNotEmpty,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Wrap(
+                                      spacing: 8,
+                                      children: files,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      /*child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         title: (data["historie"][index]["title"]  != null) ? Text(
                             data["historie"][index]["title"],
@@ -147,10 +266,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                   const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
-                            ),
-                            Text(
-                              data["historie"][index]["time"] ?? "",
-                              style: Theme.of(context).textTheme.labelLarge,
                             ),
                             if (data["historie"][index]["markup"].containsKey("homework")) ...[
                               Container(
@@ -208,7 +323,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                             )
                           ],
                         ),
-                      ),
+                      ),*/
                     ),
                   );
                 })
