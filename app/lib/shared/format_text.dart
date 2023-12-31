@@ -19,7 +19,7 @@ class FormattedText extends StatelessWidget {
   const FormattedText({super.key, required this.text});
 
   String convertLanisSyntax(String lanisStyledText) {
-    /* For better overview:
+    /* Implemented tags:
       ** => <b>,
       __ => <u>,
       -- => <i>,
@@ -106,16 +106,19 @@ class FormattedText extends StatelessWidget {
 
     String formattedText = lanisStyledText;
 
+    // Escape special characters so that StyledText doesn't use them for parsing.
     formattedText = formattedText.replaceAll("<", "&lt;");
     formattedText = formattedText.replaceAll(">", "&gt;");
     formattedText = formattedText.replaceAll("&", "&amp;");
     formattedText = formattedText.replaceAll('"', "&quot;");
     formattedText = formattedText.replaceAll("'", "&apos;");
 
+    // Apply formatting
     for (final FormatPattern pattern in formatPatterns) {
       formattedText = formattedText.replaceAllMapped(pattern.regExp, (match) => "${pattern.startTag}${match.group(pattern.group)}${pattern.endTag ?? ""}");
     }
 
+    // Surround emails and links with <a> tag
     final List<LinkifyElement> linkifiedElements = linkify(formattedText,
         options: const LinkifyOptions(humanize: true, removeWww: true),
         linkifiers: const [EmailLinkifier(), UrlLinkifier()]);

@@ -703,18 +703,24 @@ class SPHclient {
               .querySelector("div.hidden.hidden_encoded")
               ?.innerHtml = "";
 
-          List<String> markups = [];
+          Map<String, String> markups = {};
 
-          tableRow.children[1]
-              .querySelectorAll("span.markup")
-              .forEach((element) {
-            String text = element.text.trim();
-            if (text.startsWith(" ")) {
-              markups.add(text.substring(1));
-            } else {
-              markups.add(text);
-            }
-          });
+          // There is also a css selector :has() but it's not implemented yet.
+          final String? content = tableRow.children[1].querySelector("span.markup i.far.fa-comment-alt:first-child")?.parent?.text.trim();
+          if (content != null && content.startsWith(" ")) {
+            markups["content"] = content.substring(1);
+          } else if (content != null) {
+            markups["content"] = content;
+          }
+
+          final String? homework = tableRow.children[1].querySelector("span.homework + br + span.markup")?.text.trim();
+          if (homework != null && homework.startsWith(" ")) {
+            markups["homework"] = homework.substring(1);
+          } else if (homework != null) {
+            markups["homework"] = homework;
+          }
+
+          // Todo weiters
 
           List files = [];
           if (tableRow.children[1].querySelector("div.alert.alert-info") != null) {
@@ -735,7 +741,7 @@ class SPHclient {
           result["historie"]?.add({
             "time": tableRow.children[0].text.trim().replaceAll("  ", "").replaceAll("\n", " ").replaceAll("  ", " "),
             "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
-            "markup": markups.join("\n\n"),
+            "markup": markups,
             "presence": tableRow.children[2].text.trim(),
             "files": files
           });

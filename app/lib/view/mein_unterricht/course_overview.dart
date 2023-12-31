@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
-import '../../shared/styledTextWidget.dart';
+import '../../shared/format_text.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL; // Add the dataFetchURL property
@@ -131,18 +131,16 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Visibility(
-                                visible:
-                                    data["historie"][index]["markup"] != "",
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 4, bottom: 4),
-                                  child: FormattedText(text: data["historie"][index]["markup"],),
-                                )
-                            ),
+                            if (data["historie"][index]["markup"].containsKey("content")) ...[
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                child: FormattedText(text: data["historie"][index]["markup"]["content"],),
+                              ),
+                            ],
                             Visibility(
                               visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
                               child: Padding(
-                                padding: const EdgeInsets.only(top: 2, bottom: 2),
+                                padding: const EdgeInsets.only(top: 0, bottom: 4),
                                 child: Text(
                                   data["historie"][index]["presence"],
                                   style:
@@ -154,6 +152,50 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                               data["historie"][index]["time"] ?? "",
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
+                            if (data["historie"][index]["markup"].containsKey("homework")) ...[
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(12)
+                                ),
+                                margin: const EdgeInsets.only(top: 8),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+                                          child: Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(right: 8),
+                                                child: Icon(
+                                                    Icons.school,
+                                                  color: Theme.of(context).colorScheme.onPrimary,
+                                                ),
+                                              ),
+                                              Text(
+                                                  "Hausaufgabe",
+                                                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor.withOpacity(0.85),
+                                          borderRadius: BorderRadius.circular(12)
+                                      ),
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: FormattedText(text: data["historie"][index]["markup"]["homework"],),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
                             Visibility(
                               visible: files.isNotEmpty,
                               child: Padding(

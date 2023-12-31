@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
-import 'package:sph_plan/shared/styledTextWidget.dart';
+import 'package:sph_plan/shared/format_text.dart';
 import '../../client/client.dart';
 
 import '../../shared/errorView.dart';
