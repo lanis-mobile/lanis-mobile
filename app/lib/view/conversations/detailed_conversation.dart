@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
-import 'package:sph_plan/shared/styledTextWidget.dart';
+import 'package:sph_plan/shared/format_text.dart';
 import '../../client/client.dart';
-import 'package:linkify/linkify.dart';
-import 'package:marked/marked.dart';
 
 import '../../shared/errorView.dart';
 
@@ -55,55 +53,6 @@ class _DetailedConversationAnsichtState
   void initState() {
     super.initState();
     _getSingleConversation = fetchConversation();
-  }
-
-  String convertLanisSyntax(String lanisStyledText) {
-    final lanisToXML = Markdown({
-      MarkdownPlaceholder.enclosed("**", (text, match) => "<bold>$text</bold>"),
-      MarkdownPlaceholder.enclosed(
-          "__", (text, match) => "<underline>$text</underline>"),
-      MarkdownPlaceholder.enclosed(
-          "~~", (text, match) => "<italic>$text</italic>"),
-      MarkdownPlaceholder.enclosed(
-          "--", (text, match) => "<remove>$text</remove>"),
-      MarkdownPlaceholder.enclosed("`", (text, match) => "<code>$text</code>"),
-      MarkdownPlaceholder.enclosed(
-          "```", (text, match) => "<code>$text</code>"),
-      MarkdownPlaceholder.regexp(r"^- (.*)", (text, match) => "\u2022 $text"),
-      MarkdownPlaceholder.regexp(
-          r"\n- (.*)", (text, match) => "\n\u2022 $text"), // \u2022 = •
-      MarkdownPlaceholder.regexp(
-          r"_(\d) ", (text, match) => "<subscript>$text</subscript>"),
-      MarkdownPlaceholder.regexp(
-          r"_\((\d*)\)", (text, match) => "<subscript>$text</subscript>"),
-      MarkdownPlaceholder.regexp(
-          r"\^(\d) ", (text, match) => "<superscript>$text</superscript>"),
-      MarkdownPlaceholder.regexp(
-          r"\^\((\d*)\)", (text, match) => "<superscript>$text</superscript>"),
-      MarkdownPlaceholder.regexp(r"\d{2}\.\d{1,2}\.(\d{4}|\d{2}\b)",
-          (text, match) => "<date>${match.startText}</date>"),
-      MarkdownPlaceholder.regexp(r"(\d{2}):(\d{2})",
-          (text, match) => "<time>${match.startText}</time>"),
-    });
-
-    final List<LinkifyElement> linkifiedElements = linkify(lanisStyledText,
-        options: const LinkifyOptions(humanize: true, removeWww: true),
-        linkifiers: const [EmailLinkifier(), UrlLinkifier()]);
-
-    String linkifiedText = "";
-
-    for (LinkifyElement element in linkifiedElements) {
-      if (element is UrlElement) {
-        linkifiedText += "<url link='${element.url}'>${element.text}</url>";
-      } else if (element is EmailElement) {
-        linkifiedText +=
-            "<email address='${element.url}'>${element.text}</email>";
-      } else {
-        linkifiedText += element.text;
-      }
-    }
-
-    return lanisToXML.apply(linkifiedText);
   }
 
   Widget getConversationWidget(
@@ -160,7 +109,7 @@ class _DetailedConversationAnsichtState
               children: [
                 Flexible(
                   flex: 10,
-                  child: styledTextWidget(convertLanisSyntax(content))
+                  child: FormattedText(text: content,)
                 )
               ],
             ),
@@ -195,6 +144,7 @@ class _DetailedConversationAnsichtState
               if (snapshot.data is int) {
                 return ErrorView(
                   data: snapshot.data,
+                  name: "einer einzelnen Nachricht",
                   fetcher: null,
                 );
               }

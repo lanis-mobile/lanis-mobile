@@ -1,22 +1,21 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:html/parser.dart';
+import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../client/client.dart';
+import '../../shared/errorView.dart';
+import '../../shared/format_text.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL; // Add the dataFetchURL property
-
-  const CourseOverviewAnsicht({super.key, required this.dataFetchURL});
+  final String title;
+  const CourseOverviewAnsicht({super.key, required this.dataFetchURL, required this.title});
 
   @override
   State<StatefulWidget> createState() => _CourseOverviewAnsichtState();
 }
 
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
-  final double padding = 10.0;
+  static const double padding = 10.0;
 
   int _currentIndex = 0;
   bool loading = true;
@@ -118,47 +117,213 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
 
                   return Padding(
                     padding: EdgeInsets.only(
-                        left: padding, right: padding, bottom: padding),
+                      left: padding,
+                      right: padding,
+                      bottom: index == data["historie"].length - 1 ? 14 : 8,
+                    ),
                     child: Card(
-                      child: ListTile(
-                        title: (data["historie"][index]["title"]  != null) ? Text(data["historie"][index]["title"]):null,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4.0),
+                                            child: Icon(
+                                              Icons.calendar_today,
+                                              size: 15,
+                                            ),
+                                          ),
+                                          Text(
+                                            data["historie"][index]["time"] ?? "",
+                                            style: Theme.of(context).textTheme.labelSmall,
+                                          ),
+                                        ],
+                                      ),
+                                      Visibility(
+                                        visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              data["historie"][index]["presence"].replaceAll("andere schulische Veranstaltung", "a.s.V."),
+                                              style: Theme.of(context).textTheme.labelSmall,
+                                            ),
+                                            const Padding(
+                                              padding: EdgeInsets.only(left: 4.0),
+                                              child: Icon(
+                                                Icons.meeting_room,
+                                                size: 15,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (data["historie"][index]["title"] != null) ...[
+                                  Text(data["historie"][index]["title"],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge),
+                                ],
+                                if (data["historie"][index]["markup"].containsKey("content")) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                    child: FormattedText(text: data["historie"][index]["markup"]["content"],),
+                                  ),
+                                ],
+                                if (data["historie"][index]["markup"].containsKey("homework")) ...[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(12)
+                                    ),
+                                    margin: const EdgeInsets.only(top: 8, bottom: 4),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+                                              child: Row(
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(right: 8),
+                                                    child: Icon(
+                                                      Icons.school,
+                                                      color: Theme.of(context).colorScheme.onPrimary,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "Hausaufgabe",
+                                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        Container(
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context).cardColor.withOpacity(0.85),
+                                              borderRadius: BorderRadius.circular(12)
+                                          ),
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: FormattedText(text: data["historie"][index]["markup"]["homework"],),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                Visibility(
+                                  visible: files.isNotEmpty,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Wrap(
+                                      spacing: 8,
+                                      children: files,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      /*child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        title: (data["historie"][index]["title"]  != null) ? Text(
+                            data["historie"][index]["title"],
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ) : null,
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (data["historie"][index]["markup"].containsKey("content")) ...[
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                child: FormattedText(text: data["historie"][index]["markup"]["content"],),
+                              ),
+                            ],
                             Visibility(
-                                visible:
-                                    data["historie"][index]["markup"] != "",
-                                child: Linkify(
-                                  onOpen: (link) async {
-                                    if (!await launchUrl(Uri.parse(link.url))) {
-                                      debugPrint("${link.url} konnte nicht geöffnet werden.");
-                                    }
-                                  },
-                                  text: data["historie"][index]["markup"] ?? "",
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  linkStyle: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .copyWith(color: Theme.of(context).colorScheme.primary),
-                                ),
-                            ),
-                            Text(
-                              data["historie"][index]["presence"] ?? "",
-                              style:
+                              visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 0, bottom: 4),
+                                child: Text(
+                                  data["historie"][index]["presence"],
+                                  style:
                                   const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                            Text(
-                              data["historie"][index]["time"] ?? "",
-                              style:
-                                  const TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                            Wrap(
-                              spacing: 8,
-                              children: files,
+                            if (data["historie"][index]["markup"].containsKey("homework")) ...[
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(12)
+                                ),
+                                margin: const EdgeInsets.only(top: 8),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+                                          child: Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(right: 8),
+                                                child: Icon(
+                                                    Icons.school,
+                                                  color: Theme.of(context).colorScheme.onPrimary,
+                                                ),
+                                              ),
+                                              Text(
+                                                  "Hausaufgabe",
+                                                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor.withOpacity(0.85),
+                                          borderRadius: BorderRadius.circular(12)
+                                      ),
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: FormattedText(text: data["historie"][index]["markup"]["homework"],),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                            Visibility(
+                              visible: files.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: padding),
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: files,
+                                ),
+                              ),
                             )
                           ],
                         ),
-                      ),
+                      ),*/
                     ),
                   );
                 })
@@ -170,11 +335,20 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: EdgeInsets.only(
-                        left: padding, right: padding, bottom: padding),
+                      left: padding,
+                      right: padding,
+                      bottom: index == data["leistungen"].length - 1 ? 14 : 8,
+                    ),
                     child: Card(
                       child: ListTile(
-                        title: Text(data["leistungen"][index]["Name"] ?? ""),
-                        subtitle: Text(data["leistungen"][index]["Datum"] ?? ""),
+                        title: Text(
+                            data["leistungen"][index]["Name"] ?? "",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        subtitle: Text(
+                            data["leistungen"][index]["Datum"] ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                         trailing: Text(
                           data["leistungen"][index]["Note"] ?? "",
                           style: const TextStyle(
@@ -193,13 +367,20 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 itemBuilder: (context, index) {
                   return Padding(
                       padding: EdgeInsets.only(
-                          left: padding, right: padding, bottom: padding),
+                        left: padding,
+                        right: padding,
+                        bottom: index == data["leistungskontrollen"].length - 1 ? 14 : 8,
+                      ),
                       child: Card(
                           child: ListTile(
                         title:
-                            Text(data["leistungskontrollen"][index]["title"] ?? ""),
+                            Text(
+                                data["leistungskontrollen"][index]["title"] ?? "",
+                                    style: Theme.of(context).textTheme.titleMedium,
+                            ),
                         subtitle: Text(
                           data["leistungskontrollen"][index]["value"] ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )));
                 },
@@ -210,13 +391,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
             ? ListView.builder(
                 itemCount: data["anwesenheiten"].length,
                 itemBuilder: (context, index) {
+                  final String? subtitleText = parseString(data["anwesenheiten"][index]["count"])["brackets"];
                   return Padding(
                       padding: EdgeInsets.only(
-                          left: padding, right: padding, bottom: padding),
+                        left: padding,
+                        right: padding,
+                        bottom: index == data["anwesenheiten"].length - 1 ? 14 : 8,
+                      ),
                       child: Card(
                         child: ListTile(
-                          title: Text(data["anwesenheiten"][index]["type"] ?? ""),
-                          subtitle: Text(parseString(data["anwesenheiten"][index]["count"])["brackets"]!),
+                          title: Text(toBeginningOfSentenceCase(data["anwesenheiten"][index]["type"]) ?? "",),
+                          subtitle: subtitleText != null && subtitleText != "" ? Text(subtitleText) : null,
                           trailing: Text(parseString(data["anwesenheiten"][index]["count"])["before"]!,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20.0)),
@@ -233,34 +418,27 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
-    String appBarTitle;
+
     if (data is int && data < 0) {
       return Scaffold(
-        appBar: AppBar(title: Text("Fehler"),),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error,
-                size: 60,
-              ),
-              Text("Vielleicht bis du Offline?")
-            ],
-          ),
-        ),
+        appBar: AppBar(title: const Text("Fehler"),),
+        body: ErrorView(data: data, name: "einen Kurs", fetcher: null,)
       );
     }
 
     return Scaffold(
       body: _buildBody(),
       appBar: AppBar(
-        title: Text(data["name"][0]),
+        title: Text(widget.title),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,

@@ -81,7 +81,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     List<Widget> errorWidgets = [];
 
     for (int i = 0; i < data["length"]; i++) {
-      errorWidgets.add(ErrorView(data: data, fetcher: client.substitutionsFetcher,));
+      errorWidgets.add(ErrorView(data: data, name: "Vertretungsplan", fetcher: client.substitutionsFetcher,));
     }
 
     return errorWidgets;
