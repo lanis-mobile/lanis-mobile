@@ -154,7 +154,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                         child: Row(
                                           children: [
                                             Text(
-                                              data["historie"][index]["presence"],
+                                              data["historie"][index]["presence"].replaceAll("andere schulische Veranstaltung", "a.s.V."),
                                               style: Theme.of(context).textTheme.labelSmall,
                                             ),
                                             const Padding(
