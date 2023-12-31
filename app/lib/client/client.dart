@@ -92,7 +92,7 @@ class SPHclient {
   }
 
   Future<void> overwriteCredits(String username, String password,
-      String schoolID, String schoolIDHelper) async {
+      String schoolID) async {
     this.username = username;
     this.password = password;
     this.schoolID = schoolID;
@@ -100,13 +100,8 @@ class SPHclient {
     await globalStorage.write(key: "username", value: username);
     await globalStorage.write(key: "password", value: password, secure: true);
     await globalStorage.write(key: "schoolID", value: schoolID);
-    await globalStorage.write(key: "schoolIDHelper", value: schoolIDHelper);
   }
 
-  Future<String> getSchoolIDHelperString() async {
-    return await globalStorage.read(key: "schoolIDHelper") ??
-        "Max-Planck-Schule - Rüsselsheim (5182)";
-  }
 
   Future<void> loadFromStorage() async {
     loadMode = await globalStorage.read(key: "loadMode") ?? "fast";

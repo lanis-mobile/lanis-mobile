@@ -2,25 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
-class NotificationsSettingsScreen extends StatefulWidget {
+class NotificationsSettingsScreen extends StatelessWidget {
   const NotificationsSettingsScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _NotificationsSettingsScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Benachrichtigungen"),
+      ),
+      body: ListView(
+        children: const [
+          /*const ListTile(
+            leading: Icon(Icons.info),
+            title: Text("Information"),
+            subtitle: Text("Diese Einstellungen haben nur einen Effekt, wenn deine Schule den Vertretungsplan im Lanis-System verwenden."),
+          ),*/
+          NotificationElements(),
+          ListTile(
+            leading: Icon(Icons.info),
+            title: Text("Information"),
+            subtitle: Text(
+                "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert."),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _NotificationsSettingsScreenState extends State<NotificationsSettingsScreen> {
+class NotificationElements extends StatefulWidget {
+  const NotificationElements({super.key});
+
+  @override
+  State<NotificationElements> createState() => _NotificationElementsState();
+}
+
+class _NotificationElementsState extends State<NotificationElements> {
   bool _enableNotifications = true;
   int _notificationInterval = 15;
   bool _notificationsAreOngoing = false;
   bool _notificationPermissionGranted = false;
-
-  Future<void> applySettings() async {
-    await globalStorage.write(key: "settings-push-service-on", value: _enableNotifications.toString());
-    await globalStorage.write(key: "settings-push-service-interval", value: _notificationInterval.toString());
-    await globalStorage.write(key: "settings-push-service-notifications-ongoing", value: _notificationsAreOngoing.toString());
-  }
 
   Future<void> loadSettingsVariables() async {
     _enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
@@ -40,100 +62,62 @@ class _NotificationsSettingsScreenState extends State<NotificationsSettingsScree
         _enableNotifications = _enableNotifications;
         _notificationInterval = _notificationInterval;
         _notificationsAreOngoing = _notificationsAreOngoing;
+
+        _notificationPermissionGranted = _notificationPermissionGranted;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Benachrichtigungen"),
-      ),
-      body: ListView(
-        children: [
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text("Information"),
-            subtitle: Text("Diese Einstellungen haben nur einen Effekt, wenn deine Schule den Vertretungsplan im Lanis-System verwenden."),
-          ),
-          SwitchListTile(
-            title: const Text('Push Benachrichtigungen'),
-            value: _enableNotifications,
-            onChanged: (bool? value) {
-              setState(() {
-                _enableNotifications = value!;
-              });
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Anhaltende Benachrichtigung'),
-            value: _notificationsAreOngoing,
-            onChanged: _enableNotifications ? (bool? value) {
-              setState(() {
-                _notificationsAreOngoing = value!;
-              });
-            } : null,
-          ),
-          ListTile(
-            title: const Text('Update-intervall'),
-            trailing: Text('$_notificationInterval min', style: const TextStyle(fontSize: 14)),
-          ),
-          Slider(
-            value: _notificationInterval.toDouble(),
-            min: 15,
-            max: 180,
-            onChanged: _enableNotifications ? (double value) {
-              setState(() {
-                _notificationInterval = value.toInt(); // Umwandlung zu int
-              });
-            } : null,
-          ),
-          SwitchListTile(
-            title: const Text('Systemberechtigung für Benachrichtigungen'),
-            value: _notificationPermissionGranted,
-            onChanged: (bool? value) async {
-              if (!_notificationPermissionGranted) {
-                PermissionStatus status = await Permission.notification.request();
-                setState(() {
-                  _notificationPermissionGranted =  status.isGranted;
-                });
-              }
-            },
-          ),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text("Information"),
-            subtitle: Text(
-                "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert."),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(5),
-            child: ElevatedButton(
-              onPressed: () {
-                applySettings();
-
-                String message = "Ein Neustart der Anwendung ist erforderlich, um Änderungen zu übernehmen.";
-
-                if (!_notificationPermissionGranted) {
-                  message = "Es gibt ein Problem mit der Berechtigung für Benachrichtigungen! SPH kann keine Benachrichtigungen versenden.";
-                }
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text("App Neustart erforderlich"),
-                      content: Text(message),
-                    );
-                  }
-                );
-              },
-              child: const Text("Änderungen Speichern"),
-            ),
-          )
-        ],
-      ),
+    return Column(
+      children: [
+        ListTile(
+          title: const Text('Systemberechtigung für Benachrichtigungen'),
+          trailing: Text(_notificationPermissionGranted ? "Erlaubt" : "Nicht erlaubt"),
+          subtitle: !_notificationPermissionGranted ? const Text("Du musst deine Berechtigungen für Benachrichtigungen in den Systemeinstellungen der App ändern!") : null,
+        ),
+        SwitchListTile(
+          title: const Text('Push-Benachrichtigungen'),
+          value: _enableNotifications,
+          onChanged: _notificationPermissionGranted ? (bool? value) async {
+            setState(() {
+              _enableNotifications = value!;
+            });
+            await globalStorage.write(key: "settings-push-service-on", value: _enableNotifications.toString());
+          } : null,
+          subtitle: const Text("Aktiviere es, um Benachrichtigungen zu bekommen."),
+        ),
+        SwitchListTile(
+          title: const Text('Anhaltende Benachrichtigung'),
+          value: _notificationsAreOngoing,
+          onChanged: _enableNotifications && _notificationPermissionGranted ? (bool? value) async {
+            setState(() {
+              _notificationsAreOngoing = value!;
+            });
+            await globalStorage.write(key: "settings-push-service-notifications-ongoing", value: _notificationsAreOngoing.toString());
+          } : null,
+          subtitle: const Text("Wenn aktiviert, werden die Benachrichtigung dauerhaft fest stehen, die man nicht entfernen kann."),
+        ),
+        ListTile(
+          title: const Text('Update-Intervall'),
+          trailing: Text('$_notificationInterval min', style: const TextStyle(fontSize: 14)),
+          enabled: _enableNotifications && _notificationPermissionGranted,
+        ),
+        Slider(
+          value: _notificationInterval.toDouble(),
+          min: 15,
+          max: 180,
+          onChanged: _enableNotifications && _notificationPermissionGranted ? (double value) {
+            setState(() {
+              _notificationInterval = value.toInt(); // Umwandlung zu int
+            });
+          } : null,
+          onChangeEnd: (double value) async {
+            await globalStorage.write(key: "settings-push-service-interval", value: _notificationInterval.toString());
+          },
+        ),
+      ],
     );
   }
 }

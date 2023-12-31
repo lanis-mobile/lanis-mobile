@@ -8,7 +8,7 @@ fetch("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist").the
 
         data.forEach(elem => {
             elem.Schulen.forEach(schule => {
-                result.push(`${schule.Name} - ${schule.Ort} (${schule.Id})`);
+                result.push(`${schule.Name.replaceAll("-", " ")} - ${schule.Ort} (${schule.Id})`);
             })
         });
 

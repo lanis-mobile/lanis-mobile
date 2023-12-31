@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
-import '../settings/subsettings/user_login.dart';
+import '../bug_report/send_bugreport.dart';
+import '../login/screen.dart';
 import 'course_overview.dart';
 
 class MeinUnterrichtAnsicht extends StatefulWidget {
@@ -226,7 +227,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const AccountSettingsScreen()));
+                      builder: (context) => const WelcomeLoginScreen()));
             });
           }
 

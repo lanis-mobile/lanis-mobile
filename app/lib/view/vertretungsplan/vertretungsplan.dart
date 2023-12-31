@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
-import '../settings/subsettings/user_login.dart';
+import '../login/screen.dart';
 import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {
@@ -37,142 +37,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     );
   }
 
-  bool doesNoticeExist(String? info) {
-    return (info == null || info == "" || info == "---");
-  }
-
-  Widget? getSubstitutionInfo(String key, String? value, IconData icon) {
-    if (doesNoticeExist(value)) {
-      return null;
-    }
-
-    return Padding(
-        padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Icon(icon),
-              ),
-              Text(
-                key,
-                style: Theme.of(context).textTheme.labelLarge,
-              )
-            ],
-          ),
-          Text(value!)
-        ]));
-  }
-
-  Widget getSubstitutionWidget(Map<String, dynamic> substitution) {
-    return ListTile(
-      dense: (doesNoticeExist(substitution["Vertreter"]) &&
-          doesNoticeExist(substitution["Lehrer"]) &&
-          doesNoticeExist(substitution["Raum"]) &&
-          doesNoticeExist(substitution["Fach"]) &&
-          doesNoticeExist(substitution["Hinweis"])),
-      title: Padding(
-        padding: const EdgeInsets.only(top: 2),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (substitution['Art'] != null) ...[
-              Text(
-                substitution['Art'],
-                style: Theme.of(context).textTheme.titleLarge,
-              )
-            ],
-            Flexible(
-                child: Text(substitution["Klasse"] ?? "Keine Klasse angegeben",
-                    style: (substitution['Art'] != null)
-                        ? null
-                        : Theme.of(context)
-                            .textTheme
-                            .titleLarge) // highlight "Klasse" when there is no "Art" information
-                ),
-            Text(
-              substitution['Stunde'] ?? "",
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                    top: 0,
-                    bottom: (doesNoticeExist(substitution["Vertreter"]) &&
-                            doesNoticeExist(substitution["Lehrer"]) &&
-                            doesNoticeExist(substitution["Raum"]) &&
-                            !doesNoticeExist(substitution["Fach"]))
-                        ? 12
-                        : 0),
-                child: Column(
-                  children: [
-                    getSubstitutionInfo("Vertreter", substitution["Vertreter"],
-                            Icons.person) ??
-                        const SizedBox.shrink(),
-                    getSubstitutionInfo(
-                            "Lehrer", substitution["Lehrer"], Icons.school) ??
-                        const SizedBox.shrink(),
-                    getSubstitutionInfo(
-                            "Raum", substitution["Raum"], Icons.room) ??
-                        const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-              if (!doesNoticeExist(substitution["Hinweis"])) ...[
-                Padding(
-                  padding: EdgeInsets.only(
-                      right: 30,
-                      left: 30,
-                      top: 2,
-                      bottom: doesNoticeExist(substitution["Fach"]) ? 12 : 0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(right: 8.0),
-                            child: Icon(Icons.info),
-                          ),
-                          Text(
-                            "Hinweis",
-                            style: Theme.of(context).textTheme.labelLarge,
-                          )
-                        ],
-                      ),
-                      Text(
-                          "${toBeginningOfSentenceCase(substitution["Hinweis"])}")
-                    ],
-                  ),
-                )
-              ]
-            ],
-          ),
-          if (!doesNoticeExist(substitution["Fach"])) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  substitution["Fach"],
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ],
-            )
-          ]
-        ],
-      ),
-    );
-  }
-
   List<Widget> getSubstitutionViews(dynamic data) {
     List<Widget> substitutionViews = [];
 
@@ -201,8 +65,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Card(
-                  child: getSubstitutionWidget(
-                      data["days"][dayIndex]["entries"][entryIndex]),
+                  child: SubstitutionWidget(substitutionData: data["days"][dayIndex]["entries"][entryIndex]),
                 ),
               );
             },
@@ -249,7 +112,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const AccountSettingsScreen()));
+                      builder: (context) => const WelcomeLoginScreen()));
             });
           }
 
