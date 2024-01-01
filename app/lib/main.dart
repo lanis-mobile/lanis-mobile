@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'dart:io';
 
 import 'package:countly_flutter_np/countly_flutter.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -175,16 +176,40 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveTheme(
-      light: lightTheme,
-      dark: darkTheme,
-      initial: savedThemeMode ?? AdaptiveThemeMode.system,
-      builder: (theme, darkTheme) => MaterialApp(
-        title: 'lanis mobile',
-        theme: theme,
-        darkTheme: darkTheme,
-        home: const HomePage(),
-      ),
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        late ColorScheme lightColorScheme;
+        late ColorScheme darkColorScheme;
+
+        print(lightDynamic);
+
+        if (lightDynamic != null && darkDynamic != null) {
+          print("pls yes");
+          lightColorScheme = lightDynamic.harmonized();
+          darkColorScheme = darkDynamic.harmonized();
+        } else {
+          print("pls no");
+          lightColorScheme = ColorScheme.fromSeed(
+              seedColor: Colors.blueAccent
+          );
+          darkColorScheme = ColorScheme.fromSeed(
+              seedColor: Colors.blueAccent,
+              brightness: Brightness.dark
+          );
+        }
+
+        return AdaptiveTheme(
+          light: lightTheme.copyWith(colorScheme: lightColorScheme),
+          dark: darkTheme.copyWith(colorScheme: darkColorScheme),
+          initial: savedThemeMode ?? AdaptiveThemeMode.system,
+          builder: (theme, darkTheme) => MaterialApp(
+            title: 'lanis mobile',
+            theme: theme,
+            darkTheme: darkTheme,
+            home: const HomePage(),
+          ),
+        );
+      },
     );
   }
 }
