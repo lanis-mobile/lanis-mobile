@@ -2,7 +2,7 @@
 Inoffizielle Android App rund um das Schulportal Hessen. Unterstützung für den Vertretungsplan, "Mein Unterricht", Nachrichten und den Schulkalender mit mehr Geplant. 
 
 <p align="center">
-    <img src="https://play-lh.googleusercontent.com/duiSdXGQ-spJ8WA82GsW4eESJYRC55lPW04f1OdmSKVVZrUx5TDEZR5xCrNIW-p4jJw=w416-h235" width="40%" style="border-radius: 25%">
+    <img src="https://play-lh.googleusercontent.com/duiSdXGQ-spJ8WA82GsW4eESJYRC55lPW04f1OdmSKVVZrUx5TDEZR5xCrNIW-p4jJw=w416-h235" width="40%">
 </p>
 <a href='https://play.google.com/store/apps/details?id=io.github.alessioc42.sph&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
   <img alt='Jetzt bei Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png' style='height: 71px'/>
@@ -14,30 +14,13 @@ Inoffizielle Android App rund um das Schulportal Hessen. Unterstützung für den
 <details>
   <summary>Screenshots</summary>
 <div style="text-align: center;">
-    <a href="screenshots/Screenshot_1702113982.png">
-      <img src="screenshots/Screenshot_1702113982.png" width="250" >
-    </a>
-    <a href="screenshots/Screenshot_1702114019.png">
-      <img src="screenshots/Screenshot_1702114019.png" width="250" >
-    </a>
-    <a href="screenshots/Screenshot_1702114051.png">
-      <img src="screenshots/Screenshot_1702114051.png" width="250" >
-    </a>
-    <a href="screenshots/Screenshot_1702114070.png">
-      <img src="screenshots/Screenshot_1702114070.png" width="250" >
-    </a>
-    <a href="screenshots/Screenshot_1702114093.png">
-      <img src="screenshots/Screenshot_1702114093.png" width="250" >
-    </a>
-    <a href="screenshots/Screenshot_1702114119.png">
-      <img src="screenshots/Screenshot_1702114119.png" width="250" >
-    </a>
-    <a href="screenshots/Conversations_Overview.png">
-      <img src="screenshots/Conversations_Overview.png" width="250" >
-    </a>
-    <a href="screenshots/Conversation_Details.png">
-      <img src="screenshots/Conversation_Details.png" width="250" >
-    </a>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.png" width="250" >
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.png" width="250" >
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.png" width="250" >
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.png" width="250" >
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.png" width="250" >
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.png" width="250" >
+
 </div>
 </details>
 
