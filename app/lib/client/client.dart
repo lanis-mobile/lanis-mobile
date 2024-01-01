@@ -666,6 +666,33 @@ class SPHclient {
     return result;
   }
 
+  Future<dynamic> setHomeworkDone(String courseID, String courseEntry, bool status) async {
+    //returns the response of the http request. 1 means success.
+    debugPrint("$courseID $courseEntry $status");
+
+    //copy this code and make it a real form request copilot!
+    final response = await dio.post(
+      "https://start.schulportal.hessen.de/meinunterricht.php",
+      data: {
+        "a": "sus_homeworkDone",
+        "entry": courseEntry,
+        "id": courseID,
+        "b": status ? "done" : "undone"
+      },
+      options: Options(
+        headers: {
+          "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest", //this is important
+        },
+      ),
+    );
+
+    debugPrint(response.data.toString());
+
+    return response.data;
+  }
+
   Future<dynamic> getMeinUnterrichtCourseView(String url) async {
     try {
       var result = {
@@ -673,8 +700,10 @@ class SPHclient {
         "leistungen": [],
         "leistungskontrollen": [],
         "anwesenheiten": [],
-        "name": ["name"]
+        "name": ["name"],
       };
+
+      String courseID = url.split("id=")[1];
 
       final response =
           await dio.get("https://start.schulportal.hessen.de/$url");
@@ -709,13 +738,16 @@ class SPHclient {
           }
 
           final String? homework = tableRow.children[1].querySelector("span.homework + br + span.markup")?.text.trim();
-          if (homework != null && homework.startsWith(" ")) {
-            markups["homework"] = homework.substring(1);
-          } else if (homework != null) {
-            markups["homework"] = homework;
-          }
+          bool homeworkDone = false;
 
-          // Todo weiters
+          if (homework != null) {
+            homeworkDone = tableRow.querySelectorAll("span.done.hidden").isEmpty;
+            if (homework.startsWith(" ")) {
+              markups["homework"] = homework.substring(1);
+            } else {
+              markups["homework"] = homework;
+            }
+          }
 
           List files = [];
           if (tableRow.children[1].querySelector("div.alert.alert-info") != null) {
@@ -737,6 +769,9 @@ class SPHclient {
             "time": tableRow.children[0].text.trim().replaceAll("  ", "").replaceAll("\n", " ").replaceAll("  ", " "),
             "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
             "markup": markups,
+            "entry-id": tableRow.attributes["data-entry"],
+            "course-id": courseID,
+            "homework-done": homeworkDone,
             "presence": tableRow.children[2].text.trim(),
             "files": files
           });

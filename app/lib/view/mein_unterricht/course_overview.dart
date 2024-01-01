@@ -17,6 +17,8 @@ class CourseOverviewAnsicht extends StatefulWidget {
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   static const double padding = 10.0;
 
+  bool checked = false;
+
   int _currentIndex = 0;
   bool loading = true;
   dynamic data = {
@@ -210,9 +212,42 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                   ),
                                                 ],
                                               ),
-                                            )
+                                            ),
+                                            const Spacer(),
+                                              Theme(
+                                              data: ThemeData(
+                                              unselectedWidgetColor: Colors.black,
+                                              ),
+                                                child: Checkbox(
+                                                  value: data["historie"][index]["homework-done"], // Set the initial value as needed
+                                                  onChanged: (bool? value) {
+                                                    try {
+                                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                        content: Text("Hausaufgabe wird gespeichert..."),
+                                                        duration: Duration(milliseconds: 500)
+                                                      ));
+                                                      client.setHomeworkDone(data["historie"][index]["course-id"], data["historie"][index]["entry-id"], value!).then((val) {
+                                                        if (val != "1") {
+                                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                            content: Text("Fehler beim Speichern der Hausaufgabe."),
+                                                          ));
+                                                        } else {
+                                                          setState(() {
+                                                            data["historie"][index]["homework-done"] = value;
+                                                          });
+                                                        }
+                                                      });
+                                                    } catch (e) {
+                                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                        content: Text("Fehler beim Speichern der Hausaufgabe."),
+                                                      ));
+                                                    }
+                                                  },
+                                                ),
+                                              ),
                                           ],
                                         ),
+
                                         Container(
                                           width: double.infinity,
                                           decoration: BoxDecoration(
