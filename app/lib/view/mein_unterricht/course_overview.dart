@@ -17,6 +17,8 @@ class CourseOverviewAnsicht extends StatefulWidget {
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   static const double padding = 10.0;
 
+  bool checked = false;
+
   int _currentIndex = 0;
   bool loading = true;
   dynamic data = {
@@ -192,6 +194,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                     child: Column(
                                       children: [
                                         Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Padding(
                                               padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
@@ -210,9 +213,39 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                   ),
                                                 ],
                                               ),
-                                            )
+                                            ),
+                                            Checkbox(
+                                              value: data["historie"][index]["homework-done"], // Set the initial value as needed
+                                              side: BorderSide(
+                                                  color: Theme.of(context).colorScheme.onPrimary, width: 2
+                                              ),
+                                              onChanged: (bool? value) {
+                                                try {
+                                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                    content: Text("Hausaufgabe wird gespeichert..."),
+                                                    duration: Duration(milliseconds: 500)
+                                                  ));
+                                                  client.setHomeworkDone(data["historie"][index]["course-id"], data["historie"][index]["entry-id"], value!).then((val) {
+                                                    if (val != "1") {
+                                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                        content: Text("Fehler beim Speichern der Hausaufgabe."),
+                                                      ));
+                                                    } else {
+                                                      setState(() {
+                                                        data["historie"][index]["homework-done"] = value;
+                                                      });
+                                                    }
+                                                  });
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                    content: Text("Fehler beim Speichern der Hausaufgabe."),
+                                                  ));
+                                                }
+                                              },
+                                            ),
                                           ],
                                         ),
+
                                         Container(
                                           width: double.infinity,
                                           decoration: BoxDecoration(
@@ -241,89 +274,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           )
                         ],
                       ),
-                      /*child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        title: (data["historie"][index]["title"]  != null) ? Text(
-                            data["historie"][index]["title"],
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ) : null,
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (data["historie"][index]["markup"].containsKey("content")) ...[
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 4),
-                                child: FormattedText(text: data["historie"][index]["markup"]["content"],),
-                              ),
-                            ],
-                            Visibility(
-                              visible: data["historie"][index]["presence"] != "nicht erfasst" && data["historie"][index]["presence"] != null,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 0, bottom: 4),
-                                child: Text(
-                                  data["historie"][index]["presence"],
-                                  style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                            if (data["historie"][index]["markup"].containsKey("homework")) ...[
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(12)
-                                ),
-                                margin: const EdgeInsets.only(top: 8),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
-                                          child: Row(
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(right: 8),
-                                                child: Icon(
-                                                    Icons.school,
-                                                  color: Theme.of(context).colorScheme.onPrimary,
-                                                ),
-                                              ),
-                                              Text(
-                                                  "Hausaufgabe",
-                                                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          color: Theme.of(context).cardColor.withOpacity(0.85),
-                                          borderRadius: BorderRadius.circular(12)
-                                      ),
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: FormattedText(text: data["historie"][index]["markup"]["homework"],),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                            Visibility(
-                              visible: files.isNotEmpty,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: padding),
-                                child: Wrap(
-                                  spacing: 8,
-                                  children: files,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),*/
                     ),
                   );
                 })
