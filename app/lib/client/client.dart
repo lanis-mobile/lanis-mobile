@@ -668,9 +668,7 @@ class SPHclient {
 
   Future<dynamic> setHomeworkDone(String courseID, String courseEntry, bool status) async {
     //returns the response of the http request. 1 means success.
-    debugPrint("$courseID $courseEntry $status");
 
-    //copy this code and make it a real form request copilot!
     final response = await dio.post(
       "https://start.schulportal.hessen.de/meinunterricht.php",
       data: {
@@ -688,7 +686,6 @@ class SPHclient {
       ),
     );
 
-    debugPrint(response.data.toString());
 
     return response.data;
   }
