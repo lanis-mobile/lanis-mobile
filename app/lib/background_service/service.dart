@@ -33,7 +33,7 @@ Future<void> performBackgroundFetch() async {
       final List combinedVPlan = [];
 
       for (List plan in vPlan["entries"]) {
-        combinedVPlan.add(plan);
+        combinedVPlan.addAll(plan);
       }
 
       final filteredPlan = await filter_logic.filter(combinedVPlan);
