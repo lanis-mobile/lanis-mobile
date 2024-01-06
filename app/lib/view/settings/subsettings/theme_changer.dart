@@ -1,5 +1,6 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/themes.dart';
 
 class AppearanceSettingsScreen extends StatelessWidget {
   const AppearanceSettingsScreen({super.key});
@@ -25,24 +26,10 @@ class AppearanceElements extends StatefulWidget {
 class _AppearanceElementsState extends State<AppearanceElements> {
   String _selectedTheme = "system"; // Default theme
 
-  void _applyTheme(String theme) {
-    switch (theme) {
-      case "light":
-        AdaptiveTheme.of(context).setLight();
-        break;
-      case "dark":
-        AdaptiveTheme.of(context).setDark();
-        break;
-      case "system":
-        AdaptiveTheme.of(context).setSystem();
-        break;
-    }
-  }
-
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
-    _selectedTheme = AdaptiveTheme.of(context).mode.name;
+    _selectedTheme = (await globalStorage.read(key: "theme")) ?? "system";
   }
 
   @override
@@ -59,7 +46,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             onChanged: (value) {
               setState(() {
                 _selectedTheme = value.toString();
-                _applyTheme(_selectedTheme);
+                ThemeModeNotifier.setThemeMode(_selectedTheme);
               });
             },
           ),
@@ -70,7 +57,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             onChanged: (value) {
               setState(() {
                 _selectedTheme = value.toString();
-                _applyTheme(_selectedTheme);
+                ThemeModeNotifier.setThemeMode(_selectedTheme);
               });
             },
           ),
@@ -81,7 +68,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             onChanged: (value) {
               setState(() {
                 _selectedTheme = value.toString();
-                _applyTheme(_selectedTheme);
+                ThemeModeNotifier.setThemeMode(_selectedTheme);
               });
             },
           ),
@@ -90,4 +77,3 @@ class _AppearanceElementsState extends State<AppearanceElements> {
     );
   }
 }
-
