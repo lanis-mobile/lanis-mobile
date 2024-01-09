@@ -59,8 +59,8 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             borderRadius: BorderRadius.circular(10),
             color: primaryColor ?? (
                 Theme.of(context).brightness == Brightness.dark
-                    ? Themes.map[value]!.darkTheme!.colorScheme.primary
-                    : Themes.map[value]!.lightTheme!.colorScheme.primary
+                    ? Themes.flutterColorThemes[value]!.darkTheme!.colorScheme.primary
+                    : Themes.flutterColorThemes[value]!.lightTheme!.colorScheme.primary
             ),
           ),
         ),
@@ -84,7 +84,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
   Widget build(BuildContext context) {
     final List<RadioListTile> flutterColorRadioListTiles = [];
 
-    for (String name in Themes.map.keys) {
+    for (String name in Themes.flutterColorThemes.keys) {
       if (name == "standard") continue; // We already have standard
 
       flutterColorRadioListTiles.add(
@@ -151,6 +151,10 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               title: "Standart",
               subtitle: 'Dunkellila',
               value: "standard",
+                primaryColor: Theme.of(context).brightness == Brightness.dark
+                    ? Themes.standardTheme.darkTheme!.colorScheme.primary
+                    : Themes.standardTheme.lightTheme!.colorScheme.primary,
+              callOnChanged: ColorModeNotifier.setStandard
             ),
             RadioListTile(
               title: const Text("Dynamisch"),
@@ -204,6 +208,15 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                   ColorModeNotifier.setDynamic();
                 });
               },
+            ),
+            colorListTile(
+              title: "Schulfarbe",
+              subtitle: "Hier wird die Hauptfarbe von Lanis benutzt, was meistens eine Form von blau oder türkis ist.",
+              value: "school",
+              primaryColor: Theme.of(context).brightness == Brightness.dark
+                  ? Themes.schoolTheme.darkTheme!.colorScheme.primary
+                  : Themes.schoolTheme.lightTheme!.colorScheme.primary,
+              callOnChanged: ColorModeNotifier.setSchool
             ),
           ],
           const Padding(

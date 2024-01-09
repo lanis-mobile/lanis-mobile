@@ -314,9 +314,28 @@ class _HomePageState extends State<HomePage> {
     return;
   }
 
+  Future<void> getSchoolTheme() async {
+    try {
+      dynamic schoolInfo = await client.getSchoolInfo(client.schoolID);
+
+      int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
+
+      Themes.schoolTheme = Themes(
+          getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+          getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
+      );
+      
+      if (globalStorage.prefs.getString("color") == "school") {
+        ColorModeNotifier.setSchool();
+      }
+    } on Exception catch (_) {}
+  }
+
   Future<void> performLogin() async {
     statusController.add(Status.loadUserData);
     await client.loadFromStorage();
+
+    getSchoolTheme();
 
     await client.prepareDio();
 

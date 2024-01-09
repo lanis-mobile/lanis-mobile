@@ -13,6 +13,7 @@ import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/themes.dart';
 
 import '../shared/shared_functions.dart';
 
@@ -545,6 +546,8 @@ class SPHclient {
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
     globalStorage.deleteAll();
+    ColorModeNotifier.setStandard();
+    ThemeModeNotifier.set("system");
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);

@@ -16,11 +16,7 @@ class Themes {
 
   Themes(this.lightTheme, this.darkTheme);
 
-  static final Map<String, Themes> map = {
-    "standard": Themes(
-      getThemeData(ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-      getThemeData(ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark)),
-    ),
+  static final Map<String, Themes> flutterColorThemes = {
     "pink": Themes(
       getThemeData(ColorScheme.fromSeed(seedColor: Colors.pink)),
       getThemeData(ColorScheme.fromSeed(seedColor: Colors.pink, brightness: Brightness.dark)),
@@ -83,15 +79,22 @@ class Themes {
     ),
   };
 
-  static Themes dynamicTheme = Themes(null, null); // Will be later set by DynamicColorBuilder in main.dart App()
+  // Will be later set by DynamicColorBuilder in main.dart App()
+  static Themes dynamicTheme = Themes(null, null);
+  static Themes schoolTheme = Themes(null, null);
+  
+  static Themes standardTheme = Themes(
+    getThemeData(ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+    getThemeData(ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark)),
+  );
 }
 
 class ColorModeNotifier {
-  static ValueNotifier<Themes> notifier = ValueNotifier<Themes>(Themes.map["standard"]!);
+  static ValueNotifier<Themes> notifier = ValueNotifier<Themes>(Themes.standardTheme);
 
   static void set(String colorTheme) async {
     await globalStorage.write(key: "color", value: colorTheme);
-    notifier.value = Themes.map[colorTheme]!;
+    notifier.value = Themes.flutterColorThemes[colorTheme]!;
   }
 
   static void setDynamic() async {
@@ -99,11 +102,24 @@ class ColorModeNotifier {
     notifier.value = Themes.dynamicTheme;
   }
 
+  static void setSchool() async {
+    await globalStorage.write(key: "color", value: "school");
+    notifier.value = Themes.schoolTheme;
+  }
+
+  static void setStandard() async {
+    await globalStorage.write(key: "color", value: "standard");
+    notifier.value = Themes.standardTheme;
+  }
+
   static void init() async {
     String colorTheme = await globalStorage.read(key: "color") ?? "standard";
-    if (colorTheme != "dynamic") {
-      notifier.value = Themes.map[colorTheme]!;
+    if (colorTheme == "standard") {
+      setStandard();
+    } else if (colorTheme != "dynamic" && colorTheme != "school") {
+      notifier.value = Themes.flutterColorThemes[colorTheme]!;
       // Dynamic theme will be set later by DynamicColorBuilder, bc we don't get the dynamic theme on startup.
+      // The same with school theme by a future builder
     }
   }
 }
