@@ -52,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.landscape_rounded),
-            title: const Text('App Aussehen'),
+            title: const Text('Aussehen'),
             onTap: () {
               Navigator.push(
                 context,

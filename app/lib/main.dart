@@ -83,7 +83,8 @@ void main() async {
       };
     }
 
-    ThemeModeNotifier.initThemeMode();
+    ThemeModeNotifier.init();
+    ColorModeNotifier.init();
 
     runApp(const App());
 
@@ -172,21 +173,29 @@ class App extends StatelessWidget {
     return DynamicColorBuilder(
         builder: (lightDynamic, darkDynamic) {
           if (lightDynamic != null && darkDynamic != null) {
-            Themes.lightTheme = getThemeData(lightDynamic.harmonized());
-            Themes.darkTheme = getThemeData(darkDynamic.harmonized());
+            Themes.dynamicTheme = Themes(
+                getThemeData(lightDynamic.harmonized()),
+                getThemeData(darkDynamic.harmonized()),
+            );
+            if (globalStorage.prefs.getString("color") == "dynamic") ColorModeNotifier.setDynamic();
           }
 
-          return ValueListenableBuilder<ThemeMode>(
-              valueListenable: ThemeModeNotifier.notifier,
-              builder: (_, mode, __) {
-                return MaterialApp(
-                  title: 'lanis mobile',
-                  theme: Themes.lightTheme,
-                  darkTheme: Themes.darkTheme,
-                  themeMode: mode,
-                  home: const HomePage(),
-                );
-              }
+          return ValueListenableBuilder<Themes>(
+            valueListenable: ColorModeNotifier.notifier,
+            builder: (_, theme, __) {
+              return ValueListenableBuilder<ThemeMode>(
+                  valueListenable: ThemeModeNotifier.notifier,
+                  builder: (_, mode, __) {
+                    return MaterialApp(
+                      title: 'lanis mobile',
+                      theme: theme.lightTheme,
+                      darkTheme: theme.darkTheme,
+                      themeMode: mode,
+                      home: const HomePage(),
+                    );
+                  }
+              );
+            }
           );
         }
     );
