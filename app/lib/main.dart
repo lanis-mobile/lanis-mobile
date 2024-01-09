@@ -11,11 +11,14 @@ import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/themes/dark_theme.dart';
+import 'package:sph_plan/themes/light_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
@@ -68,7 +71,7 @@ void main() async {
     await initializeDateFormatting();
     if (!kDebugMode && (await globalStorage.read(key: "enable-countly")) == "true") {
       const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
-      CountlyConfig config = CountlyConfig("https://alessioc42.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
+      CountlyConfig config = CountlyConfig("https://lanis-mobile.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
       config.enableCrashReporting();
       await Countly.initWithConfig(config);
 
