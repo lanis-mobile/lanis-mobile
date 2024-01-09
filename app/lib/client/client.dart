@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
@@ -130,6 +131,23 @@ class SPHclient {
     };
   }
 
+  Future<void> _getSchoolTheme() async {
+    try {
+      dynamic schoolInfo = await client.getSchoolInfo(client.schoolID);
+
+      int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
+
+      Themes.schoolTheme = Themes(
+          getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+          getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
+      );
+
+      if (globalStorage.prefs.getString("color") == "school") {
+        ColorModeNotifier.setSchool();
+      }
+    } on Exception catch (_) {}
+  }
+
   Future<int> login({userLogin = false}) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
       return -9;
@@ -164,6 +182,8 @@ class SPHclient {
           int encryptionStatusName = await startLanisEncryption();
           debugPrint(
               "Encryption connected with status code: $encryptionStatusName");
+
+          _getSchoolTheme();
 
           return 0;
         } else {
