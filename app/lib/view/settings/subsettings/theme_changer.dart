@@ -158,7 +158,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             ),
             RadioListTile(
               title: const Text("Dynamisch"),
-              subtitle: const Text('Hier wird die Farbe von deinem Hintergrundsbild benutzt, auch bekannt als "Material You". Wird nicht von allen Geräten unterstützt.'),
+              subtitle: const Text('Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". Wird nicht von allen Geräten unterstützt.'),
               secondary: Container(
                 width: 50,
                 height: 50,
