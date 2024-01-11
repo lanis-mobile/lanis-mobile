@@ -7,12 +7,14 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/themes.dart';
 
 import '../shared/shared_functions.dart';
 
@@ -159,6 +161,7 @@ class SPHclient {
           if (userLogin) {
             await fetchRedundantData();
           }
+          await getSchoolTheme();
 
           int encryptionStatusName = await startLanisEncryption();
           debugPrint(
@@ -198,6 +201,29 @@ class SPHclient {
 
     await globalStorage.write(
         key: "supportedApps", value: jsonEncode(supportedApps));
+  }
+
+  Future<void> getSchoolTheme() async {
+    debugPrint("Trying to get a school accent color.");
+
+    if (await globalStorage.read(key: "schoolColor") == null) {
+      try {
+        dynamic schoolInfo = await client.getSchoolInfo(schoolID);
+
+        int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
+
+        Themes.schoolTheme = Themes(
+            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
+        );
+
+        if ((await globalStorage.read(key: "color")) == "school") {
+          ColorModeNotifier.setSchool();
+        }
+
+        await globalStorage.write(key: "schoolColor", value: schoolColor.toString());
+      } on Exception catch (_) {}
+    }
   }
 
   Future<String> getSchoolImage(String url) async {
@@ -545,6 +571,8 @@ class SPHclient {
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
     globalStorage.deleteAll();
+    ColorModeNotifier.setStandard();
+    ThemeModeNotifier.set("system");
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);

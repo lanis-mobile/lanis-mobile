@@ -3,20 +3,19 @@ import 'dart:ui';
 import 'dart:io';
 
 import 'package:countly_flutter_np/countly_flutter.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
-import 'package:sph_plan/themes/dark_theme.dart';
-import 'package:sph_plan/themes/light_theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
@@ -33,7 +32,6 @@ import 'background_service/service.dart' as background_service;
 
 
 void main() async {
-
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return errorWidget(details);
   };
@@ -67,8 +65,6 @@ void main() async {
           frequency: Duration(minutes: notificationInterval));
     }
 
-    final savedThemeMode = await AdaptiveTheme.getThemeMode();
-
     await initializeDateFormatting();
     if (!kDebugMode && (await globalStorage.read(key: "enable-countly")) == "true") {
       const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
@@ -80,16 +76,17 @@ void main() async {
 
           Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
 
-
         debugPrint(errorDetails.exception.toString());
         debugPrintStack(
             stackTrace: errorDetails.stack!
         );
       };
     }
-    runApp(App(
-      savedThemeMode: savedThemeMode,
-    ));
+
+    ThemeModeNotifier.init();
+    ColorModeNotifier.init();
+
+    runApp(const App());
 
   }, (obj, stack) async {
     if (!kDebugMode && await globalStorage.read(key: "enable-countly") == "true") {
@@ -169,23 +166,38 @@ Widget errorWidget(FlutterErrorDetails details) {
 }
 
 class App extends StatelessWidget {
-  final AdaptiveThemeMode? savedThemeMode;
-
-  const App({super.key, this.savedThemeMode});
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveTheme(
-      light: lightTheme,
-      dark: darkTheme,
-      initial: savedThemeMode ?? AdaptiveThemeMode.system,
-      builder: (theme, darkTheme) => MaterialApp(
-        title: 'lanis mobile',
-        theme: theme,
-        darkTheme: darkTheme,
-        home: const HomePage(),
-        debugShowCheckedModeBanner: false,
-      ),
+    return DynamicColorBuilder(
+        builder: (lightDynamic, darkDynamic) {
+          if (lightDynamic != null && darkDynamic != null) {
+            Themes.dynamicTheme = Themes(
+                getThemeData(lightDynamic.harmonized()),
+                getThemeData(darkDynamic.harmonized()),
+            );
+            if (globalStorage.prefs.getString("color") == "dynamic") ColorModeNotifier.setDynamic();
+          }
+
+          return ValueListenableBuilder<Themes>(
+            valueListenable: ColorModeNotifier.notifier,
+            builder: (_, theme, __) {
+              return ValueListenableBuilder<ThemeMode>(
+                  valueListenable: ThemeModeNotifier.notifier,
+                  builder: (_, mode, __) {
+                    return MaterialApp(
+                      title: 'lanis mobile',
+                      theme: theme.lightTheme,
+                      darkTheme: theme.darkTheme,
+                      themeMode: mode,
+                      home: const HomePage(),
+                    );
+                  }
+              );
+            }
+          );
+        }
     );
   }
 }
