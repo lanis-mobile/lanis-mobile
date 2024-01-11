@@ -116,16 +116,17 @@ class ColorModeNotifier {
 
   static void init() async {
     String colorTheme = await globalStorage.read(key: "color") ?? "standard";
+
+    int schoolColor = int.parse((await globalStorage.read(key: "schoolColor"))!);
+
+    Themes.schoolTheme = Themes(
+      getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+      getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark)),
+    );
+
     if (colorTheme == "standard") {
       setStandard();
     } else if (colorTheme == "school") {
-      int schoolColor = int.parse((await globalStorage.read(key: "schoolColor"))!);
-
-      Themes.schoolTheme = Themes(
-        getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
-        getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark)),
-      );
-
       setSchool();
     } else if (colorTheme != "dynamic") {
       notifier.value = Themes.flutterColorThemes[colorTheme]!;
