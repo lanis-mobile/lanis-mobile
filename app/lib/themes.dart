@@ -79,8 +79,10 @@ class Themes {
     ),
   };
 
-  // Will be later set by DynamicColorBuilder in main.dart App()
+  // Will be later set by DynamicColorBuilder in main.dart App().
   static Themes dynamicTheme = Themes(null, null);
+
+  // Will be set by ColorModeNotifier.init() or _getSchoolTheme() in client.dart.
   static Themes schoolTheme = Themes(null, null);
   
   static Themes standardTheme = Themes(
@@ -116,7 +118,16 @@ class ColorModeNotifier {
     String colorTheme = await globalStorage.read(key: "color") ?? "standard";
     if (colorTheme == "standard") {
       setStandard();
-    } else if (colorTheme != "dynamic" && colorTheme != "school") {
+    } else if (colorTheme == "school") {
+      int schoolColor = int.parse((await globalStorage.read(key: "schoolColor"))!);
+
+      Themes.schoolTheme = Themes(
+        getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+        getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark)),
+      );
+
+      setSchool();
+    } else if (colorTheme != "dynamic") {
       notifier.value = Themes.flutterColorThemes[colorTheme]!;
       // Dynamic theme will be set later by DynamicColorBuilder, bc we don't get the dynamic theme on startup.
       // The same with school theme by a future builder

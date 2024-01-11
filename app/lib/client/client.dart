@@ -132,20 +132,26 @@ class SPHclient {
   }
 
   Future<void> _getSchoolTheme() async {
-    try {
-      dynamic schoolInfo = await client.getSchoolInfo(client.schoolID);
+    debugPrint("Trying to get a school accent color.");
 
-      int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
+    if (await globalStorage.read(key: "schoolColor") == null) {
+      try {
+        dynamic schoolInfo = await client.getSchoolInfo(client.schoolID);
 
-      Themes.schoolTheme = Themes(
-          getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
-          getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
-      );
+        int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
 
-      if (globalStorage.prefs.getString("color") == "school") {
-        ColorModeNotifier.setSchool();
-      }
-    } on Exception catch (_) {}
+        Themes.schoolTheme = Themes(
+            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
+        );
+
+        if ((await globalStorage.read(key: "color")) == "school") {
+          ColorModeNotifier.setSchool();
+        }
+
+        await globalStorage.write(key: "schoolColor", value: schoolColor.toString());
+      } on Exception catch (_) {}
+    }
   }
 
   Future<int> login({userLogin = false}) async {

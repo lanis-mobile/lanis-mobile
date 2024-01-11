@@ -67,7 +67,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
       ),
       value: value,
       groupValue: _selectedColor,
-      onChanged: Themes.dynamicTheme.lightTheme == null ? null : (value) {
+      onChanged: (value) {
         setState(() {
           _selectedColor = value.toString();
           if (callOnChanged == null) {
@@ -169,7 +169,8 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                     ),
                     borderRadius: BorderRadius.circular(12)
                 ),
-                child: Column(
+                child: Themes.dynamicTheme.lightTheme == null ? null
+                    : Column(
                   children: [
                     Flexible(
                       child: Container(
