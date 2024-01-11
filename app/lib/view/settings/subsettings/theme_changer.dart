@@ -159,7 +159,8 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             RadioListTile(
               title: const Text("Dynamisch"),
               subtitle: const Text('Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". Wird nicht von allen Geräten unterstützt.'),
-              secondary: Container(
+              secondary: Themes.dynamicTheme.lightTheme == null ? null
+                  : Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
@@ -169,8 +170,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                     ),
                     borderRadius: BorderRadius.circular(12)
                 ),
-                child: Themes.dynamicTheme.lightTheme == null ? null
-                    : Column(
+                child: Column(
                   children: [
                     Flexible(
                       child: Container(
