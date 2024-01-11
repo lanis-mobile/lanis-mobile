@@ -103,11 +103,11 @@ class _AppearanceElementsState extends State<AppearanceElements> {
           // Theme Mode, aka light or dark mode
           ...[
             Text(
-              "Theme",
+              "Thema",
               style: Theme.of(context).textTheme.titleMedium,
             ),
             RadioListTile(
-              title: const Text('Light Mode'),
+              title: const Text('Heller Modus'),
               value: "light",
               groupValue: _selectedTheme,
               onChanged: (value) {
@@ -118,7 +118,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               },
             ),
             RadioListTile(
-              title: const Text('Dark Mode'),
+              title: const Text('Dunkler Modus'),
               value: "dark",
               groupValue: _selectedTheme,
               onChanged: (value) {
@@ -129,7 +129,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               },
             ),
             RadioListTile(
-              title: const Text('System Mode'),
+              title: const Text('System'),
               value: "system",
               groupValue: _selectedTheme,
               onChanged: (value) {
@@ -158,7 +158,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             ),
             RadioListTile(
               title: const Text("Dynamisch"),
-              subtitle: const Text('Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". Wird nicht von allen Geräten unterstützt.'),
+              subtitle: const Text('Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". (Wird nicht von allen Geräten unterstützt)'),
               secondary: Themes.dynamicTheme.lightTheme == null ? null
                   : Container(
                 width: 50,
@@ -212,7 +212,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             ),
             colorListTile(
               title: "Schulfarbe",
-              subtitle: "Hier wird die Hauptfarbe von Lanis benutzt, was meistens eine Form von blau oder türkis ist.",
+              subtitle: "Deine Schule hat in Lanis eine Akzentfarbe.",
               value: "school",
               primaryColor: Theme.of(context).brightness == Brightness.dark
                   ? Themes.schoolTheme.darkTheme!.colorScheme.primary
