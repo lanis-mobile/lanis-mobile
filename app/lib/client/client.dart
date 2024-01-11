@@ -131,29 +131,6 @@ class SPHclient {
     };
   }
 
-  Future<void> _getSchoolTheme() async {
-    debugPrint("Trying to get a school accent color.");
-
-    if (await globalStorage.read(key: "schoolColor") == null) {
-      try {
-        dynamic schoolInfo = await client.getSchoolInfo(client.schoolID);
-
-        int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
-
-        Themes.schoolTheme = Themes(
-            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
-            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
-        );
-
-        if ((await globalStorage.read(key: "color")) == "school") {
-          ColorModeNotifier.setSchool();
-        }
-
-        await globalStorage.write(key: "schoolColor", value: schoolColor.toString());
-      } on Exception catch (_) {}
-    }
-  }
-
   Future<int> login({userLogin = false}) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
       return -9;
@@ -184,12 +161,11 @@ class SPHclient {
           if (userLogin) {
             await fetchRedundantData();
           }
+          await getSchoolTheme();
 
           int encryptionStatusName = await startLanisEncryption();
           debugPrint(
               "Encryption connected with status code: $encryptionStatusName");
-
-          _getSchoolTheme();
 
           return 0;
         } else {
@@ -225,6 +201,29 @@ class SPHclient {
 
     await globalStorage.write(
         key: "supportedApps", value: jsonEncode(supportedApps));
+  }
+
+  Future<void> getSchoolTheme() async {
+    debugPrint("Trying to get a school accent color.");
+
+    if (await globalStorage.read(key: "schoolColor") == null) {
+      try {
+        dynamic schoolInfo = await client.getSchoolInfo(schoolID);
+
+        int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
+
+        Themes.schoolTheme = Themes(
+            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
+            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
+        );
+
+        if ((await globalStorage.read(key: "color")) == "school") {
+          ColorModeNotifier.setSchool();
+        }
+
+        await globalStorage.write(key: "schoolColor", value: schoolColor.toString());
+      } on Exception catch (_) {}
+    }
   }
 
   Future<String> getSchoolImage(String url) async {
