@@ -20,6 +20,7 @@ Inoffizielle Android App rund um das Schulportal Hessen. Unterstützung für den
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.png" width="250" >
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.png" width="250" >
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.png" width="250" >
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.png" width="250" >
 
 </div>
 </details>
