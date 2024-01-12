@@ -132,6 +132,8 @@ class SPHclient {
   }
 
   Future<int> login({userLogin = false}) async {
+    debugPrint("Trying to log in");
+
     if (!(await InternetConnectionChecker().hasConnection)) {
       return -9;
     }
@@ -149,14 +151,17 @@ class SPHclient {
               "password": password
             },
             options: Options(contentType: "application/x-www-form-urlencoded"));
+        debugPrint("Login: Response1");
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
           //credits are valid
           final response2 =
               await dio.get("https://connect.schulportal.hessen.de");
+          debugPrint("Login: Response2");
 
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
+          debugPrint("Login: Response3");
 
           if (userLogin) {
             await fetchRedundantData();
@@ -212,13 +217,10 @@ class SPHclient {
 
         int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
 
-        Themes.schoolTheme = Themes(
-            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor))),
-            getThemeData(ColorScheme.fromSeed(seedColor: Color(schoolColor), brightness: Brightness.dark))
-        );
+        Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
 
         if ((await globalStorage.read(key: "color")) == "school") {
-          ColorModeNotifier.setSchool();
+          ColorModeNotifier.set("school", Themes.schoolTheme);
         }
 
         await globalStorage.write(key: "schoolColor", value: schoolColor.toString());
@@ -571,7 +573,7 @@ class SPHclient {
   Future<void> deleteAllSettings() async {
     jar.deleteAll();
     globalStorage.deleteAll();
-    ColorModeNotifier.setStandard();
+    ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
 
     var tempDir = await getTemporaryDirectory();
