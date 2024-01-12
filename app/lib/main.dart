@@ -215,6 +215,7 @@ enum Feature {
   conversations("Nachrichten"),
   lessons("Mein Unterricht"),
   lanisBrowser(null),
+  moodleBrowser(null),
   settings(null),
   reportBug("Fehlerbericht senden");
 
@@ -451,6 +452,11 @@ class _HomePageState extends State<HomePage> {
         case (Feature.lanisBrowser):
           openLanisInBrowser();
           break;
+        case (Feature.moodleBrowser):
+          launchUrl(Uri.parse("https://mo${client.schoolID}.schule.hessen.de"));
+          //todo change to .schulportal.hessen.de when changes apply to SPH servers
+          //https://info.schulportal.hessen.de/veraenderungen-bei-schulmoodle-und-schulmahara-ab-08-01-2024/
+          break;
         case (Feature.settings):
           Navigator.push(
             context,
@@ -665,6 +671,10 @@ class _HomePageState extends State<HomePage> {
                     const NavigationDrawerDestination(
                       icon: Icon(Icons.open_in_new),
                       label: Text('Im Browser öffnen'),
+                    ),
+                    const NavigationDrawerDestination(
+                      icon: Icon(Icons.open_in_new),
+                      label: Text('Moodle login öffnen'),
                     ),
                     const Divider(),
                     const NavigationDrawerDestination(
