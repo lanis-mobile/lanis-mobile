@@ -10,7 +10,7 @@ import '../../client/storage.dart';
 Future<String?> whatsNew() async {
   final String currentVersion = await PackageInfo.fromPlatform().then((PackageInfo packageInfo) => packageInfo.version);
   final String storedVersion = await globalStorage.read(key: 'version') ?? '0.0.0';
-  if (currentVersion != storedVersion) {
+  if (currentVersion == storedVersion) {
     debugPrint("New Version detected: $currentVersion");
     await globalStorage.write(key: 'version', value: currentVersion);
 
@@ -23,7 +23,7 @@ Future<String?> whatsNew() async {
 
 Future<String> getReleaseMarkDown() async {
   try {
-    final response = await client.dio.get('https://api.github.com/repos/alessioc42/lanis-mobile/releases/latest');
+    final response = await client.dio.get('https://api.github.com/repos/alessioc42/lanis-mobile/releases/tags/v2.10.0+13');
     return (response.data['body']);
   } catch (e) {
     debugPrint(e.toString());
@@ -39,14 +39,15 @@ void openReleaseNotesModal(BuildContext context, String releaseNotes) {
       builder: (BuildContext context) {
         return AlertDialog(
           title:  Text('Lanis Mobile v$version'),
-          content: SizedBox(
-            width: 300,
-            child: Markdown(
-              data: releaseNotes,
-              padding: const EdgeInsets.all(0),
-              onTapLink: (text, href, title) {
-                launchUrl(Uri.parse(href!));
-              }
+          content: SizedBox( // AlertDialog doesn't support ListView, .... (viewport) widgets, so we need to constrain it.
+            width: double.maxFinite,
+            height: 300, // don't make it too big, don't make it too small
+            child: Markdown( // Markdown is always a Listable? (viewport) widget, even MarkdownBody which isn't scrollable.
+                data: releaseNotes,
+                padding: const EdgeInsets.all(0),
+                onTapLink: (text, href, title) {
+                  launchUrl(Uri.parse(href!));
+                }
             ),
           ),
           actions: <Widget>[
