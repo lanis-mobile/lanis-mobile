@@ -72,7 +72,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
           _selectedColor = value.toString();
           if (value == "standard") {
             ColorModeNotifier.set("standard", Themes.standardTheme);
-          } if (value == "school") {
+          } else if (value == "school") {
             ColorModeNotifier.set("school", Themes.standardTheme);
           } else {
             ColorModeNotifier.set(value, Themes.flutterColorThemes[value]!);
@@ -153,9 +153,9 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               title: "Standart",
               subtitle: 'Dunkellila',
               value: "standard",
-                primaryColor: Theme.of(context).brightness == Brightness.dark
-                    ? Themes.standardTheme.darkTheme!.colorScheme.primary
-                    : Themes.standardTheme.lightTheme!.colorScheme.primary,
+              primaryColor: Theme.of(context).brightness == Brightness.dark
+                  ? Themes.standardTheme.darkTheme!.colorScheme.primary
+                  : Themes.standardTheme.lightTheme!.colorScheme.primary,
             ),
             RadioListTile(
               title: const Text("Dynamisch"),
