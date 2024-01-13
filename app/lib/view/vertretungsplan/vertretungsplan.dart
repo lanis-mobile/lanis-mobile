@@ -19,7 +19,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
   final double padding = 12.0;
 
-  List<GlobalKey<RefreshIndicatorState>>? globalKeys;
+  List<GlobalKey<RefreshIndicatorState>> globalKeys = [GlobalKey<RefreshIndicatorState>()];
 
   TabController? _tabController;
 
@@ -44,7 +44,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       final int entriesLength = data["days"][dayIndex]["entries"].length;
 
       substitutionViews.add(RefreshIndicator(
-        key: globalKeys![dayIndex + 1],
+        key: globalKeys[dayIndex + 1],
         onRefresh: () async {
           client.substitutionsFetcher?.fetchData(forceRefresh: true);
         },
@@ -123,12 +123,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           }
 
           // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys = List.generate(snapshot.data?.content["length"] + 1, (index) => GlobalKey<RefreshIndicatorState>());
+          globalKeys += List.generate(snapshot.data?.content["length"], (index) => GlobalKey<RefreshIndicatorState>());
 
           // If there are no entries.
           if (snapshot.data?.content["length"] == 0) {
             return RefreshIndicator(
-              key: globalKeys![0],
+              key: globalKeys[0],
               onRefresh: () async {
                 client.substitutionsFetcher?.fetchData(forceRefresh: true);
               },
@@ -193,7 +193,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         children: [
           FloatingActionButton(
             onPressed: () => {
-              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys!) {
+              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys) {
                 globalKey.currentState?.show()
               }
             },
