@@ -29,7 +29,7 @@ class LoginFormState extends State<LoginForm> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool dseAgree = false;
-  bool countlyAgree = true;
+  bool countlyAgree = false;
 
 
   String selectedSchoolID = "5182";
@@ -157,32 +157,7 @@ class LoginFormState extends State<LoginForm> {
                     return null;
                   },
                 ),
-                const SizedBox(height: padding,), // Padding should be used but don't change style of author
-                CheckboxListTile(
-                  value: dseAgree,
-                  title: RichText(
-                    text: TextSpan(
-                      text: 'Ich stimme der ',
-                      style: DefaultTextStyle.of(context).style,
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: 'Datenschutzerklärung',
-                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
-                        ),
-                        const TextSpan(
-                          text: ' von lanis-mobile zu.',
-                        ),
-                      ],
-                    ),
-                  ),
-                  onChanged: (val) {
-                    setState(() {
-                      dseAgree = val!;
-                    });
-                  },
-                ),
+                const SizedBox(height: padding,),
                 CheckboxListTile(
                   value: countlyAgree,
                   title: RichText(
@@ -207,6 +182,31 @@ class LoginFormState extends State<LoginForm> {
                       countlyAgree = val!;
                     });
                     await globalStorage.write(key: "enable-countly", value: val.toString());
+                  },
+                ),
+                CheckboxListTile(
+                  value: dseAgree,
+                  title: RichText(
+                    text: TextSpan(
+                      text: 'Ich stimme der ',
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: 'Datenschutzerklärung',
+                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
+                        ),
+                        const TextSpan(
+                          text: ' von lanis-mobile zu.',
+                        ),
+                      ],
+                    ),
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      dseAgree = val!;
+                    });
                   },
                 ),
                 const SizedBox(height: padding,),
