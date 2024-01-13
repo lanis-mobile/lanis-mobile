@@ -40,7 +40,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
     _selectedColor = globalStorage.prefs.getString("color") ?? "standard";
   }
 
-  RadioListTile colorListTile({required String title, required String value, Color? primaryColor, String? subtitle, Function? callOnChanged}) {
+  RadioListTile colorListTile({required String title, required String value, Color? primaryColor, String? subtitle}) {
     return RadioListTile(
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle) : null,
@@ -70,10 +70,12 @@ class _AppearanceElementsState extends State<AppearanceElements> {
       onChanged: (value) {
         setState(() {
           _selectedColor = value.toString();
-          if (callOnChanged == null) {
-            ColorModeNotifier.set(value);
+          if (value == "standard") {
+            ColorModeNotifier.set("standard", Themes.standardTheme);
+          } else if (value == "school") {
+            ColorModeNotifier.set("school", Themes.standardTheme);
           } else {
-            callOnChanged();
+            ColorModeNotifier.set(value, Themes.flutterColorThemes[value]!);
           }
         });
       },
@@ -151,10 +153,9 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               title: "Standart",
               subtitle: 'Dunkellila',
               value: "standard",
-                primaryColor: Theme.of(context).brightness == Brightness.dark
-                    ? Themes.standardTheme.darkTheme!.colorScheme.primary
-                    : Themes.standardTheme.lightTheme!.colorScheme.primary,
-              callOnChanged: ColorModeNotifier.setStandard
+              primaryColor: Theme.of(context).brightness == Brightness.dark
+                  ? Themes.standardTheme.darkTheme!.colorScheme.primary
+                  : Themes.standardTheme.lightTheme!.colorScheme.primary,
             ),
             RadioListTile(
               title: const Text("Dynamisch"),
@@ -206,7 +207,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               onChanged: Themes.dynamicTheme.lightTheme == null ? null : (value) {
                 setState(() {
                   _selectedColor = value.toString();
-                  ColorModeNotifier.setDynamic();
+                  ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
                 });
               },
             ),
@@ -217,7 +218,6 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               primaryColor: Theme.of(context).brightness == Brightness.dark
                   ? Themes.schoolTheme.darkTheme!.colorScheme.primary
                   : Themes.schoolTheme.lightTheme!.colorScheme.primary,
-              callOnChanged: ColorModeNotifier.setSchool
             ),
           ],
           const Padding(
