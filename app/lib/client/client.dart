@@ -151,17 +151,14 @@ class SPHclient {
               "password": password
             },
             options: Options(contentType: "application/x-www-form-urlencoded"));
-        debugPrint("Login: Response1");
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
           //credits are valid
           final response2 =
               await dio.get("https://connect.schulportal.hessen.de");
-          debugPrint("Login: Response2");
 
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
-          debugPrint("Login: Response3");
 
           if (userLogin) {
             await fetchRedundantData();
