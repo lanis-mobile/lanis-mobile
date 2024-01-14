@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
-import '../bug_report/send_bugreport.dart';
 import '../login/screen.dart';
 import 'course_overview.dart';
 

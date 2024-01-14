@@ -790,6 +790,29 @@ class SPHclient {
             }
           }
 
+          List uploads = [];
+          final uploadGroups = tableRow.children[1].querySelectorAll("div.btn-group");
+          for (final uploadGroup in uploadGroups) {
+            final openUpload = uploadGroup.querySelector(".btn-warning");
+            final closedUpload = uploadGroup.querySelector(".btn-default");
+
+            const String baseURL = "https://start.schulportal.hessen.de/";
+
+            if (openUpload != null) {
+              uploads.add({
+                "name": openUpload.nodes[2].text?.trim(),
+                "status": "open",
+                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!
+              });
+            } else if (closedUpload != null) {
+              uploads.add({
+                "name": closedUpload.nodes[2].text?.trim(),
+                "status": "closed",
+                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!
+              });
+            }
+          }
+
           result["historie"]?.add({
             "time": tableRow.children[0].text.trim().replaceAll("  ", "").replaceAll("\n", " ").replaceAll("  ", " "),
             "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
@@ -798,7 +821,8 @@ class SPHclient {
             "course-id": courseID,
             "homework-done": homeworkDone,
             "presence": tableRow.children[2].text.trim(),
-            "files": files
+            "files": files,
+            "uploads": uploads
           });
         });
       }();

@@ -93,7 +93,7 @@ class FormattedText extends StatelessWidget {
           endTag: "</date>"
       ),
       FormatPattern(
-          regExp: RegExp(r"(\d{2}):(\d{2})"),
+          regExp: RegExp(r"(\d{2}:\d{2} Uhr)|(\d{2}:\d{2})", caseSensitive: false),
           startTag: "<time>",
           endTag: "</time>"
       ),

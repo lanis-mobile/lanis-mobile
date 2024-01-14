@@ -37,8 +37,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
 
   Future<void> _loadData({secondTry= false}) async {
     try {
-      await client.uploadFile();
-
       if (secondTry) {
         await client.login();
       }
@@ -117,6 +115,39 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                         });
                       },
                     ));
+                  });
+
+                  List<ButtonStyleButton> uploads = [];
+                  data["historie"][index]["uploads"].forEach((upload) {
+                    if (upload["status"] == "open") {
+                      uploads.add(
+                        FilledButton(
+                            onPressed: () {},
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              children: [
+                                const Icon(Icons.upload, size: 20,),
+                                Text(upload["name"])
+                              ],
+                            )
+                        )
+                      );
+                    } else {
+                      uploads.add(
+                        OutlinedButton(
+                            onPressed: () {},
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 6,
+                              children: [
+                                const Icon(Icons.file_upload_off, size: 18,),
+                                Text(upload["name"])
+                              ],
+                            )
+                        )
+                      );
+                    }
                   });
 
                   return Padding(
@@ -270,7 +301,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                       children: files,
                                     ),
                                   ),
-                                )
+                                ),
+                                Visibility(
+                                  visible: uploads.isNotEmpty,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Wrap(
+                                      spacing: 8,
+                                      children: uploads,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           )
