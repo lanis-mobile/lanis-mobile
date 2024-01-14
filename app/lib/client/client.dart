@@ -40,7 +40,7 @@ class SPHclient {
   String loadMode = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
-  late PersistCookieJar jar;
+  late CookieJar jar;
   final dio = Dio();
   late Cryptor cryptor = Cryptor();
 
@@ -83,10 +83,7 @@ class SPHclient {
   }
 
   Future<void> prepareDio() async {
-    final Directory appDocDir = await getApplicationCacheDirectory();
-    final String appDocPath = appDocDir.path;
-    jar = PersistCookieJar(
-        ignoreExpires: true, storage: FileStorage("$appDocPath/cookies"));
+    jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
