@@ -4,13 +4,13 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
-import '../../client/client.dart';
-import '../../client/storage.dart';
+import '../client/client.dart';
+import '../client/storage.dart';
 
 Future<String?> whatsNew() async {
   final String currentVersion = await PackageInfo.fromPlatform().then((PackageInfo packageInfo) => packageInfo.version);
   final String storedVersion = await globalStorage.read(key: 'version') ?? '0.0.0';
-  if (currentVersion == storedVersion) {
+  if (currentVersion != storedVersion) {
     debugPrint("New Version detected: $currentVersion");
     await globalStorage.write(key: 'version', value: currentVersion);
 
@@ -23,7 +23,7 @@ Future<String?> whatsNew() async {
 
 Future<String> getReleaseMarkDown() async {
   try {
-    final response = await client.dio.get('https://api.github.com/repos/alessioc42/lanis-mobile/releases/tags/v2.10.0+13');
+    final response = await client.dio.get('https://api.github.com/repos/alessioc42/lanis-mobile/releases/latest');
     return (response.data['body']);
   } catch (e) {
     debugPrint(e.toString());

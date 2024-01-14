@@ -7,7 +7,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:sph_plan/shared/whats-new/whats_new.dart';
+import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
 
