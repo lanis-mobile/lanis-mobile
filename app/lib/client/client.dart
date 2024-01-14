@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
+import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
@@ -973,6 +974,45 @@ class SPHclient {
     } catch (e, stack) {
       recordError(e, stack);
       return "";
+    }
+  }
+
+  Future<void> uploadFile() async {
+    debugPrint("upload file");
+
+    final MultipartFile testFile =  MultipartFile.fromString("LOREMIPSUM", filename: "dio-test.txt", contentType: MediaType.parse("text/plain"));
+
+    final FormData testData = FormData.fromMap({
+      "a": "sus_abgabe",
+      "b": "4081",
+      "e": "17",
+      "id": "2",
+      "file1": testFile,
+      "file2": testFile.clone(),
+      "file3": MultipartFile.fromString("fdsfsdf", filename: "falsche-datei.testificate")
+    });
+
+    final response = await dio.post(
+      "https://start.schulportal.hessen.de/meinunterricht.php",
+      data: testData,
+      options: Options(
+        headers: {
+          "Accept": "*/*",
+          "Content-Type": "multipart/form-data;",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "same-origin",
+        }
+      )
+    );
+
+    final resultPage = parse(response.data);
+
+    print(resultPage.querySelectorAll("div#content div.row div.col-md-12")[2].text);
+    final resultElements = resultPage.querySelectorAll("div#content div.row div.col-md-12")[2].querySelectorAll("ul li");
+
+    for (final uploadResult in resultElements) {
+      print("filename: ${uploadResult.querySelector('b')?.text}, result: ${uploadResult.querySelector('span')?.text}, message: ${uploadResult.nodes.last.text?.trim()}");
     }
   }
 

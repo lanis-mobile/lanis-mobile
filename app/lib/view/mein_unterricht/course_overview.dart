@@ -37,6 +37,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
 
   Future<void> _loadData({secondTry= false}) async {
     try {
+      await client.uploadFile();
+
       if (secondTry) {
         await client.login();
       }
