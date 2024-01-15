@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
+import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
 import '../../shared/format_text.dart';
@@ -122,7 +123,16 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     if (upload["status"] == "open") {
                       uploads.add(
                         FilledButton(
-                            onPressed: () {},
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UploadScreen(
+                                    url: upload["link"],
+                                    name: upload["name"],
+                                    status: "open"
+                                ),
+                              ),
+                            ),
                             child: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
                               spacing: 8,
@@ -136,10 +146,19 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     } else {
                       uploads.add(
                         OutlinedButton(
-                            onPressed: () {},
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UploadScreen(
+                                      url: upload["link"],
+                                      name: upload["name"],
+                                      status: "closed"
+                                  ),
+                              ),
+                            ),
                             child: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 6,
+                              spacing: 8,
                               children: [
                                 const Icon(Icons.file_upload_off, size: 18,),
                                 Text(upload["name"])
@@ -278,7 +297,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                             ),
                                           ],
                                         ),
-
                                         Container(
                                           width: double.infinity,
                                           decoration: BoxDecoration(

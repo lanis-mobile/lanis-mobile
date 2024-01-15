@@ -118,7 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   body: ElevatedButton(
                       onPressed: () async {
-                        await client.uploadFile();
+                        await client.uploadFileTest();
                       },
                       child: const Text("upload test")
                   ),

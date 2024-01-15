@@ -1001,7 +1001,88 @@ class SPHclient {
     }
   }
 
-  Future<void> uploadFile() async {
+  Future<dynamic> getUploadInfo(String url) async {
+    final response = await dio.get(url);
+    final parsed = parse(response.data);
+    
+    final requirementsGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[1];
+
+    final String? start = requirementsGroup.querySelector("span.editable")?.text.trim().replaceAll(" ab", "");
+    final String? deadline = requirementsGroup.querySelector("b span.editable")?.text.trim().replaceAll("  spätestens", "");
+    final bool uploadMultipleFiles = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[0].text.trim() == "erlaubt" ? true : false;
+
+    final bool uploadAnyNumberOfTimes = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[1].text.trim() == "erlaubt" ? true : false;
+    final String? visibility = requirementsGroup.querySelector("i.fa.fa-eye.fa-fw + span.label.label-warning")?.text.trim();
+    final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
+    final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
+    final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
+
+    final uploadForm = parsed.querySelector("div.col-md-7 form");
+
+    final String courseId = uploadForm!.querySelector("input[name='b']")!.attributes["value"]!;
+    print(courseId);
+    final String entryId = uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
+    final String uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
+
+    return {
+      "start": start,
+      "deadline": deadline,
+      "upload_multiple_files": uploadMultipleFiles,
+      "upload_any_number_of_times": uploadAnyNumberOfTimes,
+      "visibility": visibility,
+      "automatic_deletion": automaticDeletion,
+      "allowed_file_types": allowedFileTypes,
+      "max_file_size": maxFileSize,
+      "course_id": courseId,
+      "entry_id": entryId,
+      "upload_id": uploadId
+    };
+  }
+
+  Future<dynamic> uploadFile(
+      {
+        required String course,
+        required String entry,
+        required String upload,
+        required MultipartFile file1,
+        MultipartFile? file2,
+        MultipartFile? file3,
+        MultipartFile? file4,
+        MultipartFile? file5,
+      }) async {
+
+    final FormData uploadData = FormData.fromMap({
+      "a": "sus_abgabe",
+      "b": course,
+      "e": entry,
+      "id": upload,
+      "file1": file1,
+      "file2": file2,
+      "file3": file3,
+      "file4": file4,
+      "file5": file5
+    });
+
+    final response = await dio.post(
+        "https://start.schulportal.hessen.de/meinunterricht.php",
+        data: uploadData,
+        options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type": "multipart/form-data;",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "same-origin",
+            }
+        )
+    );
+
+    print(response.statusCode);
+
+    return 1;
+  }
+
+  Future<void> uploadFileTest() async {
     debugPrint("upload file");
 
     final MultipartFile testFile =  MultipartFile.fromString("LOREMIPSUM", filename: "dio-test.txt", contentType: MediaType.parse("text/plain"));
