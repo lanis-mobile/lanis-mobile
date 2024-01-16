@@ -378,7 +378,8 @@ class _HomePageState extends State<HomePage> {
           client.meinUnterrichtFetcher
         ]);
       }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
         features.add([
           Status.conversations,
           Status.errorConversations,
@@ -504,7 +505,8 @@ class _HomePageState extends State<HomePage> {
     for (var supported in [
       client.doesSupportFeature(SPHAppEnum.vertretungsplan.str),
       client.doesSupportFeature(SPHAppEnum.kalender.str),
-      client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str),
+      client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str),
       client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)
     ]) {
       if (supported) {
@@ -579,7 +581,8 @@ class _HomePageState extends State<HomePage> {
                          selectedIcon: Icon(Icons.calendar_today_outlined),
                          label: 'Kalender',
                        ),
-                     if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str))
+                     if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+                         || client.doesSupportFeature(SPHAppEnum.nachrichten.str))
                        const NavigationDestination(
                          icon: Icon(Icons.forum),
                          selectedIcon: Icon(Icons.forum_outlined),
@@ -659,7 +662,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                     NavigationDrawerDestination(
                       enabled:
-                          client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str),
+                          client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+                              || client.doesSupportFeature(SPHAppEnum.nachrichten.str),
                       icon: const Icon(Icons.forum),
                       selectedIcon: const Icon(Icons.forum_outlined),
                       label: const Text('Nachrichten'),
