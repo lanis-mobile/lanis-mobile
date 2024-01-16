@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../client/client.dart';
+import '../../shared/apps.dart';
 
 class BugReportScreen extends StatefulWidget {
   final String? generatedMessage;
@@ -197,7 +198,7 @@ Future<dynamic> generateBugReport() async {
   //mein_unterricht
   late dynamic meinUnterricht;
   late List<dynamic> meinUnterrichtKurse = [];
-  if (client.doesSupportFeature("Kalender")) {
+  if (client.doesSupportFeature(SPHAppEnum.kalender.str)) {
     meinUnterricht = await client.getMeinUnterrichtOverview();
     meinUnterricht["kursmappen"]?.forEach((kurs) async {
       meinUnterrichtKurse.add(
@@ -212,7 +213,7 @@ Future<dynamic> generateBugReport() async {
   late dynamic visibleMessages;
   late dynamic invisibleMessages;
   late dynamic firstSingleMessage;
-  if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+  if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
     visibleMessages = await client.getConversationsOverview(false);
 
     for (var element in visibleMessages) {
@@ -240,13 +241,13 @@ Future<dynamic> generateBugReport() async {
       "userdata": await client.fetchUserData()
     },
     "applets": {
-      "vertretungsplan": client.doesSupportFeature("Vertretungsplan") ? await client.getFullVplan() ?? [] : [],
-      "kalender": client.doesSupportFeature("Kalender") ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
+      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) ? await client.getFullVplan() ?? [] : [],
+      "kalender": client.doesSupportFeature(SPHAppEnum.kalender.str) ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
       "mein_unterricht": {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
       },
-      "nachrichten": client.doesSupportFeature("Nachrichten - Beta-Version") ? {
+      "nachrichten": client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str) ? {
         "eingeblendete": visibleMessages,
         "ausgeblendete": invisibleMessages,
         "erste_detaillierte_nachricht": firstSingleMessage

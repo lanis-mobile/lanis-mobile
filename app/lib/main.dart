@@ -7,6 +7,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -252,11 +253,11 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = true;
 
   Feature getDefaultFeature() {
-    if (client.doesSupportFeature("Vertretungsplan")) {
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
       return Feature.substitutions;
-    } else if (client.doesSupportFeature("Kalender")) {
+    } else if (client.doesSupportFeature(SPHAppEnum.kalender.str)) {
       return Feature.calendar;
-    } else if (client.doesSupportFeature("Mein Unterricht")) {
+    } else if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
       return Feature.lessons;
     } else {
       return Feature.conversations;
@@ -348,7 +349,7 @@ class _HomePageState extends State<HomePage> {
       schoolName = client.schoolName;
 
       if (client.loadMode == "fast") {
-        if (client.doesSupportFeature("Vertretungsplan")) {
+        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
           await fetchFeature([[Status.substitution, Status.errorSubstitution, client.substitutionsFetcher]]);
         }
 
@@ -363,21 +364,21 @@ class _HomePageState extends State<HomePage> {
 
       final features = [];
 
-      if (client.doesSupportFeature("Vertretungsplan")) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
         features.add([
           Status.substitution,
           Status.errorSubstitution,
           client.substitutionsFetcher
         ]);
       }
-      if (client.doesSupportFeature("Mein Unterricht")) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
         features.add([
           Status.meinUnterricht,
           Status.errorMeinUnterricht,
           client.meinUnterrichtFetcher
         ]);
       }
-      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
         features.add([
           Status.conversations,
           Status.errorConversations,
@@ -389,7 +390,7 @@ class _HomePageState extends State<HomePage> {
           client.invisibleConversationsFetcher
         ]);
       }
-      if (client.doesSupportFeature("Kalender")) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender.str)) {
         features.add([
           Status.calendar,
           Status.errorCalendar,
@@ -501,10 +502,10 @@ class _HomePageState extends State<HomePage> {
 
     int helpIndex = 0;
     for (var supported in [
-      client.doesSupportFeature("Vertretungsplan"),
-      client.doesSupportFeature("Kalender"),
-      client.doesSupportFeature("Nachrichten - Beta-Version"),
-      client.doesSupportFeature("Mein Unterricht")
+      client.doesSupportFeature(SPHAppEnum.vertretungsplan.str),
+      client.doesSupportFeature(SPHAppEnum.kalender.str),
+      client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str),
+      client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)
     ]) {
       if (supported) {
         bottomNavbarNavigationTranslation.add(helpIndex);
@@ -566,25 +567,25 @@ class _HomePageState extends State<HomePage> {
                    onDestinationSelected: (index) => openFeature(Feature
                        .values[bottomNavbarNavigationTranslation.indexOf(index)]),
                    destinations: [
-                     if (client.doesSupportFeature("Vertretungsplan"))
+                     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str))
                        const NavigationDestination(
                          icon: Icon(Icons.group),
                          selectedIcon: Icon(Icons.group_outlined),
                          label: 'Vertretungen',
                        ),
-                     if (client.doesSupportFeature("Kalender"))
+                     if (client.doesSupportFeature(SPHAppEnum.kalender.str))
                        const NavigationDestination(
                          icon: Icon(Icons.calendar_today),
                          selectedIcon: Icon(Icons.calendar_today_outlined),
                          label: 'Kalender',
                        ),
-                     if (client.doesSupportFeature("Nachrichten - Beta-Version"))
+                     if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str))
                        const NavigationDestination(
                          icon: Icon(Icons.forum),
                          selectedIcon: Icon(Icons.forum_outlined),
                          label: 'Nachrichten',
                        ),
-                     if (client.doesSupportFeature("Mein Unterricht"))
+                     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str))
                        const NavigationDestination(
                          icon: Icon(Icons.school),
                          selectedIcon: Icon(Icons.school_outlined),
@@ -645,26 +646,26 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature("Vertretungsplan"),
+                      enabled: client.doesSupportFeature(SPHAppEnum.vertretungsplan.str),
                       icon: const Icon(Icons.group),
                       selectedIcon: const Icon(Icons.group_outlined),
                       label: const Text('Vertretungsplan'),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature("Kalender"),
+                      enabled: client.doesSupportFeature(SPHAppEnum.kalender.str),
                       icon: const Icon(Icons.calendar_today),
                       selectedIcon: const Icon(Icons.calendar_today_outlined),
                       label: const Text('Kalender'),
                     ),
                     NavigationDrawerDestination(
                       enabled:
-                          client.doesSupportFeature("Nachrichten - Beta-Version"),
+                          client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str),
                       icon: const Icon(Icons.forum),
                       selectedIcon: const Icon(Icons.forum_outlined),
                       label: const Text('Nachrichten'),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature("Mein Unterricht"),
+                      enabled: client.doesSupportFeature(SPHAppEnum.meinUnterricht.str),
                       icon: const Icon(Icons.school),
                       selectedIcon: const Icon(Icons.school_outlined),
                       label: const Text('Mein Unterricht'),
@@ -820,7 +821,7 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.only(top: 16),
                                   child: Row(
                                     children: [
-                                      getIcon(status.data, Status.substitution, Status.errorSubstitution, "Vertretungsplan"),
+                                      getIcon(status.data, Status.substitution, Status.errorSubstitution, SPHAppEnum.vertretungsplan.str),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 8),
                                         child: Text(
@@ -838,7 +839,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, "Mein Unterricht"),
+                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, SPHAppEnum.meinUnterricht.str),
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8),
                                           child: Text(
@@ -855,7 +856,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.conversations, Status.errorConversations, "Nachrichten - Beta-Version"),
+                                        getIcon(status.data, Status.conversations, Status.errorConversations, SPHAppEnum.nachrichtenBeta.str),
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8),
@@ -873,7 +874,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.calendar, Status.errorCalendar, "Kalender"),
+                                        getIcon(status.data, Status.calendar, Status.errorCalendar, SPHAppEnum.kalender.str),
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8),
