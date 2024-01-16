@@ -11,12 +11,12 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 
 
 final List<String> supportedApps = [
-  "Nachrichten - Beta-Version",
-  "Vertretungsplan",
-  "Mein Unterricht",
-  "mein Unterricht", //apparently some schools write this in lower case. Lanis is dumb
-  "Kalender",
-  "Logout",
+  // write in lower case only
+  "nachrichten - beta-version",
+  "vertretungsplan",
+  "mein unterricht",
+  "kalender",
+  "logout",
 ];
 
 
@@ -41,7 +41,7 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),
           title: Text(value["Name"]),
-          subtitle: Text(supportedApps.contains(value["Name"]) ? "Unterstützt": "nicht Unterstützt"),
+          subtitle: Text(supportedApps.contains(value["Name"].toString().toLowerCase()) ? "Unterstützt": "nicht Unterstützt"),
         ));
       }
 
