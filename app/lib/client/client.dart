@@ -511,6 +511,7 @@ class SPHclient {
   }
 
   final List<String> _onlySupportedByStudents = [
+    // only write lower case
     "mein unterricht",
   ];
 
