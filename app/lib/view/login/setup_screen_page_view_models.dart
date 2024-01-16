@@ -7,6 +7,7 @@ import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
 import '../../client/client.dart';
+import '../../shared/apps.dart';
 import '../vertretungsplan/filtersettings.dart';
 
 final _klassenStufeController = TextEditingController();
@@ -19,7 +20,7 @@ List<PageViewModel> setupScreenPageViewModels = [
       title: "Lehreraccount",
       body: "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren."
     ),
-    if (client.doesSupportFeature("Vertretungsplan")) ...[
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) ...[
     PageViewModel(
         image: SvgPicture.asset("assets/undraw/undraw_filter_re_sa16.svg", height: 175.0),
         title: "Vertretungen filtern",

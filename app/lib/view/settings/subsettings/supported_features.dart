@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:sph_plan/client/client.dart';
 
+import '../../../shared/apps.dart';
+
 class SupportedFeaturesOverviewScreen extends StatefulWidget {
   const SupportedFeaturesOverviewScreen({super.key});
 
@@ -12,12 +14,12 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 
 final List<String> supportedApps = [
   // write in lower case only
-  "nachrichten",
-  "vertretungsplan",
-  "nachrichten - beta-version",
-  "mein unterricht",
-  "kalender",
-  "logout",
+  SPHAppEnum.nachrichten.str,
+  SPHAppEnum.vertretungsplan.str,
+  SPHAppEnum.nachrichtenBeta.str,
+  SPHAppEnum.meinUnterricht.str,
+  SPHAppEnum.kalender.str,
+  SPHAppEnum.logout.str,
 ];
 
 

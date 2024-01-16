@@ -16,6 +16,7 @@ import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/themes.dart';
 
+import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
 
 class SPHclient {
@@ -52,31 +53,31 @@ class SPHclient {
 
   void prepareFetchers() {
     if (client.loadMode == "full") {
-      if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature("Mein Unterricht") && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(const Duration(minutes: 15));
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature("Kalender") && calendarFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender.str) && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     } else {
-      if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(null);
       }
-      if (client.doesSupportFeature("Mein Unterricht") && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
-      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
       }
-      if (client.doesSupportFeature("Kalender") && calendarFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender.str) && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     }
@@ -331,7 +332,7 @@ class SPHclient {
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
-    if (!client.doesSupportFeature("Kalender")) {
+    if (!client.doesSupportFeature(SPHAppEnum.kalender.str)) {
       return -8;
     }
 
@@ -448,7 +449,7 @@ class SPHclient {
 
   Future<dynamic> getFullVplan({skipCheck= false}) async {
     if (!skipCheck) {
-      if (!client.doesSupportFeature("Vertretungsplan")) {
+      if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
         return -8;
       }
     }
@@ -517,7 +518,7 @@ class SPHclient {
 
   bool doesSupportFeature(String featureName) {
     for (var app in supportedApps) {
-      if (app["Name"] == featureName) {
+      if (app["Name"].toString().toLowerCase() == featureName.toLowerCase()) {
         if ((_onlySupportedByStudents.contains(featureName.toLowerCase()))) {
           return isStudentAccount();
         } else {
@@ -586,7 +587,7 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
-    if (!client.doesSupportFeature("Mein Unterricht")) {
+    if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
       return -8;
     }
     
@@ -873,7 +874,7 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
-    if (!client.doesSupportFeature("Nachrichten - Beta-Version")) {
+    if (!client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
       return -8;
     }
 
