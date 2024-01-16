@@ -14,6 +14,7 @@ final List<String> supportedApps = [
   // write in lower case only
   "nachrichten",
   "vertretungsplan",
+  "nachrichten - beta-version",
   "mein unterricht",
   "kalender",
   "logout",
