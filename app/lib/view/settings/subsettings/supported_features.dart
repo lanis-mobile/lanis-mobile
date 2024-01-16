@@ -12,7 +12,7 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 
 final List<String> supportedApps = [
   // write in lower case only
-  "nachrichten - beta-version",
+  "nachrichten",
   "vertretungsplan",
   "mein unterricht",
   "kalender",
