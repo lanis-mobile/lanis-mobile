@@ -256,7 +256,7 @@ class _HomePageState extends State<HomePage> {
       return Feature.substitutions;
     } else if (client.doesSupportFeature("Kalender")) {
       return Feature.calendar;
-    } else if (client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht")) {
+    } else if (client.doesSupportFeature("Mein Unterricht")) {
       return Feature.lessons;
     } else {
       return Feature.conversations;
@@ -370,8 +370,7 @@ class _HomePageState extends State<HomePage> {
           client.substitutionsFetcher
         ]);
       }
-      if (client.doesSupportFeature("Mein Unterricht") ||
-          client.doesSupportFeature("mein Unterricht")) {
+      if (client.doesSupportFeature("Mein Unterricht")) {
         features.add([
           Status.meinUnterricht,
           Status.errorMeinUnterricht,
@@ -505,8 +504,7 @@ class _HomePageState extends State<HomePage> {
       client.doesSupportFeature("Vertretungsplan"),
       client.doesSupportFeature("Kalender"),
       client.doesSupportFeature("Nachrichten - Beta-Version"),
-      client.doesSupportFeature("Mein Unterricht") ||
-          client.doesSupportFeature("mein Unterricht")
+      client.doesSupportFeature("Mein Unterricht")
     ]) {
       if (supported) {
         bottomNavbarNavigationTranslation.add(helpIndex);
@@ -586,8 +584,7 @@ class _HomePageState extends State<HomePage> {
                          selectedIcon: Icon(Icons.forum_outlined),
                          label: 'Nachrichten',
                        ),
-                     if (client.doesSupportFeature("Mein Unterricht") ||
-                         client.doesSupportFeature("mein Unterricht"))
+                     if (client.doesSupportFeature("Mein Unterricht"))
                        const NavigationDestination(
                          icon: Icon(Icons.school),
                          selectedIcon: Icon(Icons.school_outlined),
@@ -667,8 +664,7 @@ class _HomePageState extends State<HomePage> {
                       label: const Text('Nachrichten'),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature("Mein Unterricht") ||
-                          client.doesSupportFeature("mein Unterricht"),
+                      enabled: client.doesSupportFeature("Mein Unterricht"),
                       icon: const Icon(Icons.school),
                       selectedIcon: const Icon(Icons.school_outlined),
                       label: const Text('Mein Unterricht'),
@@ -842,7 +838,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, "mein Unterricht"),
+                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, "Mein Unterricht"),
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8),
                                           child: Text(

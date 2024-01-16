@@ -55,7 +55,7 @@ class SPHclient {
       if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
       }
-      if ((client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature("Mein Unterricht") && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
       }
       if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
@@ -69,7 +69,7 @@ class SPHclient {
       if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(null);
       }
-      if ((client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature("Mein Unterricht") && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
       if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
@@ -586,7 +586,7 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
-    if (!(client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht"))) {
+    if (!client.doesSupportFeature("Mein Unterricht")) {
       return -8;
     }
     
