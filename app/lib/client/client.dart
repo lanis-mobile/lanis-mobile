@@ -511,14 +511,13 @@ class SPHclient {
   }
 
   final List<String> _onlySupportedByStudents = [
-    "mein Unterricht",
-    "Mein Unterricht"
+    "mein unterricht",
   ];
 
   bool doesSupportFeature(String featureName) {
     for (var app in supportedApps) {
       if (app["Name"] == featureName) {
-        if ((_onlySupportedByStudents.contains(featureName))) {
+        if ((_onlySupportedByStudents.contains(featureName.toLowerCase()))) {
           return isStudentAccount();
         } else {
           return true;
