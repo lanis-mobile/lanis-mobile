@@ -378,7 +378,7 @@ class _HomePageState extends State<HomePage> {
           client.meinUnterrichtFetcher
         ]);
       }
-      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      if (client.doesSupportFeature("Nachrichten")) {
         features.add([
           Status.conversations,
           Status.errorConversations,
@@ -504,7 +504,7 @@ class _HomePageState extends State<HomePage> {
     for (var supported in [
       client.doesSupportFeature("Vertretungsplan"),
       client.doesSupportFeature("Kalender"),
-      client.doesSupportFeature("Nachrichten - Beta-Version"),
+      client.doesSupportFeature("Nachrichten"),
       client.doesSupportFeature("Mein Unterricht") ||
           client.doesSupportFeature("mein Unterricht")
     ]) {
@@ -580,7 +580,7 @@ class _HomePageState extends State<HomePage> {
                          selectedIcon: Icon(Icons.calendar_today_outlined),
                          label: 'Kalender',
                        ),
-                     if (client.doesSupportFeature("Nachrichten - Beta-Version"))
+                     if (client.doesSupportFeature("Nachrichten"))
                        const NavigationDestination(
                          icon: Icon(Icons.forum),
                          selectedIcon: Icon(Icons.forum_outlined),
@@ -661,7 +661,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     NavigationDrawerDestination(
                       enabled:
-                          client.doesSupportFeature("Nachrichten - Beta-Version"),
+                          client.doesSupportFeature("Nachrichten"),
                       icon: const Icon(Icons.forum),
                       selectedIcon: const Icon(Icons.forum_outlined),
                       label: const Text('Nachrichten'),
@@ -859,7 +859,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.conversations, Status.errorConversations, "Nachrichten - Beta-Version"),
+                                        getIcon(status.data, Status.conversations, Status.errorConversations, "Nachrichten"),
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8),

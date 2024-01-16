@@ -208,11 +208,11 @@ Future<dynamic> generateBugReport() async {
     meinUnterrichtKurse = ["No support."];
   }
 
-  //nachrichten beta-version
+  //nachrichten
   late dynamic visibleMessages;
   late dynamic invisibleMessages;
   late dynamic firstSingleMessage;
-  if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+  if (client.doesSupportFeature("Nachrichten")) {
     visibleMessages = await client.getConversationsOverview(false);
 
     for (var element in visibleMessages) {
@@ -246,7 +246,7 @@ Future<dynamic> generateBugReport() async {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
       },
-      "nachrichten": client.doesSupportFeature("Nachrichten - Beta-Version") ? {
+      "nachrichten": (client.doesSupportFeature("Nachrichten")) ? {
         "eingeblendete": visibleMessages,
         "ausgeblendete": invisibleMessages,
         "erste_detaillierte_nachricht": firstSingleMessage
