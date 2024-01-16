@@ -213,7 +213,8 @@ Future<dynamic> generateBugReport() async {
   late dynamic visibleMessages;
   late dynamic invisibleMessages;
   late dynamic firstSingleMessage;
-  if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
+  if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+      || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
     visibleMessages = await client.getConversationsOverview(false);
 
     for (var element in visibleMessages) {
@@ -247,7 +248,8 @@ Future<dynamic> generateBugReport() async {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
       },
-      "nachrichten": client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str) ? {
+      "nachrichten": (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) ? {
         "eingeblendete": visibleMessages,
         "ausgeblendete": invisibleMessages,
         "erste_detaillierte_nachricht": firstSingleMessage

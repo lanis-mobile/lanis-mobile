@@ -59,7 +59,8 @@ class SPHclient {
       if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(const Duration(minutes: 15));
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(const Duration(minutes: 15));
       }
@@ -73,7 +74,8 @@ class SPHclient {
       if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
       }
@@ -874,7 +876,8 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
-    if (!client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)) {
+    if (!(client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+        || client.doesSupportFeature(SPHAppEnum.nachrichten.str))) {
       return -8;
     }
 
