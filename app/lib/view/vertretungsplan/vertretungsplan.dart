@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
@@ -91,9 +92,13 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     List<Tab> tabs = [];
 
     for (Map day in fullVplan["days"]) {
+      String entryCount = day["entries"].length.toString();
       tabs.add(Tab(
-        icon: const Icon(Icons.calendar_today),
-        text: day["date"],
+        icon: Badge(
+          label: Text(entryCount),
+          child: const Icon(Icons.calendar_today),
+        ),
+        text: formatDate(day["date"]),
       ));
     }
 
@@ -165,7 +170,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
 
           // Vp could have multiple dates, so we need to set it dynamically.
           _tabController = TabController(
-                length: snapshot.data?.content["length"], vsync: this);
+              length: snapshot.data?.content["length"], vsync: this);
 
           return Column(
             children: [
@@ -220,4 +225,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       ),
     );
   }
+}
+
+String formatDate(String dateString) {
+  final inputFormat = DateFormat('dd.MM.yyyy');
+  final dateTime = inputFormat.parse(dateString);
+
+  final germanFormat = DateFormat('E dd.MM.yyyy', 'de');
+  return germanFormat.format(dateTime);
 }
