@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
+import 'package:sph_plan/client/dateispeicher_node.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
@@ -586,6 +587,35 @@ class SPHclient {
         await entity.delete(recursive: true);
       }
     }
+  }
+
+  Future<dynamic> getDateispeicherNode(int nodeID) async {
+    //if (!client.doesSupportFeature(SPHAppEnum.dateispeicher.str)) return -8;
+    final response = await dio.get("https://start.schulportal.hessen.de/dateispeicher.php?a=view&folder=$nodeID");
+    var document = parse(response.data);
+    List<FileNode> files = [];
+    List<String> headers = document.querySelectorAll("table#files thead th").map((e) => e.text).toList();
+    for (var file in document.querySelectorAll("table#files tbody tr")) {
+      final fields = file.querySelectorAll("td");
+      var name = fields[headers.indexOf("Name")].text.trim();
+      var aenderung = fields[headers.indexOf("Änderung")].text.trim();
+      var groesse = fields[headers.indexOf("Größe")].text.trim();
+      var id = int.parse(file.attributes["data-id"]!.trim());
+      files.add(FileNode(name, id, "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id", aenderung, groesse));
+    }
+    List<FolderNode> folders = [];
+    for (var folder in document.querySelectorAll(".folder")) {
+      var name = folder.querySelector(".caption")!.text.trim();
+      var desc = folder.querySelector(".desc")!.text.trim();
+      var subfolders = int.tryParse(RegExp(r"\d+").firstMatch(folder.querySelector("[title=\"Anzahl Ordner\"]")?.text.trim() ?? "")?.group(0) ?? "") ?? 0;
+      var id = int.parse(folder.attributes["data-id"]!);
+      folders.add(FolderNode(name, id, subfolders, desc));
+    }
+    return (files, folders);
+  }
+
+  Future<dynamic> getDateispeicherRoot() async {
+    return await getDateispeicherNode(0);
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
