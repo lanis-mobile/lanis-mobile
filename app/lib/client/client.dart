@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -43,6 +44,7 @@ class SPHclient {
   List<dynamic> supportedApps = [];
   late CookieJar jar;
   final dio = Dio();
+  Timer? timer;
   late Cryptor cryptor = Cryptor();
 
   SubstitutionsFetcher? substitutionsFetcher;
@@ -160,6 +162,9 @@ class SPHclient {
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
 
+          timer?.cancel();
+          timer = Timer.periodic(const Duration(seconds: 60), (timer) => preventLogout());
+
           if (userLogin) {
             await fetchRedundantData();
           }
@@ -185,6 +190,17 @@ class SPHclient {
       debugPrint(e.toString());
       return -4;
     }
+  }
+  
+  Future<void> preventLogout() async {
+    final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
+    var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+    debugPrint("Refreshing session");
+    await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
+        queryParameters: {
+          "name": sid
+        },
+        options: Options(contentType: "application/x-www-form-urlencoded"));
   }
 
   Future<void> fetchRedundantData() async {
