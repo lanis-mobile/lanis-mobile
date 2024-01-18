@@ -53,14 +53,13 @@ abstract class Fetcher {
     if (isEmpty || forceRefresh) {
       _addResponse(FetcherResponse(status: FetcherStatus.fetching));
 
+
       _get().then((data) async {
         if (data is int) {
-          if (data == -1) {
-            if (await client.login() == 0) {
-              fetchData(forceRefresh: true);
-              return;
-            } else if (secondTry == false) {
-              fetchData(forceRefresh: true, secondTry: true);
+          if (data < 0) {
+            if (!secondTry) {
+              await client.login();
+              await fetchData(forceRefresh: true, secondTry: true);
               return;
             }
           }
