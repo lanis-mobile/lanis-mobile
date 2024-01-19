@@ -83,11 +83,6 @@ class FormattedText extends StatelessWidget {
           endTag: "</code>"
       ),
       FormatPattern(
-          regExp: RegExp(r"```(.*?)```"),
-          startTag: "<code>",
-          endTag: "</code>"
-      ),
-      FormatPattern(
           regExp: RegExp(r"(\d{2}\.\d{1,2}\.(\d{4}|\d{2}\b))"),
           startTag: "<date>",
           endTag: "</date>"
