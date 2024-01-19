@@ -5,6 +5,7 @@ enum SPHAppEnum {
   vertretungsplan,
   meinUnterricht,
   kalender,
+  dateispeicher,
   logout
 }
 
@@ -17,6 +18,7 @@ extension SPHApp on SPHAppEnum {
       SPHAppEnum.vertretungsplan => "vertretungsplan",
       SPHAppEnum.meinUnterricht => "mein unterricht",
       SPHAppEnum.kalender => "kalender",
+      SPHAppEnum.dateispeicher => "dateispeicher",
       SPHAppEnum.logout => "logout"
     };
   }
