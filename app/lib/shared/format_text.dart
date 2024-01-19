@@ -48,7 +48,7 @@ class FormattedText extends StatelessWidget {
           endTag: "</sub>"
       ),
       FormatPattern(
-          regExp: RegExp(r"\_(\d){1,1}\s"),
+          regExp: RegExp(r"\_(\d){1,1}(?:(?!\n)\s)?"),
           startTag: "<sub>",
           endTag: "</sub>"
       ),
@@ -58,7 +58,7 @@ class FormattedText extends StatelessWidget {
           endTag: "</sup>"
       ),
       FormatPattern(
-          regExp: RegExp(r"\^(\d){1,1}\s"),
+          regExp: RegExp(r"\^(\d){1,1}(?:(?!\n)\s)?"),
           startTag: "<sup>",
           endTag: "</sup>"
       ),
