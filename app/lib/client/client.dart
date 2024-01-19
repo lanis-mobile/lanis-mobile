@@ -663,24 +663,60 @@ class SPHclient {
       for (var schoolClass in schoolClasses) {
         var teacher = schoolClass.querySelector(".teacher");
 
-        result["aktuell"]?.add({
-          "name": schoolClass.querySelector(".name")?.text.trim(),
-          "teacher": {
-            "short": teacher
-                ?.getElementsByClassName(
-                    "btn btn-primary dropdown-toggle btn-xs")[0]
-                .text.trim(),
-            "name": teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
-          },
-          "thema": {
-            "title": schoolClass.querySelector(".thema")?.text.trim(),
-            "date": schoolClass.querySelector(".datum")?.text.trim()
-          },
-          "data": {
-            "entry": schoolClass.attributes["data-entry"],
-            "book": schoolClass.attributes["data-entry"]
-          },
-          "_courseURL": schoolClass.querySelector("td>h3>a")?.attributes["href"]
+        if (schoolClass.querySelector(".datum") != null) {
+          result["aktuell"]?.add({
+            "name": schoolClass
+                .querySelector(".name")
+                ?.text
+                .trim(),
+            "teacher": {
+              "short": teacher
+                  ?.getElementsByClassName(
+                  "btn btn-primary dropdown-toggle btn-xs")[0]
+                  .text.trim(),
+              "name": teacher
+                  ?.querySelector("ul>li>a>i.fa")
+                  ?.parent
+                  ?.text
+                  .trim()
+            },
+            "thema": {
+              "title": schoolClass
+                  .querySelector(".thema")
+                  ?.text
+                  .trim(),
+              "date": schoolClass
+                  .querySelector(".datum")
+                  ?.text
+                  .trim()
+            },
+            "data": {
+              "entry": schoolClass.attributes["data-entry"],
+              "book": schoolClass.attributes["data-entry"]
+            },
+            "_courseURL": schoolClass
+                .querySelector("td>h3>a")
+                ?.attributes["href"]
+          });
+        }
+
+        //sort by date
+        result["aktuell"]?.sort((a, b) {
+          var aDate = a["thema"]["date"];
+          var bDate = b["thema"]["date"];
+
+          var aDateTime = DateTime(
+              int.parse(aDate.split(".")[2]),
+              int.parse(aDate.split(".")[1]),
+              int.parse(aDate.split(".")[0])
+          );
+          var bDateTime = DateTime(
+              int.parse(bDate.split(".")[2]),
+              int.parse(bDate.split(".")[1]),
+              int.parse(bDate.split(".")[0])
+          );
+
+          return bDateTime.compareTo(aDateTime);
         });
       }
     }();
