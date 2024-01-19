@@ -43,12 +43,12 @@ class FormattedText extends StatelessWidget {
           endTag: "</u>"
       ),
       FormatPattern(
-          regExp: RegExp(r"\_\((.*?)\)"),
+          regExp: RegExp(r"_\((.*?)\)"),
           startTag: "<sub>",
           endTag: "</sub>"
       ),
       FormatPattern(
-          regExp: RegExp(r"\_(\d){1,1}(?:(?!\n)\s)?"),
+          regExp: RegExp(r"_(\d){1,1}(?:(?!\n)\s)?"),
           startTag: "<sub>",
           endTag: "</sub>"
       ),
