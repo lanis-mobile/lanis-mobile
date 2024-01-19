@@ -90,7 +90,8 @@ class FormattedText extends StatelessWidget {
       FormatPattern(
           regExp: RegExp(r"(\d{2}):(\d{2})"),
           startTag: "<time>",
-          endTag: "</time>"
+          endTag: "</time>",
+          group: 0
       ),
       FormatPattern(
           regExp: RegExp(r"^( *|	*)-([ 	])(.*)", multiLine: true),
