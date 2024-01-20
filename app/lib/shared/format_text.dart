@@ -2,21 +2,31 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:linkify/linkify.dart';
+import 'package:sph_plan/shared/unicode.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FormatPattern {
   late final RegExp regExp;
-  late final String startTag;
+  late final String? startTag;
   late final String? endTag;
   late final int group;
+  late final Map<String, String> map;
 
-  FormatPattern({required this.regExp, required this.startTag, this.endTag, this.group = 1});
+  FormatPattern({required this.regExp, this.startTag, this.endTag, this.group = 1, this.map = const {}});
 }
 
 class FormattedText extends StatelessWidget {
   final String text;
   const FormattedText({super.key, required this.text});
+
+  String convertByMap(String string, Map<String, String> map) {
+    var str = string;
+    for (var entry in map.entries) {
+      str = str.replaceAll(entry.key, entry.value);
+    }
+    return str;
+  }
 
   String convertLanisSyntax(String lanisStyledText) {
     /* Implemented tags:
@@ -43,24 +53,20 @@ class FormattedText extends StatelessWidget {
           endTag: "</u>"
       ),
       FormatPattern(
-          regExp: RegExp(r"_\((.*?)\)"),
-          startTag: "<sub>",
-          endTag: "</sub>"
+          regExp: RegExp(r"_\((\d+)\)"),
+          map: digitsSubscript
       ),
       FormatPattern(
           regExp: RegExp(r"_(\d)(?:(?!\n)\s|(?=\n))"),
-          startTag: "<sub>",
-          endTag: "</sub>"
+          map: digitsSubscript
       ),
       FormatPattern(
-          regExp: RegExp(r"\^\((.*?)\)"),
-          startTag: "<sup>",
-          endTag: "</sup>"
+          regExp: RegExp(r"\^\((\d+)\)"),
+          map: digitsSuperscript
       ),
       FormatPattern(
           regExp: RegExp(r"\^(\d)(?:(?!\n)\s|(?=\n))"),
-          startTag: "<sup>",
-          endTag: "</sup>"
+          map: digitsSuperscript
       ),
       FormatPattern(
           regExp: RegExp(r"~~(.*?)~~"),
@@ -111,7 +117,8 @@ class FormattedText extends StatelessWidget {
 
     // Apply formatting
     for (final FormatPattern pattern in formatPatterns) {
-      formattedText = formattedText.replaceAllMapped(pattern.regExp, (match) => "${pattern.startTag}${match.group(pattern.group)}${pattern.endTag ?? ""}");
+      formattedText = formattedText.replaceAllMapped(pattern.regExp, (match) =>
+        "${pattern.startTag ?? ""}${convertByMap(match.group(pattern.group)!, pattern.map)}${pattern.endTag ?? ""}");
     }
 
     // Surround emails and links with <a> tag
