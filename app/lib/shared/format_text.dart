@@ -20,6 +20,7 @@ class FormattedText extends StatelessWidget {
   final String text;
   const FormattedText({super.key, required this.text});
 
+  /// Replaces all occurrences of map keys with their respective value
   String convertByMap(String string, Map<String, String> map) {
     var str = string;
     for (var entry in map.entries) {
@@ -28,19 +29,20 @@ class FormattedText extends StatelessWidget {
     return str;
   }
 
+  /// Converts Lanis-style formatting into pseudo-HTML using rules defined as in<br />
+  /// https://support.schulportal.hessen.de/knowledgebase.php?article=664<br />
+  ///<br />
+  /// Implemented:<br />
+  /// ** => <‭b>,<br />
+  /// __ => <‭u>,<br />
+  /// -- => <‭i>,<br />
+  /// ` or ``` => <‭code>,<br />
+  /// ‭- => \u2022 (•),<br />
+  /// _ and _() => character substitution subscript,<br />
+  /// ^ and ^() => character substitution superscript,<br />
+  /// 12.01.23, 12.01.2023 => <‭date>,<br />
+  /// 12:03 => <‭time><br />
   String convertLanisSyntax(String lanisStyledText) {
-    /* Implemented tags:
-      ** => <b>,
-      __ => <u>,
-      -- => <i>,
-      ` or ``` => <code>,
-      - => \u2022 (•),
-      _ and _() => character substitution subscript,
-      ^ and ^() => character substitution superscript,
-      12.01.23, 12.01.2023 => <date>,
-      12:03 => <time>
-    */
-
     final List<FormatPattern> formatPatterns = [
       FormatPattern(
         regExp: RegExp(r"\*\*(([^*]|\*(?!\*))+)\*\*"),
