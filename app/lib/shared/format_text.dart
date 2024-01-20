@@ -100,9 +100,8 @@ class FormattedText extends StatelessWidget {
           group: 0
       ),
       FormatPattern(
-          regExp: RegExp(r"^( *|	*)-([ 	])(.*)", multiLine: true),
-          startTag: "\u2022 ",
-          group: 3
+          regExp: RegExp(r"^[ \t]*-[ \t](.*)", multiLine: true),
+          startTag: "\u2022 "
       ),
     ];
 
