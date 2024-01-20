@@ -35,8 +35,8 @@ class FormattedText extends StatelessWidget {
       -- => <i>,
       ` or ``` => <code>,
       - => \u2022 (•),
-      _ and _() => <sub>,
-      ^ and ^() => <sup>,
+      _ and _() => character substitution subscript,
+      ^ and ^() => character substitution superscript,
       12.01.23, 12.01.2023 => <date>,
       12:03 => <time>
     */
