@@ -79,7 +79,7 @@ class FormattedText extends StatelessWidget {
           endTag: "</del>"
       ),
       FormatPattern(
-          regExp: RegExp(r"`(.*?)`"),
+          regExp: RegExp(r"`(?!``)(.*?)(?<!``)`"),
           startTag: "<code>",
           endTag: "</code>"
       ),
