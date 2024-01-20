@@ -143,8 +143,8 @@ class FormattedText extends StatelessWidget {
         "b": StyledTextTag(style: const TextStyle(fontWeight: FontWeight.bold)),
         "u": StyledTextTag(
             style: const TextStyle(decoration: TextDecoration.underline)),
-        "italic": StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
-        "remove": StyledTextTag(
+        "i": StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
+        "del": StyledTextTag(
             style: const TextStyle(decoration: TextDecoration.lineThrough)),
         "code": StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
           padding: const EdgeInsets.only(top: 2, bottom: 2),
