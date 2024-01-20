@@ -170,10 +170,6 @@ class FormattedText extends StatelessWidget {
             ),
           ),
         )),
-        "sub": StyledTextTag(
-            style: const TextStyle(fontFeatures: [FontFeature.subscripts()])),
-        "sup": StyledTextTag(
-            style: const TextStyle(fontFeatures: [FontFeature.superscripts()])),
         "date": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
