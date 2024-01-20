@@ -43,12 +43,12 @@ class FormattedText extends StatelessWidget {
 
     final List<FormatPattern> formatPatterns = [
       FormatPattern(
-        regExp: RegExp(r"\*\*(.*?)\*\*"),
+        regExp: RegExp(r"\*\*(([^*]|\*(?!\*))+)\*\*"),
         startTag: "<b>",
         endTag: "</b>"
       ),
       FormatPattern(
-          regExp: RegExp(r"__([^_]*?)__"),
+          regExp: RegExp(r"__(([^_]|_(?!_))+)__"),
           startTag: "<u>",
           endTag: "</u>"
       ),
@@ -69,22 +69,22 @@ class FormattedText extends StatelessWidget {
           map: digitsSuperscript
       ),
       FormatPattern(
-          regExp: RegExp(r"~~(.*?)~~"),
+          regExp: RegExp(r"~~(([^~]|~(?!~))+)~~"),
           startTag: "<i>",
           endTag: "</i>"
       ),
       FormatPattern(
-          regExp: RegExp(r"--(.*?)--"),
+          regExp: RegExp(r"--(([^-]|-(?!-))+)--"),
           startTag: "<del>",
           endTag: "</del>"
       ),
       FormatPattern(
-          regExp: RegExp(r"`(?!``)(.*?)(?<!``)`"),
+          regExp: RegExp(r"`(?!``)(.*)(?<!``)`"),
           startTag: "<code>",
           endTag: "</code>"
       ),
       FormatPattern(
-          regExp: RegExp(r"```\n*((?:[^`]|`(?!``))*?)\n*```"),
+          regExp: RegExp(r"```\n*((?:[^`]|`(?!``))*)\n*```"),
           startTag: "<code>",
           endTag: "</code>"
       ),
