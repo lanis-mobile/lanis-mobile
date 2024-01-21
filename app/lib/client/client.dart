@@ -768,16 +768,21 @@ class SPHclient {
 
       var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
 
-      for (var mappe in mappen!) {
-        parsedMappen.add({
-          "title": mappe.getElementsByTagName("h2")[0].text.trim(),
-          "teacher":
-              mappe.querySelector("div.btn-group>button")?.attributes["title"],
-          "_courseURL":
-              mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
-        });
+      if (mappen != null) {
+        for (var mappe in mappen) {
+          parsedMappen.add({
+            "title": mappe.getElementsByTagName("h2")[0].text.trim(),
+            "teacher":
+            mappe.querySelector("div.btn-group>button")?.attributes["title"],
+            "_courseURL":
+            mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
+          });
+        }
+        result["kursmappen"] = parsedMappen;
+      } else {
+        result["kursmappen"] = [];
       }
-      result["kursmappen"] = parsedMappen;
+
     }();
 
     debugPrint("Successfully got Mein Unterricht.");
