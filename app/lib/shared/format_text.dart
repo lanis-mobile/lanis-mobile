@@ -33,15 +33,15 @@ class FormattedText extends StatelessWidget {
   /// https://support.schulportal.hessen.de/knowledgebase.php?article=664<br />
   ///<br />
   /// Implemented:<br />
-  /// ** => <‭b>,<br />
-  /// __ => <‭u>,<br />
-  /// -- => <‭i>,<br />
-  /// ` or ``` => <‭code>,<br />
-  /// ‭- => \u2022 (•),<br />
+  /// ** => <​b>,<br />
+  /// __ => <​u>,<br />
+  /// -- => <​i>,<br />
+  /// ` or ``` => <​code>,<br />
+  /// ​- => \u2022 (•),<br />
   /// _ and _() => character substitution subscript,<br />
   /// ^ and ^() => character substitution superscript,<br />
-  /// 12.01.23, 12.01.2023 => <‭date>,<br />
-  /// 12:03 => <‭time><br />
+  /// 12.01.23, 12.01.2023 => <​date>,<br />
+  /// 12:03 => <​time><br />
   String convertLanisSyntax(String lanisStyledText) {
     final List<FormatPattern> formatPatterns = [
       FormatPattern(
