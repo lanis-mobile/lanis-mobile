@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../shared/marquee.dart';
+
 class SubstitutionWidget extends StatelessWidget {
   final Map<String, dynamic> substitutionData;
   const SubstitutionWidget({super.key, required this.substitutionData});
-
-  // TODO VP REWORK ("revert")
-  // REWORK THIS SHIT SO IT DOESN'T USE CONFUSING IF STATEMENTS
-  // ALSO PUT HINWEIS IN THE SAME LINE AGAIN
 
   bool doesNoticeExist(String? info) {
     return (info == null || info == "" || info == "---");
@@ -35,7 +33,9 @@ class SubstitutionWidget extends StatelessWidget {
             ],
           ),
           Text(value!)
-        ]));
+        ]
+      )
+    );
   }
 
   @override
@@ -48,30 +48,14 @@ class SubstitutionWidget extends StatelessWidget {
           doesNoticeExist(substitutionData["Hinweis"])),
       title: Padding(
         padding: const EdgeInsets.only(top: 2),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (substitutionData['Art'] != null) ...[
-              Text(
-                substitutionData['Art'],
-                style: Theme.of(context).textTheme.titleLarge,
-              )
-            ],
-            Flexible(
-                child: Text(substitutionData["Klasse"] ?? "Keine Klasse angegeben",
-                    style: (substitutionData['Art'] != null)
-                        ? null
-                        : Theme.of(context)
-                        .textTheme
-                        .titleLarge) // highlight "Klasse" when there is no "Art" information
-            ),
-            Text(
-              substitutionData['Stunde'] ?? "",
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
-        ),
+        child: (substitutionData['Art'] != null) ?
+        MarqueeWidget(
+          direction: Axis.horizontal,
+          child: Text(
+            substitutionData['Art'],
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ) : null,
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,14 +100,17 @@ class SubstitutionWidget extends StatelessWidget {
                             padding: EdgeInsets.only(right: 8.0),
                             child: Icon(Icons.info),
                           ),
-                          Text(
-                            "Hinweis",
-                            style: Theme.of(context).textTheme.labelLarge,
-                          )
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: Text(
+                              substitutionData["Hinweis"],
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
+                            ),
+                          ),
                         ],
                       ),
-                      Text(
-                          "${toBeginningOfSentenceCase(substitutionData["Hinweis"])}")
+                      const SizedBox(height: 4)
                     ],
                   ),
                 )
@@ -132,11 +119,19 @@ class SubstitutionWidget extends StatelessWidget {
           ),
           if (!doesNoticeExist(substitutionData["Fach"])) ...[
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  substitutionData["Fach"],
-                  style: const TextStyle(fontSize: 18),
+                  substitutionData["Fach"] ?? "",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  substitutionData["Klasse"] ?? "Keine Klasse angegeben",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  substitutionData['Stunde'] ?? "",
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             )
