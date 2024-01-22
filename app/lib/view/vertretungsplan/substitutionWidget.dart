@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../shared/marquee.dart';
 
@@ -44,7 +43,6 @@ class SubstitutionWidget extends StatelessWidget {
       dense: (doesNoticeExist(substitutionData["Vertreter"]) &&
           doesNoticeExist(substitutionData["Lehrer"]) &&
           doesNoticeExist(substitutionData["Raum"]) &&
-          doesNoticeExist(substitutionData["Fach"]) &&
           doesNoticeExist(substitutionData["Hinweis"])),
       title: Padding(
         padding: const EdgeInsets.only(top: 2),
@@ -60,82 +58,82 @@ class SubstitutionWidget extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                    top: 0,
-                    bottom: (doesNoticeExist(substitutionData["Vertreter"]) &&
-                        doesNoticeExist(substitutionData["Lehrer"]) &&
-                        doesNoticeExist(substitutionData["Raum"]) &&
-                        !doesNoticeExist(substitutionData["Fach"]))
-                        ? 12
-                        : 0),
-                child: Column(
-                  children: [
-                    getSubstitutionInfo(context,"Vertreter", substitutionData["Vertreter"],
-                        Icons.person) ??
-                        const SizedBox.shrink(),
-                    getSubstitutionInfo(context,
-                        "Lehrer", substitutionData["Lehrer"], Icons.school) ??
-                        const SizedBox.shrink(),
-                    getSubstitutionInfo(context,
-                        "Raum", substitutionData["Raum"], Icons.room) ??
-                        const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-              if (!doesNoticeExist(substitutionData["Hinweis"])) ...[
-                Padding(
-                  padding: EdgeInsets.only(
-                      right: 30,
-                      left: 30,
-                      top: 2,
-                      bottom: doesNoticeExist(substitutionData["Fach"]) ? 12 : 0),
-                  child: Column(
+          Padding(
+            padding: EdgeInsets.only(
+                top: 0,
+                bottom: (doesNoticeExist(substitutionData["Vertreter"]) &&
+                    doesNoticeExist(substitutionData["Lehrer"]) &&
+                    doesNoticeExist(substitutionData["Raum"]) &&
+                    !doesNoticeExist(substitutionData["Fach"]))
+                    ? 12
+                    : 0),
+            child: Column(
+              children: [
+                getSubstitutionInfo(context,"Vertreter", substitutionData["Vertreter"],
+                    Icons.person) ??
+                    const SizedBox.shrink(),
+                getSubstitutionInfo(context,
+                    "Lehrer", substitutionData["Lehrer"], Icons.school) ??
+                    const SizedBox.shrink(),
+                getSubstitutionInfo(context,
+                    "Raum", substitutionData["Raum"], Icons.room) ??
+                    const SizedBox.shrink(),
+              ],
+            ),
+          ),
+          if (!doesNoticeExist(substitutionData["Hinweis"])) ...[
+            Padding(
+              padding: EdgeInsets.only(
+                  right: 30,
+                  left: 30,
+                  top: 2,
+                  bottom: doesNoticeExist(substitutionData["Fach"]) ? 12 : 0),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(right: 8.0),
-                            child: Icon(Icons.info),
-                          ),
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: Text(
-                              substitutionData["Hinweis"],
-                              overflow: TextOverflow.visible,
-                              softWrap: true,
-                            ),
-                          ),
-                        ],
+                      const Padding(
+                        padding: EdgeInsets.only(right: 8.0),
+                        child: Icon(Icons.info),
                       ),
-                      const SizedBox(height: 4)
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Text(
+                          substitutionData["Hinweis"],
+                          overflow: TextOverflow.visible,
+                          softWrap: true,
+                        ),
+                      ),
                     ],
                   ),
-                )
-              ]
-            ],
-          ),
-          if (!doesNoticeExist(substitutionData["Fach"])) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+                  const SizedBox(height: 4)
+                ],
+              ),
+            )
+          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (!doesNoticeExist(substitutionData["Fach"])) ...[
                 Text(
-                  substitutionData["Fach"] ?? "",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(
-                  substitutionData["Klasse"] ?? "Keine Klasse angegeben",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  substitutionData['Stunde'] ?? "",
+                  substitutionData["Fach"],
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
-            )
-          ]
+              if (!doesNoticeExist(substitutionData["Klasse"])) ...[
+                Text(
+                  substitutionData["Klasse"],
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+              if (!doesNoticeExist(substitutionData['Stunde'])) ...[
+                Text(
+                  substitutionData['Stunde'],
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ]
+            ],
+          ),
         ],
       ),
     );
