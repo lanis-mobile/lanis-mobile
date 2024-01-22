@@ -2,88 +2,91 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:linkify/linkify.dart';
+import 'package:sph_plan/shared/unicode.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FormatPattern {
   late final RegExp regExp;
-  late final String startTag;
+  late final String? startTag;
   late final String? endTag;
   late final int group;
+  late final Map<String, String> map;
 
-  FormatPattern({required this.regExp, required this.startTag, this.endTag, this.group = 1});
+  FormatPattern({required this.regExp, this.startTag, this.endTag, this.group = 1, this.map = const {}});
 }
 
 class FormattedText extends StatelessWidget {
   final String text;
   const FormattedText({super.key, required this.text});
 
-  String convertLanisSyntax(String lanisStyledText) {
-    /* Implemented tags:
-      ** => <b>,
-      __ => <u>,
-      -- => <i>,
-      ` or ``` => <code>,
-      - => \u2022 (•),
-      _ and _() => <sub>,
-      ^ and ^() => <sup>,
-      12.01.23, 12.01.2023 => <date>,
-      12:03 => <time>
-    */
+  /// Replaces all occurrences of map keys with their respective value
+  String convertByMap(String string, Map<String, String> map) {
+    var str = string;
+    for (var entry in map.entries) {
+      str = str.replaceAll(entry.key, entry.value);
+    }
+    return str;
+  }
 
+  /// Converts Lanis-style formatting into pseudo-HTML using rules defined as in<br />
+  /// https://support.schulportal.hessen.de/knowledgebase.php?article=664<br />
+  ///<br />
+  /// Implemented:<br />
+  /// ** => <​b>,<br />
+  /// __ => <​u>,<br />
+  /// -- => <​i>,<br />
+  /// ` or ``` => <​code>,<br />
+  /// ​- => \u2022 (•),<br />
+  /// _ and _() => character substitution subscript,<br />
+  /// ^ and ^() => character substitution superscript,<br />
+  /// 12.01.23, 12.01.2023 => <​date>,<br />
+  /// 12:03 => <​time><br />
+  String convertLanisSyntax(String lanisStyledText) {
     final List<FormatPattern> formatPatterns = [
       FormatPattern(
-        regExp: RegExp(r"\*\*(.*?)\*\*"),
+        regExp: RegExp(r"\*\*(([^*]|\*(?!\*))+)\*\*"),
         startTag: "<b>",
         endTag: "</b>"
       ),
       FormatPattern(
-          regExp: RegExp(r"__([^_]*?)__"),
+          regExp: RegExp(r"__(([^_]|_(?!_))+)__"),
           startTag: "<u>",
           endTag: "</u>"
       ),
       FormatPattern(
-          regExp: RegExp(r"\_\((.*?)\)"),
-          startTag: "<sub>",
-          endTag: "</sub>"
+          regExp: RegExp(r"_\((\d+)\)"),
+          map: digitsSubscript
       ),
       FormatPattern(
-          regExp: RegExp(r"\_(\d){1,1}\s"),
-          startTag: "<sub>",
-          endTag: "</sub>"
+          regExp: RegExp(r"_(\d)(?:(?!\n)\s|(?=\n))"),
+          map: digitsSubscript
       ),
       FormatPattern(
-          regExp: RegExp(r"\^\((.*?)\)"),
-          startTag: "<sup>",
-          endTag: "</sup>"
+          regExp: RegExp(r"\^\((\d+)\)"),
+          map: digitsSuperscript
       ),
       FormatPattern(
-          regExp: RegExp(r"\^(\d){1,1}\s"),
-          startTag: "<sup>",
-          endTag: "</sup>"
+          regExp: RegExp(r"\^(\d)(?:(?!\n)\s|(?=\n))"),
+          map: digitsSuperscript
       ),
       FormatPattern(
-          regExp: RegExp(r"~~(.*?)~~"),
+          regExp: RegExp(r"~~(([^~]|~(?!~))+)~~"),
           startTag: "<i>",
           endTag: "</i>"
       ),
       FormatPattern(
-          regExp: RegExp(r"--(.*?)--"),
+          regExp: RegExp(r"--(([^-]|-(?!-))+)--"),
           startTag: "<del>",
           endTag: "</del>"
       ),
       FormatPattern(
-          regExp: RegExp(r"`(.*?)`"),
+          regExp: RegExp(r"`(?!``)(.*)(?<!``)`"),
           startTag: "<code>",
           endTag: "</code>"
       ),
       FormatPattern(
-          regExp: RegExp(r"```(.*?)```"),
-          startTag: "<code>",
-          endTag: "</code>"
-      ),
-      FormatPattern(
-          regExp: RegExp(r"```(.*?)```"),
+          regExp: RegExp(r"```\n*((?:[^`]|`(?!``))*)\n*```"),
           startTag: "<code>",
           endTag: "</code>"
       ),
@@ -95,12 +98,12 @@ class FormattedText extends StatelessWidget {
       FormatPattern(
           regExp: RegExp(r"(\d{2}):(\d{2})"),
           startTag: "<time>",
-          endTag: "</time>"
+          endTag: "</time>",
+          group: 0
       ),
       FormatPattern(
-          regExp: RegExp(r"^( *|	*)-([ 	])(.*)", multiLine: true),
-          startTag: "\u2022 ",
-          group: 3
+          regExp: RegExp(r"^[ \t]*-[ \t]*(.*)", multiLine: true),
+          startTag: "\u2022 "
       ),
     ];
 
@@ -115,7 +118,8 @@ class FormattedText extends StatelessWidget {
 
     // Apply formatting
     for (final FormatPattern pattern in formatPatterns) {
-      formattedText = formattedText.replaceAllMapped(pattern.regExp, (match) => "${pattern.startTag}${match.group(pattern.group)}${pattern.endTag ?? ""}");
+      formattedText = formattedText.replaceAllMapped(pattern.regExp, (match) =>
+        "${pattern.startTag ?? ""}${convertByMap(match.group(pattern.group)!, pattern.map)}${pattern.endTag ?? ""}");
     }
 
     // Surround emails and links with <a> tag
@@ -147,8 +151,8 @@ class FormattedText extends StatelessWidget {
         "b": StyledTextTag(style: const TextStyle(fontWeight: FontWeight.bold)),
         "u": StyledTextTag(
             style: const TextStyle(decoration: TextDecoration.underline)),
-        "italic": StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
-        "remove": StyledTextTag(
+        "i": StyledTextTag(style: const TextStyle(fontStyle: FontStyle.italic)),
+        "del": StyledTextTag(
             style: const TextStyle(decoration: TextDecoration.lineThrough)),
         "code": StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
           padding: const EdgeInsets.only(top: 2, bottom: 2),
@@ -167,10 +171,6 @@ class FormattedText extends StatelessWidget {
             ),
           ),
         )),
-        "sub": StyledTextTag(
-            style: const TextStyle(fontFeatures: [FontFeature.subscripts()])),
-        "sup": StyledTextTag(
-            style: const TextStyle(fontFeatures: [FontFeature.superscripts()])),
         "date": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
