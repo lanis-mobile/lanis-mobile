@@ -1010,19 +1010,22 @@ class SPHclient {
     final String? start = requirementsGroup.querySelector("span.editable")?.text.trim().replaceAll(" ab", "");
     final String? deadline = requirementsGroup.querySelector("b span.editable")?.text.trim().replaceAll("  spätestens", "");
     final bool uploadMultipleFiles = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[0].text.trim() == "erlaubt" ? true : false;
-
     final bool uploadAnyNumberOfTimes = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[1].text.trim() == "erlaubt" ? true : false;
-    final String? visibility = requirementsGroup.querySelector("i.fa.fa-eye.fa-fw + span.label.label-warning")?.text.trim();
+    final String? visibility = requirementsGroup.querySelector("i.fa.fa-eye.fa-fw + span.label")?.text.trim() ?? requirementsGroup.querySelector("i.fa.fa-eye-slash.fa-fw + span.label")?.text.trim() ;
     final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
     final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
     final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
 
     final uploadForm = parsed.querySelector("div.col-md-7 form");
+    String? courseId;
+    String? entryId;
+    String? uploadId;
 
-    final String courseId = uploadForm!.querySelector("input[name='b']")!.attributes["value"]!;
-    print(courseId);
-    final String entryId = uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
-    final String uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
+    if (uploadForm != null) {
+      courseId = uploadForm.querySelector("input[name='b']")!.attributes["value"]!;
+      entryId = uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
+      uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
+    }
 
     return {
       "start": start,

@@ -72,45 +72,54 @@ class _UploadScreenState extends State<UploadScreen> {
                         ],
                       ),
                     ],
-                    FloatingActionButton(
-                      onPressed: () async {
-                        FilePickerResult? file = await FilePicker.platform.pickFiles(
-                            type: FileType.custom,
-                            allowedExtensions: snapshot.data["allowed_file_types"]
-                        );
+                    if (value < 5) ...[
+                      FloatingActionButton(
+                        onPressed: () async {
+                          FilePickerResult? file = await FilePicker.platform.pickFiles(
+                              type: FileType.custom,
+                              allowedExtensions: snapshot.data["allowed_file_types"],
+                          );
 
-                        final PlatformFile firstFile = file!.files.first;
+                          final PlatformFile firstFile = file!.files.first;
 
-                        if (!snapshot.data["allowed_file_types"].contains(firstFile.extension?.toUpperCase())) {
-                          return;
-                        }
+                          if (!snapshot.data["allowed_file_types"].contains(firstFile.extension?.toUpperCase())) {
+                            return;
+                          }
 
-                        // firstFile.extension only returns characters after the dot of the file name, not the MimeType
-                        final String? mimeType = lookupMimeType(firstFile.path!);
 
-                        if (mimeType == null) {
-                          return;
-                        }
+                          double maxFileSize = double.parse(snapshot.data["max_file_size"].replaceAll(",00 MB", "")) * 1000000;
 
-                        // MultipartFile doesn't accept a String, only MediaType
-                        final MediaType parsedMimeType = MediaType.parse(mimeType);
+                          if (firstFile.size > maxFileSize) {
+                            return;
+                          }
 
-                        final MultipartFile multipartFile = await MultipartFile.fromFile(
-                            firstFile.path!,
-                            filename: firstFile.name,
-                            contentType: parsedMimeType
-                        );
+                          // firstFile.extension only returns characters after the dot of the file name, not the MimeType
+                          final String? mimeType = lookupMimeType(firstFile.path!);
 
-                        _multipartFiles.add(multipartFile);
-                        _fileWidgets.add(
-                            ListTile(
-                              title: Text(firstFile.name),
-                              trailing: const Icon(Icons.remove),
-                            ));
-                        _addedFiles.value += 1;
-                      },
-                      child: const Icon(Icons.add),
-                    ),
+                          if (mimeType == null) {
+                            return;
+                          }
+
+                          // MultipartFile doesn't accept a String, only MediaType
+                          final MediaType parsedMimeType = MediaType.parse(mimeType);
+
+                          final MultipartFile multipartFile = await MultipartFile.fromFile(
+                              firstFile.path!,
+                              filename: firstFile.name,
+                              contentType: parsedMimeType
+                          );
+
+                          _multipartFiles.add(multipartFile);
+                          _fileWidgets.add(
+                              ListTile(
+                                title: Text(firstFile.name),
+                                trailing: const Icon(Icons.remove),
+                              ));
+                          _addedFiles.value += 1;
+                        },
+                        child: const Icon(Icons.add),
+                      ),
+                    ]
                   ],
                 );
               }
@@ -153,14 +162,33 @@ class _UploadScreenState extends State<UploadScreen> {
                   ValueListenableBuilder(
                       valueListenable: _addedFiles,
                       builder: (context, value, _) {
-                        if (value == 0) {
+                        if (value == 0 && snapshot.data["course_id"] == null) {
                           return Container(
                             padding: const EdgeInsets.all(12.0),
                             decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                                color: Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12)
                             ),
-                            child: const Text("Du hast noch keine Dateien hinzugefügt!"),
+                            child: const Text(
+                                "Die Abgabe ist noch nicht/nicht mehr möglich."),
+                          );
+                        } else if (value == 0) {
+                          return Container(
+                            padding: const EdgeInsets.all(12.0),
+                            decoration: BoxDecoration(
+                                color: Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12)
+                            ),
+                            child: const Text(
+                                "Du hast noch keine Dateien hinzugefügt!"),
                           );
                         } else {
                           return Container(
