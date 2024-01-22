@@ -167,7 +167,7 @@ class Cryptor {
 
   String decryptEncodedTags(String htmlString) {
     // Definiere das Muster für das <encoded> Tag
-    RegExp exp = RegExp(r'<encoded>(.*?)<\/encoded>');
+    RegExp exp = RegExp(r'(?<=<encoded>).*(?=</encoded>)');
 
     // Verwende die replaceAll-Funktion, um alle Übereinstimmungen zu ersetzen
     String replacedHtml = htmlString.replaceAllMapped(exp, (match) {
