@@ -38,7 +38,6 @@ class _UploadScreenState extends State<UploadScreen> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          print(snapshot.data["own_files"]);
           return Scaffold(
             appBar: AppBar(
               title: Text(widget.name),
@@ -180,6 +179,50 @@ class _UploadScreenState extends State<UploadScreen> {
                     title: Text("Maximale Dateigröße: ${snapshot.data["max_file_size"]}"),
                     leading: const Icon(Icons.description),
                   ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      itemCount: snapshot.data["public_files"].length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(snapshot.data["public_files"][index].name),
+                          subtitle: Text(snapshot.data["public_files"][index].person),
+                          onTap: () async {
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return const AlertDialog(
+                                    title: Text("Download..."),
+                                    content: Center(
+                                      heightFactor: 1.1,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                });
+                            client.downloadFile(snapshot.data["public_files"][index].url, snapshot.data["public_files"][index].name).then((filepath) {
+                              Navigator.of(context).pop();
+
+                              if (filepath == "") {
+                                showDialog(context: context, builder: (context) => AlertDialog(
+                                  title: const Text("Fehler!"),
+                                  content: Text("Beim Download der Datei ${snapshot.data["public_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                  actions: [TextButton(
+                                    child: const Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),],
+                                ));
+                              } else {
+                                OpenFile.open(filepath);
+                              }
+                            });
+                          },
+                        );
+                      }
+                  ),
+                  const Divider(),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const ClampingScrollPhysics(),

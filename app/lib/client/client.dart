@@ -1082,6 +1082,24 @@ class SPHclient {
       uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
     }
 
+    final publicFilesGroup = parsed.querySelector("div#content div.row div.col-md-5");
+    final List<PublicFile> publicFiles = [];
+
+    if (publicFilesGroup != null) {
+      for (final group in publicFilesGroup.querySelectorAll("ul li")) {
+        final fileIndex = RegExp(r"f=(\d+)");
+
+        publicFiles.add(
+            PublicFile(
+                name: group.querySelector("a")!.text.trim(),
+                url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
+                person: group.querySelector("span.label.label-info")!.text.trim(),
+                index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
+            )
+        );
+      }
+    }
+
     return {
       "start": start,
       "deadline": deadline,
@@ -1095,6 +1113,7 @@ class SPHclient {
       "entry_id": entryId,
       "upload_id": uploadId,
       "own_files": ownFiles,
+      "public_files": publicFiles
     };
   }
 
