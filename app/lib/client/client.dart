@@ -18,6 +18,7 @@ import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/themes.dart';
 
 import '../shared/shared_functions.dart';
+import '../shared/types/mein_unterricht.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -1001,10 +1002,48 @@ class SPHclient {
     }
   }
 
+  Future<dynamic> deleteUploadedFile({
+    required String course,
+    required String entry,
+    required String upload,
+    required String file,
+    required String userPasswordEncrypted
+  }) async {
+    final response = await dio.post(
+        "https://start.schulportal.hessen.de/meinunterricht.php",
+        data: {
+          "a": "sus_abgabe",
+          "d": "delete",
+          "b": course,
+          "e": entry,
+          "id": upload,
+          "f": file,
+          "pw": userPasswordEncrypted
+        },
+        options: Options(
+          headers: {
+            "Accept": "*/*",
+            "Content-Type":
+            "application/x-www-form-urlencoded; charset=UTF-8",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        )
+    );
+
+    // -1 Wrong password
+    // -2 Delete was not possible
+    // 0 Unknown error
+    // 1 Lanis had a good day
+    return response;
+  }
+
   Future<dynamic> getUploadInfo(String url) async {
     final response = await dio.get(url);
     final parsed = parse(response.data);
-    
+
     final requirementsGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[1];
 
     final String? start = requirementsGroup.querySelector("span.editable")?.text.trim().replaceAll(" ab", "");
@@ -1015,6 +1054,22 @@ class SPHclient {
     final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
     final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
     final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
+
+    final ownFilesGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[2];
+    final List<OwnFile> ownFiles = [];
+    for (final group in ownFilesGroup.querySelectorAll("ul li")) {
+      final fileIndex = RegExp(r"f=(\d+)");
+
+      ownFiles.add(
+        OwnFile(
+          name: group.querySelector("a")!.text.trim(),
+          url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
+          time: group.querySelector("small")!.text,
+          index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
+          comment: group.nodes.elementAtOrNull(10) != null ? group.nodes[10].text!.trim() : null
+        )
+      );
+    }
 
     final uploadForm = parsed.querySelector("div.col-md-7 form");
     String? courseId;
@@ -1038,7 +1093,8 @@ class SPHclient {
       "max_file_size": maxFileSize,
       "course_id": courseId,
       "entry_id": entryId,
-      "upload_id": uploadId
+      "upload_id": uploadId,
+      "own_files": ownFiles,
     };
   }
 

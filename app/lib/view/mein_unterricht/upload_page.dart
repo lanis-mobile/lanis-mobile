@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
+import 'package:open_file/open_file.dart';
 
 import '../../client/client.dart';
 
@@ -37,6 +38,7 @@ class _UploadScreenState extends State<UploadScreen> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          print(snapshot.data["own_files"]);
           return Scaffold(
             appBar: AppBar(
               title: Text(widget.name),
@@ -177,6 +179,89 @@ class _UploadScreenState extends State<UploadScreen> {
                   ListTile(
                     title: Text("Maximale Dateigröße: ${snapshot.data["max_file_size"]}"),
                     leading: const Icon(Icons.description),
+                  ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: snapshot.data["own_files"].length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(snapshot.data["own_files"][index].name),
+                        subtitle: snapshot.data["own_files"][index].comment != null ? Text(snapshot.data["own_files"][index].comment) : null,
+                        trailing: IconButton(
+                            onPressed: () async {
+                              final TextEditingController passwordController = TextEditingController();
+
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text("Gebe dein Passwort ein"),
+                                      content: TextField(
+                                        obscureText: true,
+                                        enableSuggestions: false,
+                                        autocorrect: false,
+                                        controller: passwordController,
+                                      ),
+                                      actions: [
+                                        ElevatedButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text("Zurück")
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              await client.deleteUploadedFile(
+                                                course: snapshot.data["course_id"],
+                                                entry: snapshot.data["entry_id"],
+                                                upload: snapshot.data["upload_id"],
+                                                file: snapshot.data["own_files"][index].index,
+                                                userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
+                                              );
+                                            },
+                                            child: const Text("Löschen")
+                                        ),
+                                      ],
+                                    );
+                                  }
+                              );
+                            },
+                            icon: const Icon(Icons.delete)
+                        ),
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return const AlertDialog(
+                                  title: Text("Download..."),
+                                  content: Center(
+                                    heightFactor: 1.1,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              });
+                          client.downloadFile(snapshot.data["own_files"][index].url, snapshot.data["own_files"][index].name).then((filepath) {
+                            Navigator.of(context).pop();
+
+                            if (filepath == "") {
+                              showDialog(context: context, builder: (context) => AlertDialog(
+                                title: const Text("Fehler!"),
+                                content: Text("Beim Download der Datei ${snapshot.data["own_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                actions: [TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),],
+                              ));
+                            } else {
+                              OpenFile.open(filepath);
+                            }
+                          });
+                        },
+                      );
+                    }
                   ),
                   ValueListenableBuilder(
                       valueListenable: _addedFiles,
