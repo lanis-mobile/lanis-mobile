@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../shared/marquee.dart';
 
@@ -43,6 +44,7 @@ class SubstitutionWidget extends StatelessWidget {
       dense: (doesNoticeExist(substitutionData["Vertreter"]) &&
           doesNoticeExist(substitutionData["Lehrer"]) &&
           doesNoticeExist(substitutionData["Raum"]) &&
+          doesNoticeExist(substitutionData["Fach"]) &&
           doesNoticeExist(substitutionData["Hinweis"])),
       title: Padding(
         padding: const EdgeInsets.only(top: 2),
@@ -114,16 +116,21 @@ class SubstitutionWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              if (!doesNoticeExist(substitutionData["Klasse"])) ...[
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.30,
+                  child: MarqueeWidget(
+                    child: Text(
+                      substitutionData["Klasse"],
+                      style: Theme.of(context).textTheme.titleMedium,
+                    )
+                  ),
+                ),
+              ],
               if (!doesNoticeExist(substitutionData["Fach"])) ...[
                 Text(
                   substitutionData["Fach"],
                   style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-              if (!doesNoticeExist(substitutionData["Klasse"])) ...[
-                Text(
-                  substitutionData["Klasse"],
-                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
               if (!doesNoticeExist(substitutionData['Stunde'])) ...[
