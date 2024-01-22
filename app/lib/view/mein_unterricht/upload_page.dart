@@ -23,7 +23,7 @@ class _UploadScreenState extends State<UploadScreen> {
   final ValueNotifier<int> _addedFiles = ValueNotifier(0); // Could also use a stream
 
   final List<MultipartFile> _multipartFiles = [];
-  final List<Widget> _fileWidgets = [];
+  final List<ListTile> _fileWidgets = [];
 
   @override
   void initState() {
@@ -72,7 +72,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         ],
                       ),
                     ],
-                    if (value < 5) ...[
+                    if (value < 5 && snapshot.data["course_id"] != null) ...[
                       FloatingActionButton(
                         onPressed: () async {
                           FilePickerResult? file = await FilePicker.platform.pickFiles(
@@ -86,11 +86,17 @@ class _UploadScreenState extends State<UploadScreen> {
                             return;
                           }
 
-
-                          double maxFileSize = double.parse(snapshot.data["max_file_size"].replaceAll(",00 MB", "")) * 1000000;
+                          num maxFileSize = num.parse(snapshot.data["max_file_size"].replaceAll("MB", "").replaceAll(",", ".")) * 1000000;
 
                           if (firstFile.size > maxFileSize) {
                             return;
+                          }
+
+                          // Only check for filename like Lanis.
+                          for (final element in _multipartFiles) {
+                            if (element.filename == firstFile.name) {
+                              return;
+                            }
                           }
 
                           // firstFile.extension only returns characters after the dot of the file name, not the MimeType
@@ -114,6 +120,19 @@ class _UploadScreenState extends State<UploadScreen> {
                               ListTile(
                                 title: Text(firstFile.name),
                                 trailing: const Icon(Icons.remove),
+                                onTap: () {
+                                  // We need to calculate the index dynamically because you can remove every tile at any index.
+                                  // Maybe there is a better way.
+                                  int tileIndex = _fileWidgets.indexWhere((ListTile element) {
+                                      final Text textWidget = element.title as Text;
+                                      final String text = textWidget.data!;
+
+                                      return text == firstFile.name;
+                                  });
+                                  _fileWidgets.removeAt(tileIndex);
+                                  _multipartFiles.removeAt(tileIndex);
+                                  _addedFiles.value -= 1;
+                                },
                               ));
                           _addedFiles.value += 1;
                         },
