@@ -172,7 +172,7 @@ class Cryptor {
     // Verwende die replaceAll-Funktion, um alle Übereinstimmungen zu ersetzen
     String replacedHtml = htmlString.replaceAllMapped(exp, (match) {
       // Extrahiere den Inhalt zwischen <encoded> und </encoded>
-      String? encodedContent = match.group(1);
+      String? encodedContent = match.group(0);
 
       // Entschlüssle den Inhalt und ersetze das Tag
       String? decryptedContent = decryptString(encodedContent!);
