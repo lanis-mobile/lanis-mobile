@@ -10,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/shared/types/dateispeicher_node.dart';
@@ -320,6 +321,41 @@ class SPHclient {
     }
   }
 
+  Future<dynamic> getVplanNonJSON() async {
+    debugPrint("Trying to get substitution plan using non-JSON parser");
+    DateFormat eingabeFormat = DateFormat('dd_mm_yyyy');
+    final Map fullPlan = {"dates": [], "entries": []};
+    final document = parse((await dio.get("https://start.schulportal.hessen.de/vertretungsplan.php")).data);
+    final dates = document.querySelectorAll("[data-tag]").map((element) => element.attributes["data-tag"]!);
+    for (var date in dates) {
+      final parsedDate = eingabeFormat.parse(date);
+      fullPlan["dates"].add(date.replaceAll("_", "."));
+      var entries = [];
+      final vtable = document.querySelector("#vtable$date");
+      if (vtable == null) {
+        return fullPlan;
+      }
+      final headers = vtable.querySelectorAll("th").map((e) => e.attributes["data-field"]!).toList(growable: false);
+      for (var row in vtable.querySelectorAll("tbody tr")) {
+        final fields = row.querySelectorAll("td");
+        var entry = {
+          "Stunde": headers.contains("Stunde") ? fields[headers.indexOf("Stunde")].text.trim() : "",
+          "Klasse": headers.contains("Klasse") ? fields[headers.indexOf("Klasse")].text.trim() : "",
+          "Vertreter": headers.contains("Vertretung") ? fields[headers.indexOf("Vertretung")].text.trim() : "",
+          "Lehrer": headers.contains("Lehrer") ? fields[headers.indexOf("Lehrer")].text.trim() : "",
+          "Art": headers.contains("Art") ? fields[headers.indexOf("Art")].text.trim() : "",
+          "Fach": headers.contains("Fach") ? fields[headers.indexOf("Fach")].text.trim() : "",
+          "Raum": headers.contains("Raum") ? fields[headers.indexOf("Raum")].text.trim() : "",
+          "Hinweis": headers.contains("Hinweis") ? fields[headers.indexOf("Hinweis")].text.trim() : "",
+          "Tag_en": parsedDate.format('yyyy-MM-dd')
+        };
+        entries.add(entry);
+      }
+      fullPlan["entries"].add(entries);
+    }
+    return fullPlan;
+  }
+
   Future<dynamic> getVplan(String date) async {
     debugPrint("Trying to get substitution plan for $date");
 
@@ -476,6 +512,10 @@ class SPHclient {
     
     try {
       var dates = await getVplanDates();
+
+      if (dates.length < 1) {
+        return getVplanNonJSON();
+      }
 
       final Map fullPlan = {"dates": [], "entries": []};
 
