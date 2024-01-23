@@ -1037,7 +1037,7 @@ class SPHclient {
     // -2 Delete was not possible
     // 0 Unknown error
     // 1 Lanis had a good day
-    return response;
+    return response.data;
   }
 
   Future<dynamic> getUploadInfo(String url) async {
@@ -1155,9 +1155,20 @@ class SPHclient {
         )
     );
 
-    print(response.statusCode);
+    final parsed = parse(response.data);
+    
+    final statusMessagesGroup = parsed.querySelectorAll("div#content div.col-md-12")[2];
 
-    return 1;
+    final List<FileStatus> statusMessages = [];
+    for (final statusMessage in statusMessagesGroup.querySelectorAll("ul li")) {
+      statusMessages.add(FileStatus(
+        name: statusMessage.querySelector("b")!.text.trim(),
+        status: statusMessage.querySelector("span.label")!.text.trim(),
+        message: statusMessage.nodes[4].text?.trim(),
+      ));
+    }
+
+    return statusMessages;
   }
 
   Future<void> uploadFileTest() async {

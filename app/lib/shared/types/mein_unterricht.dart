@@ -1,18 +1,30 @@
-class OwnFile {
+// Peak code design
+
+class UploadFile {
   final String name;
   final String url;
-  final String time;
   final String index;
-  String? comment;
 
-  OwnFile({required this.name, required this.url, required this.time, required this.index, this.comment});
+  UploadFile({required this.name, required this.url, required this.index});
 }
 
-class PublicFile {
-  final String name;
-  final String url;
-  final String index;
+class OwnFile extends UploadFile {
+  final String time;
+  final String? comment;
+
+  OwnFile({required super.name, required super.url, required super.index, required this.time, this.comment});
+}
+
+class PublicFile extends UploadFile {
   final String person;
 
-  PublicFile({required this.name, required this.url, required this.person, required this.index});
+  PublicFile({required super.name, required super.url, required super.index, required this.person});
+}
+
+class FileStatus {
+  final String name;
+  final String status; //erfolgreich or fehlgeschlagen
+  final String? message;
+
+  FileStatus({required this.name, required this.status, this.message});
 }

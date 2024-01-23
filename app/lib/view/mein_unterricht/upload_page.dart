@@ -26,11 +26,68 @@ class _UploadScreenState extends State<UploadScreen> {
   final List<MultipartFile> _multipartFiles = [];
   final List<ListTile> _fileWidgets = [];
 
+  void forceReloadPage() {
+    setState(() {
+      _future = client.getUploadInfo(widget.url);
+    });
+  }
+
   @override
   void initState() {
     _future = client.getUploadInfo(widget.url);
     super.initState();
   }
+
+  void showSnackbar({required String text, SnackBarAction? action}) {
+    if (mounted) {
+      // Hide the current SnackBar if one is already visible.
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(text),
+          duration: const Duration(seconds: 6),
+          action: action
+        ),
+      );
+    }
+  }
+
+  static const Divider indentedDivider = Divider(
+    indent: 16,
+    endIndent: 16,
+  );
+
+  Container uploadStatusContainer(String text) => Container(
+    padding: const EdgeInsets.all(12.0),
+    margin: const EdgeInsets.only(left: 16, right: 16, top: 4.0, bottom: 4.0),
+    decoration: BoxDecoration(
+        color: Theme
+            .of(context)
+            .colorScheme
+            .primary
+            .withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12)
+    ),
+    child: Text(
+      text,
+      style: Theme.of(context).textTheme.labelLarge,
+    ),
+  );
+
+  Container requirementsInfo(List<Widget> widgets) => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4.0),
+    padding: const EdgeInsets.symmetric(vertical: 2.0),
+    decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12)
+    ),
+    child: Column(
+      children: [
+        ...widgets
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +101,19 @@ class _UploadScreenState extends State<UploadScreen> {
             ),
             floatingActionButton: ValueListenableBuilder(
               valueListenable: _addedFiles,
-              builder: (_, value, __) {
+              builder: (_, filesLength, __) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if (value != 0) ...[
+                    if (filesLength != 0) ...[
                       Column(
                         children: [
                           FloatingActionButton(
                             onPressed: () async {
-                              await client.uploadFile(
+                              showSnackbar(text: "Versuche die Datei(en) hochzuladen...");
+
+                              List fileStatus = await client.uploadFile(
                                 course: snapshot.data["course_id"],
                                 entry: snapshot.data["entry_id"],
                                 upload: snapshot.data["upload_id"],
@@ -64,6 +123,57 @@ class _UploadScreenState extends State<UploadScreen> {
                                 file4: _multipartFiles.elementAtOrNull(3),
                                 file5: _multipartFiles.elementAtOrNull(4),
                               );
+
+                              int successfulUploads = 0;
+                              bool renamed = false;
+                              for (final status in fileStatus) {
+                                if (status.status == "erfolgreich") {
+                                  successfulUploads++;
+                                  if (status.message.contains("Datei mit gleichem Namen schon vorhanden.")) {
+                                    renamed = true;
+                                  }
+                                }
+                              }
+
+                              showSnackbar(
+                                  text: "$successfulUploads/${fileStatus.length} wurden erfolgreich hochgeladen. ${renamed == true ? 'Manche Dateien wurden jedoch umbenannt.' : ''}",
+                                  action: SnackBarAction(
+                                      label: "Mehr sehen",
+                                      onPressed: () {
+                                        // We render the Widgets before so we can have a dynamically sized AlertDialog.
+                                        final List<ListTile> fileStatusWidgets = [];
+
+                                        for (final status in fileStatus) {
+                                          fileStatusWidgets.add(ListTile(
+                                            leading: status.status == "erfolgreich" ? const Icon(Icons.done) : const Icon(Icons.error),
+                                            title: Text(status.name),
+                                            subtitle: status.message != null && status.message != "" ? Text(status.message) : null,
+                                          ));
+                                        }
+
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const Text("Mehr Details"),
+                                                content: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    ...fileStatusWidgets
+                                                  ],
+                                                )
+                                              );
+                                            }
+                                        );
+                                      }
+                                  )
+                              );
+
+                              _addedFiles.value = 0;
+                              _multipartFiles.clear();
+                              _fileWidgets.clear();
+
+                              forceReloadPage();
                             },
                             child: const Icon(Icons.upload),
                           ),
@@ -73,8 +183,14 @@ class _UploadScreenState extends State<UploadScreen> {
                         ],
                       ),
                     ],
-                    if (value < 5 && snapshot.data["course_id"] != null) ...[
-                      FloatingActionButton(
+                    if (filesLength < 5 && snapshot.data["course_id"] != null) ...[
+                      FloatingActionButton.extended(
+                        label: Text(
+                          "$filesLength / 5",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        icon: const Icon(Icons.add),
                         onPressed: () async {
                           FilePickerResult? file = await FilePicker.platform.pickFiles(
                               type: FileType.custom,
@@ -137,7 +253,6 @@ class _UploadScreenState extends State<UploadScreen> {
                               ));
                           _addedFiles.value += 1;
                         },
-                        child: const Icon(Icons.add),
                       ),
                     ]
                   ],
@@ -147,46 +262,100 @@ class _UploadScreenState extends State<UploadScreen> {
             body: SingleChildScrollView(
               child: Column(
                 children: [
-                  ListTile(
-                    title: Text("Ab ${snapshot.data["start"]}"),
-                    leading: const Icon(Icons.hourglass_top),
-                  ),
-                  ListTile(
-                    title: Text("Bis ${snapshot.data["deadline"]}"),
-                    leading: const Icon(Icons.hourglass_bottom),
-                  ),
-                  ListTile(
-                    title: Text("Hochladen mehrerer Dateien ${snapshot.data["upload_multiple_files"] ? 'möglich' : 'nicht möglich'}"),
-                    leading: snapshot.data["upload_multiple_files"] ? const Icon(Icons.file_upload) : const Icon(Icons.file_upload_off),
-                  ),
-                  ListTile(
-                    title: Text("Beliebig häufig hochladen ${snapshot.data["upload_any_number_of_times"] ? 'möglich' : 'nicht möglich'}"),
-                    leading: snapshot.data["upload_any_number_of_times"] ? const Icon(Icons.file_upload) : const Icon(Icons.file_upload_off),
-                  ),
-                  ListTile(
-                    title: Text("Dateien sichtbar für ${snapshot.data["visibility"]}"),
-                    leading: const Icon(Icons.visibility),
-                  ),
-                  ListTile(
-                    title: Text("Automatische Löschung am ${snapshot.data["automatic_deletion"]}"),
-                    leading: const Icon(Icons.delete_forever),
-                  ),
-                  ListTile(
-                    title: Text("Erlaubte Dateitypen: ${snapshot.data["allowed_file_types"].toString().substring(1, snapshot.data["allowed_file_types"].toString().length - 1)}"),
-                    leading: const Icon(Icons.description),
-                  ),
-                  ListTile(
-                    title: Text("Maximale Dateigröße: ${snapshot.data["max_file_size"]}"),
-                    leading: const Icon(Icons.description),
-                  ),
+                  requirementsInfo([
+                    ListTile(
+                      title: const Text(
+                          "Start",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["start"]
+                      ),
+                      leading: const Icon(Icons.hourglass_top),
+                    ),
+                    ListTile(
+                      title: const Text(
+                          "Ende",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["deadline"]
+                      ),
+                      leading: const Icon(Icons.hourglass_bottom),
+                    ),
+                  ]),
+                  requirementsInfo([
+                    ListTile(
+                      title: const Text(
+                          "Hochladen mehrerer Dateien",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["upload_multiple_files"] ? 'Möglich' : 'Nicht möglich',
+                      ),
+                      leading: snapshot.data["upload_multiple_files"] ? const Icon(Icons.file_upload) : const Icon(Icons.file_upload_off),
+                    ),
+                    ListTile(
+                      title: const Text(
+                          "Beliebig häufig hochladen",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["upload_any_number_of_times"] ? 'Möglich' : 'Nicht möglich'
+                      ),
+                      leading: snapshot.data["upload_any_number_of_times"] ? const Icon(Icons.file_upload) : const Icon(Icons.file_upload_off),
+                    ),
+                  ]),
+                  requirementsInfo([
+                    ListTile(
+                      title: Text(
+                          "Dateien sichtbar für ${snapshot.data["visibility"]}",
+                      ),
+                      leading: const Icon(Icons.visibility),
+                    ),
+                    ListTile(
+                      title: const Text(
+                          "Automatische Löschung",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["automatic_deletion"]
+                      ),
+                      leading: const Icon(Icons.delete_forever),
+                    ),
+                  ]),
+                  requirementsInfo([
+                    ListTile(
+                      title: const Text(
+                        "Erlaubte Dateitypen",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["allowed_file_types"].toString().substring(1, snapshot.data["allowed_file_types"].toString().length - 1)
+                      ),
+                      leading: const Icon(Icons.description),
+                    ),
+                    ListTile(
+                      title: const Text(
+                          "Maximale Dateigröße",
+                      ),
+                      subtitle: Text(
+                          snapshot.data["max_file_size"]
+                      ),
+                      leading: const Icon(Icons.description),
+                    ),
+                  ]),
+                  if (snapshot.data["public_files"].length != 0) ...[
+                    indentedDivider
+                  ],
                   ListView.builder(
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
                       itemCount: snapshot.data["public_files"].length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(snapshot.data["public_files"][index].name),
-                          subtitle: Text(snapshot.data["public_files"][index].person),
+                          title: Text(
+                              snapshot.data["public_files"][index].name,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          subtitle: Text(
+                              snapshot.data["public_files"][index].person,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                           onTap: () async {
                             showDialog(
                                 context: context,
@@ -222,19 +391,48 @@ class _UploadScreenState extends State<UploadScreen> {
                         );
                       }
                   ),
-                  const Divider(),
+                  indentedDivider,
+                  if (snapshot.data["own_files"].length == 0) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      margin: const EdgeInsets.only(left: 16, right: 16, top: 4.0, bottom: 4.0),
+                      decoration: BoxDecoration(
+                          color: Theme
+                              .of(context)
+                              .colorScheme
+                              .secondary
+                              .withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(
+                        "Du hast noch nichts/gar nichts abgegeben!",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    )
+                  ],
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const ClampingScrollPhysics(),
                     itemCount: snapshot.data["own_files"].length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(snapshot.data["own_files"][index].name),
-                        subtitle: snapshot.data["own_files"][index].comment != null ? Text(snapshot.data["own_files"][index].comment) : null,
+                        title: Text(
+                            snapshot.data["own_files"][index].name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                snapshot.data["own_files"][index].time,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            if (snapshot.data["own_files"][index].comment != null) Text(snapshot.data["own_files"][index].comment)
+                          ],
+                        ),
                         trailing: IconButton(
                             onPressed: () async {
                               final TextEditingController passwordController = TextEditingController();
-
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -254,13 +452,30 @@ class _UploadScreenState extends State<UploadScreen> {
                                         ElevatedButton(
                                             onPressed: () async {
                                               Navigator.pop(context);
-                                              await client.deleteUploadedFile(
+
+                                              showSnackbar(text: "Versuche die Datei(en) zu löschen...");
+
+                                              dynamic response = await client.deleteUploadedFile(
                                                 course: snapshot.data["course_id"],
                                                 entry: snapshot.data["entry_id"],
                                                 upload: snapshot.data["upload_id"],
                                                 file: snapshot.data["own_files"][index].index,
                                                 userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
                                               );
+
+                                              String message = "Ein unbekannter Fehler entstand beim Löschen!";
+
+                                              if (response == "-1") {
+                                                message = "Falsches Passwort!";
+                                              } else if (response == "-2") {
+                                                message = "Das Löschen der Datei war nicht möglich!";
+                                              } else if (response == "1") {
+                                                message = "Die Datei wurde erfolgreich gelöscht!";
+                                              }
+
+                                              showSnackbar(text: "$message ($response)");
+
+                                              forceReloadPage();
                                             },
                                             child: const Text("Löschen")
                                         ),
@@ -306,44 +521,21 @@ class _UploadScreenState extends State<UploadScreen> {
                       );
                     }
                   ),
+                  indentedDivider,
                   ValueListenableBuilder(
                       valueListenable: _addedFiles,
                       builder: (context, value, _) {
                         if (value == 0 && snapshot.data["course_id"] == null) {
-                          return Container(
-                            padding: const EdgeInsets.all(12.0),
-                            decoration: BoxDecoration(
-                                color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12)
-                            ),
-                            child: const Text(
-                                "Die Abgabe ist noch nicht/nicht mehr möglich."),
-                          );
+                          return uploadStatusContainer("Die Abgabe ist noch nicht/nicht mehr möglich.");
                         } else if (value == 0) {
-                          return Container(
-                            padding: const EdgeInsets.all(12.0),
-                            decoration: BoxDecoration(
-                                color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12)
-                            ),
-                            child: const Text(
-                                "Du hast noch keine Dateien hinzugefügt!"),
-                          );
+                          return uploadStatusContainer("Du hast noch keine Dateien hinzugefügt!");
                         } else {
                           return Container(
                               margin: const EdgeInsets.only(
-                                top: 8,
-                                bottom: 8,
-                                left: 20,
-                                right: 20
+                                  top: 8,
+                                  bottom: 8,
+                                  left: 20,
+                                  right: 20
                               ),
                               decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
@@ -353,18 +545,15 @@ class _UploadScreenState extends State<UploadScreen> {
                                 children: [
                                   ..._fileWidgets,
                                   if (value != 5) ...[
-                                    Text(
-                                      "Noch ${5 - value} von 5 hinzufügbar",
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context).textTheme.labelLarge,
-                                    )
+
                                   ]
                                 ],
                               )
                           );
                         }
                       }
-                  )
+                  ),
+                  SizedBox.fromSize(size: const Size(0, 104),)
                 ],
               ),
             ),
