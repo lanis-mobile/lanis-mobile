@@ -132,16 +132,19 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               FilledButton(
-                                  onPressed: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => UploadScreen(
-                                          url: upload["link"],
-                                          name: upload["name"],
-                                          status: "open"
+                                  onPressed: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => UploadScreen(
+                                            url: upload["link"],
+                                            name: upload["name"],
+                                            status: "open"
+                                        ),
                                       ),
-                                    ),
-                                  ),
+                                    );
+                                    setState(() {_loadData();});
+                                  },
                                   child: Wrap(
                                     crossAxisAlignment: WrapCrossAlignment.center,
                                     spacing: 8,
