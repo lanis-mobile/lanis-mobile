@@ -133,6 +133,7 @@ class _UploadScreenState extends State<UploadScreen> {
                       Column(
                         children: [
                           FloatingActionButton(
+                            heroTag: null,
                             onPressed: () async {
                               if (snapshot.data["upload_multiple_files"] == false || snapshot.data["upload_any_number_of_times"] == false) {
                                 showDialog(
@@ -246,6 +247,7 @@ class _UploadScreenState extends State<UploadScreen> {
                     ],
                     if (filesLength < 5 && snapshot.data["course_id"] != null) ...[
                       FloatingActionButton.extended(
+                        heroTag: null,
                         label: Text(
                           "$filesLength / 5",
                           textAlign: TextAlign.center,
