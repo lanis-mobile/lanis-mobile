@@ -336,7 +336,7 @@ class SPHclient {
         return fullPlan;
       }
       final headers = vtable.querySelectorAll("th").map((e) => e.attributes["data-field"]!).toList(growable: false);
-      for (var row in vtable.querySelectorAll("tbody tr")) {
+      for (var row in vtable.querySelectorAll("tbody tr").where((element) => element.querySelectorAll("td[colspan]").isEmpty)) {
         final fields = row.querySelectorAll("td");
         var entry = {
           "Stunde": headers.contains("Stunde") ? fields[headers.indexOf("Stunde")].text.trim() : "",
