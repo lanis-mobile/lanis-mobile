@@ -23,7 +23,7 @@ import 'package:sph_plan/themes.dart';
 import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
 import '../shared/types/fach.dart';
-import '../shared/types/mein_unterricht.dart';
+import '../shared/types/upload.dart';
 
 class SPHclient {
   final statusCodes = {

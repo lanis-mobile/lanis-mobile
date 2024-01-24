@@ -172,6 +172,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                     MaterialPageRoute(
                                         builder: (context) {
                                           return Scaffold(
+                                            appBar: AppBar(),
                                             body: ErrorView(
                                                 data: fileStatus,
                                                 name: "Hochladen von einer Datei/Dateien",
@@ -559,6 +560,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                     MaterialPageRoute(
                                                         builder: (context) {
                                                           return Scaffold(
+                                                            appBar: AppBar(),
                                                             body: ErrorView(
                                                                 data: response,
                                                                 name: "Löschen einer Datei",
