@@ -223,7 +223,13 @@ class _UploadScreenState extends State<UploadScreen> {
                                                   children: [
                                                     ...fileStatusWidgets
                                                   ],
-                                                )
+                                                ),
+                                                actions: [
+                                                  FilledButton(
+                                                      onPressed: () => Navigator.of(context).pop(),
+                                                      child: const Text("Zurück")
+                                                  )
+                                                ],
                                               );
                                             }
                                         );
