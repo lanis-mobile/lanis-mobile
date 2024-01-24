@@ -1009,112 +1009,130 @@ class SPHclient {
     required String file,
     required String userPasswordEncrypted
   }) async {
-    final response = await dio.post(
-        "https://start.schulportal.hessen.de/meinunterricht.php",
-        data: {
-          "a": "sus_abgabe",
-          "d": "delete",
-          "b": course,
-          "e": entry,
-          "id": upload,
-          "f": file,
-          "pw": userPasswordEncrypted
-        },
-        options: Options(
-          headers: {
-            "Accept": "*/*",
-            "Content-Type":
-            "application/x-www-form-urlencoded; charset=UTF-8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-            "X-Requested-With": "XMLHttpRequest",
+    try {
+      final response = await dio.post(
+          "https://start.schulportal.hessen.de/meinunterricht.php",
+          data: {
+            "a": "sus_abgabe",
+            "d": "delete",
+            "b": course,
+            "e": entry,
+            "id": upload,
+            "f": file,
+            "pw": userPasswordEncrypted
           },
-        )
-    );
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          )
+      );
 
-    // -1 Wrong password
-    // -2 Delete was not possible
-    // 0 Unknown error
-    // 1 Lanis had a good day
-    return response.data;
+      // "-1" Wrong password
+      // "-2" Delete was not possible
+      // "0" Unknown error
+      // "1" Lanis had a good day
+      return response.data;
+     }on (SocketException, DioException) {
+      return -3;
+      // network error
+    } catch (e, stack) {
+      recordError(e, stack);
+      return -4;
+      // unknown error
+    }
   }
 
   Future<dynamic> getUploadInfo(String url) async {
-    final response = await dio.get(url);
-    final parsed = parse(response.data);
+    try {
+      final response = await dio.get(url);
+      final parsed = parse(response.data);
 
-    final requirementsGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[1];
+      final requirementsGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[1];
 
-    final String? start = requirementsGroup.querySelector("span.editable")?.text.trim().replaceAll(" ab", "");
-    final String? deadline = requirementsGroup.querySelector("b span.editable")?.text.trim().replaceAll("  spätestens", "");
-    final bool uploadMultipleFiles = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[0].text.trim() == "erlaubt" ? true : false;
-    final bool uploadAnyNumberOfTimes = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[1].text.trim() == "erlaubt" ? true : false;
-    final String? visibility = requirementsGroup.querySelector("i.fa.fa-eye.fa-fw + span.label")?.text.trim() ?? requirementsGroup.querySelector("i.fa.fa-eye-slash.fa-fw + span.label")?.text.trim() ;
-    final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
-    final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
-    final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
+      final String? start = requirementsGroup.querySelector("span.editable")?.text.trim().replaceAll(" ab", "");
+      final String? deadline = requirementsGroup.querySelector("b span.editable")?.text.trim().replaceAll("  spätestens", "");
+      final bool uploadMultipleFiles = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[0].text.trim() == "erlaubt" ? true : false;
+      final bool uploadAnyNumberOfTimes = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[1].text.trim() == "erlaubt" ? true : false;
+      final String? visibility = requirementsGroup.querySelector("i.fa.fa-eye.fa-fw + span.label")?.text.trim() ?? requirementsGroup.querySelector("i.fa.fa-eye-slash.fa-fw + span.label")?.text.trim() ;
+      final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
+      final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
+      final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
 
-    final ownFilesGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[2];
-    final List<OwnFile> ownFiles = [];
-    for (final group in ownFilesGroup.querySelectorAll("ul li")) {
-      final fileIndex = RegExp(r"f=(\d+)");
-
-      ownFiles.add(
-        OwnFile(
-          name: group.querySelector("a")!.text.trim(),
-          url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
-          time: group.querySelector("small")!.text,
-          index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
-          comment: group.nodes.elementAtOrNull(10) != null ? group.nodes[10].text!.trim() : null
-        )
-      );
-    }
-
-    final uploadForm = parsed.querySelector("div.col-md-7 form");
-    String? courseId;
-    String? entryId;
-    String? uploadId;
-
-    if (uploadForm != null) {
-      courseId = uploadForm.querySelector("input[name='b']")!.attributes["value"]!;
-      entryId = uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
-      uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
-    }
-
-    final publicFilesGroup = parsed.querySelector("div#content div.row div.col-md-5");
-    final List<PublicFile> publicFiles = [];
-
-    if (publicFilesGroup != null) {
-      for (final group in publicFilesGroup.querySelectorAll("ul li")) {
+      final ownFilesGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[2];
+      final List<OwnFile> ownFiles = [];
+      for (final group in ownFilesGroup.querySelectorAll("ul li")) {
         final fileIndex = RegExp(r"f=(\d+)");
 
-        publicFiles.add(
-            PublicFile(
+        ownFiles.add(
+            OwnFile(
+                name: group.querySelector("a")!.text.trim(),
+                url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
+                time: group.querySelector("small")!.text,
+                index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
+                comment: group.nodes.elementAtOrNull(10) != null ? group.nodes[10].text!.trim() : null
+            )
+        );
+      }
+
+      final uploadForm = parsed.querySelector("div.col-md-7 form");
+      String? courseId;
+      String? entryId;
+      String? uploadId;
+
+      if (uploadForm != null) {
+        courseId = uploadForm.querySelector("input[name='b']")!.attributes["value"]!;
+        entryId = uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
+        uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
+      }
+
+      final publicFilesGroup = parsed.querySelector("div#content div.row div.col-md-5");
+      final List<PublicFile> publicFiles = [];
+
+      if (publicFilesGroup != null) {
+        for (final group in publicFilesGroup.querySelectorAll("ul li")) {
+          final fileIndex = RegExp(r"f=(\d+)");
+
+          publicFiles.add(
+              PublicFile(
                 name: group.querySelector("a")!.text.trim(),
                 url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
                 person: group.querySelector("span.label.label-info")!.text.trim(),
                 index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
-            )
-        );
+              )
+          );
+        }
       }
-    }
 
-    return {
-      "start": start,
-      "deadline": deadline,
-      "upload_multiple_files": uploadMultipleFiles,
-      "upload_any_number_of_times": uploadAnyNumberOfTimes,
-      "visibility": visibility,
-      "automatic_deletion": automaticDeletion,
-      "allowed_file_types": allowedFileTypes,
-      "max_file_size": maxFileSize,
-      "course_id": courseId,
-      "entry_id": entryId,
-      "upload_id": uploadId,
-      "own_files": ownFiles,
-      "public_files": publicFiles
-    };
+      return {
+        "start": start,
+        "deadline": deadline,
+        "upload_multiple_files": uploadMultipleFiles,
+        "upload_any_number_of_times": uploadAnyNumberOfTimes,
+        "visibility": visibility,
+        "automatic_deletion": automaticDeletion,
+        "allowed_file_types": allowedFileTypes,
+        "max_file_size": maxFileSize,
+        "course_id": courseId,
+        "entry_id": entryId,
+        "upload_id": uploadId,
+        "own_files": ownFiles,
+        "public_files": publicFiles
+      };
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
+    } catch (e, stack) {
+      recordError(e, stack);
+      return -4;
+      // unknown error
+    }
   }
 
   Future<dynamic> uploadFile(
@@ -1129,84 +1147,54 @@ class SPHclient {
         MultipartFile? file5,
       }) async {
 
-    final FormData uploadData = FormData.fromMap({
-      "a": "sus_abgabe",
-      "b": course,
-      "e": entry,
-      "id": upload,
-      "file1": file1,
-      "file2": file2,
-      "file3": file3,
-      "file4": file4,
-      "file5": file5
-    });
+    try {
+      final FormData uploadData = FormData.fromMap({
+        "a": "sus_abgabe",
+        "b": course,
+        "e": entry,
+        "id": upload,
+        "file1": file1,
+        "file2": file2,
+        "file3": file3,
+        "file4": file4,
+        "file5": file5
+      });
 
-    final response = await dio.post(
-        "https://start.schulportal.hessen.de/meinunterricht.php",
-        data: uploadData,
-        options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type": "multipart/form-data;",
-              "Sec-Fetch-Dest": "document",
-              "Sec-Fetch-Mode": "navigate",
-              "Sec-Fetch-Site": "same-origin",
-            }
-        )
-    );
+      final response = await dio.post(
+          "https://start.schulportal.hessen.de/meinunterricht.php",
+          data: uploadData,
+          options: Options(
+              headers: {
+                "Accept": "*/*",
+                "Content-Type": "multipart/form-data;",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+              }
+          )
+      );
 
-    final parsed = parse(response.data);
-    
-    final statusMessagesGroup = parsed.querySelectorAll("div#content div.col-md-12")[2];
+      final parsed = parse(response.data);
 
-    final List<FileStatus> statusMessages = [];
-    for (final statusMessage in statusMessagesGroup.querySelectorAll("ul li")) {
-      statusMessages.add(FileStatus(
-        name: statusMessage.querySelector("b")!.text.trim(),
-        status: statusMessage.querySelector("span.label")!.text.trim(),
-        message: statusMessage.nodes[4].text?.trim(),
-      ));
-    }
+      final statusMessagesGroup = parsed.querySelectorAll("div#content div.col-md-12")[2];
 
-    return statusMessages;
-  }
+      final List<FileStatus> statusMessages = [];
+      for (final statusMessage in statusMessagesGroup.querySelectorAll("ul li")) {
+        statusMessages.add(FileStatus(
+          name: statusMessage.querySelector("b")!.text.trim(),
+          status: statusMessage.querySelector("span.label")!.text.trim(),
+          message: statusMessage.nodes[4].text?.trim(),
+        ));
+      }
 
-  Future<void> uploadFileTest() async {
-    debugPrint("upload file");
-
-    final MultipartFile testFile =  MultipartFile.fromString("LOREMIPSUM", filename: "dio-test.txt", contentType: MediaType.parse("text/plain"));
-
-    final FormData testData = FormData.fromMap({
-      "a": "sus_abgabe",
-      "b": "4081",
-      "e": "17",
-      "id": "2",
-      "file1": testFile,
-      "file2": testFile.clone(),
-      "file3": MultipartFile.fromString("fdsfsdf", filename: "falsche-datei.testificate")
-    });
-
-    final response = await dio.post(
-      "https://start.schulportal.hessen.de/meinunterricht.php",
-      data: testData,
-      options: Options(
-        headers: {
-          "Accept": "*/*",
-          "Content-Type": "multipart/form-data;",
-          "Sec-Fetch-Dest": "document",
-          "Sec-Fetch-Mode": "navigate",
-          "Sec-Fetch-Site": "same-origin",
-        }
-      )
-    );
-
-    final resultPage = parse(response.data);
-
-    print(resultPage.querySelectorAll("div#content div.row div.col-md-12")[2].text);
-    final resultElements = resultPage.querySelectorAll("div#content div.row div.col-md-12")[2].querySelectorAll("ul li");
-
-    for (final uploadResult in resultElements) {
-      print("filename: ${uploadResult.querySelector('b')?.text}, result: ${uploadResult.querySelector('span')?.text}, message: ${uploadResult.nodes.last.text?.trim()}");
+      return statusMessages;
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
+    } catch (e, stack) {
+      recordError(e, stack);
+      return -4;
+      // unknown error
     }
   }
 

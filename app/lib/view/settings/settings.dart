@@ -107,26 +107,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.bug_report),
-            title: const Text('debug'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Scaffold(
-                  appBar: AppBar(
-                    title: const Text("Test"),
-                  ),
-                  body: ElevatedButton(
-                      onPressed: () async {
-                        await client.uploadFileTest();
-                      },
-                      child: const Text("upload test")
-                  ),
-                )),
-              );
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('App Zurücksetzen | Ausloggen'),
             onTap: () => showDialog<String>(

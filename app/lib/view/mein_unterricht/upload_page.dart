@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
 import 'package:open_file/open_file.dart';
+import 'package:sph_plan/shared/errorView.dart';
 
 import '../../client/client.dart';
 
@@ -96,6 +97,19 @@ class _UploadScreenState extends State<UploadScreen> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.data is int) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(widget.name),
+              ),
+              body: ErrorView(
+                  data: snapshot.data,
+                  name: "einer Abgabe",
+                  fetcher: null
+              ),
+            );
+          }
+
           final DateTime startDate = DateFormat("EEEE d.M.yy H:mm", "de").parse(snapshot.data["start"].replaceAll(",", "").replaceAll(" den", "").replaceAll(" Uhr", ""));
           final DateTime now = DateTime.now();
 
@@ -120,7 +134,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         children: [
                           FloatingActionButton(
                             onPressed: () async {
-                              if (snapshot.data["upload_multiple_files"] == true || snapshot.data["upload_any_number_of_times"] == false) {
+                              if (snapshot.data["upload_multiple_files"] == false || snapshot.data["upload_any_number_of_times"] == false) {
                                 showDialog(
                                     context: context,
                                     builder: (context) {
@@ -141,7 +155,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                               showSnackbar(text: "Versuche die Datei(en) hochzuladen...");
 
-                              List fileStatus = await client.uploadFile(
+                              final dynamic fileStatus = await client.uploadFile(
                                 course: snapshot.data["course_id"],
                                 entry: snapshot.data["entry_id"],
                                 upload: snapshot.data["upload_id"],
@@ -151,6 +165,24 @@ class _UploadScreenState extends State<UploadScreen> {
                                 file4: _multipartFiles.elementAtOrNull(3),
                                 file5: _multipartFiles.elementAtOrNull(4),
                               );
+
+                              if (fileStatus is int) {
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) {
+                                          return Scaffold(
+                                            body: ErrorView(
+                                                data: fileStatus,
+                                                name: "Hochladen von einer Datei/Dateien",
+                                                fetcher: null
+                                            ),
+                                          );
+                                        }
+                                    )
+                                );
+                                return;
+                              }
 
                               int successfulUploads = 0;
                               bool renamed = false;
@@ -520,6 +552,24 @@ class _UploadScreenState extends State<UploadScreen> {
                                                 file: snapshot.data["own_files"][index].index,
                                                 userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
                                               );
+
+                                              if (response is int) {
+                                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) {
+                                                          return Scaffold(
+                                                            body: ErrorView(
+                                                                data: response,
+                                                                name: "Löschen einer Datei",
+                                                                fetcher: null
+                                                            ),
+                                                          );
+                                                        }
+                                                    )
+                                                );
+                                                return;
+                                              }
 
                                               String message = "Ein unbekannter Fehler entstand beim Löschen!";
 
