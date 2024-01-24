@@ -119,7 +119,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
       data.forEach((key, value) {
         if (key == "-sus") {
-          targetGroup += "${value.replaceAll(RegExp(r"amp;"), "")}";
+          targetGroup += value.replaceAll("amp;", "").toString();
           return;
         }
         targetGroup += "$value, ";
@@ -267,7 +267,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                       debugPrint("${link.url} konnte nicht geöffnet werden.");
                     }
                   },
-                  text: calendarData.data["description"].replaceAll(RegExp(r"<br />"), ""),
+                  text: calendarData.data["description"].replaceAll("<br />", "\n"),
                   style: Theme.of(context).textTheme.bodyLarge,
                   linkStyle: Theme.of(context)
                       .textTheme

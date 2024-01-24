@@ -50,6 +50,13 @@ class _AboutScreenState extends State<AboutScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Made with love by @CodeSpoof'),
+            onTap: () {
+              launchUrl(Uri.parse("https://github.com/CodeSpoof"));
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.add_comment),
             title: const Text('Feature Request'),
             onTap: () {
