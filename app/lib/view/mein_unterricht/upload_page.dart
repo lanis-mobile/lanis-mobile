@@ -120,6 +120,25 @@ class _UploadScreenState extends State<UploadScreen> {
                         children: [
                           FloatingActionButton(
                             onPressed: () async {
+                              if (snapshot.data["upload_multiple_files"] == true || snapshot.data["upload_any_number_of_times"] == false) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text("Hochladen nicht möglich!"),
+                                        content: const Text("Bei dieser Abgabe ist das Hochladen mehrerer Dateien oder beliebig häufiger Dateien nicht möglich und da wir dafür noch keine Unterstützung anbieten, kannst du gerade per App noch nichts hochladen."),
+                                        actions: [
+                                          FilledButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: const Text("Zurück"),
+                                          )
+                                        ],
+                                      );
+                                    },
+                                );
+                                return;
+                              }
+
                               showSnackbar(text: "Versuche die Datei(en) hochzuladen...");
 
                               List fileStatus = await client.uploadFile(
@@ -209,18 +228,21 @@ class _UploadScreenState extends State<UploadScreen> {
                           final PlatformFile firstFile = file!.files.first;
 
                           if (!snapshot.data["allowed_file_types"].contains(firstFile.extension?.toUpperCase())) {
+                            showSnackbar(text: "Die Datei hat keinen erlaubten Dateityp!");
                             return;
                           }
 
                           num maxFileSize = num.parse(snapshot.data["max_file_size"].replaceAll("MB", "").replaceAll(",", ".")) * 1000000;
 
                           if (firstFile.size > maxFileSize) {
+                            showSnackbar(text: "Die Datei hat die maximale Dateigröße überschritten!");
                             return;
                           }
 
                           // Only check for filename like Lanis.
                           for (final element in _multipartFiles) {
                             if (element.filename == firstFile.name) {
+                              showSnackbar(text: "Der Name der Datei gibt es schon!");
                               return;
                             }
                           }
@@ -229,6 +251,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           final String? mimeType = lookupMimeType(firstFile.path!);
 
                           if (mimeType == null) {
+                            showSnackbar(text: "Beim Herausfinden des Dateityps ist ein Fehler entstanden!");
                             return;
                           }
 
