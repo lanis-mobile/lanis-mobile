@@ -118,29 +118,55 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     ));
                   });
 
-                  List<ButtonStyleButton> uploads = [];
+                  List<Widget> uploads = [];
                   data["historie"][index]["uploads"].forEach((upload) {
                     if (upload["status"] == "open") {
                       uploads.add(
-                        FilledButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => UploadScreen(
-                                    url: upload["link"],
-                                    name: upload["name"],
-                                    status: "open"
-                                ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                            borderRadius: BorderRadius.circular(20)
+                          ),
+                          height: 40,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              FilledButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UploadScreen(
+                                          url: upload["link"],
+                                          name: upload["name"],
+                                          status: "open"
+                                      ),
+                                    ),
+                                  ),
+                                  child: Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    children: [
+                                      const Icon(Icons.upload, size: 20,),
+                                      Text(upload["name"]),
+                                      if (upload["uploaded"] != null) ...[
+                                        Badge(
+                                          backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                                          label: Text(
+                                            upload["uploaded"],
+                                            style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                          largeSize: 20,
+                                        )
+                                      ]
+                                    ],
+                                  )
                               ),
-                            ),
-                            child: Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 8,
-                              children: [
-                                const Icon(Icons.upload, size: 20,),
-                                Text(upload["name"])
-                              ],
-                            )
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12.0, right: 24.0),
+                                child: Text(upload["date"]),
+                              )
+                            ],
+                          )
                         )
                       );
                     } else {
@@ -161,7 +187,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                               spacing: 8,
                               children: [
                                 const Icon(Icons.file_upload_off, size: 18,),
-                                Text(upload["name"])
+                                Text(upload["name"]),
+                                if (upload["uploaded"] != null) ...[
+                                  Badge(
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    label: Text(
+                                      upload["uploaded"],
+                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                                    ),
+                                    largeSize: 20,
+                                  )
+                                ]
                               ],
                             )
                         )

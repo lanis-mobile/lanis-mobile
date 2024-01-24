@@ -969,13 +969,17 @@ class SPHclient {
               uploads.add({
                 "name": openUpload.nodes[2].text?.trim(),
                 "status": "open",
-                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!
+                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!,
+                "uploaded": openUpload.querySelector("span.badge")?.text,
+                "date": openUpload.querySelector("small")?.text.replaceAll("\n", "").replaceAll("                                                                ", "").replaceAll("bis ", "").replaceAll("um", ""),
               });
             } else if (closedUpload != null) {
               uploads.add({
                 "name": closedUpload.nodes[2].text?.trim(),
                 "status": "closed",
-                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!
+                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!,
+                "uploaded": closedUpload.querySelector("span.badge")?.text,
+                "date": null,
               });
             }
           }
