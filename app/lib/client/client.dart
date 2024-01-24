@@ -1094,7 +1094,7 @@ class SPHclient {
     var bytes = utf8.encode(source);
     var digest = sha256.convert(bytes);
 
-    var shortHash = digest.toString().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').substring(0, 6);
+    var shortHash = digest.toString().replaceAll(RegExp(r'[^A-z0-9]'), '').substring(0, 6);
 
     return shortHash;
   }
