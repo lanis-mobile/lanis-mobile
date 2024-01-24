@@ -26,6 +26,20 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   final GlobalKey<RefreshIndicatorState> _presenceIndicatorKey =
   GlobalKey<RefreshIndicatorState>();
 
+  final Widget noDataScreen = const Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.search,
+          size: 60,
+        ),
+        Text("Keine Kurse gefunden.")
+      ],
+    ),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +59,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
       onRefresh: () async {
         client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
-      child: ListView.builder(
+      child: presence.length != 0 ? ListView.builder(
         itemCount: presence.length,
         itemBuilder: (BuildContext context, int index) {
           List<String> keysNotRender = [
@@ -103,7 +117,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 ),
               ));
         },
-      ),
+      ) : noDataScreen
     );
   }
 
@@ -113,7 +127,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
       onRefresh: () async {
         client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
-      child: ListView.builder(
+      child: courses.length != 0 ? ListView.builder(
         itemCount: courses.length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
@@ -149,7 +163,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 ),
               ));
         },
-      ),
+      ) : noDataScreen,
     );
   }
 
@@ -159,7 +173,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
       onRefresh: () async {
         client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
       },
-      child: ListView.builder(
+      child: current.length != 0 ? ListView.builder(
         itemCount: current.length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
@@ -210,7 +224,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 ),
               ));
         },
-      ),
+      ) : noDataScreen
     );
   }
 

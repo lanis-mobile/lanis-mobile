@@ -4,8 +4,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
-import '../../client/client.dart';
-import '../../client/storage.dart';
+import '../client/client.dart';
+import '../client/storage.dart';
 
 Future<String?> whatsNew() async {
   final String currentVersion = await PackageInfo.fromPlatform().then((PackageInfo packageInfo) => packageInfo.version);
@@ -39,14 +39,15 @@ void openReleaseNotesModal(BuildContext context, String releaseNotes) {
       builder: (BuildContext context) {
         return AlertDialog(
           title:  Text('Lanis Mobile v$version'),
-          content: SizedBox(
-            width: 300,
-            child: Markdown(
-              data: releaseNotes,
-              padding: const EdgeInsets.all(0),
-              onTapLink: (text, href, title) {
-                launchUrl(Uri.parse(href!));
-              }
+          content: SizedBox( // AlertDialog doesn't support ListView, .... (viewport) widgets, so we need to constrain it.
+            width: double.maxFinite,
+            height: 300, // don't make it too big, don't make it too small
+            child: Markdown( // Markdown is always a Listable? (viewport) widget, even MarkdownBody which isn't scrollable.
+                data: releaseNotes,
+                padding: const EdgeInsets.all(0),
+                onTapLink: (text, href, title) {
+                  launchUrl(Uri.parse(href!));
+                }
             ),
           ),
           actions: <Widget>[

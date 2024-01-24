@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
@@ -19,7 +20,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
   final double padding = 12.0;
 
-  List<GlobalKey<RefreshIndicatorState>>? globalKeys;
+  List<GlobalKey<RefreshIndicatorState>> globalKeys = [GlobalKey<RefreshIndicatorState>()];
 
   TabController? _tabController;
 
@@ -44,7 +45,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       final int entriesLength = data["days"][dayIndex]["entries"].length;
 
       substitutionViews.add(RefreshIndicator(
-        key: globalKeys![dayIndex + 1],
+        key: globalKeys[dayIndex + 1],
         onRefresh: () async {
           client.substitutionsFetcher?.fetchData(forceRefresh: true);
         },
@@ -91,9 +92,13 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     List<Tab> tabs = [];
 
     for (Map day in fullVplan["days"]) {
+      String entryCount = day["entries"].length.toString();
       tabs.add(Tab(
-        icon: const Icon(Icons.calendar_today),
-        text: day["date"],
+        icon: Badge(
+          label: Text(entryCount),
+          child: const Icon(Icons.calendar_today),
+        ),
+        text: formatDate(day["date"]),
       ));
     }
 
@@ -123,12 +128,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           }
 
           // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys = List.generate(snapshot.data?.content["length"] + 1, (index) => GlobalKey<RefreshIndicatorState>());
+          globalKeys += List.generate(snapshot.data?.content["length"], (index) => GlobalKey<RefreshIndicatorState>());
 
           // If there are no entries.
           if (snapshot.data?.content["length"] == 0) {
             return RefreshIndicator(
-              key: globalKeys![0],
+              key: globalKeys[0],
               onRefresh: () async {
                 client.substitutionsFetcher?.fetchData(forceRefresh: true);
               },
@@ -165,7 +170,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
 
           // Vp could have multiple dates, so we need to set it dynamically.
           _tabController = TabController(
-                length: snapshot.data?.content["length"], vsync: this);
+              length: snapshot.data?.content["length"], vsync: this);
 
           return Column(
             children: [
@@ -193,7 +198,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         children: [
           FloatingActionButton(
             onPressed: () => {
-              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys!) {
+              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys) {
                 globalKey.currentState?.show()
               }
             },
@@ -220,4 +225,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       ),
     );
   }
+}
+
+String formatDate(String dateString) {
+  final inputFormat = DateFormat('dd.MM.yyyy');
+  final dateTime = inputFormat.parse(dateString);
+
+  final germanFormat = DateFormat('E dd.MM.yyyy', 'de');
+  return germanFormat.format(dateTime);
 }

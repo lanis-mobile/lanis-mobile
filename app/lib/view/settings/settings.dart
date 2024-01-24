@@ -6,6 +6,7 @@ import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
+import '../../shared/apps.dart';
 import '../login/screen.dart';
 import '../../client/client.dart';
 
@@ -61,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          if (client.doesSupportFeature("Vertretungsplan")) ...[
+          if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) ...[
             ListTile(
               leading: const Icon(Icons.notifications),
               title: const Text('Benachrichtigungen'),

@@ -150,7 +150,7 @@ class _DetailedConversationAnsichtState
               }
               // Successful content
               return ListView.builder(
-                  itemCount: snapshot.data["reply"].length + 3,
+                  itemCount: snapshot.data["reply"].length + 1,
                   itemBuilder: (context, index) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,

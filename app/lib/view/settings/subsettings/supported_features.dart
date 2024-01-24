@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:sph_plan/client/client.dart';
 
+import '../../../shared/apps.dart';
+
 class SupportedFeaturesOverviewScreen extends StatefulWidget {
   const SupportedFeaturesOverviewScreen({super.key});
 
@@ -11,12 +13,13 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 
 
 final List<String> supportedApps = [
-  "Nachrichten - Beta-Version",
-  "Vertretungsplan",
-  "Mein Unterricht",
-  "mein Unterricht", //apparently some schools write this in lower case. Lanis is dumb
-  "Kalender",
-  "Logout",
+  // write in lower case only
+  SPHAppEnum.nachrichten.str,
+  SPHAppEnum.vertretungsplan.str,
+  SPHAppEnum.nachrichtenBeta.str,
+  SPHAppEnum.meinUnterricht.str,
+  SPHAppEnum.kalender.str,
+  SPHAppEnum.logout.str,
 ];
 
 
@@ -41,7 +44,7 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),
           title: Text(value["Name"]),
-          subtitle: Text(supportedApps.contains(value["Name"]) ? "Unterstützt": "nicht Unterstützt"),
+          subtitle: Text(supportedApps.contains(value["Name"].toString().toLowerCase()) ? "Unterstützt": "nicht Unterstützt"),
         ));
       }
 

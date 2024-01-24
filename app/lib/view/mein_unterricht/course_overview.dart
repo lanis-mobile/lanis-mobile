@@ -63,7 +63,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
           Icons.search,
           size: 60,
         ),
-        Text("Keine Daten hinterlegt.")
+        Text("Keine Daten gefunden.")
       ],
     ),
   );

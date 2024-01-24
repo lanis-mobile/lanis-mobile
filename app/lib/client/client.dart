@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,15 +10,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
+import 'package:sph_plan/shared/types/dateispeicher_node.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/themes.dart';
 
+import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
+import '../shared/types/fach.dart';
 import '../shared/types/mein_unterricht.dart';
 
 class SPHclient {
@@ -42,8 +47,9 @@ class SPHclient {
   String loadMode = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
-  late PersistCookieJar jar;
+  late CookieJar jar;
   final dio = Dio();
+  Timer? timer;
   late Cryptor cryptor = Cryptor();
 
   SubstitutionsFetcher? substitutionsFetcher;
@@ -54,41 +60,40 @@ class SPHclient {
 
   void prepareFetchers() {
     if (client.loadMode == "full") {
-      if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
       }
-      if ((client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(const Duration(minutes: 15));
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature("Kalender") && calendarFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender.str) && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     } else {
-      if (client.doesSupportFeature("Vertretungsplan") && substitutionsFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(null);
       }
-      if ((client.doesSupportFeature("mein Unterricht") || client.doesSupportFeature("Mein Unterricht")) && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
-      if (client.doesSupportFeature("Nachrichten - Beta-Version")) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
       }
-      if (client.doesSupportFeature("Kalender") && calendarFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender.str) && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     }
   }
 
   Future<void> prepareDio() async {
-    final Directory appDocDir = await getApplicationCacheDirectory();
-    final String appDocPath = appDocDir.path;
-    jar = PersistCookieJar(
-        ignoreExpires: true, storage: FileStorage("$appDocPath/cookies"));
+    jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
@@ -162,6 +167,9 @@ class SPHclient {
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
           await dio.get(location2);
 
+          timer?.cancel();
+          timer = Timer.periodic(const Duration(seconds: 60), (timer) => preventLogout());
+
           if (userLogin) {
             await fetchRedundantData();
           }
@@ -187,6 +195,17 @@ class SPHclient {
       debugPrint(e.toString());
       return -4;
     }
+  }
+
+  Future<void> preventLogout() async {
+    final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
+    var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+    debugPrint("Refreshing session");
+    await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
+        queryParameters: {
+          "name": sid
+        },
+        options: Options(contentType: "application/x-www-form-urlencoded"));
   }
 
   Future<void> fetchRedundantData() async {
@@ -304,6 +323,41 @@ class SPHclient {
     }
   }
 
+  Future<dynamic> getVplanNonJSON() async {
+    debugPrint("Trying to get substitution plan using non-JSON parser");
+    DateFormat eingabeFormat = DateFormat('dd_mm_yyyy');
+    final Map fullPlan = {"dates": [], "entries": []};
+    final document = parse((await dio.get("https://start.schulportal.hessen.de/vertretungsplan.php")).data);
+    final dates = document.querySelectorAll("[data-tag]").map((element) => element.attributes["data-tag"]!);
+    for (var date in dates) {
+      final parsedDate = eingabeFormat.parse(date);
+      fullPlan["dates"].add(date.replaceAll("_", "."));
+      var entries = [];
+      final vtable = document.querySelector("#vtable$date");
+      if (vtable == null) {
+        return fullPlan;
+      }
+      final headers = vtable.querySelectorAll("th").map((e) => e.attributes["data-field"]!).toList(growable: false);
+      for (var row in vtable.querySelectorAll("tbody tr")) {
+        final fields = row.querySelectorAll("td");
+        var entry = {
+          "Stunde": headers.contains("Stunde") ? fields[headers.indexOf("Stunde")].text.trim() : "",
+          "Klasse": headers.contains("Klasse") ? fields[headers.indexOf("Klasse")].text.trim() : "",
+          "Vertreter": headers.contains("Vertretung") ? fields[headers.indexOf("Vertretung")].text.trim() : "",
+          "Lehrer": headers.contains("Lehrer") ? fields[headers.indexOf("Lehrer")].text.trim() : "",
+          "Art": headers.contains("Art") ? fields[headers.indexOf("Art")].text.trim() : "",
+          "Fach": headers.contains("Fach") ? fields[headers.indexOf("Fach")].text.trim() : "",
+          "Raum": headers.contains("Raum") ? fields[headers.indexOf("Raum")].text.trim() : "",
+          "Hinweis": headers.contains("Hinweis") ? fields[headers.indexOf("Hinweis")].text.trim() : "",
+          "Tag_en": parsedDate.format('yyyy-MM-dd')
+        };
+        entries.add(entry);
+      }
+      fullPlan["entries"].add(entries);
+    }
+    return fullPlan;
+  }
+
   Future<dynamic> getVplan(String date) async {
     debugPrint("Trying to get substitution plan for $date");
 
@@ -336,7 +390,7 @@ class SPHclient {
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
-    if (!client.doesSupportFeature("Kalender")) {
+    if (!client.doesSupportFeature(SPHAppEnum.kalender.str)) {
       return -8;
     }
 
@@ -453,13 +507,17 @@ class SPHclient {
 
   Future<dynamic> getFullVplan({skipCheck= false}) async {
     if (!skipCheck) {
-      if (!client.doesSupportFeature("Vertretungsplan")) {
+      if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
         return -8;
       }
     }
     
     try {
       var dates = await getVplanDates();
+
+      if (dates.length < 1) {
+        return getVplanNonJSON();
+      }
 
       final Map fullPlan = {"dates": [], "entries": []};
 
@@ -479,6 +537,44 @@ class SPHclient {
       recordError(e, stack);
       return -4;
       //unknown error;
+    }
+  }
+
+  Future<List<List<List<StdPlanFach>>>> getStundenplan() async {
+    final location = await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
+    final response = await dio.get("https://start.schulportal.hessen.de/${location.headers["location"]![0]}");
+
+    var document = parse(response.data);
+    var stundenplanTableHead = document.querySelector("#own thead");
+
+    var sk = stundenplanTableHead!.querySelector("th")!.text.contains("Stunde");
+
+    var stundenplanTableBody = document.querySelector("#own tbody");
+
+    if (stundenplanTableBody != null) {
+      List<List<List<StdPlanFach>>> result = [];
+
+      for (var row in stundenplanTableBody.querySelectorAll("tr")) {
+        if (row.text.replaceAll(RegExp(r'[\s\n\r]'), "") == "") continue;
+        List<List<StdPlanFach>> timeslot = [];
+        for (var (index, day) in row.querySelectorAll("td").indexed) {
+          if (sk && index == 0) continue;
+          List<StdPlanFach> stunde = [];
+          for (var fach in day.querySelectorAll(".stunde")) {
+            var name = fach.querySelector("b")!.text.trim();
+            var raum = fach.nodes.map((node) => node.nodeType == 3 ? node.text!.trim() : "").join();
+            var lehrer = fach.querySelector("small")!.text.trim();
+            var badge = fach.querySelector(".badge")?.text.trim() ?? "";
+            var duration = int.parse(fach.parent!.attributes["rowspan"]!);
+            stunde.add(StdPlanFach(name, raum, lehrer, badge, duration));
+          }
+          timeslot.add(stunde);
+        }
+        result.add(timeslot);
+      }
+      return result;
+    } else {
+      return [];
     }
   }
 
@@ -516,14 +612,14 @@ class SPHclient {
   }
 
   final List<String> _onlySupportedByStudents = [
-    "mein Unterricht",
-    "Mein Unterricht"
+    // only write lower case
+    "mein unterricht",
   ];
 
   bool doesSupportFeature(String featureName) {
     for (var app in supportedApps) {
-      if (app["Name"] == featureName) {
-        if ((_onlySupportedByStudents.contains(featureName))) {
+      if (app["Name"].toString().toLowerCase() == featureName.toLowerCase()) {
+        if ((_onlySupportedByStudents.contains(featureName.toLowerCase()))) {
           return isStudentAccount();
         } else {
           return true;
@@ -590,8 +686,37 @@ class SPHclient {
     }
   }
 
+  Future<dynamic> getDateispeicherNode(int nodeID) async {
+    //if (!client.doesSupportFeature(SPHAppEnum.dateispeicher.str)) return -8;
+    final response = await dio.get("https://start.schulportal.hessen.de/dateispeicher.php?a=view&folder=$nodeID");
+    var document = parse(response.data);
+    List<FileNode> files = [];
+    List<String> headers = document.querySelectorAll("table#files thead th").map((e) => e.text).toList();
+    for (var file in document.querySelectorAll("table#files tbody tr")) {
+      final fields = file.querySelectorAll("td");
+      var name = fields[headers.indexOf("Name")].text.trim();
+      var aenderung = fields[headers.indexOf("Änderung")].text.trim();
+      var groesse = fields[headers.indexOf("Größe")].text.trim();
+      var id = int.parse(file.attributes["data-id"]!.trim());
+      files.add(FileNode(name, id, "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id", aenderung, groesse));
+    }
+    List<FolderNode> folders = [];
+    for (var folder in document.querySelectorAll(".folder")) {
+      var name = folder.querySelector(".caption")!.text.trim();
+      var desc = folder.querySelector(".desc")!.text.trim();
+      var subfolders = int.tryParse(RegExp(r"\d+").firstMatch(folder.querySelector("[title=\"Anzahl Ordner\"]")?.text.trim() ?? "")?.group(0) ?? "") ?? 0;
+      var id = int.parse(folder.attributes["data-id"]!);
+      folders.add(FolderNode(name, id, subfolders, desc));
+    }
+    return (files, folders);
+  }
+
+  Future<dynamic> getDateispeicherRoot() async {
+    return await getDateispeicherNode(0);
+  }
+
   Future<dynamic> getMeinUnterrichtOverview() async {
-    if (!(client.doesSupportFeature("Mein Unterricht") || client.doesSupportFeature("mein Unterricht"))) {
+    if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
       return -8;
     }
     
@@ -610,24 +735,60 @@ class SPHclient {
       for (var schoolClass in schoolClasses) {
         var teacher = schoolClass.querySelector(".teacher");
 
-        result["aktuell"]?.add({
-          "name": schoolClass.querySelector(".name")?.text.trim(),
-          "teacher": {
-            "short": teacher
-                ?.getElementsByClassName(
-                    "btn btn-primary dropdown-toggle btn-xs")[0]
-                .text.trim(),
-            "name": teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
-          },
-          "thema": {
-            "title": schoolClass.querySelector(".thema")?.text.trim(),
-            "date": schoolClass.querySelector(".datum")?.text.trim()
-          },
-          "data": {
-            "entry": schoolClass.attributes["data-entry"],
-            "book": schoolClass.attributes["data-entry"]
-          },
-          "_courseURL": schoolClass.querySelector("td>h3>a")?.attributes["href"]
+        if (schoolClass.querySelector(".datum") != null) {
+          result["aktuell"]?.add({
+            "name": schoolClass
+                .querySelector(".name")
+                ?.text
+                .trim(),
+            "teacher": {
+              "short": teacher
+                  ?.getElementsByClassName(
+                  "btn btn-primary dropdown-toggle btn-xs")[0]
+                  .text.trim(),
+              "name": teacher
+                  ?.querySelector("ul>li>a>i.fa")
+                  ?.parent
+                  ?.text
+                  .trim()
+            },
+            "thema": {
+              "title": schoolClass
+                  .querySelector(".thema")
+                  ?.text
+                  .trim(),
+              "date": schoolClass
+                  .querySelector(".datum")
+                  ?.text
+                  .trim()
+            },
+            "data": {
+              "entry": schoolClass.attributes["data-entry"],
+              "book": schoolClass.attributes["data-entry"]
+            },
+            "_courseURL": schoolClass
+                .querySelector("td>h3>a")
+                ?.attributes["href"]
+          });
+        }
+
+        //sort by date
+        result["aktuell"]?.sort((a, b) {
+          var aDate = a["thema"]["date"];
+          var bDate = b["thema"]["date"];
+
+          var aDateTime = DateTime(
+              int.parse(aDate.split(".")[2]),
+              int.parse(aDate.split(".")[1]),
+              int.parse(aDate.split(".")[0])
+          );
+          var bDateTime = DateTime(
+              int.parse(bDate.split(".")[2]),
+              int.parse(bDate.split(".")[1]),
+              int.parse(bDate.split(".")[0])
+          );
+
+          return bDateTime.compareTo(aDateTime);
         });
       }
     }();
@@ -679,16 +840,21 @@ class SPHclient {
 
       var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
 
-      for (var mappe in mappen!) {
-        parsedMappen.add({
-          "title": mappe.getElementsByTagName("h2")[0].text.trim(),
-          "teacher":
-              mappe.querySelector("div.btn-group>button")?.attributes["title"],
-          "_courseURL":
-              mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
-        });
+      if (mappen != null) {
+        for (var mappe in mappen) {
+          parsedMappen.add({
+            "title": mappe.getElementsByTagName("h2")[0].text.trim(),
+            "teacher":
+            mappe.querySelector("div.btn-group>button")?.attributes["title"],
+            "_courseURL":
+            mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
+          });
+        }
+        result["kursmappen"] = parsedMappen;
+      } else {
+        result["kursmappen"] = [];
       }
-      result["kursmappen"] = parsedMappen;
+
     }();
 
     debugPrint("Successfully got Mein Unterricht.");
@@ -902,7 +1068,8 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
-    if (!client.doesSupportFeature("Nachrichten - Beta-Version")) {
+    if (!(client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
+        || client.doesSupportFeature(SPHAppEnum.nachrichten.str))) {
       return -8;
     }
 
