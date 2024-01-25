@@ -199,11 +199,15 @@ class SPHclient {
     final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
     var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
     debugPrint("Refreshing session");
-    await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
-        queryParameters: {
-          "name": sid
-        },
-        options: Options(contentType: "application/x-www-form-urlencoded"));
+    try {
+      await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
+          queryParameters: {
+            "name": sid
+          },
+          options: Options(contentType: "application/x-www-form-urlencoded"));
+    } on DioException {
+      return;
+    }
   }
 
   Future<void> fetchRedundantData() async {
