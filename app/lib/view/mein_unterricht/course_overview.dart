@@ -147,7 +147,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                   },
                                   child: Wrap(
                                     crossAxisAlignment: WrapCrossAlignment.center,
-                                    spacing: 8,
+                                    spacing: 6,
                                     children: [
                                       const Icon(Icons.upload, size: 20,),
                                       Text(upload["name"]),
@@ -165,8 +165,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                   )
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(left: 12.0, right: 24.0),
-                                child: Text(upload["date"]),
+                                padding: const EdgeInsets.only(left: 6.0, right: 12.0),
+                                child: Text(
+                                    upload["date"],
+                                  style: Theme.of(context).textTheme.labelMedium,
+                                ),
                               )
                             ],
                           )
@@ -364,6 +367,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Wrap(
+                                      runSpacing: 8,
                                       spacing: 8,
                                       children: uploads,
                                     ),

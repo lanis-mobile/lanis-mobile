@@ -595,17 +595,15 @@ class _UploadScreenState extends State<UploadScreen> {
 
                                               forceReloadPage();
                                             },
-                                            child: const Flexible(
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Padding(
-                                                    padding: EdgeInsets.only(right: 4.0),
-                                                    child: Icon(Icons.warning),
-                                                  ),
-                                                  Text("Dauerhaft löschen")
-                                                ],
-                                              ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(right: 4.0),
+                                                  child: Icon(Icons.warning),
+                                                ),
+                                                Text("Dauerhaft löschen")
+                                              ],
                                             ),
                                         ),
                                       ],
