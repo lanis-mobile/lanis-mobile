@@ -14,6 +14,7 @@ import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
+      debugPrint(" >>>>>>>>>>>>>>>>>>>>>>>>>>>> Background fetch triggered <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
       await performBackgroundFetch();
     } catch (e) {
       debugPrint(e.toString());
