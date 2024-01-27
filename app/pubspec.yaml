@@ -65,9 +65,11 @@ dependencies:
   flutter_markdown: ^0.6.18+3
 
 flutter_launcher_icons:
-  android: true
+  android: false
+  ios: true
+  remove_alpha_ios: true
   image_path: "assets/icon.png"
-  adaptive_icon_background: "#ffffff"
+  adaptive_icon_background: "#00BCD4"
   adaptive_icon_foreground: "assets/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
 
