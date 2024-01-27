@@ -43,9 +43,7 @@ Sensible Daten (wie Noten, Anwesenheiten, etc.) werden durch Ende-zu-Ende-Versch
 Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
 
 ## IOS/IpadOS support
-Bisher hat keiner der Entwickler zugang zu einer Apple-Entwicklungsumgebung. Zudem wäre ein Jährliches Abo von 100USD notwendig, um die App in den Apple App Store zu bringen.
-
-Mit dem kommenden Sideloading auf IOS geräten ändert sich das eventuell.
+Working on it.
 
 ## Mitarbeit
 Dieses Projekt ist stark von Bug-Reports anderer Schulen oder von neuen Mitarbeitern abhängig. Der Grund dafür liegt in
