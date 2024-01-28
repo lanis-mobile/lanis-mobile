@@ -73,7 +73,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
           if (value == "standard") {
             ColorModeNotifier.set("standard", Themes.standardTheme);
           } else if (value == "school") {
-            ColorModeNotifier.set("school", Themes.standardTheme);
+            ColorModeNotifier.set("school", Themes.schoolTheme);
           } else {
             ColorModeNotifier.set(value, Themes.flutterColorThemes[value]!);
           }
