@@ -158,7 +158,8 @@ class LoginFormState extends State<LoginForm> {
                   },
                 ),
                 const SizedBox(height: padding,),
-                CheckboxListTile(
+                ExcludeSemantics(
+                  child: CheckboxListTile(
                   value: countlyAgree,
                   title: RichText(
                     text: TextSpan(
@@ -184,7 +185,9 @@ class LoginFormState extends State<LoginForm> {
                     await globalStorage.write(key: "enable-countly", value: val.toString());
                   },
                 ),
-                CheckboxListTile(
+                ),
+                ExcludeSemantics(
+                  child: CheckboxListTile(
                   value: dseAgree,
                   title: RichText(
                     text: TextSpan(
@@ -208,6 +211,7 @@ class LoginFormState extends State<LoginForm> {
                       dseAgree = val!;
                     });
                   },
+                ),
                 ),
                 const SizedBox(height: padding,),
                 ElevatedButton(
