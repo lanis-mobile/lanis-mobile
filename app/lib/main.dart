@@ -42,29 +42,38 @@ void main() async {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    PermissionStatus? notificationsPermissionStatus;
+    /* periodic background fetching is not supported on IOS due to battery saving restrictions
+    *  a workaround would be to use an external push service, but that would require the users to
+    *  transfer their passwords to a third party service, which is not acceptable.
+    *  Maybe someone will find a better solution in the future. It would be possible to provide a 
+    *  self-hosted solution per school, but thats some unlikely idea for the future.
+    */
+    if (Platform.isAndroid) {
+      PermissionStatus? notificationsPermissionStatus;
 
-    await Permission.notification.isDenied.then((value) async {
-      if (value) {
-        notificationsPermissionStatus = await Permission.notification.request();
-      }
-    });
+      await Permission.notification.isDenied.then((value) async {
+        if (value) {
+          notificationsPermissionStatus = await Permission.notification.request();
+        }
+      });
 
-    bool enableNotifications =
-        (await globalStorage.read(key: "settings-push-service-on") ?? "true") ==
-            "true";
-    int notificationInterval = int.parse(
-        await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+      bool enableNotifications =
+          (await globalStorage.read(key: "settings-push-service-on") ?? "true") ==
+              "true";
+      int notificationInterval = int.parse(
+          await globalStorage.read(key: "settings-push-service-interval") ?? "15");
 
-    await Workmanager().cancelAll();
-    if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted &&
-        enableNotifications) {
-      await Workmanager().initialize(background_service.callbackDispatcher,
-          isInDebugMode: false);
-      await Workmanager().registerPeriodicTask(
+      await Workmanager().cancelAll();
+      if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted &&
+          enableNotifications) {
+        await Workmanager().initialize(background_service.callbackDispatcher,
+            isInDebugMode: true);
+
+        await Workmanager().registerPeriodicTask(
           "sphplanfetchservice-alessioc42-github-io",
           "sphVertretungsplanUpdateService",
           frequency: Duration(minutes: notificationInterval));
+      }
     }
 
     await initializeDateFormatting();

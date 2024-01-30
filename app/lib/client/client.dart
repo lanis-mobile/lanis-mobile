@@ -117,7 +117,10 @@ class SPHclient {
     password = await globalStorage.read(key: "password", secure: true) ?? "";
     schoolID = await globalStorage.read(key: "schoolID") ?? "";
 
-    schoolImage = await globalStorage.read(key: "schoolImage") ?? "";
+    //path
+    final Directory dir = await getApplicationDocumentsDirectory();
+    String fileName = "school.jpg";
+    schoolImage = "${dir.path}/$fileName";
 
     schoolName = await globalStorage.read(key: "schoolName") ?? "";
 
@@ -252,7 +255,8 @@ class SPHclient {
     try {
       final Directory dir = await getApplicationDocumentsDirectory();
 
-      String savePath = "${dir.path}/school.jpg";
+      String fileName = "school.jpg";
+      String savePath = "${dir.path}/$fileName";
 
       Directory folder = Directory(dir.path);
       if (!(await folder.exists())) {
