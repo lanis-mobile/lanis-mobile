@@ -67,7 +67,7 @@ void main() async {
       if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted &&
           enableNotifications) {
         await Workmanager().initialize(background_service.callbackDispatcher,
-            isInDebugMode: true);
+            isInDebugMode: kDebugMode);
 
         await Workmanager().registerPeriodicTask(
           "sphplanfetchservice-alessioc42-github-io",
