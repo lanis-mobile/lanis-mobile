@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
 
@@ -58,7 +59,11 @@ abstract class Fetcher {
         if (data is int) {
           if (data < 0) {
             if (!secondTry) {
-              await client.login();
+              try {
+                await client.login();
+              } on LanisException {
+                // former status codes ignored
+              }
               await fetchData(forceRefresh: true, secondTry: true);
               return;
             }

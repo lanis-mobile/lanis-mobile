@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../client/client.dart';
@@ -27,8 +28,8 @@ Future<void> performBackgroundFetch() async {
   var client = SPHclient();
   await client.prepareDio();
   await client.loadFromStorage();
-  final loginCode = await client.login();
-  if (loginCode == 0) {
+  try {
+    await client.login();
     final vPlan = await client.getFullVplan(skipCheck: true);
     if (vPlan is! int) {
       final List combinedVPlan = [];
@@ -66,7 +67,10 @@ Future<void> performBackgroundFetch() async {
         }
       }
     }
+  } on LanisException {
+    // former status-codes ignored
   }
+
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
