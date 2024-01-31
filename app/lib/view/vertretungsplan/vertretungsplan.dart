@@ -30,11 +30,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     client.substitutionsFetcher?.fetchData();
   }
 
-  Widget noticeWidget() {
-    return const ListTile(
-      title: Text("Keine weiteren Einträge!", style: TextStyle(fontSize: 22)),
-      subtitle: Text(
-          "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Manche Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig eingegeben hat."),
+  Widget noticeWidget(int entriesLength) {
+    String title = entriesLength != 0 ? "Keine weiteren Einträge!" : "Keine Einträge!";
+    return ListTile(
+      title: Text(title, style: const TextStyle(fontSize: 22)),
+      subtitle: const Text(
+          "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Einige Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig angibt."),
     );
   }
 
@@ -58,7 +59,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                 return Padding(
                   padding: EdgeInsets.only(bottom: padding),
                   child: Card(
-                    child: noticeWidget(),
+                    child: noticeWidget(entriesLength),
                   ),
                 );
               }
