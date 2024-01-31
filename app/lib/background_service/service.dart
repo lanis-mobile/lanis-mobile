@@ -68,6 +68,7 @@ Future<void> performBackgroundFetch() async {
       }
     }
   } on LanisException {
+    debugPrint("Exception in backgroundFetch");
     // former status-codes ignored
   }
 
