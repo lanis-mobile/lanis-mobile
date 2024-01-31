@@ -13,7 +13,6 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
-import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
 import 'package:sph_plan/shared/types/dateispeicher_node.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
@@ -1235,6 +1234,7 @@ class SPHclient {
       final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
       final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
       final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
+      final String? additionalText = requirementsGroup.querySelector("div.alert.alert-info")?.text.split("\n")[1].trim();
 
       final ownFilesGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[2];
       final List<OwnFile> ownFiles = [];
@@ -1294,7 +1294,8 @@ class SPHclient {
         "entry_id": entryId,
         "upload_id": uploadId,
         "own_files": ownFiles,
-        "public_files": publicFiles
+        "public_files": publicFiles,
+        "additional_text": additionalText,
       };
     } on (SocketException, DioException) {
       return -3;
