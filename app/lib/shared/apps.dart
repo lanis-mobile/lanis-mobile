@@ -1,12 +1,10 @@
 enum SPHAppEnum {
   stundenplan,
   nachrichten,
-  nachrichtenBeta,
   vertretungsplan,
   meinUnterricht,
   kalender,
   dateispeicher,
-  logout
 }
 
 extension SPHApp on SPHAppEnum {
@@ -14,12 +12,26 @@ extension SPHApp on SPHAppEnum {
     return switch (this) {
       SPHAppEnum.stundenplan => "stundenplan",
       SPHAppEnum.nachrichten => "nachrichten",
-      SPHAppEnum.nachrichtenBeta => "nachrichten - beta-version",
       SPHAppEnum.vertretungsplan => "vertretungsplan",
       SPHAppEnum.meinUnterricht => "mein unterricht",
       SPHAppEnum.kalender => "kalender",
       SPHAppEnum.dateispeicher => "dateispeicher",
-      SPHAppEnum.logout => "logout"
+    };
+  }
+  String get php {
+    return switch (this) {
+      SPHAppEnum.stundenplan => "stundenplan.php",
+      SPHAppEnum.nachrichten => "nachrichten.php",
+      SPHAppEnum.vertretungsplan => "vertretungsplan.php",
+      SPHAppEnum.meinUnterricht => "meinunterricht.php",
+      SPHAppEnum.kalender => "kalender.php",
+      SPHAppEnum.dateispeicher => "dateispeicher.php",
+    };
+  }
+  bool get onlyStudents {
+    return switch (this) {
+      SPHAppEnum.meinUnterricht => true,
+      _ => false,
     };
   }
 }

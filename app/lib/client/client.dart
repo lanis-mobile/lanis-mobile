@@ -59,33 +59,31 @@ class SPHclient {
 
   void prepareFetchers() {
     if (client.loadMode == "full") {
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) && substitutionsFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(const Duration(minutes: 15));
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(const Duration(minutes: 15));
       }
-      if (client.doesSupportFeature(SPHAppEnum.kalender.str) && calendarFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender) && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     } else {
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) && substitutionsFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(null);
       }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str) && meinUnterrichtFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht) && meinUnterrichtFetcher == null) {
         meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
       }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
         visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
         invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
       }
-      if (client.doesSupportFeature(SPHAppEnum.kalender.str) && calendarFetcher == null) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender) && calendarFetcher == null) {
         calendarFetcher = CalendarFetcher(null);
       }
     }
@@ -397,7 +395,7 @@ class SPHclient {
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
-    if (!client.doesSupportFeature(SPHAppEnum.kalender.str)) {
+    if (!client.doesSupportFeature(SPHAppEnum.kalender)) {
       return -8;
     }
 
@@ -514,7 +512,7 @@ class SPHclient {
 
   Future<dynamic> getFullVplan({skipCheck= false}) async {
     if (!skipCheck) {
-      if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
+      if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         return -8;
       }
     }
@@ -618,15 +616,10 @@ class SPHclient {
     return jsonDecode(response.data.toString())["entrys"];
   }
 
-  final List<String> _onlySupportedByStudents = [
-    // only write lower case
-    "mein unterricht",
-  ];
-
-  bool doesSupportFeature(String featureName) {
+  bool doesSupportFeature(SPHAppEnum feature) {
     for (var app in supportedApps) {
-      if (app["Name"].toString().toLowerCase() == featureName.toLowerCase()) {
-        if ((_onlySupportedByStudents.contains(featureName.toLowerCase()))) {
+      if (app["link"].toString() == feature.php) {
+        if (feature.onlyStudents) {
           return isStudentAccount();
         } else {
           return true;
@@ -694,7 +687,6 @@ class SPHclient {
   }
 
   Future<dynamic> getDateispeicherNode(int nodeID) async {
-    //if (!client.doesSupportFeature(SPHAppEnum.dateispeicher.str)) return -8;
     final response = await dio.get("https://start.schulportal.hessen.de/dateispeicher.php?a=view&folder=$nodeID");
     var document = parse(response.data);
     List<FileNode> files = [];
@@ -723,7 +715,7 @@ class SPHclient {
   }
 
   Future<dynamic> getMeinUnterrichtOverview() async {
-    if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
+    if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       return -8;
     }
     
@@ -1079,8 +1071,7 @@ class SPHclient {
   }
 
   Future<dynamic> getConversationsOverview(bool invisible) async {
-    if (!(client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-        || client.doesSupportFeature(SPHAppEnum.nachrichten.str))) {
+    if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
       return -8;
     }
 

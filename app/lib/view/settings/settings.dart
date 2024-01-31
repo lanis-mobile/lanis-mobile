@@ -62,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) ...[
+          if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) ...[
             ListTile(
               leading: const Icon(Icons.notifications),
               title: const Text('Benachrichtigungen'),

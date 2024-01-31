@@ -14,12 +14,11 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 
 final List<String> supportedApps = [
   // write in lower case only
-  SPHAppEnum.nachrichten.str,
-  SPHAppEnum.vertretungsplan.str,
-  SPHAppEnum.nachrichtenBeta.str,
-  SPHAppEnum.meinUnterricht.str,
-  SPHAppEnum.kalender.str,
-  SPHAppEnum.logout.str,
+  SPHAppEnum.nachrichten.php,
+  SPHAppEnum.vertretungsplan.php,
+  SPHAppEnum.meinUnterricht.php,
+  SPHAppEnum.kalender.php,
+  // SPHAppEnum.logout.php,  // relevant?
 ];
 
 

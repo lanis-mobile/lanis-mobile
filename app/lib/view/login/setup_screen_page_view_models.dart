@@ -22,7 +22,7 @@ List<PageViewModel> setupScreenPageViewModels = [
       title: "nicht-Schüleraccount",
       body: "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren."
     ),
-    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) ...[
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) ...[
     PageViewModel(
         image: SvgPicture.asset("assets/undraw/undraw_filter_re_sa16.svg", height: 175.0),
         title: "Vertretungen filtern",

@@ -15,7 +15,6 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -262,11 +261,11 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = true;
 
   Feature getDefaultFeature() {
-    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
       return Feature.substitutions;
-    } else if (client.doesSupportFeature(SPHAppEnum.kalender.str)) {
+    } else if (client.doesSupportFeature(SPHAppEnum.kalender)) {
       return Feature.calendar;
-    } else if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
+    } else if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       return Feature.lessons;
     } else {
       return Feature.conversations;
@@ -358,7 +357,7 @@ class _HomePageState extends State<HomePage> {
       schoolName = client.schoolName;
 
       if (client.loadMode == "fast") {
-        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
+        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
           await fetchFeature([[Status.substitution, Status.errorSubstitution, client.substitutionsFetcher]]);
         }
 
@@ -373,22 +372,21 @@ class _HomePageState extends State<HomePage> {
 
       final features = [];
 
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         features.add([
           Status.substitution,
           Status.errorSubstitution,
           client.substitutionsFetcher
         ]);
       }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
         features.add([
           Status.meinUnterricht,
           Status.errorMeinUnterricht,
           client.meinUnterrichtFetcher
         ]);
       }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
         features.add([
           Status.conversations,
           Status.errorConversations,
@@ -400,7 +398,7 @@ class _HomePageState extends State<HomePage> {
           client.invisibleConversationsFetcher
         ]);
       }
-      if (client.doesSupportFeature(SPHAppEnum.kalender.str)) {
+      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
         features.add([
           Status.calendar,
           Status.errorCalendar,
@@ -512,11 +510,10 @@ class _HomePageState extends State<HomePage> {
 
     int helpIndex = 0;
     for (var supported in [
-      client.doesSupportFeature(SPHAppEnum.vertretungsplan.str),
-      client.doesSupportFeature(SPHAppEnum.kalender.str),
-      client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-          || client.doesSupportFeature(SPHAppEnum.nachrichten.str),
-      client.doesSupportFeature(SPHAppEnum.meinUnterricht.str)
+      client.doesSupportFeature(SPHAppEnum.vertretungsplan),
+      client.doesSupportFeature(SPHAppEnum.kalender),
+      client.doesSupportFeature(SPHAppEnum.nachrichten),
+      client.doesSupportFeature(SPHAppEnum.meinUnterricht)
     ]) {
       if (supported) {
         bottomNavbarNavigationTranslation.add(helpIndex);
@@ -578,26 +575,25 @@ class _HomePageState extends State<HomePage> {
                    onDestinationSelected: (index) => openFeature(Feature
                        .values[bottomNavbarNavigationTranslation.indexOf(index)]),
                    destinations: [
-                     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str))
+                     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan))
                        const NavigationDestination(
                          icon: Icon(Icons.group),
                          selectedIcon: Icon(Icons.group_outlined),
                          label: 'Vertretungen',
                        ),
-                     if (client.doesSupportFeature(SPHAppEnum.kalender.str))
+                     if (client.doesSupportFeature(SPHAppEnum.kalender))
                        const NavigationDestination(
                          icon: Icon(Icons.calendar_today),
                          selectedIcon: Icon(Icons.calendar_today_outlined),
                          label: 'Kalender',
                        ),
-                     if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-                         || client.doesSupportFeature(SPHAppEnum.nachrichten.str))
+                     if (client.doesSupportFeature(SPHAppEnum.nachrichten))
                        const NavigationDestination(
                          icon: Icon(Icons.forum),
                          selectedIcon: Icon(Icons.forum_outlined),
                          label: 'Nachrichten',
                        ),
-                     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht.str))
+                     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht))
                        const NavigationDestination(
                          icon: Icon(Icons.school),
                          selectedIcon: Icon(Icons.school_outlined),
@@ -658,27 +654,26 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature(SPHAppEnum.vertretungsplan.str),
+                      enabled: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
                       icon: const Icon(Icons.group),
                       selectedIcon: const Icon(Icons.group_outlined),
                       label: const Text('Vertretungsplan'),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature(SPHAppEnum.kalender.str),
+                      enabled: client.doesSupportFeature(SPHAppEnum.kalender),
                       icon: const Icon(Icons.calendar_today),
                       selectedIcon: const Icon(Icons.calendar_today_outlined),
                       label: const Text('Kalender'),
                     ),
                     NavigationDrawerDestination(
                       enabled:
-                          client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-                              || client.doesSupportFeature(SPHAppEnum.nachrichten.str),
+                          client.doesSupportFeature(SPHAppEnum.nachrichten),
                       icon: const Icon(Icons.forum),
                       selectedIcon: const Icon(Icons.forum_outlined),
                       label: const Text('Nachrichten'),
                     ),
                     NavigationDrawerDestination(
-                      enabled: client.doesSupportFeature(SPHAppEnum.meinUnterricht.str),
+                      enabled: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
                       icon: const Icon(Icons.school),
                       selectedIcon: const Icon(Icons.school_outlined),
                       label: const Text('Mein Unterricht'),
@@ -709,10 +704,10 @@ class _HomePageState extends State<HomePage> {
         );
   }
 
-  Widget getIcon(Status? status, Status normal, Status error, String name) {
+  Widget getIcon(Status? status, Status normal, Status error, SPHAppEnum feature) {
     int currentStatus = status == null ? -1 : status.index;
 
-    if (!(client.doesSupportFeature(name) || client.doesSupportFeature(toBeginningOfSentenceCase(name)!))) {
+    if (!(client.doesSupportFeature(feature))) {
       return const Icon(Icons.not_interested);
     } else if (currentStatus <= normal.index) {
       return const Center(
@@ -834,7 +829,7 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.only(top: 16),
                                   child: Row(
                                     children: [
-                                      getIcon(status.data, Status.substitution, Status.errorSubstitution, SPHAppEnum.vertretungsplan.str),
+                                      getIcon(status.data, Status.substitution, Status.errorSubstitution, SPHAppEnum.vertretungsplan),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 8),
                                         child: Text(
@@ -852,7 +847,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, SPHAppEnum.meinUnterricht.str),
+                                        getIcon(status.data, Status.meinUnterricht, Status.errorMeinUnterricht, SPHAppEnum.meinUnterricht),
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8),
                                           child: Text(
@@ -869,7 +864,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.conversations, Status.errorConversations, SPHAppEnum.nachrichtenBeta.str),
+                                        getIcon(status.data, Status.conversations, Status.errorConversations, SPHAppEnum.nachrichten),
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8),
@@ -887,7 +882,7 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
                                       children: [
-                                        getIcon(status.data, Status.calendar, Status.errorCalendar, SPHAppEnum.kalender.str),
+                                        getIcon(status.data, Status.calendar, Status.errorCalendar, SPHAppEnum.kalender),
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8),
