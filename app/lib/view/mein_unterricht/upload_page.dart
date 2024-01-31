@@ -671,7 +671,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                           return uploadStatusContainer("Die Abgabe ist nicht mehr möglich.");
                         } else if (value == 0) {
-                          return uploadStatusContainer("Du hast noch keine Dateien hinzugefügt!");
+                          return uploadStatusContainer("Füge dateien zum Upload hinzu.");
                         } else {
                           return Container(
                               margin: const EdgeInsets.only(
