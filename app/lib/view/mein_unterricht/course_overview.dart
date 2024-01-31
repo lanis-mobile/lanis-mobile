@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
+import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
 import '../../shared/format_text.dart';
@@ -115,6 +116,99 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                         });
                       },
                     ));
+                  });
+
+                  List<Widget> uploads = [];
+                  data["historie"][index]["uploads"].forEach((upload) {
+                    if (upload["status"] == "open") {
+                      uploads.add(
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                            borderRadius: BorderRadius.circular(20)
+                          ),
+                          height: 40,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              FilledButton(
+                                  onPressed: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => UploadScreen(
+                                            url: upload["link"],
+                                            name: upload["name"],
+                                            status: "open"
+                                        ),
+                                      ),
+                                    );
+                                    setState(() {_loadData();});
+                                  },
+                                  child: Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 6,
+                                    children: [
+                                      const Icon(Icons.upload, size: 20,),
+                                      Text(upload["name"]),
+                                      if (upload["uploaded"] != null) ...[
+                                        Badge(
+                                          backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                                          label: Text(
+                                            upload["uploaded"],
+                                            style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                          largeSize: 20,
+                                        )
+                                      ]
+                                    ],
+                                  )
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 6.0, right: 12.0),
+                                child: Text(
+                                    upload["date"],
+                                  style: Theme.of(context).textTheme.labelMedium,
+                                ),
+                              )
+                            ],
+                          )
+                        )
+                      );
+                    } else {
+                      uploads.add(
+                        OutlinedButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UploadScreen(
+                                      url: upload["link"],
+                                      name: upload["name"],
+                                      status: "closed"
+                                  ),
+                              ),
+                            ),
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              children: [
+                                const Icon(Icons.file_upload_off, size: 18,),
+                                Text(upload["name"]),
+                                if (upload["uploaded"] != null) ...[
+                                  Badge(
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    label: Text(
+                                      upload["uploaded"],
+                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                                    ),
+                                    largeSize: 20,
+                                  )
+                                ]
+                              ],
+                            )
+                        )
+                      );
+                    }
                   });
 
                   return Padding(
@@ -245,7 +339,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                             ),
                                           ],
                                         ),
-
                                         Container(
                                           width: double.infinity,
                                           decoration: BoxDecoration(
@@ -268,7 +361,18 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                       children: files,
                                     ),
                                   ),
-                                )
+                                ),
+                                Visibility(
+                                  visible: uploads.isNotEmpty,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Wrap(
+                                      runSpacing: 8,
+                                      spacing: 8,
+                                      children: uploads,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           )
