@@ -617,15 +617,13 @@ class SPHclient {
   }
 
   bool doesSupportFeature(SPHAppEnum feature) {
-    var app = supportedApps.where((element) => element["link"].toString() == feature.php).single;
-    if (app["link"].toString() == feature.php) {
-      if (feature.onlyStudents) {
-        return isStudentAccount();
-      } else {
-        return true;
-      }
+    var app = supportedApps.where((element) => element["link"].toString() == feature.php).singleOrNull;
+    if (app == null) return false;
+    if (feature.onlyStudents) {
+      return isStudentAccount();
+    } else {
+      return true;
     }
-    return false;
   }
 
   bool isStudentAccount() {
