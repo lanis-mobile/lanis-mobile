@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -17,7 +19,7 @@ final _lehrerKuerzelController = TextEditingController();
 List<PageViewModel> setupScreenPageViewModels = [
     if (!client.isStudentAccount()) PageViewModel(
     image: SvgPicture.asset("assets/undraw/undraw_profile_re_4a55.svg", height: 175.0),
-      title: "Lehreraccount",
+      title: "nicht-Schüleraccount",
       body: "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren."
     ),
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) ...[
@@ -90,7 +92,13 @@ List<PageViewModel> setupScreenPageViewModels = [
           ],
         )
     ),
-    PageViewModel(
+    if (Platform.isIOS) PageViewModel(
+        image: SvgPicture.asset("assets/undraw/undraw_new_notifications_re_xpcv.svg", height: 175.0),
+        title: "Benachrichtigungen",
+        body: "Benachrichtigungen werden für dich leider nicht unterstützt, da Apple es nicht ermöglicht, dass Apps im Hintergrund laufen. Du kannst aber die App öffnen, um zu sehen, ob es neue Vertretungen gibt."
+    ),
+    if (Platform.isAndroid) ...[
+      PageViewModel(
         image: SvgPicture.asset("assets/undraw/undraw_new_notifications_re_xpcv.svg", height: 175.0),
         title: "Benachrichtigungen",
         body: "Mit Benachrichtigungen weißt du direkt, ob und welche Vertretungen es für dich gibt. Du kannst auch einstellen wie oft die App nach neuen Vertretungen checkt, aber manchmal wird das Checken durch aktivierten Energiesparmodus oder anderen Faktoren verhindert."
@@ -106,6 +114,7 @@ List<PageViewModel> setupScreenPageViewModels = [
           ],
         )
     ),
+    ]
   ],
   PageViewModel(
       image: SvgPicture.asset("assets/undraw/undraw_speed_test_re_pe1f.svg", height: 175.0),

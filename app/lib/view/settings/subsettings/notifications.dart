@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,14 +14,14 @@ class NotificationsSettingsScreen extends StatelessWidget {
         title: const Text("Benachrichtigungen"),
       ),
       body: ListView(
-        children: const [
-          /*const ListTile(
+        children: [
+          if (Platform.isIOS) const ListTile(
             leading: Icon(Icons.info),
-            title: Text("Information"),
-            subtitle: Text("Diese Einstellungen haben nur einen Effekt, wenn deine Schule den Vertretungsplan im Lanis-System verwenden."),
-          ),*/
-          NotificationElements(),
-          ListTile(
+            title: Text("Leider keiner Unterstützung"),
+            subtitle: Text("Auf deinem Endgerät (IOS / IpadOS) werden keine Benachrichtigungen unterstützt."),
+            ),
+          const NotificationElements(),
+          const ListTile(
             leading: Icon(Icons.info),
             title: Text("Information"),
             subtitle: Text(

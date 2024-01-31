@@ -66,9 +66,11 @@ class ColorModeNotifier {
     // TODO: Change "color" key and others keys to enums or so, we can't just use magic strings forever.
     String colorTheme = await globalStorage.read(key: "color") ?? "standard";
 
-    int schoolColor = int.parse((await globalStorage.read(key: "schoolColor"))!);
+    if (await globalStorage.read(key: "schoolColor") != null) {
+      int schoolColor = int.parse((await globalStorage.read(key: "schoolColor"))!);
 
-    Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
+      Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
+    }
 
     if (colorTheme == "standard") {
       set("standard", Themes.standardTheme);

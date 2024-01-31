@@ -118,7 +118,10 @@ class SPHclient {
     password = await globalStorage.read(key: "password", secure: true) ?? "";
     schoolID = await globalStorage.read(key: "schoolID") ?? "";
 
-    schoolImage = await globalStorage.read(key: "schoolImage") ?? "";
+    //path
+    final Directory dir = await getApplicationDocumentsDirectory();
+    String fileName = "school.jpg";
+    schoolImage = "${dir.path}/$fileName";
 
     schoolName = await globalStorage.read(key: "schoolName") ?? "";
 
@@ -200,11 +203,15 @@ class SPHclient {
     final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
     var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
     debugPrint("Refreshing session");
-    await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
-        queryParameters: {
-          "name": sid
-        },
-        options: Options(contentType: "application/x-www-form-urlencoded"));
+    try {
+      await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
+          queryParameters: {
+            "name": sid
+          },
+          options: Options(contentType: "application/x-www-form-urlencoded"));
+    } on DioException {
+      return;
+    }
   }
 
   Future<void> fetchRedundantData() async {
@@ -249,7 +256,8 @@ class SPHclient {
     try {
       final Directory dir = await getApplicationDocumentsDirectory();
 
-      String savePath = "${dir.path}/school.jpg";
+      String fileName = "school.jpg";
+      String savePath = "${dir.path}/$fileName";
 
       Directory folder = Directory(dir.path);
       if (!(await folder.exists())) {
@@ -337,7 +345,7 @@ class SPHclient {
         return fullPlan;
       }
       final headers = vtable.querySelectorAll("th").map((e) => e.attributes["data-field"]!).toList(growable: false);
-      for (var row in vtable.querySelectorAll("tbody tr")) {
+      for (var row in vtable.querySelectorAll("tbody tr").where((element) => element.querySelectorAll("td[colspan]").isEmpty)) {
         final fields = row.querySelectorAll("td");
         var entry = {
           "Stunde": headers.contains("Stunde") ? fields[headers.indexOf("Stunde")].text.trim() : "",
