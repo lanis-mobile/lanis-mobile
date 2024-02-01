@@ -106,10 +106,12 @@ class _FilterElementsState extends State<FilterElements> {
               decoration: const InputDecoration(
                   labelText: 'Lehrerkürzel (z.B. Abc; XYZ; Müller)')),
         ),
+        const ListTile(
+          leading: Icon(Icons.info_outline),
+          title: Text("Mehrere Filter"),
+          subtitle: Text("Du kannst mehrere Filter mit einem \";\" trennen. Beispiel: 7; 8; Q"),
+        )
       ],
     );
   }
 }
-
-
-

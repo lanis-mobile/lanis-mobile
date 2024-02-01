@@ -2,23 +2,34 @@ import 'package:intl/intl.dart';
 
 import '../../client/storage.dart';
 
+final regMatchAll = RegExp(r'.*');
+final regMatchSimple = RegExp(r'\s*(?:[\d\w]\s*(?:;\s*|$))*');
+final regGroupSimple = RegExp(r'(?<=;|^)[\d\w\s]+(?=;|$)');
+
+String buildFilterRegex(String simpleList) {
+  return regGroupSimple.allMatches(simpleList).map((element) => element.group(0)!.trim()).join("|");
+}
+
 Future<List> filter(list) async {
 
   final String? klassenStufeStorage = await globalStorage.read(key: "filter-klassenStufe");
   late Pattern klassenStufe;
 
   if (klassenStufeStorage == null || klassenStufeStorage == "") {
-    klassenStufe = RegExp(r'.*');
+    klassenStufe = regMatchAll;
+  } else if (regMatchSimple.hasMatch(klassenStufeStorage)) {
+    klassenStufe = RegExp(buildFilterRegex(klassenStufeStorage));
   } else {
-    klassenStufe =
-        RegExp(klassenStufeStorage);
+    klassenStufe = RegExp(klassenStufeStorage);
   }
 
   final String? klasseStorage = await globalStorage.read(key: "filter-klasse");
   late Pattern klasse;
 
   if (klasseStorage == null || klasseStorage == "") {
-    klasse = RegExp(r'.*');
+    klasse = regMatchAll;
+  } else if (regMatchSimple.hasMatch(klasseStorage)) {
+    klasse = RegExp(buildFilterRegex(klasseStorage));
   } else {
     klasse = RegExp(klasseStorage);
   }
@@ -27,7 +38,9 @@ Future<List> filter(list) async {
   late Pattern lehrerKuerzel;
 
   if (lehrerKuerzelStorage == null || lehrerKuerzelStorage == "") {
-    lehrerKuerzel = RegExp(r'.*');
+    lehrerKuerzel = regMatchAll;
+  } else if (regMatchSimple.hasMatch(lehrerKuerzelStorage)) {
+    lehrerKuerzel = RegExp(buildFilterRegex(lehrerKuerzelStorage));
   } else {
     lehrerKuerzel = RegExp(lehrerKuerzelStorage);
   }
