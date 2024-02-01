@@ -12,14 +12,12 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 }
 
 
-final List<String> supportedApps = [
-  // write in lower case only
-  SPHAppEnum.nachrichten.str,
-  SPHAppEnum.vertretungsplan.str,
-  SPHAppEnum.nachrichtenBeta.str,
-  SPHAppEnum.meinUnterricht.str,
-  SPHAppEnum.kalender.str,
-  SPHAppEnum.logout.str,
+final List<SPHAppEnum> supportedApps = [
+  SPHAppEnum.nachrichten,
+  SPHAppEnum.vertretungsplan,
+  SPHAppEnum.meinUnterricht,
+  SPHAppEnum.kalender,
+  // SPHAppEnum.logout.php,  // relevant?
 ];
 
 
@@ -44,7 +42,7 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),
           title: Text(value["Name"]),
-          subtitle: Text(supportedApps.contains(value["Name"].toString().toLowerCase()) ? "Unterstützt": "nicht Unterstützt"),
+          subtitle: Text(supportedApps.where((element) => value["link"].toString() == element.php).isNotEmpty ? "Unterstützt": "nicht Unterstützt"),
         ));
       }
 

@@ -198,7 +198,7 @@ Future<dynamic> generateBugReport() async {
   //mein_unterricht
   late dynamic meinUnterricht;
   late List<dynamic> meinUnterrichtKurse = [];
-  if (client.doesSupportFeature(SPHAppEnum.kalender.str)) {
+  if (client.doesSupportFeature(SPHAppEnum.kalender)) {
     meinUnterricht = await client.getMeinUnterrichtOverview();
     meinUnterricht["kursmappen"]?.forEach((kurs) async {
       meinUnterrichtKurse.add(
@@ -213,8 +213,7 @@ Future<dynamic> generateBugReport() async {
   late dynamic visibleMessages;
   late dynamic invisibleMessages;
   late dynamic firstSingleMessage;
-  if (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-      || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) {
+  if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
     visibleMessages = await client.getConversationsOverview(false);
 
     for (var element in visibleMessages) {
@@ -242,14 +241,13 @@ Future<dynamic> generateBugReport() async {
       "userdata": await client.fetchUserData()
     },
     "applets": {
-      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan.str) ? await client.getFullVplan() ?? [] : [],
-      "kalender": client.doesSupportFeature(SPHAppEnum.kalender.str) ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
+      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan) ? await client.getFullVplan() ?? [] : [],
+      "kalender": client.doesSupportFeature(SPHAppEnum.kalender) ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
       "mein_unterricht": {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
       },
-      "nachrichten": (client.doesSupportFeature(SPHAppEnum.nachrichtenBeta.str)
-          || client.doesSupportFeature(SPHAppEnum.nachrichten.str)) ? {
+      "nachrichten": (client.doesSupportFeature(SPHAppEnum.nachrichten)) ? {
         "eingeblendete": visibleMessages,
         "ausgeblendete": invisibleMessages,
         "erste_detaillierte_nachricht": firstSingleMessage
