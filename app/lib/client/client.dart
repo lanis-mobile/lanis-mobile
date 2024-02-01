@@ -193,6 +193,8 @@ class SPHclient {
       throw NetworkException();
     } on DioException {
       throw NetworkException();
+    } on LanisException {
+      rethrow;
     } catch (e, stack) {
       recordError(e, stack);
       debugPrint(e.toString());
