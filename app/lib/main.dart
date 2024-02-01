@@ -350,13 +350,7 @@ class _HomePageState extends State<HomePage> {
 
       if (client.loadMode == "fast") {
         if (client.doesSupportFeature(SPHAppEnum.vertretungsplan.str)) {
-          await fetchFeature([
-            [
-              Status.substitution,
-              Status.errorSubstitution,
-              client.substitutionsFetcher
-            ]
-          ]);
+          await fetchFeature([[Status.substitution, Status.errorSubstitution, client.substitutionsFetcher]]);
         }
 
         statusController.add(Status.finalize);
