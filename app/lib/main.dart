@@ -82,6 +82,11 @@ void main() async {
       config.enableCrashReporting();
       await Countly.initWithConfig(config);
 
+      String schoolID = await globalStorage.read(key: "schoolID") ?? "";
+      if (schoolID != "") {
+        Countly.instance.views.startView(schoolID);
+      }
+
       FlutterError.onError = (errorDetails) async {
 
           Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
