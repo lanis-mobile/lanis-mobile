@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -53,7 +54,7 @@ extension SPHApp on StorageKey {
       case StorageKey.userData:
         return "userData";
       case StorageKey.userSupportedApplets:
-        return "supportedApplets";
+        return "supportedApps";
       case StorageKey.schoolImageLocation:
         return "schoolImageLocation";
       case StorageKey.schoolAccentColor:
@@ -142,7 +143,7 @@ class Storage {
     if (secure) {
       return Future.value((await secureStorage.read(key: key.key, aOptions: _getAndroidOptions())) ?? key.defaultValue);
     } else {
-      return Future.value(prefs.getString(key.key));
+      return Future.value(prefs.getString(key.key) ?? key.defaultValue);
     }
   }
 
