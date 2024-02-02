@@ -103,38 +103,38 @@ class SPHclient {
     this.password = password;
     this.schoolID = schoolID;
 
-    await globalStorage.write(key: "username", value: username);
-    await globalStorage.write(key: "password", value: password, secure: true);
-    await globalStorage.write(key: "schoolID", value: schoolID);
+    await globalStorage.write(key: StorageKey.userUsername, value: username);
+    await globalStorage.write(key: StorageKey.userPassword, value: password, secure: true);
+    await globalStorage.write(key: StorageKey.userSchoolID, value: schoolID);
   }
 
 
   Future<void> loadFromStorage() async {
-    loadMode = await globalStorage.read(key: "loadMode") ?? "fast";
+    loadMode = await globalStorage.read(key: StorageKey.settingsLoadMode);
 
-    username = await globalStorage.read(key: "username") ?? "";
-    password = await globalStorage.read(key: "password", secure: true) ?? "";
-    schoolID = await globalStorage.read(key: "schoolID") ?? "";
+    username = await globalStorage.read(key: StorageKey.userUsername);
+    password = await globalStorage.read(key: StorageKey.userPassword, secure: true);
+    schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
 
     //path
     final Directory dir = await getApplicationDocumentsDirectory();
     String fileName = "school.jpg";
     schoolImage = "${dir.path}/$fileName";
 
-    schoolName = await globalStorage.read(key: "schoolName") ?? "";
+    schoolName = await globalStorage.read(key: StorageKey.userSchoolName);
 
-    userData = jsonDecode(await globalStorage.read(key: "userData") ?? "{}");
+    userData = jsonDecode(await globalStorage.read(key: StorageKey.userData));
 
     supportedApps =
-        jsonDecode(await globalStorage.read(key: "supportedApps") ?? "[]");
+        jsonDecode(await globalStorage.read(key: StorageKey.userSupportedApplets));
   }
 
   Future<dynamic> getCredits() async {
     return {
-      "username": await globalStorage.read(key: "username") ?? "",
-      "password": await globalStorage.read(key: "password", secure: true) ?? "",
-      "schoolID": await globalStorage.read(key: "schoolID") ?? "",
-      "schoolName": await globalStorage.read(key: "schoolName") ?? ""
+      "username": await globalStorage.read(key: StorageKey.userUsername),
+      "password": await globalStorage.read(key: StorageKey.userPassword, secure: true),
+      "schoolID": await globalStorage.read(key: StorageKey.userSchoolID),
+      "schoolName": await globalStorage.read(key: StorageKey.userSchoolName),
     };
   }
 
@@ -216,24 +216,24 @@ class SPHclient {
     final schoolInfo = await getSchoolInfo(schoolID);
 
     schoolImage = await getSchoolImage(schoolInfo["bgimg"]["sm"]["url"]);
-    await globalStorage.write(key: "schoolImage", value: schoolImage);
+    await globalStorage.write(key: StorageKey.schoolImageLocation, value: schoolImage);
 
     schoolName = schoolInfo["Name"];
-    await globalStorage.write(key: "schoolName", value: schoolName);
+    await globalStorage.write(key: StorageKey.userSchoolName, value: schoolName);
 
     userData = await fetchUserData();
     supportedApps = await getSupportedApps();
 
-    await globalStorage.write(key: "userData", value: jsonEncode(userData));
+    await globalStorage.write(key: StorageKey.userData, value: jsonEncode(userData));
 
     await globalStorage.write(
-        key: "supportedApps", value: jsonEncode(supportedApps));
+        key: StorageKey.userSupportedApplets, value: jsonEncode(supportedApps));
   }
 
   Future<void> getSchoolTheme() async {
     debugPrint("Trying to get a school accent color.");
 
-    if (await globalStorage.read(key: "schoolColor") == null) {
+    if (await globalStorage.read(key: StorageKey.schoolAccentColor) == "") {
       try {
         dynamic schoolInfo = await client.getSchoolInfo(schoolID);
 
@@ -241,11 +241,11 @@ class SPHclient {
 
         Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
 
-        if ((await globalStorage.read(key: "color")) == "school") {
+        if ((await globalStorage.read(key: StorageKey.settingsSelectedColor)) == "school") {
           ColorModeNotifier.set("school", Themes.schoolTheme);
         }
 
-        await globalStorage.write(key: "schoolColor", value: schoolColor.toString());
+        await globalStorage.write(key: StorageKey.schoolAccentColor, value: schoolColor.toString());
       } on Exception catch (_) {}
     }
   }
@@ -656,10 +656,6 @@ class SPHclient {
     } else {
       return {};
     }
-  }
-
-  Future<void> saveUserData(data) async {
-    await globalStorage.write(key: "userData", value: jsonEncode(data));
   }
 
   Future<void> deleteAllSettings() async {

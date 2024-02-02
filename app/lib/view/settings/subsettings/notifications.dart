@@ -47,9 +47,9 @@ class _NotificationElementsState extends State<NotificationElements> {
   bool _notificationPermissionGranted = false;
 
   Future<void> loadSettingsVariables() async {
-    _enableNotifications = (await globalStorage.read(key: "settings-push-service-on") ?? "true") == "true";
-    _notificationInterval = int.parse(await globalStorage.read(key: "settings-push-service-interval") ?? "15");
-    _notificationsAreOngoing = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "false") == "true";
+    _enableNotifications = (await globalStorage.read(key: StorageKey.settingsPushService)) == "true";
+    _notificationInterval = int.parse(await globalStorage.read(key: StorageKey.settingsPushServiceIntervall));
+    _notificationsAreOngoing = (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) == "true";
 
     _notificationPermissionGranted = await Permission.notification.isGranted;
   }
@@ -86,7 +86,7 @@ class _NotificationElementsState extends State<NotificationElements> {
             setState(() {
               _enableNotifications = value!;
             });
-            await globalStorage.write(key: "settings-push-service-on", value: _enableNotifications.toString());
+            await globalStorage.write(key: StorageKey.settingsPushService, value: _enableNotifications.toString());
           } : null,
           subtitle: const Text("Aktiviere es, um Benachrichtigungen zu bekommen."),
         ),
@@ -97,7 +97,7 @@ class _NotificationElementsState extends State<NotificationElements> {
             setState(() {
               _notificationsAreOngoing = value!;
             });
-            await globalStorage.write(key: "settings-push-service-notifications-ongoing", value: _notificationsAreOngoing.toString());
+            await globalStorage.write(key: StorageKey.settingsPushServiceOngoing, value: _notificationsAreOngoing.toString());
           } : null,
           subtitle: const Text("Wenn aktiviert, werden die Benachrichtigung dauerhaft fest stehen, die man nicht entfernen kann."),
         ),
@@ -116,7 +116,7 @@ class _NotificationElementsState extends State<NotificationElements> {
             });
           } : null,
           onChangeEnd: (double value) async {
-            await globalStorage.write(key: "settings-push-service-interval", value: _notificationInterval.toString());
+            await globalStorage.write(key: StorageKey.settingsPushServiceIntervall, value: _notificationInterval.toString());
           },
         ),
       ],

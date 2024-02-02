@@ -70,7 +70,7 @@ Future<void> performBackgroundFetch() async {
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
-  bool ongoingMessage = (await globalStorage.read(key: "settings-push-service-notifications-ongoing") ?? "false") == "true";
+  bool ongoingMessage = (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) == "true";
 
   var androidDetails = AndroidNotificationDetails(
       'io.github.alessioc42.sphplan', 'lanis-mobile',
@@ -95,7 +95,7 @@ String generateUUID(String input) {
 
 Future<void> markMessageAsSent(String uuid) async {
   await globalStorage.write(
-    key: 'background-service-notifications',
+    key: StorageKey.lastPushMessageHash,
     value: uuid
   );
 }
@@ -103,7 +103,7 @@ Future<void> markMessageAsSent(String uuid) async {
 Future<bool> isMessageAlreadySent(String uuid) async {
   // Read the existing JSON from secure storage
   String storageValue =
-      await globalStorage.read(key: 'background-service-notifications') ?? '{}';
+      await globalStorage.read(key: StorageKey.lastPushMessageHash);
   return storageValue == uuid;
 }
 

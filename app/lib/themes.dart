@@ -58,16 +58,16 @@ class ColorModeNotifier {
   static ValueNotifier<Themes> notifier = ValueNotifier<Themes>(Themes.standardTheme);
 
   static void set(String name, Themes theme) async {
-    await globalStorage.write(key: "color", value: name);
+    await globalStorage.write(key: StorageKey.settingsSelectedColor, value: name);
     notifier.value = theme;
   }
 
   static void init() async {
-    // TODO: Change "color" key and others keys to enums or so, we can't just use magic strings forever.
-    String colorTheme = await globalStorage.read(key: "color") ?? "standard";
+    String colorTheme = await globalStorage.read(key: StorageKey.settingsSelectedColor);
 
-    if (await globalStorage.read(key: "schoolColor") != null) {
-      int schoolColor = int.parse((await globalStorage.read(key: "schoolColor"))!);
+    String schoolAccentColor = await globalStorage.read(key: StorageKey.schoolAccentColor);
+    if (schoolAccentColor != "") {
+      int schoolColor = int.parse(schoolAccentColor);
 
       Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
     }
@@ -98,12 +98,12 @@ class ThemeModeNotifier {
   }
 
   static void init() async {
-    String theme = await globalStorage.read(key: "theme") ?? "system";
+    String theme = await globalStorage.read(key: StorageKey.settingsSelectedTheme);
     _notify(theme);
   }
 
   static void set(String theme) async {
-    await globalStorage.write(key: "theme", value: theme);
+    await globalStorage.write(key: StorageKey.settingsSelectedTheme, value: theme);
     _notify(theme);
   }
 }

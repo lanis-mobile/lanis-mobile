@@ -31,7 +31,7 @@ class _LoadModeElementsState extends State<LoadModeElements> {
   String _selectedMode = "fast"; // Default theme
 
   Future<void> _applyMode(String mode) async {
-    await globalStorage.write(key: "loadMode", value: mode);
+    await globalStorage.write(key: StorageKey.settingsLoadMode, value: mode);
     _selectedMode = mode;
     client.loadMode = mode;
   }

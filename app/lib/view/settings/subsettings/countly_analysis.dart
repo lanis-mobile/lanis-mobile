@@ -30,13 +30,8 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-    globalStorage.read(key: "enable-countly").then((value) {
-      if (value == null) {
-        globalStorage.write(key: "enable-countly", value: "false");
-        enabled = false;
-      } else {
-        enabled = value == "true";
-      }
+    globalStorage.read(key: StorageKey.settingsUseCountly).then((value) {
+      enabled = value == "true";
       setState(() {});
     });
   }
@@ -61,7 +56,7 @@ class _BodyState extends State<Body> {
           setState(() {
             enabled = state;
           });
-          await globalStorage.write(key: "enable-countly", value: state.toString());
+          await globalStorage.write(key: StorageKey.settingsUseCountly, value: state.toString());
         }),
       ],
     );
