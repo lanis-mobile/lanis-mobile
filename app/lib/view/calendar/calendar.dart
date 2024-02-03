@@ -2,6 +2,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -383,26 +384,26 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 onTap: () async {
-                                  dynamic singleEvent = await fetchEvent(value[index].data["Id"]);
-
-                                  if (mounted) {
-                                    if (singleEvent == -9) {
-                                      return;
-                                    }
-                                    if (singleEvent is int) {
-                                      showModalBottomSheet(
+                                  try {
+                                    var singleEvent = await fetchEvent(value[index].data["Id"]);
+                                    showModalBottomSheet(
                                         context: context,
                                         showDragHandle: true,
                                         builder: (context) {
-                                          return ErrorView(data: singleEvent, name: "einem Kalenderereignis", fetcher: null,);
+                                          return getEvent(value[index], singleEvent);
                                         }
-                                      );
-                                    } else {
+                                    );
+                                  } on NoConnectionException {
+                                    if (mounted) {
+                                      return;
+                                    }
+                                  } on LanisException catch (ex) {
+                                    if (mounted) {
                                       showModalBottomSheet(
                                           context: context,
                                           showDragHandle: true,
                                           builder: (context) {
-                                            return getEvent(value[index], singleEvent);
+                                            return ErrorView(data: ex, name: "einem Kalenderereignis", fetcher: null,);
                                           }
                                       );
                                     }

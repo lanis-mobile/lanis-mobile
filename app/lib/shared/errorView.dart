@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../client/client.dart';
 import '../client/fetcher.dart';
 import '../view/bug_report/send_bugreport.dart';
+import 'exceptions/client_status_exceptions.dart';
 
 class ErrorView extends StatelessWidget {
-  late final int data;
+  late final LanisException data;
   late final Fetcher? fetcher;
   late final String name;
   ErrorView({super.key, required this.data, required this.name, required this.fetcher});
@@ -33,7 +33,7 @@ class ErrorView extends StatelessWidget {
                         TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               ),
               Text(
-                  "Problem: ${client.statusCodes[data] ?? "Unbekannter Fehler"}"),
+                  "Problem: ${data.cause}"),
               Padding(
                 padding: const EdgeInsets.only(top: 35),
                 child: Row(
@@ -41,7 +41,7 @@ class ErrorView extends StatelessWidget {
                   children: [
                     FilledButton(
                         onPressed: () {
-                          if (data == -9) {
+                          if (data is NoConnectionException) {
                             showDialog(
                                 context: context,
                                 builder: (context) {
@@ -65,7 +65,7 @@ class ErrorView extends StatelessWidget {
                                                   builder: (context) =>
                                                       BugReportScreen(
                                                           generatedMessage:
-                                                              "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n$data: ${client.statusCodes[data]}\n\nMehr Details von dir:\n")),
+                                                              "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n${data.cause}\n\nMehr Details von dir:\n")),
                                             );
                                           },
                                           child:
@@ -80,7 +80,7 @@ class ErrorView extends StatelessWidget {
                             MaterialPageRoute(
                                 builder: (context) => BugReportScreen(
                                     generatedMessage:
-                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n$data: ${client.statusCodes[data]}\n\nMehr Details von dir:\n")),
+                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n${data.cause}\n\nMehr Details von dir:\n")),
                           );
                         },
                         child: const Text("Fehlerbericht senden")),

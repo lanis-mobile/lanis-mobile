@@ -434,7 +434,7 @@ class SPHclient {
 
   Future<dynamic> getEvent(String id) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
-      return -9;
+      throw NoConnectionException();
     }
 
     try {
@@ -456,12 +456,10 @@ class SPHclient {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
-      return -3;
-      //network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      //unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
