@@ -185,7 +185,7 @@ class LoginFormState extends State<LoginForm> {
                     setState(() {
                       countlyAgree = val!;
                     });
-                    await globalStorage.write(key: "enable-countly", value: val.toString());
+                    await globalStorage.write(key: StorageKey.settingsUseCountly, value: val.toString());
                   },
                 ),
                 ),

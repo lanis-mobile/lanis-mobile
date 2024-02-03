@@ -12,10 +12,10 @@ String buildFilterRegex(String simpleList) {
 
 Future<List> filter(list) async {
 
-  final String? klassenStufeStorage = await globalStorage.read(key: "filter-klassenStufe");
+  final String klassenStufeStorage = await globalStorage.read(key: StorageKey.substitutionsFilterKlassenStufe);
   late Pattern klassenStufe;
 
-  if (klassenStufeStorage == null || klassenStufeStorage == "") {
+  if (klassenStufeStorage == "") {
     klassenStufe = regMatchAll;
   } else if (regMatchSimple.hasMatch(klassenStufeStorage)) {
     klassenStufe = RegExp(buildFilterRegex(klassenStufeStorage));
@@ -23,10 +23,10 @@ Future<List> filter(list) async {
     klassenStufe = RegExp(klassenStufeStorage);
   }
 
-  final String? klasseStorage = await globalStorage.read(key: "filter-klasse");
+  final String klasseStorage = await globalStorage.read(key: StorageKey.substitutionsFilterKlasse);
   late Pattern klasse;
 
-  if (klasseStorage == null || klasseStorage == "") {
+  if (klasseStorage == "") {
     klasse = regMatchAll;
   } else if (regMatchSimple.hasMatch(klasseStorage)) {
     klasse = RegExp(buildFilterRegex(klasseStorage));
@@ -34,10 +34,10 @@ Future<List> filter(list) async {
     klasse = RegExp(klasseStorage);
   }
 
-  final String? lehrerKuerzelStorage = await globalStorage.read(key: "filter-lehrerKuerzel");
+  final String lehrerKuerzelStorage = await globalStorage.read(key: StorageKey.substitutionsFilterLehrerKuerzel);
   late Pattern lehrerKuerzel;
 
-  if (lehrerKuerzelStorage == null || lehrerKuerzelStorage == "") {
+  if (lehrerKuerzelStorage == "") {
     lehrerKuerzel = regMatchAll;
   } else if (regMatchSimple.hasMatch(lehrerKuerzelStorage)) {
     lehrerKuerzel = RegExp(buildFilterRegex(lehrerKuerzelStorage));
@@ -71,16 +71,16 @@ Future<List> filter(list) async {
 
 Future<void> setFilter(
     String klassenStufe, String klasse, String lehrerKuerzel) async {
-  await globalStorage.write(key: "filter-klassenStufe", value: klassenStufe);
-  await globalStorage.write(key: "filter-klasse", value: klasse);
-  await globalStorage.write(key: "filter-lehrerKuerzel", value: lehrerKuerzel);
+  await globalStorage.write(key: StorageKey.substitutionsFilterKlassenStufe, value: klassenStufe);
+  await globalStorage.write(key: StorageKey.substitutionsFilterKlasse, value: klasse);
+  await globalStorage.write(key: StorageKey.substitutionsFilterLehrerKuerzel, value: lehrerKuerzel);
 }
 
 dynamic getFilter() async {
   return {
-    "klassenStufe": await globalStorage.read(key: "filter-klassenStufe") ?? "",
-    "klasse": await globalStorage.read(key: "filter-klasse") ?? "",
-    "lehrerKuerzel": await globalStorage.read(key: "filter-lehrerKuerzel") ?? ""
+    "klassenStufe": await globalStorage.read(key: StorageKey.substitutionsFilterKlassenStufe),
+    "klasse": await globalStorage.read(key: StorageKey.substitutionsFilterKlasse),
+    "lehrerKuerzel": await globalStorage.read(key: StorageKey.substitutionsFilterLehrerKuerzel)
   };
 }
 

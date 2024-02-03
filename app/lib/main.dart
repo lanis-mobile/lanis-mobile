@@ -46,7 +46,7 @@ void main() async {
     *  a workaround would be to use an external push service, but that would require the users to
     *  transfer their passwords to a third party service, which is not acceptable.
     *  Maybe someone will find a better solution in the future. It would be possible to provide a 
-    *  self-hosted solution per school, but thats some unlikely idea for the future.
+    *  self-hosted solution per school, but that's some unlikely idea for the future.
     */
     if (Platform.isAndroid) {
       PermissionStatus? notificationsPermissionStatus;
@@ -56,12 +56,11 @@ void main() async {
           notificationsPermissionStatus = await Permission.notification.request();
         }
       });
-
-      bool enableNotifications =
-          (await globalStorage.read(key: "settings-push-service-on") ?? "true") ==
-              "true";
+      debugPrint("Notifications permission status: $notificationsPermissionStatus");
+      bool enableNotifications = await globalStorage.read(key: StorageKey.settingsPushService) == "true";
+      debugPrint("------------------------");
       int notificationInterval = int.parse(
-          await globalStorage.read(key: "settings-push-service-interval") ?? "15");
+          await globalStorage.read(key: StorageKey.settingsPushServiceIntervall));
 
       await Workmanager().cancelAll();
       if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted &&
@@ -77,13 +76,13 @@ void main() async {
     }
 
     await initializeDateFormatting();
-    if (!kDebugMode && (await globalStorage.read(key: "enable-countly")) == "true") {
+    if (!kDebugMode && (await globalStorage.read(key: StorageKey.settingsUseCountly)) == "true") {
       const String duckDNS = "duckdns.org"; //so web crawlers do not parse the URL from gh
       CountlyConfig config = CountlyConfig("https://lanis-mobile.$duckDNS", "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
       config.enableCrashReporting();
       await Countly.initWithConfig(config);
 
-      String schoolID = await globalStorage.read(key: "schoolID") ?? "";
+      String schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
       if (schoolID != "") {
         Countly.instance.views.startView(schoolID);
       }
@@ -105,7 +104,7 @@ void main() async {
     runApp(const App());
 
   }, (obj, stack) async {
-    if (!kDebugMode && await globalStorage.read(key: "enable-countly") == "true") {
+    if (!kDebugMode && await globalStorage.read(key: StorageKey.settingsUseCountly) == "true") {
       await Countly.recordDartError(obj, stack);
     }
   });

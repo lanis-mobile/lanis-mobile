@@ -9,10 +9,10 @@ import '../client/storage.dart';
 
 Future<String?> whatsNew() async {
   final String currentVersion = await PackageInfo.fromPlatform().then((PackageInfo packageInfo) => packageInfo.version);
-  final String storedVersion = await globalStorage.read(key: 'version') ?? '0.0.0';
+  final String storedVersion = await globalStorage.read(key: StorageKey.lastAppVersion);
   if (currentVersion != storedVersion) {
     debugPrint("New Version detected: $currentVersion");
-    await globalStorage.write(key: 'version', value: currentVersion);
+    await globalStorage.write(key: StorageKey.lastAppVersion, value: currentVersion);
 
     String releaseNotes = await getReleaseMarkDown();
     return releaseNotes;
