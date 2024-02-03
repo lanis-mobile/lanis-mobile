@@ -8,6 +8,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sph_plan/shared/apps.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -280,7 +281,7 @@ class _HomePageState extends State<HomePage> {
 
   // For status messages
   late final StreamController statusController;
-  late int errorCode;
+  late LanisException error;
 
   static List<Widget> featureScreens() {
     return <Widget>[
@@ -322,7 +323,7 @@ class _HomePageState extends State<HomePage> {
       await for (dynamic data in feature[2].stream) {
         if (data.status == FetcherStatus.error) {
           statusController.add(feature[1]);
-          errorCode = data.content;
+          error = LanisException(data.content);
           return;
         } else if (data.status == FetcherStatus.done) {
           statusController.add(feature[0]);
@@ -341,24 +342,14 @@ class _HomePageState extends State<HomePage> {
     await client.prepareDio();
 
     statusController.add(Status.login);
-    int loginCode = await client.login();
+    try {
+      await client.login();
+      selectedFeature = getDefaultFeature();
+      client.prepareFetchers();
 
-    selectedFeature = getDefaultFeature();
-
-    client.prepareFetchers();
-
-    if (loginCode == -1 || loginCode == -2) {
-      openLoginScreen();
-
-      return;
-    } else if (loginCode <= -3) {
-      statusController.add(Status.errorLogin);
-      errorCode = loginCode;
-
-      return;
-    } else {
       userName =
-          "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
+      "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ??
+          ""}";
       schoolName = client.schoolName;
 
       if (client.loadMode == "fast") {
@@ -417,6 +408,13 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isLoading = false;
       });
+    } on WrongCredentialsException {
+      openLoginScreen();
+    } on CredentialsIncompleteException {
+      openLoginScreen();
+    } on LanisException catch (e) {
+      statusController.add(Status.errorLogin);
+      error = e;
     }
   }
 
@@ -753,7 +751,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            (status.data == Status.errorLogin) && (errorCode == -9) ? "Kein Internet!" : "Willkommen zurück!",
+                            (status.data == Status.errorLogin) && (error is NoConnectionException) ? "Kein Internet!" : "Willkommen zurück!",
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                           Row(
@@ -924,7 +922,7 @@ class _HomePageState extends State<HomePage> {
                                                   builder: (context) =>
                                                       BugReportScreen(
                                                           generatedMessage:
-                                                              "AUTOMATISCH GENERIERT:\nLogin Page: ${status.data.message}\n$errorCode: ${client.statusCodes[errorCode]}\n\nMehr Details von dir:\n")),
+                                                              "AUTOMATISCH GENERIERT:\nLogin Page: ${status.data.message}\n${error.cause}\n\nMehr Details von dir:\n")),
                                             ).then((result) {
                                               openFeature(selectedFeature);
                                             });

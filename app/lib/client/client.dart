@@ -13,6 +13,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/types/dateispeicher_node.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
@@ -138,11 +139,11 @@ class SPHclient {
     };
   }
 
-  Future<int> login({userLogin = false}) async {
+  Future<void> login({userLogin = false}) async {
     debugPrint("Trying to log in");
 
     if (!(await InternetConnectionChecker().hasConnection)) {
-      return -9;
+      throw NoConnectionException();
     }
 
     jar.deleteAll();
@@ -179,21 +180,23 @@ class SPHclient {
           debugPrint(
               "Encryption connected with status code: $encryptionStatusName");
 
-          return 0;
+          return;
         } else {
-          return -1;
+          throw WrongCredentialsException();
         }
       } else {
-        return -2;
+        throw CredentialsIncompleteException();
       }
     } on SocketException {
-      return -3;
+      throw NetworkException();
     } on DioException {
-      return -3;
+      throw NetworkException();
+    } on LanisException {
+      rethrow;
     } catch (e, stack) {
       recordError(e, stack);
       debugPrint(e.toString());
-      return -4;
+      throw LoggedOffOrUnknownException();
     }
   }
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
@@ -60,25 +61,27 @@ class LoginFormState extends State<LoginForm> {
     );
 
     await client.overwriteCredits(username, password, schoolID);
-    var loginCode = await client.login(userLogin: true);
-
-    setState(() {
-      Navigator.pop(context); //pop dialog
-      if (loginCode == 0) {
+    try {
+      await client.login(userLogin: true);
+      setState(() {
+        Navigator.pop(context); //pop dialog
         widget.afterLogin();
-      } else {
+      });
+    } on LanisException catch (ex) {
+      setState(() {
+        Navigator.pop(context); //pop dialog
         showDialog(
-            context: context,
-            builder: (context)=> AlertDialog(
-              title: const Text("Fehler!"),
-              content: Text(client.statusCodes[loginCode]!),
-              actions: [
-                TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("OK"))
-              ],
-            ),
+          context: context,
+          builder: (context)=> AlertDialog(
+            title: const Text("Fehler!"),
+            content: Text(ex.cause),
+            actions: [
+              TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("OK"))
+            ],
+          ),
         );
-      }
-    });
+      });
+    }
   }
 
 
