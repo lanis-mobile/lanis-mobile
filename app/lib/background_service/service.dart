@@ -31,40 +31,38 @@ Future<void> performBackgroundFetch() async {
   try {
     await client.login();
     final vPlan = await client.getFullVplan(skipCheck: true);
-    if (vPlan is! int) {
-      final List combinedVPlan = [];
+    final List combinedVPlan = [];
 
-      for (List plan in vPlan["entries"]) {
-        combinedVPlan.addAll(plan);
-      }
+    for (List plan in vPlan["entries"]) {
+      combinedVPlan.addAll(plan);
+    }
 
-      final filteredPlan = await filter_logic.filter(combinedVPlan);
+    final filteredPlan = await filter_logic.filter(combinedVPlan);
 
-      String messageBody = "";
+    String messageBody = "";
 
-      for (final entry in filteredPlan) {
-        final time = "${wochenTag(entry["Tag_en"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
-        final type = entry["Art"] ?? "";
-        final subject = entry["Fach"] ?? "";
-        final teacher = entry["Lehrer"] ?? "";
-        final classInfo = entry["Klasse"] ?? "";
+    for (final entry in filteredPlan) {
+      final time = "${wochenTag(entry["Tag_en"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
+      final type = entry["Art"] ?? "";
+      final subject = entry["Fach"] ?? "";
+      final teacher = entry["Lehrer"] ?? "";
+      final classInfo = entry["Klasse"] ?? "";
 
-        // Concatenate non-null values with separator "-"
-        final entryText = [time, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
+      // Concatenate non-null values with separator "-"
+      final entryText = [time, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
 
-        messageBody += "$entryText\n";
-      }
+      messageBody += "$entryText\n";
+    }
 
-      if (messageBody != "") {
-        final messageUUID = generateUUID(messageBody);
+    if (messageBody != "") {
+      final messageUUID = generateUUID(messageBody);
 
-        messageBody += "Letztes Update erhalten: ${DateFormat.Hm().format(DateTime.now())}";
+      messageBody += "Letztes Update erhalten: ${DateFormat.Hm().format(DateTime.now())}";
 
-        if (!(await isMessageAlreadySent(messageUUID))) {
-          await sendMessage("${filteredPlan.length} Einträge im Vertretungsplan",
-              messageBody);
-          await markMessageAsSent(messageUUID);
-        }
+      if (!(await isMessageAlreadySent(messageUUID))) {
+        await sendMessage("${filteredPlan.length} Einträge im Vertretungsplan",
+            messageBody);
+        await markMessageAsSent(messageUUID);
       }
     }
   } on LanisException {
