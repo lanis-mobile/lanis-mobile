@@ -433,19 +433,17 @@ class _HomePageState extends State<HomePage> {
 
   void openLanisInBrowser() {
     client.getLoginURL().then((response) {
-      if (response is String) {
-        launchUrl(Uri.parse(response));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(client.statusCodes[response] ?? "Unbekannter Fehler!"),
-          duration: const Duration(seconds: 1),
-          action: SnackBarAction(
-            label: 'ACTION',
-            onPressed: () {},
-          ),
-        ));
-      }
-    });
+      launchUrl(Uri.parse(response));
+    }).catchError((ex) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(ex.cause),
+        duration: const Duration(seconds: 1),
+        action: SnackBarAction(
+          label: 'ACTION',
+          onPressed: () {},
+        ),
+      ));
+    }, test: (e) => e is LanisException);
   }
 
   void loadUserData() {

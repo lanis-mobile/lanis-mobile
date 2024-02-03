@@ -292,7 +292,7 @@ class SPHclient {
     }
   }
 
-  Future<dynamic> getLoginURL() async {
+  Future<String> getLoginURL() async {
     final dioHttp = Dio();
     final cookieJar = CookieJar();
     dioHttp.interceptors.add(CookieManager(cookieJar));
@@ -320,14 +320,14 @@ class SPHclient {
 
           return location2;
         } else {
-          return -1;
+          throw WrongCredentialsException();
         }
       } else {
-        return -2;
+        throw CredentialsIncompleteException();
       }
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
+      throw LoggedOffOrUnknownException();
     }
   }
 
