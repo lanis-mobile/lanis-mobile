@@ -56,26 +56,17 @@ abstract class Fetcher {
 
 
       _get().then((data) async {
-        if (data is int) {
-          if (data < 0) {
-            if (!secondTry) {
-              try {
-                await client.login();
-              } on LanisException {
-                // former status codes ignored
-              }
-              await fetchData(forceRefresh: true, secondTry: true);
-              return;
-            }
-          }
-
-          _addResponse(FetcherResponse(status: FetcherStatus.error, content: data));
-          return;
-        }
         _addResponse(FetcherResponse(status: FetcherStatus.done, content: data));
         isEmpty = false;
         return;
-      });
+      }).catchError((ex) async {
+        if (!secondTry) {
+          await client.login();
+          await fetchData(forceRefresh: true, secondTry: true);
+          return;
+        }
+        _addResponse(FetcherResponse(status: FetcherStatus.error, content: ex.cause));
+      }, test: (e) => e is LanisException);
     }
   }
 

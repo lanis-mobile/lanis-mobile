@@ -397,7 +397,7 @@ class SPHclient {
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
     if (!client.doesSupportFeature(SPHAppEnum.kalender)) {
-      return -8;
+      throw NotSupportedException();
     }
 
     debugPrint("Trying to get calendar...");
@@ -424,13 +424,11 @@ class SPHclient {
       return jsonDecode(response.toString());
     } on SocketException {
       debugPrint("Calendar: -3");
-      return -3;
-      //network error
+      throw NetworkException();
     } catch (e, stack) {
       debugPrint("Calendar: -4");
       recordError(e, stack);
-      return -4;
-      //unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
