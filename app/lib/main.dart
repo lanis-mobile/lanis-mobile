@@ -7,6 +7,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:sph_plan/client/load_mode.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/whats_new.dart';
@@ -351,7 +352,7 @@ class _HomePageState extends State<HomePage> {
           ""}";
       schoolName = client.schoolName;
 
-      if (client.loadMode == "fast") {
+      if (client.loadMode == LoadModeEnum.fast) {
         if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
           await fetchFeature([[Status.substitution, Status.errorSubstitution, client.substitutionsFetcher]]);
         }
@@ -842,7 +843,7 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                 ),
-                                if (client.loadMode == "full") ...[
+                                if (client.loadMode == LoadModeEnum.full) ...[
                                   Padding(
                                     padding: const EdgeInsets.only(top: 16),
                                     child: Row(
