@@ -51,7 +51,7 @@ class SPHclient {
   List<dynamic> supportedApps = [];
   late CookieJar jar;
   final dio = Dio();
-  Timer? timer;
+  Timer? preventLogoutTimer;
   late Cryptor cryptor = Cryptor();
 
   late SubstitutionsParser substitutions = SubstitutionsParser(dio, this);
@@ -159,26 +159,11 @@ class SPHclient {
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
     try {
-      if (username != "" && password != "" && schoolID != "") {
-        final response1 = await dio.post(
-            "https://login.schulportal.hessen.de/?i=$schoolID",
-            queryParameters: {
-              "user": '$schoolID.$username',
-              "user2": username,
-              "password": password
-            },
-            options: Options(contentType: "application/x-www-form-urlencoded"));
-        if (response1.headers.value(HttpHeaders.locationHeader) != null) {
-          //credits are valid
-          final response2 =
-              await dio.get("https://connect.schulportal.hessen.de");
+          String loginURL = await getLoginURL();
+          await dio.get(loginURL);
 
-          String location2 =
-              response2.headers.value(HttpHeaders.locationHeader) ?? "";
-          await dio.get(location2);
-
-          timer?.cancel();
-          timer = Timer.periodic(const Duration(seconds: 60), (timer) => preventLogout());
+          preventLogoutTimer?.cancel();
+          preventLogoutTimer = Timer.periodic(const Duration(seconds: 60), (timer) => preventLogout());
 
           if (userLogin) {
             await fetchRedundantData();
@@ -189,12 +174,6 @@ class SPHclient {
           debugPrint("Encryption connected with status code: $encryptionStatusName");
 
           return;
-        } else {
-          throw WrongCredentialsException();
-        }
-      } else {
-        throw CredentialsIncompleteException();
-      }
     } on SocketException {
       throw NetworkException();
     } on DioException {
@@ -208,6 +187,8 @@ class SPHclient {
     }
   }
 
+  ///Periodically sends a request to the server to prevent the user from being logged out.
+  ///Without this the user cannot access encrypted data after 3-4 minutes.
   Future<void> preventLogout() async {
     final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
     var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
