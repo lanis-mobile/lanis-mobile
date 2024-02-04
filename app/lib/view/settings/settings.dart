@@ -6,6 +6,7 @@ import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
+import '../../login.dart';
 import '../../shared/apps.dart';
 import '../login/screen.dart';
 import '../../client/client.dart';
@@ -104,6 +105,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.login),
+            title: const Text('login test'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
           ),

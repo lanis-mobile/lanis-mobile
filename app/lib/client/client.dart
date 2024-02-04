@@ -46,6 +46,7 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
+  String? schoolLogo = "";
   String loadMode = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
@@ -203,8 +204,17 @@ class SPHclient {
   Future<void> fetchRedundantData() async {
     final schoolInfo = await getSchoolInfo(schoolID);
 
-    schoolImage = await getSchoolImage(schoolInfo["bgimg"]["sm"]["url"]);
+    schoolImage = await savePersistentImage(schoolInfo["bgimg"]["sm"]["url"], "school.jpg");
     await globalStorage.write(key: StorageKey.schoolImageLocation, value: schoolImage);
+
+    String? schoolImageLink = schoolInfo["Logo"];
+    if (schoolImageLink != null) {
+      schoolLogo = await savePersistentImage(schoolInfo["Logo"], "logo.jpg");
+      await globalStorage.write(key: StorageKey.schoolLogoLocation, value: schoolLogo!);
+    } else {
+      schoolLogo = null;
+    }
+
 
     schoolName = schoolInfo["Name"];
     await globalStorage.write(key: StorageKey.userSchoolName, value: schoolName);
@@ -240,11 +250,10 @@ class SPHclient {
   }
 
   ///Fetches the school's image and saves it to the storage.
-  Future<String> getSchoolImage(String url) async {
+  Future<String> savePersistentImage(String url, String fileName) async {
     try {
       final Directory dir = await getApplicationDocumentsDirectory();
 
-      String fileName = "school.jpg";
       String savePath = "${dir.path}/$fileName";
 
       Directory folder = Directory(dir.path);

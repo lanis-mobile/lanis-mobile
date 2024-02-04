@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +24,7 @@ enum StorageKey {
   lastPushMessageHash,
   lastAppVersion,
   schoolImageLocation,
+  schoolLogoLocation,
   schoolAccentColor,
 }
 
@@ -57,6 +57,8 @@ extension SPHApp on StorageKey {
         return "supportedApps";
       case StorageKey.schoolImageLocation:
         return "schoolImageLocation";
+      case StorageKey.schoolLogoLocation:
+        return "schoolLogoLocation";
       case StorageKey.schoolAccentColor:
         return "schoolColor";
       case StorageKey.settingsSelectedColor:
