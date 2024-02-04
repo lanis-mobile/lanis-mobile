@@ -19,6 +19,7 @@ import 'package:sph_plan/client/cryptor.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/themes.dart';
 
+import '../shared/account_types.dart';
 import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
 import 'client_submodules/calendar.dart';
@@ -354,14 +355,18 @@ class SPHclient {
     var app = supportedApps.where((element) => element["link"].toString() == feature.php).singleOrNull;
     if (app == null) return false;
     if (feature.onlyStudents) {
-      return isStudentAccount();
+      return getAccountType() == AccountType.student;
     } else {
       return true;
     }
   }
 
-  bool isStudentAccount() {
-    return userData.containsKey("klasse");
+  AccountType getAccountType() {
+    if (userData.containsKey("klasse")) {
+      return AccountType.student;
+    } else {
+      return AccountType.teacher;
+    }
   }
 
   Future<dynamic> fetchUserData() async {
