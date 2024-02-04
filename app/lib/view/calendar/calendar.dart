@@ -45,7 +45,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         await client.login();
       }
 
-      return await client.getEvent(id);
+      return await client.calendar.getEvent(id);
     } catch (e) {
       if(!secondTry) {
         fetchEvent(id, secondTry: true);

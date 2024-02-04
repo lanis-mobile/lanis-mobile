@@ -22,6 +22,7 @@ import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
 import '../shared/types/fach.dart';
 import '../shared/types/upload.dart';
+import 'client_submodules/calendar.dart';
 import 'client_submodules/substitutions.dart';
 
 class SPHclient {
@@ -51,7 +52,8 @@ class SPHclient {
   Timer? timer;
   late Cryptor cryptor = Cryptor();
 
-  late SubstitutionsParser substitutions;
+  late SubstitutionsParser substitutions = SubstitutionsParser(dio, this);
+  late CalendarParser calendar = CalendarParser(dio, this);
 
   SubstitutionsFetcher? substitutionsFetcher;
   MeinUnterrichtFetcher? meinUnterrichtFetcher;
@@ -179,8 +181,6 @@ class SPHclient {
 
           int encryptionStatusName = await cryptor.start(dio);
           debugPrint("Encryption connected with status code: $encryptionStatusName");
-
-          substitutions = SubstitutionsParser(dio, this);
 
           return;
         } else {
@@ -327,74 +327,6 @@ class SPHclient {
       } else {
         throw CredentialsIncompleteException();
       }
-    } catch (e, stack) {
-      recordError(e, stack);
-      throw LoggedOffOrUnknownException();
-    }
-  }
-
-  Future<dynamic> getCalendar(String startDate, String endDate) async {
-    if (!client.doesSupportFeature(SPHAppEnum.kalender)) {
-      throw NotSupportedException();
-    }
-
-    debugPrint("Trying to get calendar...");
-
-    try {
-      final response = await dio.post(
-          "https://start.schulportal.hessen.de/kalender.php",
-          queryParameters: {
-            "f": "getEvents",
-            "start": startDate,
-            "end": endDate
-          },
-          data: 'f=getEvents&start=$startDate&end=$endDate',
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-                  "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-            },
-          ));
-      return jsonDecode(response.toString());
-    } on SocketException {
-      debugPrint("Calendar: -3");
-      throw NetworkException();
-    } catch (e, stack) {
-      debugPrint("Calendar: -4");
-      recordError(e, stack);
-      throw LoggedOffOrUnknownException();
-    }
-  }
-
-  Future<dynamic> getEvent(String id) async {
-    if (!(await InternetConnectionChecker().hasConnection)) {
-      throw NoConnectionException();
-    }
-
-    try {
-      final response = await dio.post(
-          "https://start.schulportal.hessen.de/kalender.php",
-          data: {
-            "f": "getEvent",
-            "id": id,
-          },
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-            },
-          ));
-      return jsonDecode(response.toString());
-    } on SocketException {
-      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
       throw LoggedOffOrUnknownException();

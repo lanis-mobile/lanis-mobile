@@ -133,6 +133,6 @@ class CalendarFetcher extends Fetcher {
 
     final formatter = DateFormat('yyyy-MM-dd');
 
-    return client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+    return client.calendar.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
   }
 }

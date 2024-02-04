@@ -242,7 +242,7 @@ Future<dynamic> generateBugReport() async {
     },
     "applets": {
       "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan) ? await client.substitutions.getAllSubstitutions() ?? [] : [],
-      "kalender": client.doesSupportFeature(SPHAppEnum.kalender) ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
+      "kalender": client.doesSupportFeature(SPHAppEnum.kalender) ? await client.calendar.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
       "mein_unterricht": {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
