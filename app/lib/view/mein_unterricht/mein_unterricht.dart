@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
 import '../login/screen.dart';
@@ -234,8 +235,8 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
       body: StreamBuilder<FetcherResponse>(
         stream: client.meinUnterrichtFetcher?.stream,
         builder: (context, snapshot) {
-          if (snapshot.data?.status == FetcherStatus.error &&
-              snapshot.data?.content == -2) {
+          if (snapshot.hasError &&
+              snapshot.error is CredentialsIncompleteException) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                   context,
@@ -261,10 +262,10 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    if (snapshot.data?.status == FetcherStatus.error) ...[
-                      ErrorView(data: snapshot.data!.content, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher,),
-                      ErrorView(data: snapshot.data!.content, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher),
-                      ErrorView(data: snapshot.data!.content, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher)
+                    if (snapshot.hasError && snapshot.error is LanisException) ...[
+                      ErrorView(data: snapshot.error as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher,),
+                      ErrorView(data: snapshot.error as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher),
+                      ErrorView(data: snapshot.error as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher)
                     ]
                     else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) ...[
                       const Center(child: CircularProgressIndicator()),

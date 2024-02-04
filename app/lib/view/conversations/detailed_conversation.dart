@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/format_text.dart';
 import '../../client/client.dart';
 
@@ -41,10 +42,12 @@ class _DetailedConversationAnsichtState
         await client.login();
       }
 
-      return client.getSingleConversation(widget.uniqueID);
+      return client.conversations.getSingleConversation(widget.uniqueID);
     } catch (e) {
       if (!secondTry) {
         fetchConversation(secondTry: true);
+      } else {
+        rethrow;
       }
     }
   }
@@ -141,12 +144,14 @@ class _DetailedConversationAnsichtState
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.waiting) {
               // Error content
-              if (snapshot.data is int) {
-                return ErrorView.fromCode(
-                  data: snapshot.data,
-                  name: "einer einzelnen Nachricht",
-                  fetcher: null,
-                );
+              if (snapshot.hasError) {
+                if (snapshot.error is LanisException) {
+                  return ErrorView(
+                    data: snapshot.error as LanisException,
+                    name: "einer einzelnen Nachricht",
+                    fetcher: null,
+                  );
+                }
               }
               // Successful content
               return ListView.builder(

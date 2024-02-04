@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
@@ -78,7 +79,9 @@ class SubstitutionsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() async {
-    final substitutionPlan = await client.getFullVplan();
+    debugPrint("Fetching substitution plan");
+    final substitutionPlan = await client.substitutions.getAllSubstitutions();
+    debugPrint("Fetched substitution plan");
 
     final Map filteredSubstitutionPlan = {"length": 0, "days": []};
 
@@ -97,7 +100,7 @@ class MeinUnterrichtFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getMeinUnterrichtOverview();
+    return client.meinUnterricht.getOverview();
   }
 }
 
@@ -106,7 +109,7 @@ class VisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getConversationsOverview(false);
+    return client.conversations.getOverview(false);
   }
 }
 
@@ -115,7 +118,7 @@ class InvisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getConversationsOverview(true);
+    return client.conversations.getOverview(true);
   }
 }
 
@@ -130,6 +133,6 @@ class CalendarFetcher extends Fetcher {
 
     final formatter = DateFormat('yyyy-MM-dd');
 
-    return client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+    return client.calendar.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
   }
 }

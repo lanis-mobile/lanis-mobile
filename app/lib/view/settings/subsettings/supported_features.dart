@@ -23,7 +23,6 @@ final List<SPHAppEnum> supportedApps = [
 
 class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverviewScreen> {
   double padding = 10.0;
-  final bool isEncryptionSupported = client.getEncryptionAuthStatus();
 
   List<ListTile> featureListListTiles = [];
 
@@ -48,8 +47,8 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
 
       featureListListTiles.add(ListTile(
         leading: const Icon(Icons.lock),
-        title: const Text("Verschlüsselung"),
-        subtitle: Text(isEncryptionSupported
+        title: const Text("Ende-zu-Ende Verschlüsselung"),
+        subtitle: Text(client.cryptor.authenticated
             ? "Unterstützt\nVerschlüsselung ist benötigt, um zum Beispiel Nachrichten oder Noten anzuzeigen."
             : "nicht Unterstützt\nDas könnte möglicherweise ein Fehler sein, kontaktiere bitte den Entwickler der App. Du kannst keine Nachrichten oder Noten sehen!"),
       ));

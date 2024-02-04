@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sph_plan/shared/account_types.dart';
 import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
@@ -17,7 +18,8 @@ final _klassenController = TextEditingController();
 final _lehrerKuerzelController = TextEditingController();
 
 List<PageViewModel> setupScreenPageViewModels = [
-    if (!client.isStudentAccount()) PageViewModel(
+    //todo @codespoof
+    if (client.getAccountType() != AccountType.student) PageViewModel(
     image: SvgPicture.asset("assets/undraw/undraw_profile_re_4a55.svg", height: 175.0),
       title: "nicht-Schüleraccount",
       body: "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren."

@@ -43,7 +43,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       }
 
       String url = widget.dataFetchURL;
-      data = await client.getMeinUnterrichtCourseView(url);
+      data = await client.meinUnterricht.getCourseView(url);
 
       loading = false;
       setState(() {});
@@ -319,7 +319,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                     content: Text("Hausaufgabe wird gespeichert..."),
                                                     duration: Duration(milliseconds: 500)
                                                   ));
-                                                  client.setHomeworkDone(data["historie"][index]["course-id"], data["historie"][index]["entry-id"], value!).then((val) {
+                                                  client.meinUnterricht.setHomework(data["historie"][index]["course-id"], data["historie"][index]["entry-id"], value!).then((val) {
                                                     if (val != "1") {
                                                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                                                         content: Text("Fehler beim Speichern der Hausaufgabe."),

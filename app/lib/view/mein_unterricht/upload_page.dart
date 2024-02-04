@@ -31,13 +31,13 @@ class _UploadScreenState extends State<UploadScreen> {
 
   void forceReloadPage() {
     setState(() {
-      _future = client.getUploadInfo(widget.url);
+      _future = client.meinUnterricht.getUploadInfo(widget.url);
     });
   }
 
   @override
   void initState() {
-    _future = client.getUploadInfo(widget.url);
+    _future = client.meinUnterricht.getUploadInfo(widget.url);
     super.initState();
   }
 
@@ -157,7 +157,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                               showSnackbar(text: "Versuche die Datei(en) hochzuladen...");
 
-                              final dynamic fileStatus = await client.uploadFile(
+                              final dynamic fileStatus = await client.meinUnterricht.uploadFile(
                                 course: snapshot.data["course_id"],
                                 entry: snapshot.data["entry_id"],
                                 upload: snapshot.data["upload_id"],
@@ -569,7 +569,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                                               showSnackbar(text: "Versuche die Datei(en) zu löschen...");
 
-                                              dynamic response = await client.deleteUploadedFile(
+                                              dynamic response = await client.meinUnterricht.deleteUploadedFile(
                                                 course: snapshot.data["course_id"],
                                                 entry: snapshot.data["entry_id"],
                                                 upload: snapshot.data["upload_id"],
