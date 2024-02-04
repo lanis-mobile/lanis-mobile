@@ -200,7 +200,7 @@ Future<dynamic> generateBugReport() async {
   //mein_unterricht
   late dynamic meinUnterricht;
   late List<dynamic> meinUnterrichtKurse = [];
-  if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+  if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
     meinUnterricht = await client.getMeinUnterrichtOverview();
     meinUnterricht["kursmappen"]?.forEach((kurs) async {
       meinUnterrichtKurse.add(

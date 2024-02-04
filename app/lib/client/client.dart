@@ -694,7 +694,7 @@ class SPHclient {
 
   Future<dynamic> getMeinUnterrichtOverview() async {
     if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-      return -8;
+     throw NotSupportedException();
     }
     
     debugPrint("Get Mein Unterricht overview");
@@ -1044,7 +1044,7 @@ class SPHclient {
       debugPrint(e.toString());
       debugPrint(stack.toString());
       recordError(e, stack);
-      return -4;
+      throw LoggedOffOrUnknownException();
     }
   }
 
