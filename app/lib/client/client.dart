@@ -176,9 +176,8 @@ class SPHclient {
           }
           await getSchoolTheme();
 
-          int encryptionStatusName = await startLanisEncryption();
-          debugPrint(
-              "Encryption connected with status code: $encryptionStatusName");
+          await startLanisEncryption();
+          debugPrint("Encryption connected");
 
           return;
         } else {
@@ -1388,8 +1387,8 @@ class SPHclient {
     }
   }
 
-  Future<int> startLanisEncryption() async {
-    return await cryptor.start(dio);
+  Future<void> startLanisEncryption() async {
+    await cryptor.start(dio);
   }
 
   bool getEncryptionAuthStatus() {
