@@ -21,11 +21,10 @@ import 'package:sph_plan/themes.dart';
 
 import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
-import '../shared/types/fach.dart';
-import '../shared/types/upload.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
+import 'client_submodules/timetable.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -59,6 +58,7 @@ class SPHclient {
   late DataStorageParser dataStorage = DataStorageParser(dio, this);
   late MeinUnterrichtParser meinUnterricht = MeinUnterrichtParser(dio, this);
   late ConversationsParser conversations = ConversationsParser(dio, this);
+  late TimetableParser timetable = TimetableParser(dio, this);
 
   SubstitutionsFetcher? substitutionsFetcher;
   MeinUnterrichtFetcher? meinUnterrichtFetcher;
@@ -338,65 +338,6 @@ class SPHclient {
     }
   }
 
-  Future<List<List<List<StdPlanFach>>>> getStundenplan() async {
-    final location = await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
-    final response = await dio.get("https://start.schulportal.hessen.de/${location.headers["location"]![0]}");
-
-    var document = parse(response.data);
-    var stundenplanTableHead = document.querySelector("#own thead");
-
-    var sk = stundenplanTableHead!.querySelector("th")!.text.contains("Stunde");
-
-    var stundenplanTableBody = document.querySelector("#own tbody");
-
-    if (stundenplanTableBody != null) {
-      List<List<List<StdPlanFach>>> result = [];
-
-      for (var row in stundenplanTableBody.querySelectorAll("tr")) {
-        if (row.text.replaceAll(RegExp(r'[\s\n\r]'), "") == "") continue;
-        List<List<StdPlanFach>> timeslot = [];
-        for (var (index, day) in row.querySelectorAll("td").indexed) {
-          if (sk && index == 0) continue;
-          List<StdPlanFach> stunde = [];
-          for (var fach in day.querySelectorAll(".stunde")) {
-            var name = fach.querySelector("b")!.text.trim();
-            var raum = fach.nodes.map((node) => node.nodeType == 3 ? node.text!.trim() : "").join();
-            var lehrer = fach.querySelector("small")!.text.trim();
-            var badge = fach.querySelector(".badge")?.text.trim() ?? "";
-            var duration = int.parse(fach.parent!.attributes["rowspan"]!);
-            stunde.add(StdPlanFach(name, raum, lehrer, badge, duration));
-          }
-          timeslot.add(stunde);
-        }
-        result.add(timeslot);
-      }
-      return result;
-    } else {
-      return [];
-    }
-  }
-
-  Future<bool> isAuth() async {
-    try {
-      final response = await dio.get(
-          "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
-      String responseText = response.data.toString();
-      if (responseText.contains("Fehler - Schulportal Hessen") ||
-          username.isEmpty ||
-          password.isEmpty ||
-          schoolID.isEmpty) {
-        return false;
-      } else if (responseText.contains(username)) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e, stack) {
-      recordError(e, stack);
-      return false;
-    }
-  }
-
   Future<dynamic> getSchoolInfo(String schoolID) async {
     final response = await dio.get(
         "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=$schoolID");
@@ -452,6 +393,17 @@ class SPHclient {
   }
 
   Future<void> deleteAllSettings() async {
+    Future<void> deleteSubfoldersAndFiles(Directory directory) async {
+      await for (var entity in directory.list()) {
+        if (entity is File) {
+          await entity.delete(recursive: true);
+        } else if (entity is Directory) {
+          await deleteSubfoldersAndFiles(entity);
+          await entity.delete(recursive: true);
+        }
+      }
+    }
+
     jar.deleteAll();
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
@@ -461,28 +413,17 @@ class SPHclient {
     await deleteSubfoldersAndFiles(tempDir);
   }
 
-  Future<void> deleteSubfoldersAndFiles(Directory directory) async {
-    await for (var entity in directory.list()) {
-      if (entity is File) {
-        await entity.delete(recursive: true);
-      } else if (entity is Directory) {
-        await deleteSubfoldersAndFiles(entity);
-        await entity.delete(recursive: true);
-      }
-    }
-  }
-
-
-  String generateUniqueHash(String source) {
-    var bytes = utf8.encode(source);
-    var digest = sha256.convert(bytes);
-
-    var shortHash = digest.toString().replaceAll(RegExp(r'[^A-z0-9]'), '').substring(0, 6);
-
-    return shortHash;
-  }
 
   Future<String> downloadFile(String url, String filename) async {
+    String generateUniqueHash(String source) {
+      var bytes = utf8.encode(source);
+      var digest = sha256.convert(bytes);
+
+      var shortHash = digest.toString().replaceAll(RegExp(r'[^A-z0-9]'), '').substring(0, 6);
+
+      return shortHash;
+    }
+
     try {
       var tempDir = await getTemporaryDirectory();
 
