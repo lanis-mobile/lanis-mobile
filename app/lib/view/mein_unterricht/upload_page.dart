@@ -103,7 +103,7 @@ class _UploadScreenState extends State<UploadScreen> {
               appBar: AppBar(
                 title: Text(widget.name),
               ),
-              body: ErrorView(
+              body: ErrorView.fromCode(
                   data: snapshot.data,
                   name: "einer Abgabe",
                   fetcher: null

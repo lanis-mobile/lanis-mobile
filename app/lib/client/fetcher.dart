@@ -45,7 +45,7 @@ abstract class Fetcher {
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
       if (isEmpty) {
-        _addResponse(FetcherResponse(status: FetcherStatus.error, content: -9));
+        _addResponse(FetcherResponse(status: FetcherStatus.error, content: NoConnectionException()));
       }
 
       return;

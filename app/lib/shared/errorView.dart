@@ -9,6 +9,9 @@ class ErrorView extends StatelessWidget {
   late final Fetcher? fetcher;
   late final String name;
   ErrorView({super.key, required this.data, required this.name, required this.fetcher});
+  ErrorView.fromCode({super.key, required int data, required this.name, required this.fetcher}) {
+    this.data = LanisException.fromCode(data);
+  }
 
   @override
   Widget build(BuildContext context) {

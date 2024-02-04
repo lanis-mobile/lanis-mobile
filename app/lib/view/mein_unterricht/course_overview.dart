@@ -485,7 +485,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     if (data is int && data < 0) {
       return Scaffold(
         appBar: AppBar(title: const Text("Fehler"),),
-        body: ErrorView(data: data, name: "einen Kurs", fetcher: null,)
+        body: ErrorView.fromCode(data: data, name: "einen Kurs", fetcher: null,)
       );
     }
 
