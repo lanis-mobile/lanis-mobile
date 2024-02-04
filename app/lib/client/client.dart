@@ -24,6 +24,7 @@ import '../shared/shared_functions.dart';
 import '../shared/types/fach.dart';
 import '../shared/types/upload.dart';
 import 'client_submodules/calendar.dart';
+import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 
 class SPHclient {
@@ -57,6 +58,7 @@ class SPHclient {
   late CalendarParser calendar = CalendarParser(dio, this);
   late DataStorageParser dataStorage = DataStorageParser(dio, this);
   late MeinUnterrichtParser meinUnterricht = MeinUnterrichtParser(dio, this);
+  late ConversationsParser conversations = ConversationsParser(dio, this);
 
   SubstitutionsFetcher? substitutionsFetcher;
   MeinUnterrichtFetcher? meinUnterrichtFetcher;
@@ -470,53 +472,6 @@ class SPHclient {
     }
   }
 
-  Future<dynamic> getConversationsOverview(bool invisible) async {
-    if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
-      return -8;
-    }
-
-    debugPrint("Get new conversation data. Invisible: $invisible.");
-    try {
-      final response =
-          await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-              data: {
-                "a": "headers",
-                "getType": invisible ? "unvisibleOnly" : "visibleOnly",
-                "last": "0"
-              },
-              options: Options(
-                headers: {
-                  "Accept": "*/*",
-                  "Content-Type":
-                      "application/x-www-form-urlencoded; charset=UTF-8",
-                  "Sec-Fetch-Dest": "empty",
-                  "Sec-Fetch-Mode": "cors",
-                  "Sec-Fetch-Site": "same-origin",
-                  "X-Requested-With": "XMLHttpRequest",
-                },
-              ));
-
-      final Map<String, dynamic> encryptedJSON =
-          jsonDecode(response.toString());
-
-      final String? decryptedConversations =
-          cryptor.decryptString(encryptedJSON["rows"]);
-
-      if (decryptedConversations == null) {
-        return -7;
-        // unknown error (encrypted isn't salted)
-      }
-
-      return jsonDecode(decryptedConversations);
-    } on (SocketException, DioException) {
-      return -3;
-      // network error
-    } catch (e, stack) {
-      recordError(e, stack);
-      return -4;
-      // unknown error
-    }
-  }
 
   String generateUniqueHash(String source) {
     var bytes = utf8.encode(source);
@@ -568,48 +523,6 @@ class SPHclient {
     } catch (e, stack) {
       recordError(e, stack);
       return "";
-    }
-  }
-
-  Future<dynamic> getSingleConversation(String uniqueID) async {
-    if (!(await InternetConnectionChecker().hasConnection)) {
-      return -9;
-    }
-
-    try {
-      final encryptedUniqueID = cryptor.encryptString(uniqueID);
-
-      final response =
-          await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-              queryParameters: {"a": "read", "msg": uniqueID},
-              data: {"a": "read", "uniqid": encryptedUniqueID},
-              options: Options(
-                headers: {
-                  "Accept": "*/*",
-                  "Content-Type":
-                      "application/x-www-form-urlencoded; charset=UTF-8",
-                  "Sec-Fetch-Dest": "empty",
-                  "Sec-Fetch-Mode": "cors",
-                  "Sec-Fetch-Site": "same-origin",
-                  "X-Requested-With": "XMLHttpRequest",
-                },
-              ));
-
-      final Map<String, dynamic> encryptedJSON =
-          jsonDecode(response.toString());
-
-      final String? decryptedConversations =
-          cryptor.decryptString(encryptedJSON["message"]);
-
-      if (decryptedConversations == null) {
-        return -7;
-        // unknown error (encrypted isn't salted)
-      }
-
-      return jsonDecode(decryptedConversations);
-    } on (SocketException, DioException) {
-      return -3;
-      // network error
     }
   }
 }

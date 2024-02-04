@@ -41,7 +41,7 @@ class _DetailedConversationAnsichtState
         await client.login();
       }
 
-      return client.getSingleConversation(widget.uniqueID);
+      return client.conversations.getSingleConversation(widget.uniqueID);
     } catch (e) {
       if (!secondTry) {
         fetchConversation(secondTry: true);

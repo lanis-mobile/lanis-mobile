@@ -109,7 +109,7 @@ class VisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getConversationsOverview(false);
+    return client.conversations.getOverview(false);
   }
 }
 
@@ -118,7 +118,7 @@ class InvisibleConversationsFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getConversationsOverview(true);
+    return client.conversations.getOverview(true);
   }
 }
 

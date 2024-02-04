@@ -1,0 +1,109 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+
+import '../../shared/apps.dart';
+import '../../shared/shared_functions.dart';
+import '../client.dart';
+
+class ConversationsParser {
+  late Dio dio;
+  late SPHclient client;
+
+  ConversationsParser(Dio dioClient, this.client) {
+    dio = dioClient;
+  }
+
+  Future<dynamic> getOverview(bool invisible) async {
+    if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
+      return -8;
+    }
+
+    debugPrint("Get new conversation data. Invisible: $invisible.");
+    try {
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          data: {
+            "a": "headers",
+            "getType": invisible ? "unvisibleOnly" : "visibleOnly",
+            "last": "0"
+          },
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          ));
+
+      final Map<String, dynamic> encryptedJSON =
+      jsonDecode(response.toString());
+
+      final String? decryptedConversations =
+      client.cryptor.decryptString(encryptedJSON["rows"]);
+
+      if (decryptedConversations == null) {
+        return -7;
+        // unknown error (encrypted isn't salted)
+      }
+
+      return jsonDecode(decryptedConversations);
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
+    } catch (e, stack) {
+      recordError(e, stack);
+      return -4;
+      // unknown error
+    }
+  }
+
+  Future<dynamic> getSingleConversation(String uniqueID) async {
+    if (!(await InternetConnectionChecker().hasConnection)) {
+      return -9;
+    }
+
+    try {
+      final encryptedUniqueID = client.cryptor.encryptString(uniqueID);
+
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          queryParameters: {"a": "read", "msg": uniqueID},
+          data: {"a": "read", "uniqid": encryptedUniqueID},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          ));
+
+      final Map<String, dynamic> encryptedJSON =
+      jsonDecode(response.toString());
+
+      final String? decryptedConversations =
+      client.cryptor.decryptString(encryptedJSON["message"]);
+
+      if (decryptedConversations == null) {
+        return -7;
+        // unknown error (encrypted isn't salted)
+      }
+
+      return jsonDecode(decryptedConversations);
+    } on (SocketException, DioException) {
+      return -3;
+      // network error
+    }
+  }
+}
