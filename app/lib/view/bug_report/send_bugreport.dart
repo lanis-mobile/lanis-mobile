@@ -241,7 +241,7 @@ Future<dynamic> generateBugReport() async {
       "userdata": await client.fetchUserData()
     },
     "applets": {
-      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan) ? await client.getFullVplan() ?? [] : [],
+      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan) ? await client.substitutions.getAllSubstitutions() ?? [] : [],
       "kalender": client.doesSupportFeature(SPHAppEnum.kalender) ? await client.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
       "mein_unterricht": {
         "übersicht": meinUnterricht,

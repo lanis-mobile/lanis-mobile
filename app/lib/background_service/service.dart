@@ -30,7 +30,7 @@ Future<void> performBackgroundFetch() async {
   await client.loadFromStorage();
   try {
     await client.login();
-    final vPlan = await client.getFullVplan(skipCheck: true);
+    final vPlan = await client.substitutions.getAllSubstitutions(skipCheck: true);
     final List combinedVPlan = [];
 
     for (List plan in vPlan["entries"]) {

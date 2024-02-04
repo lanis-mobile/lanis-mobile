@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -24,6 +22,7 @@ import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
 import '../shared/types/fach.dart';
 import '../shared/types/upload.dart';
+import 'client_submodules/substitutions.dart';
 
 class SPHclient {
   final statusCodes = {
@@ -51,6 +50,8 @@ class SPHclient {
   final dio = Dio();
   Timer? timer;
   late Cryptor cryptor = Cryptor();
+
+  late SubstitutionsParser substitutions;
 
   SubstitutionsFetcher? substitutionsFetcher;
   MeinUnterrichtFetcher? meinUnterrichtFetcher;
@@ -176,9 +177,10 @@ class SPHclient {
           }
           await getSchoolTheme();
 
-          int encryptionStatusName = await startLanisEncryption();
-          debugPrint(
-              "Encryption connected with status code: $encryptionStatusName");
+          int encryptionStatusName = await cryptor.start(dio);
+          debugPrint("Encryption connected with status code: $encryptionStatusName");
+
+          substitutions = SubstitutionsParser(dio, this);
 
           return;
         } else {
@@ -331,70 +333,6 @@ class SPHclient {
     }
   }
 
-  Future<Map<String, List<dynamic>>> getVplanNonJSON() async {
-    debugPrint("Trying to get substitution plan using non-JSON parser");
-    DateFormat eingabeFormat = DateFormat('dd_mm_yyyy');
-    final Map<String, List<dynamic>> fullPlan = {"dates": [], "entries": []};
-    final document = parse((await dio.get("https://start.schulportal.hessen.de/vertretungsplan.php")).data);
-    final dates = document.querySelectorAll("[data-tag]").map((element) => element.attributes["data-tag"]!);
-    for (var date in dates) {
-      final parsedDate = eingabeFormat.parse(date);
-      fullPlan["dates"]!.add(date.replaceAll("_", "."));
-      var entries = [];
-      final vtable = document.querySelector("#vtable$date");
-      if (vtable == null) {
-        return fullPlan;
-      }
-      final headers = vtable.querySelectorAll("th").map((e) => e.attributes["data-field"]!).toList(growable: false);
-      for (var row in vtable.querySelectorAll("tbody tr").where((element) => element.querySelectorAll("td[colspan]").isEmpty)) {
-        final fields = row.querySelectorAll("td");
-        var entry = {
-          "Stunde": headers.contains("Stunde") ? fields[headers.indexOf("Stunde")].text.trim() : "",
-          "Klasse": headers.contains("Klasse") ? fields[headers.indexOf("Klasse")].text.trim() : "",
-          "Vertreter": headers.contains("Vertretung") ? fields[headers.indexOf("Vertretung")].text.trim() : "",
-          "Lehrer": headers.contains("Lehrer") ? fields[headers.indexOf("Lehrer")].text.trim() : "",
-          "Art": headers.contains("Art") ? fields[headers.indexOf("Art")].text.trim() : "",
-          "Fach": headers.contains("Fach") ? fields[headers.indexOf("Fach")].text.trim() : "",
-          "Raum": headers.contains("Raum") ? fields[headers.indexOf("Raum")].text.trim() : "",
-          "Hinweis": headers.contains("Hinweis") ? fields[headers.indexOf("Hinweis")].text.trim() : "",
-          "Tag_en": parsedDate.format('yyyy-MM-dd')
-        };
-        entries.add(entry);
-      }
-      fullPlan["entries"]!.add(entries);
-    }
-    return fullPlan;
-  }
-
-  Future<dynamic> getVplan(String date) async {
-    debugPrint("Trying to get substitution plan for $date");
-
-    try {
-      final response = await dio.post(
-          "https://start.schulportal.hessen.de/vertretungsplan.php",
-          queryParameters: {"a": "my"},
-          data: {"tag": date, "ganzerPlan": "true"},
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-                  "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-            },
-          ));
-      return jsonDecode(response.toString());
-    } on SocketException {
-      debugPrint("Substitution plan error: -3");
-      throw NetworkException();
-    } catch (e, stack) {
-      debugPrint("Substitution plan error: -4");
-      recordError(e, stack);
-      throw LoggedOffOrUnknownException();
-    }
-  }
-
   Future<dynamic> getCalendar(String startDate, String endDate) async {
     if (!client.doesSupportFeature(SPHAppEnum.kalender)) {
       throw NotSupportedException();
@@ -457,74 +395,6 @@ class SPHclient {
       return jsonDecode(response.toString());
     } on SocketException {
       throw NetworkException();
-    } catch (e, stack) {
-      recordError(e, stack);
-      throw LoggedOffOrUnknownException();
-    }
-  }
-
-  Future<List<String>> getVplanDates() async {
-    try {
-      final response = await dio
-          .get('https://start.schulportal.hessen.de/vertretungsplan.php');
-
-      String text = response.toString();
-
-      if (text.contains("Fehler - Schulportal Hessen - ")) {
-        throw UnauthorizedException();
-      } else {
-        RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
-        Iterable<RegExpMatch> matches = datePattern.allMatches(text);
-
-        List<String> uniqueDates = [];
-
-        for (RegExpMatch match in matches) {
-          int day = int.parse(match.group(1) ?? "00");
-          int month = int.parse(match.group(2) ?? "00");
-          int year = int.parse(match.group(3) ?? "00");
-          DateTime extractedDate = DateTime(year, month, day);
-
-          String dateString = extractedDate.format("dd.MM.yyyy");
-
-          if (!uniqueDates.any((date) => date == dateString)) {
-            uniqueDates.add(dateString);
-          }
-        }
-
-        return uniqueDates;
-      }
-    } on SocketException {
-      throw NetworkException();
-    } catch (e, stack) {
-      recordError(e, stack);
-      throw LoggedOffOrUnknownException();
-    }
-  }
-
-  Future<dynamic> getFullVplan({skipCheck= false}) async {
-    if (!skipCheck) {
-      if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-        throw NotSupportedException();
-      }
-    }
-    
-    try {
-      var dates = await getVplanDates();
-
-      if (dates.isEmpty) {
-        return getVplanNonJSON();
-      }
-
-      final Map fullPlan = {"dates": [], "entries": []};
-
-      for (String date in dates) {
-        var plan = await getVplan(date);
-
-        fullPlan["dates"].add(date);
-        fullPlan["entries"].add(List.from(plan));
-
-      }
-      return fullPlan;
     } catch (e, stack) {
       recordError(e, stack);
       throw LoggedOffOrUnknownException();
@@ -1042,8 +912,6 @@ class SPHclient {
 
       return result;
     } catch (e, stack) {
-      debugPrint(e.toString());
-      debugPrint(stack.toString());
       recordError(e, stack);
       return -4;
     }
@@ -1388,14 +1256,6 @@ class SPHclient {
       return -3;
       // network error
     }
-  }
-
-  Future<int> startLanisEncryption() async {
-    return await cryptor.start(dio);
-  }
-
-  bool getEncryptionAuthStatus() {
-    return cryptor.authenticated;
   }
 }
 
