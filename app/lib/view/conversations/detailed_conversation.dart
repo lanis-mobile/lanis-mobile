@@ -142,7 +142,7 @@ class _DetailedConversationAnsichtState
             if (snapshot.connectionState != ConnectionState.waiting) {
               // Error content
               if (snapshot.data is int) {
-                return ErrorView(
+                return ErrorView.fromCode(
                   data: snapshot.data,
                   name: "einer einzelnen Nachricht",
                   fetcher: null,

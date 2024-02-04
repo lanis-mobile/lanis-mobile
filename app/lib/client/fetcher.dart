@@ -45,7 +45,7 @@ abstract class Fetcher {
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
       if (isEmpty) {
-        _addResponse(FetcherResponse(status: FetcherStatus.error, content: -9));
+        _addResponse(FetcherResponse(status: FetcherStatus.error, content: NoConnectionException()));
       }
 
       return;
@@ -56,26 +56,17 @@ abstract class Fetcher {
 
 
       _get().then((data) async {
-        if (data is int) {
-          if (data < 0) {
-            if (!secondTry) {
-              try {
-                await client.login();
-              } on LanisException {
-                // former status codes ignored
-              }
-              await fetchData(forceRefresh: true, secondTry: true);
-              return;
-            }
-          }
-
-          _addResponse(FetcherResponse(status: FetcherStatus.error, content: data));
-          return;
-        }
         _addResponse(FetcherResponse(status: FetcherStatus.done, content: data));
         isEmpty = false;
         return;
-      });
+      }).catchError((ex) async {
+        if (!secondTry) {
+          await client.login();
+          await fetchData(forceRefresh: true, secondTry: true);
+          return;
+        }
+        _addResponse(FetcherResponse(status: FetcherStatus.error, content: ex.cause));
+      }, test: (e) => e is LanisException);
     }
   }
 
@@ -89,19 +80,15 @@ class SubstitutionsFetcher extends Fetcher {
   Future<dynamic> _get() async {
     final substitutionPlan = await client.getFullVplan();
 
-    if (substitutionPlan is! int) {
-      final Map filteredSubstitutionPlan = {"length": 0, "days": []};
+    final Map filteredSubstitutionPlan = {"length": 0, "days": []};
 
-      for (int i = 0; i < substitutionPlan["dates"].length; i++) {
-        filteredSubstitutionPlan["days"].add({"date": substitutionPlan["dates"][i], "entries": await filterlogic.filter(substitutionPlan["entries"][i])});
-      }
-
-      filteredSubstitutionPlan["length"] = substitutionPlan["dates"].length;
-
-      return Future.value(filteredSubstitutionPlan);
-    } else {
-      return Future.value(substitutionPlan);
+    for (int i = 0; i < substitutionPlan["dates"].length; i++) {
+      filteredSubstitutionPlan["days"].add({"date": substitutionPlan["dates"][i], "entries": await filterlogic.filter(substitutionPlan["entries"][i])});
     }
+
+    filteredSubstitutionPlan["length"] = substitutionPlan["dates"].length;
+
+    return Future.value(filteredSubstitutionPlan);
   }
 }
 

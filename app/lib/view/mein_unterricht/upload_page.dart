@@ -10,6 +10,7 @@ import 'package:open_file/open_file.dart';
 import 'package:sph_plan/shared/errorView.dart';
 
 import '../../client/client.dart';
+import '../../shared/exceptions/client_status_exceptions.dart';
 
 class UploadScreen extends StatefulWidget {
   final String url;
@@ -102,7 +103,7 @@ class _UploadScreenState extends State<UploadScreen> {
               appBar: AppBar(
                 title: Text(widget.name),
               ),
-              body: ErrorView(
+              body: ErrorView.fromCode(
                   data: snapshot.data,
                   name: "einer Abgabe",
                   fetcher: null
@@ -175,7 +176,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                           return Scaffold(
                                             appBar: AppBar(),
                                             body: ErrorView(
-                                                data: fileStatus,
+                                                data: LanisException.fromCode(fileStatus),
                                                 name: "Hochladen von einer Datei/Dateien",
                                                 fetcher: null
                                             ),
@@ -584,7 +585,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                           return Scaffold(
                                                             appBar: AppBar(),
                                                             body: ErrorView(
-                                                                data: response,
+                                                                data: LanisException.fromCode(response),
                                                                 name: "Löschen einer Datei",
                                                                 fetcher: null
                                                             ),

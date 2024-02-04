@@ -292,7 +292,7 @@ class SPHclient {
     }
   }
 
-  Future<dynamic> getLoginURL() async {
+  Future<String> getLoginURL() async {
     final dioHttp = Dio();
     final cookieJar = CookieJar();
     dioHttp.interceptors.add(CookieManager(cookieJar));
@@ -320,26 +320,26 @@ class SPHclient {
 
           return location2;
         } else {
-          return -1;
+          throw WrongCredentialsException();
         }
       } else {
-        return -2;
+        throw CredentialsIncompleteException();
       }
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
+      throw LoggedOffOrUnknownException();
     }
   }
 
-  Future<dynamic> getVplanNonJSON() async {
+  Future<Map<String, List<dynamic>>> getVplanNonJSON() async {
     debugPrint("Trying to get substitution plan using non-JSON parser");
     DateFormat eingabeFormat = DateFormat('dd_mm_yyyy');
-    final Map fullPlan = {"dates": [], "entries": []};
+    final Map<String, List<dynamic>> fullPlan = {"dates": [], "entries": []};
     final document = parse((await dio.get("https://start.schulportal.hessen.de/vertretungsplan.php")).data);
     final dates = document.querySelectorAll("[data-tag]").map((element) => element.attributes["data-tag"]!);
     for (var date in dates) {
       final parsedDate = eingabeFormat.parse(date);
-      fullPlan["dates"].add(date.replaceAll("_", "."));
+      fullPlan["dates"]!.add(date.replaceAll("_", "."));
       var entries = [];
       final vtable = document.querySelector("#vtable$date");
       if (vtable == null) {
@@ -361,7 +361,7 @@ class SPHclient {
         };
         entries.add(entry);
       }
-      fullPlan["entries"].add(entries);
+      fullPlan["entries"]!.add(entries);
     }
     return fullPlan;
   }
@@ -387,19 +387,17 @@ class SPHclient {
       return jsonDecode(response.toString());
     } on SocketException {
       debugPrint("Substitution plan error: -3");
-      return -3;
-      //network error
+      throw NetworkException();
     } catch (e, stack) {
       debugPrint("Substitution plan error: -4");
       recordError(e, stack);
-      return -4;
-      //unknown error;
+      throw LoggedOffOrUnknownException();
     }
   }
 
   Future<dynamic> getCalendar(String startDate, String endDate) async {
     if (!client.doesSupportFeature(SPHAppEnum.kalender)) {
-      return -8;
+      throw NotSupportedException();
     }
 
     debugPrint("Trying to get calendar...");
@@ -426,19 +424,17 @@ class SPHclient {
       return jsonDecode(response.toString());
     } on SocketException {
       debugPrint("Calendar: -3");
-      return -3;
-      //network error
+      throw NetworkException();
     } catch (e, stack) {
       debugPrint("Calendar: -4");
       recordError(e, stack);
-      return -4;
-      //unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
   Future<dynamic> getEvent(String id) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
-      return -9;
+      throw NoConnectionException();
     }
 
     try {
@@ -460,16 +456,14 @@ class SPHclient {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
-      return -3;
-      //network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      //unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
-  Future<dynamic> getVplanDates() async {
+  Future<List<String>> getVplanDates() async {
     try {
       final response = await dio
           .get('https://start.schulportal.hessen.de/vertretungsplan.php');
@@ -477,12 +471,12 @@ class SPHclient {
       String text = response.toString();
 
       if (text.contains("Fehler - Schulportal Hessen - ")) {
-        return -5;
+        throw UnauthorizedException();
       } else {
         RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
         Iterable<RegExpMatch> matches = datePattern.allMatches(text);
 
-        var uniqueDates = [];
+        List<String> uniqueDates = [];
 
         for (RegExpMatch match in matches) {
           int day = int.parse(match.group(1) ?? "00");
@@ -497,33 +491,27 @@ class SPHclient {
           }
         }
 
-        if (uniqueDates.isEmpty) {
-          return [];
-        }
-
         return uniqueDates;
       }
     } on SocketException {
-      return -3;
-      //network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      //unknown error;
+      throw LoggedOffOrUnknownException();
     }
   }
 
   Future<dynamic> getFullVplan({skipCheck= false}) async {
     if (!skipCheck) {
       if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-        return -8;
+        throw NotSupportedException();
       }
     }
     
     try {
       var dates = await getVplanDates();
 
-      if (dates.length < 1) {
+      if (dates.isEmpty) {
         return getVplanNonJSON();
       }
 
@@ -532,10 +520,6 @@ class SPHclient {
       for (String date in dates) {
         var plan = await getVplan(date);
 
-        if (plan is int) {
-          return plan;
-        }
-
         fullPlan["dates"].add(date);
         fullPlan["entries"].add(List.from(plan));
 
@@ -543,8 +527,7 @@ class SPHclient {
       return fullPlan;
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      //unknown error;
+      throw LoggedOffOrUnknownException();
     }
   }
 
