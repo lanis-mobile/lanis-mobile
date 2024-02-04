@@ -134,21 +134,22 @@ class _BugReportScreenState extends State<BugReportScreen> {
                                   bugDescriptionController.text,
                                   contactInformationController.text,
                                   sendMetadata,
-                                ).then((result) {
+                                ).then((void _) {
                                   Navigator.pop(context);
-                                  if (result == 0) {
-                                    showDialog(context: context, builder: (context) => AlertDialog(
-                                      title: const Text("Erfolg!"),
-                                      content: const Text("Der Fehlerbericht wurde Gesendet."),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, "OK"),
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ));
-                                    clearInputs();
-                                  } else {
+                                  showDialog(context: context, builder: (context) => AlertDialog(
+                                    title: const Text("Erfolg!"),
+                                    content: const Text("Der Fehlerbericht wurde Gesendet."),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, "OK"),
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  ));
+                                  clearInputs();
+                                }).catchError((ex) {
+                                  if (ex is LanisException) {
+                                    debugPrint("Fehlerbericht nicht gesendet: ${ex.cause}");
                                     showDialog(context: context, builder: (context) => AlertDialog(
                                       title: const Text("Fehler!"),
                                       content: const Text("Der Fehlerbericht wurde nicht Gesendet."),
@@ -159,10 +160,10 @@ class _BugReportScreenState extends State<BugReportScreen> {
                                         ),
                                       ],
                                     ));
+                                  } else {
+                                    Navigator.pop(context);
+                                    debugPrint('Error sending bug report: $ex');
                                   }
-                                }).catchError((error) {
-                                  Navigator.pop(context);
-                                  debugPrint('Error sending bug report: $error');
                                 });
                               },
                               child: const Text('OK'),
@@ -260,7 +261,7 @@ Future<dynamic> generateBugReport() async {
   };
 }
 
-Future<int> sendToServer(String bugDescription, String contactInformation, bool sendMetaData) async {
+Future<void> sendToServer(String bugDescription, String contactInformation, bool sendMetaData) async {
   const apiEndpointLocation = "https://sph-bugreport-service.alessioc42.workers.dev/api/add";
 
   late dynamic deviceData = {"applets":[]};
@@ -283,15 +284,15 @@ Future<int> sendToServer(String bugDescription, String contactInformation, bool 
       },
     );
     if (response.statusCode == 200) {
-      return 0;
+      return;
     } else {
-      return -4;
+      throw LoggedOffOrUnknownException();
     }
   } on (SocketException,) {
-    return -3;
+    throw NetworkException();
   } catch (e) {
     debugPrint(e.toString());
-    return -4;
+    throw LoggedOffOrUnknownException();
   }
 }
 
