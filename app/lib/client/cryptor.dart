@@ -10,6 +10,7 @@ import 'package:encrypt/encrypt.dart' as encrypt; // Main lib
 import 'package:crypto/crypto.dart'; // Hashing functions
 
 import 'package:dio/dio.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
 // We use this class to authenticate with Lanis' Encryption and decrypt things.
 class Cryptor {
@@ -185,7 +186,7 @@ class Cryptor {
   }
 
   // Use this to start allowing Lanis to return encrypted messages.
-  Future<int> start(Dio dioClient) async {
+  Future<void> start(Dio dioClient) async {
     dio = dioClient;
 
     key = generateKey();
@@ -193,7 +194,7 @@ class Cryptor {
     final publicKey = await getPublicKey();
 
     if (publicKey == null) {
-      return -3;
+      throw NetworkException();
     }
 
     final encryptedKey = encryptKey(publicKey);
@@ -201,16 +202,16 @@ class Cryptor {
     final challenge = await handshake(base64.encode(encryptedKey));
 
     if (challenge == null) {
-      return -3;
+      throw NetworkException();
     }
 
     final equal = checkForEqualEncryption(base64.decode(challenge));
 
     if (equal) {
       authenticated = true;
-      return 0;
+      return;
     }
 
-    return -6;
+    throw EncryptionCheckFailedException();
   }
 }
