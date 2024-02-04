@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
 import '../../client/client.dart';
 import '../../shared/apps.dart';
@@ -225,8 +226,11 @@ Future<dynamic> generateBugReport() async {
     for (var element in invisibleMessages) {
       element.remove("empf");
     }
-
-    firstSingleMessage = await client.getSingleConversation(visibleMessages[0]["Uniquid"]); // Single Conversations have more possible dict keys.
+    try {
+      firstSingleMessage = await client.getSingleConversation(visibleMessages[0]["Uniquid"]); // Single Conversations have more possible dict keys.
+    } on LanisException catch (ex) {
+      firstSingleMessage = "LanisException: ${ex.cause}";
+    }
   }
 
   return {

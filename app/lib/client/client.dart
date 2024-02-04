@@ -1350,7 +1350,7 @@ class SPHclient {
 
   Future<dynamic> getSingleConversation(String uniqueID) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
-      return -9;
+      throw NoConnectionException();
     }
 
     try {
@@ -1379,14 +1379,12 @@ class SPHclient {
           cryptor.decryptString(encryptedJSON["message"]);
 
       if (decryptedConversations == null) {
-        return -7;
-        // unknown error (encrypted isn't salted)
+        throw UnsaltedOrUnknownException();
       }
 
       return jsonDecode(decryptedConversations);
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     }
   }
 
