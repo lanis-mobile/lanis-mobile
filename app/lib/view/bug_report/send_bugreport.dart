@@ -199,10 +199,10 @@ Future<dynamic> generateBugReport() async {
   late dynamic meinUnterricht;
   late List<dynamic> meinUnterrichtKurse = [];
   if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-    meinUnterricht = await client.getMeinUnterrichtOverview();
+    meinUnterricht = await client.meinUnterricht.getOverview();
     meinUnterricht["kursmappen"]?.forEach((kurs) async {
       meinUnterrichtKurse.add(
-          (await client.getMeinUnterrichtCourseView(kurs["_courseURL"]))
+          (await client.meinUnterricht.getCourseView(kurs["_courseURL"]))
       );
     });
   } else {

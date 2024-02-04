@@ -100,7 +100,7 @@ class MeinUnterrichtFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.getMeinUnterrichtOverview();
+    return client.meinUnterricht.getOverview();
   }
 }
 
