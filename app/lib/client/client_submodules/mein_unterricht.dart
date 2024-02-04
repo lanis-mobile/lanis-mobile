@@ -6,6 +6,7 @@ import 'package:html/parser.dart';
 import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
+import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/shared_functions.dart';
 import '../../shared/types/upload.dart';
 
@@ -21,7 +22,7 @@ class MeinUnterrichtParser {
 
   Future<dynamic> getOverview() async {
     if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-      return -8;
+      throw NotSupportedException();
     }
 
     debugPrint("Get Mein Unterricht overview");
@@ -369,7 +370,7 @@ class MeinUnterrichtParser {
       return result;
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
+      throw LoggedOffOrUnknownException();
     }
   }
 

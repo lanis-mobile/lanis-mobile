@@ -165,8 +165,8 @@ class SPHclient {
           }
           await getSchoolTheme();
 
-          int encryptionStatusName = await cryptor.start(dio);
-          debugPrint("Encryption connected with status code: $encryptionStatusName");
+          await cryptor.start(dio);
+          debugPrint("Encryption connected");
 
           return;
     } on SocketException {

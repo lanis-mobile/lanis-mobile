@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import '../../shared/apps.dart';
+import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/shared_functions.dart';
 import '../client.dart';
 
@@ -67,7 +68,7 @@ class ConversationsParser {
 
   Future<dynamic> getSingleConversation(String uniqueID) async {
     if (!(await InternetConnectionChecker().hasConnection)) {
-      return -9;
+      throw NoConnectionException();
     }
 
     try {
@@ -96,14 +97,12 @@ class ConversationsParser {
       client.cryptor.decryptString(encryptedJSON["message"]);
 
       if (decryptedConversations == null) {
-        return -7;
-        // unknown error (encrypted isn't salted)
+        throw UnsaltedOrUnknownException();
       }
 
       return jsonDecode(decryptedConversations);
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     }
   }
 }
