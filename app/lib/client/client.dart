@@ -107,6 +107,7 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
   }
 
+  ///Overwrites the user's credentials with the given ones and saves them to the storage.
   Future<void> overwriteCredits(String username, String password,
       String schoolID) async {
     this.username = username;
@@ -118,7 +119,9 @@ class SPHclient {
     await globalStorage.write(key: StorageKey.userSchoolID, value: schoolID);
   }
 
-
+  ///Loads the user's credentials from the storage.
+  ///
+  ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
     loadMode = await globalStorage.read(key: StorageKey.settingsLoadMode);
 
@@ -139,15 +142,7 @@ class SPHclient {
         jsonDecode(await globalStorage.read(key: StorageKey.userSupportedApplets));
   }
 
-  Future<dynamic> getCredits() async {
-    return {
-      "username": await globalStorage.read(key: StorageKey.userUsername),
-      "password": await globalStorage.read(key: StorageKey.userPassword, secure: true),
-      "schoolID": await globalStorage.read(key: StorageKey.userSchoolID),
-      "schoolName": await globalStorage.read(key: StorageKey.userSchoolName),
-    };
-  }
-
+  ///Logs the user in and fetches the necessary metadata.
   Future<void> login({userLogin = false}) async {
     debugPrint("Trying to log in");
 
@@ -204,6 +199,7 @@ class SPHclient {
     }
   }
 
+  ///Fetches the user's data and the supported apps.
   Future<void> fetchRedundantData() async {
     final schoolInfo = await getSchoolInfo(schoolID);
 
@@ -222,6 +218,7 @@ class SPHclient {
         key: StorageKey.userSupportedApplets, value: jsonEncode(supportedApps));
   }
 
+  ///Fetches the school's accent color and saves it to the storage.
   Future<void> getSchoolTheme() async {
     debugPrint("Trying to get a school accent color.");
 
@@ -242,6 +239,7 @@ class SPHclient {
     }
   }
 
+  ///Fetches the school's image and saves it to the storage.
   Future<String> getSchoolImage(String url) async {
     try {
       final Directory dir = await getApplicationDocumentsDirectory();
@@ -281,6 +279,9 @@ class SPHclient {
     }
   }
 
+  ///returns a URL that when called loggs the user in.
+  ///
+  ///This can be used to open lanis in the browser of the user.
   Future<String> getLoginURL() async {
     final dioHttp = Dio();
     final cookieJar = CookieJar();
@@ -320,18 +321,21 @@ class SPHclient {
     }
   }
 
+  ///returns the user's school's information.
   Future<dynamic> getSchoolInfo(String schoolID) async {
     final response = await dio.get(
         "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=$schoolID");
     return jsonDecode(response.data.toString());
   }
 
+  ///returns the lanis fast navigation menubar.
   Future<dynamic> getSupportedApps() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps");
     return jsonDecode(response.data.toString())["entrys"];
   }
 
+  ///check weather the user is able to use a feature of the application.
   bool doesSupportFeature(SPHAppEnum feature) {
     var app = supportedApps.where((element) => element["link"].toString() == feature.php).singleOrNull;
     if (app == null) return false;
@@ -342,6 +346,9 @@ class SPHclient {
     }
   }
 
+  ///returns the user's account type.
+  ///
+  /// [AccountType.student] || [AccountType.teacher] || [AccountType.parent]
   AccountType getAccountType() {
     if (userData.containsKey("klasse")) {
       return AccountType.student;
@@ -350,6 +357,7 @@ class SPHclient {
     }
   }
 
+  ///parsed personal information of the user.
   Future<dynamic> fetchUserData() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
@@ -378,6 +386,9 @@ class SPHclient {
     }
   }
 
+  ///resets the application's settings and deletes all stored data.
+  ///
+  ///The login screen has to be opened after this method is called.
   Future<void> deleteAllSettings() async {
     Future<void> deleteSubfoldersAndFiles(Directory directory) async {
       await for (var entity in directory.list()) {
@@ -399,7 +410,10 @@ class SPHclient {
     await deleteSubfoldersAndFiles(tempDir);
   }
 
-
+  ///downloads a file from an URL and returns the path of the file.
+  ///
+  ///The file is stored in the temporary directory of the device.
+  ///So calling the same URL twice will result in the same file and one Download.
   Future<String> downloadFile(String url, String filename) async {
     String generateUniqueHash(String source) {
       var bytes = utf8.encode(source);
