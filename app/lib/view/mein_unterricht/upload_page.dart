@@ -98,13 +98,13 @@ class _UploadScreenState extends State<UploadScreen> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.data is int) {
+          if (snapshot.hasError && snapshot.error is LanisException) {
             return Scaffold(
               appBar: AppBar(
                 title: Text(widget.name),
               ),
-              body: ErrorView.fromCode(
-                  data: snapshot.data,
+              body: ErrorView(
+                  data: snapshot.error as LanisException,
                   name: "einer Abgabe",
                   fetcher: null
               ),

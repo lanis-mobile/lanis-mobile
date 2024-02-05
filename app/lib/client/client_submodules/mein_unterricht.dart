@@ -498,12 +498,10 @@ class MeinUnterrichtParser {
         "additional_text": additionalText,
       };
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
