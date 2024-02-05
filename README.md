@@ -25,6 +25,9 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 </div>
 </details>
 
+## Hilf mit!
+Wir sind offen für neue Colaborator. Aber auch wenn du nicht coden kannst, bist du in der Lage einen beitrag zur App zu leisten. Du kannst den Vertretungsplan deiner Schule anpassen. Siehe [hier](https://github.com/alessioC42/lanis-mobile-autoconfig/issues/1) und [hier](https://github.com/alessioC42/lanis-mobile-autoconfig)
+
 ## features
 - [x] Login
 - [x] Vertretungsplan
