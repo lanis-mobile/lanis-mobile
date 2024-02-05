@@ -166,30 +166,6 @@ class MeinUnterrichtParser {
     return result;
   }
 
-  Future<dynamic> setHomework(String courseID, String courseEntry, bool status) async {
-    //returns the response of the http request. 1 means success.
-
-    final response = await dio.post(
-      "https://start.schulportal.hessen.de/meinunterricht.php",
-      data: {
-        "a": "sus_homeworkDone",
-        "entry": courseEntry,
-        "id": courseID,
-        "b": status ? "done" : "undone"
-      },
-      options: Options(
-        headers: {
-          "Content-Type":
-          "application/x-www-form-urlencoded; charset=UTF-8",
-          "X-Requested-With": "XMLHttpRequest", //this is important
-        },
-      ),
-    );
-
-
-    return response.data;
-  }
-
   Future<dynamic> getCourseView(String url) async {
     try {
       var result = {
@@ -197,6 +173,7 @@ class MeinUnterrichtParser {
         "leistungen": [],
         "leistungskontrollen": [],
         "anwesenheiten": [],
+        "halbjahr1": [],
         "name": ["name"],
       };
 
@@ -213,6 +190,14 @@ class MeinUnterrichtParser {
       result["name"] = [
         heading?.text.trim()
       ];
+
+      //halbjahr2
+      var halbJahrButtons = document.getElementsByClassName("btn btn-default hidden-print");
+      if (halbJahrButtons.length > 1) {
+        if (halbJahrButtons[0].attributes["href"]!.contains("&halb=1")) {
+          result["halbjahr1"] = [halbJahrButtons[0].attributes["href"]];
+        }
+      }
 
       //historie
           () {
@@ -372,6 +357,30 @@ class MeinUnterrichtParser {
       recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
+  }
+
+  Future<dynamic> setHomework(String courseID, String courseEntry, bool status) async {
+    //returns the response of the http request. 1 means success.
+
+    final response = await dio.post(
+      "https://start.schulportal.hessen.de/meinunterricht.php",
+      data: {
+        "a": "sus_homeworkDone",
+        "entry": courseEntry,
+        "id": courseID,
+        "b": status ? "done" : "undone"
+      },
+      options: Options(
+        headers: {
+          "Content-Type":
+          "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest", //this is important
+        },
+      ),
+    );
+
+
+    return response.data;
   }
 
   Future<dynamic> deleteUploadedFile({
