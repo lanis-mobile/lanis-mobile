@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
+import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
 import '../../shared/errorView.dart';
@@ -493,6 +494,21 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       body: _buildBody(),
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          if (data["halbjahr1"].length > 0) IconButton(
+            icon: const Icon(Icons.looks_one_outlined),
+            onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CourseOverviewAnsicht(
+                      dataFetchURL: data["halbjahr1"][0],
+                      title: widget.title,
+                    )),
+              );
+            }
+          )
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
