@@ -568,16 +568,16 @@ class _UploadScreenState extends State<UploadScreen> {
                                               Navigator.pop(context);
 
                                               showSnackbar(text: "Versuche die Datei(en) zu löschen...");
-
-                                              dynamic response = await client.meinUnterricht.deleteUploadedFile(
-                                                course: snapshot.data["course_id"],
-                                                entry: snapshot.data["entry_id"],
-                                                upload: snapshot.data["upload_id"],
-                                                file: snapshot.data["own_files"][index].index,
-                                                userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
-                                              );
-
-                                              if (response is int) {
+                                              String response;
+                                              try {
+                                                response = await client.meinUnterricht.deleteUploadedFile(
+                                                  course: snapshot.data["course_id"],
+                                                  entry: snapshot.data["entry_id"],
+                                                  upload: snapshot.data["upload_id"],
+                                                  file: snapshot.data["own_files"][index].index,
+                                                  userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
+                                                );
+                                              } on LanisException catch(ex) {
                                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                 Navigator.of(context).push(
                                                     MaterialPageRoute(
@@ -585,7 +585,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                           return Scaffold(
                                                             appBar: AppBar(),
                                                             body: ErrorView(
-                                                                data: LanisException.fromCode(response),
+                                                                data: ex,
                                                                 name: "Löschen einer Datei",
                                                                 fetcher: null
                                                             ),
