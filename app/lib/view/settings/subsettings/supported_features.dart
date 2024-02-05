@@ -12,15 +12,6 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
 }
 
 
-final List<SPHAppEnum> supportedApps = [
-  SPHAppEnum.nachrichten,
-  SPHAppEnum.vertretungsplan,
-  SPHAppEnum.meinUnterricht,
-  SPHAppEnum.kalender,
-  // SPHAppEnum.logout.php,  // relevant?
-];
-
-
 class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverviewScreen> {
   double padding = 10.0;
 
