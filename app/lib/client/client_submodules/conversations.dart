@@ -20,7 +20,7 @@ class ConversationsParser {
 
   Future<dynamic> getOverview(bool invisible) async {
     if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
-      return -8;
+      throw NotSupportedException();
     }
 
     debugPrint("Get new conversation data. Invisible: $invisible.");
@@ -51,18 +51,17 @@ class ConversationsParser {
       client.cryptor.decryptString(encryptedJSON["rows"]);
 
       if (decryptedConversations == null) {
-        return -7;
-        // unknown error (encrypted isn't salted)
+        throw UnsaltedOrUnknownException();
       }
 
       return jsonDecode(decryptedConversations);
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
+    } on LanisException {
+      rethrow;
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
