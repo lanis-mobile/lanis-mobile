@@ -173,7 +173,6 @@ Widget errorWidget(FlutterErrorDetails details) {
                     return Colors.white;
                   }),
                   backgroundColor: MaterialStateProperty.resolveWith((states) {
-                    // If the button is pressed, return green, otherwise blue
                     if (states.contains(MaterialState.pressed)) {
                       return Colors.redAccent;
                     }

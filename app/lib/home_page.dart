@@ -25,9 +25,9 @@ enum Feature {
   settings(null),
   reportBug("Fehlerbericht senden");
 
-  const Feature(this.value);
+  const Feature(this.title);
 
-  final String? value;
+  final String? title;
 }
 
 class HomePage extends StatefulWidget {
@@ -41,9 +41,20 @@ class _HomePageState extends State<HomePage> {
   late final Feature defaultFeature;
   late Feature selectedFeature;
 
-  String userName =
+  // Only for bottom navigation bar and showing no supported applets screen.
+  final List<int?> bottomNavbarItems = [];
+  int supportedIndex = 0;
+
+  // We don't want firstname.lastname
+  final String formattedUsername =
       "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
-  String schoolName = client.schoolName;
+
+  static final List<Widget> featureScreens = <Widget>[
+    const VertretungsplanAnsicht(),
+    const CalendarAnsicht(),
+    const ConversationsAnsicht(),
+    const MeinUnterrichtAnsicht(),
+  ];
 
   Feature getDefaultFeature() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
@@ -55,23 +66,6 @@ class _HomePageState extends State<HomePage> {
     } else {
       return Feature.conversations;
     }
-  }
-
-  static List<Widget> featureScreens() {
-    return <Widget>[
-      const VertretungsplanAnsicht(),
-      const CalendarAnsicht(),
-      const ConversationsAnsicht(),
-      const MeinUnterrichtAnsicht(),
-    ];
-  }
-
-  @override
-  void initState() {
-    defaultFeature = getDefaultFeature();
-    openFeature(defaultFeature);
-
-    super.initState();
   }
 
   void openLanisInBrowser() {
@@ -89,22 +83,9 @@ class _HomePageState extends State<HomePage> {
     }, test: (e) => e is LanisException);
   }
 
-  void loadUserData() {
-    setState(() {
-      userName =
-      "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
-      schoolName = client.schoolName;
-    });
-  }
-
   // Open specified feature without popping the navigator.
   void openFeature(Feature currentFeature) {
     setState(() {
-      loadUserData();
-
-      userName =
-      "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
-
       switch (currentFeature) {
         case (Feature.lanisBrowser):
           openLanisInBrowser();
@@ -143,16 +124,169 @@ class _HomePageState extends State<HomePage> {
     openFeature(Feature.values[index]);
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Center noAppsSupported() {
+    return Center(
+      // In case no feature is supported at all just show an open in browser button.
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.disabled_by_default_outlined, size: 150,),
+          const Padding(padding: EdgeInsets.all(8), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
+          ElevatedButton(onPressed: openLanisInBrowser, child: const Text("Im Browser öffnen"))
+        ],
+      ),
+    );
+  }
+
+  NavigationBar navigationBar() {
+    return NavigationBar(
+      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+      selectedIndex:
+      bottomNavbarItems[selectedFeature.index]!,
+      onDestinationSelected: (index) => openFeature(Feature
+          .values[bottomNavbarItems.indexOf(index)]),
+      destinations: [
+        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan))
+          const NavigationDestination(
+            icon: Icon(Icons.group),
+            selectedIcon: Icon(Icons.group_outlined),
+            label: 'Vertretungen',
+          ),
+        if (client.doesSupportFeature(SPHAppEnum.kalender))
+          const NavigationDestination(
+            icon: Icon(Icons.calendar_today),
+            selectedIcon: Icon(Icons.calendar_today_outlined),
+            label: 'Kalender',
+          ),
+        if (client.doesSupportFeature(SPHAppEnum.nachrichten))
+          const NavigationDestination(
+            icon: Icon(Icons.forum),
+            selectedIcon: Icon(Icons.forum_outlined),
+            label: 'Nachrichten',
+          ),
+        if (client.doesSupportFeature(SPHAppEnum.meinUnterricht))
+          const NavigationDestination(
+            icon: Icon(Icons.school),
+            selectedIcon: Icon(Icons.school_outlined),
+            label: 'Mein Unterricht',
+          ),
+      ],
+    );
+  }
+
+  NavigationDrawer navigationDrawer() {
+    // Complex calculation but it shouldn't be played multiple times.
     final Color imageColor =
     Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
     final Color textColor =
     imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
 
-    List<int?> bottomNavbarNavigationTranslation = [];
+    return NavigationDrawer(
+      onDestinationSelected: onNavigationItemTapped,
+      selectedIndex: selectedFeature.index,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              ClipRRect(
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  child: ColorFiltered(
+                    colorFilter:
+                    ColorFilter.mode(imageColor, BlendMode.srcOver),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Image.file(
+                        File(client.schoolImage),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      client.schoolName,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: textColor),
+                    ),
+                    Text(
+                      formattedUsername,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: textColor),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+        NavigationDrawerDestination(
+          enabled: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
+          icon: const Icon(Icons.group),
+          selectedIcon: const Icon(Icons.group_outlined),
+          label: const Text('Vertretungsplan'),
+        ),
+        NavigationDrawerDestination(
+          enabled: client.doesSupportFeature(SPHAppEnum.kalender),
+          icon: const Icon(Icons.calendar_today),
+          selectedIcon: const Icon(Icons.calendar_today_outlined),
+          label: const Text('Kalender'),
+        ),
+        NavigationDrawerDestination(
+          enabled:
+          client.doesSupportFeature(SPHAppEnum.nachrichten),
+          icon: const Icon(Icons.forum),
+          selectedIcon: const Icon(Icons.forum_outlined),
+          label: const Text('Nachrichten'),
+        ),
+        NavigationDrawerDestination(
+          enabled: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
+          icon: const Icon(Icons.school),
+          selectedIcon: const Icon(Icons.school_outlined),
+          label: const Text('Mein Unterricht'),
+        ),
+        const NavigationDrawerDestination(
+          icon: Icon(Icons.open_in_new),
+          label: Text('Im Browser öffnen'),
+        ),
+        const NavigationDrawerDestination(
+          icon: Icon(Icons.open_in_new),
+          label: Text('Moodle login öffnen'),
+        ),
+        const Divider(indent: 20, endIndent: 20,),
+        const NavigationDrawerDestination(
+          icon: Icon(Icons.settings),
+          label: Text('Einstellungen'),
+        ),
+        const NavigationDrawerDestination(
+          enabled: true,
+          icon: Icon(Icons.bug_report),
+          selectedIcon: Icon(Icons.bug_report_outlined),
+          label: Text('Fehlerbericht senden'),
+        ),
+      ],
+    );
+  }
 
-    int helpIndex = 0;
+  @override
+  void initState() {
+    defaultFeature = getDefaultFeature();
+    openFeature(defaultFeature);
+
+    // Only need to calculate once
     for (var supported in [
       client.doesSupportFeature(SPHAppEnum.vertretungsplan),
       client.doesSupportFeature(SPHAppEnum.kalender),
@@ -160,20 +294,24 @@ class _HomePageState extends State<HomePage> {
       client.doesSupportFeature(SPHAppEnum.meinUnterricht)
     ]) {
       if (supported) {
-        bottomNavbarNavigationTranslation.add(helpIndex);
-        helpIndex += 1;
+        bottomNavbarItems.add(supportedIndex);
+        supportedIndex += 1;
       } else {
-        bottomNavbarNavigationTranslation.add(null);
+        bottomNavbarItems.add(null);
       }
     }
 
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return StreamBuilder<InternetConnectionStatus>(
         stream: InternetConnectionChecker().onStatusChange,
         builder: (context, network) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(selectedFeature
-                  .value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
+              title: Text(selectedFeature.title!),
               bottom: network.data == InternetConnectionStatus.disconnected ? PreferredSize(
                 preferredSize: const Size.fromHeight(40),
                 child: Padding(
@@ -194,150 +332,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               ) : null,
             ),
-            body: Center(
-              child: helpIndex != 0 ? featureScreens()[selectedFeature.index] : Center(
-                //in case no feature is supported at all just show an open in browser button.
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.disabled_by_default_outlined, size: 150,),
-                    const Padding(padding: EdgeInsets.all(8), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
-                    ElevatedButton(onPressed: openLanisInBrowser, child: const Text("Im browser öffnen"))
-                  ],
-                ),
-              ),
-            ),
-            bottomNavigationBar: helpIndex > 1 ? NavigationBar(
-              labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-              selectedIndex:
-              bottomNavbarNavigationTranslation[selectedFeature.index]!,
-              onDestinationSelected: (index) => openFeature(Feature
-                  .values[bottomNavbarNavigationTranslation.indexOf(index)]),
-              destinations: [
-                if (client.doesSupportFeature(SPHAppEnum.vertretungsplan))
-                  const NavigationDestination(
-                    icon: Icon(Icons.group),
-                    selectedIcon: Icon(Icons.group_outlined),
-                    label: 'Vertretungen',
-                  ),
-                if (client.doesSupportFeature(SPHAppEnum.kalender))
-                  const NavigationDestination(
-                    icon: Icon(Icons.calendar_today),
-                    selectedIcon: Icon(Icons.calendar_today_outlined),
-                    label: 'Kalender',
-                  ),
-                if (client.doesSupportFeature(SPHAppEnum.nachrichten))
-                  const NavigationDestination(
-                    icon: Icon(Icons.forum),
-                    selectedIcon: Icon(Icons.forum_outlined),
-                    label: 'Nachrichten',
-                  ),
-                if (client.doesSupportFeature(SPHAppEnum.meinUnterricht))
-                  const NavigationDestination(
-                    icon: Icon(Icons.school),
-                    selectedIcon: Icon(Icons.school_outlined),
-                    label: 'Mein Unterricht',
-                  ),
-              ],
-            ) : null,
-            drawer: NavigationDrawer(
-              onDestinationSelected: onNavigationItemTapped,
-              selectedIndex: selectedFeature.index,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      ClipRRect(
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                          child: ColorFiltered(
-                            colorFilter:
-                            ColorFilter.mode(imageColor, BlendMode.srcOver),
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: Image.file(
-                                File(client.schoolImage),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              schoolName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(color: textColor),
-                            ),
-                            Text(
-                              userName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor),
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                NavigationDrawerDestination(
-                  enabled: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
-                  icon: const Icon(Icons.group),
-                  selectedIcon: const Icon(Icons.group_outlined),
-                  label: const Text('Vertretungsplan'),
-                ),
-                NavigationDrawerDestination(
-                  enabled: client.doesSupportFeature(SPHAppEnum.kalender),
-                  icon: const Icon(Icons.calendar_today),
-                  selectedIcon: const Icon(Icons.calendar_today_outlined),
-                  label: const Text('Kalender'),
-                ),
-                NavigationDrawerDestination(
-                  enabled:
-                  client.doesSupportFeature(SPHAppEnum.nachrichten),
-                  icon: const Icon(Icons.forum),
-                  selectedIcon: const Icon(Icons.forum_outlined),
-                  label: const Text('Nachrichten'),
-                ),
-                NavigationDrawerDestination(
-                  enabled: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
-                  icon: const Icon(Icons.school),
-                  selectedIcon: const Icon(Icons.school_outlined),
-                  label: const Text('Mein Unterricht'),
-                ),
-                const NavigationDrawerDestination(
-                  icon: Icon(Icons.open_in_new),
-                  label: Text('Im Browser öffnen'),
-                ),
-                const NavigationDrawerDestination(
-                  icon: Icon(Icons.open_in_new),
-                  label: Text('Moodle login öffnen'),
-                ),
-                const Divider(),
-                const NavigationDrawerDestination(
-                  icon: Icon(Icons.settings),
-                  label: Text('Einstellungen'),
-                ),
-                const NavigationDrawerDestination(
-                  enabled: true,
-                  icon: Icon(Icons.bug_report),
-                  selectedIcon: Icon(Icons.bug_report_outlined),
-                  label: Text('Fehlerbericht senden'),
-                ),
-              ],
-            ),
+            body: supportedIndex != 0 ? featureScreens[selectedFeature.index] : noAppsSupported(),
+            bottomNavigationBar: supportedIndex > 1 ? navigationBar() : null,
+            drawer: navigationDrawer()
           );
         }
     );
