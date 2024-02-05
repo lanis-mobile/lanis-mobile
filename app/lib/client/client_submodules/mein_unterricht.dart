@@ -505,7 +505,7 @@ class MeinUnterrichtParser {
     }
   }
 
-  Future<dynamic> uploadFile(
+  Future<List<FileStatus>> uploadFile(
       {
         required String course,
         required String entry,
@@ -559,12 +559,10 @@ class MeinUnterrichtParser {
 
       return statusMessages;
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 }
