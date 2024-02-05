@@ -12,13 +12,7 @@ import 'package:sph_plan/view/login/screen.dart';
 import 'client/client.dart';
 import 'client/fetcher.dart';
 
-/* TODO:
- * Whats new
- * Perform login function
- * openLoginScreen(), push home page, ...
- * global error var?
-*/
-
+/// Just a collection of possible messages for the bottom progress indicator, so we that we have not magic strings.
 class Message {
   static String initialise = "Initialisieren...";
   static String login = "Einloggen...";
@@ -27,6 +21,7 @@ class Message {
   static String error = "Beim Laden ist ein Fehler passiert!";
 }
 
+/// Status of each step
 enum Status {
   waiting,
   loading,
@@ -34,6 +29,7 @@ enum Status {
   error;
 }
 
+/// All possible steps which need to be fetched.
 class Step {
   static String login = "Login";
   static String substitutions = "Vertretungsplan";
@@ -42,6 +38,7 @@ class Step {
   static String calendar = "Kalender";
 }
 
+/// More advanced class, so we can have a tidy and clean progress indicator of the steps.
 class ProgressNotifier with ChangeNotifier {
   final Map<String, Status> _steps = {};
 
@@ -64,6 +61,7 @@ class ProgressNotifier with ChangeNotifier {
   }
 }
 
+/// Possible applet which will be fetched by [fetchApplet].
 class Applet {
   final Fetcher? fetcher;
   final String step;
@@ -90,6 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
   ValueNotifier<bool> isError = ValueNotifier<bool>(false);
   final Map<String, LanisException?> errors = {Step.login: null};
 
+  // We need to load storage first, so we have to wait before everything.
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
 
   void openWelcomeScreen() {
@@ -190,6 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // Handy functions
   IconData getIcon(Status status) {
     switch (status) {
       case Status.finished:
@@ -202,7 +202,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return Icons.error_outline;
     }
   }
-
   String getProgressMessage(Status status) {
     switch (status) {
       case Status.finished:
@@ -218,8 +217,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
+    // So that we begin loading instantly on startup.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // We need to load this first so that everything works.
       client.loadFromStorage().then((_) {
+        // Show welcome screen nearly instantly.
         if (client.username == "") {
           performLogin();
           return;
@@ -262,6 +264,227 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
 
+  /// Either school image or app version.
+  Widget topPart() {
+    if (client.schoolLogo == "") {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FutureBuilder(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, packageInfo) {
+              return Text(
+                "lanis-mobile ${packageInfo.data?.version}",
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.25)),
+              );
+            },
+          )
+        ],
+      );
+    } else {
+      return Image.file(
+        File(client.schoolLogo),
+      );
+    }
+  }
+
+  Widget currentStepsStatus() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Container(
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondary,
+              borderRadius: BorderRadius.circular(16.0)
+          ),
+          padding: const EdgeInsets.all(12.0),
+          margin: const EdgeInsets.symmetric(horizontal: 84),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ValueListenableBuilder(
+                  valueListenable: finishedLoadingStorage,
+                  builder: (context, _finishedLoadingStorage, _) {
+                    if (_finishedLoadingStorage) {
+                      // Show all steps like login, vp, ...
+                      return ListenableBuilder(
+                          listenable: progress,
+                          builder: (context, _) {
+                            return ListView.separated(
+                                shrinkWrap: true,
+                                itemCount: steps.length,
+                                separatorBuilder: (context, index) {
+                                  return const SizedBox(
+                                    height: 8,
+                                  );
+                                },
+                                itemBuilder: (context, index) {
+                                  final String step = steps[index];
+                                  final Status status = progress.steps[step]!;
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(right: 4.0),
+                                            child: Icon(
+                                              getIcon(status),
+                                              color: Theme.of(context).colorScheme.onSecondary,
+                                            ),
+                                          ),
+                                          Text(
+                                              step,
+                                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                          getProgressMessage(status),
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
+                                      )
+                                    ],
+                                  );
+                                }
+                            );
+                          }
+                      );
+                    }
+                    // Show only that client.loadFromStorage() is being executed.
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                            "Lade gespeicherte Daten...",
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
+                        )
+                      ],
+                    );
+                  }
+              )
+            ],
+          )
+      ),
+    );
+  }
+
+  Widget errorButtons() {
+    return ValueListenableBuilder(
+        valueListenable: isError,
+        builder: (context, _isError, _) {
+          if (_isError) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ValueListenableBuilder(
+                      valueListenable: noInternet,
+                      builder: (context, _noInternet, _) {
+                        if (_noInternet) {
+                          return const SizedBox.shrink();
+                        }
+                        return FilledButton(
+                            onPressed: () {
+                              // Prepare error message
+                              String errorInfo = "";
+                              errors.forEach((key, value) {
+                                if (value == null) {
+                                  return;
+                                }
+                                errorInfo += "$key - ${value.cause}\n";
+                              });
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        BugReportScreen(
+                                            generatedMessage:
+                                            "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
+                              );
+                            },
+                            child: const Text(
+                                "Fehlerbericht senden"));
+                      }
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: OutlinedButton(
+                        onPressed: () async {
+                          // Reset
+                          progress.reset();
+                          errors.updateAll((key, value) => value = null);
+                          isError.value = false;
+                          noInternet.value = false;
+                          loadingMessage.value = "Initialisieren...";
+
+                          await performLogin();
+                        },
+                        child:
+                        const Text("Erneut versuchen")),
+                  )
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        }
+    );
+  }
+
+  /// The bottom thing that shows a message and a "big" progress indicator.
+  Widget progressIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(16.0)
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          margin: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              ValueListenableBuilder(
+                  valueListenable: loadingMessage,
+                  builder: (context, _loadingMessage, _) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: Text(
+                          _loadingMessage,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary)
+                      ),
+                    );
+                  }
+              ),
+              ValueListenableBuilder(
+                  valueListenable: isError,
+                  builder: (context, _isError, _) {
+                    if (_isError) {
+                      return Icon(
+                        Icons.error,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      );
+                    }
+                    return SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    );
+                  }
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -269,28 +492,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (client.schoolLogo == "") ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FutureBuilder(
-                    future: PackageInfo.fromPlatform(),
-                    builder: (context, packageInfo) {
-                      return Text(
-                        "lanis-mobile ${packageInfo.data?.version}",
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.25)),
-                      );
-                    },
-                  )
-                ],
-              ),
-            ] else ...[
-              Image.file(
-                File(client.schoolLogo),
-              ),
-            ],
+            topPart(),
             Column(
               children: [
+                // Greeting message
                 Container(
                   decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
@@ -313,193 +518,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   )
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Container(
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(16.0)
-                      ),
-                      padding: const EdgeInsets.all(12.0),
-                      margin: const EdgeInsets.symmetric(horizontal: 84),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ValueListenableBuilder(
-                              valueListenable: finishedLoadingStorage,
-                              builder: (context, _finishedLoadingStorage, _) {
-                                if (_finishedLoadingStorage) {
-                                  return ListenableBuilder(
-                                      listenable: progress,
-                                      builder: (context, _) {
-                                        return ListView.separated(
-                                            shrinkWrap: true,
-                                            itemCount: steps.length,
-                                            separatorBuilder: (context, index) {
-                                              return const SizedBox(
-                                                height: 8,
-                                              );
-                                            },
-                                            itemBuilder: (context, index) {
-                                              final String step = steps[index];
-                                              final Status status = progress.steps[step]!;
-                                              return Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Padding(
-                                                        padding: const EdgeInsets.only(right: 4.0),
-                                                        child: Icon(
-                                                          getIcon(status),
-                                                          color: Theme.of(context).colorScheme.onSecondary,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                          step,
-                                                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Text(
-                                                      getProgressMessage(status),
-                                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
-                                                  )
-                                                ],
-                                              );
-                                            }
-                                        );
-                                      }
-                                  );
-                                }
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                        "Lade gespeicherte Daten...",
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
-                                    )
-                                  ],
-                                );
-                              }
-                          )
-                        ],
-                      )
-                  ),
-                ),
-                ValueListenableBuilder(
-                    valueListenable: isError,
-                    builder: (context, _isError, _) {
-                      if (_isError) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ValueListenableBuilder(
-                                  valueListenable: noInternet,
-                                  builder: (context, _noInternet, _) {
-                                    if (_noInternet) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    return FilledButton(
-                                        onPressed: () {
-                                          // Prepare error message
-                                          String errorInfo = "";
-                                          errors.forEach((key, value) {
-                                            if (value == null) {
-                                              return;
-                                            }
-                                            errorInfo += "$key - ${value.cause}\n";
-                                          });
-
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    BugReportScreen(
-                                                        generatedMessage:
-                                                        "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
-                                          );
-                                        },
-                                        child: const Text(
-                                            "Fehlerbericht senden"));
-                                  }
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: OutlinedButton(
-                                    onPressed: () async {
-                                      // Reset
-                                      progress.reset();
-                                      errors.updateAll((key, value) => value = null);
-                                      isError.value = false;
-                                      noInternet.value = false;
-                                      loadingMessage.value = "Initialisieren...";
-
-                                      await performLogin();
-                                    },
-                                    child:
-                                    const Text("Erneut versuchen")),
-                              )
-                            ],
-                          ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }
-                ),
+                currentStepsStatus(),
+                errorButtons(),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(16.0)
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  margin: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      ValueListenableBuilder(
-                        valueListenable: loadingMessage,
-                        builder: (context, _loadingMessage, _) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 12.0),
-                            child: Text(
-                                _loadingMessage,
-                                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary)
-                            ),
-                          );
-                        }
-                      ),
-                      ValueListenableBuilder(
-                          valueListenable: isError,
-                          builder: (context, _isError, _) {
-                            if (_isError) {
-                              return Icon(
-                                Icons.error,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              );
-                            }
-                            return SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: CircularProgressIndicator(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            );
-                          }
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            progressIndicator()
           ],
         ),
       ),
