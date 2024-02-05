@@ -262,10 +262,10 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    if (snapshot.hasError && snapshot.error is LanisException) ...[
-                      ErrorView(data: snapshot.error as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher,),
-                      ErrorView(data: snapshot.error as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher),
-                      ErrorView(data: snapshot.error as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher)
+                    if (snapshot.data?.status == FetcherStatus.error && snapshot.data?.content is LanisException) ...[
+                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher,),
+                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher),
+                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher)
                     ]
                     else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) ...[
                       const Center(child: CircularProgressIndicator()),
