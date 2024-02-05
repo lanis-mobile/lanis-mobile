@@ -46,7 +46,7 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
-  String? schoolLogo = "";
+  String schoolLogo = "";
   String loadMode = "";
   dynamic userData = {};
   List<dynamic> supportedApps = [];
@@ -130,10 +130,8 @@ class SPHclient {
     password = await globalStorage.read(key: StorageKey.userPassword, secure: true);
     schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
 
-    //path
-    final Directory dir = await getApplicationDocumentsDirectory();
-    String fileName = "school.jpg";
-    schoolImage = "${dir.path}/$fileName";
+    schoolImage = await globalStorage.read(key: StorageKey.schoolImageLocation);
+    schoolLogo = await globalStorage.read(key: StorageKey.schoolLogoLocation);
 
     schoolName = await globalStorage.read(key: StorageKey.userSchoolName);
 
@@ -210,12 +208,9 @@ class SPHclient {
     String? schoolImageLink = schoolInfo["Logo"];
     if (schoolImageLink != null) {
       schoolLogo = await savePersistentImage(schoolInfo["Logo"], "logo.jpg");
-      await globalStorage.write(key: StorageKey.schoolLogoLocation, value: schoolLogo!);
-    } else {
-      schoolLogo = null;
+      await globalStorage.write(key: StorageKey.schoolLogoLocation, value: schoolLogo);
     }
-
-
+    
     schoolName = schoolInfo["Name"];
     await globalStorage.write(key: StorageKey.userSchoolName, value: schoolName);
 
