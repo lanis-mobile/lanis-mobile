@@ -41,7 +41,7 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),
           title: Text(value["Name"]),
-          subtitle: Text(supportedApps.where((element) => value["link"].toString() == element.php).isNotEmpty ? "Unterstützt": "nicht Unterstützt"),
+          subtitle: Text(getAppSupportStatus(value["link"].toString())),
         ));
       }
 
