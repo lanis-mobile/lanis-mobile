@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:countly_flutter_np/countly_flutter.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:sph_plan/login.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -13,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
-import 'app.dart';
 import 'background_service/service.dart' as background_service;
 
 
@@ -92,6 +93,40 @@ void main() async {
       await Countly.recordDartError(obj, stack);
     }
   });
+}
+
+class App extends StatelessWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DynamicColorBuilder(
+        builder: (lightDynamic, darkDynamic) {
+          if (lightDynamic != null && darkDynamic != null) {
+            Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
+            if (globalStorage.prefs.getString("color") == "dynamic") ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
+          }
+
+          return ValueListenableBuilder<Themes>(
+              valueListenable: ColorModeNotifier.notifier,
+              builder: (_, theme, __) {
+                return ValueListenableBuilder<ThemeMode>(
+                    valueListenable: ThemeModeNotifier.notifier,
+                    builder: (_, mode, __) {
+                      return MaterialApp(
+                        title: 'lanis mobile',
+                        theme: theme.lightTheme,
+                        darkTheme: theme.darkTheme,
+                        themeMode: mode,
+                        home: const LoginScreen(),
+                      );
+                    }
+                );
+              }
+          );
+        }
+    );
+  }
 }
 
 Widget errorWidget(FlutterErrorDetails details) {
