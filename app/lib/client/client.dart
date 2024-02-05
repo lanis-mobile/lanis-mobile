@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/client_submodules/datastorage.dart';
 import 'package:sph_plan/client/client_submodules/mein_unterricht.dart';
+import 'package:sph_plan/client/load_mode.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
@@ -46,7 +47,7 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
-  String loadMode = "";
+  LoadModeEnum loadMode = LoadModeEnum.fast;
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late CookieJar jar;
@@ -68,7 +69,7 @@ class SPHclient {
   CalendarFetcher? calendarFetcher;
 
   void prepareFetchers() {
-    if (client.loadMode == "full") {
+    if (client.loadMode == LoadModeEnum.full) {
       if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && substitutionsFetcher == null) {
         substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
       }
@@ -123,7 +124,7 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
-    loadMode = await globalStorage.read(key: StorageKey.settingsLoadMode);
+    loadMode = LoadModeEnum.fromName(await globalStorage.read(key: StorageKey.settingsLoadMode));
 
     username = await globalStorage.read(key: StorageKey.userUsername);
     password = await globalStorage.read(key: StorageKey.userPassword, secure: true);

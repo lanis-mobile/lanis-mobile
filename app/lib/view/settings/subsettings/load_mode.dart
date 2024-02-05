@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/client/load_mode.dart';
 
 import '../../../client/storage.dart';
 
@@ -28,10 +29,10 @@ class LoadModeElements extends StatefulWidget {
 }
 
 class _LoadModeElementsState extends State<LoadModeElements> {
-  String _selectedMode = "fast"; // Default theme
+  LoadModeEnum _selectedMode = LoadModeEnum.fast; // Default mode
 
-  Future<void> _applyMode(String mode) async {
-    await globalStorage.write(key: StorageKey.settingsLoadMode, value: mode);
+  Future<void> _applyMode(LoadModeEnum mode) async {
+    await globalStorage.write(key: StorageKey.settingsLoadMode, value: mode.name);
     _selectedMode = mode;
     client.loadMode = mode;
   }
@@ -50,11 +51,11 @@ class _LoadModeElementsState extends State<LoadModeElements> {
         RadioListTile(
           title: const Text('Nur Vertretungsplan laden'),
           subtitle: const Text("Ist schneller, aber beim Angucken anderer Daten müssen sie zuerst geladen werden, was immer zuerst einen Ladebalken zeigt. Nützlich wenn man so schnell wie möglich den Vertretungsplan sehen möchte. Außerdem spart es Daten für dich und Lanis. Empfohlen für die meisten Nutzer."),
-          value: "fast",
+          value: LoadModeEnum.fast,
           groupValue: _selectedMode,
           onChanged: (value) {
             setState(() {
-              _selectedMode = value.toString();
+              _selectedMode = value!;
               _applyMode(_selectedMode);
             });
           },
@@ -62,11 +63,11 @@ class _LoadModeElementsState extends State<LoadModeElements> {
         RadioListTile(
           title: const Text('Alles laden'),
           subtitle: const Text('Dauert ein bisschen länger, aber du kannst alle Daten des Schulportals direkt sehen, ohne immer einen Ladebildschirm zu haben. Außerdem werden alle 15 Minuten Daten neu geladen.'),
-          value: "full",
+          value: LoadModeEnum.full,
           groupValue: _selectedMode,
           onChanged: (value) {
             setState(() {
-              _selectedMode = value.toString();
+              _selectedMode = value!;
               _applyMode(_selectedMode);
             });
           },
