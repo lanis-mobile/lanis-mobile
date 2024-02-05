@@ -23,7 +23,6 @@ class Message {
   static String initialise = "Initialisieren...";
   static String login = "Einloggen...";
   static String load = "Lade Apps...";
-  static String loadFast = "Lade Vertretungsplan...";
   static String finalise = "Finalisieren...";
   static String error = "Beim Laden ist ein Fehler passiert!";
 }
@@ -94,12 +93,15 @@ class _LoginScreenState extends State<LoginScreen> {
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
 
   void openWelcomeScreen() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
-    ).then((_) {
+    ).then((_) async {
       client.prepareFetchers();
-      //openFeature(getDefaultFeature());
+      await client.prepareDio();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),);
     });
   }
 
@@ -132,52 +134,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> performLogin() async {
     // Step 1
-
-    // It doesn't show it immediately but faster than before.
+    // It doesn't show it immediately but a lot faster than before.
     // I think this check is enough.
+    await client.prepareDio();
     if (client.username == "") {
       openWelcomeScreen();
+      return;
     }
-
-    await client.prepareDio();
 
     // Step 2 (if this fails, show login screen or notify error)
     loadingMessage.value = Message.login;
     progress.set(Step.login, Status.loading);
     try {
       await client.login();
-      client.prepareFetchers();
       progress.set(Step.login, Status.finished);
-
-      // Step 3 (only load vp) will be removed
-      if (client.loadMode == "fast") {
-        loadingMessage.value = Message.loadFast;
-        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-          await fetchApplet(Applet(fetcher: client.substitutionsFetcher, step: Step.substitutions, finishMessage: "Vertretungen wurden geladen!"));
-        }
-
-        if (!isError.value) {
-          loadingMessage.value = Message.finalise;
-          whatsNew().then((value) {
-            if (value != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ReleaseNotesScreen(value)),
-              ).then((_) {
-                //client.prepareFetchers();
-                //openFeature(getDefaultFeature());
-              });
-            }
-          });
-
-          // Context is always mounted
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        }
-        return;
-      }
 
       loadingMessage.value = Message.load;
 
@@ -192,18 +162,15 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => ReleaseNotesScreen(value)),
-            ).then((_) {
-              //client.prepareFetchers();
-              //openFeature(getDefaultFeature());
-            });
+            ).then((_) => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),));
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),);
           }
         });
-
-        // Context is always mounted
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
       }
       return;
     } on WrongCredentialsException {
@@ -253,6 +220,12 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       client.loadFromStorage().then((_) {
+        if (client.username == "") {
+          performLogin();
+          return;
+        }
+
+        client.prepareFetchers();
         finishedLoadingStorage.value = true;
 
         if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {

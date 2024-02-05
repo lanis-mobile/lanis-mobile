@@ -139,6 +139,8 @@ class SPHclient {
 
     supportedApps =
         jsonDecode(await globalStorage.read(key: StorageKey.userSupportedApplets));
+
+    return;
   }
 
   ///Logs the user in and fetches the necessary metadata.
