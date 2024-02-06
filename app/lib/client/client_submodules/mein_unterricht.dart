@@ -383,7 +383,7 @@ class MeinUnterrichtParser {
     return response.data;
   }
 
-  Future<dynamic> deleteUploadedFile({
+  Future<String> deleteUploadedFile({
     required String course,
     required String entry,
     required String upload,
@@ -421,12 +421,10 @@ class MeinUnterrichtParser {
       // "1" Lanis had a good day
       return response.data;
     }on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
@@ -509,16 +507,14 @@ class MeinUnterrichtParser {
         "additional_text": additionalText,
       };
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
-  Future<dynamic> uploadFile(
+  Future<List<FileStatus>> uploadFile(
       {
         required String course,
         required String entry,
@@ -572,12 +568,10 @@ class MeinUnterrichtParser {
 
       return statusMessages;
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 }

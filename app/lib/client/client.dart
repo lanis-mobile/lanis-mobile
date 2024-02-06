@@ -29,19 +29,6 @@ import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 
 class SPHclient {
-  final statusCodes = {
-    0: "Alles supper Brudi!",
-    -1: "Falsche Anmeldedaten",
-    -2: "Nicht alle Anmeldedaten angegeben",
-    -3: "Netzwerkfehler",
-    -4: "Unbekannter Fehler! Bist du eingeloggt?",
-    -5: "Keine Erlaubnis",
-    -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
-    -7: "Unbekannter Fehler! Antwort war nicht salted.",
-    -8: "Nicht unterstützt!",
-    -9: "Kein Internet."
-  };
-
   String username = "";
   String password = "";
   String schoolID = "";
