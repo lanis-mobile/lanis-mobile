@@ -6,9 +6,10 @@ enum StorageKey {
   settingsPushServiceIntervall,
   settingsPushServiceOngoing,
   settingsUseCountly,
-  settingsLoadMode,
   settingsSelectedColor,
   settingsSelectedTheme,
+  settingsLoadApps,
+  settingsUpdateAppsIntervall,
 
   userSchoolID,
   userUsername,
@@ -39,8 +40,10 @@ extension SPHApp on StorageKey {
         return "settings-push-service-notifications-ongoing";
       case StorageKey.settingsUseCountly:
         return "enable-countly";
-      case StorageKey.settingsLoadMode:
-        return "loadMode";
+      case StorageKey.settingsLoadApps:
+        return "loadApps";
+      case StorageKey.settingsUpdateAppsIntervall:
+        return "updateAppsIntervall";
       case StorageKey.userSchoolID:
         return "schoolID";
       case StorageKey.lastAppVersion:
@@ -84,8 +87,8 @@ extension SPHApp on StorageKey {
         return "15";
       case StorageKey.settingsUseCountly:
         return "true";
-      case StorageKey.settingsLoadMode:
-        return "fast";
+      case StorageKey.settingsUpdateAppsIntervall:
+        return "15";
       case StorageKey.lastAppVersion:
         return "0.0.0";
       case StorageKey.userData:

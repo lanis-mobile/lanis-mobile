@@ -1,12 +1,11 @@
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/countly_analysis.dart';
-import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
+import 'package:sph_plan/view/settings/subsettings/start_apps.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
-import '../../login.dart';
 import '../../shared/apps.dart';
 import '../login/screen.dart';
 import '../../client/client.dart';
@@ -76,17 +75,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ],
-          ListTile(
-            leading: const Icon(Icons.speed),
-            title: const Text('Lademodus'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const LoadModeScreen()),
-              );
-            },
-          ),
+          if (client.loadApps!.isNotEmpty) ...[
+            ListTile(
+              leading: const Icon(Icons.speed),
+              title: const Text('Startapps'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const LoadModeScreen()),
+                );
+              },
+            ),
+          ],
           ListTile(
             leading: const Icon(Icons.analytics),
             title: const Text('Countly Bugreports'),
@@ -105,16 +106,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AboutScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.login),
-            title: const Text('login test'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
           ),

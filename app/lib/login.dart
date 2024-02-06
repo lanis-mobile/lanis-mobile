@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
-import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
@@ -230,25 +229,24 @@ class _LoginScreenState extends State<LoginScreen> {
         client.prepareFetchers();
         finishedLoadingStorage.value = true;
 
-        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-          steps.add(Step.substitutions);
-          appletFetchers.add(Applet(fetcher: client.substitutionsFetcher, step: Step.substitutions, finishMessage: "Vertretungen wurden geladen!"));
-          errors.addEntries([MapEntry(Step.substitutions, null)]);
-        }
-
-        if (client.loadMode == "full") {
-          if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
+        if (client.loadApps != null) {
+          if (client.loadApps!.containsKey(Step.substitutions) && client.loadApps![Step.substitutions] == true) {
+            steps.add(Step.substitutions);
+            appletFetchers.add(Applet(fetcher: client.substitutionsFetcher, step: Step.substitutions, finishMessage: "Vertretungen wurden geladen!"));
+            errors.addEntries([MapEntry(Step.substitutions, null)]);
+          }
+          if (client.loadApps!.containsKey(Step.meinUnterricht) && client.loadApps![Step.meinUnterricht] == true)  {
             steps.add(Step.meinUnterricht);
             appletFetchers.add(Applet(fetcher: client.meinUnterrichtFetcher, step: Step.meinUnterricht, finishMessage: "Mein Unterricht wurde geladen!"));
             errors.addEntries([MapEntry(Step.meinUnterricht, null)]);
           }
-          if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
+          if (client.loadApps!.containsKey(Step.conversations) && client.loadApps![Step.conversations] == true) {
             steps.add(Step.conversations);
             appletFetchers.add(Applet(fetcher: client.invisibleConversationsFetcher, step: Step.conversations, finishMessage: "Nachrichten wurden geladen! (1/2)"));
             appletFetchers.add(Applet(fetcher: client.visibleConversationsFetcher, step: Step.conversations, finishMessage: "Nachrichten wurden geladen! (2/2)"));
             errors.addEntries([MapEntry(Step.conversations, null)]);
           }
-          if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+          if (client.loadApps!.containsKey(Step.calendar) && client.loadApps![Step.calendar] == true) {
             steps.add(Step.calendar);
             appletFetchers.add(Applet(fetcher: client.calendarFetcher, step: Step.calendar, finishMessage: "Kalender wurde geladen!"));
             errors.addEntries([MapEntry(Step.calendar, null)]);
@@ -288,7 +286,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Widget currentStepsStatus() {
+  Widget currentSteps() {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
@@ -518,7 +516,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   )
                 ),
-                currentStepsStatus(),
+                currentSteps(),
                 errorButtons(),
               ],
             ),
