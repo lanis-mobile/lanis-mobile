@@ -278,8 +278,6 @@ class SPHclient {
     dioHttp.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
 
-    debugPrint("the password is"+password);
-
     try {
       if (username != "" && password != "" && schoolID != "") {
         final response1 = await dioHttp.post(
