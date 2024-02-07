@@ -278,6 +278,8 @@ class SPHclient {
     dioHttp.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
 
+    debugPrint("the password is"+password);
+
     try {
       if (username != "" && password != "" && schoolID != "") {
         final response1 = await dioHttp.post(
@@ -303,8 +305,8 @@ class SPHclient {
       } else {
         throw CredentialsIncompleteException();
       }
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
+      if (e is CredentialsIncompleteException) rethrow;
       throw LoggedOffOrUnknownException();
     }
   }

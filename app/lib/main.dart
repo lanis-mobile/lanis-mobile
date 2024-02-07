@@ -412,7 +412,8 @@ class _HomePageState extends State<HomePage> {
       openLoginScreen();
     } on CredentialsIncompleteException {
       openLoginScreen();
-    } on LanisException catch (e) {
+    } on LanisException catch (e, stack) {
+      debugPrint(stack.toString());
       statusController.add(Status.errorLogin);
       error = e;
     }
