@@ -303,8 +303,9 @@ class SPHclient {
       } else {
         throw CredentialsIncompleteException();
       }
-    } catch (e, stack) {
-      recordError(e, stack);
+    } on CredentialsIncompleteException {
+      rethrow;
+    } catch (e) {
       throw LoggedOffOrUnknownException();
     }
   }
