@@ -4,7 +4,9 @@ enum SPHAppEnum {
   vertretungsplan,
   meinUnterricht,
   kalender,
-  dateispeicher,
+  dateispeicher;
+
+  static SPHAppEnum fromJson(String json) => values.byName(json);
 }
 
 extension SPHApp on SPHAppEnum {
@@ -18,6 +20,18 @@ extension SPHApp on SPHAppEnum {
       SPHAppEnum.dateispeicher => "dateispeicher.php",
     };
   }
+
+  String get fullName {
+    return switch (this) {
+      SPHAppEnum.stundenplan => "Stundenplan",
+      SPHAppEnum.nachrichten => "Nachrichten",
+      SPHAppEnum.vertretungsplan => "Vertretungsplan",
+      SPHAppEnum.meinUnterricht => "Mein Unterricht",
+      SPHAppEnum.kalender => "Kalender",
+      SPHAppEnum.dateispeicher => "Dateispeicher",
+    };
+  }
+
   bool get onlyStudents {
     return switch (this) {
       SPHAppEnum.meinUnterricht => true,

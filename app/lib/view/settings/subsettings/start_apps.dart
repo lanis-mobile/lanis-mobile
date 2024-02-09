@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/shared/apps.dart';
 
 import '../../../client/storage.dart';
+import '../../../shared/types/load_app.dart';
 
 class LoadModeScreen extends StatelessWidget {
   const LoadModeScreen({super.key});
@@ -34,15 +36,15 @@ class LoadModeElements extends StatefulWidget {
 }
 
 class _LoadModeElementsState extends State<LoadModeElements> {
-  IconData getIcon(String name) {
-    switch (name) {
-      case "Vertretungsplan":
+  IconData getIcon(SPHAppEnum applet) {
+    switch (applet) {
+      case SPHAppEnum.vertretungsplan:
         return Icons.people;
-      case "Mein Unterricht":
+      case SPHAppEnum.meinUnterricht:
         return Icons.school;
-      case "Nachrichten":
+      case SPHAppEnum.nachrichten:
         return Icons.forum;
-      case "Kalender":
+      case SPHAppEnum.kalender:
         return Icons.calendar_today;
       default:
         return Icons.help;
@@ -74,19 +76,31 @@ class _LoadModeElementsState extends State<LoadModeElements> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: client.loadApps!.length,
             itemBuilder: (context, index) {
-              final String name = client.loadApps!.keys.elementAt(index);
-              final bool state = client.loadApps!.values.elementAt(index);
+              final LoadApp loadApp = client.loadApps!.values.elementAt(index);
               return CheckboxListTile(
-                secondary: Icon(getIcon(name)),
-                subtitle: name == "Kalender" ? const Text("Der Kalender wird nicht neu geladen.") : null,
-                title: Text(name),
-                  value: state,
+                secondary: Icon(getIcon(loadApp.applet)),
+                subtitle: loadApp.applet == SPHAppEnum.kalender ? const Text("Der Kalender wird nicht neu geladen.") : null,
+                title: Text(loadApp.applet.fullName),
+                  value: loadApp.shouldFetch,
                   onChanged: (value) async {
                     setState(() {
-                      client.loadApps![name] = value!;
+                      loadApp.shouldFetch = value!;
+                      //client.loadApps![loadApp.applet]!.shouldFetch = value;
                     });
-                    await globalStorage.write(key: StorageKey.settingsLoadApps, value: json.encode(client.loadApps!));
-                  }
+
+                    // To JSON
+                    final Map<String, Map<String, dynamic>> jsonLoadApps = {};
+                    for (final applet in client.loadApps!.keys) {
+                      jsonLoadApps.addEntries([
+                        MapEntry(
+                            applet.name,
+                            client.loadApps![applet]!.toJson()
+                        )
+                      ]);
+                    }
+
+                    await globalStorage.write(key: StorageKey.settingsLoadApps, value: json.encode(jsonLoadApps));
+                }
               );
             }
         ),
