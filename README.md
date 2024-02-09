@@ -46,6 +46,8 @@ Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
 Working on it.
 
 ## Mitarbeit
+[Schulkonfiguration der Vertretungspläne](https://github.com/alessioC42/lanis-mobile-autoconfig)
+
 Dieses Projekt ist stark von Bug-Reports anderer Schulen oder von neuen Mitarbeitern abhängig. Der Grund dafür liegt in
 der modularen Natur des Schulportals, die es äußerst schwierig macht, eine universelle Lanis-App zu entwickeln.
 
