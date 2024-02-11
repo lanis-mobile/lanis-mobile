@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -8,6 +7,7 @@ import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
 
 import 'client.dart';
+import 'connection_checker.dart';
 
 
 enum FetcherStatus {
@@ -34,7 +34,7 @@ abstract class Fetcher {
   Fetcher(this.validCacheDuration) {
     if (validCacheDuration != null) {
       Timer.periodic(validCacheDuration!, (timer) async {
-        if (await InternetConnectionChecker().hasConnection) {
+        if (await connectionChecker.hasInternetAccess) {
           await fetchData(forceRefresh: true);
         }
       });
@@ -44,7 +44,7 @@ abstract class Fetcher {
   void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
   
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
-    if (!(await InternetConnectionChecker().hasConnection)) {
+    if (!(await connectionChecker.hasInternetAccess)) {
       if (isEmpty) {
         _addResponse(FetcherResponse(status: FetcherStatus.error, content: NoConnectionException()));
       }

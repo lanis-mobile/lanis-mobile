@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../client.dart';
+import '../connection_checker.dart';
 
 class ConversationsParser {
   late Dio dio;
@@ -58,13 +58,13 @@ class ConversationsParser {
       throw NetworkException();
     } on LanisException {
       rethrow;
-    } catch (e, stack) {
+    } catch (e) {
       throw LoggedOffOrUnknownException();
     }
   }
 
   Future<dynamic> getSingleConversation(String uniqueID) async {
-    if (!(await InternetConnectionChecker().hasConnection)) {
+    if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
     }
 
