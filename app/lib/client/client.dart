@@ -22,7 +22,6 @@ import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
-import '../shared/shared_functions.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
@@ -164,7 +163,6 @@ class SPHclient {
     } on LanisException {
       rethrow;
     } catch (e, stack) {
-      recordError(e, stack);
       debugPrint(e.toString());
       throw LoggedOffOrUnknownException();
     }
@@ -262,7 +260,6 @@ class SPHclient {
 
       return savePath;
     } catch (e, stack) {
-      recordError(e, stack);
       return "";
     }
   }
@@ -451,7 +448,6 @@ class SPHclient {
 
       return savePath;
     } catch (e, stack) {
-      recordError(e, stack);
       return "";
     }
   }

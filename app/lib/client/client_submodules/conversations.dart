@@ -7,7 +7,6 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/shared_functions.dart';
 import '../client.dart';
 
 class ConversationsParser {
@@ -60,7 +59,6 @@ class ConversationsParser {
     } on LanisException {
       rethrow;
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
