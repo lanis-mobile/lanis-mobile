@@ -1,4 +1,5 @@
 import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/clear_cache.dart';
 import 'package:sph_plan/view/settings/subsettings/countly_analysis.dart';
 import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
@@ -83,6 +84,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const LoadModeScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: const Text('Cache leeren'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ClearCacheScreen()),
               );
             },
           ),
