@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
-import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
@@ -174,7 +173,8 @@ class _StartupScreenState extends State<StartupScreen> {
       openWelcomeScreen();
     } on CredentialsIncompleteException {
       openWelcomeScreen();
-    } on LanisException catch (e) {
+    } on LanisException catch (e, stack) {
+      debugPrint(stack.toString());
       errors[Step.login] = e;
       isError.value = true;
       progress.set(Step.login, Status.error);
