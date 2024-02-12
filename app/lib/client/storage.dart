@@ -29,7 +29,7 @@ enum StorageKey {
   schoolAccentColor,
 }
 
-extension SPHApp on StorageKey {
+extension on StorageKey {
   String get key {
     switch (this) {
       case StorageKey.settingsPushService:
@@ -111,7 +111,7 @@ extension SPHApp on StorageKey {
 
 class Storage {
   late SharedPreferences prefs;
-  final secureStorage = const FlutterSecureStorage();
+  final secureStorage = const FlutterSecureStorage(aOptions: AndroidOptions.defaultOptions);
 
   Storage() {
     _initialize();

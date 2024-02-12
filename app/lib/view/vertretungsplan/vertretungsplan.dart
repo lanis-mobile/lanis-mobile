@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
@@ -116,7 +117,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         stream: substitutionsFetcher.stream,
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error &&
-              snapshot.data?.content == -2) {
+              snapshot.data?.content == CredentialsIncompleteException().cause) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                   context,

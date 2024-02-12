@@ -1,41 +1,28 @@
 enum SPHAppEnum {
-  stundenplan,
-  nachrichten,
-  vertretungsplan,
-  meinUnterricht,
-  kalender,
-  dateispeicher;
+  stundenplan("stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
+  nachrichten("nachrichten.php", "Nachrichten", false, AppSupportStatus.supported),
+  vertretungsplan("vertretungsplan.php", "Vertretungsplan", false, AppSupportStatus.supported),
+  meinUnterricht("meinunterricht.php", "Mein Unterricht", true, AppSupportStatus.supported),
+  kalender("kalender.php", "Kalender", false, AppSupportStatus.supported),
+  dateispeicher("dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
 
-  static SPHAppEnum fromJson(String json) => values.byName(json);
+  final String php;
+  final String fullName;
+  final bool onlyStudents;
+  final AppSupportStatus status;
+  const SPHAppEnum(this.php, this.fullName, this.onlyStudents, this.status);
 }
 
-extension SPHApp on SPHAppEnum {
-  String get php {
-    return switch (this) {
-      SPHAppEnum.stundenplan => "stundenplan.php",
-      SPHAppEnum.nachrichten => "nachrichten.php",
-      SPHAppEnum.vertretungsplan => "vertretungsplan.php",
-      SPHAppEnum.meinUnterricht => "meinunterricht.php",
-      SPHAppEnum.kalender => "kalender.php",
-      SPHAppEnum.dateispeicher => "dateispeicher.php",
-    };
-  }
+enum AppSupportStatus {
+  supported("Unterstützt"),
+  unsupported("nicht Unterstützt"),
+  planned("Geplant"),
+  workedOn("in Arbeit");
 
-  String get fullName {
-    return switch (this) {
-      SPHAppEnum.stundenplan => "Stundenplan",
-      SPHAppEnum.nachrichten => "Nachrichten",
-      SPHAppEnum.vertretungsplan => "Vertretungsplan",
-      SPHAppEnum.meinUnterricht => "Mein Unterricht",
-      SPHAppEnum.kalender => "Kalender",
-      SPHAppEnum.dateispeicher => "Dateispeicher",
-    };
-  }
+  final String text;
+  const AppSupportStatus(this.text);
+}
 
-  bool get onlyStudents {
-    return switch (this) {
-      SPHAppEnum.meinUnterricht => true,
-      _ => false,
-    };
-  }
+String getAppSupportStatus(String link) {
+  return SPHAppEnum.values.where((e) => e.php == link).firstOrNull?.status.text ?? AppSupportStatus.unsupported.text;
 }

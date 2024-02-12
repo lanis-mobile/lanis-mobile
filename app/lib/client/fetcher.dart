@@ -102,13 +102,17 @@ class SubstitutionsFetcher extends Fetcher {
     final Map filteredSubstitutionPlan = {"length": 0, "days": []};
 
     for (int i = 0; i < substitutionPlan["dates"].length; i++) {
-      filteredSubstitutionPlan["days"].add({"date": substitutionPlan["dates"][i], "entries": await filterlogic.filter(substitutionPlan["entries"][i])});
+      final filteredEntries = await filterlogic.filter(substitutionPlan["entries"][i]);
+      if (filteredEntries.isNotEmpty) {
+        filteredSubstitutionPlan["days"].add({"date": substitutionPlan["dates"][i], "entries": filteredEntries});
+      }
     }
 
-    filteredSubstitutionPlan["length"] = substitutionPlan["dates"].length;
+    filteredSubstitutionPlan["length"] = filteredSubstitutionPlan["days"].length;
 
     return Future.value(filteredSubstitutionPlan);
   }
+
 }
 
 class MeinUnterrichtFetcher extends Fetcher {

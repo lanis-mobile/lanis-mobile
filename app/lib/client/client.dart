@@ -29,19 +29,6 @@ import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 
 class SPHclient {
-  final statusCodes = {
-    0: "Alles supper Brudi!",
-    -1: "Falsche Anmeldedaten",
-    -2: "Nicht alle Anmeldedaten angegeben",
-    -3: "Netzwerkfehler",
-    -4: "Unbekannter Fehler! Bist du eingeloggt?",
-    -5: "Keine Erlaubnis",
-    -6: "Verschlüsselungsüberprüfung fehlgeschlagen",
-    -7: "Unbekannter Fehler! Antwort war nicht salted.",
-    -8: "Nicht unterstützt!",
-    -9: "Kein Internet."
-  };
-
   String username = "";
   String password = "";
   String schoolID = "";
@@ -247,7 +234,7 @@ class SPHclient {
       schoolLogo = await savePersistentImage(schoolInfo["Logo"], "logo.jpg");
       await globalStorage.write(key: StorageKey.schoolLogoLocation, value: schoolLogo);
     }
-    
+
     schoolName = schoolInfo["Name"];
     await globalStorage.write(key: StorageKey.userSchoolName, value: schoolName);
 
@@ -356,8 +343,9 @@ class SPHclient {
       } else {
         throw CredentialsIncompleteException();
       }
-    } catch (e, stack) {
-      recordError(e, stack);
+    } on CredentialsIncompleteException {
+      rethrow;
+    } catch (e) {
       throw LoggedOffOrUnknownException();
     }
   }

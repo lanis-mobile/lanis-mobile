@@ -11,6 +11,7 @@ import 'package:sph_plan/shared/errorView.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../shared/types/upload.dart';
 
 class UploadScreen extends StatefulWidget {
   final String url;
@@ -98,13 +99,13 @@ class _UploadScreenState extends State<UploadScreen> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.data is int) {
+          if (snapshot.hasError && snapshot.error is LanisException) {
             return Scaffold(
               appBar: AppBar(
                 title: Text(widget.name),
               ),
-              body: ErrorView.fromCode(
-                  data: snapshot.data,
+              body: ErrorView(
+                  data: snapshot.error as LanisException,
                   name: "einer Abgabe",
                   fetcher: null
               ),
@@ -157,18 +158,20 @@ class _UploadScreenState extends State<UploadScreen> {
 
                               showSnackbar(text: "Versuche die Datei(en) hochzuladen...");
 
-                              final dynamic fileStatus = await client.meinUnterricht.uploadFile(
-                                course: snapshot.data["course_id"],
-                                entry: snapshot.data["entry_id"],
-                                upload: snapshot.data["upload_id"],
-                                file1: _multipartFiles[0],
-                                file2: _multipartFiles.elementAtOrNull(1),
-                                file3: _multipartFiles.elementAtOrNull(2),
-                                file4: _multipartFiles.elementAtOrNull(3),
-                                file5: _multipartFiles.elementAtOrNull(4),
-                              );
+                              List<FileStatus> fileStatus;
 
-                              if (fileStatus is int) {
+                              try {
+                                fileStatus = await client.meinUnterricht.uploadFile(
+                                  course: snapshot.data["course_id"],
+                                  entry: snapshot.data["entry_id"],
+                                  upload: snapshot.data["upload_id"],
+                                  file1: _multipartFiles[0],
+                                  file2: _multipartFiles.elementAtOrNull(1),
+                                  file3: _multipartFiles.elementAtOrNull(2),
+                                  file4: _multipartFiles.elementAtOrNull(3),
+                                  file5: _multipartFiles.elementAtOrNull(4),
+                                );
+                              } on LanisException catch(ex) {
                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                 Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -176,7 +179,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                           return Scaffold(
                                             appBar: AppBar(),
                                             body: ErrorView(
-                                                data: LanisException.fromCode(fileStatus),
+                                                data: ex,
                                                 name: "Hochladen von einer Datei/Dateien",
                                                 fetcher: null
                                             ),
@@ -192,7 +195,7 @@ class _UploadScreenState extends State<UploadScreen> {
                               for (final status in fileStatus) {
                                 if (status.status == "erfolgreich") {
                                   successfulUploads++;
-                                  if (status.message.contains("Datei mit gleichem Namen schon vorhanden.")) {
+                                  if (status.message!.contains("Datei mit gleichem Namen schon vorhanden.")) {
                                     renamed = true;
                                   }
                                 }
@@ -210,7 +213,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                           fileStatusWidgets.add(ListTile(
                                             leading: status.status == "erfolgreich" ? const Icon(Icons.done) : const Icon(Icons.error),
                                             title: Text(status.name),
-                                            subtitle: status.message != null && status.message != "" ? Text(status.message) : null,
+                                            subtitle: status.message != null && status.message != "" ? Text(status.message!) : null,
                                           ));
                                         }
 
@@ -568,16 +571,16 @@ class _UploadScreenState extends State<UploadScreen> {
                                               Navigator.pop(context);
 
                                               showSnackbar(text: "Versuche die Datei(en) zu löschen...");
-
-                                              dynamic response = await client.meinUnterricht.deleteUploadedFile(
-                                                course: snapshot.data["course_id"],
-                                                entry: snapshot.data["entry_id"],
-                                                upload: snapshot.data["upload_id"],
-                                                file: snapshot.data["own_files"][index].index,
-                                                userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
-                                              );
-
-                                              if (response is int) {
+                                              String response;
+                                              try {
+                                                response = await client.meinUnterricht.deleteUploadedFile(
+                                                  course: snapshot.data["course_id"],
+                                                  entry: snapshot.data["entry_id"],
+                                                  upload: snapshot.data["upload_id"],
+                                                  file: snapshot.data["own_files"][index].index,
+                                                  userPasswordEncrypted: client.cryptor.encryptString(passwordController.text),
+                                                );
+                                              } on LanisException catch(ex) {
                                                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                 Navigator.of(context).push(
                                                     MaterialPageRoute(
@@ -585,7 +588,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                           return Scaffold(
                                                             appBar: AppBar(),
                                                             body: ErrorView(
-                                                                data: LanisException.fromCode(response),
+                                                                data: ex,
                                                                 name: "Löschen einer Datei",
                                                                 fetcher: null
                                                             ),

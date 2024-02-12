@@ -166,30 +166,6 @@ class MeinUnterrichtParser {
     return result;
   }
 
-  Future<dynamic> setHomework(String courseID, String courseEntry, bool status) async {
-    //returns the response of the http request. 1 means success.
-
-    final response = await dio.post(
-      "https://start.schulportal.hessen.de/meinunterricht.php",
-      data: {
-        "a": "sus_homeworkDone",
-        "entry": courseEntry,
-        "id": courseID,
-        "b": status ? "done" : "undone"
-      },
-      options: Options(
-        headers: {
-          "Content-Type":
-          "application/x-www-form-urlencoded; charset=UTF-8",
-          "X-Requested-With": "XMLHttpRequest", //this is important
-        },
-      ),
-    );
-
-
-    return response.data;
-  }
-
   Future<dynamic> getCourseView(String url) async {
     try {
       var result = {
@@ -197,6 +173,7 @@ class MeinUnterrichtParser {
         "leistungen": [],
         "leistungskontrollen": [],
         "anwesenheiten": [],
+        "halbjahr1": [],
         "name": ["name"],
       };
 
@@ -213,6 +190,14 @@ class MeinUnterrichtParser {
       result["name"] = [
         heading?.text.trim()
       ];
+
+      //halbjahr2
+      var halbJahrButtons = document.getElementsByClassName("btn btn-default hidden-print");
+      if (halbJahrButtons.length > 1) {
+        if (halbJahrButtons[0].attributes["href"]!.contains("&halb=1")) {
+          result["halbjahr1"] = [halbJahrButtons[0].attributes["href"]];
+        }
+      }
 
       //historie
           () {
@@ -374,7 +359,31 @@ class MeinUnterrichtParser {
     }
   }
 
-  Future<dynamic> deleteUploadedFile({
+  Future<dynamic> setHomework(String courseID, String courseEntry, bool status) async {
+    //returns the response of the http request. 1 means success.
+
+    final response = await dio.post(
+      "https://start.schulportal.hessen.de/meinunterricht.php",
+      data: {
+        "a": "sus_homeworkDone",
+        "entry": courseEntry,
+        "id": courseID,
+        "b": status ? "done" : "undone"
+      },
+      options: Options(
+        headers: {
+          "Content-Type":
+          "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest", //this is important
+        },
+      ),
+    );
+
+
+    return response.data;
+  }
+
+  Future<String> deleteUploadedFile({
     required String course,
     required String entry,
     required String upload,
@@ -412,12 +421,10 @@ class MeinUnterrichtParser {
       // "1" Lanis had a good day
       return response.data;
     }on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
@@ -500,16 +507,14 @@ class MeinUnterrichtParser {
         "additional_text": additionalText,
       };
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 
-  Future<dynamic> uploadFile(
+  Future<List<FileStatus>> uploadFile(
       {
         required String course,
         required String entry,
@@ -563,12 +568,10 @@ class MeinUnterrichtParser {
 
       return statusMessages;
     } on (SocketException, DioException) {
-      return -3;
-      // network error
+      throw NetworkException();
     } catch (e, stack) {
       recordError(e, stack);
-      return -4;
-      // unknown error
+      throw LoggedOffOrUnknownException();
     }
   }
 }
