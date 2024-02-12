@@ -1,9 +1,0 @@
-worker/node_modules
-app/node_modules/
-app/*.map
-app/.DS_Store
-app/.sourcemaps
-app/dist/
-.idea/*
-.idea/libraries/Dart_Packages.xml
-.idea/workspace.xml
