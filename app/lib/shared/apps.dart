@@ -10,7 +10,10 @@ enum SPHAppEnum {
   final String fullName;
   final bool onlyStudents;
   final AppSupportStatus status;
+
   const SPHAppEnum(this.php, this.fullName, this.onlyStudents, this.status);
+
+  static SPHAppEnum fromJson(String json) => values.byName(json);
 }
 
 enum AppSupportStatus {
