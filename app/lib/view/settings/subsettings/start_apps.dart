@@ -17,7 +17,7 @@ class LoadModeScreen extends StatelessWidget {
           title: const Text("Startapps"),
         ),
         body: const Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(0),
           child: Column(
             children: [
               LoadModeElements(),
@@ -107,7 +107,7 @@ class _LoadModeElementsState extends State<LoadModeElements> {
         ListTile(
           title: const Text('Update-Intervall'),
           trailing: Text('${client.updateAppsIntervall} min', style: const TextStyle(fontSize: 14)),
-          subtitle: const Text("Die App muss neugestartet werden, damit die Änderung in Kraft gesetzt wird."),
+          subtitle: const Text("Die App muss neu gestartet werden, damit eine Änderung wirksam wird."),
         ),
         Slider(
           value: client.updateAppsIntervall.toDouble(),
@@ -125,7 +125,7 @@ class _LoadModeElementsState extends State<LoadModeElements> {
         const ListTile(
           leading: Icon(Icons.info),
           title: Text("Information"),
-          subtitle: Text("Die hier ausgewählten Apps werden bei Appstart automatisch geladen, damit du deine wichtigsten Apps direkt sehen kannst. Außerdem kannst du sie einstellen, wann sie immer neu geladen werden sollen."),
+          subtitle: Text("Anstatt Apps erst zu laden, wenn du sie verwendest, kannst du hier deine wichtigsten Apps auswählen, damit sie direkt bei App-Start geladen werden und du sie sofort verwenden kannst. Außerdem kannst du festlegen, wann sie automatisch geladen werden sollen, damit du immer auf dem neuesten Stand bist."),
         ),
       ],
     );
