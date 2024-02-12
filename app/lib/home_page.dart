@@ -150,24 +150,29 @@ class _HomePageState extends State<HomePage> {
 
   NavigationBar navigationBar() {
     List<NavigationDestination> navigationDestinations = [];
-    List<int> bottomNavItems = [];
+    List<int?> bottomNavItems = [];
 
-    int appletIndex = 0;
-    for (final app in client.applets!.keys) {
-      navigationDestinations.add(NavigationDestination(
-          icon: appletHelpers[app]!.icon,
-          selectedIcon: appletHelpers[app]!.selectedIcon,
-          label: app.fullName
-      ));
+    int supportedIndex = 0;
+    for (final applet in SPHAppEnum.values) {
+      if (applet.status == AppSupportStatus.supported) {
+        if (client.doesSupportFeature(applet)) {
+          navigationDestinations.add(NavigationDestination(
+              icon: appletHelpers[applet]!.icon,
+              selectedIcon: appletHelpers[applet]!.selectedIcon,
+              label: applet.fullName
+          ));
 
-      bottomNavItems.add(appletIndex);
-      appletIndex++;
+          bottomNavItems.add(supportedIndex);
+          supportedIndex++;
+        } else {
+          bottomNavItems.add(null);
+        }
+      }
     }
 
     return NavigationBar(
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      selectedIndex:
-      bottomNavItems[selectedFeature.index],
+      selectedIndex: bottomNavItems[selectedFeature.index]!,
       onDestinationSelected: (index) => openFeature(Feature
           .values[bottomNavItems.indexOf(index)]),
       destinations: navigationDestinations

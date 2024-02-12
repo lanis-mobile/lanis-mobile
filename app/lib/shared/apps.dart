@@ -1,9 +1,9 @@
 enum SPHAppEnum {
-  stundenplan("stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
-  nachrichten("nachrichten.php", "Nachrichten", false, AppSupportStatus.supported),
   vertretungsplan("vertretungsplan.php", "Vertretungsplan", false, AppSupportStatus.supported),
-  meinUnterricht("meinunterricht.php", "Mein Unterricht", true, AppSupportStatus.supported),
   kalender("kalender.php", "Kalender", false, AppSupportStatus.supported),
+  nachrichten("nachrichten.php", "Nachrichten", false, AppSupportStatus.supported),
+  meinUnterricht("meinunterricht.php", "Mein Unterricht", true, AppSupportStatus.supported),
+  stundenplan("stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
   dateispeicher("dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
 
   final String php;
