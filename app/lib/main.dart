@@ -6,7 +6,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:sph_plan/login.dart';
+import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -118,7 +118,7 @@ class App extends StatelessWidget {
                         theme: theme.lightTheme,
                         darkTheme: theme.darkTheme,
                         themeMode: mode,
-                        home: const LoginScreen(),
+                        home: const StartupScreen(),
                       );
                     }
                 );

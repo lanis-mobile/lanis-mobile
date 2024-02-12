@@ -29,13 +29,10 @@ enum Status {
   error;
 }
 
-/// All possible steps which need to be fetched.
+/// Collection of steps so we don't have magic strings.
 class Step {
   static String login = "Login";
-  static String substitutions = SPHAppEnum.vertretungsplan.name;
-  static String meinUnterricht = SPHAppEnum.meinUnterricht.name;
-  static String conversations = SPHAppEnum.nachrichten.name;
-  static String calendar = SPHAppEnum.kalender.name;
+  // The rest is now dynamic, gotten by [client.loadApps]
 }
 
 /// More advanced class, so we can have a tidy and clean progress indicator of the steps.
@@ -70,14 +67,14 @@ class Applet {
   Applet({required this.fetcher, required this.step, required this.finishMessage});
 }
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class StartupScreen extends StatefulWidget {
+  const StartupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<StartupScreen> createState() => _StartupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _StartupScreenState extends State<StartupScreen> {
   ValueNotifier<String> loadingMessage = ValueNotifier<String>(Message.initialise);
 
   final List<Applet> appletFetchers = [];
@@ -96,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((_) async {
-      client.prepareFetchers();
+      client.initialiseLoadApps();
       await client.prepareDio();
       Navigator.pushReplacement(
         context,
@@ -146,9 +143,8 @@ class _LoginScreenState extends State<LoginScreen> {
     progress.set(Step.login, Status.loading);
     try {
       await client.login();
-      progress.set(Step.login, Status.finished);
-
       client.initialiseLoadApps();
+      progress.set(Step.login, Status.finished);
 
       loadingMessage.value = Message.load;
 
@@ -223,37 +219,30 @@ class _LoginScreenState extends State<LoginScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // We need to load this first so that everything works.
       client.loadFromStorage().then((_) {
-        print("aaa ${client.loadApps}");
         // Show welcome screen nearly instantly.
         if (client.username == "") {
           performLogin();
           return;
         }
 
-        client.prepareFetchers();
         finishedLoadingStorage.value = true;
 
-        if (client.loadApps != null) {
-          if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.vertretungsplan) && client.loadApps![SPHAppEnum.vertretungsplan]?.shouldFetch == true) {
-            steps.add(Step.substitutions);
-            appletFetchers.add(Applet(fetcher: client.substitutionsFetcher, step: Step.substitutions, finishMessage: "Vertretungen wurden geladen!"));
-            errors.addEntries([MapEntry(Step.substitutions, null)]);
-          }
-          if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.meinUnterricht) && client.loadApps![SPHAppEnum.meinUnterricht]?.shouldFetch == true)  {
-            steps.add(Step.meinUnterricht);
-            appletFetchers.add(Applet(fetcher: client.meinUnterrichtFetcher, step: Step.meinUnterricht, finishMessage: "Mein Unterricht wurde geladen!"));
-            errors.addEntries([MapEntry(Step.meinUnterricht, null)]);
-          }
-          if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.nachrichten) && client.loadApps![SPHAppEnum.nachrichten]?.shouldFetch == true) {
-            steps.add(Step.conversations);
-            appletFetchers.add(Applet(fetcher: client.invisibleConversationsFetcher, step: Step.conversations, finishMessage: "Nachrichten wurden geladen! (1/2)"));
-            appletFetchers.add(Applet(fetcher: client.visibleConversationsFetcher, step: Step.conversations, finishMessage: "Nachrichten wurden geladen! (2/2)"));
-            errors.addEntries([MapEntry(Step.conversations, null)]);
-          }
-          if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.kalender) && client.loadApps![SPHAppEnum.kalender]?.shouldFetch == true) {
-            steps.add(Step.calendar);
-            appletFetchers.add(Applet(fetcher: client.calendarFetcher, step: Step.calendar, finishMessage: "Kalender wurde geladen!"));
-            errors.addEntries([MapEntry(Step.calendar, null)]);
+        if (client.applets != null) {
+          for (final loadApp in client.applets!.keys) {
+            final currentLoadApp = client.applets![loadApp];
+
+            if (currentLoadApp!.shouldFetch == true) {
+              steps.add(currentLoadApp.applet.fullName);
+              for (final fetcher in currentLoadApp.fetchers) {
+                appletFetchers.add(Applet(
+                  fetcher: fetcher,
+                  step: currentLoadApp.applet.fullName,
+                  finishMessage: "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"
+                ));
+              }
+            }
+
+            errors.addEntries([MapEntry(currentLoadApp.applet.fullName, null)]);
           }
         }
 

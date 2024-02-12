@@ -75,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ],
-          if (client.loadApps!.isNotEmpty) ...[
+          if (client.applets!.isNotEmpty) ...[
             ListTile(
               leading: const Icon(Icons.speed),
               title: const Text('Startapps'),

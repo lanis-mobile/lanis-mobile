@@ -22,7 +22,7 @@ import 'package:sph_plan/themes.dart';
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
 import '../shared/shared_functions.dart';
-import '../shared/types/load_app.dart';
+import '../shared/types/startup_app.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
@@ -48,7 +48,7 @@ class SPHclient {
   String schoolName = "";
   String schoolImage = "";
   String schoolLogo = "";
-  Map<SPHAppEnum, LoadApp>? loadApps;
+  Map<SPHAppEnum, LoadApp>? applets;
   int updateAppsIntervall = 15;
   dynamic userData = {};
   List<dynamic> supportedApps = [];
@@ -63,48 +63,6 @@ class SPHclient {
   late MeinUnterrichtParser meinUnterricht = MeinUnterrichtParser(dio, this);
   late ConversationsParser conversations = ConversationsParser(dio, this);
   late TimetableParser timetable = TimetableParser(dio, this);
-
-  SubstitutionsFetcher? substitutionsFetcher;
-  MeinUnterrichtFetcher? meinUnterrichtFetcher;
-  VisibleConversationsFetcher? visibleConversationsFetcher;
-  InvisibleConversationsFetcher? invisibleConversationsFetcher;
-  CalendarFetcher? calendarFetcher;
-
-  void prepareFetchers() {
-    if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.vertretungsplan) && client.loadApps![SPHAppEnum.vertretungsplan]?.shouldFetch == true) {
-      substitutionsFetcher ??= SubstitutionsFetcher(Duration(minutes: updateAppsIntervall));
-    } else {
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-        substitutionsFetcher ??= SubstitutionsFetcher(null);
-      }
-    }
-
-    if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.meinUnterricht) && client.loadApps![SPHAppEnum.meinUnterricht]?.shouldFetch == true)  {
-      meinUnterrichtFetcher ??= MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall));
-    } else {
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-        meinUnterrichtFetcher ??= MeinUnterrichtFetcher(null);
-      }
-    }
-
-    if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.nachrichten) && client.loadApps![SPHAppEnum.nachrichten]?.shouldFetch == true) {
-      visibleConversationsFetcher ??= VisibleConversationsFetcher(Duration(minutes: updateAppsIntervall));
-      invisibleConversationsFetcher ??= InvisibleConversationsFetcher(Duration(minutes: updateAppsIntervall));
-    } else {
-      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-        visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
-        invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
-      }
-    }
-
-    if (client.loadApps != null && client.loadApps!.containsKey(SPHAppEnum.kalender) && client.loadApps![SPHAppEnum.kalender]?.shouldFetch == true) {
-      calendarFetcher ??= CalendarFetcher(null);
-    } else {
-      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-        calendarFetcher ??= CalendarFetcher(null);
-      }
-    }
-  }
 
   Future<void> prepareDio() async {
     jar = CookieJar();
@@ -130,21 +88,23 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
+    updateAppsIntervall = int.parse((await globalStorage.read(key: StorageKey.settingsUpdateAppsIntervall)));
+
     final String loadAppsString = await globalStorage.read(key: StorageKey.settingsLoadApps);
     if (loadAppsString != "") {
+      applets = {};
       Map<String, dynamic> decodedLoadApps = json.decode(loadAppsString);
       for(final loadApp in decodedLoadApps.keys) {
-        loadApps?.addEntries([
+        applets!.addEntries([
           MapEntry(
               SPHAppEnum.fromJson(loadApp),
-              LoadApp.fromJson(decodedLoadApps[loadApp]!)
+              LoadApp.fromJson(decodedLoadApps[loadApp]!, Duration(minutes: updateAppsIntervall))
           )
         ]);
       }
     } else {
-      loadApps = null;
+      applets = null;
     }
-    updateAppsIntervall = int.parse((await globalStorage.read(key: StorageKey.settingsUpdateAppsIntervall)));
 
     username = await globalStorage.read(key: StorageKey.userUsername);
     password = await globalStorage.read(key: StorageKey.userPassword, secure: true);
@@ -164,10 +124,10 @@ class SPHclient {
   }
 
   void initialiseLoadApps() {
-    if (client.loadApps == null) {
-      client.loadApps = {};
+    if (client.applets == null) {
+      client.applets = {};
       if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-        client.loadApps!.addEntries([
+        client.applets!.addEntries([
           MapEntry(
               SPHAppEnum.vertretungsplan,
               LoadApp(
@@ -175,12 +135,11 @@ class SPHclient {
                   shouldFetch: true,
                   fetchers: [
                     SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
-                  ],
-                  supported: true))
+                  ]))
         ]);
       }
       if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-        client.loadApps!.addEntries([
+        client.applets!.addEntries([
           MapEntry(
               SPHAppEnum.nachrichten,
               LoadApp(
@@ -189,12 +148,11 @@ class SPHclient {
                   fetchers: [
                     InvisibleConversationsFetcher(Duration(minutes: updateAppsIntervall)),
                     VisibleConversationsFetcher(Duration(minutes: updateAppsIntervall))
-                  ],
-                  supported: true))
+                  ]))
         ]);
       }
       if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-        client.loadApps!.addEntries([
+        client.applets!.addEntries([
           MapEntry(
               SPHAppEnum.meinUnterricht,
               LoadApp(
@@ -202,12 +160,11 @@ class SPHclient {
                   shouldFetch: false,
                   fetchers: [
                     MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall)),
-                  ],
-                  supported: true))
+                  ]))
         ]);
       }
       if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-        client.loadApps!.addEntries([
+        client.applets!.addEntries([
           MapEntry(
               SPHAppEnum.kalender,
               LoadApp(
@@ -215,8 +172,7 @@ class SPHclient {
                   shouldFetch: false,
                   fetchers: [
                     CalendarFetcher(null),
-                  ],
-                  supported: true))
+                  ]))
         ]);
       }
     }
@@ -490,7 +446,7 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
-    client.loadApps = null;
+    client.applets = null;
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);

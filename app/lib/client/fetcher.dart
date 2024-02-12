@@ -24,14 +24,6 @@ class FetcherResponse {
 }
 
 abstract class Fetcher {
-  static Map<String, Function> fetchers = {
-    "SubstitutionsFetcher": (Duration validCacheDuration) => SubstitutionsFetcher(validCacheDuration),
-    "MeinUnterrichtFetcher": (Duration validCacheDuration) => MeinUnterrichtFetcher(validCacheDuration),
-    "VisibleConversationsFetcher": (Duration validCacheDuration) => VisibleConversationsFetcher(validCacheDuration),
-    "InvisibleConversationsFetcher": (Duration validCacheDuration) => InvisibleConversationsFetcher(validCacheDuration),
-    "CalendarFetcher": (Duration validCacheDuration) => CalendarFetcher(null),
-  };
-
   final BehaviorSubject<FetcherResponse> _controller = BehaviorSubject();
   late Timer timer;
   late Duration? validCacheDuration;
@@ -78,6 +70,14 @@ abstract class Fetcher {
       }, test: (e) => e is LanisException);
     }
   }
+
+  static Map<String, Function> fetchers = {
+    "SubstitutionsFetcher": (Duration validCacheDuration) => SubstitutionsFetcher(validCacheDuration),
+    "MeinUnterrichtFetcher": (Duration validCacheDuration) => MeinUnterrichtFetcher(validCacheDuration),
+    "VisibleConversationsFetcher": (Duration validCacheDuration) => VisibleConversationsFetcher(validCacheDuration),
+    "InvisibleConversationsFetcher": (Duration validCacheDuration) => InvisibleConversationsFetcher(validCacheDuration),
+    "CalendarFetcher": (Duration validCacheDuration) => CalendarFetcher(null),
+  };
 
   String toJson() => runtimeType.toString();
   static Fetcher fromJson(String json, Duration validCacheDuration) {

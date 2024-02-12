@@ -3,6 +3,7 @@ import 'package:sph_plan/view/conversations/detailed_conversation.dart';
 
 import '../../client/client.dart';
 import '../../client/fetcher.dart';
+import '../../shared/apps.dart';
 import '../../shared/errorView.dart';
 
 class ConversationsAnsicht extends StatefulWidget {
@@ -14,6 +15,9 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     with TickerProviderStateMixin {
+  final InvisibleConversationsFetcher invisibleConversationsFetcher = client.applets![SPHAppEnum.nachrichten]!.fetchers[0] as InvisibleConversationsFetcher;
+  final VisibleConversationsFetcher visibleConversationsFetcher = client.applets![SPHAppEnum.nachrichten]!.fetchers[1] as VisibleConversationsFetcher;
+
   static const double padding = 12.0;
 
   final GlobalKey<RefreshIndicatorState> _refreshVisibleKey =
@@ -30,8 +34,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
 
-    client.visibleConversationsFetcher?.fetchData();
-    client.invisibleConversationsFetcher?.fetchData();
+    visibleConversationsFetcher.fetchData();
+    invisibleConversationsFetcher.fetchData();
 
     super.initState();
   }
@@ -197,26 +201,26 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         controller: _tabController,
         children: [
           StreamBuilder(
-              stream: client.visibleConversationsFetcher?.stream,
+              stream: visibleConversationsFetcher.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView(data: snapshot.data?.content, name: "Nachrichten", fetcher: client.visibleConversationsFetcher);
+                  return ErrorView(data: snapshot.data?.content, name: "Nachrichten", fetcher: visibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, client.visibleConversationsFetcher!, _refreshVisibleKey);
+                  return conversationsView(context, snapshot.data?.content, visibleConversationsFetcher, _refreshVisibleKey);
                 }
               }
           ),
           StreamBuilder(
-              stream: client.invisibleConversationsFetcher?.stream,
+              stream: invisibleConversationsFetcher.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView.fromCode(data: snapshot.data?.content, name: "Nachrichten", fetcher: client.invisibleConversationsFetcher);
+                  return ErrorView.fromCode(data: snapshot.data?.content, name: "Nachrichten", fetcher: invisibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, client.invisibleConversationsFetcher!, _refreshInvisibleKey);
+                  return conversationsView(context, snapshot.data?.content, invisibleConversationsFetcher, _refreshInvisibleKey);
                 }
               }
           )

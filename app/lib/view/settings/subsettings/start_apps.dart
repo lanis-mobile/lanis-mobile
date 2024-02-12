@@ -5,7 +5,7 @@ import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/shared/apps.dart';
 
 import '../../../client/storage.dart';
-import '../../../shared/types/load_app.dart';
+import '../../../shared/types/startup_app.dart';
 
 class LoadModeScreen extends StatelessWidget {
   const LoadModeScreen({super.key});
@@ -59,7 +59,7 @@ class _LoadModeElementsState extends State<LoadModeElements> {
 
   @override
   Widget build(BuildContext context) {
-    if (client.loadApps!.isEmpty) {
+    if (client.applets!.isEmpty) {
       return const Column(
           crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -74,9 +74,9 @@ class _LoadModeElementsState extends State<LoadModeElements> {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: client.loadApps!.length,
+          itemCount: client.applets!.length,
             itemBuilder: (context, index) {
-              final LoadApp loadApp = client.loadApps!.values.elementAt(index);
+              final LoadApp loadApp = client.applets!.values.elementAt(index);
               return CheckboxListTile(
                 secondary: Icon(getIcon(loadApp.applet)),
                 subtitle: loadApp.applet == SPHAppEnum.kalender ? const Text("Der Kalender wird nicht neu geladen.") : null,
@@ -90,11 +90,11 @@ class _LoadModeElementsState extends State<LoadModeElements> {
 
                     // To JSON
                     final Map<String, Map<String, dynamic>> jsonLoadApps = {};
-                    for (final applet in client.loadApps!.keys) {
+                    for (final applet in client.applets!.keys) {
                       jsonLoadApps.addEntries([
                         MapEntry(
                             applet.name,
-                            client.loadApps![applet]!.toJson()
+                            client.applets![applet]!.toJson()
                         )
                       ]);
                     }
