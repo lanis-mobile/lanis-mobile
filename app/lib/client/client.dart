@@ -138,6 +138,18 @@ class SPHclient {
                   ]))
         ]);
       }
+      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.kalender,
+              LoadApp(
+                  applet: SPHAppEnum.kalender,
+                  shouldFetch: false,
+                  fetchers: [
+                    CalendarFetcher(null),
+                  ]))
+        ]);
+      }
       if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
         client.applets!.addEntries([
           MapEntry(
@@ -160,18 +172,6 @@ class SPHclient {
                   shouldFetch: false,
                   fetchers: [
                     MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall)),
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.kalender,
-              LoadApp(
-                  applet: SPHAppEnum.kalender,
-                  shouldFetch: false,
-                  fetchers: [
-                    CalendarFetcher(null),
                   ]))
         ]);
       }

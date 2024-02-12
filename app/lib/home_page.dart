@@ -30,6 +30,13 @@ enum Feature {
   final String? title;
 }
 
+class Helper {
+  final Icon icon;
+  final Icon selectedIcon;
+
+  Helper({required this.icon, required this.selectedIcon});
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -41,13 +48,16 @@ class _HomePageState extends State<HomePage> {
   late final Feature defaultFeature;
   late Feature selectedFeature;
 
-  // Only for bottom navigation bar and showing no supported applets screen.
-  final List<int?> bottomNavbarItems = [];
-  int supportedIndex = 0;
-
   // We don't want firstname.lastname
   final String formattedUsername =
       "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
+
+  Map<SPHAppEnum, Helper> appletHelpers = {
+    SPHAppEnum.vertretungsplan: Helper(icon: const Icon(Icons.group), selectedIcon: const Icon(Icons.group_outlined)),
+    SPHAppEnum.kalender: Helper(icon: const Icon(Icons.calendar_today), selectedIcon: const Icon(Icons.calendar_today_outlined)),
+    SPHAppEnum.nachrichten: Helper(icon: const Icon(Icons.forum), selectedIcon: const Icon(Icons.forum_outlined)),
+    SPHAppEnum.meinUnterricht: Helper(icon: const Icon(Icons.school), selectedIcon: const Icon(Icons.school_outlined)),
+  };
 
   static final List<Widget> featureScreens = <Widget>[
     const VertretungsplanAnsicht(),
@@ -139,38 +149,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   NavigationBar navigationBar() {
+    List<NavigationDestination> navigationDestinations = [];
+    List<int> bottomNavItems = [];
+
+    int appletIndex = 0;
+    for (final app in client.applets!.keys) {
+      navigationDestinations.add(NavigationDestination(
+          icon: appletHelpers[app]!.icon,
+          selectedIcon: appletHelpers[app]!.selectedIcon,
+          label: app.fullName
+      ));
+
+      bottomNavItems.add(appletIndex);
+      appletIndex++;
+    }
+
     return NavigationBar(
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       selectedIndex:
-      bottomNavbarItems[selectedFeature.index]!,
+      bottomNavItems[selectedFeature.index],
       onDestinationSelected: (index) => openFeature(Feature
-          .values[bottomNavbarItems.indexOf(index)]),
-      destinations: [
-        if (client.doesSupportFeature(SPHAppEnum.vertretungsplan))
-          const NavigationDestination(
-            icon: Icon(Icons.group),
-            selectedIcon: Icon(Icons.group_outlined),
-            label: 'Vertretungen',
-          ),
-        if (client.doesSupportFeature(SPHAppEnum.kalender))
-          const NavigationDestination(
-            icon: Icon(Icons.calendar_today),
-            selectedIcon: Icon(Icons.calendar_today_outlined),
-            label: 'Kalender',
-          ),
-        if (client.doesSupportFeature(SPHAppEnum.nachrichten))
-          const NavigationDestination(
-            icon: Icon(Icons.forum),
-            selectedIcon: Icon(Icons.forum_outlined),
-            label: 'Nachrichten',
-          ),
-        if (client.doesSupportFeature(SPHAppEnum.meinUnterricht))
-          const NavigationDestination(
-            icon: Icon(Icons.school),
-            selectedIcon: Icon(Icons.school_outlined),
-            label: 'Mein Unterricht',
-          ),
-      ],
+          .values[bottomNavItems.indexOf(index)]),
+      destinations: navigationDestinations
     );
   }
 
@@ -180,6 +180,16 @@ class _HomePageState extends State<HomePage> {
     Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
     final Color textColor =
     imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+
+    List<NavigationDrawerDestination> navigationDrawerDestination = [];
+
+    for (final app in client.applets!.keys) {
+      navigationDrawerDestination.add(NavigationDrawerDestination(
+          icon: appletHelpers[app]!.icon,
+          selectedIcon: appletHelpers[app]!.selectedIcon,
+          label: Text(app.fullName)
+      ));
+    }
 
     return NavigationDrawer(
       onDestinationSelected: onNavigationItemTapped,
@@ -233,31 +243,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        NavigationDrawerDestination(
-          enabled: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
-          icon: const Icon(Icons.group),
-          selectedIcon: const Icon(Icons.group_outlined),
-          label: const Text('Vertretungsplan'),
-        ),
-        NavigationDrawerDestination(
-          enabled: client.doesSupportFeature(SPHAppEnum.kalender),
-          icon: const Icon(Icons.calendar_today),
-          selectedIcon: const Icon(Icons.calendar_today_outlined),
-          label: const Text('Kalender'),
-        ),
-        NavigationDrawerDestination(
-          enabled:
-          client.doesSupportFeature(SPHAppEnum.nachrichten),
-          icon: const Icon(Icons.forum),
-          selectedIcon: const Icon(Icons.forum_outlined),
-          label: const Text('Nachrichten'),
-        ),
-        NavigationDrawerDestination(
-          enabled: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
-          icon: const Icon(Icons.school),
-          selectedIcon: const Icon(Icons.school_outlined),
-          label: const Text('Mein Unterricht'),
-        ),
+        ...navigationDrawerDestination,
         const NavigationDrawerDestination(
           icon: Icon(Icons.open_in_new),
           label: Text('Im Browser öffnen'),
@@ -285,22 +271,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     defaultFeature = getDefaultFeature();
     openFeature(defaultFeature);
-
-    // Only need to calculate once
-    for (var supported in [
-      client.doesSupportFeature(SPHAppEnum.vertretungsplan),
-      client.doesSupportFeature(SPHAppEnum.kalender),
-      client.doesSupportFeature(SPHAppEnum.nachrichten),
-      client.doesSupportFeature(SPHAppEnum.meinUnterricht)
-    ]) {
-      if (supported) {
-        bottomNavbarItems.add(supportedIndex);
-        supportedIndex += 1;
-      } else {
-        bottomNavbarItems.add(null);
-      }
-    }
-
     super.initState();
   }
 
@@ -332,8 +302,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ) : null,
             ),
-            body: supportedIndex != 0 ? featureScreens[selectedFeature.index] : noAppsSupported(),
-            bottomNavigationBar: supportedIndex > 1 ? navigationBar() : null,
+            body: client.applets!.isNotEmpty ? featureScreens[selectedFeature.index] : noAppsSupported(),
+            bottomNavigationBar: client.applets!.length > 1 ? navigationBar() : null,
             drawer: navigationDrawer()
           );
         }
