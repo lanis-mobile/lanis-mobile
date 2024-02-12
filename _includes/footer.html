@@ -1,0 +1,12 @@
+<footer class="footer">
+  <div class="container">
+    <div class="footer__container">
+      <p class="footer__love">{{ site.data.strings.footer.copyright }}</p>
+      <ul class="footer__links">
+        {% for link in site.data.strings.footer.links %}
+        <li class="footer__link"><a href="{{ link.url }}" target="{{ link.target }}">{{ link.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</footer>
