@@ -445,15 +445,17 @@ class _UploadScreenState extends State<UploadScreen> {
                   Visibility(
                     visible: snapshot.data["additional_text"] != null,
                     child: requirementsInfo([
-                      ListTile(
-                        title: const Text(
+                      if (snapshot.data["additional_text"] != null) ...[
+                        ListTile(
+                          title: const Text(
                             "Zusätzliche Informationen",
+                          ),
+                          subtitle: Text(
+                              snapshot.data["additional_text"] ?? ""
+                          ),
+                          leading: const Icon(Icons.info),
                         ),
-                        subtitle: Text(
-                            snapshot.data["additional_text"]
-                        ),
-                        leading: const Icon(Icons.info),
-                      ),
+                      ]
                     ]),
                   ),
                   if (snapshot.data["public_files"].length != 0) ...[
