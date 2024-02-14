@@ -48,6 +48,8 @@ class _HomePageState extends State<HomePage> {
   late final Feature defaultFeature;
   late Feature selectedFeature;
 
+  final List<int?> supportedFeatures = [];
+
   // We don't want firstname.lastname
   final String formattedUsername =
       "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
@@ -150,31 +152,22 @@ class _HomePageState extends State<HomePage> {
 
   NavigationBar navigationBar() {
     List<NavigationDestination> navigationDestinations = [];
-    List<int?> bottomNavItems = [];
 
-    int supportedIndex = 0;
-    for (final applet in SPHAppEnum.values) {
-      if (applet.status == AppSupportStatus.supported) {
-        if (client.doesSupportFeature(applet)) {
-          navigationDestinations.add(NavigationDestination(
-              icon: appletHelpers[applet]!.icon,
-              selectedIcon: appletHelpers[applet]!.selectedIcon,
-              label: applet.fullName
-          ));
+    for (final i in supportedFeatures) {
+      final applet = SPHAppEnum.values[supportedFeatures.indexOf(i)];
 
-          bottomNavItems.add(supportedIndex);
-          supportedIndex++;
-        } else {
-          bottomNavItems.add(null);
-        }
-      }
+      navigationDestinations.add(NavigationDestination(
+          icon: appletHelpers[applet]!.icon,
+          selectedIcon: appletHelpers[applet]!.selectedIcon,
+          label: applet.fullName
+      ));
     }
 
     return NavigationBar(
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      selectedIndex: bottomNavItems[selectedFeature.index]!,
+      selectedIndex: supportedFeatures[selectedFeature.index]!,
       onDestinationSelected: (index) => openFeature(Feature
-          .values[bottomNavItems.indexOf(index)]),
+          .values[supportedFeatures.indexOf(index)]),
       destinations: navigationDestinations
     );
   }
@@ -188,17 +181,19 @@ class _HomePageState extends State<HomePage> {
 
     List<NavigationDrawerDestination> navigationDrawerDestination = [];
 
-    for (final app in client.applets!.keys) {
+    for (final i in supportedFeatures) {
+      final applet = SPHAppEnum.values[supportedFeatures.indexOf(i)];
+
       navigationDrawerDestination.add(NavigationDrawerDestination(
-          icon: appletHelpers[app]!.icon,
-          selectedIcon: appletHelpers[app]!.selectedIcon,
-          label: Text(app.fullName)
+          icon: appletHelpers[applet]!.icon,
+          selectedIcon: appletHelpers[applet]!.selectedIcon,
+          label: Text(applet.fullName)
       ));
     }
 
     return NavigationDrawer(
       onDestinationSelected: onNavigationItemTapped,
-      selectedIndex: selectedFeature.index,
+      selectedIndex: supportedFeatures.indexOf(selectedFeature.index),
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
@@ -276,6 +271,19 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     defaultFeature = getDefaultFeature();
     openFeature(defaultFeature);
+
+    int supportedIndex = 0;
+    for (final applet in SPHAppEnum.values) {
+      if (applet.status == AppSupportStatus.supported) {
+        if (client.doesSupportFeature(applet)) {
+          supportedFeatures.add(supportedIndex);
+          supportedIndex++;
+        } else {
+          supportedFeatures.add(null);
+        }
+      }
+    }
+
     super.initState();
   }
 
@@ -308,7 +316,7 @@ class _HomePageState extends State<HomePage> {
               ) : null,
             ),
             body: client.applets!.isNotEmpty ? featureScreens[selectedFeature.index] : noAppsSupported(),
-            bottomNavigationBar: client.applets!.length > 1 ? navigationBar() : null,
+            bottomNavigationBar: client.applets!.length > 2 ? navigationBar() : null,
             drawer: navigationDrawer()
           );
         }
