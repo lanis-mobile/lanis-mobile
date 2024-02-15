@@ -273,8 +273,26 @@ class _StartupScreenState extends State<StartupScreen> {
         ],
       );
     } else {
-      return Image.file(
-        File(client.schoolLogo),
+      //invert image if theme is dark mode
+      //https://stackoverflow.com/questions/56107197/how-to-invert-image-color-in-flutter
+      return
+        ColorFiltered(
+          colorFilter: Theme.of(context).brightness == Brightness.dark
+              ? const ColorFilter.matrix(<double>[
+            -1.0, 0.0, 0.0, 0.0, 255.0, //
+            0.0, -1.0, 0.0, 0.0, 255.0, //
+            0.0, 0.0, -1.0, 0.0, 255.0, //
+            0.0, 0.0, 0.0, 1.0, 0.0, //
+          ])
+              : const ColorFilter.matrix(<double>[
+            1.0, 0.0, 0.0, 0.0, 0.0, //
+            0.0, 1.0, 0.0, 0.0, 0.0, //
+            0.0, 0.0, 1.0, 0.0, 0.0, //
+            0.0, 0.0, 0.0, 1.0, 0.0, //
+          ]),
+          child: Image.file(
+            File(client.schoolLogo),
+        ),
       );
     }
   }
