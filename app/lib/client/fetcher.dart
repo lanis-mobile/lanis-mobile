@@ -71,6 +71,10 @@ abstract class Fetcher {
     }
   }
 
+  String toJson() => runtimeType.toString();
+
+  /// [fromJson] requires this for easy initialisation.
+  /// This needs to be expanded when more fetchers will be added.
   static Map<String, Function> fetchers = {
     "SubstitutionsFetcher": (Duration validCacheDuration) => SubstitutionsFetcher(validCacheDuration),
     "MeinUnterrichtFetcher": (Duration validCacheDuration) => MeinUnterrichtFetcher(validCacheDuration),
@@ -79,7 +83,8 @@ abstract class Fetcher {
     "CalendarFetcher": (Duration validCacheDuration) => CalendarFetcher(null),
   };
 
-  String toJson() => runtimeType.toString();
+  /// Return a specific instance from the given string.
+  /// If an ArgumentError is thrown then something is very wrong.
   static Fetcher fromJson(String json, Duration validCacheDuration) {
     if (!fetchers.containsKey(json)) {
       throw ArgumentError();

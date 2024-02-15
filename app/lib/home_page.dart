@@ -292,6 +292,7 @@ class _HomePageState extends State<HomePage> {
       destinations: barDestinations,
       selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
       onDestinationSelected: (int index) => openDestination(indexNavbarTranslationLayer.indexOf(index), false),
+      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
     );
   }
 

@@ -94,6 +94,9 @@ class _StartupScreenState extends State<StartupScreen> {
     ).then((_) async {
       client.initialiseLoadApps();
       await client.prepareDio();
+
+      // Context should be mounted
+      // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),);

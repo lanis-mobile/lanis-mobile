@@ -7,7 +7,7 @@ enum SPHAppEnum {
   dateispeicher("dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
 
   final String php;
-  final String fullName;
+  final String fullName; // The "humanised" form of .name, prefer to use this than magic strings.
   final bool onlyStudents;
   final AppSupportStatus status;
 

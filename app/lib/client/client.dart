@@ -80,17 +80,17 @@ class SPHclient {
     final String loadAppsString = await globalStorage.read(key: StorageKey.settingsLoadApps);
     if (loadAppsString != "") {
       applets = {};
-      Map<String, dynamic> decodedLoadApps = json.decode(loadAppsString);
-      for(final loadApp in decodedLoadApps.keys) {
+      Map<String, dynamic> mappedLoadApps = json.decode(loadAppsString);
+      for(final loadApp in mappedLoadApps.keys) {
         applets!.addEntries([
           MapEntry(
               SPHAppEnum.fromJson(loadApp),
-              LoadApp.fromJson(decodedLoadApps[loadApp]!, Duration(minutes: updateAppsIntervall))
+              LoadApp.fromJson(mappedLoadApps[loadApp]!, Duration(minutes: updateAppsIntervall))
           )
         ]);
       }
     } else {
-      applets = null;
+      applets = null; // wasn't previously initialised.
     }
 
     username = await globalStorage.read(key: StorageKey.userUsername);
@@ -110,6 +110,10 @@ class SPHclient {
     return;
   }
 
+  /// Initialises [client.applets] if [client.loadFromStorage] set it to null, used to make the code more dynamic.
+  /// This step occurs right after login.
+  ///
+  /// New fetchers should be added here.
   void initialiseLoadApps() {
     if (client.applets == null) {
       client.applets = {};
