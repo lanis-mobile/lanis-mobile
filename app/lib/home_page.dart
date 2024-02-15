@@ -103,9 +103,7 @@ class _HomePageState extends State<HomePage> {
           openLanisInBrowser();
           break;
         case (Feature.moodleBrowser):
-          launchUrl(Uri.parse("https://mo${client.schoolID}.schule.hessen.de"));
-          //todo change to .schulportal.hessen.de when changes apply to SPH servers
-          //https://info.schulportal.hessen.de/veraenderungen-bei-schulmoodle-und-schulmahara-ab-08-01-2024/
+          launchUrl(Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"));
           break;
         case (Feature.settings):
           Navigator.push(
