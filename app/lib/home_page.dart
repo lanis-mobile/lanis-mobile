@@ -22,11 +22,12 @@ class Destination {
   final bool isSupported;
   final bool enableBottomNavigation;
   final bool enableDrawer;
+  final bool addDivider;
   final Function? action;
   final Widget? body;
 
   //Either a body or an action has to be provided!
-  Destination({this.body, this.action, required this.enableBottomNavigation, required this.enableDrawer, required this.label, required this.isSupported, required this.icon, required this.selectedIcon});
+  Destination({this.body, this.action, this.addDivider = false, required this.enableBottomNavigation, required this.enableDrawer, required this.label, required this.isSupported, required this.icon, required this.selectedIcon});
 }
 
 class HomePage extends StatefulWidget {
@@ -108,6 +109,7 @@ class _HomePageState extends State<HomePage> {
       isSupported: true,
       enableBottomNavigation: false,
       enableDrawer: true,
+      addDivider: true,
       action: (context) => Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -183,10 +185,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   NavigationDrawer navDrawer(context) {
-    List<NavigationDrawerDestination> drawerDestinations = [];
+    List<Widget> drawerDestinations = [];
 
     for (var destination in destinations) {
       if (destination.enableDrawer) {
+        if (destination.addDivider) {
+          drawerDestinations.add(const Divider());
+        }
         drawerDestinations.add(NavigationDrawerDestination(
           label: Text(destination.label),
           icon: destination.icon,
