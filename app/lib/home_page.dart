@@ -15,26 +15,18 @@ import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum Feature {
-  substitutions("Vertretungsplan"),
-  calendar("Kalender"),
-  conversations("Nachrichten"),
-  lessons("Mein Unterricht"),
-  lanisBrowser(null),
-  moodleBrowser(null),
-  settings(null),
-  reportBug("Fehlerbericht senden");
-
-  const Feature(this.title);
-
-  final String? title;
-}
-
-class Helper {
+class Destination {
+  final String label;
   final Icon icon;
   final Icon selectedIcon;
+  final bool isSupported;
+  final bool enableBottomNavigation;
+  final bool enableDrawer;
+  final Function? action;
+  final Widget? body;
 
-  Helper({required this.icon, required this.selectedIcon});
+  //Either a body or an action has to be provided!
+  Destination({this.body, this.action, required this.enableBottomNavigation, required this.enableDrawer, required this.label, required this.isSupported, required this.icon, required this.selectedIcon});
 }
 
 class HomePage extends StatefulWidget {
@@ -45,45 +37,115 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final Feature defaultFeature;
-  late Feature selectedFeature;
+  late int selectedDestinationDrawer;
 
-  final List<int?> supportedFeatures = [];
 
-  // We don't want firstname.lastname
-  final String formattedUsername =
-      "${client.userData["nachname"] ?? ""}, ${client.userData["vorname"] ?? ""}";
-
-  Map<SPHAppEnum, Helper> appletHelpers = {
-    SPHAppEnum.vertretungsplan: Helper(icon: const Icon(Icons.group), selectedIcon: const Icon(Icons.group_outlined)),
-    SPHAppEnum.kalender: Helper(icon: const Icon(Icons.calendar_today), selectedIcon: const Icon(Icons.calendar_today_outlined)),
-    SPHAppEnum.nachrichten: Helper(icon: const Icon(Icons.forum), selectedIcon: const Icon(Icons.forum_outlined)),
-    SPHAppEnum.meinUnterricht: Helper(icon: const Icon(Icons.school), selectedIcon: const Icon(Icons.school_outlined)),
-  };
-
-  static final List<Widget> featureScreens = <Widget>[
-    const VertretungsplanAnsicht(),
-    const CalendarAnsicht(),
-    const ConversationsAnsicht(),
-    const MeinUnterrichtAnsicht(),
+  ///The UI is build dynamically based on this list.
+  ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
+  List<Destination> destinations = [
+    Destination(
+      label: "Vertretungsplan",
+      icon: const Icon(Icons.group),
+      selectedIcon: const Icon(Icons.group_outlined),
+      isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
+      enableBottomNavigation: true,
+      enableDrawer: true,
+      body: const VertretungsplanAnsicht()
+    ),
+    Destination(
+      label: "Kalender",
+      icon: const Icon(Icons.calendar_today),
+      selectedIcon: const Icon(Icons.calendar_today_outlined),
+      isSupported: client.doesSupportFeature(SPHAppEnum.kalender),
+      enableBottomNavigation: true,
+      enableDrawer: true,
+      body: const CalendarAnsicht()
+    ),
+    Destination(
+      label: "Nachrichten",
+      icon: const Icon(Icons.forum),
+      selectedIcon: const Icon(Icons.forum_outlined),
+      isSupported: client.doesSupportFeature(SPHAppEnum.nachrichten),
+      enableBottomNavigation: true,
+      enableDrawer: true,
+      body: const ConversationsAnsicht()
+    ),
+    Destination(
+      label: "Mein Unterricht",
+      icon: const Icon(Icons.school),
+      selectedIcon: const Icon(Icons.school_outlined),
+      isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
+      enableBottomNavigation: true,
+      enableDrawer: true,
+      body: const MeinUnterrichtAnsicht()
+    ),
+    Destination(
+      label: "Lanis im Browser öffnen",
+      icon: const Icon(Icons.open_in_new),
+      selectedIcon: const Icon(Icons.open_in_new),
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      action: (_context) {
+        client.getLoginURL().then((response) {
+          launchUrl(Uri.parse(response));
+        });
+      }
+    ),
+    Destination(
+      label: "Moodle Login öffnen",
+      icon: const Icon(Icons.open_in_new),
+      selectedIcon: const Icon(Icons.open_in_new),
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      action: (_context) => launchUrl(Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"))
+    ),
+    Destination(
+      label: "Einstellungen",
+      icon: const Icon(Icons.settings),
+      selectedIcon: const Icon(Icons.settings),
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      action: (context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      )
+    ),
+    Destination(
+      label: "Fehlerbericht senden",
+      icon: const Icon(Icons.bug_report),
+      selectedIcon: const Icon(Icons.bug_report_outlined),
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      action: (context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const BugReportScreen())),
+    ),
   ];
 
-  Feature getDefaultFeature() {
-    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-      return Feature.substitutions;
-    } else if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-      return Feature.calendar;
-    } else if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-      return Feature.lessons;
-    } else {
-      return Feature.conversations;
+  void setDefaultDestinations() {
+    for (var destination in destinations) {
+      if (destination.isSupported && destination.enableBottomNavigation) {
+        selectedDestinationDrawer = destinations.indexOf(destination);
+        break;
+      }
     }
   }
 
-  void openLanisInBrowser() {
+  @override
+  void initState() {
+    super.initState();
+    setDefaultDestinations();
+  }
+
+  void openLanisInBrowser(BuildContext? context) {
     client.getLoginURL().then((response) {
       launchUrl(Uri.parse(response));
     }).catchError((ex) {
+      if (context == null) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(ex.cause),
         duration: const Duration(seconds: 1),
@@ -95,46 +157,7 @@ class _HomePageState extends State<HomePage> {
     }, test: (e) => e is LanisException);
   }
 
-  // Open specified feature without popping the navigator.
-  void openFeature(Feature currentFeature) {
-    setState(() {
-      switch (currentFeature) {
-        case (Feature.lanisBrowser):
-          openLanisInBrowser();
-          break;
-        case (Feature.moodleBrowser):
-          launchUrl(Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"));
-          break;
-        case (Feature.settings):
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsScreen()),
-          ).then((result) {
-            openFeature(selectedFeature);
-          });
-          break;
-        case (Feature.reportBug):
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const BugReportScreen()),
-          ).then((result) {
-            openFeature(selectedFeature);
-          });
-          break;
-        default:
-          selectedFeature = currentFeature;
-          break;
-      }
-    });
-  }
-
-  // Only used by NavigationDrawer
-  void onNavigationItemTapped(int index) {
-    Navigator.pop(context);
-    openFeature(Feature.values[index]);
-  }
-
-  Center noAppsSupported() {
+  Widget noAppsSupported() {
     return Center(
       // In case no feature is supported at all just show an open in browser button.
       child: Column(
@@ -142,147 +165,129 @@ class _HomePageState extends State<HomePage> {
         children: [
           const Icon(Icons.disabled_by_default_outlined, size: 150,),
           const Padding(padding: EdgeInsets.all(8), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
-          ElevatedButton(onPressed: openLanisInBrowser, child: const Text("Im Browser öffnen"))
+          ElevatedButton(onPressed: () => openLanisInBrowser(context), child: const Text("Im Browser öffnen"))
         ],
       ),
     );
   }
 
-  NavigationBar navigationBar() {
-    List<NavigationDestination> navigationDestinations = [];
-
-    for (final i in supportedFeatures) {
-      final applet = SPHAppEnum.values[supportedFeatures.indexOf(i)];
-
-      navigationDestinations.add(NavigationDestination(
-          icon: appletHelpers[applet]!.icon,
-          selectedIcon: appletHelpers[applet]!.selectedIcon,
-          label: applet.fullName
-      ));
-    }
-
-    return NavigationBar(
-      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      selectedIndex: supportedFeatures[selectedFeature.index]!,
-      onDestinationSelected: (index) => openFeature(Feature
-          .values[supportedFeatures.indexOf(index)]),
-      destinations: navigationDestinations
-    );
+  void openDestination(int index, bool fromDrawer) {
+      if (destinations[index].action != null) {
+        destinations[index].action!(context);
+      } else {
+        setState(() {
+          selectedDestinationDrawer = index;
+          if (fromDrawer) Navigator.pop(context);
+        });
+      }
   }
 
-  NavigationDrawer navigationDrawer() {
-    // Complex calculation but it shouldn't be played multiple times.
-    final Color imageColor =
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
-    final Color textColor =
-    imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+  NavigationDrawer navDrawer(context) {
+    List<NavigationDrawerDestination> drawerDestinations = [];
 
-    List<NavigationDrawerDestination> navigationDrawerDestination = [];
-
-    for (final i in supportedFeatures) {
-      final applet = SPHAppEnum.values[supportedFeatures.indexOf(i)];
-
-      navigationDrawerDestination.add(NavigationDrawerDestination(
-          icon: appletHelpers[applet]!.icon,
-          selectedIcon: appletHelpers[applet]!.selectedIcon,
-          label: Text(applet.fullName)
-      ));
+    for (var destination in destinations) {
+      if (destination.enableDrawer) {
+        drawerDestinations.add(NavigationDrawerDestination(
+          label: Text(destination.label),
+          icon: destination.icon,
+          selectedIcon: destination.selectedIcon,
+          enabled: destination.isSupported,
+        ));
+      }
     }
 
+    final Color imageColor = Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+    final Color textColor = imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+
     return NavigationDrawer(
-      onDestinationSelected: onNavigationItemTapped,
-      selectedIndex: supportedFeatures.indexOf(selectedFeature.index),
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              ClipRRect(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                  child: ColorFiltered(
-                    colorFilter:
-                    ColorFilter.mode(imageColor, BlendMode.srcOver),
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Image.file(
-                        File(client.schoolImage),
-                        fit: BoxFit.cover,
+        selectedIndex: selectedDestinationDrawer,
+        onDestinationSelected: (int index) => openDestination(index, true),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                ClipRRect(
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                    child: ColorFiltered(
+                      colorFilter:
+                      ColorFilter.mode(imageColor, BlendMode.srcOver),
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Image.file(
+                          File(client.schoolImage),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      client.schoolName,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(color: textColor),
-                    ),
-                    Text(
-                      formattedUsername,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: textColor),
-                    )
-                  ],
-                ),
-              )
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        client.schoolName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: textColor),
+                      ),
+                      Text(
+                        "${client.userData["nachname"]}, ${client.userData["vorname"]}",
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: textColor),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-        ...navigationDrawerDestination,
-        const NavigationDrawerDestination(
-          icon: Icon(Icons.open_in_new),
-          label: Text('Im Browser öffnen'),
-        ),
-        const NavigationDrawerDestination(
-          icon: Icon(Icons.open_in_new),
-          label: Text('Moodle login öffnen'),
-        ),
-        const Divider(indent: 20, endIndent: 20,),
-        const NavigationDrawerDestination(
-          icon: Icon(Icons.settings),
-          label: Text('Einstellungen'),
-        ),
-        const NavigationDrawerDestination(
-          enabled: true,
-          icon: Icon(Icons.bug_report),
-          selectedIcon: Icon(Icons.bug_report_outlined),
-          label: Text('Fehlerbericht senden'),
-        ),
-      ],
+          ...drawerDestinations,
+        ]
     );
   }
 
-  @override
-  void initState() {
-    defaultFeature = getDefaultFeature();
-    openFeature(defaultFeature);
+  NavigationBar navBar(context) {
+    List<NavigationDestination> barDestinations = [];
 
-    int supportedIndex = 0;
-    for (final applet in SPHAppEnum.values) {
-      if (applet.status == AppSupportStatus.supported) {
-        if (client.doesSupportFeature(applet)) {
-          supportedFeatures.add(supportedIndex);
-          supportedIndex++;
-        } else {
-          supportedFeatures.add(null);
-        }
+    for (var destination in destinations) {
+      if (destination.enableBottomNavigation && destination.isSupported) {
+        barDestinations.add(NavigationDestination(
+          label: destination.label,
+          icon: destination.icon,
+          selectedIcon: destination.selectedIcon,
+          enabled: destination.isSupported,
+          tooltip: destination.label,
+        ));
       }
     }
 
-    super.initState();
+    List<int?> indexNavbarTranslationLayer = [];
+
+    int helpIndex = 0;
+    for (var destination in destinations) {
+      if (destination.enableBottomNavigation && destination.isSupported) {
+        indexNavbarTranslationLayer.add(helpIndex);
+        helpIndex += 1;
+      } else {
+        indexNavbarTranslationLayer.add(null);
+      }
+    }
+
+    return NavigationBar(
+      destinations: barDestinations,
+      selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
+      onDestinationSelected: (int index) => openDestination(indexNavbarTranslationLayer.indexOf(index), false),
+    );
   }
 
   @override
@@ -292,7 +297,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, network) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(selectedFeature.title!),
+              title: Text(destinations[selectedDestinationDrawer].label),
               bottom: network.data == InternetConnectionStatus.disconnected ? PreferredSize(
                 preferredSize: const Size.fromHeight(40),
                 child: Padding(
@@ -313,9 +318,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               ) : null,
             ),
-            body: client.applets!.isNotEmpty ? featureScreens[selectedFeature.index] : noAppsSupported(),
-            bottomNavigationBar: client.applets!.length > 2 ? navigationBar() : null,
-            drawer: navigationDrawer()
+            body: destinations[selectedDestinationDrawer].body,
+            bottomNavigationBar: navBar(context),
+            drawer: navDrawer(context)
           );
         }
     );
