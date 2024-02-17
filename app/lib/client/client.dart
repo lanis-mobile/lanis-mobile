@@ -8,7 +8,6 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/client_submodules/datastorage.dart';
@@ -22,11 +21,11 @@ import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
-import '../shared/shared_functions.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
+import 'connection_checker.dart';
 
 class SPHclient {
   String username = "";
@@ -134,7 +133,7 @@ class SPHclient {
   Future<void> login({userLogin = false}) async {
     debugPrint("Trying to log in");
 
-    if (!(await InternetConnectionChecker().hasConnection)) {
+    if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
     }
 
@@ -163,8 +162,7 @@ class SPHclient {
       throw NetworkException();
     } on LanisException {
       rethrow;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       debugPrint(e.toString());
       throw LoggedOffOrUnknownException();
     }
@@ -261,8 +259,7 @@ class SPHclient {
       );
 
       return savePath;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       return "";
     }
   }
@@ -450,8 +447,7 @@ class SPHclient {
       await raf.close();
 
       return savePath;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       return "";
     }
   }

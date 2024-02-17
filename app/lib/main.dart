@@ -7,6 +7,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:sph_plan/client/load_mode.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -16,7 +17,6 @@ import 'package:stack_trace/stack_trace.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -32,6 +32,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'background_service/service.dart' as background_service;
+import 'client/connection_checker.dart';
 
 
 void main() async {
@@ -530,14 +531,14 @@ class _HomePageState extends State<HomePage> {
 
     return isLoading
         ? loadingScreen()
-        : StreamBuilder<InternetConnectionStatus>(
-          stream: InternetConnectionChecker().onStatusChange,
+        : StreamBuilder<InternetStatus>(
+          stream: connectionChecker.onStatusChange,
           builder: (context, network) {
             return Scaffold(
                 appBar: AppBar(
                   title: Text(selectedFeature
                       .value!), // We could also use a list with all title names, but a empty title should be always the first page (Vp)
-                  bottom: network.data == InternetConnectionStatus.disconnected ? PreferredSize(
+                  bottom: network.data == InternetStatus.disconnected ? PreferredSize(
                     preferredSize: const Size.fromHeight(40),
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 16),
@@ -549,7 +550,7 @@ class _HomePageState extends State<HomePage> {
                             child: Icon(Icons.signal_wifi_off),
                           ),
                           Text(
-                            "Kein Internet! Geladene Daten sind noch aufrufbar!",
+                            "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                         ],
@@ -750,7 +751,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            (status.data == Status.errorLogin) && (error is NoConnectionException) ? "Kein Internet!" : "Willkommen zurück!",
+                            (status.data == Status.errorLogin) && (error is NoConnectionException) ? "Keine Verbindung!" : "Willkommen zurück!",
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                           Row(

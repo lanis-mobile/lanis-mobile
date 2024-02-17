@@ -53,7 +53,6 @@ dependencies:
   open_file: ^3.3.2
   shared_preferences: ^2.2.2
   rxdart: ^0.27.7
-  internet_connection_checker: ^1.0.0+1
   stack_trace: ^1.11.1
   styled_text: ^8.1.0
   linkify: ^5.0.0
@@ -67,6 +66,7 @@ dependencies:
   http_parser: ^4.0.2
   mime: ^1.0.4
   flutter_native_splash: ^2.3.9
+  internet_connection_checker_plus: ^2.2.0
 
 flutter_launcher_icons:
   android: false

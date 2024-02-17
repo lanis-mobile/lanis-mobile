@@ -57,5 +57,5 @@ class NotSupportedException implements LanisException {
 class NoConnectionException implements LanisException {
   @override
   String cause;
-  NoConnectionException([this.cause = "Kein Internet."]);
+  NoConnectionException([this.cause = "Keine verbindung zum SPH"]);
 }

@@ -3,12 +3,11 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/shared_functions.dart';
+import '../connection_checker.dart';
 
 class CalendarParser {
   late Dio dio;
@@ -50,13 +49,12 @@ class CalendarParser {
       throw NetworkException();
     } catch (e, stack) {
       debugPrint("Calendar: -4");
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
 
   Future<dynamic> getEvent(String id) async {
-    if (!(await InternetConnectionChecker().hasConnection)) {
+    if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
     }
 
@@ -81,7 +79,6 @@ class CalendarParser {
     } on SocketException {
       throw NetworkException();
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }

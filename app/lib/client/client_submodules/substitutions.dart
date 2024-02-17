@@ -10,7 +10,6 @@ import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/shared_functions.dart';
 
 class SubstitutionsParser {
   late Dio dio;
@@ -79,7 +78,6 @@ class SubstitutionsParser {
       throw NetworkException();
     } catch (e, stack) {
       debugPrint("Substitution plan error: -4");
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
@@ -117,7 +115,6 @@ class SubstitutionsParser {
     } on SocketException {
       throw NetworkException();
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
@@ -147,8 +144,7 @@ class SubstitutionsParser {
 
       }
       return fullPlan;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       throw LoggedOffOrUnknownException();
     }
   }
