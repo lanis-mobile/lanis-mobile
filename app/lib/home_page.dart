@@ -5,7 +5,6 @@ import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/conversations/conversations.dart';
@@ -14,6 +13,9 @@ import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sph_plan/client/connection_checker.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+
 
 class Destination {
   final String label;
@@ -298,13 +300,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<InternetConnectionStatus>(
-        stream: InternetConnectionChecker().onStatusChange,
+    return StreamBuilder<InternetStatus>(
+        stream: connectionChecker.onStatusChange,
         builder: (context, network) {
           return Scaffold(
             appBar: AppBar(
               title: Text(destinations[selectedDestinationDrawer].label),
-              bottom: network.data == InternetConnectionStatus.disconnected ? PreferredSize(
+              bottom: network.data == InternetStatus.disconnected ? PreferredSize(
                 preferredSize: const Size.fromHeight(40),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -316,7 +318,7 @@ class _HomePageState extends State<HomePage> {
                         child: Icon(Icons.signal_wifi_off),
                       ),
                       Text(
-                        "Kein Internet! Geladene Daten sind noch aufrufbar!",
+                        "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                     ],

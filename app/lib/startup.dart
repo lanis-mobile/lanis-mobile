@@ -80,7 +80,7 @@ class _StartupScreenState extends State<StartupScreen> {
   final List<String> steps = [Step.login];
   late final ProgressNotifier progress;
 
-  ValueNotifier<bool> noInternet = ValueNotifier<bool>(false);
+  ValueNotifier<bool> noConnection = ValueNotifier<bool>(false);
   ValueNotifier<bool> isError = ValueNotifier<bool>(false);
   final Map<String, LanisException?> errors = {Step.login: null};
 
@@ -116,7 +116,7 @@ class _StartupScreenState extends State<StartupScreen> {
         errors[applet.step] = data.content;
 
         if (data.content is NoConnectionException) {
-          noInternet.value = true;
+          noConnection.value = true;
         }
 
         return;
@@ -183,7 +183,7 @@ class _StartupScreenState extends State<StartupScreen> {
       progress.set(Step.login, Status.error);
 
       if (e is NoConnectionException) {
-        noInternet.value = true;
+        noConnection.value = true;
       }
 
       loadingMessage.value = Message.error;
@@ -391,7 +391,7 @@ class _StartupScreenState extends State<StartupScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ValueListenableBuilder(
-                      valueListenable: noInternet,
+                      valueListenable: noConnection,
                       builder: (context, _noInternet, _) {
                         if (_noInternet) {
                           return const SizedBox.shrink();
@@ -428,7 +428,7 @@ class _StartupScreenState extends State<StartupScreen> {
                           progress.reset();
                           errors.updateAll((key, value) => value = null);
                           isError.value = false;
-                          noInternet.value = false;
+                          noConnection.value = false;
                           loadingMessage.value = "Initialisieren...";
 
                           await performLogin();
@@ -515,11 +515,11 @@ class _StartupScreenState extends State<StartupScreen> {
                   ),
                   padding: const EdgeInsets.all(12.0),
                   child: ValueListenableBuilder(
-                    valueListenable: noInternet,
-                    builder: (context, _noInternet, _) {
-                      if (_noInternet) {
+                    valueListenable: noConnection,
+                    builder: (context, noConnection, _) {
+                      if (noConnection) {
                         return Text(
-                            "Kein Internet!",
+                            "Keine Verbindung!",
                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary)
                         );
                       }
