@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sph_plan/shared/account_types.dart';
-import 'package:sph_plan/view/settings/subsettings/load_mode.dart';
+import 'package:sph_plan/view/settings/subsettings/start_apps.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
@@ -120,7 +120,7 @@ List<PageViewModel> setupScreenPageViewModels = [
   ],
   PageViewModel(
       image: SvgPicture.asset("assets/undraw/undraw_speed_test_re_pe1f.svg", height: 175.0),
-      title: "Lademodus beim Starten der App",
+      title: "Startapps",
       bodyWidget: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,

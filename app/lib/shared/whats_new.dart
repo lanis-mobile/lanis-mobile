@@ -31,34 +31,44 @@ Future<String> getReleaseMarkDown() async {
   }
 }
 
+class ReleaseNotesScreen extends StatelessWidget {
+  final String releaseNotes;
+  const ReleaseNotesScreen(this.releaseNotes, {super.key});
 
-void openReleaseNotesModal(BuildContext context, String releaseNotes) {
-  PackageInfo.fromPlatform().then((PackageInfo packageInfo) => packageInfo.version).then((version) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title:  Text('Lanis Mobile v$version'),
-          content: SizedBox( // AlertDialog doesn't support ListView, .... (viewport) widgets, so we need to constrain it.
-            width: double.maxFinite,
-            height: 300, // don't make it too big, don't make it too small
-            child: Markdown( // Markdown is always a Listable? (viewport) widget, even MarkdownBody which isn't scrollable.
-                data: releaseNotes,
-                padding: const EdgeInsets.all(0),
-                onTapLink: (text, href, title) {
-                  launchUrl(Uri.parse(href!));
-                }
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Schließen'),
-            ),
-          ],
-        );
-      },
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: PackageInfo.fromPlatform(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text("Update ${snapshot.data?.version}"),
+              ),
+              body: Markdown(
+                  data: releaseNotes,
+                  padding: const EdgeInsets.all(16),
+                  onTapLink: (text, href, title) {
+                    launchUrl(Uri.parse(href!));
+                  }
+              ),
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.done),
+                label: const Text("Fertig"),
+              ),
+            );
+          } else {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text("Lade Update..."),
+              ),
+              body: const Center(
+                child: CircularProgressIndicator(),
+              )
+            );
+          }
+        },
     );
-  });
-
+  }
 }

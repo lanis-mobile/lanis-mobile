@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../../client/client.dart';
+import '../../shared/apps.dart';
 import '../../shared/errorView.dart';
 import '../login/screen.dart';
 import 'course_overview.dart';
@@ -17,6 +18,8 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     with TickerProviderStateMixin {
+  final MeinUnterrichtFetcher meinUnterrichtFetcher = client.applets![SPHAppEnum.meinUnterricht]!.fetchers[0] as MeinUnterrichtFetcher;
+
   static const double padding = 12.0;
   late TabController _tabController;
 
@@ -45,7 +48,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    client.meinUnterrichtFetcher?.fetchData();
+    meinUnterrichtFetcher.fetchData();
   }
 
   @override
@@ -58,7 +61,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: _presenceIndicatorKey,
       onRefresh: () async {
-        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
+        meinUnterrichtFetcher.fetchData(forceRefresh: true);
       },
       child: presence.length != 0 ? ListView.builder(
         itemCount: presence.length,
@@ -126,7 +129,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: _coursesIndicatorKey,
       onRefresh: () async {
-        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
+        meinUnterrichtFetcher.fetchData(forceRefresh: true);
       },
       child: courses.length != 0 ? ListView.builder(
         itemCount: courses.length,
@@ -172,7 +175,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     return RefreshIndicator(
       key: _currentIndicatorKey,
       onRefresh: () async {
-        client.meinUnterrichtFetcher?.fetchData(forceRefresh: true);
+        meinUnterrichtFetcher.fetchData(forceRefresh: true);
       },
       child: current.length != 0 ? ListView.builder(
         itemCount: current.length,
@@ -233,7 +236,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<FetcherResponse>(
-        stream: client.meinUnterrichtFetcher?.stream,
+        stream: meinUnterrichtFetcher.stream,
         builder: (context, snapshot) {
           if (snapshot.hasError &&
               snapshot.error is CredentialsIncompleteException) {
@@ -263,9 +266,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                   controller: _tabController,
                   children: [
                     if (snapshot.data?.status == FetcherStatus.error && snapshot.data?.content is LanisException) ...[
-                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher,),
-                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher),
-                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: client.meinUnterrichtFetcher)
+                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: meinUnterrichtFetcher,),
+                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: meinUnterrichtFetcher),
+                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: meinUnterrichtFetcher)
                     ]
                     else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) ...[
                       const Center(child: CircularProgressIndicator()),

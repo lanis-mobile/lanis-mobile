@@ -1,15 +1,19 @@
 enum SPHAppEnum {
-  stundenplan("stundenplan.php", false, AppSupportStatus.workedOn),
-  nachrichten("nachrichten.php", false, AppSupportStatus.supported),
-  vertretungsplan("vertretungsplan.php", false, AppSupportStatus.supported),
-  meinUnterricht("meinunterricht.php", true, AppSupportStatus.supported),
-  kalender("kalender.php", false, AppSupportStatus.supported),
-  dateispeicher("dateispeicher.php", false, AppSupportStatus.planned);
+  vertretungsplan("vertretungsplan.php", "Vertretungsplan", false, AppSupportStatus.supported),
+  kalender("kalender.php", "Kalender", false, AppSupportStatus.supported),
+  nachrichten("nachrichten.php", "Nachrichten", false, AppSupportStatus.supported),
+  meinUnterricht("meinunterricht.php", "Mein Unterricht", true, AppSupportStatus.supported),
+  stundenplan("stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
+  dateispeicher("dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
 
   final String php;
+  final String fullName; // The "humanised" form of .name, prefer to use this than magic strings.
   final bool onlyStudents;
   final AppSupportStatus status;
-  const SPHAppEnum(this.php, this.onlyStudents, this.status);
+
+  const SPHAppEnum(this.php, this.fullName, this.onlyStudents, this.status);
+
+  static SPHAppEnum fromJson(String json) => values.byName(json);
 }
 
 enum AppSupportStatus {

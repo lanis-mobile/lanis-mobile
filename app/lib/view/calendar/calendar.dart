@@ -7,6 +7,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
+import '../../shared/apps.dart';
 import '../../shared/errorView.dart';
 class CalendarAnsicht extends StatefulWidget {
   const CalendarAnsicht({super.key});
@@ -16,6 +17,8 @@ class CalendarAnsicht extends StatefulWidget {
 }
 
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
+  CalendarFetcher calendarFetcher = client.applets![SPHAppEnum.kalender]!.fetchers[0] as CalendarFetcher;
+
   late final ValueNotifier<List<Event>> _selectedEvents;
 
   CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -36,7 +39,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
 
-    client.calendarFetcher?.fetchData();
+    calendarFetcher.fetchData();
   }
 
   Future<dynamic> fetchEvent(String id, {secondTry = false}) async {
@@ -286,10 +289,10 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<FetcherResponse>(
-      stream: client.calendarFetcher?.stream,
+      stream: calendarFetcher.stream,
       builder: (context, snapshot) {
         if (snapshot.data?.status == FetcherStatus.error) {
-          return ErrorView(data: snapshot.data!.content, name: "Kalender", fetcher: client.calendarFetcher,);
+          return ErrorView(data: snapshot.data!.content, name: "Kalender", fetcher: calendarFetcher);
         } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
           return const Center(child: CircularProgressIndicator());
         } else {

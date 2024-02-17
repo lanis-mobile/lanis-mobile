@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
 import '../../client/client.dart';
@@ -19,6 +20,8 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
+  final SubstitutionsFetcher substitutionsFetcher = client.applets![SPHAppEnum.vertretungsplan]!.fetchers[0] as SubstitutionsFetcher;
+
   final double padding = 12.0;
 
   List<GlobalKey<RefreshIndicatorState>> globalKeys = [GlobalKey<RefreshIndicatorState>()];
@@ -28,7 +31,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
   @override
   void initState() {
     super.initState();
-    client.substitutionsFetcher?.fetchData();
+    substitutionsFetcher.fetchData();
   }
 
   Widget noticeWidget(int entriesLength) {
@@ -49,7 +52,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       substitutionViews.add(RefreshIndicator(
         key: globalKeys[dayIndex + 1],
         onRefresh: () async {
-          client.substitutionsFetcher?.fetchData(forceRefresh: true);
+          substitutionsFetcher.fetchData(forceRefresh: true);
         },
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
@@ -84,7 +87,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     List<Widget> errorWidgets = [];
 
     for (int i = 0; i < data["length"]; i++) {
-      errorWidgets.add(ErrorView.fromCode(data: data, name: "Vertretungsplan", fetcher: client.substitutionsFetcher,));
+      errorWidgets.add(ErrorView.fromCode(data: data, name: "Vertretungsplan", fetcher: substitutionsFetcher,));
     }
 
     return errorWidgets;
@@ -111,7 +114,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<FetcherResponse>(
-        stream: client.substitutionsFetcher?.stream,
+        stream: substitutionsFetcher.stream,
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error &&
               snapshot.data?.content == CredentialsIncompleteException().cause) {
@@ -137,7 +140,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
             return RefreshIndicator(
               key: globalKeys[0],
               onRefresh: () async {
-                client.substitutionsFetcher?.fetchData(forceRefresh: true);
+                substitutionsFetcher.fetchData(forceRefresh: true);
               },
               child: const CustomScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
@@ -213,12 +216,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           FloatingActionButton(
             heroTag: "FilterSubstitutions",
             onPressed: () {
-              client.substitutionsFetcher?.fetchData();
+              substitutionsFetcher.fetchData();
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => FilterPlan()))
                   .then((_) => setState(() {
-                client.substitutionsFetcher
-                    ?.fetchData(forceRefresh: true);
+                substitutionsFetcher
+                    .fetchData(forceRefresh: true);
               }));
             },
             child: const Icon(Icons.filter_alt),
