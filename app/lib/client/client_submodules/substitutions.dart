@@ -46,7 +46,7 @@ class SubstitutionsParser {
           "Fach": headers.contains("Fach") ? fields[headers.indexOf("Fach")].text.trim() : "",
           "Raum": headers.contains("Raum") ? fields[headers.indexOf("Raum")].text.trim() : "",
           "Hinweis": headers.contains("Hinweis") ? fields[headers.indexOf("Hinweis")].text.trim() : "",
-          "Tag_en": parsedDate.format('yyyy-MM-dd')
+          "Tag": parsedDate.format('dd.MM.yyyy')
         };
         entries.add(entry);
       }
