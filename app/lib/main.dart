@@ -6,16 +6,23 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:sph_plan/startup.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:sph_plan/shared/apps.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:sph_plan/startup.dart';
+
 
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background_service/service.dart' as background_service;
+import 'client/connection_checker.dart';
 
 
 void main() async {

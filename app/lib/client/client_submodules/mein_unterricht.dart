@@ -7,7 +7,6 @@ import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/shared_functions.dart';
 import '../../shared/types/upload.dart';
 
 
@@ -354,7 +353,6 @@ class MeinUnterrichtParser {
 
       return result;
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
@@ -423,7 +421,6 @@ class MeinUnterrichtParser {
     }on (SocketException, DioException) {
       throw NetworkException();
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
@@ -509,7 +506,6 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
@@ -570,7 +566,6 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e, stack) {
-      recordError(e, stack);
       throw LoggedOffOrUnknownException();
     }
   }
