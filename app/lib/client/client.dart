@@ -211,7 +211,12 @@ class SPHclient {
   ///Without this the user cannot access encrypted data after 3-4 minutes.
   Future<void> preventLogout() async {
     final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
-    var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+    String sid;
+    try {
+      sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+    } on StateError {
+      return;
+    }
     debugPrint("Refreshing session");
     try {
       await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
