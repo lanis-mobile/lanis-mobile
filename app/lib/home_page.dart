@@ -41,6 +41,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late int selectedDestinationDrawer;
+  late bool doesSupportAnyApplet = false;
 
 
   ///The UI is build dynamically based on this list.
@@ -130,19 +131,21 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
-  void setDefaultDestinations() {
+  void setDefaultDestination() {
     for (var destination in destinations) {
       if (destination.isSupported && destination.enableBottomNavigation) {
         selectedDestinationDrawer = destinations.indexOf(destination);
+        doesSupportAnyApplet = true;
         break;
       }
     }
+    selectedDestinationDrawer = -1;
   }
 
   @override
   void initState() {
     super.initState();
-    setDefaultDestinations();
+    setDefaultDestination();
   }
 
   void openLanisInBrowser(BuildContext? context) {
@@ -168,7 +171,7 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.disabled_by_default_outlined, size: 150,),
-          const Padding(padding: EdgeInsets.all(8), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
+          const Padding(padding: EdgeInsets.all(32), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
           ElevatedButton(onPressed: () => openLanisInBrowser(context), child: const Text("Im Browser öffnen"))
         ],
       ),
@@ -305,7 +308,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, network) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(destinations[selectedDestinationDrawer].label),
+              title: Text(doesSupportAnyApplet ? destinations[selectedDestinationDrawer].label : "Im Browser öffnen"),
               bottom: network.data == InternetStatus.disconnected ? PreferredSize(
                 preferredSize: const Size.fromHeight(40),
                 child: Padding(
@@ -326,8 +329,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ) : null,
             ),
-            body: destinations[selectedDestinationDrawer].body,
-            bottomNavigationBar: navBar(context),
+            body: doesSupportAnyApplet ? destinations[selectedDestinationDrawer].body : noAppsSupported(),
+            bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
             drawer: navDrawer(context)
           );
         }
