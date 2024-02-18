@@ -42,7 +42,7 @@ Future<void> performBackgroundFetch() async {
     String messageBody = "";
 
     for (final entry in filteredPlan) {
-      final time = "${wochenTag(entry["Tag_en"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
+      final time = "${weekDayGer(entry["Tag"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
       final type = entry["Art"] ?? "";
       final subject = entry["Fach"] ?? "";
       final teacher = entry["Lehrer"] ?? "";
@@ -110,13 +110,11 @@ Future<bool> isMessageAlreadySent(String uuid) async {
   return storageValue == uuid;
 }
 
-String wochenTag(String dateEn) {
-  DateFormat eingabeFormat = DateFormat('yyyy-MM-dd');
-  DateTime zielDatum = eingabeFormat.parse(dateEn);
 
-  // Wochentag auf Deutsch
-  var wochentagFormat = DateFormat.EEEE('de_DE');
-  String wochentag = wochentagFormat.format(zielDatum);
+String weekDayGer(String dateString) {
+  final inputFormat = DateFormat('dd.MM.yyyy');
+  final dateTime = inputFormat.parse(dateString);
 
-  return wochentag.substring(0, 2);
+  final germanFormat = DateFormat('E', 'de');
+  return germanFormat.format(dateTime);
 }
