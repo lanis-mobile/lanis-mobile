@@ -8,12 +8,10 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/client_submodules/datastorage.dart';
 import 'package:sph_plan/client/client_submodules/mein_unterricht.dart';
-import 'package:sph_plan/client/load_mode.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
@@ -22,11 +20,12 @@ import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
-import '../shared/shared_functions.dart';
+import '../shared/types/startup_app.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
+import 'connection_checker.dart';
 
 class SPHclient {
   String username = "";
@@ -34,7 +33,9 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
   String schoolImage = "";
-  LoadModeEnum loadMode = LoadModeEnum.fast;
+  String schoolLogo = "";
+  Map<SPHAppEnum, LoadApp>? applets;
+  int updateAppsIntervall = 15;
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   late CookieJar jar;
@@ -48,44 +49,6 @@ class SPHclient {
   late MeinUnterrichtParser meinUnterricht = MeinUnterrichtParser(dio, this);
   late ConversationsParser conversations = ConversationsParser(dio, this);
   late TimetableParser timetable = TimetableParser(dio, this);
-
-  SubstitutionsFetcher? substitutionsFetcher;
-  MeinUnterrichtFetcher? meinUnterrichtFetcher;
-  VisibleConversationsFetcher? visibleConversationsFetcher;
-  InvisibleConversationsFetcher? invisibleConversationsFetcher;
-  CalendarFetcher? calendarFetcher;
-
-  void prepareFetchers() {
-    if (client.loadMode == LoadModeEnum.full) {
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && substitutionsFetcher == null) {
-        substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 15));
-      }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht) && meinUnterrichtFetcher == null) {
-        meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
-      }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-        visibleConversationsFetcher ??= VisibleConversationsFetcher(const Duration(minutes: 15));
-        invisibleConversationsFetcher ??= InvisibleConversationsFetcher(const Duration(minutes: 15));
-      }
-      if (client.doesSupportFeature(SPHAppEnum.kalender) && calendarFetcher == null) {
-        calendarFetcher = CalendarFetcher(null);
-      }
-    } else {
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && substitutionsFetcher == null) {
-        substitutionsFetcher = SubstitutionsFetcher(null);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht) && meinUnterrichtFetcher == null) {
-        meinUnterrichtFetcher = MeinUnterrichtFetcher(null);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-        visibleConversationsFetcher ??= VisibleConversationsFetcher(null);
-        invisibleConversationsFetcher ??= InvisibleConversationsFetcher(null);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.kalender) && calendarFetcher == null) {
-        calendarFetcher = CalendarFetcher(null);
-      }
-    }
-  }
 
   Future<void> prepareDio() async {
     jar = CookieJar();
@@ -111,16 +74,30 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
-    loadMode = LoadModeEnum.fromName(await globalStorage.read(key: StorageKey.settingsLoadMode));
+    updateAppsIntervall = int.parse((await globalStorage.read(key: StorageKey.settingsUpdateAppsIntervall)));
+
+    final String loadAppsString = await globalStorage.read(key: StorageKey.settingsLoadApps);
+    if (loadAppsString != "") {
+      applets = {};
+      Map<String, dynamic> mappedLoadApps = json.decode(loadAppsString);
+      for(final loadApp in mappedLoadApps.keys) {
+        applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.fromJson(loadApp),
+              LoadApp.fromJson(mappedLoadApps[loadApp]!, Duration(minutes: updateAppsIntervall))
+          )
+        ]);
+      }
+    } else {
+      applets = null; // wasn't previously initialised.
+    }
 
     username = await globalStorage.read(key: StorageKey.userUsername);
     password = await globalStorage.read(key: StorageKey.userPassword, secure: true);
     schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
 
-    //path
-    final Directory dir = await getApplicationDocumentsDirectory();
-    String fileName = "school.jpg";
-    schoolImage = "${dir.path}/$fileName";
+    schoolImage = await globalStorage.read(key: StorageKey.schoolImageLocation);
+    schoolLogo = await globalStorage.read(key: StorageKey.schoolLogoLocation);
 
     schoolName = await globalStorage.read(key: StorageKey.userSchoolName);
 
@@ -128,13 +105,74 @@ class SPHclient {
 
     supportedApps =
         jsonDecode(await globalStorage.read(key: StorageKey.userSupportedApplets));
+
+    return;
+  }
+
+  /// Initialises [client.applets] if [client.loadFromStorage] set it to null, used to make the code more dynamic.
+  /// This step occurs right after login.
+  ///
+  /// New fetchers should be added here.
+  void initialiseLoadApps() {
+    if (client.applets == null) {
+      client.applets = {};
+      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.vertretungsplan,
+              LoadApp(
+                  applet: SPHAppEnum.vertretungsplan,
+                  shouldFetch: true,
+                  fetchers: [
+                    SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
+                  ]))
+        ]);
+      }
+      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.kalender,
+              LoadApp(
+                  applet: SPHAppEnum.kalender,
+                  shouldFetch: false,
+                  fetchers: [
+                    CalendarFetcher(null),
+                  ]))
+        ]);
+      }
+      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.nachrichten,
+              LoadApp(
+                  applet: SPHAppEnum.nachrichten,
+                  shouldFetch: false,
+                  fetchers: [
+                    InvisibleConversationsFetcher(Duration(minutes: updateAppsIntervall)),
+                    VisibleConversationsFetcher(Duration(minutes: updateAppsIntervall))
+                  ]))
+        ]);
+      }
+      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.meinUnterricht,
+              LoadApp(
+                  applet: SPHAppEnum.meinUnterricht,
+                  shouldFetch: false,
+                  fetchers: [
+                    MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall)),
+                  ]))
+        ]);
+      }
+    }
   }
 
   ///Logs the user in and fetches the necessary metadata.
   Future<void> login({userLogin = false}) async {
     debugPrint("Trying to log in");
 
-    if (!(await InternetConnectionChecker().hasConnection)) {
+    if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
     }
 
@@ -163,8 +201,7 @@ class SPHclient {
       throw NetworkException();
     } on LanisException {
       rethrow;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       debugPrint(e.toString());
       throw LoggedOffOrUnknownException();
     }
@@ -174,7 +211,12 @@ class SPHclient {
   ///Without this the user cannot access encrypted data after 3-4 minutes.
   Future<void> preventLogout() async {
     final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
-    var sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+    String sid;
+    try {
+      sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+    } on StateError {
+      return;
+    }
     debugPrint("Refreshing session");
     try {
       await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
@@ -191,8 +233,14 @@ class SPHclient {
   Future<void> fetchRedundantData() async {
     final schoolInfo = await getSchoolInfo(schoolID);
 
-    schoolImage = await getSchoolImage(schoolInfo["bgimg"]["sm"]["url"]);
+    schoolImage = await savePersistentImage(schoolInfo["bgimg"]["sm"]["url"], "school.jpg");
     await globalStorage.write(key: StorageKey.schoolImageLocation, value: schoolImage);
+
+    String? schoolImageLink = schoolInfo["Logo"];
+    if (schoolImageLink != null) {
+      schoolLogo = await savePersistentImage(schoolInfo["Logo"], "logo.jpg");
+      await globalStorage.write(key: StorageKey.schoolLogoLocation, value: schoolLogo);
+    }
 
     schoolName = schoolInfo["Name"];
     await globalStorage.write(key: StorageKey.userSchoolName, value: schoolName);
@@ -228,11 +276,10 @@ class SPHclient {
   }
 
   ///Fetches the school's image and saves it to the storage.
-  Future<String> getSchoolImage(String url) async {
+  Future<String> savePersistentImage(String url, String fileName) async {
     try {
       final Directory dir = await getApplicationDocumentsDirectory();
 
-      String fileName = "school.jpg";
       String savePath = "${dir.path}/$fileName";
 
       Directory folder = Directory(dir.path);
@@ -261,8 +308,7 @@ class SPHclient {
       );
 
       return savePath;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       return "";
     }
   }
@@ -394,6 +440,7 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
+    client.applets = null;
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);
@@ -450,8 +497,7 @@ class SPHclient {
       await raf.close();
 
       return savePath;
-    } catch (e, stack) {
-      recordError(e, stack);
+    } catch (e) {
       return "";
     }
   }

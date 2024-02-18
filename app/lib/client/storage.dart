@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,9 +6,10 @@ enum StorageKey {
   settingsPushServiceIntervall,
   settingsPushServiceOngoing,
   settingsUseCountly,
-  settingsLoadMode,
   settingsSelectedColor,
   settingsSelectedTheme,
+  settingsLoadApps,
+  settingsUpdateAppsIntervall,
 
   userSchoolID,
   userUsername,
@@ -25,6 +25,7 @@ enum StorageKey {
   lastPushMessageHash,
   lastAppVersion,
   schoolImageLocation,
+  schoolLogoLocation,
   schoolAccentColor,
 }
 
@@ -39,8 +40,10 @@ extension on StorageKey {
         return "settings-push-service-notifications-ongoing";
       case StorageKey.settingsUseCountly:
         return "enable-countly";
-      case StorageKey.settingsLoadMode:
-        return "loadMode";
+      case StorageKey.settingsLoadApps:
+        return "loadApps";
+      case StorageKey.settingsUpdateAppsIntervall:
+        return "updateAppsIntervall";
       case StorageKey.userSchoolID:
         return "schoolID";
       case StorageKey.lastAppVersion:
@@ -57,6 +60,8 @@ extension on StorageKey {
         return "supportedApps";
       case StorageKey.schoolImageLocation:
         return "schoolImageLocation";
+      case StorageKey.schoolLogoLocation:
+        return "schoolLogoLocation";
       case StorageKey.schoolAccentColor:
         return "schoolColor";
       case StorageKey.settingsSelectedColor:
@@ -82,8 +87,8 @@ extension on StorageKey {
         return "15";
       case StorageKey.settingsUseCountly:
         return "true";
-      case StorageKey.settingsLoadMode:
-        return "fast";
+      case StorageKey.settingsUpdateAppsIntervall:
+        return "15";
       case StorageKey.lastAppVersion:
         return "0.0.0";
       case StorageKey.userData:
