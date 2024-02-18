@@ -22,7 +22,7 @@ class SubstitutionsParser {
 
   Future<Map<String, List<dynamic>>> getVplanNonAJAX() async {
     debugPrint("Trying to get substitution plan using non-JSON parser");
-    DateFormat eingabeFormat = DateFormat('dd_mm_yyyy');
+    DateFormat eingabeFormat = DateFormat('dd_MM_yyyy');
     final Map<String, List<dynamic>> fullPlan = {"dates": [], "entries": []};
     final document = parse((await dio.get("https://start.schulportal.hessen.de/vertretungsplan.php")).data);
     final dates = document.querySelectorAll("[data-tag]").map((element) => element.attributes["data-tag"]!);
