@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/view/settings/info_button.dart';
 
 class UserdataAnsicht extends StatefulWidget {
   const UserdataAnsicht({super.key});
@@ -30,11 +31,6 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
           subtitle: Text(toBeginningOfSentenceCase(key)!),
         ));
       });
-      userDataListTiles.add(const ListTile(
-        leading: Icon(Icons.info),
-        title: Text("Information"),
-        subtitle: Text("Alle Benutzerdaten sind auf den Lanis-Servern gespeichert."),
-      ));
     });
   }
 
@@ -43,6 +39,9 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Benutzerdaten"),
+        actions: [
+          InfoButton(infoText: "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.", context: context)
+        ],
       ),
       body: ListView(
         children: userDataListTiles,

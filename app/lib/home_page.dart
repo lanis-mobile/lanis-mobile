@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
       if (destination.isSupported && destination.enableBottomNavigation) {
         selectedDestinationDrawer = destinations.indexOf(destination);
         doesSupportAnyApplet = true;
-        break;
+        return;
       }
     }
     selectedDestinationDrawer = -1;
