@@ -3,8 +3,6 @@
 ## Verantwortlicher
 Alessio Caputo
 
-Georg-Jung-Str 38
-
 65428 Rüsselsheim am Main
 
 E-Mail: alessioc42.dev@gmail.com
