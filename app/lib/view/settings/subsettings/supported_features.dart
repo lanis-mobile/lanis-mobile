@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/view/settings/info_button.dart';
 
 import '../../../shared/apps.dart';
 
@@ -40,14 +41,8 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
         leading: const Icon(Icons.lock),
         title: const Text("Ende-zu-Ende Verschlüsselung"),
         subtitle: Text(client.cryptor.authenticated
-            ? "Unterstützt\nVerschlüsselung ist benötigt, um zum Beispiel Nachrichten oder Noten anzuzeigen."
+            ? "Unterstützt\nEine Verschlüsselung ist benötigt, um Beispielsweise Nachrichten oder Noten anzuzeigen."
             : "nicht Unterstützt\nDas könnte möglicherweise ein Fehler sein, kontaktiere bitte den Entwickler der App. Du kannst keine Nachrichten oder Noten sehen!"),
-      ));
-
-      featureListListTiles.add(const ListTile(
-        leading: Icon(Icons.info),
-        title: Text("Information"),
-        subtitle: Text("Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann."),
       ));
     });
   }
@@ -57,6 +52,9 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
     return Scaffold(
       appBar: AppBar(
         title: const Text("Unterstützung"),
+        actions: [
+          InfoButton(infoText: "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.", context: context)
+        ],
       ),
       body: ListView(
         children: featureListListTiles,

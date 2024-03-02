@@ -6,6 +6,7 @@ import 'package:sph_plan/shared/apps.dart';
 
 import '../../../client/storage.dart';
 import '../../../shared/types/startup_app.dart';
+import '../info_button.dart';
 
 class LoadModeScreen extends StatelessWidget {
   const LoadModeScreen({super.key});
@@ -15,13 +16,23 @@ class LoadModeScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Startapps"),
+          actions: [
+            InfoButton(
+                infoText: "Anstatt Apps erst zu laden, wenn du sie verwendest, kannst du hier deine wichtigsten Apps auswählen, damit sie direkt bei App-Start geladen werden und du sie sofort verwenden kannst. Außerdem kannst du festlegen, wann sie automatisch geladen werden sollen, damit du immer auf dem neuesten Stand bist.",
+                context: context
+            ),
+          ],
         ),
-        body: const Padding(
-          padding: EdgeInsets.all(0),
-          child: Column(
-            children: [
-              LoadModeElements(),
-            ],
+        body: Padding(
+          padding: const EdgeInsets.all(0),
+          child: ListView(
+            children: const [
+              Column(
+                children: [
+                  LoadModeElements(),
+                ],
+              )
+            ]
           ),
         )
     );
@@ -121,11 +132,6 @@ class _LoadModeElementsState extends State<LoadModeElements> {
           onChangeEnd: (double value) async {
             await globalStorage.write(key: StorageKey.settingsUpdateAppsIntervall, value: client.updateAppsIntervall.toString());
           },
-        ),
-        const ListTile(
-          leading: Icon(Icons.info),
-          title: Text("Information"),
-          subtitle: Text("Anstatt Apps erst zu laden, wenn du sie verwendest, kannst du hier deine wichtigsten Apps auswählen, damit sie direkt bei App-Start geladen werden und du sie sofort verwenden kannst. Außerdem kannst du festlegen, wann sie automatisch geladen werden sollen, damit du immer auf dem neuesten Stand bist."),
         ),
       ],
     );
