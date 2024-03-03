@@ -39,7 +39,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     return ListTile(
       title: Text(title, style: const TextStyle(fontSize: 22)),
       subtitle: const Text(
-          "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab. Einige Einträge können auch merkwürdig aussehen, da deine Schule möglicherweise nicht alle Einträge vollständig angibt."),
+          "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden."),
     );
   }
 
@@ -56,7 +56,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         },
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: ListView.builder(
+          child: GridView.builder(
             itemCount: entriesLength + 1,
             itemBuilder: (context, entryIndex) {
               if (entryIndex == entriesLength) {
@@ -74,7 +74,10 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                   child: SubstitutionWidget(substitutionData: data["days"][dayIndex]["entries"][entryIndex]),
                 ),
               );
-            },
+            }, gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 500,
+            childAspectRatio: 20/11
+          ),
           ),
         ),
       ));
