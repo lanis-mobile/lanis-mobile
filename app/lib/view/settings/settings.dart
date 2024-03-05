@@ -71,7 +71,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const NotificationsSettingsScreen()),
+                      builder: (context) =>
+                          const NotificationsSettingsScreen()),
                 );
               },
             ),
@@ -139,11 +140,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       client.deleteAllSettings().then((_) {
                         Navigator.pop(context, 'OK');
                         Navigator.push(
-                          context,
+                            context,
                             MaterialPageRoute(
-                                builder: (context) => const WelcomeLoginScreen()
-                            )
-                        );
+                                builder: (context) =>
+                                    const WelcomeLoginScreen()));
                       });
                     },
                     child: const Text('OK'),

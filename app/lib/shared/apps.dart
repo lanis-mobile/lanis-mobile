@@ -1,13 +1,19 @@
 enum SPHAppEnum {
-  vertretungsplan("vertretungsplan.php", "Vertretungsplan", false, AppSupportStatus.supported),
+  vertretungsplan("vertretungsplan.php", "Vertretungsplan", false,
+      AppSupportStatus.supported),
   kalender("kalender.php", "Kalender", false, AppSupportStatus.supported),
-  nachrichten("nachrichten.php", "Nachrichten", false, AppSupportStatus.supported),
-  meinUnterricht("meinunterricht.php", "Mein Unterricht", true, AppSupportStatus.supported),
-  stundenplan("stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
-  dateispeicher("dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
+  nachrichten(
+      "nachrichten.php", "Nachrichten", false, AppSupportStatus.supported),
+  meinUnterricht("meinunterricht.php", "Mein Unterricht", true,
+      AppSupportStatus.supported),
+  stundenplan(
+      "stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
+  dateispeicher(
+      "dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
 
   final String php;
-  final String fullName; // The "humanised" form of .name, prefer to use this than magic strings.
+  final String
+      fullName; // The "humanised" form of .name, prefer to use this than magic strings.
   final bool onlyStudents;
   final AppSupportStatus status;
 
@@ -27,5 +33,10 @@ enum AppSupportStatus {
 }
 
 String getAppSupportStatus(String link) {
-  return SPHAppEnum.values.where((e) => e.php == link).firstOrNull?.status.text ?? AppSupportStatus.unsupported.text;
+  return SPHAppEnum.values
+          .where((e) => e.php == link)
+          .firstOrNull
+          ?.status
+          .text ??
+      AppSupportStatus.unsupported.text;
 }

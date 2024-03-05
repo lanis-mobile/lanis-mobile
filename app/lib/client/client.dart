@@ -59,14 +59,15 @@ class SPHclient {
   }
 
   ///Overwrites the user's credentials with the given ones and saves them to the storage.
-  Future<void> overwriteCredits(String username, String password,
-      String schoolID) async {
+  Future<void> overwriteCredits(
+      String username, String password, String schoolID) async {
     this.username = username;
     this.password = password;
     this.schoolID = schoolID;
 
     await globalStorage.write(key: StorageKey.userUsername, value: username);
-    await globalStorage.write(key: StorageKey.userPassword, value: password, secure: true);
+    await globalStorage.write(
+        key: StorageKey.userPassword, value: password, secure: true);
     await globalStorage.write(key: StorageKey.userSchoolID, value: schoolID);
   }
 
@@ -74,18 +75,20 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
-    updateAppsIntervall = int.parse((await globalStorage.read(key: StorageKey.settingsUpdateAppsIntervall)));
+    updateAppsIntervall = int.parse((await globalStorage.read(
+        key: StorageKey.settingsUpdateAppsIntervall)));
 
-    final String loadAppsString = await globalStorage.read(key: StorageKey.settingsLoadApps);
+    final String loadAppsString =
+        await globalStorage.read(key: StorageKey.settingsLoadApps);
     if (loadAppsString != "") {
       applets = {};
       Map<String, dynamic> mappedLoadApps = json.decode(loadAppsString);
-      for(final loadApp in mappedLoadApps.keys) {
+      for (final loadApp in mappedLoadApps.keys) {
         applets!.addEntries([
           MapEntry(
               SPHAppEnum.fromJson(loadApp),
-              LoadApp.fromJson(mappedLoadApps[loadApp]!, Duration(minutes: updateAppsIntervall))
-          )
+              LoadApp.fromJson(mappedLoadApps[loadApp]!,
+                  Duration(minutes: updateAppsIntervall)))
         ]);
       }
     } else {
@@ -93,7 +96,8 @@ class SPHclient {
     }
 
     username = await globalStorage.read(key: StorageKey.userUsername);
-    password = await globalStorage.read(key: StorageKey.userPassword, secure: true);
+    password =
+        await globalStorage.read(key: StorageKey.userPassword, secure: true);
     schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
 
     schoolImage = await globalStorage.read(key: StorageKey.schoolImageLocation);
@@ -103,8 +107,8 @@ class SPHclient {
 
     userData = jsonDecode(await globalStorage.read(key: StorageKey.userData));
 
-    supportedApps =
-        jsonDecode(await globalStorage.read(key: StorageKey.userSupportedApplets));
+    supportedApps = jsonDecode(
+        await globalStorage.read(key: StorageKey.userSupportedApplets));
 
     return;
   }
@@ -148,8 +152,10 @@ class SPHclient {
                   applet: SPHAppEnum.nachrichten,
                   shouldFetch: false,
                   fetchers: [
-                    InvisibleConversationsFetcher(Duration(minutes: updateAppsIntervall)),
-                    VisibleConversationsFetcher(Duration(minutes: updateAppsIntervall))
+                    InvisibleConversationsFetcher(
+                        Duration(minutes: updateAppsIntervall)),
+                    VisibleConversationsFetcher(
+                        Duration(minutes: updateAppsIntervall))
                   ]))
         ]);
       }
@@ -161,7 +167,8 @@ class SPHclient {
                   applet: SPHAppEnum.meinUnterricht,
                   shouldFetch: false,
                   fetchers: [
-                    MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall)),
+                    MeinUnterrichtFetcher(
+                        Duration(minutes: updateAppsIntervall)),
                   ]))
         ]);
       }
@@ -180,21 +187,22 @@ class SPHclient {
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
     try {
-          String loginURL = await getLoginURL();
-          await dio.get(loginURL);
+      String loginURL = await getLoginURL();
+      await dio.get(loginURL);
 
-          preventLogoutTimer?.cancel();
-          preventLogoutTimer = Timer.periodic(const Duration(seconds: 60), (timer) => preventLogout());
+      preventLogoutTimer?.cancel();
+      preventLogoutTimer = Timer.periodic(
+          const Duration(seconds: 60), (timer) => preventLogout());
 
-          if (userLogin) {
-            await fetchRedundantData();
-          }
-          await getSchoolTheme();
+      if (userLogin) {
+        await fetchRedundantData();
+      }
+      await getSchoolTheme();
 
-          await cryptor.start(dio);
-          debugPrint("Encryption connected");
+      await cryptor.start(dio);
+      debugPrint("Encryption connected");
 
-          return;
+      return;
     } on SocketException {
       throw NetworkException();
     } on DioException {
@@ -213,16 +221,16 @@ class SPHclient {
     final uri = Uri.parse("https://start.schulportal.hessen.de/ajax_login.php");
     String sid;
     try {
-      sid = (await jar.loadForRequest(uri)).firstWhere((element) => element.name == "sid").value;
+      sid = (await jar.loadForRequest(uri))
+          .firstWhere((element) => element.name == "sid")
+          .value;
     } on StateError {
       return;
     }
     debugPrint("Refreshing session");
     try {
       await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
-          queryParameters: {
-            "name": sid
-          },
+          queryParameters: {"name": sid},
           options: Options(contentType: "application/x-www-form-urlencoded"));
     } on DioException {
       return;
@@ -233,22 +241,27 @@ class SPHclient {
   Future<void> fetchRedundantData() async {
     final schoolInfo = await getSchoolInfo(schoolID);
 
-    schoolImage = await savePersistentImage(schoolInfo["bgimg"]["sm"]["url"], "school.jpg");
-    await globalStorage.write(key: StorageKey.schoolImageLocation, value: schoolImage);
+    schoolImage = await savePersistentImage(
+        schoolInfo["bgimg"]["sm"]["url"], "school.jpg");
+    await globalStorage.write(
+        key: StorageKey.schoolImageLocation, value: schoolImage);
 
     String? schoolImageLink = schoolInfo["Logo"];
     if (schoolImageLink != null) {
       schoolLogo = await savePersistentImage(schoolInfo["Logo"], "logo.jpg");
-      await globalStorage.write(key: StorageKey.schoolLogoLocation, value: schoolLogo);
+      await globalStorage.write(
+          key: StorageKey.schoolLogoLocation, value: schoolLogo);
     }
 
     schoolName = schoolInfo["Name"];
-    await globalStorage.write(key: StorageKey.userSchoolName, value: schoolName);
+    await globalStorage.write(
+        key: StorageKey.userSchoolName, value: schoolName);
 
     userData = await fetchUserData();
     supportedApps = await getSupportedApps();
 
-    await globalStorage.write(key: StorageKey.userData, value: jsonEncode(userData));
+    await globalStorage.write(
+        key: StorageKey.userData, value: jsonEncode(userData));
 
     await globalStorage.write(
         key: StorageKey.userSupportedApplets, value: jsonEncode(supportedApps));
@@ -262,15 +275,19 @@ class SPHclient {
       try {
         dynamic schoolInfo = await client.getSchoolInfo(schoolID);
 
-        int schoolColor = int.parse("FF${schoolInfo["Farben"]["bg"].substring(1)}", radix: 16);
+        int schoolColor = int.parse(
+            "FF${schoolInfo["Farben"]["bg"].substring(1)}",
+            radix: 16);
 
         Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
 
-        if ((await globalStorage.read(key: StorageKey.settingsSelectedColor)) == "school") {
+        if ((await globalStorage.read(key: StorageKey.settingsSelectedColor)) ==
+            "school") {
           ColorModeNotifier.set("school", Themes.schoolTheme);
         }
 
-        await globalStorage.write(key: StorageKey.schoolAccentColor, value: schoolColor.toString());
+        await globalStorage.write(
+            key: StorageKey.schoolAccentColor, value: schoolColor.toString());
       } on Exception catch (_) {}
     }
   }
@@ -299,7 +316,8 @@ class SPHclient {
           responseType: ResponseType.bytes,
           followRedirects: true,
           headers: {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept":
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "none",
@@ -372,7 +390,9 @@ class SPHclient {
 
   ///check weather the user is able to use a feature of the application.
   bool doesSupportFeature(SPHAppEnum feature) {
-    var app = supportedApps.where((element) => element["link"].toString() == feature.php).singleOrNull;
+    var app = supportedApps
+        .where((element) => element["link"].toString() == feature.php)
+        .singleOrNull;
     if (app == null) return false;
     if (feature.onlyStudents) {
       return getAccountType() == AccountType.student;
@@ -455,7 +475,10 @@ class SPHclient {
       var bytes = utf8.encode(source);
       var digest = sha256.convert(bytes);
 
-      var shortHash = digest.toString().replaceAll(RegExp(r'[^A-z0-9]'), '').substring(0, 6);
+      var shortHash = digest
+          .toString()
+          .replaceAll(RegExp(r'[^A-z0-9]'), '')
+          .substring(0, 6);
 
       return shortHash;
     }

@@ -37,7 +37,7 @@ class CalendarParser {
             headers: {
               "Accept": "*/*",
               "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
+                  "application/x-www-form-urlencoded; charset=UTF-8",
               "Sec-Fetch-Dest": "empty",
               "Sec-Fetch-Mode": "cors",
               "Sec-Fetch-Site": "same-origin",
@@ -47,7 +47,7 @@ class CalendarParser {
     } on SocketException {
       debugPrint("Calendar: -3");
       throw NetworkException();
-    } catch (e, stack) {
+    } catch (e) {
       debugPrint("Calendar: -4");
       throw LoggedOffOrUnknownException();
     }
@@ -59,26 +59,26 @@ class CalendarParser {
     }
 
     try {
-      final response = await dio.post(
-          "https://start.schulportal.hessen.de/kalender.php",
-          data: {
-            "f": "getEvent",
-            "id": id,
-          },
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-            },
-          ));
+      final response =
+          await dio.post("https://start.schulportal.hessen.de/kalender.php",
+              data: {
+                "f": "getEvent",
+                "id": id,
+              },
+              options: Options(
+                headers: {
+                  "Accept": "*/*",
+                  "Content-Type":
+                      "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Sec-Fetch-Dest": "empty",
+                  "Sec-Fetch-Mode": "cors",
+                  "Sec-Fetch-Site": "same-origin",
+                },
+              ));
       return jsonDecode(response.toString());
     } on SocketException {
       throw NetworkException();
-    } catch (e, stack) {
+    } catch (e) {
       throw LoggedOffOrUnknownException();
     }
   }

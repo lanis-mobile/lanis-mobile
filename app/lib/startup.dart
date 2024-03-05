@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/shared/whats_new.dart';
+import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/login/screen.dart';
 
@@ -63,7 +63,8 @@ class Applet {
   final String step;
   final String finishMessage;
 
-  Applet({required this.fetcher, required this.step, required this.finishMessage});
+  Applet(
+      {required this.fetcher, required this.step, required this.finishMessage});
 }
 
 class StartupScreen extends StatefulWidget {
@@ -74,7 +75,8 @@ class StartupScreen extends StatefulWidget {
 }
 
 class _StartupScreenState extends State<StartupScreen> {
-  ValueNotifier<String> loadingMessage = ValueNotifier<String>(Message.initialise);
+  ValueNotifier<String> loadingMessage =
+      ValueNotifier<String>(Message.initialise);
 
   final List<Applet> appletFetchers = [];
   final List<String> steps = [Step.login];
@@ -99,7 +101,8 @@ class _StartupScreenState extends State<StartupScreen> {
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),);
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     });
   }
 
@@ -151,7 +154,8 @@ class _StartupScreenState extends State<StartupScreen> {
       loadingMessage.value = Message.load;
 
       // Step 4 (fetch everything async)
-      await Future.wait(List.generate(appletFetchers.length, (index) => fetchApplet(appletFetchers[index])));
+      await Future.wait(List.generate(appletFetchers.length,
+          (index) => fetchApplet(appletFetchers[index])));
 
       // Step 5 (finish)
       if (!isError.value) {
@@ -160,14 +164,17 @@ class _StartupScreenState extends State<StartupScreen> {
           if (value != null) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ReleaseNotesScreen(value)),
+              MaterialPageRoute(
+                  builder: (context) => ReleaseNotesScreen(value)),
             ).then((_) => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),));
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                ));
           } else {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),);
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
           }
         });
       }
@@ -203,6 +210,7 @@ class _StartupScreenState extends State<StartupScreen> {
         return Icons.error_outline;
     }
   }
+
   String getProgressMessage(Status status) {
     switch (status) {
       case Status.finished:
@@ -238,10 +246,10 @@ class _StartupScreenState extends State<StartupScreen> {
               steps.add(currentLoadApp.applet.fullName);
               for (final fetcher in currentLoadApp.fetchers) {
                 appletFetchers.add(Applet(
-                  fetcher: fetcher,
-                  step: currentLoadApp.applet.fullName,
-                  finishMessage: "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"
-                ));
+                    fetcher: fetcher,
+                    step: currentLoadApp.applet.fullName,
+                    finishMessage:
+                        "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
               }
             }
 
@@ -269,7 +277,11 @@ class _StartupScreenState extends State<StartupScreen> {
             builder: (context, packageInfo) {
               return Text(
                 "lanis-mobile ${packageInfo.data?.version}",
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.25)),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.25)),
               );
             },
           )
@@ -278,23 +290,22 @@ class _StartupScreenState extends State<StartupScreen> {
     } else {
       //invert image if theme is dark mode
       //https://stackoverflow.com/questions/56107197/how-to-invert-image-color-in-flutter
-      return
-        ColorFiltered(
-          colorFilter: Theme.of(context).brightness == Brightness.dark
-              ? const ColorFilter.matrix(<double>[
-            -1.0, 0.0, 0.0, 0.0, 255.0, //
-            0.0, -1.0, 0.0, 0.0, 255.0, //
-            0.0, 0.0, -1.0, 0.0, 255.0, //
-            0.0, 0.0, 0.0, 1.0, 0.0, //
-          ])
-              : const ColorFilter.matrix(<double>[
-            1.0, 0.0, 0.0, 0.0, 0.0, //
-            0.0, 1.0, 0.0, 0.0, 0.0, //
-            0.0, 0.0, 1.0, 0.0, 0.0, //
-            0.0, 0.0, 0.0, 1.0, 0.0, //
-          ]),
-          child: Image.file(
-            File(client.schoolLogo),
+      return ColorFiltered(
+        colorFilter: Theme.of(context).brightness == Brightness.dark
+            ? const ColorFilter.matrix(<double>[
+                -1.0, 0.0, 0.0, 0.0, 255.0, //
+                0.0, -1.0, 0.0, 0.0, 255.0, //
+                0.0, 0.0, -1.0, 0.0, 255.0, //
+                0.0, 0.0, 0.0, 1.0, 0.0, //
+              ])
+            : const ColorFilter.matrix(<double>[
+                1.0, 0.0, 0.0, 0.0, 0.0, //
+                0.0, 1.0, 0.0, 0.0, 0.0, //
+                0.0, 0.0, 1.0, 0.0, 0.0, //
+                0.0, 0.0, 0.0, 1.0, 0.0, //
+              ]),
+        child: Image.file(
+          File(client.schoolLogo),
         ),
       );
     }
@@ -306,8 +317,7 @@ class _StartupScreenState extends State<StartupScreen> {
       child: Container(
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.secondary,
-              borderRadius: BorderRadius.circular(16.0)
-          ),
+              borderRadius: BorderRadius.circular(16.0)),
           padding: const EdgeInsets.all(12.0),
           margin: const EdgeInsets.symmetric(horizontal: 84),
           child: Column(
@@ -315,8 +325,8 @@ class _StartupScreenState extends State<StartupScreen> {
             children: [
               ValueListenableBuilder(
                   valueListenable: finishedLoadingStorage,
-                  builder: (context, _finishedLoadingStorage, _) {
-                    if (_finishedLoadingStorage) {
+                  builder: (context, finishedLoadingStorage, _) {
+                    if (finishedLoadingStorage) {
                       // Show all steps like login, vp, ...
                       return ListenableBuilder(
                           listenable: progress,
@@ -333,50 +343,62 @@ class _StartupScreenState extends State<StartupScreen> {
                                   final String step = steps[index];
                                   final Status status = progress.steps[step]!;
                                   return Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.only(right: 4.0),
+                                            padding: const EdgeInsets.only(
+                                                right: 4.0),
                                             child: Icon(
                                               getIcon(status),
-                                              color: Theme.of(context).colorScheme.onSecondary,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondary,
                                             ),
                                           ),
-                                          Text(
-                                              step,
-                                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
-                                          ),
+                                          Text(step,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelLarge
+                                                  ?.copyWith(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSecondary)),
                                         ],
                                       ),
-                                      Text(
-                                          getProgressMessage(status),
-                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
-                                      )
+                                      Text(getProgressMessage(status),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSecondary))
                                     ],
                                   );
-                                }
-                            );
-                          }
-                      );
+                                });
+                          });
                     }
                     // Show only that client.loadFromStorage() is being executed.
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                            "Lade gespeicherte Daten...",
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSecondary)
-                        )
+                        Text("Lade gespeicherte Daten...",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondary))
                       ],
                     );
-                  }
-              )
+                  })
             ],
-          )
-      ),
+          )),
     );
   }
 
@@ -392,8 +414,8 @@ class _StartupScreenState extends State<StartupScreen> {
                 children: [
                   ValueListenableBuilder(
                       valueListenable: noConnection,
-                      builder: (context, _noInternet, _) {
-                        if (_noInternet) {
+                      builder: (context, noInternet, _) {
+                        if (noInternet) {
                           return const SizedBox.shrink();
                         }
                         return FilledButton(
@@ -410,16 +432,13 @@ class _StartupScreenState extends State<StartupScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        BugReportScreen(
-                                            generatedMessage:
+                                    builder: (context) => BugReportScreen(
+                                        generatedMessage:
                                             "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
                               );
                             },
-                            child: const Text(
-                                "Fehlerbericht senden"));
-                      }
-                  ),
+                            child: const Text("Fehlerbericht senden"));
+                      }),
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: OutlinedButton(
@@ -433,16 +452,14 @@ class _StartupScreenState extends State<StartupScreen> {
 
                           await performLogin();
                         },
-                        child:
-                        const Text("Erneut versuchen")),
+                        child: const Text("Erneut versuchen")),
                   )
                 ],
               ),
             );
           }
           return const SizedBox.shrink();
-        }
-    );
+        });
   }
 
   /// The bottom thing that shows a message and a "big" progress indicator.
@@ -454,24 +471,25 @@ class _StartupScreenState extends State<StartupScreen> {
         Container(
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(16.0)
-          ),
+              borderRadius: BorderRadius.circular(16.0)),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           margin: const EdgeInsets.all(12),
           child: Row(
             children: [
               ValueListenableBuilder(
                   valueListenable: loadingMessage,
-                  builder: (context, _loadingMessage, _) {
+                  builder: (context, loadingMessage, _) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
-                      child: Text(
-                          _loadingMessage,
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary)
-                      ),
+                      child: Text(loadingMessage,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary)),
                     );
-                  }
-              ),
+                  }),
               ValueListenableBuilder(
                   valueListenable: isError,
                   builder: (context, _isError, _) {
@@ -488,8 +506,7 @@ class _StartupScreenState extends State<StartupScreen> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     );
-                  }
-              )
+                  })
             ],
           ),
         ),
@@ -509,27 +526,33 @@ class _StartupScreenState extends State<StartupScreen> {
               children: [
                 // Greeting message
                 Container(
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(16.0)
-                  ),
-                  padding: const EdgeInsets.all(12.0),
-                  child: ValueListenableBuilder(
-                    valueListenable: noConnection,
-                    builder: (context, noConnection, _) {
-                      if (noConnection) {
-                        return Text(
-                            "Keine Verbindung!",
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary)
-                        );
-                      }
-                      return Text(
-                          "Willkommen zurück!",
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary)
-                      );
-                    },
-                  )
-                ),
+                    decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(16.0)),
+                    padding: const EdgeInsets.all(12.0),
+                    child: ValueListenableBuilder(
+                      valueListenable: noConnection,
+                      builder: (context, noConnection, _) {
+                        if (noConnection) {
+                          return Text("Keine Verbindung!",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary));
+                        }
+                        return Text("Willkommen zurück!",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary));
+                      },
+                    )),
                 currentSteps(),
                 errorButtons(),
               ],
