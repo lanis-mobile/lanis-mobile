@@ -285,33 +285,12 @@ class _StartupScreenState extends State<StartupScreen> {
     return CachedNetworkImage(
       imageUrl:
           "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}",
-      fadeInDuration: const Duration(milliseconds: 100),
+      fadeInDuration: const Duration(milliseconds: 0),
       placeholder: (context, url) => deviceInfo,
       errorWidget: (context, url, error) => deviceInfo,
       imageBuilder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
-            ? const ColorFilter.matrix([
-                -1,
-                0,
-                0,
-                0,
-                255,
-                0,
-                -1,
-                0,
-                0,
-                255,
-                0,
-                0,
-                -1,
-                0,
-                255,
-                0,
-                0,
-                0,
-                1,
-                0,
-              ])
+            ? const ColorFilter.matrix([-1, 0 ,0 ,0 ,255 ,0 ,-1 ,0 ,0 ,255 ,0 ,0 ,-1 ,0 ,255 ,0 ,0 ,0 ,1 ,0])
             : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
         child: Image(
           image: imageProvider,

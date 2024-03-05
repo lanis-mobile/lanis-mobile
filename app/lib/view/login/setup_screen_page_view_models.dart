@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sph_plan/shared/account_types.dart';
+import 'package:sph_plan/shared/widgets/substitutions/substitutions_listtile.dart';
 import 'package:sph_plan/view/settings/subsettings/start_apps.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
-import 'package:sph_plan/view/vertretungsplan/substitutionWidget.dart';
 
 import '../../client/client.dart';
 import '../../shared/apps.dart';
@@ -49,7 +49,7 @@ List<PageViewModel> setupScreenPageViewModels = [
               ),
             ),
             Card(
-              child: SubstitutionWidget(substitutionData: {
+              child: SubstitutionListTile(substitutionData: {
                 "Stunde": "1 - 2",
                 "Klasse": "Q3/4",
                 "Vertreter": "KAP",
@@ -67,7 +67,7 @@ List<PageViewModel> setupScreenPageViewModels = [
               ),
             ),
             Card(
-              child: SubstitutionWidget(substitutionData: {
+              child: SubstitutionListTile(substitutionData: {
                 "Stunde": "1 - 2",
                 "Vertreter": "KAP",
                 "Hinweis": "Fällt aus"
