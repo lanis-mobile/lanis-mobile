@@ -13,11 +13,8 @@ class AppearanceSettingsScreen extends StatelessWidget {
           title: const Text("Aussehen"),
         ),
         body: ListView(
-            children: const [
-              AppearanceElements()
-            ],
-        )
-    );
+          children: const [AppearanceElements()],
+        ));
   }
 }
 
@@ -40,7 +37,11 @@ class _AppearanceElementsState extends State<AppearanceElements> {
     _selectedColor = globalStorage.prefs.getString("color") ?? "standard";
   }
 
-  RadioListTile colorListTile({required String title, required String value, Color? primaryColor, String? subtitle}) {
+  RadioListTile colorListTile(
+      {required String title,
+      required String value,
+      Color? primaryColor,
+      String? subtitle}) {
     return RadioListTile(
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle) : null,
@@ -49,19 +50,17 @@ class _AppearanceElementsState extends State<AppearanceElements> {
         height: 50,
         decoration: BoxDecoration(
             border: Border.all(
-                color: Theme.of(context).colorScheme.onSurface,
-                width: 2
-            ),
-            borderRadius: BorderRadius.circular(12)
-        ),
+                color: Theme.of(context).colorScheme.onSurface, width: 2),
+            borderRadius: BorderRadius.circular(12)),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: primaryColor ?? (
-                Theme.of(context).brightness == Brightness.dark
-                    ? Themes.flutterColorThemes[value]!.darkTheme!.colorScheme.primary
-                    : Themes.flutterColorThemes[value]!.lightTheme!.colorScheme.primary
-            ),
+            color: primaryColor ??
+                (Theme.of(context).brightness == Brightness.dark
+                    ? Themes.flutterColorThemes[value]!.darkTheme!.colorScheme
+                        .primary
+                    : Themes.flutterColorThemes[value]!.lightTheme!.colorScheme
+                        .primary),
           ),
         ),
       ),
@@ -90,11 +89,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
       if (name == "standard") continue; // We already have standard
 
       flutterColorRadioListTiles.add(
-        colorListTile(
-            title: toBeginningOfSentenceCase(name)!,
-            value: name
-        )
-      );
+          colorListTile(title: toBeginningOfSentenceCase(name)!, value: name));
     }
 
     return Padding(
@@ -159,57 +154,65 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             ),
             RadioListTile(
               title: const Text("Dynamisch"),
-              subtitle: const Text('Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". (Wird nicht von allen Geräten unterstützt)'),
-              secondary: Themes.dynamicTheme.lightTheme == null ? null
+              subtitle: const Text(
+                  'Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". (Wird nicht von allen Geräten unterstützt)'),
+              secondary: Themes.dynamicTheme.lightTheme == null
+                  ? null
                   : Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        width: 2
-                    ),
-                    borderRadius: BorderRadius.circular(12)
-                ),
-                child: Column(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 2),
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Column(
+                        children: [
+                          Flexible(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                ),
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Themes.dynamicTheme.darkTheme!.colorScheme
+                                        .primary
+                                    : Themes.dynamicTheme.lightTheme!
+                                        .colorScheme.primary,
+                              ),
+                            ),
                           ),
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Themes.dynamicTheme.darkTheme!.colorScheme.primary
-                              : Themes.dynamicTheme.lightTheme!.colorScheme.primary,
-                        ),
+                          Flexible(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(10),
+                                  bottomRight: Radius.circular(10),
+                                ),
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Themes.dynamicTheme.darkTheme!.colorScheme
+                                        .secondary
+                                    : Themes.dynamicTheme.lightTheme!
+                                        .colorScheme.secondary,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    Flexible(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          ),
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Themes.dynamicTheme.darkTheme!.colorScheme.secondary
-                              : Themes.dynamicTheme.lightTheme!.colorScheme.secondary,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
               value: "dynamic",
               groupValue: _selectedColor,
-              onChanged: Themes.dynamicTheme.lightTheme == null ? null : (value) {
-                setState(() {
-                  _selectedColor = value.toString();
-                  ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
-                });
-              },
+              onChanged: Themes.dynamicTheme.lightTheme == null
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _selectedColor = value.toString();
+                        ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
+                      });
+                    },
             ),
             colorListTile(
               title: "Schulfarbe",

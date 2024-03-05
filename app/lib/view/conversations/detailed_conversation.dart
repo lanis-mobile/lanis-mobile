@@ -111,9 +111,10 @@ class _DetailedConversationAnsichtState
             child: Row(
               children: [
                 Flexible(
-                  flex: 10,
-                  child: FormattedText(text: content,)
-                )
+                    flex: 10,
+                    child: FormattedText(
+                      text: content,
+                    ))
               ],
             ),
           ),

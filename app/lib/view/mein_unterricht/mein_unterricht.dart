@@ -18,7 +18,9 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     with TickerProviderStateMixin {
-  final MeinUnterrichtFetcher meinUnterrichtFetcher = client.applets![SPHAppEnum.meinUnterricht]!.fetchers[0] as MeinUnterrichtFetcher;
+  final MeinUnterrichtFetcher meinUnterrichtFetcher = client
+      .applets![SPHAppEnum.meinUnterricht]!
+      .fetchers[0] as MeinUnterrichtFetcher;
 
   static const double padding = 12.0;
   late TabController _tabController;
@@ -26,9 +28,9 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   final GlobalKey<RefreshIndicatorState> _currentIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _coursesIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _presenceIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
 
   final Widget noDataScreen = const Center(
     child: Column(
@@ -59,70 +61,72 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
 
   Widget presenceView(BuildContext context, dynamic presence) {
     return RefreshIndicator(
-      key: _presenceIndicatorKey,
-      onRefresh: () async {
-        meinUnterrichtFetcher.fetchData(forceRefresh: true);
-      },
-      child: presence.length != 0 ? ListView.builder(
-        itemCount: presence.length,
-        itemBuilder: (BuildContext context, int index) {
-          List<String> keysNotRender = [
-            "Kurs",
-            "Lehrkraft",
-            "_courseURL"
-          ];
-          List<Widget> rowChildren = [];
-
-          presence[index].forEach((key, value) {
-            if (!keysNotRender.contains(key) && value != "") {
-              rowChildren.add(Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                      toBeginningOfSentenceCase("$key:")!,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  Text(value)
-                ],
-              ));
-            }
-          });
-
-          return Padding(
-              padding: EdgeInsets.only(
-                left: padding,
-                right: padding,
-                bottom: index == presence.length - 1 ? 14 : 8,
-                top: index == 0 ? padding : 0,
-              ),
-              child: Card(
-                child: ListTile(
-                  title: Text(
-                      presence[index]["Kurs"] ?? "",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: rowChildren,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CourseOverviewAnsicht(
-                            dataFetchURL: presence[index]["_courseURL"],
-                            title: presence[index]["Kurs"],
-                          )),
-                    );
-                  },
-                ),
-              ));
+        key: _presenceIndicatorKey,
+        onRefresh: () async {
+          meinUnterrichtFetcher.fetchData(forceRefresh: true);
         },
-      ) : noDataScreen
-    );
+        child: presence.length != 0
+            ? ListView.builder(
+                itemCount: presence.length,
+                itemBuilder: (BuildContext context, int index) {
+                  List<String> keysNotRender = [
+                    "Kurs",
+                    "Lehrkraft",
+                    "_courseURL"
+                  ];
+                  List<Widget> rowChildren = [];
+
+                  presence[index].forEach((key, value) {
+                    if (!keysNotRender.contains(key) && value != "") {
+                      rowChildren.add(Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            toBeginningOfSentenceCase("$key:")!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          Text(value)
+                        ],
+                      ));
+                    }
+                  });
+
+                  return Padding(
+                      padding: EdgeInsets.only(
+                        left: padding,
+                        right: padding,
+                        bottom: index == presence.length - 1 ? 14 : 8,
+                        top: index == 0 ? padding : 0,
+                      ),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(
+                            presence[index]["Kurs"] ?? "",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: rowChildren,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CourseOverviewAnsicht(
+                                        dataFetchURL: presence[index]
+                                            ["_courseURL"],
+                                        title: presence[index]["Kurs"],
+                                      )),
+                            );
+                          },
+                        ),
+                      ));
+                },
+              )
+            : noDataScreen);
   }
 
   Widget coursesView(BuildContext context, dynamic courses) {
@@ -131,105 +135,108 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
       onRefresh: () async {
         meinUnterrichtFetcher.fetchData(forceRefresh: true);
       },
-      child: courses.length != 0 ? ListView.builder(
-        itemCount: courses.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-              padding: EdgeInsets.only(
-                left: padding,
-                right: padding,
-                bottom: index == courses.length - 1 ? 14 : 8,
-                top: index == 0 ? padding : 0,
-              ),
-              child: Card(
-                child: ListTile(
-                  title: Text(
-                      courses[index]["title"] ?? "",
-                      style: Theme.of(context).textTheme.titleMedium
-                  ),
-                  subtitle: Text(
-                      courses[index]["teacher"] ?? "",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CourseOverviewAnsicht(
-                            dataFetchURL: courses[index]["_courseURL"],
-                            title: courses[index]["title"],
-                          )),
-                    );
-                  },
-                ),
-              ));
-        },
-      ) : noDataScreen,
+      child: courses.length != 0
+          ? ListView.builder(
+              itemCount: courses.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                    padding: EdgeInsets.only(
+                      left: padding,
+                      right: padding,
+                      bottom: index == courses.length - 1 ? 14 : 8,
+                      top: index == 0 ? padding : 0,
+                    ),
+                    child: Card(
+                      child: ListTile(
+                        title: Text(courses[index]["title"] ?? "",
+                            style: Theme.of(context).textTheme.titleMedium),
+                        subtitle: Text(
+                          courses[index]["teacher"] ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CourseOverviewAnsicht(
+                                      dataFetchURL: courses[index]
+                                          ["_courseURL"],
+                                      title: courses[index]["title"],
+                                    )),
+                          );
+                        },
+                      ),
+                    ));
+              },
+            )
+          : noDataScreen,
     );
   }
 
   Widget currentView(BuildContext context, dynamic current) {
     return RefreshIndicator(
-      key: _currentIndicatorKey,
-      onRefresh: () async {
-        meinUnterrichtFetcher.fetchData(forceRefresh: true);
-      },
-      child: current.length != 0 ? ListView.builder(
-        itemCount: current.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-              padding: EdgeInsets.only(
-                  left: padding,
-                  right: padding,
-                  bottom: index == current.length - 1 ? 14 : 8,
-                  top: index == 0 ? padding : 0,
-              ),
-              child: Card(
-                child: ListTile(
-                  title: Text(
-                      current[index]["name"] ?? "",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          "Thema: ${current[index]["thema"]["title"] ?? ""}",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                              "${current[index]["teacher"]["name"]??""} (${current[index]["teacher"]["short"] ?? "-"})",
-                          ),
-                          Text(current[index]["thema"]["date"]??"-")
-                        ],
-                      ),
-                    ],
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CourseOverviewAnsicht(
-                            dataFetchURL: current[index]["_courseURL"],
-                            title: current[index]["name"],
-                          )),
-                    );
-                  },
-                ),
-              ));
+        key: _currentIndicatorKey,
+        onRefresh: () async {
+          meinUnterrichtFetcher.fetchData(forceRefresh: true);
         },
-      ) : noDataScreen
-    );
+        child: current.length != 0
+            ? ListView.builder(
+                itemCount: current.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Padding(
+                      padding: EdgeInsets.only(
+                        left: padding,
+                        right: padding,
+                        bottom: index == current.length - 1 ? 14 : 8,
+                        top: index == 0 ? padding : 0,
+                      ),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(
+                            current[index]["name"] ?? "",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Thema: ${current[index]["thema"]["title"] ?? ""}",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${current[index]["teacher"]["name"] ?? ""} (${current[index]["teacher"]["short"] ?? "-"})",
+                                  ),
+                                  Text(current[index]["thema"]["date"] ?? "-")
+                                ],
+                              ),
+                            ],
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CourseOverviewAnsicht(
+                                        dataFetchURL: current[index]
+                                            ["_courseURL"],
+                                        title: current[index]["name"],
+                                      )),
+                            );
+                          },
+                        ),
+                      ));
+                },
+              )
+            : noDataScreen);
   }
 
   @override
@@ -265,20 +272,33 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    if (snapshot.data?.status == FetcherStatus.error && snapshot.data?.content is LanisException) ...[
-                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: meinUnterrichtFetcher,),
-                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: meinUnterrichtFetcher),
-                      ErrorView(data: snapshot.data?.content as LanisException, name: "Mein Unterricht", fetcher: meinUnterrichtFetcher)
-                    ]
-                    else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) ...[
+                    if (snapshot.data?.status == FetcherStatus.error &&
+                        snapshot.data?.content is LanisException) ...[
+                      ErrorView(
+                        data: snapshot.data?.content as LanisException,
+                        name: "Mein Unterricht",
+                        fetcher: meinUnterrichtFetcher,
+                      ),
+                      ErrorView(
+                          data: snapshot.data?.content as LanisException,
+                          name: "Mein Unterricht",
+                          fetcher: meinUnterrichtFetcher),
+                      ErrorView(
+                          data: snapshot.data?.content as LanisException,
+                          name: "Mein Unterricht",
+                          fetcher: meinUnterrichtFetcher)
+                    ] else if (snapshot.data?.status ==
+                            FetcherStatus.fetching ||
+                        snapshot.data == null) ...[
                       const Center(child: CircularProgressIndicator()),
                       const Center(child: CircularProgressIndicator()),
                       const Center(child: CircularProgressIndicator()),
-                    ]
-                    else ...[
+                    ] else ...[
                       currentView(context, snapshot.data?.content["aktuell"]),
-                      coursesView(context, snapshot.data?.content["kursmappen"]),
-                      presenceView(context, snapshot.data?.content["anwesenheiten"]),
+                      coursesView(
+                          context, snapshot.data?.content["kursmappen"]),
+                      presenceView(
+                          context, snapshot.data?.content["anwesenheiten"]),
                     ]
                   ],
                 ),

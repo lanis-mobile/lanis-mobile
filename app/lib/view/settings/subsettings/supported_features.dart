@@ -9,11 +9,12 @@ class SupportedFeaturesOverviewScreen extends StatefulWidget {
   const SupportedFeaturesOverviewScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _SupportedFeaturesOverviewScreenState();
+  State<StatefulWidget> createState() =>
+      _SupportedFeaturesOverviewScreenState();
 }
 
-
-class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverviewScreen> {
+class _SupportedFeaturesOverviewScreenState
+    extends State<SupportedFeaturesOverviewScreen> {
   double padding = 10.0;
 
   List<ListTile> featureListListTiles = [];
@@ -53,7 +54,10 @@ class _SupportedFeaturesOverviewScreenState extends State<SupportedFeaturesOverv
       appBar: AppBar(
         title: const Text("Unterstützung"),
         actions: [
-          InfoButton(infoText: "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.", context: context)
+          InfoButton(
+              infoText:
+                  "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
+              context: context)
         ],
       ),
       body: ListView(

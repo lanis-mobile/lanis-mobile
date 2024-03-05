@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
@@ -16,7 +17,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/client/connection_checker.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
-
 class Destination {
   final String label;
   final Icon icon;
@@ -29,7 +29,16 @@ class Destination {
   final Widget? body;
 
   //Either a body or an action has to be provided!
-  Destination({this.body, this.action, this.addDivider = false, required this.enableBottomNavigation, required this.enableDrawer, required this.label, required this.isSupported, required this.icon, required this.selectedIcon});
+  Destination(
+      {this.body,
+      this.action,
+      this.addDivider = false,
+      required this.enableBottomNavigation,
+      required this.enableDrawer,
+      required this.label,
+      required this.isSupported,
+      required this.icon,
+      required this.selectedIcon});
 }
 
 class HomePage extends StatefulWidget {
@@ -43,81 +52,74 @@ class _HomePageState extends State<HomePage> {
   late int selectedDestinationDrawer;
   late bool doesSupportAnyApplet = false;
 
-
   ///The UI is build dynamically based on this list.
   ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
   List<Destination> destinations = [
     Destination(
-      label: "Vertretungsplan",
-      icon: const Icon(Icons.group),
-      selectedIcon: const Icon(Icons.group_outlined),
-      isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
-      enableBottomNavigation: true,
-      enableDrawer: true,
-      body: const VertretungsplanAnsicht()
-    ),
+        label: "Vertretungsplan",
+        icon: const Icon(Icons.group),
+        selectedIcon: const Icon(Icons.group_outlined),
+        isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
+        enableBottomNavigation: true,
+        enableDrawer: true,
+        body: const VertretungsplanAnsicht()),
     Destination(
-      label: "Kalender",
-      icon: const Icon(Icons.calendar_today),
-      selectedIcon: const Icon(Icons.calendar_today_outlined),
-      isSupported: client.doesSupportFeature(SPHAppEnum.kalender),
-      enableBottomNavigation: true,
-      enableDrawer: true,
-      body: const CalendarAnsicht()
-    ),
+        label: "Kalender",
+        icon: const Icon(Icons.calendar_today),
+        selectedIcon: const Icon(Icons.calendar_today_outlined),
+        isSupported: client.doesSupportFeature(SPHAppEnum.kalender),
+        enableBottomNavigation: true,
+        enableDrawer: true,
+        body: const CalendarAnsicht()),
     Destination(
-      label: "Nachrichten",
-      icon: const Icon(Icons.forum),
-      selectedIcon: const Icon(Icons.forum_outlined),
-      isSupported: client.doesSupportFeature(SPHAppEnum.nachrichten),
-      enableBottomNavigation: true,
-      enableDrawer: true,
-      body: const ConversationsAnsicht()
-    ),
+        label: "Nachrichten",
+        icon: const Icon(Icons.forum),
+        selectedIcon: const Icon(Icons.forum_outlined),
+        isSupported: client.doesSupportFeature(SPHAppEnum.nachrichten),
+        enableBottomNavigation: true,
+        enableDrawer: true,
+        body: const ConversationsAnsicht()),
     Destination(
-      label: "Mein Unterricht",
-      icon: const Icon(Icons.school),
-      selectedIcon: const Icon(Icons.school_outlined),
-      isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
-      enableBottomNavigation: true,
-      enableDrawer: true,
-      body: const MeinUnterrichtAnsicht()
-    ),
+        label: "Mein Unterricht",
+        icon: const Icon(Icons.school),
+        selectedIcon: const Icon(Icons.school_outlined),
+        isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
+        enableBottomNavigation: true,
+        enableDrawer: true,
+        body: const MeinUnterrichtAnsicht()),
     Destination(
-      label: "Lanis im Browser öffnen",
-      icon: const Icon(Icons.open_in_new),
-      selectedIcon: const Icon(Icons.open_in_new),
-      isSupported: true,
-      enableBottomNavigation: false,
-      enableDrawer: true,
-      action: (_context) {
-        client.getLoginURL().then((response) {
-          launchUrl(Uri.parse(response));
-        });
-      }
-    ),
+        label: "Lanis im Browser öffnen",
+        icon: const Icon(Icons.open_in_new),
+        selectedIcon: const Icon(Icons.open_in_new),
+        isSupported: true,
+        enableBottomNavigation: false,
+        enableDrawer: true,
+        action: (_context) {
+          client.getLoginURL().then((response) {
+            launchUrl(Uri.parse(response));
+          });
+        }),
     Destination(
-      label: "Moodle Login öffnen",
-      icon: const Icon(Icons.open_in_new),
-      selectedIcon: const Icon(Icons.open_in_new),
-      isSupported: true,
-      enableBottomNavigation: false,
-      enableDrawer: true,
-      action: (_context) => launchUrl(Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"))
-    ),
+        label: "Moodle Login öffnen",
+        icon: const Icon(Icons.open_in_new),
+        selectedIcon: const Icon(Icons.open_in_new),
+        isSupported: true,
+        enableBottomNavigation: false,
+        enableDrawer: true,
+        action: (_context) => launchUrl(
+            Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"))),
     Destination(
-      label: "Einstellungen",
-      icon: const Icon(Icons.settings),
-      selectedIcon: const Icon(Icons.settings),
-      isSupported: true,
-      enableBottomNavigation: false,
-      enableDrawer: true,
-      addDivider: true,
-      action: (context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SettingsScreen()),
-      )
-    ),
+        label: "Einstellungen",
+        icon: const Icon(Icons.settings),
+        selectedIcon: const Icon(Icons.settings),
+        isSupported: true,
+        enableBottomNavigation: false,
+        enableDrawer: true,
+        addDivider: true,
+        action: (context) => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            )),
     Destination(
       label: "Fehlerbericht senden",
       icon: const Icon(Icons.bug_report),
@@ -125,9 +127,8 @@ class _HomePageState extends State<HomePage> {
       isSupported: true,
       enableBottomNavigation: false,
       enableDrawer: true,
-      action: (context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const BugReportScreen())),
+      action: (context) => Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const BugReportScreen())),
     ),
   ];
 
@@ -170,23 +171,32 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.disabled_by_default_outlined, size: 150,),
-          const Padding(padding: EdgeInsets.all(32), child: Text("Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),),
-          ElevatedButton(onPressed: () => openLanisInBrowser(context), child: const Text("Im Browser öffnen"))
+          const Icon(
+            Icons.disabled_by_default_outlined,
+            size: 150,
+          ),
+          const Padding(
+            padding: EdgeInsets.all(32),
+            child: Text(
+                "Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),
+          ),
+          ElevatedButton(
+              onPressed: () => openLanisInBrowser(context),
+              child: const Text("Im Browser öffnen"))
         ],
       ),
     );
   }
 
   void openDestination(int index, bool fromDrawer) {
-      if (destinations[index].action != null) {
-        destinations[index].action!(context);
-      } else {
-        setState(() {
-          selectedDestinationDrawer = index;
-          if (fromDrawer) Navigator.pop(context);
-        });
-      }
+    if (destinations[index].action != null) {
+      destinations[index].action!(context);
+    } else {
+      setState(() {
+        selectedDestinationDrawer = index;
+        if (fromDrawer) Navigator.pop(context);
+      });
+    }
   }
 
   NavigationDrawer navDrawer(context) {
@@ -206,8 +216,10 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    final Color imageColor = Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
-    final Color textColor = imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+    final Color imageColor =
+        Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+    final Color textColor =
+        imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
 
     return NavigationDrawer(
         selectedIndex: selectedDestinationDrawer,
@@ -223,12 +235,18 @@ class _HomePageState extends State<HomePage> {
                     imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                     child: ColorFiltered(
                       colorFilter:
-                      ColorFilter.mode(imageColor, BlendMode.srcOver),
+                          ColorFilter.mode(imageColor, BlendMode.srcOver),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.file(
-                          File(client.schoolImage),
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=lg",
+                          fadeInDuration: const Duration(milliseconds: 0),
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => Image.file(
+                            File("assets/icon.png"),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
@@ -252,8 +270,7 @@ class _HomePageState extends State<HomePage> {
                             .textTheme
                             .headlineMedium
                             ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: textColor),
+                                fontWeight: FontWeight.bold, color: textColor),
                       )
                     ],
                   ),
@@ -262,8 +279,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           ...drawerDestinations,
-        ]
-    );
+        ]);
   }
 
   NavigationBar navBar(context) {
@@ -296,7 +312,8 @@ class _HomePageState extends State<HomePage> {
     return NavigationBar(
       destinations: barDestinations,
       selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
-      onDestinationSelected: (int index) => openDestination(indexNavbarTranslationLayer.indexOf(index), false),
+      onDestinationSelected: (int index) =>
+          openDestination(indexNavbarTranslationLayer.indexOf(index), false),
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
     );
   }
@@ -307,33 +324,38 @@ class _HomePageState extends State<HomePage> {
         stream: connectionChecker.onStatusChange,
         builder: (context, network) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(doesSupportAnyApplet ? destinations[selectedDestinationDrawer].label : "Im Browser öffnen"),
-              bottom: network.data == InternetStatus.disconnected ? PreferredSize(
-                preferredSize: const Size.fromHeight(40),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: Icon(Icons.signal_wifi_off),
-                      ),
-                      Text(
-                        "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                    ],
-                  ),
-                ),
-              ) : null,
-            ),
-            body: doesSupportAnyApplet ? destinations[selectedDestinationDrawer].body : noAppsSupported(),
-            bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
-            drawer: navDrawer(context)
-          );
-        }
-    );
+              appBar: AppBar(
+                title: Text(doesSupportAnyApplet
+                    ? destinations[selectedDestinationDrawer].label
+                    : "Im Browser öffnen"),
+                bottom: network.data == InternetStatus.disconnected
+                    ? PreferredSize(
+                        preferredSize: const Size.fromHeight(40),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(right: 8),
+                                child: Icon(Icons.signal_wifi_off),
+                              ),
+                              Text(
+                                "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+              body: doesSupportAnyApplet
+                  ? destinations[selectedDestinationDrawer].body
+                  : noAppsSupported(),
+              bottomNavigationBar:
+                  doesSupportAnyApplet ? navBar(context) : null,
+              drawer: navDrawer(context));
+        });
   }
 }

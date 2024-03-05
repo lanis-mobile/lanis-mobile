@@ -12,8 +12,7 @@ class ClearCacheScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Cache leeren"),
         ),
-        body: const Body()
-    );
+        body: const Body());
   }
 }
 
@@ -33,7 +32,8 @@ class _BodyState extends State<Body> {
     var dir = Directory(dirPath);
 
     if (dir.existsSync()) {
-      dir.listSync(recursive: true, followLinks: false)
+      dir
+          .listSync(recursive: true, followLinks: false)
           .forEach((FileSystemEntity entity) {
         if (entity is File) {
           fileNum++;
@@ -56,7 +56,7 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-     getTemporaryDirectory().then((dir) {
+    getTemporaryDirectory().then((dir) {
       setState(() {
         cacheStats = dirStatSync(dir.path);
       });
@@ -70,18 +70,20 @@ class _BodyState extends State<Body> {
         const ListTile(
           leading: Icon(Icons.cached),
           title: Text('Cache'),
-          subtitle: Text('Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.'),
+          subtitle: Text(
+              'Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.'),
         ),
         ListTile(
           leading: const Icon(Icons.file_download_sharp),
           title: const Text('Dateien'),
-          trailing: Text(cacheStats['fileNum'].toString(), style: const TextStyle(fontSize: 28)),
+          trailing: Text(cacheStats['fileNum'].toString(),
+              style: const TextStyle(fontSize: 28)),
           subtitle: Text('Größe: ${cacheStats['size']! ~/ 1024} KB'),
         ),
         ListTile(
           leading: const Icon(Icons.delete_forever),
           title: const Text('Cache leeren'),
-          onTap: (){
+          onTap: () {
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -113,4 +115,3 @@ class _BodyState extends State<Body> {
     );
   }
 }
-

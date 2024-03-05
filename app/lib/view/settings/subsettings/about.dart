@@ -17,8 +17,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   void initState() {
-    PackageInfo.fromPlatform().then((PackageInfo packageInfo){
-
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
       appName = packageInfo.appName;
       packageName = packageInfo.packageName;
       version = packageInfo.version;
@@ -30,9 +29,7 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Über Lanis-Mobile")
-      ),
+      appBar: AppBar(title: const Text("Über Lanis-Mobile")),
       body: ListView(
         children: <Widget>[
           ListTile(
@@ -76,8 +73,8 @@ class _AboutScreenState extends State<AboutScreen> {
             leading: const Icon(Icons.code),
             title: const Text('GitHub Repository'),
             onTap: () {
-              launchUrl(Uri.parse(
-                  "https://github.com/alessioC42/lanis-mobile"));
+              launchUrl(
+                  Uri.parse("https://github.com/alessioC42/lanis-mobile"));
             },
           ),
           ListTile(
@@ -85,30 +82,27 @@ class _AboutScreenState extends State<AboutScreen> {
               title: const Text('Datenschutzerklärung'),
               onTap: () {
                 launchUrl(Uri.parse(
-                    "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")
-                );
-              }
-          ),
+                    "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md"));
+              }),
           ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('Open Source Lizenzen'),
-            onTap: () {
-              showLicensePage(context: context);
-            }
-          ),
+              leading: const Icon(Icons.info),
+              title: const Text('Open Source Lizenzen'),
+              onTap: () {
+                showLicensePage(context: context);
+              }),
           ListTile(
             leading: const Icon(Icons.build),
             title: const Text("Build Informationen"),
-            onTap: (){
+            onTap: () {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text("App Informationen"),
-                      content: Text("appName: $appName\npackageName: $packageName\nversion: $version\nbuildNumber: $buildNumber"),
+                      content: Text(
+                          "appName: $appName\npackageName: $packageName\nversion: $version\nbuildNumber: $buildNumber"),
                     );
-                  }
-              );
+                  });
             },
           )
         ],

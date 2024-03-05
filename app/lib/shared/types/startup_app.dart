@@ -12,7 +12,10 @@ class LoadApp {
   bool shouldFetch;
   final List<Fetcher> fetchers;
 
-  LoadApp({required this.applet, required this.shouldFetch, required this.fetchers});
+  LoadApp(
+      {required this.applet,
+      required this.shouldFetch,
+      required this.fetchers});
 
   Map<String, dynamic> toJson() {
     final List<String> _fetchers = [];
@@ -28,7 +31,8 @@ class LoadApp {
   }
 
   /// Deserialises a JSON which needs some boilerplate functions because some objects aren't conveniently serialisable.
-  static LoadApp fromJson(Map<String, dynamic> jsonData, Duration validCacheDuration) {
+  static LoadApp fromJson(
+      Map<String, dynamic> jsonData, Duration validCacheDuration) {
     final List<Fetcher> _fetchers = [];
     for (final fetcher in jsonData["fetchers"]) {
       _fetchers.add(Fetcher.fromJson(fetcher, const Duration(minutes: 15)));
@@ -37,7 +41,6 @@ class LoadApp {
     return LoadApp(
         applet: SPHAppEnum.fromJson(jsonData["applet"]),
         shouldFetch: jsonData["shouldFetch"],
-        fetchers: _fetchers
-    );
+        fetchers: _fetchers);
   }
 }

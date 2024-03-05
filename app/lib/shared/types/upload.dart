@@ -12,13 +12,22 @@ class OwnFile extends UploadFile {
   final String time;
   final String? comment;
 
-  OwnFile({required super.name, required super.url, required super.index, required this.time, this.comment});
+  OwnFile(
+      {required super.name,
+      required super.url,
+      required super.index,
+      required this.time,
+      this.comment});
 }
 
 class PublicFile extends UploadFile {
   final String person;
 
-  PublicFile({required super.name, required super.url, required super.index, required this.person});
+  PublicFile(
+      {required super.name,
+      required super.url,
+      required super.index,
+      required this.person});
 }
 
 class FileStatus {

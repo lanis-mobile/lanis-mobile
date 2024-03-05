@@ -18,24 +18,21 @@ class LoadModeScreen extends StatelessWidget {
           title: const Text("Startapps"),
           actions: [
             InfoButton(
-                infoText: "Anstatt Apps erst zu laden, wenn du sie verwendest, kannst du hier deine wichtigsten Apps auswählen, damit sie direkt bei App-Start geladen werden und du sie sofort verwenden kannst. Außerdem kannst du festlegen, wann sie automatisch geladen werden sollen, damit du immer auf dem neuesten Stand bist.",
-                context: context
-            ),
+                infoText:
+                    "Anstatt Apps erst zu laden, wenn du sie verwendest, kannst du hier deine wichtigsten Apps auswählen, damit sie direkt bei App-Start geladen werden und du sie sofort verwenden kannst. Außerdem kannst du festlegen, wann sie automatisch geladen werden sollen, damit du immer auf dem neuesten Stand bist.",
+                context: context),
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(0),
-          child: ListView(
-            children: const [
-              Column(
-                children: [
-                  LoadModeElements(),
-                ],
-              )
-            ]
-          ),
-        )
-    );
+          child: ListView(children: const [
+            Column(
+              children: [
+                LoadModeElements(),
+              ],
+            )
+          ]),
+        ));
   }
 }
 
@@ -72,10 +69,8 @@ class _LoadModeElementsState extends State<LoadModeElements> {
   Widget build(BuildContext context) {
     if (client.applets!.isEmpty) {
       return const Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text("Es werden keine Apps unterstützt!")
-        ],
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [Text("Es werden keine Apps unterstützt!")],
       );
     }
 
@@ -83,15 +78,17 @@ class _LoadModeElementsState extends State<LoadModeElements> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: client.applets!.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: client.applets!.length,
             itemBuilder: (context, index) {
               final LoadApp loadApp = client.applets!.values.elementAt(index);
               return CheckboxListTile(
-                secondary: Icon(getIcon(loadApp.applet)),
-                subtitle: loadApp.applet == SPHAppEnum.kalender ? const Text("Der Kalender wird nicht neu geladen.") : null,
-                title: Text(loadApp.applet.fullName),
+                  secondary: Icon(getIcon(loadApp.applet)),
+                  subtitle: loadApp.applet == SPHAppEnum.kalender
+                      ? const Text("Der Kalender wird nicht neu geladen.")
+                      : null,
+                  title: Text(loadApp.applet.fullName),
                   value: loadApp.shouldFetch,
                   onChanged: (value) async {
                     setState(() {
@@ -103,22 +100,21 @@ class _LoadModeElementsState extends State<LoadModeElements> {
                     final Map<String, Map<String, dynamic>> jsonLoadApps = {};
                     for (final applet in client.applets!.keys) {
                       jsonLoadApps.addEntries([
-                        MapEntry(
-                            applet.name,
-                            client.applets![applet]!.toJson()
-                        )
+                        MapEntry(applet.name, client.applets![applet]!.toJson())
                       ]);
                     }
 
-                    await globalStorage.write(key: StorageKey.settingsLoadApps, value: json.encode(jsonLoadApps));
-                }
-              );
-            }
-        ),
+                    await globalStorage.write(
+                        key: StorageKey.settingsLoadApps,
+                        value: json.encode(jsonLoadApps));
+                  });
+            }),
         ListTile(
           title: const Text('Update-Intervall'),
-          trailing: Text('${client.updateAppsIntervall} min', style: const TextStyle(fontSize: 14)),
-          subtitle: const Text("Die App muss neu gestartet werden, damit eine Änderung wirksam wird."),
+          trailing: Text('${client.updateAppsIntervall} min',
+              style: const TextStyle(fontSize: 14)),
+          subtitle: const Text(
+              "Die App muss neu gestartet werden, damit eine Änderung wirksam wird."),
         ),
         Slider(
           value: client.updateAppsIntervall.toDouble(),
@@ -130,11 +126,12 @@ class _LoadModeElementsState extends State<LoadModeElements> {
             });
           },
           onChangeEnd: (double value) async {
-            await globalStorage.write(key: StorageKey.settingsUpdateAppsIntervall, value: client.updateAppsIntervall.toString());
+            await globalStorage.write(
+                key: StorageKey.settingsUpdateAppsIntervall,
+                value: client.updateAppsIntervall.toString());
           },
         ),
       ],
     );
   }
 }
-

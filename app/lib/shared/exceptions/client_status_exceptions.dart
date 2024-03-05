@@ -15,7 +15,8 @@ class WrongCredentialsException implements LanisException {
 class CredentialsIncompleteException implements LanisException {
   @override
   String cause;
-  CredentialsIncompleteException([this.cause = "Nicht alle Anmeldedaten angegeben"]);
+  CredentialsIncompleteException(
+      [this.cause = "Nicht alle Anmeldedaten angegeben"]);
 }
 
 class NetworkException implements LanisException {
@@ -27,7 +28,8 @@ class NetworkException implements LanisException {
 class LoggedOffOrUnknownException implements LanisException {
   @override
   String cause;
-  LoggedOffOrUnknownException([this.cause = "Unbekannter Fehler! Bist du eingeloggt?"]);
+  LoggedOffOrUnknownException(
+      [this.cause = "Unbekannter Fehler! Bist du eingeloggt?"]);
 }
 
 class UnauthorizedException implements LanisException {
@@ -39,13 +41,15 @@ class UnauthorizedException implements LanisException {
 class EncryptionCheckFailedException implements LanisException {
   @override
   String cause;
-  EncryptionCheckFailedException([this.cause = "Verschlüsselungsüberprüfung fehlgeschlagen"]);
+  EncryptionCheckFailedException(
+      [this.cause = "Verschlüsselungsüberprüfung fehlgeschlagen"]);
 }
 
 class UnsaltedOrUnknownException implements LanisException {
   @override
   String cause;
-  UnsaltedOrUnknownException([this.cause = "Unbekannter Fehler! Antwort war nicht salted."]);
+  UnsaltedOrUnknownException(
+      [this.cause = "Unbekannter Fehler! Antwort war nicht salted."]);
 }
 
 class NotSupportedException implements LanisException {

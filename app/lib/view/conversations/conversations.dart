@@ -15,15 +15,19 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     with TickerProviderStateMixin {
-  final InvisibleConversationsFetcher invisibleConversationsFetcher = client.applets![SPHAppEnum.nachrichten]!.fetchers[0] as InvisibleConversationsFetcher;
-  final VisibleConversationsFetcher visibleConversationsFetcher = client.applets![SPHAppEnum.nachrichten]!.fetchers[1] as VisibleConversationsFetcher;
+  final InvisibleConversationsFetcher invisibleConversationsFetcher = client
+      .applets![SPHAppEnum.nachrichten]!
+      .fetchers[0] as InvisibleConversationsFetcher;
+  final VisibleConversationsFetcher visibleConversationsFetcher = client
+      .applets![SPHAppEnum.nachrichten]!
+      .fetchers[1] as VisibleConversationsFetcher;
 
   static const double padding = 12.0;
 
   final GlobalKey<RefreshIndicatorState> _refreshVisibleKey =
       GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _refreshInvisibleKey =
-  GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
 
   dynamic visibleConversations;
   dynamic invisibleConversations;
@@ -120,8 +124,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                conversation["Datum"] ??
-                    "",
+                conversation["Datum"] ?? "",
               )
             ],
           ),
@@ -133,7 +136,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     );
   }
 
-  Widget conversationsView(BuildContext context, conversations, Fetcher fetcher, GlobalKey key) {
+  Widget conversationsView(
+      BuildContext context, conversations, Fetcher fetcher, GlobalKey key) {
     return RefreshIndicator(
       key: key,
       onRefresh: () async {
@@ -144,10 +148,10 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.only(
-                left: padding,
-                right: padding,
-                bottom: index == conversations.length ? 14 : 8,
-                top: index == 0 ? padding : 0,
+              left: padding,
+              right: padding,
+              bottom: index == conversations.length ? 14 : 8,
+              top: index == 0 ? padding : 0,
             ),
             child: Card(
               child: InkWell(
@@ -158,12 +162,10 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  DetailedConversationAnsicht(
+                              builder: (context) => DetailedConversationAnsicht(
                                     uniqueID: conversations[index]
-                                    ["Uniquid"], // nice typo Lanis
-                                    title: conversations[index]
-                                    ["Betreff"],
+                                        ["Uniquid"], // nice typo Lanis
+                                    title: conversations[index]["Betreff"],
                                   )));
                     }
                   },
@@ -171,8 +173,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                       borderRadius: BorderRadius.circular(12)),
                   child: index == conversations.length
                       ? _tabController.index == 0
-                      ? infoCard
-                      : infoCardInvisibility
+                          ? infoCard
+                          : infoCardInvisibility
                       : getConversationWidget(conversations[index])),
             ),
           );
@@ -192,8 +194,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             icon: Icon(Icons.visibility),
           ),
           Tab(
-              text: "Ausgeblendet",
-              icon: Icon(Icons.visibility_off),
+            text: "Ausgeblendet",
+            icon: Icon(Icons.visibility_off),
           )
         ],
       ),
@@ -204,26 +206,34 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               stream: visibleConversationsFetcher.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView(data: snapshot.data?.content, name: "Nachrichten", fetcher: visibleConversationsFetcher);
-                } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
+                  return ErrorView(
+                      data: snapshot.data?.content,
+                      name: "Nachrichten",
+                      fetcher: visibleConversationsFetcher);
+                } else if (snapshot.data?.status == FetcherStatus.fetching ||
+                    snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, visibleConversationsFetcher, _refreshVisibleKey);
+                  return conversationsView(context, snapshot.data?.content,
+                      visibleConversationsFetcher, _refreshVisibleKey);
                 }
-              }
-          ),
+              }),
           StreamBuilder(
               stream: invisibleConversationsFetcher.stream,
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView.fromCode(data: snapshot.data?.content, name: "Nachrichten", fetcher: invisibleConversationsFetcher);
-                } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
+                  return ErrorView.fromCode(
+                      data: snapshot.data?.content,
+                      name: "Nachrichten",
+                      fetcher: invisibleConversationsFetcher);
+                } else if (snapshot.data?.status == FetcherStatus.fetching ||
+                    snapshot.data == null) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return conversationsView(context, snapshot.data?.content, invisibleConversationsFetcher, _refreshInvisibleKey);
+                  return conversationsView(context, snapshot.data?.content,
+                      invisibleConversationsFetcher, _refreshInvisibleKey);
                 }
-              }
-          )
+              })
         ],
       ),
       floatingActionButton: FloatingActionButton(

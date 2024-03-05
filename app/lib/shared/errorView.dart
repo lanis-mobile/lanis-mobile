@@ -8,8 +8,16 @@ class ErrorView extends StatelessWidget {
   late final LanisException data;
   late final Fetcher? fetcher;
   late final String name;
-  ErrorView({super.key, required this.data, required this.name, required this.fetcher});
-  ErrorView.fromCode({super.key, required int data, required this.name, required this.fetcher}) {
+  ErrorView(
+      {super.key,
+      required this.data,
+      required this.name,
+      required this.fetcher});
+  ErrorView.fromCode(
+      {super.key,
+      required int data,
+      required this.name,
+      required this.fetcher}) {
     this.data = LanisException.fromCode(data);
   }
 
@@ -35,8 +43,7 @@ class ErrorView extends StatelessWidget {
                     style:
                         TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               ),
-              Text(
-                  "Problem: ${data.cause}"),
+              Text("Problem: ${data.cause}"),
               Padding(
                 padding: const EdgeInsets.only(top: 35),
                 child: Row(

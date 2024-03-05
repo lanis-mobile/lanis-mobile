@@ -10,7 +10,8 @@ class SubstitutionWidget extends StatelessWidget {
     return (info == null || info == "" || info == "---");
   }
 
-  Widget? getSubstitutionInfo(BuildContext context, String key, String? value, IconData icon) {
+  Widget? getSubstitutionInfo(
+      BuildContext context, String key, String? value, IconData icon) {
     if (doesNoticeExist(value)) {
       return null;
     }
@@ -18,7 +19,7 @@ class SubstitutionWidget extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
         child:
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
             children: [
               Padding(
@@ -32,9 +33,7 @@ class SubstitutionWidget extends StatelessWidget {
             ],
           ),
           Text(value!)
-        ]
-      )
-    );
+        ]));
   }
 
   @override
@@ -47,14 +46,15 @@ class SubstitutionWidget extends StatelessWidget {
           doesNoticeExist(substitutionData["Hinweis"])),
       title: Padding(
         padding: const EdgeInsets.only(top: 2),
-        child: (substitutionData['Art'] != null) ?
-        MarqueeWidget(
-          direction: Axis.horizontal,
-          child: Text(
-            substitutionData['Art'],
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ) : null,
+        child: (substitutionData['Art'] != null)
+            ? MarqueeWidget(
+                direction: Axis.horizontal,
+                child: Text(
+                  substitutionData['Art'],
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              )
+            : null,
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,21 +63,21 @@ class SubstitutionWidget extends StatelessWidget {
             padding: EdgeInsets.only(
                 top: 0,
                 bottom: (doesNoticeExist(substitutionData["Vertreter"]) &&
-                    doesNoticeExist(substitutionData["Lehrer"]) &&
-                    doesNoticeExist(substitutionData["Raum"]) &&
-                    !doesNoticeExist(substitutionData["Fach"]))
+                        doesNoticeExist(substitutionData["Lehrer"]) &&
+                        doesNoticeExist(substitutionData["Raum"]) &&
+                        !doesNoticeExist(substitutionData["Fach"]))
                     ? 12
                     : 0),
             child: Column(
               children: [
-                getSubstitutionInfo(context,"Vertreter", substitutionData["Vertreter"],
-                    Icons.person) ??
+                getSubstitutionInfo(context, "Vertreter",
+                        substitutionData["Vertreter"], Icons.person) ??
                     const SizedBox.shrink(),
-                getSubstitutionInfo(context,
-                    "Lehrer", substitutionData["Lehrer"], Icons.school) ??
+                getSubstitutionInfo(context, "Lehrer",
+                        substitutionData["Lehrer"], Icons.school) ??
                     const SizedBox.shrink(),
-                getSubstitutionInfo(context,
-                    "Raum", substitutionData["Raum"], Icons.room) ??
+                getSubstitutionInfo(context, "Raum", substitutionData["Raum"],
+                        Icons.room) ??
                     const SizedBox.shrink(),
               ],
             ),
@@ -119,11 +119,10 @@ class SubstitutionWidget extends StatelessWidget {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.30,
                   child: MarqueeWidget(
-                    child: Text(
-                      substitutionData["Klasse"],
-                      style: Theme.of(context).textTheme.titleMedium,
-                    )
-                  ),
+                      child: Text(
+                    substitutionData["Klasse"],
+                    style: Theme.of(context).textTheme.titleMedium,
+                  )),
                 ),
               ],
               if (!doesNoticeExist(substitutionData["Fach"])) ...[

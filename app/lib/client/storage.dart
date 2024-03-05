@@ -108,10 +108,10 @@ extension on StorageKey {
   }
 }
 
-
 class Storage {
   late SharedPreferences prefs;
-  final secureStorage = const FlutterSecureStorage(aOptions: AndroidOptions.defaultOptions);
+  final secureStorage =
+      const FlutterSecureStorage(aOptions: AndroidOptions.defaultOptions);
 
   Storage() {
     _initialize();
@@ -122,8 +122,8 @@ class Storage {
   }
 
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+        encryptedSharedPreferences: true,
+      );
 
   Future<void> write({
     required StorageKey key,
@@ -146,7 +146,9 @@ class Storage {
     await _initialize();
 
     if (secure) {
-      return Future.value((await secureStorage.read(key: key.key, aOptions: _getAndroidOptions())) ?? key.defaultValue);
+      return Future.value((await secureStorage.read(
+              key: key.key, aOptions: _getAndroidOptions())) ??
+          key.defaultValue);
     } else {
       return Future.value(prefs.getString(key.key) ?? key.defaultValue);
     }

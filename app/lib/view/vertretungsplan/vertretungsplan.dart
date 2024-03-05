@@ -20,11 +20,15 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
-  final SubstitutionsFetcher substitutionsFetcher = client.applets![SPHAppEnum.vertretungsplan]!.fetchers[0] as SubstitutionsFetcher;
+  final SubstitutionsFetcher substitutionsFetcher = client
+      .applets![SPHAppEnum.vertretungsplan]!
+      .fetchers[0] as SubstitutionsFetcher;
 
   final double padding = 12.0;
 
-  List<GlobalKey<RefreshIndicatorState>> globalKeys = [GlobalKey<RefreshIndicatorState>()];
+  List<GlobalKey<RefreshIndicatorState>> globalKeys = [
+    GlobalKey<RefreshIndicatorState>()
+  ];
 
   TabController? _tabController;
 
@@ -35,7 +39,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
   }
 
   Widget noticeWidget(int entriesLength) {
-    String title = entriesLength != 0 ? "Keine weiteren Einträge!" : "Keine Einträge!";
+    String title =
+        entriesLength != 0 ? "Keine weiteren Einträge!" : "Keine Einträge!";
     return ListTile(
       title: Text(title, style: const TextStyle(fontSize: 22)),
       subtitle: const Text(
@@ -71,7 +76,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Card(
-                  child: SubstitutionWidget(substitutionData: data["days"][dayIndex]["entries"][entryIndex]),
+                  child: SubstitutionWidget(
+                      substitutionData: data["days"][dayIndex]["entries"]
+                          [entryIndex]),
                 ),
               );
             },
@@ -87,7 +94,11 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     List<Widget> errorWidgets = [];
 
     for (int i = 0; i < data["length"]; i++) {
-      errorWidgets.add(ErrorView.fromCode(data: data, name: "Vertretungsplan", fetcher: substitutionsFetcher,));
+      errorWidgets.add(ErrorView.fromCode(
+        data: data,
+        name: "Vertretungsplan",
+        fetcher: substitutionsFetcher,
+      ));
     }
 
     return errorWidgets;
@@ -117,7 +128,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         stream: substitutionsFetcher.stream,
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error &&
-              snapshot.data?.content == CredentialsIncompleteException().cause) {
+              snapshot.data?.content ==
+                  CredentialsIncompleteException().cause) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                   context,
@@ -126,14 +138,16 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
             });
           }
 
-          if (snapshot.connectionState == ConnectionState.waiting || snapshot.data?.status == FetcherStatus.fetching) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              snapshot.data?.status == FetcherStatus.fetching) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys += List.generate(snapshot.data?.content["length"], (index) => GlobalKey<RefreshIndicatorState>());
+          globalKeys += List.generate(snapshot.data?.content["length"],
+              (index) => GlobalKey<RefreshIndicatorState>());
 
           // If there are no entries.
           if (snapshot.data?.content["length"] == 0) {
@@ -150,20 +164,15 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(
-                            Icons.sentiment_dissatisfied,
-                            size: 60
-                        ),
+                        Icon(Icons.sentiment_dissatisfied, size: 60),
                         Padding(
                           padding: EdgeInsets.all(35),
-                          child: Text(
-                              "Es gibt keine Vertretungen!",
+                          child: Text("Es gibt keine Vertretungen!",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                              )
-                          ),
+                              )),
                         ),
                       ],
                     ),
@@ -203,9 +212,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         children: [
           FloatingActionButton(
             onPressed: () => {
-              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys) {
-                globalKey.currentState?.show()
-              }
+              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys)
+                {globalKey.currentState?.show()}
             },
             heroTag: "RefreshSubstitutions",
             child: const Icon(Icons.refresh),
@@ -220,9 +228,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => FilterPlan()))
                   .then((_) => setState(() {
-                substitutionsFetcher
-                    .fetchData(forceRefresh: true);
-              }));
+                        substitutionsFetcher.fetchData(forceRefresh: true);
+                      }));
             },
             child: const Icon(Icons.filter_alt),
           ),

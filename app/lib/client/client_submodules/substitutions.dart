@@ -23,8 +23,12 @@ class SubstitutionsParser {
     debugPrint("Trying to get substitution plan using non-JSON parser");
     DateFormat eingabeFormat = DateFormat('dd_MM_yyyy');
     final Map<String, List<dynamic>> fullPlan = {"dates": [], "entries": []};
-    final document = parse((await dio.get("https://start.schulportal.hessen.de/vertretungsplan.php")).data);
-    final dates = document.querySelectorAll("[data-tag]").map((element) => element.attributes["data-tag"]!);
+    final document = parse((await dio
+            .get("https://start.schulportal.hessen.de/vertretungsplan.php"))
+        .data);
+    final dates = document
+        .querySelectorAll("[data-tag]")
+        .map((element) => element.attributes["data-tag"]!);
     for (var date in dates) {
       final parsedDate = eingabeFormat.parse(date);
       fullPlan["dates"]!.add(date.replaceAll("_", "."));
@@ -33,18 +37,38 @@ class SubstitutionsParser {
       if (vtable == null) {
         return fullPlan;
       }
-      final headers = vtable.querySelectorAll("th").map((e) => e.attributes["data-field"]!).toList(growable: false);
-      for (var row in vtable.querySelectorAll("tbody tr").where((element) => element.querySelectorAll("td[colspan]").isEmpty)) {
+      final headers = vtable
+          .querySelectorAll("th")
+          .map((e) => e.attributes["data-field"]!)
+          .toList(growable: false);
+      for (var row in vtable.querySelectorAll("tbody tr").where(
+          (element) => element.querySelectorAll("td[colspan]").isEmpty)) {
         final fields = row.querySelectorAll("td");
         var entry = {
-          "Stunde": headers.contains("Stunde") ? fields[headers.indexOf("Stunde")].text.trim() : "",
-          "Klasse": headers.contains("Klasse") ? fields[headers.indexOf("Klasse")].text.trim() : "",
-          "Vertreter": headers.contains("Vertretung") ? fields[headers.indexOf("Vertretung")].text.trim() : "",
-          "Lehrer": headers.contains("Lehrer") ? fields[headers.indexOf("Lehrer")].text.trim() : "",
-          "Art": headers.contains("Art") ? fields[headers.indexOf("Art")].text.trim() : "",
-          "Fach": headers.contains("Fach") ? fields[headers.indexOf("Fach")].text.trim() : "",
-          "Raum": headers.contains("Raum") ? fields[headers.indexOf("Raum")].text.trim() : "",
-          "Hinweis": headers.contains("Hinweis") ? fields[headers.indexOf("Hinweis")].text.trim() : "",
+          "Stunde": headers.contains("Stunde")
+              ? fields[headers.indexOf("Stunde")].text.trim()
+              : "",
+          "Klasse": headers.contains("Klasse")
+              ? fields[headers.indexOf("Klasse")].text.trim()
+              : "",
+          "Vertreter": headers.contains("Vertretung")
+              ? fields[headers.indexOf("Vertretung")].text.trim()
+              : "",
+          "Lehrer": headers.contains("Lehrer")
+              ? fields[headers.indexOf("Lehrer")].text.trim()
+              : "",
+          "Art": headers.contains("Art")
+              ? fields[headers.indexOf("Art")].text.trim()
+              : "",
+          "Fach": headers.contains("Fach")
+              ? fields[headers.indexOf("Fach")].text.trim()
+              : "",
+          "Raum": headers.contains("Raum")
+              ? fields[headers.indexOf("Raum")].text.trim()
+              : "",
+          "Hinweis": headers.contains("Hinweis")
+              ? fields[headers.indexOf("Hinweis")].text.trim()
+              : "",
           "Tag": parsedDate.format('dd.MM.yyyy')
         };
         entries.add(entry);
@@ -66,7 +90,7 @@ class SubstitutionsParser {
             headers: {
               "Accept": "*/*",
               "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
+                  "application/x-www-form-urlencoded; charset=UTF-8",
               "Sec-Fetch-Dest": "empty",
               "Sec-Fetch-Mode": "cors",
               "Sec-Fetch-Site": "same-origin",
@@ -119,7 +143,7 @@ class SubstitutionsParser {
     }
   }
 
-  Future<dynamic> getAllSubstitutions({skipCheck= false}) async {
+  Future<dynamic> getAllSubstitutions({skipCheck = false}) async {
     if (!skipCheck) {
       if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         throw NotSupportedException();
@@ -141,7 +165,6 @@ class SubstitutionsParser {
 
         fullPlan["dates"].add(date);
         fullPlan["entries"].add(List.from(plan));
-
       }
       return fullPlan;
     } catch (e) {

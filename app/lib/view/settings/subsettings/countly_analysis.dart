@@ -12,8 +12,7 @@ class CountlySettingsScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Countly"),
         ),
-        body: const Body()
-    );
+        body: const Body());
   }
 }
 
@@ -35,7 +34,7 @@ class _BodyState extends State<Body> {
       setState(() {});
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -43,23 +42,23 @@ class _BodyState extends State<Body> {
         ListTile(
           leading: const Icon(Icons.info),
           title: const Text('Countly Server'),
-          subtitle: const Text('Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben.'),
+          subtitle: const Text(
+              'Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben.'),
           onTap: () {
-            launchUrl(Uri.parse("https://countly.com/lite")
-            );
+            launchUrl(Uri.parse("https://countly.com/lite"));
           },
         ),
         SwitchListTile(
             value: enabled,
             title: const Text("Anonyme Bugreports senden"),
             onChanged: (state) async {
-          setState(() {
-            enabled = state;
-          });
-          await globalStorage.write(key: StorageKey.settingsUseCountly, value: state.toString());
-        }),
+              setState(() {
+                enabled = state;
+              });
+              await globalStorage.write(
+                  key: StorageKey.settingsUseCountly, value: state.toString());
+            }),
       ],
     );
   }
 }
-

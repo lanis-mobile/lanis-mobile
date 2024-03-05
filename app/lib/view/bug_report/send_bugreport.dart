@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -50,21 +49,23 @@ class _BugReportScreenState extends State<BugReportScreen> {
         child: ListView(
           children: [
             const ListTile(
-              title: Text("Danke, dass du aktiv zur Entwicklung der App beiträgst!"),
-              subtitle: Text("Es ist schwierig, eine APP für alle Schulen zu entwickeln."),
+              title: Text(
+                  "Danke, dass du aktiv zur Entwicklung der App beiträgst!"),
+              subtitle: Text(
+                  "Es ist schwierig, eine APP für alle Schulen zu entwickeln."),
             ),
             Padding(
               padding:
-              EdgeInsets.only(left: padding, right: padding, top: padding),
-              child:
-              TextFormField(
+                  EdgeInsets.only(left: padding, right: padding, top: padding),
+              child: TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: 8,
                 controller: bugDescriptionController,
                 decoration: const InputDecoration(
                   labelText: "Beschreibe den Bug",
                   alignLabelWithHint: true,
-                  hintText: "Hier kannst du deinen Bug beschreiben...\n - Sei so genau wie möglich \n - Was hast du erwartet?\n - Was ist passiert?\n - Könnte es sich um ein Schulspezifisches Problem handeln?",
+                  hintText:
+                      "Hier kannst du deinen Bug beschreiben...\n - Sei so genau wie möglich \n - Was hast du erwartet?\n - Was ist passiert?\n - Könnte es sich um ein Schulspezifisches Problem handeln?",
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -76,16 +77,16 @@ class _BugReportScreenState extends State<BugReportScreen> {
             ),
             Padding(
               padding:
-              EdgeInsets.only(left: padding, right: padding, top: padding),
-              child:
-              TextFormField(
+                  EdgeInsets.only(left: padding, right: padding, top: padding),
+              child: TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: 4,
                 controller: contactInformationController,
                 decoration: const InputDecoration(
                   labelText: "Wie können wir dich erreichen?",
                   alignLabelWithHint: true,
-                  hintText: "Vielleicht haben die Entwickler Fragen zu den Bugs. Eine Kontaktmöglichkeit wäre sehr hilfreich! \nz.B. Email oder Telefon",
+                  hintText:
+                      "Vielleicht haben die Entwickler Fragen zu den Bugs. Eine Kontaktmöglichkeit wäre sehr hilfreich! \nz.B. Email oder Telefon",
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -97,16 +98,17 @@ class _BugReportScreenState extends State<BugReportScreen> {
             ),
             SwitchListTile(
                 title: const Text("Metadaten Senden"),
-                subtitle: const Text("Dies beinhaltet in der Regel sensible Informationen über deine Schule und deine Kurse. Eventuell auch Informationen über dich als Person. In den meisten Fällen sind diese Informationen notwendig, um den Fehler reproduzieren zu können. Dein Passwort wird nicht mit den Entwicklern geteilt."),
+                subtitle: const Text(
+                    "Dies beinhaltet in der Regel sensible Informationen über deine Schule und deine Kurse. Eventuell auch Informationen über dich als Person. In den meisten Fällen sind diese Informationen notwendig, um den Fehler reproduzieren zu können. Dein Passwort wird nicht mit den Entwicklern geteilt."),
                 value: sendMetadata,
                 onChanged: (state) {
                   setState(() {
                     sendMetadata = state;
                   });
-                }
-            ),
+                }),
             Padding(
-              padding: EdgeInsets.only(left: padding, right: padding, top: padding),
+              padding:
+                  EdgeInsets.only(left: padding, right: padding, top: padding),
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -136,30 +138,40 @@ class _BugReportScreenState extends State<BugReportScreen> {
                                   sendMetadata,
                                 ).then((void _) {
                                   Navigator.pop(context);
-                                  showDialog(context: context, builder: (context) => AlertDialog(
-                                    title: const Text("Erfolg!"),
-                                    content: const Text("Der Fehlerbericht wurde Gesendet."),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context, "OK"),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ));
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                            title: const Text("Erfolg!"),
+                                            content: const Text(
+                                                "Der Fehlerbericht wurde Gesendet."),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, "OK"),
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ));
                                   clearInputs();
                                 }).catchError((ex) {
                                   if (ex is LanisException) {
-                                    debugPrint("Fehlerbericht nicht gesendet: ${ex.cause}");
-                                    showDialog(context: context, builder: (context) => AlertDialog(
-                                      title: const Text("Fehler!"),
-                                      content: const Text("Der Fehlerbericht wurde nicht Gesendet."),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, "OK"),
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ));
+                                    debugPrint(
+                                        "Fehlerbericht nicht gesendet: ${ex.cause}");
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                              title: const Text("Fehler!"),
+                                              content: const Text(
+                                                  "Der Fehlerbericht wurde nicht Gesendet."),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          context, "OK"),
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
+                                            ));
                                   } else {
                                     Navigator.pop(context);
                                     debugPrint('Error sending bug report: $ex');
@@ -180,7 +192,8 @@ class _BugReportScreenState extends State<BugReportScreen> {
             const ListTile(
               trailing: Icon(Icons.info),
               title: Text("Wie gehen wir mit deinen Daten um?"),
-              subtitle: Text("Sobald wir die Ursache des Fehlers gefunden haben oder den Fehler reproduzieren können, werden deine Daten umgehend gelöscht. Eventuell werden die Daten in einem gesicherten Rahmen mit anderen Entwicklern ausgetauscht."),
+              subtitle: Text(
+                  "Sobald wir die Ursache des Fehlers gefunden haben oder den Fehler reproduzieren können, werden deine Daten umgehend gelöscht. Eventuell werden die Daten in einem gesicherten Rahmen mit anderen Entwicklern ausgetauscht."),
             ),
           ],
         ),
@@ -196,16 +209,14 @@ Future<dynamic> generateBugReport() async {
   DateTime oneYearLater = currentDate.add(const Duration(days: 365));
   final formatter = DateFormat('yyyy-MM-dd');
 
-
   //mein_unterricht
   late dynamic meinUnterricht;
   late List<dynamic> meinUnterrichtKurse = [];
   if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
     meinUnterricht = await client.meinUnterricht.getOverview();
     meinUnterricht["kursmappen"]?.forEach((kurs) async {
-      meinUnterrichtKurse.add(
-          (await client.meinUnterricht.getCourseView(kurs["_courseURL"]))
-      );
+      meinUnterrichtKurse
+          .add((await client.meinUnterricht.getCourseView(kurs["_courseURL"])));
     });
   } else {
     meinUnterrichtKurse = ["No support."];
@@ -228,7 +239,9 @@ Future<dynamic> generateBugReport() async {
       element.remove("empf");
     }
     try {
-      firstSingleMessage = await client.conversations.getSingleConversation(visibleMessages[0]["Uniquid"]); // Single Conversations have more possible dict keys.
+      firstSingleMessage = await client.conversations.getSingleConversation(
+          visibleMessages[0][
+              "Uniquid"]); // Single Conversations have more possible dict keys.
     } on LanisException catch (ex) {
       firstSingleMessage = "LanisException: ${ex.cause}";
     }
@@ -246,25 +259,35 @@ Future<dynamic> generateBugReport() async {
       "userdata": await client.fetchUserData()
     },
     "applets": {
-      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan) ? await client.substitutions.getAllSubstitutions() ?? [] : [],
-      "kalender": client.doesSupportFeature(SPHAppEnum.kalender) ? await client.calendar.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater)) ?? [] : [],
+      "vertretungsplan": client.doesSupportFeature(SPHAppEnum.vertretungsplan)
+          ? await client.substitutions.getAllSubstitutions() ?? []
+          : [],
+      "kalender": client.doesSupportFeature(SPHAppEnum.kalender)
+          ? await client.calendar.getCalendar(formatter.format(sixMonthsAgo),
+                  formatter.format(oneYearLater)) ??
+              []
+          : [],
       "mein_unterricht": {
         "übersicht": meinUnterricht,
         "kurse": meinUnterrichtKurse
       },
-      "nachrichten": (client.doesSupportFeature(SPHAppEnum.nachrichten)) ? {
-        "eingeblendete": visibleMessages,
-        "ausgeblendete": invisibleMessages,
-        "erste_detaillierte_nachricht": firstSingleMessage
-      } : []
+      "nachrichten": (client.doesSupportFeature(SPHAppEnum.nachrichten))
+          ? {
+              "eingeblendete": visibleMessages,
+              "ausgeblendete": invisibleMessages,
+              "erste_detaillierte_nachricht": firstSingleMessage
+            }
+          : []
     }
   };
 }
 
-Future<void> sendToServer(String bugDescription, String contactInformation, bool sendMetaData) async {
-  const apiEndpointLocation = "https://sph-bugreport-service.alessioc42.workers.dev/api/add";
+Future<void> sendToServer(
+    String bugDescription, String contactInformation, bool sendMetaData) async {
+  const apiEndpointLocation =
+      "https://sph-bugreport-service.alessioc42.workers.dev/api/add";
 
-  late dynamic deviceData = {"applets":[]};
+  late dynamic deviceData = {"applets": []};
   if (sendMetaData) {
     try {
       deviceData = ((await generateBugReport()) ?? '["Error loading data!"]');

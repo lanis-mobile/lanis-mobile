@@ -14,15 +14,20 @@ class NotificationsSettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Benachrichtigungen"),
         actions: [
-          InfoButton(infoText: "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.", context: context)
+          InfoButton(
+              infoText:
+                  "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
+              context: context)
         ],
       ),
       body: ListView(
         children: [
-          if (Platform.isIOS) const ListTile(
-            leading: Icon(Icons.info),
-            title: Text("Leider keiner Unterstützung"),
-            subtitle: Text("Auf deinem Endgerät (IOS / IpadOS) werden keine Benachrichtigungen unterstützt."),
+          if (Platform.isIOS)
+            const ListTile(
+              leading: Icon(Icons.info),
+              title: Text("Leider keiner Unterstützung"),
+              subtitle: Text(
+                  "Auf deinem Endgerät (IOS / IpadOS) werden keine Benachrichtigungen unterstützt."),
             ),
           const NotificationElements(),
         ],
@@ -45,9 +50,14 @@ class _NotificationElementsState extends State<NotificationElements> {
   bool _notificationPermissionGranted = false;
 
   Future<void> loadSettingsVariables() async {
-    _enableNotifications = (await globalStorage.read(key: StorageKey.settingsPushService)) == "true";
-    _notificationInterval = int.parse(await globalStorage.read(key: StorageKey.settingsPushServiceIntervall));
-    _notificationsAreOngoing = (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) == "true";
+    _enableNotifications =
+        (await globalStorage.read(key: StorageKey.settingsPushService)) ==
+            "true";
+    _notificationInterval = int.parse(
+        await globalStorage.read(key: StorageKey.settingsPushServiceIntervall));
+    _notificationsAreOngoing = (await globalStorage.read(
+            key: StorageKey.settingsPushServiceOngoing)) ==
+        "true";
 
     _notificationPermissionGranted = await Permission.notification.isGranted;
   }
@@ -74,47 +84,66 @@ class _NotificationElementsState extends State<NotificationElements> {
       children: [
         ListTile(
           title: const Text('Systemberechtigung für Benachrichtigungen'),
-          trailing: Text(_notificationPermissionGranted ? "Erlaubt" : "Nicht erlaubt"),
-          subtitle: !_notificationPermissionGranted ? const Text("Du musst deine Berechtigungen für Benachrichtigungen in den Systemeinstellungen der App ändern!") : null,
+          trailing: Text(
+              _notificationPermissionGranted ? "Erlaubt" : "Nicht erlaubt"),
+          subtitle: !_notificationPermissionGranted
+              ? const Text(
+                  "Du musst deine Berechtigungen für Benachrichtigungen in den Systemeinstellungen der App ändern!")
+              : null,
         ),
         SwitchListTile(
           title: const Text('Push-Benachrichtigungen'),
           value: _enableNotifications,
-          onChanged: _notificationPermissionGranted ? (bool? value) async {
-            setState(() {
-              _enableNotifications = value!;
-            });
-            await globalStorage.write(key: StorageKey.settingsPushService, value: _enableNotifications.toString());
-          } : null,
-          subtitle: const Text("Aktiviere es, um Benachrichtigungen zu bekommen."),
+          onChanged: _notificationPermissionGranted
+              ? (bool? value) async {
+                  setState(() {
+                    _enableNotifications = value!;
+                  });
+                  await globalStorage.write(
+                      key: StorageKey.settingsPushService,
+                      value: _enableNotifications.toString());
+                }
+              : null,
+          subtitle:
+              const Text("Aktiviere es, um Benachrichtigungen zu bekommen."),
         ),
         SwitchListTile(
           title: const Text('Anhaltende Benachrichtigung'),
           value: _notificationsAreOngoing,
-          onChanged: _enableNotifications && _notificationPermissionGranted ? (bool? value) async {
-            setState(() {
-              _notificationsAreOngoing = value!;
-            });
-            await globalStorage.write(key: StorageKey.settingsPushServiceOngoing, value: _notificationsAreOngoing.toString());
-          } : null,
-          subtitle: const Text("Wenn aktiviert, werden die Benachrichtigung dauerhaft fest stehen, die man nicht entfernen kann."),
+          onChanged: _enableNotifications && _notificationPermissionGranted
+              ? (bool? value) async {
+                  setState(() {
+                    _notificationsAreOngoing = value!;
+                  });
+                  await globalStorage.write(
+                      key: StorageKey.settingsPushServiceOngoing,
+                      value: _notificationsAreOngoing.toString());
+                }
+              : null,
+          subtitle: const Text(
+              "Wenn aktiviert, werden die Benachrichtigung dauerhaft fest stehen, die man nicht entfernen kann."),
         ),
         ListTile(
           title: const Text('Update-Intervall'),
-          trailing: Text('$_notificationInterval min', style: const TextStyle(fontSize: 14)),
+          trailing: Text('$_notificationInterval min',
+              style: const TextStyle(fontSize: 14)),
           enabled: _enableNotifications && _notificationPermissionGranted,
         ),
         Slider(
           value: _notificationInterval.toDouble(),
           min: 15,
           max: 180,
-          onChanged: _enableNotifications && _notificationPermissionGranted ? (double value) {
-            setState(() {
-              _notificationInterval = value.toInt(); // Umwandlung zu int
-            });
-          } : null,
+          onChanged: _enableNotifications && _notificationPermissionGranted
+              ? (double value) {
+                  setState(() {
+                    _notificationInterval = value.toInt(); // Umwandlung zu int
+                  });
+                }
+              : null,
           onChangeEnd: (double value) async {
-            await globalStorage.write(key: StorageKey.settingsPushServiceIntervall, value: _notificationInterval.toString());
+            await globalStorage.write(
+                key: StorageKey.settingsPushServiceIntervall,
+                value: _notificationInterval.toString());
           },
         ),
       ],

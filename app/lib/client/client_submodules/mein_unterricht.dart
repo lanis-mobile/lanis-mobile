@@ -9,7 +9,6 @@ import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/upload.dart';
 
-
 class MeinUnterrichtParser {
   late Dio dio;
   late SPHclient client;
@@ -17,7 +16,6 @@ class MeinUnterrichtParser {
   MeinUnterrichtParser(Dio dioClient, this.client) {
     dio = dioClient;
   }
-
 
   Future<dynamic> getOverview() async {
     if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
@@ -29,50 +27,38 @@ class MeinUnterrichtParser {
     var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
     final response =
-    await dio.get("https://start.schulportal.hessen.de/meinunterricht.php");
+        await dio.get("https://start.schulportal.hessen.de/meinunterricht.php");
     var encryptedHTML = client.cryptor.decryptEncodedTags(response.data);
     var document = parse(encryptedHTML);
 
     //Aktuelle Einträge
-        () {
+    () {
       var schoolClasses = document.querySelectorAll("tr.printable");
       for (var schoolClass in schoolClasses) {
         var teacher = schoolClass.querySelector(".teacher");
 
         if (schoolClass.querySelector(".datum") != null) {
           result["aktuell"]?.add({
-            "name": schoolClass
-                .querySelector(".name")
-                ?.text
-                .trim(),
+            "name": schoolClass.querySelector(".name")?.text.trim(),
             "teacher": {
               "short": teacher
                   ?.getElementsByClassName(
-                  "btn btn-primary dropdown-toggle btn-xs")[0]
-                  .text.trim(),
-              "name": teacher
-                  ?.querySelector("ul>li>a>i.fa")
-                  ?.parent
-                  ?.text
-                  .trim()
+                      "btn btn-primary dropdown-toggle btn-xs")[0]
+                  .text
+                  .trim(),
+              "name":
+                  teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
             },
             "thema": {
-              "title": schoolClass
-                  .querySelector(".thema")
-                  ?.text
-                  .trim(),
-              "date": schoolClass
-                  .querySelector(".datum")
-                  ?.text
-                  .trim()
+              "title": schoolClass.querySelector(".thema")?.text.trim(),
+              "date": schoolClass.querySelector(".datum")?.text.trim()
             },
             "data": {
               "entry": schoolClass.attributes["data-entry"],
               "book": schoolClass.attributes["data-entry"]
             },
-            "_courseURL": schoolClass
-                .querySelector("td>h3>a")
-                ?.attributes["href"]
+            "_courseURL":
+                schoolClass.querySelector("td>h3>a")?.attributes["href"]
           });
         }
 
@@ -81,16 +67,10 @@ class MeinUnterrichtParser {
           var aDate = a["thema"]["date"];
           var bDate = b["thema"]["date"];
 
-          var aDateTime = DateTime(
-              int.parse(aDate.split(".")[2]),
-              int.parse(aDate.split(".")[1]),
-              int.parse(aDate.split(".")[0])
-          );
-          var bDateTime = DateTime(
-              int.parse(bDate.split(".")[2]),
-              int.parse(bDate.split(".")[1]),
-              int.parse(bDate.split(".")[0])
-          );
+          var aDateTime = DateTime(int.parse(aDate.split(".")[2]),
+              int.parse(aDate.split(".")[1]), int.parse(aDate.split(".")[0]));
+          var bDateTime = DateTime(int.parse(bDate.split(".")[2]),
+              int.parse(bDate.split(".")[1]), int.parse(bDate.split(".")[0]));
 
           return bDateTime.compareTo(aDateTime);
         });
@@ -99,7 +79,7 @@ class MeinUnterrichtParser {
 
     //Anwesenheiten
     var anwesendDOM = document.getElementById("anwesend");
-        () {
+    () {
       var thead = anwesendDOM?.querySelector("thead>tr");
       var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
@@ -113,8 +93,7 @@ class MeinUnterrichtParser {
           element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
 
           if (keys[i] != "Kurs") {
-            textElements
-                .add(element.text.trim());
+            textElements.add(element.text.trim());
           } else {
             textElements.add(element.text.trim());
           }
@@ -139,7 +118,7 @@ class MeinUnterrichtParser {
 
     //Kursmappen
     var kursmappenDOM = document.getElementById("mappen");
-        () {
+    () {
       var parsedMappen = [];
 
       var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
@@ -148,17 +127,17 @@ class MeinUnterrichtParser {
         for (var mappe in mappen) {
           parsedMappen.add({
             "title": mappe.getElementsByTagName("h2")[0].text.trim(),
-            "teacher":
-            mappe.querySelector("div.btn-group>button")?.attributes["title"],
+            "teacher": mappe
+                .querySelector("div.btn-group>button")
+                ?.attributes["title"],
             "_courseURL":
-            mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
+                mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
           });
         }
         result["kursmappen"] = parsedMappen;
       } else {
         result["kursmappen"] = [];
       }
-
     }();
 
     debugPrint("Successfully got Mein Unterricht.");
@@ -179,19 +158,18 @@ class MeinUnterrichtParser {
       String courseID = url.split("id=")[1];
 
       final response =
-      await dio.get("https://start.schulportal.hessen.de/$url");
+          await dio.get("https://start.schulportal.hessen.de/$url");
       var encryptedHTML = client.cryptor.decryptEncodedTags(response.data);
       var document = parse(encryptedHTML);
 
       //course name
       var heading = document.getElementById("content")?.querySelector("h1");
       heading?.children[0].innerHtml = "";
-      result["name"] = [
-        heading?.text.trim()
-      ];
+      result["name"] = [heading?.text.trim()];
 
       //halbjahr2
-      var halbJahrButtons = document.getElementsByClassName("btn btn-default hidden-print");
+      var halbJahrButtons =
+          document.getElementsByClassName("btn btn-default hidden-print");
       if (halbJahrButtons.length > 1) {
         if (halbJahrButtons[0].attributes["href"]!.contains("&halb=1")) {
           result["halbjahr1"] = [halbJahrButtons[0].attributes["href"]];
@@ -199,7 +177,7 @@ class MeinUnterrichtParser {
       }
 
       //historie
-          () {
+      () {
         var historySection = document.getElementById("history");
         var tableRows = historySection?.querySelectorAll("table>tbody>tr");
 
@@ -211,18 +189,26 @@ class MeinUnterrichtParser {
           Map<String, String> markups = {};
 
           // There is also a css selector :has() but it's not implemented yet.
-          final String? content = tableRow.children[1].querySelector("span.markup i.far.fa-comment-alt:first-child")?.parent?.text.trim();
+          final String? content = tableRow.children[1]
+              .querySelector("span.markup i.far.fa-comment-alt:first-child")
+              ?.parent
+              ?.text
+              .trim();
           if (content != null && content.startsWith(" ")) {
             markups["content"] = content.substring(1);
           } else if (content != null) {
             markups["content"] = content;
           }
 
-          final String? homework = tableRow.children[1].querySelector("span.homework + br + span.markup")?.text.trim();
+          final String? homework = tableRow.children[1]
+              .querySelector("span.homework + br + span.markup")
+              ?.text
+              .trim();
           bool homeworkDone = false;
 
           if (homework != null) {
-            homeworkDone = tableRow.querySelectorAll("span.done.hidden").isEmpty;
+            homeworkDone =
+                tableRow.querySelectorAll("span.done.hidden").isEmpty;
             if (homework.startsWith(" ")) {
               markups["homework"] = homework.substring(1);
             } else {
@@ -231,12 +217,16 @@ class MeinUnterrichtParser {
           }
 
           List files = [];
-          if (tableRow.children[1].querySelector("div.alert.alert-info") != null) {
+          if (tableRow.children[1].querySelector("div.alert.alert-info") !=
+              null) {
             String baseURL = "https://start.schulportal.hessen.de/";
-            baseURL += tableRow.children[1].querySelector("div.alert.alert-info>a")!.attributes["href"]!;
+            baseURL += tableRow.children[1]
+                .querySelector("div.alert.alert-info>a")!
+                .attributes["href"]!;
             baseURL = baseURL.replaceAll("&b=zip", "");
 
-            for (var fileDiv in tableRow.getElementsByClassName("files")[0].children) {
+            for (var fileDiv
+                in tableRow.getElementsByClassName("files")[0].children) {
               String? filename = fileDiv.attributes["data-file"];
               files.add({
                 "filename": filename,
@@ -247,7 +237,8 @@ class MeinUnterrichtParser {
           }
 
           List uploads = [];
-          final uploadGroups = tableRow.children[1].querySelectorAll("div.btn-group");
+          final uploadGroups =
+              tableRow.children[1].querySelectorAll("div.btn-group");
           for (final uploadGroup in uploadGroups) {
             final openUpload = uploadGroup.querySelector(".btn-warning");
             final closedUpload = uploadGroup.querySelector(".btn-default");
@@ -258,15 +249,29 @@ class MeinUnterrichtParser {
               uploads.add({
                 "name": openUpload.nodes[2].text?.trim(),
                 "status": "open",
-                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!,
+                "link": baseURL +
+                    uploadGroup
+                        .querySelector("ul.dropdown-menu li a")!
+                        .attributes["href"]!,
                 "uploaded": openUpload.querySelector("span.badge")?.text,
-                "date": openUpload.querySelector("small")?.text.replaceAll("\n", "").replaceAll("                                                                ", "").replaceAll("bis ", "").replaceAll("um", ""),
+                "date": openUpload
+                    .querySelector("small")
+                    ?.text
+                    .replaceAll("\n", "")
+                    .replaceAll(
+                        "                                                                ",
+                        "")
+                    .replaceAll("bis ", "")
+                    .replaceAll("um", ""),
               });
             } else if (closedUpload != null) {
               uploads.add({
                 "name": closedUpload.nodes[2].text?.trim(),
                 "status": "closed",
-                "link": baseURL + uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!,
+                "link": baseURL +
+                    uploadGroup
+                        .querySelector("ul.dropdown-menu li a")!
+                        .attributes["href"]!,
                 "uploaded": closedUpload.querySelector("span.badge")?.text,
                 "date": null,
               });
@@ -274,7 +279,11 @@ class MeinUnterrichtParser {
           }
 
           result["historie"]?.add({
-            "time": tableRow.children[0].text.trim().replaceAll("  ", "").replaceAll("\n", " ").replaceAll("  ", " "),
+            "time": tableRow.children[0].text
+                .trim()
+                .replaceAll("  ", "")
+                .replaceAll("\n", " ")
+                .replaceAll("  ", " "),
             "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
             "markup": markups,
             "entry-id": tableRow.attributes["data-entry"],
@@ -288,7 +297,7 @@ class MeinUnterrichtParser {
       }();
 
       //anwesenheiten
-          () {
+      () {
         var presenceSection = document.getElementById("attendanceTable");
         var tableRows = presenceSection?.querySelectorAll("table>tbody>tr");
 
@@ -298,13 +307,15 @@ class MeinUnterrichtParser {
             e.innerHtml = "";
           }
 
-          result["anwesenheiten"]?.add(
-              {"type": row.children[0].text.trim(), "count": row.children[1].text.trim()});
+          result["anwesenheiten"]?.add({
+            "type": row.children[0].text.trim(),
+            "count": row.children[1].text.trim()
+          });
         });
       }();
 
       //leistungen
-          () {
+      () {
         var marksSection = document.getElementById("marks");
         var tableRows = marksSection?.querySelectorAll("table>tbody>tr");
 
@@ -316,10 +327,8 @@ class MeinUnterrichtParser {
 
           if (row.children.length == 3) {
             result["leistungen"]?.add({
-              "Name":
-              row.children[0].text.trim(),
-              "Datum":
-              row.children[1].text.trim(),
+              "Name": row.children[0].text.trim(),
+              "Datum": row.children[1].text.trim(),
               "Note": row.children[2].text.trim()
             });
           }
@@ -327,7 +336,7 @@ class MeinUnterrichtParser {
       }();
 
       //leistungskontrollen
-          () {
+      () {
         var examSection = document.getElementById("klausuren");
         var lists = examSection?.children;
 
@@ -336,9 +345,12 @@ class MeinUnterrichtParser {
 
           final elements = element.querySelectorAll("ul li");
 
-          for (var element in elements) { //todo better solution that splitting the string with "  ...  "
-            var exam = element.text.trim().split("                                                                                                    ");
-            exams += "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}";
+          for (var element in elements) {
+            //todo better solution that splitting the string with "  ...  "
+            var exam = element.text.trim().split(
+                "                                                                                                    ");
+            exams +=
+                "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}";
             if (element != elements.last) {
               exams += "\n";
             }
@@ -357,7 +369,8 @@ class MeinUnterrichtParser {
     }
   }
 
-  Future<dynamic> setHomework(String courseID, String courseEntry, bool status) async {
+  Future<dynamic> setHomework(
+      String courseID, String courseEntry, bool status) async {
     //returns the response of the http request. 1 means success.
 
     final response = await dio.post(
@@ -370,24 +383,21 @@ class MeinUnterrichtParser {
       },
       options: Options(
         headers: {
-          "Content-Type":
-          "application/x-www-form-urlencoded; charset=UTF-8",
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           "X-Requested-With": "XMLHttpRequest", //this is important
         },
       ),
     );
 
-
     return response.data;
   }
 
-  Future<String> deleteUploadedFile({
-    required String course,
-    required String entry,
-    required String upload,
-    required String file,
-    required String userPasswordEncrypted
-  }) async {
+  Future<String> deleteUploadedFile(
+      {required String course,
+      required String entry,
+      required String upload,
+      required String file,
+      required String userPasswordEncrypted}) async {
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/meinunterricht.php",
@@ -404,21 +414,20 @@ class MeinUnterrichtParser {
             headers: {
               "Accept": "*/*",
               "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
+                  "application/x-www-form-urlencoded; charset=UTF-8",
               "Sec-Fetch-Dest": "empty",
               "Sec-Fetch-Mode": "cors",
               "Sec-Fetch-Site": "same-origin",
               "X-Requested-With": "XMLHttpRequest",
             },
-          )
-      );
+          ));
 
       // "-1" Wrong password
       // "-2" Delete was not possible
       // "0" Unknown error
       // "1" Lanis had a good day
       return response.data;
-    }on (SocketException, DioException) {
+    } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e, stack) {
       throw LoggedOffOrUnknownException();
@@ -430,32 +439,79 @@ class MeinUnterrichtParser {
       final response = await dio.get(url);
       final parsed = parse(response.data);
 
-      final requirementsGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[1];
+      final requirementsGroup =
+          parsed.querySelectorAll("div#content div.row div.col-md-12")[1];
 
-      final String? start = requirementsGroup.querySelector("span.editable")?.text.trim().replaceAll(" ab", "");
-      final String? deadline = requirementsGroup.querySelector("b span.editable")?.text.trim().replaceAll("  spätestens", "");
-      final bool uploadMultipleFiles = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[0].text.trim() == "erlaubt" ? true : false;
-      final bool uploadAnyNumberOfTimes = requirementsGroup.querySelectorAll("i.fa.fa-check-square-o.fa-fw + span.label.label-success")[1].text.trim() == "erlaubt" ? true : false;
-      final String? visibility = requirementsGroup.querySelector("i.fa.fa-eye.fa-fw + span.label")?.text.trim() ?? requirementsGroup.querySelector("i.fa.fa-eye-slash.fa-fw + span.label")?.text.trim() ;
-      final String? automaticDeletion = requirementsGroup.querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")?.text.trim();
-      final List<String> allowedFileTypes = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0].text.trim().split(", ");
-      final String maxFileSize = requirementsGroup.querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1].text.trim();
-      final String? additionalText = requirementsGroup.querySelector("div.alert.alert-info")?.text.split("\n")[1].trim();
+      final String? start = requirementsGroup
+          .querySelector("span.editable")
+          ?.text
+          .trim()
+          .replaceAll(" ab", "");
+      final String? deadline = requirementsGroup
+          .querySelector("b span.editable")
+          ?.text
+          .trim()
+          .replaceAll("  spätestens", "");
+      final bool uploadMultipleFiles = requirementsGroup
+                  .querySelectorAll(
+                      "i.fa.fa-check-square-o.fa-fw + span.label.label-success")[0]
+                  .text
+                  .trim() ==
+              "erlaubt"
+          ? true
+          : false;
+      final bool uploadAnyNumberOfTimes = requirementsGroup
+                  .querySelectorAll(
+                      "i.fa.fa-check-square-o.fa-fw + span.label.label-success")[1]
+                  .text
+                  .trim() ==
+              "erlaubt"
+          ? true
+          : false;
+      final String? visibility = requirementsGroup
+              .querySelector("i.fa.fa-eye.fa-fw + span.label")
+              ?.text
+              .trim() ??
+          requirementsGroup
+              .querySelector("i.fa.fa-eye-slash.fa-fw + span.label")
+              ?.text
+              .trim();
+      final String? automaticDeletion = requirementsGroup
+          .querySelector("i.fa.fa-trash-o.fa-fw + span.label.label-info")
+          ?.text
+          .trim();
+      final List<String> allowedFileTypes = requirementsGroup
+          .querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[0]
+          .text
+          .trim()
+          .split(", ");
+      final String maxFileSize = requirementsGroup
+          .querySelectorAll("i.fa.fa-file.fa-fw + span.label.label-warning")[1]
+          .text
+          .trim();
+      final String? additionalText = requirementsGroup
+          .querySelector("div.alert.alert-info")
+          ?.text
+          .split("\n")[1]
+          .trim();
 
-      final ownFilesGroup = parsed.querySelectorAll("div#content div.row div.col-md-12")[2];
+      final ownFilesGroup =
+          parsed.querySelectorAll("div#content div.row div.col-md-12")[2];
       final List<OwnFile> ownFiles = [];
       for (final group in ownFilesGroup.querySelectorAll("ul li")) {
         final fileIndex = RegExp(r"f=(\d+)");
 
-        ownFiles.add(
-            OwnFile(
-                name: group.querySelector("a")!.text.trim(),
-                url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
-                time: group.querySelector("small")!.text,
-                index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
-                comment: group.nodes.elementAtOrNull(10) != null ? group.nodes[10].text!.trim() : null
-            )
-        );
+        ownFiles.add(OwnFile(
+            name: group.querySelector("a")!.text.trim(),
+            url:
+                "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
+            time: group.querySelector("small")!.text,
+            index: fileIndex
+                .firstMatch(group.querySelector("a")!.attributes["href"]!)!
+                .group(1)!,
+            comment: group.nodes.elementAtOrNull(10) != null
+                ? group.nodes[10].text!.trim()
+                : null));
       }
 
       final uploadForm = parsed.querySelector("div.col-md-7 form");
@@ -464,26 +520,31 @@ class MeinUnterrichtParser {
       String? uploadId;
 
       if (uploadForm != null) {
-        courseId = uploadForm.querySelector("input[name='b']")!.attributes["value"]!;
-        entryId = uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
-        uploadId = uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
+        courseId =
+            uploadForm.querySelector("input[name='b']")!.attributes["value"]!;
+        entryId =
+            uploadForm.querySelector("input[name='e']")!.attributes["value"]!;
+        uploadId =
+            uploadForm.querySelector("input[name='id']")!.attributes["value"]!;
       }
 
-      final publicFilesGroup = parsed.querySelector("div#content div.row div.col-md-5");
+      final publicFilesGroup =
+          parsed.querySelector("div#content div.row div.col-md-5");
       final List<PublicFile> publicFiles = [];
 
       if (publicFilesGroup != null) {
         for (final group in publicFilesGroup.querySelectorAll("ul li")) {
           final fileIndex = RegExp(r"f=(\d+)");
 
-          publicFiles.add(
-              PublicFile(
-                name: group.querySelector("a")!.text.trim(),
-                url: "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
-                person: group.querySelector("span.label.label-info")!.text.trim(),
-                index: fileIndex.firstMatch(group.querySelector("a")!.attributes["href"]!)!.group(1)!,
-              )
-          );
+          publicFiles.add(PublicFile(
+            name: group.querySelector("a")!.text.trim(),
+            url:
+                "https://start.schulportal.hessen.de/${group.querySelector("a")!.attributes["href"]!}",
+            person: group.querySelector("span.label.label-info")!.text.trim(),
+            index: fileIndex
+                .firstMatch(group.querySelector("a")!.attributes["href"]!)!
+                .group(1)!,
+          ));
         }
       }
 
@@ -510,18 +571,16 @@ class MeinUnterrichtParser {
     }
   }
 
-  Future<List<FileStatus>> uploadFile(
-      {
-        required String course,
-        required String entry,
-        required String upload,
-        required MultipartFile file1,
-        MultipartFile? file2,
-        MultipartFile? file3,
-        MultipartFile? file4,
-        MultipartFile? file5,
-      }) async {
-
+  Future<List<FileStatus>> uploadFile({
+    required String course,
+    required String entry,
+    required String upload,
+    required MultipartFile file1,
+    MultipartFile? file2,
+    MultipartFile? file3,
+    MultipartFile? file4,
+    MultipartFile? file5,
+  }) async {
     try {
       final FormData uploadData = FormData.fromMap({
         "a": "sus_abgabe",
@@ -538,23 +597,22 @@ class MeinUnterrichtParser {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/meinunterricht.php",
           data: uploadData,
-          options: Options(
-              headers: {
-                "Accept": "*/*",
-                "Content-Type": "multipart/form-data;",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "same-origin",
-              }
-          )
-      );
+          options: Options(headers: {
+            "Accept": "*/*",
+            "Content-Type": "multipart/form-data;",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+          }));
 
       final parsed = parse(response.data);
 
-      final statusMessagesGroup = parsed.querySelectorAll("div#content div.col-md-12")[2];
+      final statusMessagesGroup =
+          parsed.querySelectorAll("div#content div.col-md-12")[2];
 
       final List<FileStatus> statusMessages = [];
-      for (final statusMessage in statusMessagesGroup.querySelectorAll("ul li")) {
+      for (final statusMessage
+          in statusMessagesGroup.querySelectorAll("ul li")) {
         statusMessages.add(FileStatus(
           name: statusMessage.querySelector("b")!.text.trim(),
           status: statusMessage.querySelector("span.label")!.text.trim(),
