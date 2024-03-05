@@ -64,7 +64,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         },
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: (deviceWidth > 400)
+          child: (deviceWidth > 505)
               ? GridView.builder(
                   itemCount: entriesLength + 1,
                   itemBuilder: (context, entryIndex) {
