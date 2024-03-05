@@ -32,8 +32,6 @@ class SPHclient {
   String password = "";
   String schoolID = "";
   String schoolName = "";
-  String schoolImage = "";
-  String schoolLogo = "";
   Map<SPHAppEnum, LoadApp>? applets;
   int updateAppsIntervall = 15;
   dynamic userData = {};
@@ -99,9 +97,6 @@ class SPHclient {
     password =
         await globalStorage.read(key: StorageKey.userPassword, secure: true);
     schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
-
-    schoolImage = await globalStorage.read(key: StorageKey.schoolImageLocation);
-    schoolLogo = await globalStorage.read(key: StorageKey.schoolLogoLocation);
 
     schoolName = await globalStorage.read(key: StorageKey.userSchoolName);
 
@@ -241,18 +236,6 @@ class SPHclient {
   Future<void> fetchRedundantData() async {
     final schoolInfo = await getSchoolInfo(schoolID);
 
-    schoolImage = await savePersistentImage(
-        schoolInfo["bgimg"]["sm"]["url"], "school.jpg");
-    await globalStorage.write(
-        key: StorageKey.schoolImageLocation, value: schoolImage);
-
-    String? schoolImageLink = schoolInfo["Logo"];
-    if (schoolImageLink != null) {
-      schoolLogo = await savePersistentImage(schoolInfo["Logo"], "logo.jpg");
-      await globalStorage.write(
-          key: StorageKey.schoolLogoLocation, value: schoolLogo);
-    }
-
     schoolName = schoolInfo["Name"];
     await globalStorage.write(
         key: StorageKey.userSchoolName, value: schoolName);
@@ -289,45 +272,6 @@ class SPHclient {
         await globalStorage.write(
             key: StorageKey.schoolAccentColor, value: schoolColor.toString());
       } on Exception catch (_) {}
-    }
-  }
-
-  ///Fetches the school's image and saves it to the storage.
-  Future<String> savePersistentImage(String url, String fileName) async {
-    try {
-      final Directory dir = await getApplicationDocumentsDirectory();
-
-      String savePath = "${dir.path}/$fileName";
-
-      Directory folder = Directory(dir.path);
-      if (!(await folder.exists())) {
-        await folder.create(recursive: true);
-      }
-
-      File existingFile = File(savePath);
-      if (await existingFile.exists()) {
-        return savePath;
-      }
-
-      await dio.download(
-        url,
-        savePath,
-        options: Options(
-          responseType: ResponseType.bytes,
-          followRedirects: true,
-          headers: {
-            "Accept":
-                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-          },
-        ),
-      );
-
-      return savePath;
-    } catch (e) {
-      return "";
     }
   }
 

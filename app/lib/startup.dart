@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
@@ -267,48 +268,57 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   /// Either school image or app version.
-  Widget topPart() {
-    if (client.schoolLogo == "") {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FutureBuilder(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, packageInfo) {
-              return Text(
-                "lanis-mobile ${packageInfo.data?.version}",
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.25)),
-              );
-            },
-          )
-        ],
-      );
-    } else {
-      //invert image if theme is dark mode
-      //https://stackoverflow.com/questions/56107197/how-to-invert-image-color-in-flutter
-      return ColorFiltered(
-        colorFilter: Theme.of(context).brightness == Brightness.dark
-            ? const ColorFilter.matrix(<double>[
-                -1.0, 0.0, 0.0, 0.0, 255.0, //
-                0.0, -1.0, 0.0, 0.0, 255.0, //
-                0.0, 0.0, -1.0, 0.0, 255.0, //
-                0.0, 0.0, 0.0, 1.0, 0.0, //
+  Widget schoolLogo() {
+    var darkMode = Theme.of(context).brightness == Brightness.dark;
+
+    Widget deviceInfo = FutureBuilder(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, packageInfo) {
+        return Text(
+          "lanis-mobile ${packageInfo.data?.version}",
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.25)),
+        );
+      },
+    );
+
+    return CachedNetworkImage(
+      imageUrl:
+          "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}",
+      fadeInDuration: const Duration(milliseconds: 100),
+      placeholder: (context, url) => deviceInfo,
+      errorWidget: (context, url, error) => deviceInfo,
+      imageBuilder: (context, imageProvider) => ColorFiltered(
+        colorFilter: darkMode
+            ? const ColorFilter.matrix([
+                -1,
+                0,
+                0,
+                0,
+                255,
+                0,
+                -1,
+                0,
+                0,
+                255,
+                0,
+                0,
+                -1,
+                0,
+                255,
+                0,
+                0,
+                0,
+                1,
+                0,
               ])
-            : const ColorFilter.matrix(<double>[
-                1.0, 0.0, 0.0, 0.0, 0.0, //
-                0.0, 1.0, 0.0, 0.0, 0.0, //
-                0.0, 0.0, 1.0, 0.0, 0.0, //
-                0.0, 0.0, 0.0, 1.0, 0.0, //
-              ]),
-        child: Image.file(
-          File(client.schoolLogo),
+            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+        child: Image(
+          image: imageProvider,
+          fit: BoxFit.cover,
         ),
-      );
-    }
+      ),
+    );
   }
 
   Widget currentSteps() {
@@ -478,10 +488,10 @@ class _StartupScreenState extends State<StartupScreen> {
             children: [
               ValueListenableBuilder(
                   valueListenable: loadingMessage,
-                  builder: (context, loadingMessage, _) {
+                  builder: (context, _loadingMessage, _) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
-                      child: Text(loadingMessage,
+                      child: Text(_loadingMessage,
                           style: Theme.of(context)
                               .textTheme
                               .labelLarge
@@ -521,7 +531,7 @@ class _StartupScreenState extends State<StartupScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            topPart(),
+            schoolLogo(),
             Column(
               children: [
                 // Greeting message

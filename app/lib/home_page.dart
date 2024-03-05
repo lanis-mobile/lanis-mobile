@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
         isSupported: true,
         enableBottomNavigation: false,
         enableDrawer: true,
-        action: (context) {
+        action: (_context) {
           client.getLoginURL().then((response) {
             launchUrl(Uri.parse(response));
           });
@@ -237,9 +238,15 @@ class _HomePageState extends State<HomePage> {
                           ColorFilter.mode(imageColor, BlendMode.srcOver),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.file(
-                          File(client.schoolImage),
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=lg",
+                          fadeInDuration: const Duration(milliseconds: 0),
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => Image.file(
+                            File("assets/icon.png"),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),

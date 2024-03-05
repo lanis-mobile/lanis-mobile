@@ -16,6 +16,7 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background_service/service.dart' as background_service;
+import 'client/connection_checker.dart';
 
 void main() async {
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -81,9 +82,6 @@ void main() async {
 
       FlutterError.onError = (errorDetails) async {
         Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
-
-        debugPrint(errorDetails.exception.toString());
-        debugPrintStack(stackTrace: errorDetails.stack!);
       };
     }
 
