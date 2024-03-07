@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:flutter/foundation.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../client.dart';
 import '../connection_checker.dart';
+import '../cryptor.dart';
 
 class ConversationsParser {
   late Dio dio;
@@ -43,17 +45,7 @@ class ConversationsParser {
             },
           ));
 
-      final Map<String, dynamic> encryptedJSON =
-      jsonDecode(response.toString());
-
-      final String? decryptedConversations =
-      client.cryptor.decryptString(encryptedJSON["rows"]);
-
-      if (decryptedConversations == null) {
-        throw UnsaltedOrUnknownException();
-      }
-
-      return jsonDecode(decryptedConversations);
+      return compute(computeJson, [response.toString(), client.cryptor.key.bytes]);
     } on (SocketException, DioException) {
       throw NetworkException();
     } on LanisException {
@@ -61,6 +53,20 @@ class ConversationsParser {
     } catch (e) {
       throw LoggedOffOrUnknownException();
     }
+  }
+
+  static dynamic computeJson(List<dynamic> args) {
+    final Map<String, dynamic> encryptedJSON =
+    jsonDecode(args[0]);
+
+    final String? decryptedConversations =
+    Cryptor.decryptWithKeyString(encryptedJSON["rows"], encrypt.Key(args[1]));
+
+    if (decryptedConversations == null) {
+      throw UnsaltedOrUnknownException();
+    }
+
+    return jsonDecode(decryptedConversations);
   }
 
   Future<dynamic> getSingleConversation(String uniqueID) async {

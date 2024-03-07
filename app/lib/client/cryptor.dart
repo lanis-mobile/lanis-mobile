@@ -92,7 +92,7 @@ class Cryptor {
   // https://www.openssl.org/docs/man3.1/man3/EVP_BytesToKey.html
   // NOTE: This is deprecated and should only be used for compatibility.
   // https://gist.github.com/suehok/dfc4a6989537e4a3ba4058669289737f
-  Uint8List bytesToKeys(Uint8List salt) {
+  static Uint8List bytesToKeys(Uint8List salt, encrypt.Key key) {
     Uint8List concatenatedHashes = Uint8List(0);
     Uint8List currentHash = Uint8List(0);
     bool enoughBytesForKey = false;
@@ -116,7 +116,7 @@ class Cryptor {
   String encryptString(String decryptedData) {
     final salt = encrypt.SecureRandom(8).bytes;
 
-    final derivedKeyAndIV = bytesToKeys(salt);
+    final derivedKeyAndIV = bytesToKeys(salt, key);
 
     final derivedKey = encrypt.Key(derivedKeyAndIV.sublist(0, 32));
     final derivedIV = encrypt.IV(derivedKeyAndIV.sublist(32, 48));
@@ -132,7 +132,7 @@ class Cryptor {
     return base64.encode(finalEncrypted);
   }
 
-  List<int>? decrypt(Uint8List encryptedDataWithSalt) {
+  static List<int>? decryptWithKey(Uint8List encryptedDataWithSalt, encrypt.Key key) {
     final encryptedData = encrypt.Encrypted.fromBase64(
         base64.encode(encryptedDataWithSalt.sublist(16)));
 
@@ -143,27 +143,35 @@ class Cryptor {
 
     final salt = encryptedDataWithSalt.sublist(8, 16);
 
-    final derivedKeyAndIV = bytesToKeys(salt);
+    final derivedKeyAndIV = bytesToKeys(salt, key);
 
     final derivedKey = encrypt.Key(derivedKeyAndIV.sublist(0, 32));
     final derivedIV = encrypt.IV(derivedKeyAndIV.sublist(32, 48));
 
     // CBC mode isn't the best anymore.
     final aes =
-        encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
+    encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
 
     return aes.decryptBytes(encryptedData, iv: derivedIV);
   }
 
+  List<int>? decrypt(Uint8List encryptedDataWithSalt) {
+    return decryptWithKey(encryptedDataWithSalt, key);
+  }
+
   // Use this to get a readable string for humans™. If you get null then something is wrong.
-  String? decryptString(String encryptedData) {
-    final decryptedBytes = decrypt(base64.decode(encryptedData));
+  static String? decryptWithKeyString(String encryptedData, encrypt.Key key) {
+    final decryptedBytes = decryptWithKey(base64.decode(encryptedData), key);
 
     if (decryptedBytes != null) {
       return utf8.decode(decryptedBytes);
     }
 
     return null;
+  }
+
+  String? decryptString(String encryptedData) {
+    return decryptWithKeyString(encryptedData, key);
   }
 
   String decryptEncodedTags(String htmlString) {
