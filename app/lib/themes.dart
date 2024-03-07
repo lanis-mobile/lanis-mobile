@@ -13,11 +13,10 @@ class Themes {
     // The basic theme, global theme data changes should be put here.
     ThemeData basicTheme(Brightness brightness) {
       return ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: seedColor,
-            brightness: brightness
-        ),
-        inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
+        inputDecorationTheme:
+            const InputDecorationTheme(border: OutlineInputBorder()),
       );
     }
 
@@ -50,22 +49,26 @@ class Themes {
 
   // Will be set by ColorModeNotifier.init() or _getSchoolTheme() in client.dart.
   static Themes schoolTheme = Themes(null, null);
-  
+
   static Themes standardTheme = getNewTheme(Colors.deepPurple);
 }
 
 class ColorModeNotifier {
-  static ValueNotifier<Themes> notifier = ValueNotifier<Themes>(Themes.standardTheme);
+  static ValueNotifier<Themes> notifier =
+      ValueNotifier<Themes>(Themes.standardTheme);
 
   static void set(String name, Themes theme) async {
-    await globalStorage.write(key: StorageKey.settingsSelectedColor, value: name);
+    await globalStorage.write(
+        key: StorageKey.settingsSelectedColor, value: name);
     notifier.value = theme;
   }
 
   static void init() async {
-    String colorTheme = await globalStorage.read(key: StorageKey.settingsSelectedColor);
+    String colorTheme =
+        await globalStorage.read(key: StorageKey.settingsSelectedColor);
 
-    String schoolAccentColor = await globalStorage.read(key: StorageKey.schoolAccentColor);
+    String schoolAccentColor =
+        await globalStorage.read(key: StorageKey.schoolAccentColor);
     if (schoolAccentColor != "") {
       int schoolColor = int.parse(schoolAccentColor);
 
@@ -85,7 +88,8 @@ class ColorModeNotifier {
 
 // For setting the themeMode of MaterialApp dynamically
 class ThemeModeNotifier {
-  static ValueNotifier<ThemeMode> notifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+  static ValueNotifier<ThemeMode> notifier =
+      ValueNotifier<ThemeMode>(ThemeMode.system);
 
   static void _notify(String theme) {
     if (theme == "dark") {
@@ -98,12 +102,14 @@ class ThemeModeNotifier {
   }
 
   static void init() async {
-    String theme = await globalStorage.read(key: StorageKey.settingsSelectedTheme);
+    String theme =
+        await globalStorage.read(key: StorageKey.settingsSelectedTheme);
     _notify(theme);
   }
 
   static void set(String theme) async {
-    await globalStorage.write(key: StorageKey.settingsSelectedTheme, value: theme);
+    await globalStorage.write(
+        key: StorageKey.settingsSelectedTheme, value: theme);
     _notify(theme);
   }
 }

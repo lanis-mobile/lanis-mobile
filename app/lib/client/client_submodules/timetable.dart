@@ -13,8 +13,10 @@ class TimetableParser {
   }
 
   Future<List<List<List<StdPlanFach>>>> getTimetable() async {
-    final location = await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
-    final response = await dio.get("https://start.schulportal.hessen.de/${location.headers["location"]![0]}");
+    final location =
+        await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
+    final response = await dio.get(
+        "https://start.schulportal.hessen.de/${location.headers["location"]![0]}");
 
     var document = parse(response.data);
     var stundenplanTableHead = document.querySelector("#own thead");
@@ -34,7 +36,9 @@ class TimetableParser {
           List<StdPlanFach> stunde = [];
           for (var fach in day.querySelectorAll(".stunde")) {
             var name = fach.querySelector("b")!.text.trim();
-            var raum = fach.nodes.map((node) => node.nodeType == 3 ? node.text!.trim() : "").join();
+            var raum = fach.nodes
+                .map((node) => node.nodeType == 3 ? node.text!.trim() : "")
+                .join();
             var lehrer = fach.querySelector("small")!.text.trim();
             var badge = fach.querySelector(".badge")?.text.trim() ?? "";
             var duration = int.parse(fach.parent!.attributes["rowspan"]!);

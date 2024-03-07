@@ -40,7 +40,10 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
       appBar: AppBar(
         title: const Text("Benutzerdaten"),
         actions: [
-          InfoButton(infoText: "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.", context: context)
+          InfoButton(
+              infoText:
+                  "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
+              context: context)
         ],
       ),
       body: ListView(

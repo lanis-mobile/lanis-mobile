@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/shared/format_text.dart';
+import 'package:sph_plan/shared/widgets/format_text.dart';
 import '../../client/client.dart';
 
-import '../../shared/errorView.dart';
+import '../../shared/widgets/error_view.dart';
 
 class DetailedConversationAnsicht extends StatefulWidget {
   final String uniqueID;
@@ -111,9 +111,10 @@ class _DetailedConversationAnsichtState
             child: Row(
               children: [
                 Flexible(
-                  flex: 10,
-                  child: FormattedText(text: content,)
-                )
+                    flex: 10,
+                    child: FormattedText(
+                      text: content,
+                    ))
               ],
             ),
           ),

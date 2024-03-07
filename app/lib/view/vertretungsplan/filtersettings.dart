@@ -39,8 +39,12 @@ class FilterPlan extends StatelessWidget {
               padding: EdgeInsets.all(padding),
               child: Card(
                 child: ListTile(
-                  title: Text("Hinweis", style: TextStyle(fontSize: 22),),
-                  subtitle: Text("Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
+                  title: Text(
+                    "Hinweis",
+                    style: TextStyle(fontSize: 22),
+                  ),
+                  subtitle: Text(
+                      "Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
                 ),
               ),
             ),
@@ -53,7 +57,11 @@ class FilterElements extends StatefulWidget {
   final TextEditingController klassenStufeController;
   final TextEditingController klassenController;
   final TextEditingController lehrerKuerzelController;
-  const FilterElements({super.key, required this.klassenStufeController, required this.klassenController, required this.lehrerKuerzelController});
+  const FilterElements(
+      {super.key,
+      required this.klassenStufeController,
+      required this.klassenController,
+      required this.lehrerKuerzelController});
 
   @override
   State<FilterElements> createState() => _FilterElementsState();
@@ -64,17 +72,14 @@ class _FilterElementsState extends State<FilterElements> {
 
   Timer? _debounceTimer;
 
-
   void _onTypingFinished(String text) {
     if (_debounceTimer != null) {
       _debounceTimer!.cancel();
     }
 
     _debounceTimer = Timer(const Duration(milliseconds: 1500), () async {
-      await setFilter(
-          widget.klassenStufeController.text,
-          widget.klassenController.text,
-          widget.lehrerKuerzelController.text);
+      await setFilter(widget.klassenStufeController.text,
+          widget.klassenController.text, widget.lehrerKuerzelController.text);
     });
   }
 
@@ -109,7 +114,8 @@ class _FilterElementsState extends State<FilterElements> {
         const ListTile(
           leading: Icon(Icons.info_outline),
           title: Text("Mehrere Filter"),
-          subtitle: Text("Du kannst mehrere Filter mit einem \";\" trennen. Beispiel: 7; 8; Q"),
+          subtitle: Text(
+              "Du kannst mehrere Filter mit einem \";\" trennen. Beispiel: 7; 8; Q"),
         )
       ],
     );
