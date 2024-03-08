@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
-import 'package:sph_plan/shared/whats_new.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
-import '../../shared/errorView.dart';
-import '../../shared/format_text.dart';
+import '../../shared/widgets/error_view.dart';
+import '../../shared/widgets/format_text.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL; // Add the dataFetchURL property

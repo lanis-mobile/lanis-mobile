@@ -27,23 +27,23 @@ class ConversationsParser {
     debugPrint("Get new conversation data. Invisible: $invisible.");
     try {
       final response =
-      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-          data: {
-            "a": "headers",
-            "getType": invisible ? "unvisibleOnly" : "visibleOnly",
-            "last": "0"
-          },
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-              "X-Requested-With": "XMLHttpRequest",
-            },
-          ));
+          await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+              data: {
+                "a": "headers",
+                "getType": invisible ? "unvisibleOnly" : "visibleOnly",
+                "last": "0"
+              },
+              options: Options(
+                headers: {
+                  "Accept": "*/*",
+                  "Content-Type":
+                      "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Sec-Fetch-Dest": "empty",
+                  "Sec-Fetch-Mode": "cors",
+                  "Sec-Fetch-Site": "same-origin",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              ));
 
       return compute(computeJson, [response.toString(), client.cryptor.key.bytes]);
     } on (SocketException, DioException) {
@@ -78,26 +78,26 @@ class ConversationsParser {
       final encryptedUniqueID = client.cryptor.encryptString(uniqueID);
 
       final response =
-      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-          queryParameters: {"a": "read", "msg": uniqueID},
-          data: {"a": "read", "uniqid": encryptedUniqueID},
-          options: Options(
-            headers: {
-              "Accept": "*/*",
-              "Content-Type":
-              "application/x-www-form-urlencoded; charset=UTF-8",
-              "Sec-Fetch-Dest": "empty",
-              "Sec-Fetch-Mode": "cors",
-              "Sec-Fetch-Site": "same-origin",
-              "X-Requested-With": "XMLHttpRequest",
-            },
-          ));
+          await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+              queryParameters: {"a": "read", "msg": uniqueID},
+              data: {"a": "read", "uniqid": encryptedUniqueID},
+              options: Options(
+                headers: {
+                  "Accept": "*/*",
+                  "Content-Type":
+                      "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Sec-Fetch-Dest": "empty",
+                  "Sec-Fetch-Mode": "cors",
+                  "Sec-Fetch-Site": "same-origin",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              ));
 
       final Map<String, dynamic> encryptedJSON =
-      jsonDecode(response.toString());
+          jsonDecode(response.toString());
 
       final String? decryptedConversations =
-      client.cryptor.decryptString(encryptedJSON["message"]);
+          client.cryptor.decryptString(encryptedJSON["message"]);
 
       if (decryptedConversations == null) {
         throw UnsaltedOrUnknownException();

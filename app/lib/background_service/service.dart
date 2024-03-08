@@ -10,12 +10,12 @@ import '../client/client.dart';
 import '../client/storage.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
 
-
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      debugPrint(" >>>>>>>>>>>>>>>>>>>>>>>>>>>> Background fetch triggered <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+      debugPrint(
+          " >>>>>>>>>>>>>>>>>>>>>>>>>>>> Background fetch triggered <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
       await performBackgroundFetch();
     } catch (e) {
       debugPrint(e.toString());
@@ -30,7 +30,8 @@ Future<void> performBackgroundFetch() async {
   await client.loadFromStorage();
   try {
     await client.login();
-    final vPlan = await client.substitutions.getAllSubstitutions(skipCheck: true);
+    final vPlan =
+        await client.substitutions.getAllSubstitutions(skipCheck: true);
     final List combinedVPlan = [];
 
     for (List plan in vPlan["entries"]) {
@@ -42,14 +43,17 @@ Future<void> performBackgroundFetch() async {
     String messageBody = "";
 
     for (final entry in filteredPlan) {
-      final time = "${weekDayGer(entry["Tag"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
+      final time =
+          "${weekDayGer(entry["Tag"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
       final type = entry["Art"] ?? "";
       final subject = entry["Fach"] ?? "";
       final teacher = entry["Lehrer"] ?? "";
       final classInfo = entry["Klasse"] ?? "";
 
       // Concatenate non-null values with separator "-"
-      final entryText = [time, type, subject, teacher, classInfo].where((e) => e.isNotEmpty).join(" - ");
+      final entryText = [time, type, subject, teacher, classInfo]
+          .where((e) => e.isNotEmpty)
+          .join(" - ");
 
       messageBody += "$entryText\n";
     }
@@ -57,11 +61,12 @@ Future<void> performBackgroundFetch() async {
     if (messageBody != "") {
       final messageUUID = generateUUID(messageBody);
 
-      messageBody += "Letztes Update erhalten: ${DateFormat.Hm().format(DateTime.now())}";
+      messageBody +=
+          "Letztes Update erhalten: ${DateFormat.Hm().format(DateTime.now())}";
 
       if (!(await isMessageAlreadySent(messageUUID))) {
-        await sendMessage("${filteredPlan.length} Einträge im Vertretungsplan",
-            messageBody);
+        await sendMessage(
+            "${filteredPlan.length} Einträge im Vertretungsplan", messageBody);
         await markMessageAsSent(messageUUID);
       }
     }
@@ -69,22 +74,21 @@ Future<void> performBackgroundFetch() async {
     debugPrint("Exception in backgroundFetch");
     // former status-codes ignored
   }
-
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
-  bool ongoingMessage = (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) == "true";
+  bool ongoingMessage =
+      (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) ==
+          "true";
 
   var androidDetails = AndroidNotificationDetails(
       'io.github.alessioc42.sphplan', 'lanis-mobile',
       channelDescription: "Benachrichtigungen über den Vertretungsplan",
-
       importance: Importance.high,
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
       ongoing: ongoingMessage,
-      icon: "@drawable/ic_launcher"
-      );
+      icon: "@drawable/ic_launcher");
   var platformDetails = NotificationDetails(android: androidDetails);
   await FlutterLocalNotificationsPlugin()
       .show(id, title, message, platformDetails);
@@ -97,10 +101,7 @@ String generateUUID(String input) {
 }
 
 Future<void> markMessageAsSent(String uuid) async {
-  await globalStorage.write(
-    key: StorageKey.lastPushMessageHash,
-    value: uuid
-  );
+  await globalStorage.write(key: StorageKey.lastPushMessageHash, value: uuid);
 }
 
 Future<bool> isMessageAlreadySent(String uuid) async {
@@ -109,7 +110,6 @@ Future<bool> isMessageAlreadySent(String uuid) async {
       await globalStorage.read(key: StorageKey.lastPushMessageHash);
   return storageValue == uuid;
 }
-
 
 String weekDayGer(String dateString) {
   final inputFormat = DateFormat('dd.MM.yyyy');

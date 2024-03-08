@@ -6,10 +6,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
-
 import 'client.dart';
 import 'connection_checker.dart';
-
 
 enum FetcherStatus {
   fetching,
@@ -43,11 +41,12 @@ abstract class Fetcher {
   }
 
   void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
-  
+
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
     if (!(await connectionChecker.hasInternetAccess)) {
       if (isEmpty) {
-        _addResponse(FetcherResponse(status: FetcherStatus.error, content: NoConnectionException()));
+        _addResponse(FetcherResponse(
+            status: FetcherStatus.error, content: NoConnectionException()));
       }
 
       return;
@@ -56,9 +55,9 @@ abstract class Fetcher {
     if (isEmpty || forceRefresh) {
       _addResponse(FetcherResponse(status: FetcherStatus.fetching));
 
-
       _get().then((data) async {
-        _addResponse(FetcherResponse(status: FetcherStatus.done, content: data));
+        _addResponse(
+            FetcherResponse(status: FetcherStatus.done, content: data));
         isEmpty = false;
         return;
       }).catchError((ex) async {
@@ -67,7 +66,8 @@ abstract class Fetcher {
           await fetchData(forceRefresh: true, secondTry: true);
           return;
         }
-        _addResponse(FetcherResponse(status: FetcherStatus.error, content: ex.cause));
+        _addResponse(
+            FetcherResponse(status: FetcherStatus.error, content: ex.cause));
       }, test: (e) => e is LanisException);
     }
   }
@@ -77,10 +77,14 @@ abstract class Fetcher {
   /// [fromJson] requires this for easy initialisation.
   /// This needs to be expanded when more fetchers will be added.
   static Map<String, Function> fetchers = {
-    "SubstitutionsFetcher": (Duration validCacheDuration) => SubstitutionsFetcher(validCacheDuration),
-    "MeinUnterrichtFetcher": (Duration validCacheDuration) => MeinUnterrichtFetcher(validCacheDuration),
-    "VisibleConversationsFetcher": (Duration validCacheDuration) => VisibleConversationsFetcher(validCacheDuration),
-    "InvisibleConversationsFetcher": (Duration validCacheDuration) => InvisibleConversationsFetcher(validCacheDuration),
+    "SubstitutionsFetcher": (Duration validCacheDuration) =>
+        SubstitutionsFetcher(validCacheDuration),
+    "MeinUnterrichtFetcher": (Duration validCacheDuration) =>
+        MeinUnterrichtFetcher(validCacheDuration),
+    "VisibleConversationsFetcher": (Duration validCacheDuration) =>
+        VisibleConversationsFetcher(validCacheDuration),
+    "InvisibleConversationsFetcher": (Duration validCacheDuration) =>
+        InvisibleConversationsFetcher(validCacheDuration),
     "CalendarFetcher": (Duration validCacheDuration) => CalendarFetcher(null),
   };
 
@@ -108,17 +112,19 @@ class SubstitutionsFetcher extends Fetcher {
     final Map filteredSubstitutionPlan = {"length": 0, "days": []};
 
     for (int i = 0; i < substitutionPlan["dates"].length; i++) {
-      final filteredEntries = await filterlogic.filter(substitutionPlan["entries"][i]);
+      final filteredEntries =
+          await filterlogic.filter(substitutionPlan["entries"][i]);
       if (filteredEntries.isNotEmpty) {
-        filteredSubstitutionPlan["days"].add({"date": substitutionPlan["dates"][i], "entries": filteredEntries});
+        filteredSubstitutionPlan["days"].add(
+            {"date": substitutionPlan["dates"][i], "entries": filteredEntries});
       }
     }
 
-    filteredSubstitutionPlan["length"] = filteredSubstitutionPlan["days"].length;
+    filteredSubstitutionPlan["length"] =
+        filteredSubstitutionPlan["days"].length;
 
     return Future.value(filteredSubstitutionPlan);
   }
-
 }
 
 class MeinUnterrichtFetcher extends Fetcher {
@@ -159,6 +165,7 @@ class CalendarFetcher extends Fetcher {
 
     final formatter = DateFormat('yyyy-MM-dd');
 
-    return client.calendar.getCalendar(formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+    return client.calendar.getCalendar(
+        formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
   }
 }

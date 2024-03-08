@@ -11,7 +11,12 @@ class FormatPattern {
   late final int group;
   late final Map<String, String> map;
 
-  FormatPattern({required this.regExp, this.startTag, this.endTag, this.group = 1, this.map = const {}});
+  FormatPattern(
+      {required this.regExp,
+      this.startTag,
+      this.endTag,
+      this.group = 1,
+      this.map = const {}});
 }
 
 class FormattedText extends StatelessWidget {
@@ -43,66 +48,48 @@ class FormattedText extends StatelessWidget {
   String convertLanisSyntax(String lanisStyledText) {
     final List<FormatPattern> formatPatterns = [
       FormatPattern(
-        regExp: RegExp(r"\*\*(([^*]|\*(?!\*))+)\*\*"),
-        startTag: "<b>",
-        endTag: "</b>"
-      ),
+          regExp: RegExp(r"\*\*(([^*]|\*(?!\*))+)\*\*"),
+          startTag: "<b>",
+          endTag: "</b>"),
       FormatPattern(
           regExp: RegExp(r"__(([^_]|_(?!_))+)__"),
           startTag: "<u>",
-          endTag: "</u>"
-      ),
+          endTag: "</u>"),
+      FormatPattern(regExp: RegExp(r"_\((\d+)\)"), map: digitsSubscript),
       FormatPattern(
-          regExp: RegExp(r"_\((\d+)\)"),
-          map: digitsSubscript
-      ),
+          regExp: RegExp(r"_(\d)(?:(?!\n)\s|(?=\n))"), map: digitsSubscript),
+      FormatPattern(regExp: RegExp(r"\^\((\d+)\)"), map: digitsSuperscript),
       FormatPattern(
-          regExp: RegExp(r"_(\d)(?:(?!\n)\s|(?=\n))"),
-          map: digitsSubscript
-      ),
-      FormatPattern(
-          regExp: RegExp(r"\^\((\d+)\)"),
-          map: digitsSuperscript
-      ),
-      FormatPattern(
-          regExp: RegExp(r"\^(\d)(?:(?!\n)\s|(?=\n))"),
-          map: digitsSuperscript
-      ),
+          regExp: RegExp(r"\^(\d)(?:(?!\n)\s|(?=\n))"), map: digitsSuperscript),
       FormatPattern(
           regExp: RegExp(r"~~(([^~]|~(?!~))+)~~"),
           startTag: "<i>",
-          endTag: "</i>"
-      ),
+          endTag: "</i>"),
       FormatPattern(
           regExp: RegExp(r"--(([^-]|-(?!-))+)--"),
           startTag: "<del>",
-          endTag: "</del>"
-      ),
+          endTag: "</del>"),
       FormatPattern(
           regExp: RegExp(r"`(?!``)(.*)(?<!``)`"),
           startTag: "<code>",
-          endTag: "</code>"
-      ),
+          endTag: "</code>"),
       FormatPattern(
           regExp: RegExp(r"```\n*((?:[^`]|`(?!``))*)\n*```"),
           startTag: "<code>",
-          endTag: "</code>"
-      ),
+          endTag: "</code>"),
       FormatPattern(
           regExp: RegExp(r"(\d{2}\.\d{1,2}\.(\d{4}|\d{2}\b))"),
           startTag: "<date>",
-          endTag: "</date>"
-      ),
+          endTag: "</date>"),
       FormatPattern(
-          regExp: RegExp(r"(\d{2}:\d{2} Uhr)|(\d{2}:\d{2})", caseSensitive: false),
+          regExp:
+              RegExp(r"(\d{2}:\d{2} Uhr)|(\d{2}:\d{2})", caseSensitive: false),
           startTag: "<time>",
           endTag: "</time>",
-          group: 0
-      ),
+          group: 0),
       FormatPattern(
           regExp: RegExp(r"^[ \t]*-[ \t]*(.*)", multiLine: true),
-          startTag: "\u2022 "
-      ),
+          startTag: "\u2022 "),
     ];
 
     String formattedText = lanisStyledText;
@@ -116,8 +103,10 @@ class FormattedText extends StatelessWidget {
 
     // Apply formatting
     for (final FormatPattern pattern in formatPatterns) {
-      formattedText = formattedText.replaceAllMapped(pattern.regExp, (match) =>
-        "${pattern.startTag ?? ""}${convertByMap(match.group(pattern.group)!, pattern.map)}${pattern.endTag ?? ""}");
+      formattedText = formattedText.replaceAllMapped(
+          pattern.regExp,
+          (match) =>
+              "${pattern.startTag ?? ""}${convertByMap(match.group(pattern.group)!, pattern.map)}${pattern.endTag ?? ""}");
     }
 
     // Surround emails and links with <a> tag
@@ -129,9 +118,11 @@ class FormattedText extends StatelessWidget {
 
     for (LinkifyElement element in linkifiedElements) {
       if (element is UrlElement) {
-        linkifiedText += "<a href='${element.url}' type='url'>${element.text}</a>";
+        linkifiedText +=
+            "<a href='${element.url}' type='url'>${element.text}</a>";
       } else if (element is EmailElement) {
-        linkifiedText += "<a href='${element.url}' type='email'>${element.text}</a>";
+        linkifiedText +=
+            "<a href='${element.url}' type='email'>${element.text}</a>";
       } else {
         linkifiedText += element.text;
       }
@@ -153,65 +144,68 @@ class FormattedText extends StatelessWidget {
         "del": StyledTextTag(
             style: const TextStyle(decoration: TextDecoration.lineThrough)),
         "code": StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
-          padding: const EdgeInsets.only(top: 2, bottom: 2),
-          child: Container(
-            padding:
-            const EdgeInsets.only(left: 8.0, right: 8.0, top: 4, bottom: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              color: Theme.of(context).colorScheme.secondary.withOpacity(0.25),
-            ),
-            child: Text(
-              textContent!,
-              style: const TextStyle(
-                fontFamily: "Roboto Mono",
+              padding: const EdgeInsets.only(top: 2, bottom: 2),
+              child: Container(
+                padding: const EdgeInsets.only(
+                    left: 8.0, right: 8.0, top: 4, bottom: 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color:
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.25),
+                ),
+                child: Text(
+                  textContent!,
+                  style: const TextStyle(
+                    fontFamily: "Roboto Mono",
+                  ),
+                ),
               ),
-            ),
-          ),
-        )),
+            )),
         "date": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 2),
-              child: Icon(Icons.calendar_today,
-                  size: 20, color: Theme.of(context).colorScheme.primary),
-            ),
-            Flexible(
-              child: Text(
-                textContent!,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold),
-              ),
-            )
-          ],
-        )),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 2),
+                  child: Icon(Icons.calendar_today,
+                      size: 20, color: Theme.of(context).colorScheme.primary),
+                ),
+                Flexible(
+                  child: Text(
+                    textContent!,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            )),
         "time": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 2),
-              child: Icon(Icons.access_time_filled,
-                  size: 20, color: Theme.of(context).colorScheme.primary),
-            ),
-            Flexible(
-              child: Text(
-                textContent!,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold),
-              ),
-            )
-          ],
-        )),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 2),
+                  child: Icon(Icons.access_time_filled,
+                      size: 20, color: Theme.of(context).colorScheme.primary),
+                ),
+                Flexible(
+                  child: Text(
+                    textContent!,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            )),
         "a": StyledTextWidgetBuilderTag((context, attributes, textContent) {
           late final Icon icon;
 
           if (attributes["type"] == "url") {
-            icon = Icon(Icons.link, color: Theme.of(context).colorScheme.primary);
+            icon =
+                Icon(Icons.link, color: Theme.of(context).colorScheme.primary);
           } else {
-            icon = Icon(Icons.email_rounded, color: Theme.of(context).colorScheme.primary);
+            icon = Icon(Icons.email_rounded,
+                color: Theme.of(context).colorScheme.primary);
           }
 
           return Padding(
@@ -225,12 +219,12 @@ class FormattedText extends StatelessWidget {
               },
               borderRadius: BorderRadius.circular(6),
               child: Container(
-                  padding:
-                  const EdgeInsets.only(left: 7, right: 8, top: 2, bottom: 2),
+                  padding: const EdgeInsets.only(
+                      left: 7, right: 8, top: 2, bottom: 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
                     color:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                        Theme.of(context).colorScheme.primary.withOpacity(0.25),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

@@ -67,6 +67,7 @@ dependencies:
   flutter_native_splash: ^2.3.10
   table_calendar: ^3.0.9
   intl: ^0.18.1
+  cached_network_image: ^3.3.1
 
 flutter_launcher_icons:
   android: false

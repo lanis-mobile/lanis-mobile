@@ -12,7 +12,6 @@ class WelcomeLoginScreen extends StatefulWidget {
 }
 
 class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
-
   String currentPage = "intro";
   List<String> schoolList = [];
 
@@ -31,11 +30,9 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
               currentPage = "login";
             });
           },
-          dotsDecorator: DotsDecorator(
-              activeColor: Theme.of(context).colorScheme.primary
-          ),
-          pages: intoScreenPageViewModels
-      );
+          dotsDecorator:
+              DotsDecorator(activeColor: Theme.of(context).colorScheme.primary),
+          pages: intoScreenPageViewModels);
     } else if (currentPage == "login") {
       return Scaffold(
         body: LoginForm(
@@ -48,18 +45,17 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
       );
     } else if (currentPage == "setup") {
       return IntroductionScreen(
-          done: const Text("Fertig"),
-          showNextButton: false,
-          onDone: () {
-            setState(() {
-              Navigator.pop(context);
-            });
-          },
-          pages: setupScreenPageViewModels,
-          dotsFlex: 2,
-        dotsDecorator: DotsDecorator(
-          activeColor: Theme.of(context).colorScheme.primary
-        ),
+        done: const Text("Fertig"),
+        showNextButton: false,
+        onDone: () {
+          setState(() {
+            Navigator.pop(context);
+          });
+        },
+        pages: setupScreenPageViewModels,
+        dotsFlex: 2,
+        dotsDecorator:
+            DotsDecorator(activeColor: Theme.of(context).colorScheme.primary),
       );
     }
 
@@ -68,10 +64,6 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-        child: buildBody()
-    );
+    return PopScope(canPop: false, child: buildBody());
   }
 }
-
