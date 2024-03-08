@@ -240,7 +240,7 @@ class _HomePageState extends State<HomePage> {
                         aspectRatio: 16 / 9,
                         child: CachedNetworkImage(
                           imageUrl:
-                              "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=lg",
+                              "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=xs",
                           fadeInDuration: const Duration(milliseconds: 0),
                           fit: BoxFit.cover,
                           placeholder: (context, url) => const Image(
