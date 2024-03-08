@@ -243,8 +243,8 @@ class _HomePageState extends State<HomePage> {
                               "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=lg",
                           fadeInDuration: const Duration(milliseconds: 0),
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Image.file(
-                            File("assets/icon.png"),
+                          placeholder: (context, url) => const Image(
+                            image: AssetImage("assets/icon.png"),
                             fit: BoxFit.cover,
                           ),
                         ),
