@@ -214,8 +214,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           return Column(
             children: [
               TabBar(
-                  controller: _tabController,
-                  tabs: getTabs(snapshot.data?.content)),
+                isScrollable: true,
+                controller: _tabController,
+                tabs: getTabs(snapshot.data?.content)),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
