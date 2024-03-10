@@ -16,7 +16,6 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background_service/service.dart' as background_service;
-import 'client/connection_checker.dart';
 
 void main() async {
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -106,8 +105,9 @@ class App extends StatelessWidget {
     return DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
       if (lightDynamic != null && darkDynamic != null) {
         Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
-        if (globalStorage.prefs.getString("color") == "dynamic")
+        if (globalStorage.prefs.getString("color") == "dynamic") {
           ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
+        }
       }
 
       return ValueListenableBuilder<Themes>(

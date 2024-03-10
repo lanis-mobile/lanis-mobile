@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sph_plan/shared/apps.dart';
@@ -94,7 +93,7 @@ class _HomePageState extends State<HomePage> {
         isSupported: true,
         enableBottomNavigation: false,
         enableDrawer: true,
-        action: (_context) {
+        action: (context) {
           client.getLoginURL().then((response) {
             launchUrl(Uri.parse(response));
           });
