@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
+import '../../shared/launch_file.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/format_text.dart';
 
@@ -118,45 +118,9 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   data["historie"][index]["files"].forEach((file) {
                     files.add(ActionChip(
                       label: Text(file["filename"]),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text("Download... ${file['filesize']}"),
-                                content: const Center(
-                                  heightFactor: 1.1,
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            });
-                        client
-                            .downloadFile(file["url"], file["filename"])
-                            .then((filepath) {
-                          Navigator.of(context).pop();
-
-                          if (filepath == "") {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                      title: const Text("Fehler!"),
-                                      content: Text(
-                                          "Beim Download der Datei ${file["filename"]} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
-                                      actions: [
-                                        TextButton(
-                                          child: const Text('OK'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    ));
-                          } else {
-                            OpenFile.open(filepath);
-                          }
-                        });
-                      },
+                      onPressed: () => launchFile(
+                          context, file["url"], file["filename"], file["size"]
+                      ),
                     ));
                   });
 

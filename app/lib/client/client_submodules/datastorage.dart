@@ -23,6 +23,12 @@ class DataStorageParser {
         .toList();
     for (var file in document.querySelectorAll("table#files tbody tr")) {
       final fields = file.querySelectorAll("td");
+      String? hinweis = fields[headers.indexOf("Name")]
+          .querySelector("small")?.text.trim();
+      if (hinweis != null) {
+        fields[headers.indexOf("Name")]
+            .querySelector("small")?.text = "";
+      }
       var name = fields[headers.indexOf("Name")].text.trim();
       var aenderung = fields[headers.indexOf("Änderung")].text.trim();
       var groesse = fields[headers.indexOf("Größe")].text.trim();
@@ -32,8 +38,11 @@ class DataStorageParser {
           id,
           "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id",
           aenderung,
-          groesse));
+          groesse,
+          hinweis: hinweis
+      ));
     }
+
     List<FolderNode> folders = [];
     for (var folder in document.querySelectorAll(".folder")) {
       var name = folder.querySelector(".caption")!.text.trim();
