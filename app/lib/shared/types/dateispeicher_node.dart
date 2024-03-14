@@ -4,8 +4,9 @@ class FileNode {
   String downloadUrl;
   String groesse;
   String aenderung;
+  String? hinweis;
 
-  FileNode(this.name, this.id, this.downloadUrl, this.aenderung, this.groesse);
+  FileNode(this.name, this.id, this.downloadUrl, this.aenderung, this.groesse, {this.hinweis});
 }
 
 class FolderNode {
