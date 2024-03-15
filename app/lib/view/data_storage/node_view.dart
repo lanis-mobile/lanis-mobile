@@ -1,8 +1,10 @@
 import 'package:file_icon/file_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/shared/widgets/error_view.dart';
 import 'package:sph_plan/shared/widgets/marquee.dart';
 
 import '../../client/client.dart';
+import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/launch_file.dart';
 import '../../shared/types/dateispeicher_node.dart';
 
@@ -18,6 +20,7 @@ class DataStorageNodeView extends StatefulWidget {
 
 class _DataStorageNodeViewState extends State<DataStorageNodeView> {
   var loading = true;
+  var error = false;
   late List<FileNode> files;
   late List<FolderNode> folders;
 
@@ -33,6 +36,7 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
   }
 
   void loadItems() async {
+    try {
       var items = await client.dataStorage.getNode(widget.nodeID);
       var (fileList, folderList)  = items;
       files = fileList;
@@ -41,6 +45,12 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
       setState(() {
         loading = false;
       });
+    } on LanisException catch (e) {
+      setState(() {
+        error = true;
+        loading = false;
+      });
+    }
   }
 
   List<ListTile> getListTiles() {
@@ -88,10 +98,17 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
       ),
       body: loading ? const Center(
         child: CircularProgressIndicator(),
+      ) : error ? const Center(
+        child: Column(
+          children: [
+            Icon(Icons.error_outline, size: 100),
+            SizedBox(height: 10),
+            Text("Fehler beim Laden der Dateien"),
+          ],
+        )
       ) : ListView(
         children: getListTiles(),
       ),
     );
   }
 }
-
