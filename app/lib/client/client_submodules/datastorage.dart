@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
 
@@ -11,6 +13,25 @@ class DataStorageParser {
 
   DataStorageParser(Dio dioClient, this.client) {
     dio = dioClient;
+  }
+
+  Future<dynamic> searchFiles(String query) async {
+    final response = await dio.get(
+        "https://start.schulportal.hessen.de/dateispeicher.php",
+      queryParameters: {
+        "q": query,
+        "a": "searchFiles"
+      },
+      data: {
+        "q": query,
+        "a": "searchFiles"
+      },
+      options: Options(
+        contentType: "application/x-www-form-urlencoded"
+      )
+    );
+    final data = jsonDecode(response.data);
+    return data[0];
   }
 
   Future<(List<FileNode>, List<FolderNode>)> getNode(int nodeID) async {
@@ -41,12 +62,13 @@ class DataStorageParser {
         var groesse = fields[headers.indexOf("Größe")].text.trim();
         var id = int.parse(file.attributes["data-id"]!.trim());
         files.add(FileNode(
-            name,
-            id,
-            "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id",
-            aenderung,
-            groesse,
-            hinweis: hinweis));
+            name: name,
+            id: id,
+            downloadUrl: "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id",
+            aenderung: aenderung,
+            groesse: groesse,
+            hinweis: hinweis,
+        ));
       }
 
       List<FolderNode> folders = [];

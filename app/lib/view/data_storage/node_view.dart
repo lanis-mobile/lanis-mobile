@@ -1,12 +1,9 @@
-import 'package:file_icon/file_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:sph_plan/shared/widgets/error_view.dart';
-import 'package:sph_plan/shared/widgets/marquee.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/launch_file.dart';
 import '../../shared/types/dateispeicher_node.dart';
+import 'file_listtile.dart';
 
 class DataStorageNodeView extends StatefulWidget {
   final int nodeID;
@@ -23,11 +20,6 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
   var error = false;
   late List<FileNode> files;
   late List<FolderNode> folders;
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   void initState() {
@@ -73,18 +65,7 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
     }
 
     for (var file in files) {
-      listTiles.add(ListTile(
-        title: MarqueeWidget(child: Text(file.name)),
-        subtitle: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (file.hinweis != null) MarqueeWidget(child: Text( file.hinweis!)) else Text(file.groesse),
-            Text(file.aenderung),
-          ],
-        ),
-        leading: FileIcon(file.name, ),
-        onTap: () => launchFile(context, file.downloadUrl, file.name, file.groesse),
-      ));
+      listTiles.add(FileListTile(context: context, file: file));
     }
 
     return listTiles;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'node_view.dart';
+import 'package:sph_plan/view/data_storage/root_view.dart';
 
 class DataStorageAnsicht extends StatefulWidget {
   const DataStorageAnsicht({super.key});
@@ -14,7 +14,7 @@ class _DataStorageAnsichtState extends State<DataStorageAnsicht> {
 
   @override
   Widget build(BuildContext context) {
-    return const DataStorageNodeView(nodeID: 0, title: "Datenspeicher");
+    return const DataStorageRootView();
   }
 }
 
