@@ -1,6 +1,8 @@
 # Lanis Mobile
 Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertretungsplan, "Mein Unterricht", Nachrichten und den Schulkalender mit mehr Geplant. 
 
+**Einsatz an über 50 Schulen in Hessen mit mehreren hundert Nutzern**
+
 <p align="center">
     <img src="https://github.com/alessioC42/lanis-mobile/assets/84250128/19d30436-32f7-4cbe-b78e-f2fee3583c28" width="60%">
 </p>
