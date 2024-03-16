@@ -11,6 +11,7 @@ import 'package:sph_plan/view/conversations/conversations.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
+import 'package:sph_plan/view/timetable/timetable.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/client/connection_checker.dart';
@@ -70,6 +71,15 @@ class _HomePageState extends State<HomePage> {
         enableBottomNavigation: true,
         enableDrawer: true,
         body: const CalendarAnsicht()),
+    Destination(
+      label: "Stundenplan",
+      icon: const Icon(Icons.timelapse),
+      selectedIcon: const Icon(Icons.timelapse),
+      isSupported: client.doesSupportFeature(SPHAppEnum.stundenplan),
+      enableBottomNavigation: true,
+      enableDrawer: true,
+      body: const TimetableAnsicht(),
+    ),
     Destination(
         label: "Nachrichten",
         icon: const Icon(Icons.forum),

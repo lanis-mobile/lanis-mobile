@@ -167,6 +167,20 @@ class SPHclient {
                   ]))
         ]);
       }
+      if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
+        debugPrint("----------------- initializing stundenplan fetcher! -----------------");
+
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.stundenplan,
+              LoadApp(
+                  applet: SPHAppEnum.stundenplan,
+                  shouldFetch: false,
+                  fetchers: [
+                    TimeTableFetcher(Duration(minutes: updateAppsIntervall)),
+                  ]))
+        ]);
+      }
     }
   }
 
