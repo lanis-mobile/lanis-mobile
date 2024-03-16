@@ -3,7 +3,7 @@ import 'package:open_file/open_file.dart';
 
 import '../client/client.dart';
 
-void launchFile(context, url, filename, filesize) {
+void launchFile(BuildContext context, String url, String filename, String filesize, Function callback) {
   showDialog(
       context: context,
       barrierDismissible: false,
@@ -39,6 +39,7 @@ void launchFile(context, url, filename, filesize) {
           ));
     } else {
       OpenFile.open(filepath);
+      callback(); // Call the callback function after the file is opened
     }
   });
 }

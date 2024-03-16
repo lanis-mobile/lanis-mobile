@@ -45,8 +45,8 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
     }
   }
 
-  List<ListTile> getListTiles() {
-    var listTiles = <ListTile>[];
+  List<Widget> getListTiles() {
+    var listTiles = <Widget>[];
 
     for (var folder in folders) {
       listTiles.add(ListTile(

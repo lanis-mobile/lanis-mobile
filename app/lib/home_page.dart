@@ -319,7 +319,6 @@ class _HomePageState extends State<HomePage> {
         indexNavbarTranslationLayer.add(null);
       }
     }
-    debugPrint(selectedDestinationDrawer.toString());
     return NavigationBar(
       destinations: barDestinations,
       selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,

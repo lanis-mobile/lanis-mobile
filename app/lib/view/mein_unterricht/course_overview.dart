@@ -7,7 +7,7 @@ import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/format_text.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
-  final String dataFetchURL; // Add the dataFetchURL property
+  final String dataFetchURL;
   final String title;
   const CourseOverviewAnsicht(
       {super.key, required this.dataFetchURL, required this.title});
@@ -119,7 +119,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     files.add(ActionChip(
                       label: Text(file["filename"]),
                       onPressed: () => launchFile(
-                          context, file["url"], file["filename"], file["size"]
+                          context, file["url"], file["filename"], file["size"], (){}
                       ),
                     ));
                   });

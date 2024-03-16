@@ -109,13 +109,11 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
       _searchingWithQuery = controller.text;
       var options = await client.dataStorage.searchFiles(_searchingWithQuery!);
 
-      debugPrint("Search results: ${options.length}");
-
       if (_searchingWithQuery != controller.text) {
         return _lastOptions;
       }
 
-      _lastOptions = List<ListTile>.generate(options.length, (int index) {
+      _lastOptions = List<Widget>.generate(options.length, (int index) {
         final Map item = options[index];
         return SearchFileListTile(
             context: context,

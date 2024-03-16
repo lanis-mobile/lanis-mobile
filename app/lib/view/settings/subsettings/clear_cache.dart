@@ -41,7 +41,6 @@ class _BodyState extends State<Body> {
         }
       });
     }
-    debugPrint(fileNum.toString());
     return {'fileNum': fileNum, 'size': totalSize};
   }
 
