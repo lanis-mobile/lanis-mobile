@@ -152,7 +152,6 @@ class SubstitutionsParser {
 
     try {
       var dates = await getSubstitutionDates();
-      debugPrint(dates.toString());
 
       if (dates.isEmpty) {
         return getVplanNonAJAX();

@@ -205,7 +205,6 @@ class SPHclient {
     } on LanisException {
       rethrow;
     } catch (e) {
-      debugPrint(e.toString());
       throw LoggedOffOrUnknownException();
     }
   }
@@ -364,8 +363,6 @@ class SPHclient {
     var userDataTableBody =
         document.querySelector("div.col-md-12 table.table.table-striped tbody");
 
-    //TODO find out how "Zugeordnete Eltern/Erziehungsberechtigte" is used in this scope
-
     if (userDataTableBody != null) {
       var result = {};
 
@@ -410,43 +407,47 @@ class SPHclient {
     await deleteSubfoldersAndFiles(tempDir);
   }
 
+  // This function generates a unique hash for a given source string
+  String generateUniqueHash(String source) {
+    var bytes = utf8.encode(source);
+    var digest = sha256.convert(bytes);
+
+    var shortHash = digest
+        .toString()
+        .replaceAll(RegExp(r'[^A-z0-9]'), '')
+        .substring(0, 12);
+
+    return shortHash;
+  }
+
+  /// This function checks if a file exists in the temporary directory downloaded by [downloadFile]
+  Future<bool> doesFileExist(String url, String filename) async {
+    var tempDir = await getTemporaryDirectory();
+    String urlHash = generateUniqueHash(url);
+    String folderPath = "${tempDir.path}/$urlHash";
+    String filePath = "$folderPath/$filename";
+
+    File existingFile = File(filePath);
+    return existingFile.existsSync();
+  }
+
   ///downloads a file from an URL and returns the path of the file.
   ///
   ///The file is stored in the temporary directory of the device.
   ///So calling the same URL twice will result in the same file and one Download.
   Future<String> downloadFile(String url, String filename) async {
-    String generateUniqueHash(String source) {
-      var bytes = utf8.encode(source);
-      var digest = sha256.convert(bytes);
-
-      var shortHash = digest
-          .toString()
-          .replaceAll(RegExp(r'[^A-z0-9]'), '')
-          .substring(0, 6);
-
-      return shortHash;
-    }
-
     try {
       var tempDir = await getTemporaryDirectory();
-
-      // To ensure unique file names, we store each file in a folder
-      // with a hashed value of the download URL.
-      // It is necessary for a teacher to upload files with unique file names.
       String urlHash = generateUniqueHash(url);
-
       String folderPath = "${tempDir.path}/$urlHash";
       String savePath = "$folderPath/$filename";
 
-      // Check if the folder exists, create it if not
       Directory folder = Directory(folderPath);
       if (!folder.existsSync()) {
         folder.createSync(recursive: true);
       }
 
-      // Check if the file already exists
-      File existingFile = File(savePath);
-      if (existingFile.existsSync()) {
+      if (await doesFileExist(url, filename)) {
         return savePath;
       }
 
