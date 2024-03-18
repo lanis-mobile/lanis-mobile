@@ -113,7 +113,6 @@ class SPHclient {
   ///
   /// New fetchers should be added here.
   void initialiseLoadApps() {
-    if (client.applets == null) {
       client.applets = {};
       if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         client.applets!.addEntries([
@@ -181,7 +180,6 @@ class SPHclient {
                   ]))
         ]);
       }
-    }
   }
 
   ///Logs the user in and fetches the necessary metadata.

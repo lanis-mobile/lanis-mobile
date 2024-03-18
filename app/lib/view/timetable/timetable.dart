@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/apps.dart';
 
@@ -31,19 +34,33 @@ class _TimetableAnsichtState extends State<TimetableAnsicht>
       body: StreamBuilder<FetcherResponse>(
         stream: timetableFetcher.stream,
         builder: (context, snapshot) {
-          if (snapshot.data == null) {
+          if (snapshot.data?.content == null) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
+          var json = (jsonEncode(snapshot.data!.content));
 
-          return ListView(
-            children: [
-              Text(snapshot.data!.content.toString())
-            ],
+          Clipboard.setData(ClipboardData(text: json));
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              await timetableFetcher.fetchData(forceRefresh: true);
+            },
+            child: ListView(
+              children: [
+                Text(snapshot.data!.content.toString())
+              ],
+            ),
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await timetableFetcher.fetchData(forceRefresh: true);
+        },
+        child: const Icon(Icons.refresh),
+      )
     );
   }
 }
