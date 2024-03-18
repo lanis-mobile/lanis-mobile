@@ -119,7 +119,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     files.add(ActionChip(
                       label: Text(file["filename"]),
                       onPressed: () => launchFile(
-                          context, file["url"], file["filename"], file["size"], (){}
+                          context, file["url"], file["filename"], file["filesize"], (){}
                       ),
                     ));
                   });
