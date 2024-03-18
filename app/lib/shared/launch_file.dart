@@ -3,13 +3,13 @@ import 'package:open_file/open_file.dart';
 
 import '../client/client.dart';
 
-void launchFile(BuildContext context, String url, String filename, String filesize, Function callback) {
+void launchFile(BuildContext context, String url, String filename, String? filesize, Function callback) {
   showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Download... $filesize"),
+          title: Text("Download... ${filesize ?? ""}"),
           content: const Center(
             heightFactor: 1.1,
             child: CircularProgressIndicator(),
