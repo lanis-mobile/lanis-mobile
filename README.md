@@ -39,6 +39,7 @@ Wir sind offen für neue Colaborator. Aber auch wenn du nicht coden kannst, bist
 - [x] Benutzerdaten
 - [x] Mein Unterricht
 - [x] Nachrichten
+- [x] Datenspeicher
 - [ ] Stundenplan (In Arbeit)
 
 Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
