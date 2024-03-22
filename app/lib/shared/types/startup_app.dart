@@ -3,7 +3,7 @@ import 'package:sph_plan/shared/apps.dart';
 
 import '../../client/fetcher.dart';
 
-/// Defines a supported applet with its fetcher(s), so that we only need to initialise it once in [SPHclient.initialiseLoadApps].
+/// Defines a supported applet with its fetcher(s), so that we only need to initialise it once in [SPHclient.initialiseApplets].
 /// Useful for adding new applets easily.
 ///
 /// [shouldFetch] - Should we fetch it on startup?

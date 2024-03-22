@@ -33,8 +33,14 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
+  /// The list of fetchers and which are used by the different views.
+  /// Properties of each LoadApp can change.
   final Map<SPHAppEnum, LoadApp> applets = {};
-  late Map<String, dynamic> shouldFetchApplets;
+
+  /// Loaded from [loadFromStorage] to be *only* used in [initialiseApplets].
+  /// Map of bools which indicate if a applet should be periodically loaded.
+  /// Just a convenience variable because of how [initState] in [startup.dart] works.
+  late final Map<String, dynamic> shouldFetchApplets;
   int updateAppsIntervall = 15;
 
   dynamic userData = {};
@@ -80,7 +86,7 @@ class SPHclient {
     updateAppsIntervall = int.parse((await globalStorage.read(
         key: StorageKey.settingsUpdateAppsIntervall)));
 
-    shouldFetchApplets = jsonDecode(await globalStorage.read(key: StorageKey.settingsLoadApps));
+    shouldFetchApplets = jsonDecode(await globalStorage.read(key: StorageKey.settingsShouldFetchApplets));
 
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
@@ -105,7 +111,7 @@ class SPHclient {
   ///   3. Add LoadApp in this function.
   ///
   /// This step occurs right after the start of the app.
-  void initialiseLoadApps() {
+  void initialiseApplets() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
       client.applets.addEntries([
         MapEntry(

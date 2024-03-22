@@ -103,7 +103,7 @@ class _LoadModeElementsState extends State<LoadModeElements> {
                     }
 
                     await globalStorage.write(
-                        key: StorageKey.settingsLoadApps,
+                        key: StorageKey.settingsShouldFetchApplets,
                         value: json.encode(jsonLoadApps));
                   });
             }),

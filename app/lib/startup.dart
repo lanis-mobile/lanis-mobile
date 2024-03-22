@@ -93,7 +93,7 @@ class _StartupScreenState extends State<StartupScreen> {
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((_) async {
-      client.initialiseLoadApps();
+      client.initialiseApplets();
       await client.prepareDio();
 
       // Context should be mounted
@@ -234,7 +234,7 @@ class _StartupScreenState extends State<StartupScreen> {
           return;
         }
 
-        client.initialiseLoadApps();
+        client.initialiseApplets();
 
         finishedLoadingStorage.value = true;
 

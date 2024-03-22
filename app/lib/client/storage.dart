@@ -8,7 +8,7 @@ enum StorageKey {
   settingsUseCountly,
   settingsSelectedColor,
   settingsSelectedTheme,
-  settingsLoadApps,
+  settingsShouldFetchApplets,
   settingsUpdateAppsIntervall,
 
   userSchoolID,
@@ -40,8 +40,8 @@ extension on StorageKey {
         return "settings-push-service-notifications-ongoing";
       case StorageKey.settingsUseCountly:
         return "enable-countly";
-      case StorageKey.settingsLoadApps:
-        return "loadApps";
+      case StorageKey.settingsShouldFetchApplets:
+        return "shouldFetchApplets";
       case StorageKey.settingsUpdateAppsIntervall:
         return "updateAppsIntervall";
       case StorageKey.userSchoolID:
