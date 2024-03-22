@@ -176,7 +176,7 @@ class SPHclient {
                   applet: SPHAppEnum.stundenplan,
                   shouldFetch: false,
                   fetchers: [
-                    TimeTableFetcher(Duration(minutes: updateAppsIntervall)),
+                    TimeTableFetcher(const Duration(days: 1)),
                   ]))
         ]);
       }

@@ -4,24 +4,24 @@ class StdPlanFach {
   String? lehrer;
   String? badge;
   int duration;
-  String? startTime;
-  String? endTime;
+  (int, int) startTime;
+  (int, int) endTime;
 
-  StdPlanFach(
-      {required this.name,
-      required this.raum,
-      required this.lehrer,
-      required this.badge,
-      required this.duration,
-      this.startTime,
-      this.endTime});
+  StdPlanFach({
+    required this.name,
+    required this.raum,
+    required this.lehrer,
+    required this.badge,
+    required this.duration,
+    required this.startTime,
+    required this.endTime
+  });
 
   @override
   String toString() {
-    return "(Fach: $name, Raum: $raum, Lehrer: $lehrer, Badge: $badge, Dauer: $duration ($startTime-$endTime))";
+    return "(Fach: $name, Raum: $raum, Lehrer: $lehrer, Badge: $badge, Dauer: $duration (${startTime.$1}:${startTime.$2}-${endTime.$1}:${endTime.$2}))";
   }
 
-  //to JSON
   Map<String, dynamic> toJson() {
     return {
       "name": name,
@@ -34,7 +34,6 @@ class StdPlanFach {
     };
   }
 
-  //to compare with another object
   @override
   bool operator == (Object other) {
     if (other is StdPlanFach) {

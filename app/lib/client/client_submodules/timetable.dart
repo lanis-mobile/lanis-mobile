@@ -33,11 +33,13 @@ class TimetableParser {
   List<Day> parseRoomPlan(Element tbody) {
     List<Day> result = List.generate(5, (_) => []);
 
-    List<(String, String)> timeSlots =
+    List<((int, int), (int, int))> timeSlots =
     tbody.querySelectorAll(".VonBis").map((e) {
       var timeString = e.text.trim();
-      var split = timeString.split(" - ");
-      return (split[0], split[1]);
+      var s = timeString.split(" - ");
+      var splitA = s[0].split(":");
+      var splitB = s[1].split(":");
+      return ((int.parse(splitA[0]), int.parse(splitA[1])), (int.parse(splitB[0]), int.parse(splitB[1])));
     }).toList();
 
     List<List<bool>> alreadyParsed = List.generate(timeSlots.length+1, (_) => List.generate(5, (_) => false));
@@ -66,7 +68,7 @@ class TimetableParser {
   }
 
   List<StdPlanFach> parseSingeEntry(
-      Element cell, int y, List<(String, String)> timeSlots) {
+      Element cell, int y, List<((int, int), (int, int))> timeSlots) {
     List<StdPlanFach> result = [];
     for (var row in cell.querySelectorAll(".stunde")) {
       var name = row.querySelector("b")?.text.trim();
