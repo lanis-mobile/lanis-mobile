@@ -32,14 +32,18 @@ class SPHclient {
   String password = "";
   String schoolID = "";
   String schoolName = "";
-  Map<SPHAppEnum, LoadApp>? applets;
+
+  final Map<SPHAppEnum, LoadApp> applets = {};
+  late Map<String, dynamic> shouldFetchApplets;
   int updateAppsIntervall = 15;
+
   dynamic userData = {};
   List<dynamic> supportedApps = [];
+  Timer? preventLogoutTimer;
+
+  late Cryptor cryptor = Cryptor();
   late CookieJar jar;
   final dio = Dio();
-  Timer? preventLogoutTimer;
-  late Cryptor cryptor = Cryptor();
 
   late SubstitutionsParser substitutions = SubstitutionsParser(dio, this);
   late CalendarParser calendar = CalendarParser(dio, this);
@@ -76,22 +80,7 @@ class SPHclient {
     updateAppsIntervall = int.parse((await globalStorage.read(
         key: StorageKey.settingsUpdateAppsIntervall)));
 
-    final String loadAppsString =
-        await globalStorage.read(key: StorageKey.settingsLoadApps);
-    if (loadAppsString != "") {
-      applets = {};
-      Map<String, dynamic> mappedLoadApps = json.decode(loadAppsString);
-      for (final loadApp in mappedLoadApps.keys) {
-        applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.fromJson(loadApp),
-              LoadApp.fromJson(mappedLoadApps[loadApp]!,
-                  Duration(minutes: updateAppsIntervall)))
-        ]);
-      }
-    } else {
-      applets = null; // wasn't previously initialised.
-    }
+    shouldFetchApplets = jsonDecode(await globalStorage.read(key: StorageKey.settingsLoadApps));
 
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
@@ -108,65 +97,66 @@ class SPHclient {
     return;
   }
 
-  /// Initialises [client.applets] if [client.loadFromStorage] set it to null, used to make the code more dynamic.
-  /// This step occurs right after login.
+  /// Initialises [client.applets].
   ///
-  /// New fetchers should be added here.
+  ///  How to add new applet:
+  ///   1. Create Fetcher.
+  ///   2. Create SPHAppEnum.
+  ///   3. Add LoadApp in this function.
+  ///
+  /// This step occurs right after the start of the app.
   void initialiseLoadApps() {
-    if (client.applets == null) {
-      client.applets = {};
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.vertretungsplan,
-              LoadApp(
-                  applet: SPHAppEnum.vertretungsplan,
-                  shouldFetch: true,
-                  fetchers: [
-                    SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.kalender,
-              LoadApp(
-                  applet: SPHAppEnum.kalender,
-                  shouldFetch: false,
-                  fetchers: [
-                    CalendarFetcher(null),
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.nachrichten,
-              LoadApp(
-                  applet: SPHAppEnum.nachrichten,
-                  shouldFetch: false,
-                  fetchers: [
-                    InvisibleConversationsFetcher(
-                        Duration(minutes: updateAppsIntervall)),
-                    VisibleConversationsFetcher(
-                        Duration(minutes: updateAppsIntervall))
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.meinUnterricht,
-              LoadApp(
-                  applet: SPHAppEnum.meinUnterricht,
-                  shouldFetch: false,
-                  fetchers: [
-                    MeinUnterrichtFetcher(
-                        Duration(minutes: updateAppsIntervall)),
-                  ]))
-        ]);
-      }
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
+      client.applets.addEntries([
+        MapEntry(
+            SPHAppEnum.vertretungsplan,
+            LoadApp(
+                applet: SPHAppEnum.vertretungsplan,
+                shouldFetch: client.shouldFetchApplets[SPHAppEnum.vertretungsplan.name] ?? true,
+                fetchers: [
+                  SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
+                ]))
+      ]);
+    }
+    if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+      client.applets.addEntries([
+        MapEntry(
+            SPHAppEnum.kalender,
+            LoadApp(
+                applet: SPHAppEnum.kalender,
+                shouldFetch: client.shouldFetchApplets[SPHAppEnum.kalender.name] ?? false,
+                fetchers: [
+                  CalendarFetcher(null),
+                ]))
+      ]);
+    }
+    if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
+      client.applets.addEntries([
+        MapEntry(
+            SPHAppEnum.nachrichten,
+            LoadApp(
+                applet: SPHAppEnum.nachrichten,
+                shouldFetch: client.shouldFetchApplets[SPHAppEnum.nachrichten.name] ?? false,
+                fetchers: [
+                  InvisibleConversationsFetcher(
+                      Duration(minutes: updateAppsIntervall)),
+                  VisibleConversationsFetcher(
+                      Duration(minutes: updateAppsIntervall))
+                ]))
+      ]);
+    }
+    if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
+      client.applets.addEntries([
+        MapEntry(
+            SPHAppEnum.meinUnterricht,
+            LoadApp(
+                applet: SPHAppEnum.meinUnterricht,
+                shouldFetch: client.shouldFetchApplets[SPHAppEnum.meinUnterricht.name] ?? false,
+                fetchers: [
+                  MeinUnterrichtFetcher(
+                      Duration(minutes: updateAppsIntervall)),
+                ]))
+      ]);
     }
   }
 
@@ -401,7 +391,7 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
-    client.applets = null;
+    client.applets.clear();
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);

@@ -15,10 +15,12 @@ class InfoButton extends IconButton {
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      const Text("Information",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20)),
-                      Text(infoText),
+                      Text("Information",
+                          style: Theme.of(context).textTheme.headlineSmall),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(infoText),
+                      ),
                     ],
                   ),
                   actions: <Widget>[

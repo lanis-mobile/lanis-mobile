@@ -61,13 +61,12 @@ class _LoadModeElementsState extends State<LoadModeElements> {
 
   @override
   void initState() {
-    client.initialiseLoadApps();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (client.applets!.isEmpty) {
+    if (client.applets.isEmpty) {
       return const Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [Text("Es werden keine Apps unterstützt!")],
@@ -80,9 +79,9 @@ class _LoadModeElementsState extends State<LoadModeElements> {
         ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: client.applets!.length,
+            itemCount: client.applets.length,
             itemBuilder: (context, index) {
-              final LoadApp loadApp = client.applets!.values.elementAt(index);
+              final LoadApp loadApp = client.applets.values.elementAt(index);
               return CheckboxListTile(
                   secondary: Icon(getIcon(loadApp.applet)),
                   subtitle: loadApp.applet == SPHAppEnum.kalender
@@ -93,14 +92,13 @@ class _LoadModeElementsState extends State<LoadModeElements> {
                   onChanged: (value) async {
                     setState(() {
                       loadApp.shouldFetch = value!;
-                      //client.loadApps![loadApp.applet]!.shouldFetch = value;
                     });
 
                     // To JSON
-                    final Map<String, Map<String, dynamic>> jsonLoadApps = {};
-                    for (final applet in client.applets!.keys) {
+                    final Map<String, bool> jsonLoadApps = {};
+                    for (final applet in client.applets.keys) {
                       jsonLoadApps.addEntries([
-                        MapEntry(applet.name, client.applets![applet]!.toJson())
+                        MapEntry(applet.name, client.applets[applet]!.shouldFetch)
                       ]);
                     }
 
