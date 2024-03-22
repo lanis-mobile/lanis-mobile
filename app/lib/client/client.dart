@@ -56,6 +56,14 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
   }
 
+  /// Similar to [overwriteCredits] but not permanently.
+  Future<void> temporaryOverwriteCredits(String username, String password,
+      String schoolID) async {
+    this.username = username;
+    this.password = password;
+    this.schoolID = schoolID;
+  }
+
   ///Overwrites the user's credentials with the given ones and saves them to the storage.
   Future<void> overwriteCredits(
       String username, String password, String schoolID) async {

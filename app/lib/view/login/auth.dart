@@ -58,10 +58,10 @@ class LoginFormState extends State<LoginForm> {
                 child: CircularProgressIndicator(),
               ),
             ));
-
-    await client.overwriteCredits(username, password, schoolID);
+    await client.temporaryOverwriteCredits(username, password, schoolID);
     try {
       await client.login(userLogin: true);
+      await client.overwriteCredits(username, password, schoolID);
       setState(() {
         Navigator.pop(context); //pop dialog
         widget.afterLogin();
