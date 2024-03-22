@@ -24,7 +24,6 @@ class LoginForm extends StatefulWidget {
 class LoginFormState extends State<LoginForm> {
   static const double padding = 10.0;
 
-
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController schoolIDController = TextEditingController();
@@ -33,33 +32,32 @@ class LoginFormState extends State<LoginForm> {
   bool dseAgree = false;
   bool countlyAgree = false;
 
-
   String selectedSchoolID = "5182";
-  List<String> schoolList = ["Error: Not able to load schools. Use school id instead!"];
+  List<String> schoolList = [
+    "Error: Not able to load schools. Use school id instead!"
+  ];
   String dropDownSelectedItem = "Max Planck Schule - Rüsselsheim (5182)";
 
-
   Future<void> loadSchoolList() async {
-    final String data = await DefaultAssetBundle.of(context).loadString("assets/school_list.json");
+    final String data = await DefaultAssetBundle.of(context)
+        .loadString("assets/school_list.json");
 
     setState(() {
       schoolList = List<String>.from(jsonDecode(data));
     });
   }
 
-
   void login(String username, String password, String schoolID) async {
     showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context)=> const AlertDialog(
-          title: Text("Anmeldung"),
-          content: Center(
-            heightFactor: 1.2,
-            child: CircularProgressIndicator(),
-          ),
-        )
-    );
+        builder: (context) => const AlertDialog(
+              title: Text("Anmeldung"),
+              content: Center(
+                heightFactor: 1.2,
+                child: CircularProgressIndicator(),
+              ),
+            ));
 
     await client.overwriteCredits(username, password, schoolID);
     try {
@@ -73,11 +71,15 @@ class LoginFormState extends State<LoginForm> {
         Navigator.pop(context); //pop dialog
         showDialog(
           context: context,
-          builder: (context)=> AlertDialog(
+          builder: (context) => AlertDialog(
             title: const Text("Fehler!"),
             content: Text(ex.cause),
             actions: [
-              TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("OK"))
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("OK"))
             ],
           ),
         );
@@ -85,13 +87,11 @@ class LoginFormState extends State<LoginForm> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
     loadSchoolList();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,37 +111,43 @@ class LoginFormState extends State<LoginForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: padding,),
+                const SizedBox(
+                  height: padding,
+                ),
                 const Center(
                   child: Column(
                     children: [
                       Icon(Icons.person, size: 70),
-                      Text("Login", style: TextStyle(fontSize: 35),)
+                      Text(
+                        "Login",
+                        style: TextStyle(fontSize: 35),
+                      )
                     ],
                   ),
                 ),
-                const SizedBox(height: padding*5,),
+                const SizedBox(
+                  height: padding * 5,
+                ),
                 DropdownSearch(
-                    popupProps: const PopupProps.menu(
-                        showSearchBox: true,
-                        searchDelay: Duration(milliseconds: 150)
-                    ),
-                    dropdownDecoratorProps: const DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                            labelText: "Schule auswählen"
-                        )
-                    ),
-                    selectedItem: dropDownSelectedItem,
-                    enabled: !widget.relogin,
-                    onChanged: (value){
-                      debugPrint("changed!");
-                      dropDownSelectedItem = value;
-                      selectedSchoolID = extractNumber(value);
-                      debugPrint(selectedSchoolID);
-                    },
+                  popupProps: const PopupProps.menu(
+                      showSearchBox: true,
+                      searchDelay: Duration(milliseconds: 150)),
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration:
+                          InputDecoration(labelText: "Schule auswählen")),
+                  selectedItem: dropDownSelectedItem,
+                  enabled: !widget.relogin,
+                  onChanged: (value) {
+                    debugPrint("changed!");
+                    dropDownSelectedItem = value;
+                    selectedSchoolID = extractNumber(value);
+                    debugPrint(selectedSchoolID);
+                  },
                   items: schoolList,
                 ),
-                const SizedBox(height: padding,),
+                const SizedBox(
+                  height: padding,
+                ),
                 TextFormField(
                   controller: usernameController,
                   autocorrect: false,
@@ -154,13 +160,15 @@ class LoginFormState extends State<LoginForm> {
                     return null;
                   },
                 ),
-                const SizedBox(height: padding,),
+                const SizedBox(
+                  height: padding,
+                ),
                 TextFormField(
                   controller: passwordController,
                   autocorrect: false,
                   obscureText: true,
                   decoration: const InputDecoration(
-                      labelText: "Passwort",
+                    labelText: "Passwort",
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -169,9 +177,11 @@ class LoginFormState extends State<LoginForm> {
                     return null;
                   },
                 ),
-                const SizedBox(height: padding,),
+                const SizedBox(
+                  height: padding,
+                ),
                 Visibility(
-                  visible: !widget.relogin,
+                    visible: !widget.relogin,
                     child: Column(
                       children: [
                         ExcludeSemantics(
@@ -184,9 +194,13 @@ class LoginFormState extends State<LoginForm> {
                                 children: <TextSpan>[
                                   TextSpan(
                                     text: 'Countly',
-                                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
                                     recognizer: TapGestureRecognizer()
-                                      ..onTap = () => launchUrl(Uri.parse("https://countly.com/lite")),
+                                      ..onTap = () => launchUrl(Uri.parse(
+                                          "https://countly.com/lite")),
                                   ),
                                   const TextSpan(
                                     text: ' senden',
@@ -198,7 +212,9 @@ class LoginFormState extends State<LoginForm> {
                               setState(() {
                                 countlyAgree = val!;
                               });
-                              await globalStorage.write(key: StorageKey.settingsUseCountly, value: val.toString());
+                              await globalStorage.write(
+                                  key: StorageKey.settingsUseCountly,
+                                  value: val.toString());
                             },
                           ),
                         ),
@@ -212,9 +228,13 @@ class LoginFormState extends State<LoginForm> {
                                 children: <TextSpan>[
                                   TextSpan(
                                     text: 'Datenschutzerklärung',
-                                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
                                     recognizer: TapGestureRecognizer()
-                                      ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
+                                      ..onTap = () => launchUrl(Uri.parse(
+                                          "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
                                   ),
                                   const TextSpan(
                                     text: ' von lanis-mobile zu.',
@@ -230,28 +250,28 @@ class LoginFormState extends State<LoginForm> {
                           ),
                         ),
                       ],
-                    )
+                    )),
+                const SizedBox(
+                  height: padding,
                 ),
-                const SizedBox(height: padding,),
                 ElevatedButton(
-                  onPressed:dseAgree? () {
-                    if (_formKey.currentState!.validate()) {
-                      login(
-                        usernameController.text,
-                        passwordController.text,
-                        selectedSchoolID
-                      );
-                    }
-                  } : null,
+                  onPressed: dseAgree
+                      ? () {
+                          if (_formKey.currentState!.validate()) {
+                            login(usernameController.text,
+                                passwordController.text, selectedSchoolID);
+                          }
+                        }
+                      : null,
                   child: const Text('Anmelden'),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        onPressed: () => launchUrl(Uri.parse("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
-                        child: const Text("Passwort zurücksetzen")
-                    )
+                        onPressed: () => launchUrl(Uri.parse(
+                            "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
+                        child: const Text("Passwort zurücksetzen"))
                   ],
                 )
               ],
@@ -263,8 +283,7 @@ class LoginFormState extends State<LoginForm> {
   }
 }
 
-
-String extractNumber(str){
+String extractNumber(str) {
   RegExp numberPattern = RegExp(r'(?<=\()\d+(?=\))');
 
   Match match = numberPattern.firstMatch(str) as Match;
