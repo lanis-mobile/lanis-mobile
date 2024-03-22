@@ -1,11 +1,13 @@
 class FileNode {
   String name;
   int id;
+  int? folderID;
   String downloadUrl;
   String groesse;
   String aenderung;
+  String? hinweis;
 
-  FileNode(this.name, this.id, this.downloadUrl, this.aenderung, this.groesse);
+  FileNode({required this.name, required this.id, required this.downloadUrl, this.aenderung = "", this.groesse = "", this.hinweis, this.folderID});
 }
 
 class FolderNode {

@@ -129,10 +129,8 @@ class LoginFormState extends State<LoginForm> {
                           InputDecoration(labelText: "Schule auswählen")),
                   selectedItem: dropDownSelectedItem,
                   onChanged: (value) {
-                    debugPrint("changed!");
                     dropDownSelectedItem = value;
                     selectedSchoolID = extractNumber(value);
-                    debugPrint(selectedSchoolID);
                   },
                   items: schoolList,
                 ),

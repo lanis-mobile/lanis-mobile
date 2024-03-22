@@ -9,7 +9,7 @@ enum SPHAppEnum {
   stundenplan(
       "stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
   dateispeicher(
-      "dateispeicher.php", "Dateispeicher", false, AppSupportStatus.planned);
+      "dateispeicher.php", "Dateispeicher", false, AppSupportStatus.supported);
 
   final String php;
   final String
