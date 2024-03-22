@@ -334,15 +334,20 @@ class SPHclient {
               "password": password
             },
             options: Options(contentType: "application/x-www-form-urlencoded"));
+
+        final loginTimeout = parse(response1.data).getElementById("authErrorLocktime");
+
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
           //credits are valid
           final response2 =
-              await dioHttp.get("https://connect.schulportal.hessen.de");
+          await dioHttp.get("https://connect.schulportal.hessen.de");
 
           String location2 =
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
 
           return location2;
+        } else if (loginTimeout != null) {
+          throw LoginTimeoutException(loginTimeout.text, "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du ${loginTimeout.text}s warten!");
         } else {
           throw WrongCredentialsException();
         }

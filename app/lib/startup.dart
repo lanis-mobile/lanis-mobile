@@ -20,6 +20,7 @@ class Message {
   static String finalise = "Finalisieren...";
   static String error = "Beim Laden ist ein Fehler passiert!";
   static String wrongCredentials = "Falsche Anmeldedaten!";
+  static String loginTimeout = "Zu oft falsch eingeloggt!";
 }
 
 /// Status of each step
@@ -205,7 +206,11 @@ class _StartupScreenState extends State<StartupScreen> {
       }
 
       if (e is WrongCredentialsException) {
-        loadingMessage.value = Message.wrongCredentials;
+        if (e is LoginTimeoutException) {
+          loadingMessage.value = "${Message.loginTimeout} (${e.time}s)";
+        } else {
+          loadingMessage.value = Message.wrongCredentials;
+        }
       } else {
         loadingMessage.value = Message.error;
       }
