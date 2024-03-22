@@ -351,6 +351,8 @@ class SPHclient {
       }
     } on CredentialsIncompleteException {
       rethrow;
+    } on WrongCredentialsException {
+      rethrow;
     } catch (e) {
       throw LoggedOffOrUnknownException();
     }

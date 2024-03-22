@@ -11,8 +11,9 @@ import '../../client/storage.dart';
 
 class LoginForm extends StatefulWidget {
   final Function() afterLogin;
+  final bool relogin;
 
-  const LoginForm({super.key, required this.afterLogin});
+  const LoginForm({super.key, required this.afterLogin, this.relogin = false});
 
   @override
   LoginFormState createState() {
@@ -94,6 +95,13 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.relogin) {
+      dropDownSelectedItem = "${client.schoolName} (${client.schoolID})";
+      selectedSchoolID = client.schoolID;
+      dseAgree = true;
+      usernameController.text = client.username;
+    }
+
     return Padding(
       padding: const EdgeInsets.all(padding),
       child: Form(
@@ -124,6 +132,7 @@ class LoginFormState extends State<LoginForm> {
                         )
                     ),
                     selectedItem: dropDownSelectedItem,
+                    enabled: !widget.relogin,
                     onChanged: (value){
                       debugPrint("changed!");
                       dropDownSelectedItem = value;
@@ -161,60 +170,67 @@ class LoginFormState extends State<LoginForm> {
                   },
                 ),
                 const SizedBox(height: padding,),
-                ExcludeSemantics(
-                  child: CheckboxListTile(
-                  value: countlyAgree,
-                  title: RichText(
-                    text: TextSpan(
-                      text: 'Anonyme Bugreports mit ',
-                      style: DefaultTextStyle.of(context).style,
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: 'Countly',
-                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => launchUrl(Uri.parse("https://countly.com/lite")),
+                Visibility(
+                  visible: !widget.relogin,
+                    child: Column(
+                      children: [
+                        ExcludeSemantics(
+                          child: CheckboxListTile(
+                            value: countlyAgree,
+                            title: RichText(
+                              text: TextSpan(
+                                text: 'Anonyme Bugreports mit ',
+                                style: DefaultTextStyle.of(context).style,
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'Countly',
+                                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => launchUrl(Uri.parse("https://countly.com/lite")),
+                                  ),
+                                  const TextSpan(
+                                    text: ' senden',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            onChanged: (val) async {
+                              setState(() {
+                                countlyAgree = val!;
+                              });
+                              await globalStorage.write(key: StorageKey.settingsUseCountly, value: val.toString());
+                            },
+                          ),
                         ),
-                        const TextSpan(
-                          text: ' senden',
+                        ExcludeSemantics(
+                          child: CheckboxListTile(
+                            value: dseAgree,
+                            title: RichText(
+                              text: TextSpan(
+                                text: 'Ich stimme der ',
+                                style: DefaultTextStyle.of(context).style,
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'Datenschutzerklärung',
+                                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
+                                  ),
+                                  const TextSpan(
+                                    text: ' von lanis-mobile zu.',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            onChanged: (val) {
+                              setState(() {
+                                dseAgree = val!;
+                              });
+                            },
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                  onChanged: (val) async {
-                    setState(() {
-                      countlyAgree = val!;
-                    });
-                    await globalStorage.write(key: StorageKey.settingsUseCountly, value: val.toString());
-                  },
-                ),
-                ),
-                ExcludeSemantics(
-                  child: CheckboxListTile(
-                  value: dseAgree,
-                  title: RichText(
-                    text: TextSpan(
-                      text: 'Ich stimme der ',
-                      style: DefaultTextStyle.of(context).style,
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: 'Datenschutzerklärung',
-                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
-                        ),
-                        const TextSpan(
-                          text: ' von lanis-mobile zu.',
-                        ),
-                      ],
-                    ),
-                  ),
-                  onChanged: (val) {
-                    setState(() {
-                      dseAgree = val!;
-                    });
-                  },
-                ),
+                    )
                 ),
                 const SizedBox(height: padding,),
                 ElevatedButton(
