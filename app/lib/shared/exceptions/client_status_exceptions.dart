@@ -9,7 +9,7 @@ interface class LanisException implements Exception {
 class WrongCredentialsException implements LanisException {
   @override
   String cause;
-  WrongCredentialsException([this.cause = "Falsche Anmeldedaten oder zu oft falsch eingeloggt, in dem Fall musst du warten!"]);
+  WrongCredentialsException([this.cause = "Falsche Anmeldedaten oder zu oft falsch eingeloggt, indem Fall musst du warten!"]);
 }
 
 class CredentialsIncompleteException implements LanisException {
