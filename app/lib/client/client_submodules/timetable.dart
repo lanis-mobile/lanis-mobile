@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart' as m;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import '../../shared/types/fach.dart';
+import 'package:sph_plan/shared/types/fach.dart';
 import '../client.dart';
+
+typedef Day = List<StdPlanFach>;
 
 class TimetableParser {
   late Dio dio;
@@ -13,44 +14,54 @@ class TimetableParser {
     dio = dioClient;
   }
 
-  Future<dynamic> getTimetable() async {
+  Future<Element?> getTableBody() async {
     final redirectedRequest =
         await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
     final response = await dio.get(
         "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]![0]}");
 
     var document = parse(response.data);
-    var stundenplanTableBody = document.querySelector("#all tbody");
+    return document.querySelector("#all tbody");
+  }
+
+  Future<List> getPlan() async {
+    final tbody = await getTableBody();
+
+    return parseRoomPlan(tbody!);
+  }
+
+  List<Day> parseRoomPlan(Element tbody) {
+    List<Day> result = List.generate(5, (_) => []);
+
     List<(String, String)> timeSlots =
-        stundenplanTableBody!.querySelectorAll(".VonBis").map((e) {
+    tbody.querySelectorAll(".VonBis").map((e) {
       var timeString = e.text.trim();
       var split = timeString.split(" - ");
       return (split[0], split[1]);
     }).toList();
 
-    final lookUpTable = TableCoordinateLookup(stundenplanTableBody);
-    final (maxX, maxY) = lookUpTable.getMaxCoordinates();
+    List<List<bool>> alreadyParsed = List.generate(timeSlots.length+1, (_) => List.generate(5, (_) => false));
 
-    List<dynamic> result = [[],[],[],[],[]];
-    for (var y = 1; y <= maxY; y++) {
-      m.debugPrint(y.toString());
-      List cells = [];
-      for (var x = 1; x <= maxX; x++) {
-        var cell = lookUpTable.getCell(y, x);
-        if (cell != null) {
-          //only add cell to cells if it does not already exist in list
-          if (!cells.contains(cell)) {
-            cells.add(cell);
-          }
+
+    for (var (rowIndex, rowElement) in tbody.children.indexed) {
+      if (rowIndex == 0) continue; // skip first empty row
+      for (var (colIndex, colElement) in rowElement.children.indexed) {
+        if (colIndex == 0) continue; // skip first column
+        final int rowSpan = int.parse(colElement.attributes["rowspan"] ?? "1");
+
+        var actualDay = colIndex - 1;
+        //actualDay sould be the first where alreadyParsed is false
+        while (alreadyParsed[rowIndex][actualDay]) {
+          actualDay++;
         }
-      }
-      for (var cell in cells) {
-        result[y - 1].addAll(parseSingeEntry(cell, y, timeSlots));
+        //set all the affected rowspans to true
+        for (var i = 0; i < rowSpan; i++) {
+          alreadyParsed[rowIndex + i][actualDay] = true;
+        }
+
+        result[actualDay].addAll(parseSingeEntry(colElement, rowIndex, timeSlots));
       }
     }
-
-    m.debugPrint("${result[0].length}");
-
     return result;
   }
 
@@ -75,52 +86,9 @@ class TimetableParser {
           badge: badge,
           duration: duration,
           startTime: startTime,
-          endTime: endTime));
+          endTime: endTime)
+      );
     }
     return result;
-  }
-}
-
-///Helper class to handle [rowspan] in the table correctly
-class TableCoordinateLookup {
-  final Element tbody;
-  late Map<String, Element> lookupTable;
-
-  TableCoordinateLookup(this.tbody) {
-    lookupTable = createCoordinateLookup();
-  }
-
-  Map<String, Element> createCoordinateLookup() {
-    final rows = tbody.children;
-    var coordinateLookup = <String, Element>{};
-
-    for (var posY = 0; posY < rows.length; posY++) {
-      var row = rows[posY];
-      var posX = 0;
-      for (var cell in row.children) {
-        while (coordinateLookup.containsKey('$posX,$posY')) {
-          posX++;
-        }
-        int rowspan = int.parse(cell.attributes["rowspan"] ?? "1");
-        for (var i = 0; i < rowspan; i++) {
-          coordinateLookup['$posX,${posY + i}'] = cell;
-        }
-        posX++;
-      }
-    }
-
-    return coordinateLookup;
-  }
-
-  /// Get the cell content at a specific coordinate
-  Element? getCell(int x, int y) {
-    return lookupTable['$x,$y'];
-  }
-
-  /// Get the maximum X and Y coordinates
-  (int, int) getMaxCoordinates() {
-    final maxX = lookupTable.keys.map((key) => int.parse(key.split(',')[0])).reduce((a, b) => a > b ? a : b);
-    final maxY = lookupTable.keys.map((key) => int.parse(key.split(',')[1])).reduce((a, b) => a > b ? a : b);
-    return (maxX, maxY);
   }
 }

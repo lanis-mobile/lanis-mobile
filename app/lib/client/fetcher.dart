@@ -177,6 +177,6 @@ class TimeTableFetcher extends Fetcher {
 
   @override
   Future<dynamic> _get() {
-    return client.timetable.getTimetable();
+    return client.timetable.getPlan();
   }
 }

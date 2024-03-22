@@ -6,6 +6,7 @@ import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/apps.dart';
 
 import '../../client/client.dart';
+import '../../shared/types/fach.dart';
 
 class TimetableAnsicht extends StatefulWidget {
   const TimetableAnsicht({super.key});
@@ -39,9 +40,11 @@ class _TimetableAnsichtState extends State<TimetableAnsicht>
               child: CircularProgressIndicator(),
             );
           }
-          var json = (jsonEncode(snapshot.data!.content));
+          List<List<StdPlanFach>> data = snapshot.data!.content;
 
-          Clipboard.setData(ClipboardData(text: json));
+          debugPrint("${data[0].length} ${data[1].length} ${data[2].length} ${data[3].length} ${data[4].length}");
+
+          Clipboard.setData(ClipboardData(text: jsonEncode(data)));
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -49,8 +52,9 @@ class _TimetableAnsichtState extends State<TimetableAnsicht>
             },
             child: ListView(
               children: [
-                Text(snapshot.data!.content.toString())
+                Text(data.toString())
               ],
+
             ),
           );
         },
