@@ -9,7 +9,14 @@ interface class LanisException implements Exception {
 class WrongCredentialsException implements LanisException {
   @override
   String cause;
-  WrongCredentialsException([this.cause = "Falsche Anmeldedaten"]);
+  WrongCredentialsException([this.cause = "Falsche Anmeldedaten!"]);
+}
+
+class LoginTimeoutException implements WrongCredentialsException {
+  @override
+  String cause;
+  final String time;
+  LoginTimeoutException(this.time, [this.cause = "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du kurz warten!"]);
 }
 
 class CredentialsIncompleteException implements LanisException {
@@ -61,5 +68,5 @@ class NotSupportedException implements LanisException {
 class NoConnectionException implements LanisException {
   @override
   String cause;
-  NoConnectionException([this.cause = "Keine verbindung zum SPH"]);
+  NoConnectionException([this.cause = "Keine Verbindung zum SPH"]);
 }
