@@ -33,7 +33,7 @@ enum Status {
 /// Collection of steps so we don't have magic strings.
 class Step {
   static String login = "Login";
-// The rest is now dynamic, gotten by [client.loadApps]
+// The rest is now dynamic, gotten by [client.applets]
 }
 
 /// More advanced class, so we can have a tidy and clean progress indicator of the steps.
@@ -171,7 +171,6 @@ class _StartupScreenState extends State<StartupScreen> {
     progress.set(Step.login, Status.loading);
     try {
       await client.login();
-      client.initialiseLoadApps();
       progress.set(Step.login, Status.finished);
 
       loadingMessage.value = Message.load;
@@ -267,25 +266,25 @@ class _StartupScreenState extends State<StartupScreen> {
           return;
         }
 
+        client.initialiseLoadApps();
+
         finishedLoadingStorage.value = true;
 
-        if (client.applets != null) {
-          for (final loadApp in client.applets!.keys) {
-            final currentLoadApp = client.applets![loadApp];
+        for (final loadApp in client.applets.keys) {
+          final currentLoadApp = client.applets[loadApp];
 
-            if (currentLoadApp!.shouldFetch == true) {
-              steps.add(currentLoadApp.applet.fullName);
-              for (final fetcher in currentLoadApp.fetchers) {
-                appletFetchers.add(Applet(
-                    fetcher: fetcher,
-                    step: currentLoadApp.applet.fullName,
-                    finishMessage:
-                        "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
-              }
+          if (currentLoadApp!.shouldFetch == true) {
+            steps.add(currentLoadApp.applet.fullName);
+            for (final fetcher in currentLoadApp.fetchers) {
+              appletFetchers.add(Applet(
+                  fetcher: fetcher,
+                  step: currentLoadApp.applet.fullName,
+                  finishMessage:
+                  "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
             }
-
-            errors.addEntries([MapEntry(currentLoadApp.applet.fullName, null)]);
           }
+
+          errors.addEntries([MapEntry(currentLoadApp.applet.fullName, null)]);
         }
 
         progress = ProgressNotifier(steps);
