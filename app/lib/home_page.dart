@@ -95,9 +95,10 @@ class _HomePageState extends State<HomePage> {
         enableBottomNavigation: false,
         enableDrawer: true,
         action: (context) => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DataStorageAnsicht()),
-        )),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const DataStorageAnsicht()),
+            )),
     Destination(
         label: "Lanis im Browser öffnen",
         icon: const Icon(Icons.open_in_new),

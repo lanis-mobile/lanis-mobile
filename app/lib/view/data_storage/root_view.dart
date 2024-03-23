@@ -7,7 +7,6 @@ import '../../shared/types/dateispeicher_node.dart';
 import 'file_listtile.dart';
 
 class DataStorageRootView extends StatefulWidget {
-
   const DataStorageRootView({super.key});
 
   @override
@@ -30,7 +29,7 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
   void loadItems() async {
     try {
       var items = await client.dataStorage.getRoot();
-      var (fileList, folderList)  = items;
+      var (fileList, folderList) = items;
       files = fileList;
       folders = folderList;
 
@@ -66,19 +65,22 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
           AsyncSearchAnchor(),
         ],
       ),
-      body: loading ? const Center(
-        child: CircularProgressIndicator(),
-      ) : error ? const Center(
-          child: Column(
-            children: [
-              Icon(Icons.error_outline, size: 100),
-              SizedBox(height: 10),
-              Text("Fehler beim Laden der Dateien"),
-            ],
-          )
-      ) : ListView(
-        children: getListTiles(),
-      ),
+      body: loading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : error
+              ? const Center(
+                  child: Column(
+                  children: [
+                    Icon(Icons.error_outline, size: 100),
+                    SizedBox(height: 10),
+                    Text("Fehler beim Laden der Dateien"),
+                  ],
+                ))
+              : ListView(
+                  children: getListTiles(),
+                ),
     );
   }
 }
@@ -98,14 +100,14 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
   Widget build(BuildContext context) {
     return SearchAnchor(
         builder: (BuildContext context, SearchController controller) {
-          return IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              controller.openView();
-            },
-          );
-        }, suggestionsBuilder:
-        (BuildContext context, SearchController controller) async {
+      return IconButton(
+        icon: const Icon(Icons.search),
+        onPressed: () {
+          controller.openView();
+        },
+      );
+    }, suggestionsBuilder:
+            (BuildContext context, SearchController controller) async {
       _searchingWithQuery = controller.text;
       var options = await client.dataStorage.searchFiles(_searchingWithQuery!);
 
@@ -118,8 +120,8 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
         return SearchFileListTile(
             context: context,
             name: item["text"],
-            downloadUrl: "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=${item["id"]}"
-        );
+            downloadUrl:
+                "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=${item["id"]}");
       });
 
       if (_lastOptions.isEmpty) {

@@ -248,7 +248,7 @@ class _StartupScreenState extends State<StartupScreen> {
                   fetcher: fetcher,
                   step: currentLoadApp.applet.fullName,
                   finishMessage:
-                  "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
+                      "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
             }
           }
 
@@ -287,7 +287,28 @@ class _StartupScreenState extends State<StartupScreen> {
       errorWidget: (context, url, error) => deviceInfo,
       imageBuilder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
-            ? const ColorFilter.matrix([-1, 0 ,0 ,0 ,255 ,0 ,-1 ,0 ,0 ,255 ,0 ,0 ,-1 ,0 ,255 ,0 ,0 ,0 ,1 ,0])
+            ? const ColorFilter.matrix([
+                -1,
+                0,
+                0,
+                0,
+                255,
+                0,
+                -1,
+                0,
+                0,
+                255,
+                0,
+                0,
+                -1,
+                0,
+                255,
+                0,
+                0,
+                0,
+                1,
+                0
+              ])
             : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
         child: Image(
           image: imageProvider,

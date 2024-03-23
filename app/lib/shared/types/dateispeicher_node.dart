@@ -7,7 +7,14 @@ class FileNode {
   String aenderung;
   String? hinweis;
 
-  FileNode({required this.name, required this.id, required this.downloadUrl, this.aenderung = "", this.groesse = "", this.hinweis, this.folderID});
+  FileNode(
+      {required this.name,
+      required this.id,
+      required this.downloadUrl,
+      this.aenderung = "",
+      this.groesse = "",
+      this.hinweis,
+      this.folderID});
 }
 
 class FolderNode {

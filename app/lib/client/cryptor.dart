@@ -132,7 +132,8 @@ class Cryptor {
     return base64.encode(finalEncrypted);
   }
 
-  static List<int>? decryptWithKey(Uint8List encryptedDataWithSalt, encrypt.Key key) {
+  static List<int>? decryptWithKey(
+      Uint8List encryptedDataWithSalt, encrypt.Key key) {
     final encryptedData = encrypt.Encrypted.fromBase64(
         base64.encode(encryptedDataWithSalt.sublist(16)));
 
@@ -150,7 +151,7 @@ class Cryptor {
 
     // CBC mode isn't the best anymore.
     final aes =
-    encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
+        encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc));
 
     return aes.decryptBytes(encryptedData, iv: derivedIV);
   }

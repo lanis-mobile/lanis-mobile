@@ -86,7 +86,8 @@ class SPHclient {
     updateAppsIntervall = int.parse((await globalStorage.read(
         key: StorageKey.settingsUpdateAppsIntervall)));
 
-    shouldFetchApplets = jsonDecode(await globalStorage.read(key: StorageKey.settingsShouldFetchApplets));
+    shouldFetchApplets = jsonDecode(
+        await globalStorage.read(key: StorageKey.settingsShouldFetchApplets));
 
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
@@ -118,7 +119,9 @@ class SPHclient {
             SPHAppEnum.vertretungsplan,
             LoadApp(
                 applet: SPHAppEnum.vertretungsplan,
-                shouldFetch: client.shouldFetchApplets[SPHAppEnum.vertretungsplan.name] ?? true,
+                shouldFetch: client
+                        .shouldFetchApplets[SPHAppEnum.vertretungsplan.name] ??
+                    true,
                 fetchers: [
                   SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
                 ]))
@@ -130,7 +133,9 @@ class SPHclient {
             SPHAppEnum.kalender,
             LoadApp(
                 applet: SPHAppEnum.kalender,
-                shouldFetch: client.shouldFetchApplets[SPHAppEnum.kalender.name] ?? false,
+                shouldFetch:
+                    client.shouldFetchApplets[SPHAppEnum.kalender.name] ??
+                        false,
                 fetchers: [
                   CalendarFetcher(null),
                 ]))
@@ -142,7 +147,9 @@ class SPHclient {
             SPHAppEnum.nachrichten,
             LoadApp(
                 applet: SPHAppEnum.nachrichten,
-                shouldFetch: client.shouldFetchApplets[SPHAppEnum.nachrichten.name] ?? false,
+                shouldFetch:
+                    client.shouldFetchApplets[SPHAppEnum.nachrichten.name] ??
+                        false,
                 fetchers: [
                   InvisibleConversationsFetcher(
                       Duration(minutes: updateAppsIntervall)),
@@ -157,10 +164,11 @@ class SPHclient {
             SPHAppEnum.meinUnterricht,
             LoadApp(
                 applet: SPHAppEnum.meinUnterricht,
-                shouldFetch: client.shouldFetchApplets[SPHAppEnum.meinUnterricht.name] ?? false,
+                shouldFetch:
+                    client.shouldFetchApplets[SPHAppEnum.meinUnterricht.name] ??
+                        false,
                 fetchers: [
-                  MeinUnterrichtFetcher(
-                      Duration(minutes: updateAppsIntervall)),
+                  MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall)),
                 ]))
       ]);
     }
@@ -408,10 +416,8 @@ class SPHclient {
     var bytes = utf8.encode(source);
     var digest = sha256.convert(bytes);
 
-    var shortHash = digest
-        .toString()
-        .replaceAll(RegExp(r'[^A-z0-9]'), '')
-        .substring(0, 12);
+    var shortHash =
+        digest.toString().replaceAll(RegExp(r'[^A-z0-9]'), '').substring(0, 12);
 
     return shortHash;
   }

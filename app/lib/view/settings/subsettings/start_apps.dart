@@ -98,7 +98,8 @@ class _LoadModeElementsState extends State<LoadModeElements> {
                     final Map<String, bool> jsonLoadApps = {};
                     for (final applet in client.applets.keys) {
                       jsonLoadApps.addEntries([
-                        MapEntry(applet.name, client.applets[applet]!.shouldFetch)
+                        MapEntry(
+                            applet.name, client.applets[applet]!.shouldFetch)
                       ]);
                     }
 
