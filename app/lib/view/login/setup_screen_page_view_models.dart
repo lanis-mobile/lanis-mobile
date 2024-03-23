@@ -5,7 +5,6 @@ import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sph_plan/shared/account_types.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_listtile.dart';
-import 'package:sph_plan/view/settings/subsettings/start_apps.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 
@@ -100,7 +99,7 @@ List<PageViewModel> setupScreenPageViewModels = [
               height: 175.0),
           title: "Benachrichtigungen",
           body:
-              "Benachrichtigungen werden für dich leider nicht unterstützt, da Apple es nicht ermöglicht, dass Apps im Hintergrund laufen. Du kannst aber die App öffnen, um zu sehen, ob es neue Vertretungen gibt."),
+              "Benachrichtigungen werden für dich leider nicht unterstützt, da Apple es nicht ermöglicht, dass Apps periodisch im Hintergrund laufen. Du kannst aber die App öffnen, um zu sehen, ob es neue Vertretungen gibt."),
     if (Platform.isAndroid) ...[
       PageViewModel(
           image: SvgPicture.asset(
@@ -121,15 +120,6 @@ List<PageViewModel> setupScreenPageViewModels = [
           )),
     ]
   ],
-  PageViewModel(
-      image: SvgPicture.asset("assets/undraw/undraw_speed_test_re_pe1f.svg",
-          height: 175.0),
-      title: "Startapps",
-      bodyWidget: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [LoadModeElements()],
-      )),
   PageViewModel(
       image: SvgPicture.asset("assets/undraw/undraw_add_color_re_buro.svg",
           height: 175.0),

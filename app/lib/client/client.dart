@@ -15,12 +15,10 @@ import 'package:sph_plan/client/client_submodules/mein_unterricht.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
-import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
-import '../shared/types/startup_app.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
@@ -33,14 +31,6 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
-  /// The list of fetchers and which are used by the different views.
-  /// Properties of each LoadApp can change.
-  final Map<SPHAppEnum, LoadApp> applets = {};
-
-  /// Loaded from [loadFromStorage] to be *only* used in [initialiseApplets].
-  /// Map of bools which indicate if a applet should be periodically loaded.
-  /// Just a convenience variable because of how [initState] in [startup.dart] works.
-  late final Map<String, dynamic> shouldFetchApplets;
   int updateAppsIntervall = 15;
 
   dynamic userData = {};
@@ -86,9 +76,6 @@ class SPHclient {
     updateAppsIntervall = int.parse((await globalStorage.read(
         key: StorageKey.settingsUpdateAppsIntervall)));
 
-    shouldFetchApplets = jsonDecode(
-        await globalStorage.read(key: StorageKey.settingsShouldFetchApplets));
-
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
         await globalStorage.read(key: StorageKey.userPassword, secure: true);
@@ -104,75 +91,6 @@ class SPHclient {
     return;
   }
 
-  /// Initialises [client.applets].
-  ///
-  ///  How to add new applet:
-  ///   1. Create Fetcher.
-  ///   2. Create SPHAppEnum.
-  ///   3. Add LoadApp in this function.
-  ///
-  /// This step occurs right after the start of the app.
-  void initialiseApplets() {
-    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-      client.applets.addEntries([
-        MapEntry(
-            SPHAppEnum.vertretungsplan,
-            LoadApp(
-                applet: SPHAppEnum.vertretungsplan,
-                shouldFetch: client
-                        .shouldFetchApplets[SPHAppEnum.vertretungsplan.name] ??
-                    true,
-                fetchers: [
-                  SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
-                ]))
-      ]);
-    }
-    if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-      client.applets.addEntries([
-        MapEntry(
-            SPHAppEnum.kalender,
-            LoadApp(
-                applet: SPHAppEnum.kalender,
-                shouldFetch:
-                    client.shouldFetchApplets[SPHAppEnum.kalender.name] ??
-                        false,
-                fetchers: [
-                  CalendarFetcher(null),
-                ]))
-      ]);
-    }
-    if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-      client.applets.addEntries([
-        MapEntry(
-            SPHAppEnum.nachrichten,
-            LoadApp(
-                applet: SPHAppEnum.nachrichten,
-                shouldFetch:
-                    client.shouldFetchApplets[SPHAppEnum.nachrichten.name] ??
-                        false,
-                fetchers: [
-                  InvisibleConversationsFetcher(
-                      Duration(minutes: updateAppsIntervall)),
-                  VisibleConversationsFetcher(
-                      Duration(minutes: updateAppsIntervall))
-                ]))
-      ]);
-    }
-    if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-      client.applets.addEntries([
-        MapEntry(
-            SPHAppEnum.meinUnterricht,
-            LoadApp(
-                applet: SPHAppEnum.meinUnterricht,
-                shouldFetch:
-                    client.shouldFetchApplets[SPHAppEnum.meinUnterricht.name] ??
-                        false,
-                fetchers: [
-                  MeinUnterrichtFetcher(Duration(minutes: updateAppsIntervall)),
-                ]))
-      ]);
-    }
-  }
 
   ///Logs the user in and fetches the necessary metadata.
   Future<void> login({userLogin = false}) async {
@@ -255,8 +173,6 @@ class SPHclient {
 
   ///Fetches the school's accent color and saves it to the storage.
   Future<void> getSchoolTheme() async {
-    debugPrint("Trying to get a school accent color.");
-
     if (await globalStorage.read(key: StorageKey.schoolAccentColor) == "") {
       try {
         dynamic schoolInfo = await client.getSchoolInfo(schoolID);
@@ -405,7 +321,6 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
-    client.applets.clear();
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);

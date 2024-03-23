@@ -18,8 +18,7 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     with TickerProviderStateMixin {
-  final MeinUnterrichtFetcher meinUnterrichtFetcher = client
-      .applets[SPHAppEnum.meinUnterricht]!.fetchers[0] as MeinUnterrichtFetcher;
+  final MeinUnterrichtFetcher meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 15));
 
   static const double padding = 12.0;
   late TabController _tabController;

@@ -16,6 +16,7 @@ enum StorageKey {
   userPassword,
   userSchoolName,
   userData,
+  ///Fast Navigation menu JSON [client.getSupportedApps]
   userSupportedApplets,
 
   substitutionsFilterKlassenStufe,

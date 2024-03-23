@@ -15,12 +15,8 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     with TickerProviderStateMixin {
-  final InvisibleConversationsFetcher invisibleConversationsFetcher = client
-      .applets[SPHAppEnum.nachrichten]!
-      .fetchers[0] as InvisibleConversationsFetcher;
-  final VisibleConversationsFetcher visibleConversationsFetcher = client
-      .applets[SPHAppEnum.nachrichten]!
-      .fetchers[1] as VisibleConversationsFetcher;
+  final InvisibleConversationsFetcher invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 5));
+  final VisibleConversationsFetcher visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 5));
 
   static const double padding = 12.0;
 

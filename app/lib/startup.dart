@@ -93,7 +93,6 @@ class _StartupScreenState extends State<StartupScreen> {
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((_) async {
-      client.initialiseApplets();
       await client.prepareDio();
 
       // Context should be mounted
@@ -142,7 +141,6 @@ class _StartupScreenState extends State<StartupScreen> {
       return;
     }
 
-    // Step 2 (if this fails, show login screen or notify error)
     loadingMessage.value = Message.login;
     progress.set(Step.login, Status.loading);
     try {
@@ -151,11 +149,9 @@ class _StartupScreenState extends State<StartupScreen> {
 
       loadingMessage.value = Message.load;
 
-      // Step 4 (fetch everything async)
       await Future.wait(List.generate(appletFetchers.length,
           (index) => fetchApplet(appletFetchers[index])));
 
-      // Step 5 (finish)
       if (!isError.value) {
         loadingMessage.value = Message.finalise;
         whatsNew().then((value) {
@@ -195,7 +191,6 @@ class _StartupScreenState extends State<StartupScreen> {
     }
   }
 
-  // Handy functions
   IconData getIcon(Status status) {
     switch (status) {
       case Status.finished:
@@ -224,39 +219,10 @@ class _StartupScreenState extends State<StartupScreen> {
 
   @override
   void initState() {
-    // So that we begin loading instantly on startup.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // We need to load this first so that everything works.
       client.loadFromStorage().then((_) {
-        // Show welcome screen nearly instantly.
-        if (client.username == "") {
-          performLogin();
-          return;
-        }
-
-        client.initialiseApplets();
-
         finishedLoadingStorage.value = true;
-
-        for (final loadApp in client.applets.keys) {
-          final currentLoadApp = client.applets[loadApp];
-
-          if (currentLoadApp!.shouldFetch == true) {
-            steps.add(currentLoadApp.applet.fullName);
-            for (final fetcher in currentLoadApp.fetchers) {
-              appletFetchers.add(Applet(
-                  fetcher: fetcher,
-                  step: currentLoadApp.applet.fullName,
-                  finishMessage:
-                      "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
-            }
-          }
-
-          errors.addEntries([MapEntry(currentLoadApp.applet.fullName, null)]);
-        }
-
         progress = ProgressNotifier(steps);
-
         performLogin();
       });
     });

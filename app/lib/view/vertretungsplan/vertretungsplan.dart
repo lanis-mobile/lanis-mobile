@@ -21,8 +21,7 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
-  final SubstitutionsFetcher substitutionsFetcher = client
-      .applets[SPHAppEnum.vertretungsplan]!.fetchers[0] as SubstitutionsFetcher;
+  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
 
   final double padding = 12.0;
 
