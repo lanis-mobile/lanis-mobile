@@ -32,8 +32,6 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
-  int updateAppsIntervall = 15;
-
   dynamic userData = {};
   List<dynamic> supportedApps = [];
   Timer? preventLogoutTimer;
@@ -76,9 +74,6 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
-    updateAppsIntervall = int.parse((await globalStorage.read(
-        key: StorageKey.settingsUpdateAppsIntervall)));
-
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
         await globalStorage.read(key: StorageKey.userPassword, secure: true);

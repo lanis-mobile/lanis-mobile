@@ -167,7 +167,7 @@ class GlobalFetcher {
           InvisibleConversationsFetcher(const Duration(minutes: 5));
     }
     if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-      calendarFetcher = CalendarFetcher(const Duration(minutes: 20));
+      calendarFetcher = CalendarFetcher(null);
     }
   }
 }
