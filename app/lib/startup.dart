@@ -4,7 +4,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
-import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/login/screen.dart';
 
 import 'client/client.dart';
@@ -401,14 +400,6 @@ class _StartupScreenState extends State<StartupScreen> {
                                 }
                                 errorInfo += "$key - ${value.cause}\n";
                               });
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => BugReportScreen(
-                                        generatedMessage:
-                                            "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
-                              );
                             },
                             child: const Text("Fehlerbericht senden"));
                       }),
