@@ -158,7 +158,7 @@ class GlobalFetcher {
       substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
     }
     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-      meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 5));
+      meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 20));
     }
     if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
       visibleConversationsFetcher =
@@ -167,7 +167,7 @@ class GlobalFetcher {
           InvisibleConversationsFetcher(const Duration(minutes: 5));
     }
     if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-      calendarFetcher = CalendarFetcher(const Duration(minutes: 5));
+      calendarFetcher = CalendarFetcher(const Duration(minutes: 20));
     }
   }
 }
