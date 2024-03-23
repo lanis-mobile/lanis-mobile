@@ -24,6 +24,7 @@ import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 import 'connection_checker.dart';
+import 'fetcher.dart';
 
 class SPHclient {
   String username = "";
@@ -47,6 +48,8 @@ class SPHclient {
   late MeinUnterrichtParser meinUnterricht = MeinUnterrichtParser(dio, this);
   late ConversationsParser conversations = ConversationsParser(dio, this);
   late TimetableParser timetable = TimetableParser(dio, this);
+
+  late GlobalFetcher fetchers;
 
   Future<void> prepareDio() async {
     jar = CookieJar();
@@ -88,6 +91,8 @@ class SPHclient {
     supportedApps = jsonDecode(
         await globalStorage.read(key: StorageKey.userSupportedApplets));
 
+    fetchers = GlobalFetcher();
+
     return;
   }
 
@@ -114,6 +119,7 @@ class SPHclient {
       if (userLogin) {
         await fetchRedundantData();
       }
+      fetchers = GlobalFetcher();
       await getSchoolTheme();
 
       await cryptor.start(dio);

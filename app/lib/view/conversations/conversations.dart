@@ -15,8 +15,8 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     with TickerProviderStateMixin {
-  final InvisibleConversationsFetcher invisibleConversationsFetcher = InvisibleConversationsFetcher(const Duration(minutes: 5));
-  final VisibleConversationsFetcher visibleConversationsFetcher = VisibleConversationsFetcher(const Duration(minutes: 5));
+  final InvisibleConversationsFetcher invisibleConversationsFetcher = client.fetchers.invisibleConversationsFetcher;
+  final VisibleConversationsFetcher visibleConversationsFetcher = client.fetchers.visibleConversationsFetcher;
 
   static const double padding = 12.0;
 

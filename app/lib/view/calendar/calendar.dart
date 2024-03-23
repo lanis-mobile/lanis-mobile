@@ -18,7 +18,7 @@ class CalendarAnsicht extends StatefulWidget {
 }
 
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
-  CalendarFetcher calendarFetcher = CalendarFetcher(const Duration(minutes: 15));
+  CalendarFetcher calendarFetcher = client.fetchers.calendarFetcher;
 
   late final ValueNotifier<List<Event>> _selectedEvents;
 

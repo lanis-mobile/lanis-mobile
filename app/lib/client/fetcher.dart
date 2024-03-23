@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
@@ -142,5 +143,31 @@ class CalendarFetcher extends Fetcher {
 
     return client.calendar.getCalendar(
         formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+  }
+}
+
+class GlobalFetcher {
+  late final SubstitutionsFetcher substitutionsFetcher;
+  late final MeinUnterrichtFetcher meinUnterrichtFetcher;
+  late final VisibleConversationsFetcher visibleConversationsFetcher;
+  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
+  late final CalendarFetcher calendarFetcher;
+
+  GlobalFetcher() {
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
+      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
+    }
+    if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
+      meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 5));
+    }
+    if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
+      visibleConversationsFetcher =
+          VisibleConversationsFetcher(const Duration(minutes: 5));
+      invisibleConversationsFetcher =
+          InvisibleConversationsFetcher(const Duration(minutes: 5));
+    }
+    if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+      calendarFetcher = CalendarFetcher(const Duration(minutes: 5));
+    }
   }
 }
