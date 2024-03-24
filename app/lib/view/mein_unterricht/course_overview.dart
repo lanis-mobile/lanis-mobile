@@ -492,9 +492,22 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           data["leistungen"][index]["Name"] ?? "",
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        subtitle: Text(
-                          data["leistungen"][index]["Datum"] ?? "",
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                          children: [
+                            Text(
+                              data["leistungen"][index]["Datum"] ?? "",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            if (data["leistungen"][index]["Kommentar"] != null) Text(
+                              data["leistungen"][index]["Kommentar"] ?? "",
+                              style: TextStyle(
+                                fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            )
+                          ],
                         ),
                         trailing: Text(
                           data["leistungen"][index]["Note"] ?? "",
