@@ -5,6 +5,7 @@ import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/bug_report/send_bugreport.dart';
+import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 
 import 'client/client.dart';
@@ -17,6 +18,8 @@ class Message {
   static String load = "Lade Apps...";
   static String finalise = "Finalisieren...";
   static String error = "Beim Laden ist ein Fehler passiert!";
+  static String wrongCredentials = "Falsche Anmeldedaten!";
+  static String loginTimeout = "Zu oft falsch eingeloggt!";
 }
 
 /// Status of each step
@@ -30,7 +33,7 @@ enum Status {
 /// Collection of steps so we don't have magic strings.
 class Step {
   static String login = "Login";
-  // The rest is now dynamic, gotten by [client.loadApps]
+// The rest is now dynamic, gotten by [client.loadApps]
 }
 
 /// More advanced class, so we can have a tidy and clean progress indicator of the steps.
@@ -103,6 +106,27 @@ class _StartupScreenState extends State<StartupScreen> {
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     });
+  }
+
+  void openLoginScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => Scaffold(
+                  body: LoginForm(
+                afterLogin: () async {
+                  client.initialiseLoadApps();
+                  await client.prepareDio();
+
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
+                },
+                relogin: true,
+              ))),
+    );
   }
 
   Future<void> fetchApplet(Applet applet) async {
@@ -178,8 +202,6 @@ class _StartupScreenState extends State<StartupScreen> {
         });
       }
       return;
-    } on WrongCredentialsException {
-      openWelcomeScreen();
     } on CredentialsIncompleteException {
       openWelcomeScreen();
     } on LanisException catch (e, stack) {
@@ -193,6 +215,16 @@ class _StartupScreenState extends State<StartupScreen> {
       }
 
       loadingMessage.value = Message.error;
+
+      if (e is WrongCredentialsException) {
+        if (e is LoginTimeoutException) {
+          loadingMessage.value = "${Message.loginTimeout} (${e.time}s)";
+        } else {
+          loadingMessage.value = Message.wrongCredentials;
+        }
+      } else {
+        loadingMessage.value = Message.error;
+      }
     }
   }
 
@@ -288,7 +320,28 @@ class _StartupScreenState extends State<StartupScreen> {
       errorWidget: (context, url, error) => deviceInfo,
       imageBuilder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
-            ? const ColorFilter.matrix([-1, 0 ,0 ,0 ,255 ,0 ,-1 ,0 ,0 ,255 ,0 ,0 ,-1 ,0 ,255 ,0 ,0 ,0 ,1 ,0])
+            ? const ColorFilter.matrix([
+                -1,
+                0,
+                0,
+                0,
+                255,
+                0,
+                -1,
+                0,
+                0,
+                255,
+                0,
+                0,
+                -1,
+                0,
+                255,
+                0,
+                0,
+                0,
+                1,
+                0
+              ])
             : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
         child: Image(
           image: imageProvider,
@@ -395,55 +448,72 @@ class _StartupScreenState extends State<StartupScreen> {
         builder: (context, _isError, _) {
           if (_isError) {
             return Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ValueListenableBuilder(
-                      valueListenable: noConnection,
-                      builder: (context, noInternet, _) {
-                        if (noInternet) {
-                          return const SizedBox.shrink();
-                        }
-                        return FilledButton(
-                            onPressed: () {
-                              // Prepare error message
-                              String errorInfo = "";
-                              errors.forEach((key, value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                errorInfo += "$key - ${value.cause}\n";
-                              });
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ValueListenableBuilder(
+                            valueListenable: noConnection,
+                            builder: (context, noInternet, _) {
+                              if (noInternet) {
+                                return const SizedBox.shrink();
+                              }
+                              return FilledButton(
+                                  onPressed: () {
+                                    // Prepare error message
+                                    String errorInfo = "";
+                                    errors.forEach((key, value) {
+                                      if (value == null) {
+                                        return;
+                                      }
+                                      errorInfo += "$key - ${value.cause}\n";
+                                    });
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => BugReportScreen(
-                                        generatedMessage:
-                                            "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
-                              );
-                            },
-                            child: const Text("Fehlerbericht senden"));
-                      }),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: OutlinedButton(
-                        onPressed: () async {
-                          // Reset
-                          progress.reset();
-                          errors.updateAll((key, value) => value = null);
-                          isError.value = false;
-                          noConnection.value = false;
-                          loadingMessage.value = "Initialisieren...";
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => BugReportScreen(
+                                              generatedMessage:
+                                                  "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
+                                    );
+                                  },
+                                  child: const Text("Fehlerbericht senden"));
+                            }),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: OutlinedButton(
+                              onPressed: () async {
+                                // Reset
+                                progress.reset();
+                                errors.updateAll((key, value) => value = null);
+                                isError.value = false;
+                                noConnection.value = false;
+                                loadingMessage.value = "Initialisieren...";
 
-                          await performLogin();
-                        },
-                        child: const Text("Erneut versuchen")),
-                  )
-                ],
-              ),
-            );
+                                await performLogin();
+                              },
+                              child: const Text("Erneut versuchen")),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (errors[Step.login]
+                            is WrongCredentialsException) ...[
+                          TextButton(
+                              onPressed: () => openLoginScreen(),
+                              child: const Text("Neu anmelden")),
+                        ],
+                        TextButton(
+                            onPressed: () => openWelcomeScreen(),
+                            child: const Text("App zurücksetzen")),
+                      ],
+                    )
+                  ],
+                ));
           }
           return const SizedBox.shrink();
         });

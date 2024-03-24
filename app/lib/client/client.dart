@@ -56,6 +56,14 @@ class SPHclient {
         (status) => status != null && (status == 200 || status == 302);
   }
 
+  /// Similar to [overwriteCredits] but not permanently.
+  Future<void> temporaryOverwriteCredits(String username, String password,
+      String schoolID) async {
+    this.username = username;
+    this.password = password;
+    this.schoolID = schoolID;
+  }
+
   ///Overwrites the user's credentials with the given ones and saves them to the storage.
   Future<void> overwriteCredits(
       String username, String password, String schoolID) async {
@@ -295,6 +303,9 @@ class SPHclient {
               "password": password
             },
             options: Options(contentType: "application/x-www-form-urlencoded"));
+
+        final loginTimeout = parse(response1.data).getElementById("authErrorLocktime");
+
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
           //credits are valid
           final response2 =
@@ -304,6 +315,8 @@ class SPHclient {
               response2.headers.value(HttpHeaders.locationHeader) ?? "";
 
           return location2;
+        } else if (loginTimeout != null) {
+          throw LoginTimeoutException(loginTimeout.text, "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du ${loginTimeout.text}s warten!");
         } else {
           throw WrongCredentialsException();
         }
@@ -311,6 +324,8 @@ class SPHclient {
         throw CredentialsIncompleteException();
       }
     } on CredentialsIncompleteException {
+      rethrow;
+    } on WrongCredentialsException {
       rethrow;
     } catch (e) {
       throw LoggedOffOrUnknownException();
