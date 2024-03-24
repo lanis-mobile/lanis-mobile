@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
   ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
   List<Destination> destinations = [
     Destination(
-        label: "Vertretungsplan",
+        label: "Vertretungen",
         icon: const Icon(Icons.group),
         selectedIcon: const Icon(Icons.group_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         body: const ConversationsAnsicht()),
     Destination(
-        label: "Mein Unterricht",
+        label: "Unterricht",
         icon: const Icon(Icons.school),
         selectedIcon: const Icon(Icons.school_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
