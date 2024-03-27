@@ -5,6 +5,7 @@ import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../shared/apps.dart';
 import '../login/screen.dart';
@@ -24,13 +25,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Einstellungen"),
+        title: Text(AppLocalizations.of(context)!.settings),
       ),
       body: ListView(
         children: <Widget>[
           ListTile(
             leading: const Icon(Icons.person_pin),
-            title: const Text('Benutzerdaten'),
+            title: Text(AppLocalizations.of(context)!.userData),
             onTap: () {
               Navigator.push(
                 context,
@@ -41,7 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.apps),
-            title: const Text('Unterstützung für deine Schule'),
+            title: Text(AppLocalizations.of(context)!.personalSchoolSupport),
             onTap: () {
               Navigator.push(
                 context,
@@ -53,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.landscape_rounded),
-            title: const Text('Aussehen'),
+            title: Text(AppLocalizations.of(context)!.appearance),
             onTap: () {
               Navigator.push(
                 context,
@@ -65,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) ...[
             ListTile(
               leading: const Icon(Icons.notifications),
-              title: const Text('Benachrichtigungen'),
+              title: Text(AppLocalizations.of(context)!.notifications),
               onTap: () {
                 Navigator.push(
                   context,
@@ -78,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
           ListTile(
             leading: const Icon(Icons.storage),
-            title: const Text('Cache leeren'),
+            title: Text(AppLocalizations.of(context)!.clearCache),
             onTap: () {
               Navigator.push(
                 context,
@@ -89,7 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.analytics),
-            title: const Text('Countly Bugreports'),
+            title: Text(AppLocalizations.of(context)!.telemetry),
             onTap: () {
               Navigator.push(
                 context,
@@ -100,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.qr_code_outlined),
-            title: const Text('Über die App'),
+            title: Text(AppLocalizations.of(context)!.about),
             onTap: () {
               Navigator.push(
                 context,

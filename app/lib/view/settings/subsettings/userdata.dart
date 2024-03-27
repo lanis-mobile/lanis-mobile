@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
@@ -38,11 +39,10 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Benutzerdaten"),
+        title: Text(AppLocalizations.of(context)!.userData),
         actions: [
           InfoButton(
-              infoText:
-                  "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
+              infoText: AppLocalizations.of(context)!.settingsInfoUserData,
               context: context)
         ],
       ),

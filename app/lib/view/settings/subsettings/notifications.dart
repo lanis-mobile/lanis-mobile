@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class NotificationsSettingsScreen extends StatelessWidget {
   const NotificationsSettingsScreen({super.key});
@@ -12,11 +13,11 @@ class NotificationsSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Benachrichtigungen"),
+        title: Text(AppLocalizations.of(context)!.notifications),
         actions: [
           InfoButton(
               infoText:
-                  "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
+                  AppLocalizations.of(context)!.settingsInfoNotifications,
               context: context)
         ],
       ),
@@ -25,7 +26,7 @@ class NotificationsSettingsScreen extends StatelessWidget {
           if (Platform.isIOS)
             const ListTile(
               leading: Icon(Icons.info),
-              title: Text("Leider keiner Unterstützung"),
+              title: Text("Leider keine Unterstützung"),
               subtitle: Text(
                   "Auf deinem Endgerät (IOS / IpadOS) werden keine Benachrichtigungen unterstützt."),
             ),

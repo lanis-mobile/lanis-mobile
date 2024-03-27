@@ -1,0 +1,27 @@
+{
+  "welcomeBack": "Welcome Back",
+  "substitutions": "Substitutions",
+  "calendar": "Calendar",
+  "messages": "Messages",
+  "timeTable": "Timetable",
+  "lessons": "Lessons",
+  "storage": "Datastorage",
+  "settings": "Settings",
+  "about": "About",
+  "openLanisInBrowser": "Open SPH in Browser",
+  "openMoodleLogin": "Open Moodle Login",
+  "userData": "Userdata",
+  "personalSchoolSupport": "Personal school support",
+  "appearance": "Appearance",
+  "notifications": "Notifications",
+  "clearCache": "Clear cache",
+  "telemetry": "Telemetry",
+  "sendAnonymousBugReports": "Send anonymous bug reports",
+  "appInformation": "App information",
+
+  "settingsInfoUserData": "All user data is stored on the Lanis servers.",
+  "settingsInfoPersonalSchoolSupport": "Every school has different apps. Your school has the apps listed here. Not all apps are supported by this app. If an app does not work as expected, please contact the developer of the app. There is probably a problem with your school that can be fixed.",
+  "settingsInfoNotifications": "The frequency and time at which the substitution plan is updated depends on various factors relating to the end device. In battery-saving mode, for example, the substitution plan is often not updated.",
+  "settingsInfoClearCache": "All files that you have ever downloaded form the cache. You can empty it here to free up storage space.",
+  "settingsInfoTelemetry": "We use Countly to automatically send anonymous bug reports to the developers. No data is passed on to third parties."
+}

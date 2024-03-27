@@ -62,6 +62,8 @@ dependencies:
   cached_network_image: ^3.3.1
   file_icon: ^1.0.0
   syncfusion_flutter_calendar: ^25.1.35
+  flutter_localizations:
+    sdk: flutter
 
 flutter_launcher_icons:
   android: false
@@ -275,3 +277,5 @@ flutter:
     - family: Roboto Mono
       fonts:
         - asset: fonts/RobotoMono-Regular.ttf
+
+  generate: true

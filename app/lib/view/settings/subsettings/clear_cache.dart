@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ClearCacheScreen extends StatelessWidget {
   const ClearCacheScreen({super.key});
@@ -10,7 +11,7 @@ class ClearCacheScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Cache leeren"),
+          title: Text(AppLocalizations.of(context)!.clearCache),
         ),
         body: const Body());
   }
@@ -66,11 +67,10 @@ class _BodyState extends State<Body> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const ListTile(
-          leading: Icon(Icons.cached),
-          title: Text('Cache'),
-          subtitle: Text(
-              'Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.'),
+        ListTile(
+          leading: const Icon(Icons.cached),
+          title: const Text('Cache'),
+          subtitle: Text(AppLocalizations.of(context)!.settingsInfoClearCache),
         ),
         ListTile(
           leading: const Icon(Icons.file_download_sharp),

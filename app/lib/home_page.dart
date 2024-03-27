@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
@@ -18,27 +19,27 @@ import 'package:sph_plan/client/connection_checker.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class Destination {
-  final String label;
   final Icon icon;
   final Icon selectedIcon;
-  final bool isSupported;
   final bool enableBottomNavigation;
   final bool enableDrawer;
   final bool addDivider;
+  final Function label;
   final Function? action;
   final Widget? body;
+  late final bool isSupported;
 
-  //Either a body or an action has to be provided!
+
   Destination(
       {this.body,
       this.action,
       this.addDivider = false,
+      required this.isSupported,
       required this.enableBottomNavigation,
       required this.enableDrawer,
-      required this.label,
-      required this.isSupported,
       required this.icon,
-      required this.selectedIcon});
+      required this.selectedIcon,
+      required this.label});
 }
 
 class HomePage extends StatefulWidget {
@@ -56,15 +57,16 @@ class _HomePageState extends State<HomePage> {
   ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
   List<Destination> destinations = [
     Destination(
-        label: "Vertretungen",
+        label: (context) => AppLocalizations.of(context)!.substitutions,
         icon: const Icon(Icons.group),
         selectedIcon: const Icon(Icons.group_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
         enableBottomNavigation: true,
         enableDrawer: true,
-        body: const VertretungsplanAnsicht()),
+        body: const VertretungsplanAnsicht()
+    ),
     Destination(
-        label: "Kalender",
+        label: (context) => AppLocalizations.of(context)!.calendar,
         icon: const Icon(Icons.calendar_today),
         selectedIcon: const Icon(Icons.calendar_today_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.kalender),
@@ -72,7 +74,7 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         body: const CalendarAnsicht()),
     Destination(
-      label: "Stundenplan",
+      label: (context) => AppLocalizations.of(context)!.timeTable,
       icon: const Icon(Icons.timelapse),
       selectedIcon: const Icon(Icons.timelapse),
       isSupported: client.doesSupportFeature(SPHAppEnum.stundenplan),
@@ -81,7 +83,7 @@ class _HomePageState extends State<HomePage> {
       body: const TimetableAnsicht(),
     ),
     Destination(
-        label: "Nachrichten",
+        label: (context) => AppLocalizations.of(context)!.messages,
         icon: const Icon(Icons.forum),
         selectedIcon: const Icon(Icons.forum_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.nachrichten),
@@ -89,7 +91,7 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         body: const ConversationsAnsicht()),
     Destination(
-        label: "Unterricht",
+        label: (context) => AppLocalizations.of(context)!.lessons,
         icon: const Icon(Icons.school),
         selectedIcon: const Icon(Icons.school_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         body: const MeinUnterrichtAnsicht()),
     Destination(
-        label: "Dateispeicher",
+        label: (context) => AppLocalizations.of(context)!.storage,
         icon: const Icon(Icons.folder_copy),
         selectedIcon: const Icon(Icons.folder_copy_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.dateispeicher),
@@ -109,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                   builder: (context) => const DataStorageAnsicht()),
             )),
     Destination(
-        label: "Lanis im Browser öffnen",
+        label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
@@ -121,7 +123,7 @@ class _HomePageState extends State<HomePage> {
           });
         }),
     Destination(
-        label: "Moodle Login öffnen",
+        label: (context) => AppLocalizations.of(context)!.openMoodleLogin,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
@@ -130,7 +132,7 @@ class _HomePageState extends State<HomePage> {
         action: (context) => launchUrl(
             Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"))),
     Destination(
-        label: "Einstellungen",
+        label: (context) => AppLocalizations.of(context)!.settings,
         icon: const Icon(Icons.settings),
         selectedIcon: const Icon(Icons.settings),
         isSupported: true,
@@ -219,7 +221,7 @@ class _HomePageState extends State<HomePage> {
           drawerDestinations.add(const Divider());
         }
         drawerDestinations.add(NavigationDrawerDestination(
-          label: Text(destination.label),
+          label: Text(destination.label(context)),
           icon: destination.icon,
           selectedIcon: destination.selectedIcon,
           enabled: destination.isSupported,
@@ -299,11 +301,10 @@ class _HomePageState extends State<HomePage> {
     for (var destination in destinations) {
       if (destination.enableBottomNavigation && destination.isSupported) {
         barDestinations.add(NavigationDestination(
-          label: destination.label,
+          label: destination.label(context),
           icon: destination.icon,
           selectedIcon: destination.selectedIcon,
           enabled: destination.isSupported,
-          tooltip: destination.label,
         ));
       }
     }
@@ -336,7 +337,7 @@ class _HomePageState extends State<HomePage> {
           return Scaffold(
               appBar: AppBar(
                 title: Text(doesSupportAnyApplet
-                    ? destinations[selectedDestinationDrawer].label
+                    ? destinations[selectedDestinationDrawer].label(context)
                     : "Im Browser öffnen"),
                 bottom: network.data == InternetStatus.disconnected
                     ? PreferredSize(

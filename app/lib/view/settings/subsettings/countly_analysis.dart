@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../client/storage.dart';
 
@@ -10,7 +11,7 @@ class CountlySettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Countly"),
+          title: Text(AppLocalizations.of(context)!.telemetry),
         ),
         body: const Body());
   }
@@ -42,8 +43,7 @@ class _BodyState extends State<Body> {
         ListTile(
           leading: const Icon(Icons.info),
           title: const Text('Countly Server'),
-          subtitle: const Text(
-              'Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben.'),
+          subtitle: Text(AppLocalizations.of(context)!.settingsInfoTelemetry),
           onTap: () {
             launchUrl(Uri.parse("https://countly.com/lite"));
           },

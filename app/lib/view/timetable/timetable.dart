@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -55,7 +56,9 @@ class _TimetableAnsichtState extends State<TimetableAnsicht>
           return SfCalendar(
             view: CalendarView.day,
             headerHeight: 0,
-            timeZone: 'Europe/Berlin',
+            timeSlotViewSettings: const TimeSlotViewSettings(
+              timeFormat: "HH:mm",
+            ),
             dataSource: TimeTableDataSource(snapshot.data!.content),
             minDate: DateTime.now(),
             maxDate: DateTime.now().add(const Duration(days: 7)),

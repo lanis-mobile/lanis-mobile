@@ -1,0 +1,27 @@
+{
+  "welcomeBack": "Wilkommen zurück",
+  "substitutions": "Vertretungen",
+  "calendar": "Kalender",
+  "messages": "Nachrichten",
+  "timeTable": "Stundenplan",
+  "lessons": "Unterricht",
+  "storage": "Dateispeicher",
+  "settings": "Einstellungen",
+  "about": "Über",
+  "openLanisInBrowser": "SPH Im Browser öffnen",
+  "openMoodleLogin": "Moodle Login öffnen",
+  "userData": "Benutzerdaten",
+  "personalSchoolSupport": "Unterstützung für deine Schule",
+  "appearance": "Aussehen",
+  "notifications": "Benachrichtigungen",
+  "clearCache": "Cache leeren",
+  "telemetry": "Telemetrie",
+  "sendAnonymousBugReports": "Anonyme Bugreports senden",
+  "appInformation": "App Informationen",
+
+  "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
+  "settingsInfoPersonalSchoolSupport": "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
+  "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
+  "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.",
+  "settingsInfoTelemetry": "Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben."
+}

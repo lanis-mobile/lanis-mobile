@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:countly_flutter_np/countly_flutter.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,8 @@ void main() async {
     *  transfer their passwords to a third party service, which is not acceptable.
     *  Maybe someone will find a better solution in the future. It would be possible to provide a 
     *  self-hosted solution per school, but that's some unlikely idea for the future.
+    *
+    *  edit: it should be possible to run an event on a specified time, but that would require the user to open the app at least once a day
     */
     if (Platform.isAndroid) {
       PermissionStatus? notificationsPermissionStatus;
@@ -40,12 +43,9 @@ void main() async {
               await Permission.notification.request();
         }
       });
-      debugPrint(
-          "Notifications permission status: $notificationsPermissionStatus");
       bool enableNotifications =
           await globalStorage.read(key: StorageKey.settingsPushService) ==
               "true";
-      debugPrint("------------------------");
       int notificationInterval = int.parse(await globalStorage.read(
           key: StorageKey.settingsPushServiceIntervall));
 
@@ -121,6 +121,8 @@ class App extends StatelessWidget {
                     theme: theme.lightTheme,
                     darkTheme: theme.darkTheme,
                     themeMode: mode,
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
                     home: const StartupScreen(),
                   );
                 });
