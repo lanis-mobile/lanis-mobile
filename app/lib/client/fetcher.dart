@@ -86,6 +86,8 @@ abstract class Fetcher {
     "InvisibleConversationsFetcher": (Duration validCacheDuration) =>
         InvisibleConversationsFetcher(validCacheDuration),
     "CalendarFetcher": (Duration validCacheDuration) => CalendarFetcher(null),
+    "TimeTableFetcher": (Duration validCacheDuration) =>
+        TimeTableFetcher(validCacheDuration),
   };
 
   /// Return a specific instance from the given string.
@@ -167,5 +169,14 @@ class CalendarFetcher extends Fetcher {
 
     return client.calendar.getCalendar(
         formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+  }
+}
+
+class TimeTableFetcher extends Fetcher {
+  TimeTableFetcher(super.validCacheDuration);
+
+  @override
+  Future<dynamic> _get() {
+    return client.timetable.getPlan();
   }
 }

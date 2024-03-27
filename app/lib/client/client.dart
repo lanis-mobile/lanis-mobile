@@ -121,7 +121,6 @@ class SPHclient {
   ///
   /// New fetchers should be added here.
   void initialiseLoadApps() {
-    if (client.applets == null) {
       client.applets = {};
       if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         client.applets!.addEntries([
@@ -175,7 +174,20 @@ class SPHclient {
                   ]))
         ]);
       }
-    }
+      if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
+        debugPrint("----------------- initializing stundenplan fetcher! -----------------");
+
+        client.applets!.addEntries([
+          MapEntry(
+              SPHAppEnum.stundenplan,
+              LoadApp(
+                  applet: SPHAppEnum.stundenplan,
+                  shouldFetch: false,
+                  fetchers: [
+                    TimeTableFetcher(const Duration(days: 1)),
+                  ]))
+        ]);
+      }
   }
 
   ///Logs the user in and fetches the necessary metadata.
