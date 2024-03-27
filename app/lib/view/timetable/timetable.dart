@@ -15,8 +15,7 @@ class TimetableAnsicht extends StatefulWidget {
 
 class _TimetableAnsichtState extends State<TimetableAnsicht>
     with TickerProviderStateMixin {
-  final TimeTableFetcher timetableFetcher =
-      client.applets![SPHAppEnum.stundenplan]!.fetchers[0] as TimeTableFetcher;
+  final TimeTableFetcher timetableFetcher = client.fetchers.timeTableFetcher;
 
   @override
   void initState() {

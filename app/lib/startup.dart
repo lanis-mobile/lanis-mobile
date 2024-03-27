@@ -449,28 +449,13 @@ class _StartupScreenState extends State<StartupScreen> {
                           noConnection.value = false;
                           loadingMessage.value = "Initialisieren...";
 
-                                await performLogin();
-                              },
-                              child: const Text("Erneut versuchen")),
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (errors[Step.login]
-                            is WrongCredentialsException) ...[
-                          TextButton(
-                              onPressed: () => openLoginScreen(),
-                              child: const Text("Neu anmelden")),
-                        ],
-                        TextButton(
-                            onPressed: () => openWelcomeScreen(),
-                            child: const Text("App zurücksetzen")),
-                      ],
-                    )
-                  ],
-                ));
+                          await performLogin();
+                        },
+                        child: const Text("Erneut versuchen")),
+                  )
+                ],
+              ),
+            );
           }
           return const SizedBox.shrink();
         });
