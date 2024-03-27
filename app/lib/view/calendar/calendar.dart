@@ -18,8 +18,7 @@ class CalendarAnsicht extends StatefulWidget {
 }
 
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
-  CalendarFetcher calendarFetcher =
-      client.applets![SPHAppEnum.kalender]!.fetchers[0] as CalendarFetcher;
+  CalendarFetcher calendarFetcher = client.fetchers.calendarFetcher;
 
   late final ValueNotifier<List<Event>> _selectedEvents;
 

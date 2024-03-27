@@ -118,9 +118,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   data["historie"][index]["files"].forEach((file) {
                     files.add(ActionChip(
                       label: Text(file["filename"]),
-                      onPressed: () => launchFile(
-                          context, file["url"], file["filename"], file["filesize"], (){}
-                      ),
+                      onPressed: () => launchFile(context, file["url"],
+                          file["filename"], file["filesize"], () {}),
                     ));
                   });
 

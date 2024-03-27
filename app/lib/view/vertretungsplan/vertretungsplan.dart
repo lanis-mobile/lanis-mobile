@@ -21,9 +21,7 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
-  final SubstitutionsFetcher substitutionsFetcher = client
-      .applets![SPHAppEnum.vertretungsplan]!
-      .fetchers[0] as SubstitutionsFetcher;
+  final SubstitutionsFetcher substitutionsFetcher = client.fetchers.substitutionsFetcher;
 
   final double padding = 12.0;
 
@@ -80,7 +78,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                     return Card(
                       child: SubstitutionGridTile(
                           substitutionData: data["days"][dayIndex]["entries"]
-                          [entryIndex]),
+                              [entryIndex]),
                     );
                   },
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -214,9 +212,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           return Column(
             children: [
               TabBar(
-                isScrollable: true,
-                controller: _tabController,
-                tabs: getTabs(snapshot.data?.content)),
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: getTabs(snapshot.data?.content)),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,

@@ -4,7 +4,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
-import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 
@@ -33,7 +32,7 @@ enum Status {
 /// Collection of steps so we don't have magic strings.
 class Step {
   static String login = "Login";
-// The rest is now dynamic, gotten by [client.loadApps]
+// The rest is now dynamic, gotten by [client.applets]
 }
 
 /// More advanced class, so we can have a tidy and clean progress indicator of the steps.
@@ -96,7 +95,6 @@ class _StartupScreenState extends State<StartupScreen> {
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((_) async {
-      client.initialiseLoadApps();
       await client.prepareDio();
 
       // Context should be mounted
@@ -115,7 +113,7 @@ class _StartupScreenState extends State<StartupScreen> {
           builder: (context) => Scaffold(
                   body: LoginForm(
                 afterLogin: () async {
-                  client.initialiseLoadApps();
+                  await client.loadFromStorage();
                   await client.prepareDio();
 
                   // ignore: use_build_context_synchronously
@@ -166,21 +164,17 @@ class _StartupScreenState extends State<StartupScreen> {
       return;
     }
 
-    // Step 2 (if this fails, show login screen or notify error)
     loadingMessage.value = Message.login;
     progress.set(Step.login, Status.loading);
     try {
       await client.login();
-      client.initialiseLoadApps();
       progress.set(Step.login, Status.finished);
 
       loadingMessage.value = Message.load;
 
-      // Step 4 (fetch everything async)
       await Future.wait(List.generate(appletFetchers.length,
           (index) => fetchApplet(appletFetchers[index])));
 
-      // Step 5 (finish)
       if (!isError.value) {
         loadingMessage.value = Message.finalise;
         whatsNew().then((value) {
@@ -202,6 +196,8 @@ class _StartupScreenState extends State<StartupScreen> {
         });
       }
       return;
+    } on WrongCredentialsException {
+      openWelcomeScreen();
     } on CredentialsIncompleteException {
       openWelcomeScreen();
     } on LanisException catch (e, stack) {
@@ -257,39 +253,10 @@ class _StartupScreenState extends State<StartupScreen> {
 
   @override
   void initState() {
-    // So that we begin loading instantly on startup.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // We need to load this first so that everything works.
       client.loadFromStorage().then((_) {
-        // Show welcome screen nearly instantly.
-        if (client.username == "") {
-          performLogin();
-          return;
-        }
-
         finishedLoadingStorage.value = true;
-
-        if (client.applets != null) {
-          for (final loadApp in client.applets!.keys) {
-            final currentLoadApp = client.applets![loadApp];
-
-            if (currentLoadApp!.shouldFetch == true) {
-              steps.add(currentLoadApp.applet.fullName);
-              for (final fetcher in currentLoadApp.fetchers) {
-                appletFetchers.add(Applet(
-                    fetcher: fetcher,
-                    step: currentLoadApp.applet.fullName,
-                    finishMessage:
-                        "${currentLoadApp.applet.fullName} wurde(n) fertig geladen!"));
-              }
-            }
-
-            errors.addEntries([MapEntry(currentLoadApp.applet.fullName, null)]);
-          }
-        }
-
         progress = ProgressNotifier(steps);
-
         performLogin();
       });
     });
@@ -448,72 +415,47 @@ class _StartupScreenState extends State<StartupScreen> {
         builder: (context, _isError, _) {
           if (_isError) {
             return Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ValueListenableBuilder(
-                            valueListenable: noConnection,
-                            builder: (context, noInternet, _) {
-                              if (noInternet) {
-                                return const SizedBox.shrink();
-                              }
-                              return FilledButton(
-                                  onPressed: () {
-                                    // Prepare error message
-                                    String errorInfo = "";
-                                    errors.forEach((key, value) {
-                                      if (value == null) {
-                                        return;
-                                      }
-                                      errorInfo += "$key - ${value.cause}\n";
-                                    });
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ValueListenableBuilder(
+                      valueListenable: noConnection,
+                      builder: (context, noInternet, _) {
+                        if (noInternet) {
+                          return const SizedBox.shrink();
+                        }
+                        return FilledButton(
+                            onPressed: () {
+                              // Prepare error message
+                              String errorInfo = "";
+                              errors.forEach((key, value) {
+                                if (value == null) {
+                                  return;
+                                }
+                                errorInfo += "$key - ${value.cause}\n";
+                              });
+                            },
+                            child: const Text("Fehlerbericht senden"));
+                      }),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: OutlinedButton(
+                        onPressed: () async {
+                          // Reset
+                          progress.reset();
+                          errors.updateAll((key, value) => value = null);
+                          isError.value = false;
+                          noConnection.value = false;
+                          loadingMessage.value = "Initialisieren...";
 
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => BugReportScreen(
-                                              generatedMessage:
-                                                  "AUTOMATISCH GENERIERT (LOGIN PAGE):\n$errorInfo\nMehr Details von dir:\n")),
-                                    );
-                                  },
-                                  child: const Text("Fehlerbericht senden"));
-                            }),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: OutlinedButton(
-                              onPressed: () async {
-                                // Reset
-                                progress.reset();
-                                errors.updateAll((key, value) => value = null);
-                                isError.value = false;
-                                noConnection.value = false;
-                                loadingMessage.value = "Initialisieren...";
-
-                                await performLogin();
-                              },
-                              child: const Text("Erneut versuchen")),
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (errors[Step.login]
-                            is WrongCredentialsException) ...[
-                          TextButton(
-                              onPressed: () => openLoginScreen(),
-                              child: const Text("Neu anmelden")),
-                        ],
-                        TextButton(
-                            onPressed: () => openWelcomeScreen(),
-                            child: const Text("App zurücksetzen")),
-                      ],
-                    )
-                  ],
-                ));
+                          await performLogin();
+                        },
+                        child: const Text("Erneut versuchen")),
+                  )
+                ],
+              ),
+            );
           }
           return const SizedBox.shrink();
         });

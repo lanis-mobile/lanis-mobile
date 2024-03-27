@@ -8,14 +8,13 @@ enum StorageKey {
   settingsUseCountly,
   settingsSelectedColor,
   settingsSelectedTheme,
-  settingsLoadApps,
-  settingsUpdateAppsIntervall,
 
   userSchoolID,
   userUsername,
   userPassword,
   userSchoolName,
   userData,
+  ///Fast Navigation menu JSON [client.getSupportedApps]
   userSupportedApplets,
 
   substitutionsFilterKlassenStufe,
@@ -40,10 +39,6 @@ extension on StorageKey {
         return "settings-push-service-notifications-ongoing";
       case StorageKey.settingsUseCountly:
         return "enable-countly";
-      case StorageKey.settingsLoadApps:
-        return "loadApps";
-      case StorageKey.settingsUpdateAppsIntervall:
-        return "updateAppsIntervall";
       case StorageKey.userSchoolID:
         return "schoolID";
       case StorageKey.lastAppVersion:
@@ -87,8 +82,6 @@ extension on StorageKey {
         return "15";
       case StorageKey.settingsUseCountly:
         return "true";
-      case StorageKey.settingsUpdateAppsIntervall:
-        return "15";
       case StorageKey.lastAppVersion:
         return "0.0.0";
       case StorageKey.userData:

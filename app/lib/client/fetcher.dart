@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
@@ -70,33 +71,6 @@ abstract class Fetcher {
             FetcherResponse(status: FetcherStatus.error, content: ex.cause));
       }, test: (e) => e is LanisException);
     }
-  }
-
-  String toJson() => runtimeType.toString();
-
-  /// [fromJson] requires this for easy initialisation.
-  /// This needs to be expanded when more fetchers will be added.
-  static Map<String, Function> fetchers = {
-    "SubstitutionsFetcher": (Duration validCacheDuration) =>
-        SubstitutionsFetcher(validCacheDuration),
-    "MeinUnterrichtFetcher": (Duration validCacheDuration) =>
-        MeinUnterrichtFetcher(validCacheDuration),
-    "VisibleConversationsFetcher": (Duration validCacheDuration) =>
-        VisibleConversationsFetcher(validCacheDuration),
-    "InvisibleConversationsFetcher": (Duration validCacheDuration) =>
-        InvisibleConversationsFetcher(validCacheDuration),
-    "CalendarFetcher": (Duration validCacheDuration) => CalendarFetcher(null),
-    "TimeTableFetcher": (Duration validCacheDuration) =>
-        TimeTableFetcher(validCacheDuration),
-  };
-
-  /// Return a specific instance from the given string.
-  /// If an ArgumentError is thrown then something is very wrong.
-  static Fetcher fromJson(String json, Duration validCacheDuration) {
-    if (!fetchers.containsKey(json)) {
-      throw ArgumentError();
-    }
-    return fetchers[json]!(validCacheDuration);
   }
 
   Future<dynamic> _get();
@@ -178,5 +152,35 @@ class TimeTableFetcher extends Fetcher {
   @override
   Future<dynamic> _get() {
     return client.timetable.getPlan();
+  }
+}
+
+class GlobalFetcher {
+  late final SubstitutionsFetcher substitutionsFetcher;
+  late final MeinUnterrichtFetcher meinUnterrichtFetcher;
+  late final VisibleConversationsFetcher visibleConversationsFetcher;
+  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
+  late final CalendarFetcher calendarFetcher;
+  late final TimeTableFetcher timeTableFetcher;
+
+  GlobalFetcher() {
+    if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
+      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
+    }
+    if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
+      meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 20));
+    }
+    if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
+      visibleConversationsFetcher =
+          VisibleConversationsFetcher(const Duration(minutes: 5));
+      invisibleConversationsFetcher =
+          InvisibleConversationsFetcher(const Duration(minutes: 5));
+    }
+    if (client.doesSupportFeature(SPHAppEnum.kalender)) {
+      calendarFetcher = CalendarFetcher(null);
+    }
+    if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
+      timeTableFetcher = TimeTableFetcher(null);
+    }
   }
 }

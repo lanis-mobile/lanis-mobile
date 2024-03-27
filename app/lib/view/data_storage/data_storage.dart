@@ -9,12 +9,8 @@ class DataStorageAnsicht extends StatefulWidget {
 }
 
 class _DataStorageAnsichtState extends State<DataStorageAnsicht> {
-
-
-
   @override
   Widget build(BuildContext context) {
     return const DataStorageRootView();
   }
 }
-

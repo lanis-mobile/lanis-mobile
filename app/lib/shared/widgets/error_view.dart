@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../client/fetcher.dart';
-import '../../view/bug_report/send_bugreport.dart';
 import '../exceptions/client_status_exceptions.dart';
 
 class ErrorView extends StatelessWidget {
@@ -33,19 +32,19 @@ class ErrorView extends StatelessWidget {
             children: [
               const Icon(
                 Icons.warning,
-                size: 60,
+                size: 40,
               ),
               const Padding(
-                padding: EdgeInsets.all(35),
+                padding: EdgeInsets.all(10),
                 child: Text(
                     "Es gab wohl ein Problem, bitte sende einen Fehlerbericht!",
                     textAlign: TextAlign.center,
                     style:
-                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               Text("Problem: ${data.cause}"),
               Padding(
-                padding: const EdgeInsets.only(top: 35),
+                padding: const EdgeInsets.only(top: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -65,33 +64,11 @@ class ErrorView extends StatelessWidget {
                                             Navigator.pop(context);
                                           },
                                           child: const Text("Zurück")),
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      BugReportScreen(
-                                                          generatedMessage:
-                                                              "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n${data.cause}\n\nMehr Details von dir:\n")),
-                                            );
-                                          },
-                                          child:
-                                              const Text("Ich bin mir sicher")),
                                     ],
                                   );
                                 });
                             return;
                           }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BugReportScreen(
-                                    generatedMessage:
-                                        "AUTOMATISCH GENERIERT:\nEin Fehler ist bei(m) $name aufgetreten:\n${data.cause}\n\nMehr Details von dir:\n")),
-                          );
                         },
                         child: const Text("Fehlerbericht senden")),
                     if (fetcher != null) ...[

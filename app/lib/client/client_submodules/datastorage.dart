@@ -18,18 +18,9 @@ class DataStorageParser {
   Future<dynamic> searchFiles(String query) async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/dateispeicher.php",
-      queryParameters: {
-        "q": query,
-        "a": "searchFiles"
-      },
-      data: {
-        "q": query,
-        "a": "searchFiles"
-      },
-      options: Options(
-        contentType: "application/x-www-form-urlencoded"
-      )
-    );
+        queryParameters: {"q": query, "a": "searchFiles"},
+        data: {"q": query, "a": "searchFiles"},
+        options: Options(contentType: "application/x-www-form-urlencoded"));
     final data = jsonDecode(response.data);
     return data[0];
   }
@@ -62,12 +53,13 @@ class DataStorageParser {
         var groesse = fields[headers.indexOf("Größe")].text.trim();
         var id = int.parse(file.attributes["data-id"]!.trim());
         files.add(FileNode(
-            name: name,
-            id: id,
-            downloadUrl: "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id",
-            aenderung: aenderung,
-            groesse: groesse,
-            hinweis: hinweis,
+          name: name,
+          id: id,
+          downloadUrl:
+              "https://start.schulportal.hessen.de/dateispeicher.php?a=download&f=$id",
+          aenderung: aenderung,
+          groesse: groesse,
+          hinweis: hinweis,
         ));
       }
 

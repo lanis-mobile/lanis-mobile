@@ -11,7 +11,6 @@ import 'package:sph_plan/view/conversations/conversations.dart';
 import 'package:sph_plan/view/data_storage/data_storage.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
-import 'package:sph_plan/view/bug_report/send_bugreport.dart';
 import 'package:sph_plan/view/timetable/timetable.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -105,9 +104,10 @@ class _HomePageState extends State<HomePage> {
         enableBottomNavigation: false,
         enableDrawer: true,
         action: (context) => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DataStorageAnsicht()),
-        )),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const DataStorageAnsicht()),
+            )),
     Destination(
         label: "Lanis im Browser öffnen",
         icon: const Icon(Icons.open_in_new),
@@ -141,16 +141,6 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
             )),
-    Destination(
-      label: "Fehlerbericht senden",
-      icon: const Icon(Icons.bug_report),
-      selectedIcon: const Icon(Icons.bug_report_outlined),
-      isSupported: true,
-      enableBottomNavigation: false,
-      enableDrawer: true,
-      action: (context) => Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const BugReportScreen())),
-    ),
   ];
 
   void setDefaultDestination() {

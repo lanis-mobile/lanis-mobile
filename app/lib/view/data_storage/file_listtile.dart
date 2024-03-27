@@ -6,14 +6,14 @@ import '../../shared/launch_file.dart';
 import '../../shared/widgets/marquee.dart';
 
 enum FileExists { yes, no, loading }
+
 extension FileExistsExtension on FileExists {
   MaterialColor? get color => {
-    FileExists.yes: Colors.green,
-    FileExists.no: Colors.red,
-    FileExists.loading: Colors.grey,
-  }[this];
+        FileExists.yes: Colors.green,
+        FileExists.no: Colors.red,
+        FileExists.loading: Colors.grey,
+      }[this];
 }
-
 
 class FileListTile extends StatefulWidget {
   final dynamic file;
@@ -35,7 +35,9 @@ class _FileListTileState extends State<FileListTile> {
   }
 
   void updateLocalFileStatus() {
-    client.doesFileExist(widget.file.downloadUrl, widget.file.name).then((value) {
+    client
+        .doesFileExist(widget.file.downloadUrl, widget.file.name)
+        .then((value) {
       setState(() {
         exists = value ? FileExists.yes : FileExists.no;
       });
@@ -49,16 +51,24 @@ class _FileListTileState extends State<FileListTile> {
       subtitle: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (widget.file.hinweis != null) Expanded(child: MarqueeWidget(child: Text(widget.file.hinweis!),)) else Text(widget.file.groesse),
+          if (widget.file.hinweis != null)
+            Expanded(
+                child: MarqueeWidget(
+              child: Text(widget.file.hinweis!),
+            ))
+          else
+            Text(widget.file.groesse),
           const SizedBox(width: 5),
           Text(widget.file.aenderung),
         ],
       ),
       leading: Badge(
           backgroundColor: exists.color,
-          child: FileIcon(widget.file.name, )
-      ),
-      onTap: () => launchFile(context, widget.file.downloadUrl, widget.file.name, widget.file.groesse, updateLocalFileStatus),
+          child: FileIcon(
+            widget.file.name,
+          )),
+      onTap: () => launchFile(context, widget.file.downloadUrl,
+          widget.file.name, widget.file.groesse, updateLocalFileStatus),
     );
   }
 }
@@ -68,12 +78,12 @@ class SearchFileListTile extends StatefulWidget {
   final String downloadUrl;
   final BuildContext context;
 
-  const SearchFileListTile({
-    Key? key,
-    required this.context,
-    required this.name,
-    required this.downloadUrl
-  }) : super(key: key);
+  const SearchFileListTile(
+      {Key? key,
+      required this.context,
+      required this.name,
+      required this.downloadUrl})
+      : super(key: key);
 
   @override
   _SearchFileListTileState createState() => _SearchFileListTileState();
@@ -104,7 +114,8 @@ class _SearchFileListTileState extends State<SearchFileListTile> {
         backgroundColor: exists.color,
         child: FileIcon(widget.name),
       ),
-      onTap: () => launchFile(context, widget.downloadUrl, widget.name, "", updateLocalFileStatus),
+      onTap: () => launchFile(
+          context, widget.downloadUrl, widget.name, "", updateLocalFileStatus),
     );
   }
 }

@@ -15,31 +15,30 @@ import 'package:sph_plan/client/client_submodules/mein_unterricht.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/client/cryptor.dart';
-import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
-import '../shared/types/startup_app.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 import 'connection_checker.dart';
+import 'fetcher.dart';
 
 class SPHclient {
   String username = "";
   String password = "";
   String schoolID = "";
   String schoolName = "";
-  Map<SPHAppEnum, LoadApp>? applets;
-  int updateAppsIntervall = 15;
+
   dynamic userData = {};
   List<dynamic> supportedApps = [];
+  Timer? preventLogoutTimer;
+
+  late Cryptor cryptor = Cryptor();
   late CookieJar jar;
   final dio = Dio();
-  Timer? preventLogoutTimer;
-  late Cryptor cryptor = Cryptor();
 
   late SubstitutionsParser substitutions = SubstitutionsParser(dio, this);
   late CalendarParser calendar = CalendarParser(dio, this);
@@ -47,6 +46,8 @@ class SPHclient {
   late MeinUnterrichtParser meinUnterricht = MeinUnterrichtParser(dio, this);
   late ConversationsParser conversations = ConversationsParser(dio, this);
   late TimetableParser timetable = TimetableParser(dio, this);
+
+  late GlobalFetcher fetchers;
 
   Future<void> prepareDio() async {
     jar = CookieJar();
@@ -81,26 +82,6 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
-    updateAppsIntervall = int.parse((await globalStorage.read(
-        key: StorageKey.settingsUpdateAppsIntervall)));
-
-    final String loadAppsString =
-        await globalStorage.read(key: StorageKey.settingsLoadApps);
-    if (loadAppsString != "") {
-      applets = {};
-      Map<String, dynamic> mappedLoadApps = json.decode(loadAppsString);
-      for (final loadApp in mappedLoadApps.keys) {
-        applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.fromJson(loadApp),
-              LoadApp.fromJson(mappedLoadApps[loadApp]!,
-                  Duration(minutes: updateAppsIntervall)))
-        ]);
-      }
-    } else {
-      applets = null; // wasn't previously initialised.
-    }
-
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
         await globalStorage.read(key: StorageKey.userPassword, secure: true);
@@ -113,81 +94,9 @@ class SPHclient {
     supportedApps = jsonDecode(
         await globalStorage.read(key: StorageKey.userSupportedApplets));
 
+    fetchers = GlobalFetcher();
+
     return;
-  }
-
-  /// Initialises [client.applets] if [client.loadFromStorage] set it to null, used to make the code more dynamic.
-  /// This step occurs right after login.
-  ///
-  /// New fetchers should be added here.
-  void initialiseLoadApps() {
-      client.applets = {};
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.vertretungsplan,
-              LoadApp(
-                  applet: SPHAppEnum.vertretungsplan,
-                  shouldFetch: true,
-                  fetchers: [
-                    SubstitutionsFetcher(Duration(minutes: updateAppsIntervall))
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.kalender)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.kalender,
-              LoadApp(
-                  applet: SPHAppEnum.kalender,
-                  shouldFetch: false,
-                  fetchers: [
-                    CalendarFetcher(null),
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.nachrichten,
-              LoadApp(
-                  applet: SPHAppEnum.nachrichten,
-                  shouldFetch: false,
-                  fetchers: [
-                    InvisibleConversationsFetcher(
-                        Duration(minutes: updateAppsIntervall)),
-                    VisibleConversationsFetcher(
-                        Duration(minutes: updateAppsIntervall))
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.meinUnterricht,
-              LoadApp(
-                  applet: SPHAppEnum.meinUnterricht,
-                  shouldFetch: false,
-                  fetchers: [
-                    MeinUnterrichtFetcher(
-                        Duration(minutes: updateAppsIntervall)),
-                  ]))
-        ]);
-      }
-      if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
-        debugPrint("----------------- initializing stundenplan fetcher! -----------------");
-
-        client.applets!.addEntries([
-          MapEntry(
-              SPHAppEnum.stundenplan,
-              LoadApp(
-                  applet: SPHAppEnum.stundenplan,
-                  shouldFetch: false,
-                  fetchers: [
-                    TimeTableFetcher(const Duration(days: 1)),
-                  ]))
-        ]);
-      }
   }
 
   ///Logs the user in and fetches the necessary metadata.
@@ -212,6 +121,7 @@ class SPHclient {
       if (userLogin) {
         await fetchRedundantData();
       }
+      fetchers = GlobalFetcher();
       await getSchoolTheme();
 
       await cryptor.start(dio);
@@ -271,8 +181,6 @@ class SPHclient {
 
   ///Fetches the school's accent color and saves it to the storage.
   Future<void> getSchoolTheme() async {
-    debugPrint("Trying to get a school accent color.");
-
     if (await globalStorage.read(key: StorageKey.schoolAccentColor) == "") {
       try {
         dynamic schoolInfo = await client.getSchoolInfo(schoolID);
@@ -428,7 +336,6 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
-    client.applets = null;
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);
@@ -439,10 +346,8 @@ class SPHclient {
     var bytes = utf8.encode(source);
     var digest = sha256.convert(bytes);
 
-    var shortHash = digest
-        .toString()
-        .replaceAll(RegExp(r'[^A-z0-9]'), '')
-        .substring(0, 12);
+    var shortHash =
+        digest.toString().replaceAll(RegExp(r'[^A-z0-9]'), '').substring(0, 12);
 
     return shortHash;
   }

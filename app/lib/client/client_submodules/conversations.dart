@@ -45,7 +45,8 @@ class ConversationsParser {
                 },
               ));
 
-      return compute(computeJson, [response.toString(), client.cryptor.key.bytes]);
+      return compute(
+          computeJson, [response.toString(), client.cryptor.key.bytes]);
     } on (SocketException, DioException) {
       throw NetworkException();
     } on LanisException {
@@ -56,11 +57,10 @@ class ConversationsParser {
   }
 
   static dynamic computeJson(List<dynamic> args) {
-    final Map<String, dynamic> encryptedJSON =
-    jsonDecode(args[0]);
+    final Map<String, dynamic> encryptedJSON = jsonDecode(args[0]);
 
-    final String? decryptedConversations =
-    Cryptor.decryptWithKeyString(encryptedJSON["rows"], encrypt.Key(args[1]));
+    final String? decryptedConversations = Cryptor.decryptWithKeyString(
+        encryptedJSON["rows"], encrypt.Key(args[1]));
 
     if (decryptedConversations == null) {
       throw UnsaltedOrUnknownException();
