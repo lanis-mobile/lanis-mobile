@@ -146,12 +146,22 @@ class CalendarFetcher extends Fetcher {
   }
 }
 
+class TimeTableFetcher extends Fetcher {
+  TimeTableFetcher(super.validCacheDuration);
+
+  @override
+  Future<dynamic> _get() {
+    return client.timetable.getPlan();
+  }
+}
+
 class GlobalFetcher {
   late final SubstitutionsFetcher substitutionsFetcher;
   late final MeinUnterrichtFetcher meinUnterrichtFetcher;
   late final VisibleConversationsFetcher visibleConversationsFetcher;
   late final InvisibleConversationsFetcher invisibleConversationsFetcher;
   late final CalendarFetcher calendarFetcher;
+  late final TimeTableFetcher timeTableFetcher;
 
   GlobalFetcher() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
@@ -168,6 +178,9 @@ class GlobalFetcher {
     }
     if (client.doesSupportFeature(SPHAppEnum.kalender)) {
       calendarFetcher = CalendarFetcher(null);
+    }
+    if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
+      timeTableFetcher = TimeTableFetcher(null);
     }
   }
 }

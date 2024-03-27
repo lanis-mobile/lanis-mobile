@@ -11,6 +11,7 @@ import 'package:sph_plan/view/conversations/conversations.dart';
 import 'package:sph_plan/view/data_storage/data_storage.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
+import 'package:sph_plan/view/timetable/timetable.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/client/connection_checker.dart';
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
   List<Destination> destinations = [
     Destination(
-        label: "Vertretungsplan",
+        label: "Vertretungen",
         icon: const Icon(Icons.group),
         selectedIcon: const Icon(Icons.group_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
@@ -71,6 +72,15 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         body: const CalendarAnsicht()),
     Destination(
+      label: "Stundenplan",
+      icon: const Icon(Icons.timelapse),
+      selectedIcon: const Icon(Icons.timelapse),
+      isSupported: client.doesSupportFeature(SPHAppEnum.stundenplan),
+      enableBottomNavigation: true,
+      enableDrawer: true,
+      body: const TimetableAnsicht(),
+    ),
+    Destination(
         label: "Nachrichten",
         icon: const Icon(Icons.forum),
         selectedIcon: const Icon(Icons.forum_outlined),
@@ -79,7 +89,7 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         body: const ConversationsAnsicht()),
     Destination(
-        label: "Mein Unterricht",
+        label: "Unterricht",
         icon: const Icon(Icons.school),
         selectedIcon: const Icon(Icons.school_outlined),
         isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),

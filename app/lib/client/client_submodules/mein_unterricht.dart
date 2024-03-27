@@ -317,9 +317,9 @@ class MeinUnterrichtParser {
       //leistungen
       () {
         var marksSection = document.getElementById("marks");
-        var tableRows = marksSection?.querySelectorAll("table>tbody>tr");
+        List tableRows = marksSection?.querySelectorAll("table>tbody>tr") as List;
 
-        tableRows?.forEach((row) {
+        for (var (index, row) in tableRows.indexed) {
           var encodedElements = row.getElementsByClassName("hidden_encoded");
           for (var e in encodedElements) {
             e.innerHtml = "";
@@ -332,7 +332,13 @@ class MeinUnterrichtParser {
               "Note": row.children[2].text.trim()
             });
           }
-        });
+          if (row.children.length == 2) {
+            String comment = row.children[1].text.trim();
+            comment = comment.split(":").sublist(1).join(":");
+
+            result["leistungen"]![index-1]["Kommentar"] = comment;
+          }
+        }
       }();
 
       //leistungskontrollen

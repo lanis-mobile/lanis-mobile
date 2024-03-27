@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
+import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 
 import 'client/client.dart';
@@ -16,6 +17,8 @@ class Message {
   static String load = "Lade Apps...";
   static String finalise = "Finalisieren...";
   static String error = "Beim Laden ist ein Fehler passiert!";
+  static String wrongCredentials = "Falsche Anmeldedaten!";
+  static String loginTimeout = "Zu oft falsch eingeloggt!";
 }
 
 /// Status of each step
@@ -103,6 +106,27 @@ class _StartupScreenState extends State<StartupScreen> {
     });
   }
 
+  void openLoginScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => Scaffold(
+                  body: LoginForm(
+                afterLogin: () async {
+                  await client.loadFromStorage();
+                  await client.prepareDio();
+
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
+                },
+                relogin: true,
+              ))),
+    );
+  }
+
   Future<void> fetchApplet(Applet applet) async {
     progress.set(applet.step, Status.loading);
 
@@ -187,9 +211,20 @@ class _StartupScreenState extends State<StartupScreen> {
       }
 
       loadingMessage.value = Message.error;
+
+      if (e is WrongCredentialsException) {
+        if (e is LoginTimeoutException) {
+          loadingMessage.value = "${Message.loginTimeout} (${e.time}s)";
+        } else {
+          loadingMessage.value = Message.wrongCredentials;
+        }
+      } else {
+        loadingMessage.value = Message.error;
+      }
     }
   }
 
+  // Handy functions
   IconData getIcon(Status status) {
     switch (status) {
       case Status.finished:
@@ -414,13 +449,28 @@ class _StartupScreenState extends State<StartupScreen> {
                           noConnection.value = false;
                           loadingMessage.value = "Initialisieren...";
 
-                          await performLogin();
-                        },
-                        child: const Text("Erneut versuchen")),
-                  )
-                ],
-              ),
-            );
+                                await performLogin();
+                              },
+                              child: const Text("Erneut versuchen")),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (errors[Step.login]
+                            is WrongCredentialsException) ...[
+                          TextButton(
+                              onPressed: () => openLoginScreen(),
+                              child: const Text("Neu anmelden")),
+                        ],
+                        TextButton(
+                            onPressed: () => openWelcomeScreen(),
+                            child: const Text("App zurücksetzen")),
+                      ],
+                    )
+                  ],
+                ));
           }
           return const SizedBox.shrink();
         });

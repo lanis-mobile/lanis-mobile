@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-
-import '../../shared/types/fach.dart';
+import 'package:sph_plan/shared/types/fach.dart';
 import '../client.dart';
+
+typedef Day = List<StdPlanFach>;
 
 class TimetableParser {
   late Dio dio;
@@ -12,45 +14,83 @@ class TimetableParser {
     dio = dioClient;
   }
 
-  Future<List<List<List<StdPlanFach>>>> getTimetable() async {
-    final location =
+  Future<Element?> getTableBody() async {
+    final redirectedRequest =
         await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
     final response = await dio.get(
-        "https://start.schulportal.hessen.de/${location.headers["location"]![0]}");
+        "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]![0]}");
 
     var document = parse(response.data);
-    var stundenplanTableHead = document.querySelector("#own thead");
+    return document.querySelector("#all tbody");
+  }
 
-    var sk = stundenplanTableHead!.querySelector("th")!.text.contains("Stunde");
+  Future<List> getPlan() async {
+    final tbody = await getTableBody();
 
-    var stundenplanTableBody = document.querySelector("#own tbody");
+    return parseRoomPlan(tbody!);
+  }
 
-    if (stundenplanTableBody != null) {
-      List<List<List<StdPlanFach>>> result = [];
+  List<Day> parseRoomPlan(Element tbody) {
+    List<Day> result = List.generate(5, (_) => []);
 
-      for (var row in stundenplanTableBody.querySelectorAll("tr")) {
-        if (row.text.replaceAll(RegExp(r'[\s\n\r]'), "") == "") continue;
-        List<List<StdPlanFach>> timeslot = [];
-        for (var (index, day) in row.querySelectorAll("td").indexed) {
-          if (sk && index == 0) continue;
-          List<StdPlanFach> stunde = [];
-          for (var fach in day.querySelectorAll(".stunde")) {
-            var name = fach.querySelector("b")!.text.trim();
-            var raum = fach.nodes
-                .map((node) => node.nodeType == 3 ? node.text!.trim() : "")
-                .join();
-            var lehrer = fach.querySelector("small")!.text.trim();
-            var badge = fach.querySelector(".badge")?.text.trim() ?? "";
-            var duration = int.parse(fach.parent!.attributes["rowspan"]!);
-            stunde.add(StdPlanFach(name, raum, lehrer, badge, duration));
-          }
-          timeslot.add(stunde);
+    List<((int, int), (int, int))> timeSlots =
+    tbody.querySelectorAll(".VonBis").map((e) {
+      var timeString = e.text.trim();
+      var s = timeString.split(" - ");
+      var splitA = s[0].split(":");
+      var splitB = s[1].split(":");
+      return ((int.parse(splitA[0]), int.parse(splitA[1])), (int.parse(splitB[0]), int.parse(splitB[1])));
+    }).toList();
+
+    List<List<bool>> alreadyParsed = List.generate(timeSlots.length+1, (_) => List.generate(5, (_) => false));
+
+
+    for (var (rowIndex, rowElement) in tbody.children.indexed) {
+      if (rowIndex == 0) continue; // skip first empty row
+      for (var (colIndex, colElement) in rowElement.children.indexed) {
+        if (colIndex == 0) continue; // skip first column
+        final int rowSpan = int.parse(colElement.attributes["rowspan"] ?? "1");
+
+        var actualDay = colIndex - 1;
+        //actualDay sould be the first where alreadyParsed is false
+        while (alreadyParsed[rowIndex][actualDay]) {
+          actualDay++;
         }
-        result.add(timeslot);
+        //set all the affected rowspans to true
+        for (var i = 0; i < rowSpan; i++) {
+          alreadyParsed[rowIndex + i][actualDay] = true;
+        }
+
+        result[actualDay].addAll(parseSingeEntry(colElement, rowIndex, timeSlots));
       }
-      return result;
-    } else {
-      return [];
     }
+    return result;
+  }
+
+  List<StdPlanFach> parseSingeEntry(
+      Element cell, int y, List<((int, int), (int, int))> timeSlots) {
+    List<StdPlanFach> result = [];
+    for (var row in cell.querySelectorAll(".stunde")) {
+      var name = row.querySelector("b")?.text.trim();
+      var raum = row.nodes
+          .map((node) => node.nodeType == 3 ? node.text!.trim() : "")
+          .join();
+      var lehrer = row.querySelector("small")?.text.trim();
+      var badge = row.querySelector(".badge")?.text.trim();
+      var duration = int.parse(row.parent!.attributes["rowspan"]!);
+      var startTime = timeSlots[y - 1].$1;
+      var endTime = timeSlots[y - 1 + duration - 1].$2;
+
+      result.add(StdPlanFach(
+          name: name,
+          raum: raum,
+          lehrer: lehrer,
+          badge: badge,
+          duration: duration,
+          startTime: startTime,
+          endTime: endTime)
+      );
+    }
+    return result;
   }
 }
