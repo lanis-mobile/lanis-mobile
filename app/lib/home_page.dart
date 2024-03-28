@@ -29,7 +29,6 @@ class Destination {
   final Widget? body;
   late final bool isSupported;
 
-
   Destination(
       {this.body,
       this.action,
@@ -63,8 +62,7 @@ class _HomePageState extends State<HomePage> {
         isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
         enableBottomNavigation: true,
         enableDrawer: true,
-        body: const VertretungsplanAnsicht()
-    ),
+        body: const VertretungsplanAnsicht()),
     Destination(
         label: (context) => AppLocalizations.of(context)!.calendar,
         icon: const Icon(Icons.calendar_today),
@@ -188,10 +186,9 @@ class _HomePageState extends State<HomePage> {
             Icons.disabled_by_default_outlined,
             size: 150,
           ),
-          const Padding(
-            padding: EdgeInsets.all(32),
-            child: Text(
-                "Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen."),
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(AppLocalizations.of(context)!.noSupportOpenInBrowser),
           ),
           ElevatedButton(
               onPressed: () => openLanisInBrowser(context),
@@ -338,7 +335,7 @@ class _HomePageState extends State<HomePage> {
               appBar: AppBar(
                 title: Text(doesSupportAnyApplet
                     ? destinations[selectedDestinationDrawer].label(context)
-                    : "Im Browser öffnen"),
+                    : AppLocalizations.of(context)!.openLanisInBrowser),
                 bottom: network.data == InternetStatus.disconnected
                     ? PreferredSize(
                         preferredSize: const Size.fromHeight(40),
@@ -352,7 +349,8 @@ class _HomePageState extends State<HomePage> {
                                 child: Icon(Icons.signal_wifi_off),
                               ),
                               Text(
-                                "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
+                                AppLocalizations.of(context)!
+                                    .noInternetConnection,
                                 style: Theme.of(context).textTheme.labelLarge,
                               ),
                             ],

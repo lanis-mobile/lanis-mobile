@@ -3,9 +3,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_gridtile.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_listtile.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../shared/widgets/error_view.dart';
@@ -21,7 +21,8 @@ class VertretungsplanAnsicht extends StatefulWidget {
 
 class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     with TickerProviderStateMixin {
-  final SubstitutionsFetcher substitutionsFetcher = client.fetchers.substitutionsFetcher;
+  final SubstitutionsFetcher substitutionsFetcher =
+      client.fetchers.substitutionsFetcher;
 
   final double padding = 12.0;
 
@@ -38,12 +39,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
   }
 
   Widget noticeWidget(int entriesLength) {
-    String title =
-        entriesLength != 0 ? "Keine weiteren Einträge!" : "Keine Einträge!";
+    String title = entriesLength != 0
+        ? AppLocalizations.of(context)!.noFurtherEntries
+        : AppLocalizations.of(context)!.noEntries;
     return ListTile(
       title: Text(title, style: const TextStyle(fontSize: 22)),
-      subtitle: const Text(
-          "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden."),
+      subtitle: Text(AppLocalizations.of(context)!.substitutionsEndCardMessage),
     );
   }
 
@@ -119,7 +120,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     for (int i = 0; i < data["length"]; i++) {
       errorWidgets.add(ErrorView.fromCode(
         data: data,
-        name: "Vertretungsplan",
+        name: AppLocalizations.of(context)!.substitutions,
         fetcher: substitutionsFetcher,
       ));
     }
@@ -179,20 +180,20 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
               onRefresh: () async {
                 substitutionsFetcher.fetchData(forceRefresh: true);
               },
-              child: const CustomScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverFillRemaining(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(Icons.sentiment_dissatisfied, size: 60),
+                        const Icon(Icons.sentiment_dissatisfied, size: 60),
                         Padding(
-                          padding: EdgeInsets.all(35),
-                          child: Text("Es gibt keine Vertretungen!",
+                          padding: const EdgeInsets.all(35),
+                          child: Text(AppLocalizations.of(context)!.noEntries,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               )),

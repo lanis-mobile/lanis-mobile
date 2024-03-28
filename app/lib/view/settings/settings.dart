@@ -111,16 +111,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('App Zurücksetzen | Ausloggen'),
+            title: Text(AppLocalizations.of(context)!.logout),
             onTap: () => showDialog<String>(
               context: context,
               builder: (BuildContext context) => AlertDialog(
-                title: const Text('Wirklich zurücksetzen?'),
-                content: const Text('Alle Einstellungen werden Gelöscht.'),
+                title: Text(AppLocalizations.of(context)!.reallyReset),
+                content: Text(AppLocalizations.of(context)!.allSettingsWillBeLost),
                 actions: <Widget>[
                   TextButton(
-                    onPressed: () => Navigator.pop(context, 'Abbrechen'),
-                    child: const Text('Abbrechen'),
+                    onPressed: () => Navigator.pop(context, AppLocalizations.of(context)!.cancel),
+                    child:  Text(AppLocalizations.of(context)!.cancel),
                   ),
                   TextButton(
                     onPressed: () {

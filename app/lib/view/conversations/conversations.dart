@@ -3,7 +3,7 @@ import 'package:sph_plan/view/conversations/detailed_conversation.dart';
 
 import '../../client/client.dart';
 import '../../client/fetcher.dart';
-import '../../shared/apps.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
 
 class ConversationsAnsicht extends StatefulWidget {
@@ -15,8 +15,10 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     with TickerProviderStateMixin {
-  final InvisibleConversationsFetcher invisibleConversationsFetcher = client.fetchers.invisibleConversationsFetcher;
-  final VisibleConversationsFetcher visibleConversationsFetcher = client.fetchers.visibleConversationsFetcher;
+  final InvisibleConversationsFetcher invisibleConversationsFetcher =
+      client.fetchers.invisibleConversationsFetcher;
+  final VisibleConversationsFetcher visibleConversationsFetcher =
+      client.fetchers.visibleConversationsFetcher;
 
   static const double padding = 12.0;
 
@@ -54,42 +56,39 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     }
   }
 
-  // Borrowed from vertretungsplan.dart
-  Widget infoCard = const ListTile(
-    title: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          flex: 3,
-          child: Text(
-            "Keine weiteren Einträge!",
-            style: TextStyle(fontSize: 21),
-          ),
+  Widget infoCard(context) => ListTile(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              flex: 3,
+              child: Text(
+                AppLocalizations.of(context)!.noFurtherEntries,
+                style: const TextStyle(fontSize: 21),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-    subtitle: Text(
-      "Alle Angaben ohne Gewähr. \nDie Funktionalität der App hängt stark von der verwendeten Schule und den eingestellten Filtern ab.",
-    ),
-  );
+      );
 
-  Widget infoCardInvisibility = const ListTile(
-    title: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          flex: 3,
-          child: Text(
-            "Hinweis",
-            style: TextStyle(fontSize: 21),
-          ),
+  Widget infoCardInvisibility(context) => ListTile(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              flex: 3,
+              child: Text(
+                AppLocalizations.of(context)!.note,
+                style: const TextStyle(fontSize: 21),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-    subtitle: Text(
-      "Du kannst auf Lanis Unterhaltungen ausblenden. Diese Unterhaltungen löschen sich automatisch nach einer Zeit, aber werden wieder eingeblendet, wenn sie aktiv werden.",
-    ),
-  );
+        subtitle: Text(
+          AppLocalizations.of(context)!.notificationsNote,
+          style: const TextStyle(fontSize: 17),
+        ),
+      );
 
   Widget getConversationWidget(Map<String, dynamic> conversation) {
     return ListTile(
@@ -169,8 +168,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                       borderRadius: BorderRadius.circular(12)),
                   child: index == conversations.length
                       ? _tabController.index == 0
-                          ? infoCard
-                          : infoCardInvisibility
+                          ? infoCard(context)
+                          : infoCardInvisibility(context)
                       : getConversationWidget(conversations[index])),
             ),
           );
@@ -184,14 +183,14 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     return Scaffold(
       appBar: TabBar(
         controller: _tabController,
-        tabs: const [
+        tabs: [
           Tab(
-            text: "Eingeblendet",
-            icon: Icon(Icons.visibility),
+            text: AppLocalizations.of(context)!.visible,
+            icon: const Icon(Icons.visibility),
           ),
           Tab(
-            text: "Ausgeblendet",
-            icon: Icon(Icons.visibility_off),
+            text: AppLocalizations.of(context)!.invisible,
+            icon: const Icon(Icons.visibility_off),
           )
         ],
       ),
@@ -204,7 +203,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                 if (snapshot.data?.status == FetcherStatus.error) {
                   return ErrorView(
                       data: snapshot.data?.content,
-                      name: "Nachrichten",
+                      name: AppLocalizations.of(context)!.messages,
                       fetcher: visibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching ||
                     snapshot.data == null) {
@@ -220,7 +219,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                 if (snapshot.data?.status == FetcherStatus.error) {
                   return ErrorView.fromCode(
                       data: snapshot.data?.content,
-                      name: "Nachrichten",
+                      name: AppLocalizations.of(context)!.messages,
                       fetcher: invisibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching ||
                     snapshot.data == null) {

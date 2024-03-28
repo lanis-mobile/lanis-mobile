@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import '../../client/client.dart';
-import '../../shared/apps.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
 import '../login/screen.dart';
 import 'course_overview.dart';
@@ -18,7 +18,8 @@ class MeinUnterrichtAnsicht extends StatefulWidget {
 
 class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
     with TickerProviderStateMixin {
-  final MeinUnterrichtFetcher meinUnterrichtFetcher = client.fetchers.meinUnterrichtFetcher;
+  final MeinUnterrichtFetcher meinUnterrichtFetcher =
+      client.fetchers.meinUnterrichtFetcher;
 
   static const double padding = 12.0;
   late TabController _tabController;
@@ -30,19 +31,19 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
   final GlobalKey<RefreshIndicatorState> _presenceIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
-  final Widget noDataScreen = const Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.search,
-          size: 60,
+  Widget noDataScreen(context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search,
+              size: 60,
+            ),
+            Text(AppLocalizations.of(context)!.noCoursesFound)
+          ],
         ),
-        Text("Keine Kurse gefunden.")
-      ],
-    ),
-  );
+      );
 
   @override
   void initState() {
@@ -124,7 +125,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                       ));
                 },
               )
-            : noDataScreen);
+            : noDataScreen(context));
   }
 
   Widget coursesView(BuildContext context, dynamic courses) {
@@ -170,7 +171,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                     ));
               },
             )
-          : noDataScreen,
+          : noDataScreen(context),
     );
   }
 
@@ -234,7 +235,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                       ));
                 },
               )
-            : noDataScreen);
+            : noDataScreen(context));
   }
 
   @override
@@ -255,15 +256,17 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
 
           return Column(
             children: [
-              TabBar(controller: _tabController, tabs: const [
+              TabBar(controller: _tabController, tabs: [
                 Tab(
-                  icon: Icon(Icons.list),
-                  text: "Aktuelles",
+                  icon: const Icon(Icons.list),
+                  text: AppLocalizations.of(context)!.current,
                 ),
-                Tab(icon: Icon(Icons.folder_copy), text: "Kursmappen"),
                 Tab(
-                  icon: Icon(Icons.calendar_today),
-                  text: "Anwesenheiten",
+                    icon: const Icon(Icons.folder_copy),
+                    text: AppLocalizations.of(context)!.courseFolders),
+                Tab(
+                  icon: const Icon(Icons.calendar_today),
+                  text: AppLocalizations.of(context)!.attendances,
                 )
               ]),
               Expanded(

@@ -121,7 +121,8 @@ class App extends StatelessWidget {
                     theme: theme.lightTheme,
                     darkTheme: theme.darkTheme,
                     themeMode: mode,
-                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
                     home: const StartupScreen(),
                   );
@@ -131,68 +132,67 @@ class App extends StatelessWidget {
   }
 }
 
-Widget errorWidget(FlutterErrorDetails details) {
-  return Container(
-    color: Colors.red.withOpacity(0.1),
-    child: Padding(
-      padding: const EdgeInsets.only(
-          left: 20.0, right: 20.0, top: 32.0, bottom: 32.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.warning,
-            size: 60,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(35),
-            child: Text("Ups, es ist ein Fehler aufgetreten!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                )),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 35),
-            child: Text(
-              "Problem: ${details.exception.toString()}",
-              textAlign: TextAlign.center,
+Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
+  return ListView(children: [
+    Container(
+      color: Colors.red.withOpacity(0.1),
+      child: Padding(
+        padding: const EdgeInsets.only(
+            left: 20.0, right: 20.0, top: 32.0, bottom: 32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.warning,
+              size: 60,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 35),
-            child: FilledButton(
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(
-                      text: Trace.from(details.stack!).terse.toString()));
-                },
-                style: ButtonStyle(
-                  overlayColor: MaterialStateProperty.resolveWith((states) {
-                    return Colors.redAccent;
-                  }),
-                  foregroundColor: MaterialStateProperty.resolveWith((states) {
-                    return Colors.white;
-                  }),
-                  backgroundColor: MaterialStateProperty.resolveWith((states) {
-                    if (states.contains(MaterialState.pressed)) {
+            const Padding(
+              padding: EdgeInsets.all(35),
+              child: Text("Whoops! An error occurred.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  )),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 35),
+              child: Text(
+                "Problem: ${details.exception.toString()}",
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 35),
+              child: FilledButton(
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(
+                        text: Trace.from(details.stack!).terse.toString()));
+                  },
+                  style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.resolveWith((states) {
                       return Colors.redAccent;
-                    }
-                    return Colors.red;
-                  }),
-                ),
-                child: const Text(
-                  "Fehlerdetails kopieren",
-                )),
-          ),
-          const Text(
-            "Solche Fehler werden normalerweise automatisch an den Entwickler gesendet.",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w400),
-          )
-        ],
+                    }),
+                    foregroundColor:
+                        MaterialStateProperty.resolveWith((states) {
+                      return Colors.white;
+                    }),
+                    backgroundColor:
+                        MaterialStateProperty.resolveWith((states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.redAccent;
+                      }
+                      return Colors.red;
+                    }),
+                  ),
+                  child: const Text(
+                    "Copy error details to clipboard",
+                  )),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    )
+  ]);
 }

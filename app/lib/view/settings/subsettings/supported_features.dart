@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../shared/apps.dart';
 
@@ -37,14 +38,6 @@ class _SupportedFeaturesOverviewScreenState
           subtitle: Text(getAppSupportStatus(value["link"].toString())),
         ));
       }
-
-      featureListListTiles.add(ListTile(
-        leading: const Icon(Icons.lock),
-        title: const Text("Ende-zu-Ende Verschlüsselung"),
-        subtitle: Text(client.cryptor.authenticated
-            ? "Unterstützt\nEine Verschlüsselung ist benötigt, um Beispielsweise Nachrichten oder Noten anzuzeigen."
-            : "nicht Unterstützt\nDas könnte möglicherweise ein Fehler sein, kontaktiere bitte den Entwickler der App. Du kannst keine Nachrichten oder Noten sehen!"),
-      ));
     });
   }
 
@@ -52,11 +45,11 @@ class _SupportedFeaturesOverviewScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Unterstützung"),
+        title: Text(AppLocalizations.of(context)!.personalSchoolSupport),
         actions: [
           InfoButton(
-              infoText:
-                  "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
+              infoText: AppLocalizations.of(context)!
+                  .settingsInfoPersonalSchoolSupport,
               context: context)
         ],
       ),

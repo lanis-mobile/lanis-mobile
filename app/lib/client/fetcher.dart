@@ -168,7 +168,8 @@ class GlobalFetcher {
       substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
     }
     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
-      meinUnterrichtFetcher = MeinUnterrichtFetcher(const Duration(minutes: 20));
+      meinUnterrichtFetcher =
+          MeinUnterrichtFetcher(const Duration(minutes: 20));
     }
     if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
       visibleConversationsFetcher =

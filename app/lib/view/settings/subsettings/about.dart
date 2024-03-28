@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -29,7 +31,7 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Über Lanis-Mobile")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.about)),
       body: ListView(
         children: <Widget>[
           ListTile(
@@ -63,7 +65,7 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.update),
-            title: const Text('Last Release'),
+            title: const Text('Latest Release'),
             onTap: () {
               launchUrl(Uri.parse(
                   "https://github.com/alessioC42/lanis-mobile/releases/latest"));
@@ -79,28 +81,28 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           ListTile(
               leading: const Icon(Icons.security),
-              title: const Text('Datenschutzerklärung'),
+              title: const Text('Privacy policy'),
               onTap: () {
                 launchUrl(Uri.parse(
                     "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md"));
               }),
           ListTile(
               leading: const Icon(Icons.info),
-              title: const Text('Open Source Lizenzen'),
+              title: const Text('Open Source Licenses'),
               onTap: () {
                 showLicensePage(context: context);
               }),
           ListTile(
             leading: const Icon(Icons.build),
-            title: const Text("Build Informationen"),
+            title: const Text("Build information"),
             onTap: () {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text("App Informationen"),
+                      title: const Text("App Information"),
                       content: Text(
-                          "appName: $appName\npackageName: $packageName\nversion: $version\nbuildNumber: $buildNumber"),
+                          "appName: $appName\npackageName: $packageName\nversion: $version\nbuildNumber: $buildNumber\nisDebug: $kDebugMode\n isProfile: $kProfileMode\n isRelease: $kReleaseMode\n"),
                     );
                   });
             },

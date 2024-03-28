@@ -16,7 +16,9 @@ class LoginTimeoutException implements WrongCredentialsException {
   @override
   String cause;
   final String time;
-  LoginTimeoutException(this.time, [this.cause = "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du kurz warten!"]);
+  LoginTimeoutException(this.time,
+      [this.cause =
+          "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du kurz warten!"]);
 }
 
 class CredentialsIncompleteException implements LanisException {

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:sph_plan/client/fetcher.dart';
-import 'package:sph_plan/shared/apps.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../../client/client.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppearanceSettingsScreen extends StatelessWidget {
   const AppearanceSettingsScreen({super.key});
@@ -10,7 +11,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Aussehen"),
+          title: Text(AppLocalizations.of(context)!.appearance),
         ),
         body: ListView(
           children: const [AppearanceElements()],
@@ -100,11 +101,11 @@ class _AppearanceElementsState extends State<AppearanceElements> {
           // Theme Mode, aka light or dark mode
           ...[
             Text(
-              "Thema",
+              AppLocalizations.of(context)!.theme,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             RadioListTile(
-              title: const Text('Heller Modus'),
+              title: Text(AppLocalizations.of(context)!.lightMode),
               value: "light",
               groupValue: _selectedTheme,
               onChanged: (value) {
@@ -115,7 +116,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               },
             ),
             RadioListTile(
-              title: const Text('Dunkler Modus'),
+              title: Text(AppLocalizations.of(context)!.darkMode),
               value: "dark",
               groupValue: _selectedTheme,
               onChanged: (value) {
@@ -126,7 +127,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               },
             ),
             RadioListTile(
-              title: const Text('System'),
+              title: Text(AppLocalizations.of(context)!.systemMode),
               value: "system",
               groupValue: _selectedTheme,
               onChanged: (value) {
@@ -141,21 +142,19 @@ class _AppearanceElementsState extends State<AppearanceElements> {
           // Color mode, aka the primary color accent of the app
           ...[
             Text(
-              "Farbe",
+              AppLocalizations.of(context)!.accentColor,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             colorListTile(
-              title: "Standart",
-              subtitle: 'Dunkellila',
+              title: AppLocalizations.of(context)!.standard,
               value: "standard",
               primaryColor: Theme.of(context).brightness == Brightness.dark
                   ? Themes.standardTheme.darkTheme!.colorScheme.primary
                   : Themes.standardTheme.lightTheme!.colorScheme.primary,
             ),
             RadioListTile(
-              title: const Text("Dynamisch"),
-              subtitle: const Text(
-                  'Hier wird die Farbe von deinem Hintergrundbild benutzt, auch bekannt als "Material You". (Wird nicht von allen Geräten unterstützt)'),
+              title: Text(AppLocalizations.of(context)!.dynamicColor),
+              subtitle: const Text('Material You'),
               secondary: Themes.dynamicTheme.lightTheme == null
                   ? null
                   : Container(
@@ -215,8 +214,9 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                     },
             ),
             colorListTile(
-              title: "Schulfarbe",
-              subtitle: "Deine Schule hat in Lanis eine Akzentfarbe.",
+              title: AppLocalizations.of(context)!.schoolColor,
+              subtitle:
+                  AppLocalizations.of(context)!.schoolColorOriginExplanation,
               value: "school",
               primaryColor: Theme.of(context).brightness == Brightness.dark
                   ? Themes.schoolTheme.darkTheme!.colorScheme.primary

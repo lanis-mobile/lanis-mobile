@@ -419,25 +419,6 @@ class _StartupScreenState extends State<StartupScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ValueListenableBuilder(
-                      valueListenable: noConnection,
-                      builder: (context, noInternet, _) {
-                        if (noInternet) {
-                          return const SizedBox.shrink();
-                        }
-                        return FilledButton(
-                            onPressed: () {
-                              // Prepare error message
-                              String errorInfo = "";
-                              errors.forEach((key, value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                errorInfo += "$key - ${value.cause}\n";
-                              });
-                            },
-                            child: const Text("Fehlerbericht senden"));
-                      }),
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: OutlinedButton(

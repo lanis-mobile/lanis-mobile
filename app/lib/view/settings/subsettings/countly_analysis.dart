@@ -50,7 +50,7 @@ class _BodyState extends State<Body> {
         ),
         SwitchListTile(
             value: enabled,
-            title: const Text("Anonyme Bugreports senden"),
+            title: Text(AppLocalizations.of(context)!.sendAnonymousBugReports),
             onChanged: (state) async {
               setState(() {
                 enabled = state;

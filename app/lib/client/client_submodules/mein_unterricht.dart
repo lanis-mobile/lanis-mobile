@@ -317,7 +317,8 @@ class MeinUnterrichtParser {
       //leistungen
       () {
         var marksSection = document.getElementById("marks");
-        List tableRows = marksSection?.querySelectorAll("table>tbody>tr") as List;
+        List tableRows =
+            marksSection?.querySelectorAll("table>tbody>tr") as List;
 
         for (var (index, row) in tableRows.indexed) {
           var encodedElements = row.getElementsByClassName("hidden_encoded");
@@ -336,7 +337,7 @@ class MeinUnterrichtParser {
             String comment = row.children[1].text.trim();
             comment = comment.split(":").sublist(1).join(":");
 
-            result["leistungen"]![index-1]["Kommentar"] = comment;
+            result["leistungen"]![index - 1]["Kommentar"] = comment;
           }
         }
       }();

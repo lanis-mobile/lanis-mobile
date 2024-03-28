@@ -7,7 +7,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
-import '../../shared/apps.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
 
 class CalendarAnsicht extends StatefulWidget {
@@ -310,13 +310,16 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
             return Column(
               children: [
                 TableCalendar<Event>(
-                  locale: "de_DE",
+                  locale: AppLocalizations.of(context)!.locale,
                   firstDay: DateTime.utc(2020),
                   lastDay: DateTime.utc(2030),
-                  availableCalendarFormats: const {
-                    CalendarFormat.month: "Woche",
-                    CalendarFormat.twoWeeks: "Monat",
-                    CalendarFormat.week: "zwei Wochen"
+                  availableCalendarFormats: {
+                    CalendarFormat.month:
+                        AppLocalizations.of(context)!.calendarFormatMonth,
+                    CalendarFormat.twoWeeks:
+                        AppLocalizations.of(context)!.calendarFormatTwoWeeks,
+                    CalendarFormat.week:
+                        AppLocalizations.of(context)!.calendarFormatWeek,
                   },
                   focusedDay: _focusedDay,
                   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),

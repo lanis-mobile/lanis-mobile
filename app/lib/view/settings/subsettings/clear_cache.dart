@@ -69,19 +69,20 @@ class _BodyState extends State<Body> {
       children: [
         ListTile(
           leading: const Icon(Icons.cached),
-          title: const Text('Cache'),
+          title: Text(AppLocalizations.of(context)!.cache),
           subtitle: Text(AppLocalizations.of(context)!.settingsInfoClearCache),
         ),
         ListTile(
           leading: const Icon(Icons.file_download_sharp),
-          title: const Text('Dateien'),
+          title: Text(AppLocalizations.of(context)!.files),
           trailing: Text(cacheStats['fileNum'].toString(),
               style: const TextStyle(fontSize: 28)),
-          subtitle: Text('Größe: ${cacheStats['size']! ~/ 1024} KB'),
+          subtitle: Text(
+              '${AppLocalizations.of(context)!.size}: ${cacheStats['size']! ~/ 1024} KB'),
         ),
         ListTile(
           leading: const Icon(Icons.delete_forever),
-          title: const Text('Cache leeren'),
+          title: Text(AppLocalizations.of(context)!.clearCache),
           onTap: () {
             showDialog(
               context: context,

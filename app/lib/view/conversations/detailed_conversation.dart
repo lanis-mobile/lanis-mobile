@@ -3,6 +3,7 @@ import 'package:html/parser.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/format_text.dart';
 import '../../client/client.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../shared/widgets/error_view.dart';
 
@@ -83,7 +84,9 @@ class _DetailedConversationAnsichtState
                   ),
                 ),
                 Text(
-                  username == " , " ? "Kein Name" : username,
+                  username == " , "
+                      ? AppLocalizations.of(context)!.unknown
+                      : username,
                   style: Theme.of(context).textTheme.labelSmall,
                 )
               ],
@@ -138,7 +141,7 @@ class _DetailedConversationAnsichtState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title ?? "Nachricht"),
+        title: Text(widget.title ?? AppLocalizations.of(context)!.message),
       ),
       body: FutureBuilder(
           future: _getSingleConversation,

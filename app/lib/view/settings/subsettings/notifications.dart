@@ -16,19 +16,18 @@ class NotificationsSettingsScreen extends StatelessWidget {
         title: Text(AppLocalizations.of(context)!.notifications),
         actions: [
           InfoButton(
-              infoText:
-                  AppLocalizations.of(context)!.settingsInfoNotifications,
+              infoText: AppLocalizations.of(context)!.settingsInfoNotifications,
               context: context)
         ],
       ),
       body: ListView(
         children: [
           if (Platform.isIOS)
-            const ListTile(
-              leading: Icon(Icons.info),
-              title: Text("Leider keine Unterstützung"),
-              subtitle: Text(
-                  "Auf deinem Endgerät (IOS / IpadOS) werden keine Benachrichtigungen unterstützt."),
+            ListTile(
+              leading: const Icon(Icons.info),
+              title: Text(AppLocalizations.of(context)!.sadlyNoSupport),
+              subtitle:
+                  Text(AppLocalizations.of(context)!.noAppleMessageSupport),
             ),
           const NotificationElements(),
         ],
@@ -84,16 +83,18 @@ class _NotificationElementsState extends State<NotificationElements> {
     return Column(
       children: [
         ListTile(
-          title: const Text('Systemberechtigung für Benachrichtigungen'),
-          trailing: Text(
-              _notificationPermissionGranted ? "Erlaubt" : "Nicht erlaubt"),
+          title: Text(
+              AppLocalizations.of(context)!.systemPermissionForNotifications),
+          trailing: Text(_notificationPermissionGranted
+              ? AppLocalizations.of(context)!.granted
+              : AppLocalizations.of(context)!.denied),
           subtitle: !_notificationPermissionGranted
-              ? const Text(
-                  "Du musst deine Berechtigungen für Benachrichtigungen in den Systemeinstellungen der App ändern!")
+              ? Text(AppLocalizations.of(context)!
+                  .systemPermissionForNotificationsExplained)
               : null,
         ),
         SwitchListTile(
-          title: const Text('Push-Benachrichtigungen'),
+          title: Text(AppLocalizations.of(context)!.pushNotifications),
           value: _enableNotifications,
           onChanged: _notificationPermissionGranted
               ? (bool? value) async {
@@ -106,10 +107,10 @@ class _NotificationElementsState extends State<NotificationElements> {
                 }
               : null,
           subtitle:
-              const Text("Aktiviere es, um Benachrichtigungen zu bekommen."),
+              Text(AppLocalizations.of(context)!.activateToGetNotification),
         ),
         SwitchListTile(
-          title: const Text('Anhaltende Benachrichtigung'),
+          title: Text(AppLocalizations.of(context)!.persistentNotification),
           value: _notificationsAreOngoing,
           onChanged: _enableNotifications && _notificationPermissionGranted
               ? (bool? value) async {
@@ -121,11 +122,9 @@ class _NotificationElementsState extends State<NotificationElements> {
                       value: _notificationsAreOngoing.toString());
                 }
               : null,
-          subtitle: const Text(
-              "Wenn aktiviert, werden die Benachrichtigung dauerhaft fest stehen, die man nicht entfernen kann."),
         ),
         ListTile(
-          title: const Text('Update-Intervall'),
+          title: Text(AppLocalizations.of(context)!.updateInterval),
           trailing: Text('$_notificationInterval min',
               style: const TextStyle(fontSize: 14)),
           enabled: _enableNotifications && _notificationPermissionGranted,

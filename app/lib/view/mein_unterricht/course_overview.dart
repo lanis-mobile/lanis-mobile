@@ -5,6 +5,7 @@ import '../../client/client.dart';
 import '../../shared/launch_file.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/format_text.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CourseOverviewAnsicht extends StatefulWidget {
   final String dataFetchURL;
@@ -55,23 +56,23 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     }
   }
 
-  final Widget noDataScreen = const Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.search,
-          size: 60,
+  Widget noDataScreen(context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search,
+              size: 60,
+            ),
+            Text(AppLocalizations.of(context)!.noDataFound)
+          ],
         ),
-        Text("Keine Daten gefunden.")
-      ],
-    ),
-  );
+      );
 
   Widget _buildBody() {
     if (data is int && data < 0) {
-      return noDataScreen;
+      return noDataScreen(context);
     }
 
     switch (_currentIndex) {
@@ -104,9 +105,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                           )),
                                 );
                               },
-                              child: const Text("Zu Halbjahr 1",
+                              child: Text(
+                                  AppLocalizations.of(context)!.toSemesterOne,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18))),
                         ),
@@ -358,7 +360,9 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                     ),
                                                   ),
                                                   Text(
-                                                    "Hausaufgabe",
+                                                    AppLocalizations.of(
+                                                            context)!
+                                                        .homework,
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .labelLarge
@@ -382,12 +386,15 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                               onChanged: (bool? value) {
                                                 try {
                                                   ScaffoldMessenger.of(context)
-                                                      .showSnackBar(const SnackBar(
+                                                      .showSnackBar(SnackBar(
                                                           content: Text(
-                                                              "Hausaufgabe wird gespeichert..."),
-                                                          duration: Duration(
-                                                              milliseconds:
-                                                                  500)));
+                                                              AppLocalizations.of(
+                                                                      context)!
+                                                                  .homeworkSaving),
+                                                          duration:
+                                                              const Duration(
+                                                                  milliseconds:
+                                                                      500)));
                                                   client.meinUnterricht
                                                       .setHomework(
                                                           data["historie"]
@@ -402,9 +409,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                       ScaffoldMessenger.of(
                                                               context)
                                                           .showSnackBar(
-                                                              const SnackBar(
+                                                              SnackBar(
                                                         content: Text(
-                                                            "Fehler beim Speichern der Hausaufgabe."),
+                                                            AppLocalizations.of(
+                                                                    context)!
+                                                                .homeworkSavingError),
                                                       ));
                                                     } else {
                                                       setState(() {
@@ -416,10 +425,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                   });
                                                 } catch (e) {
                                                   ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                          const SnackBar(
+                                                      .showSnackBar(SnackBar(
                                                     content: Text(
-                                                        "Fehler beim Speichern der Hausaufgabe."),
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .homeworkSavingError),
                                                   ));
                                                 }
                                               },
@@ -473,7 +483,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     ),
                   );
                 })
-            : noDataScreen;
+            : noDataScreen(context);
       case 1: // leistungen
         return data["leistungen"].length != 0
             ? ListView.builder(
@@ -493,19 +503,22 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-
                           children: [
                             Text(
                               data["leistungen"][index]["Datum"] ?? "",
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            if (data["leistungen"][index]["Kommentar"] != null) Text(
-                              data["leistungen"][index]["Kommentar"] ?? "",
-                              style: TextStyle(
-                                fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            )
+                            if (data["leistungen"][index]["Kommentar"] != null)
+                              Text(
+                                data["leistungen"][index]["Kommentar"] ?? "",
+                                style: TextStyle(
+                                  fontSize: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .fontSize,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
                           ],
                         ),
                         trailing: Text(
@@ -518,7 +531,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   );
                 },
               )
-            : noDataScreen;
+            : noDataScreen(context);
       case 2: //Leistungskontrollen
         return data["leistungskontrollen"].length != 0
             ? ListView.builder(
@@ -545,7 +558,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       )));
                 },
               )
-            : noDataScreen;
+            : noDataScreen(context);
       case 3: //anwesenheiten
         return data["anwesenheiten"].length != 0
             ? ListView.builder(
@@ -579,9 +592,9 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       ));
                 },
               )
-            : noDataScreen;
+            : noDataScreen(context);
       default:
-        return const Text("das hätte nicht passieren sollen!");
+        return const Text("How did you manage to get here?");
     }
   }
 
@@ -601,7 +614,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
     if (data is int && data < 0) {
       return Scaffold(
           appBar: AppBar(
-            title: const Text("Fehler"),
+            title: Text(AppLocalizations.of(context)!.error),
           ),
           body: ErrorView.fromCode(
             data: data,
@@ -637,25 +650,25 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
             _currentIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.history),
-            selectedIcon: Icon(Icons.history_outlined),
-            label: 'Historie',
+            icon: const Icon(Icons.history),
+            selectedIcon: const Icon(Icons.history_outlined),
+            label: AppLocalizations.of(context)!.history,
           ),
           NavigationDestination(
-            icon: Icon(Icons.star),
-            selectedIcon: Icon(Icons.star_outline),
-            label: 'Leistungen',
+            icon: const Icon(Icons.star),
+            selectedIcon: const Icon(Icons.star_outline),
+            label: AppLocalizations.of(context)!.performance,
           ),
           NavigationDestination(
-              icon: Icon(Icons.draw),
-              selectedIcon: Icon(Icons.draw_outlined),
-              label: "Klausuren"),
+              icon: const Icon(Icons.draw),
+              selectedIcon: const Icon(Icons.draw_outlined),
+              label: AppLocalizations.of(context)!.exams),
           NavigationDestination(
-            icon: Icon(Icons.list),
-            selectedIcon: Icon(Icons.list_outlined),
-            label: 'Anwesenheiten',
+            icon: const Icon(Icons.list),
+            selectedIcon: const Icon(Icons.list_outlined),
+            label: AppLocalizations.of(context)!.attendances,
           )
         ],
       ),

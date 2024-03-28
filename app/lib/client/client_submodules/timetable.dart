@@ -34,16 +34,19 @@ class TimetableParser {
     List<Day> result = List.generate(5, (_) => []);
 
     List<((int, int), (int, int))> timeSlots =
-    tbody.querySelectorAll(".VonBis").map((e) {
+        tbody.querySelectorAll(".VonBis").map((e) {
       var timeString = e.text.trim();
       var s = timeString.split(" - ");
       var splitA = s[0].split(":");
       var splitB = s[1].split(":");
-      return ((int.parse(splitA[0]), int.parse(splitA[1])), (int.parse(splitB[0]), int.parse(splitB[1])));
+      return (
+        (int.parse(splitA[0]), int.parse(splitA[1])),
+        (int.parse(splitB[0]), int.parse(splitB[1]))
+      );
     }).toList();
 
-    List<List<bool>> alreadyParsed = List.generate(timeSlots.length+1, (_) => List.generate(5, (_) => false));
-
+    List<List<bool>> alreadyParsed = List.generate(
+        timeSlots.length + 1, (_) => List.generate(5, (_) => false));
 
     for (var (rowIndex, rowElement) in tbody.children.indexed) {
       if (rowIndex == 0) continue; // skip first empty row
@@ -61,7 +64,8 @@ class TimetableParser {
           alreadyParsed[rowIndex + i][actualDay] = true;
         }
 
-        result[actualDay].addAll(parseSingeEntry(colElement, rowIndex, timeSlots));
+        result[actualDay]
+            .addAll(parseSingeEntry(colElement, rowIndex, timeSlots));
       }
     }
     return result;
@@ -88,8 +92,7 @@ class TimetableParser {
           badge: badge,
           duration: duration,
           startTime: startTime,
-          endTime: endTime)
-      );
+          endTime: endTime));
     }
     return result;
   }

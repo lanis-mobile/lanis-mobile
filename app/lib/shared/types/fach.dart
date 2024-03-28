@@ -7,15 +7,14 @@ class StdPlanFach {
   (int, int) startTime;
   (int, int) endTime;
 
-  StdPlanFach({
-    required this.name,
-    required this.raum,
-    required this.lehrer,
-    required this.badge,
-    required this.duration,
-    required this.startTime,
-    required this.endTime
-  });
+  StdPlanFach(
+      {required this.name,
+      required this.raum,
+      required this.lehrer,
+      required this.badge,
+      required this.duration,
+      required this.startTime,
+      required this.endTime});
 
   @override
   String toString() {
@@ -35,7 +34,7 @@ class StdPlanFach {
   }
 
   @override
-  bool operator == (Object other) {
+  bool operator ==(Object other) {
     if (other is StdPlanFach) {
       return name == other.name &&
           raum == other.raum &&
