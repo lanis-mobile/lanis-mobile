@@ -5,6 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 import '../../client/client.dart';
 import '../../client/storage.dart';
@@ -51,9 +53,9 @@ class LoginFormState extends State<LoginForm> {
     showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const AlertDialog(
-              title: Text("Anmeldung"),
-              content: Center(
+        builder: (context) => AlertDialog(
+              title: Text(AppLocalizations.of(context)!.logInTitle),
+              content: const Center(
                 heightFactor: 1.2,
                 child: CircularProgressIndicator(),
               ),
@@ -72,7 +74,7 @@ class LoginFormState extends State<LoginForm> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text("Fehler!"),
+            title: Text(AppLocalizations.of(context)!.error),
             content: Text(ex.cause),
             actions: [
               TextButton(
@@ -114,13 +116,13 @@ class LoginFormState extends State<LoginForm> {
                 const SizedBox(
                   height: padding,
                 ),
-                const Center(
+                Center(
                   child: Column(
                     children: [
-                      Icon(Icons.person, size: 70),
+                      const Icon(Icons.person, size: 70),
                       Text(
-                        "Login",
-                        style: TextStyle(fontSize: 35),
+                        AppLocalizations.of(context)!.logIn,
+                        style: const TextStyle(fontSize: 35),
                       )
                     ],
                   ),
@@ -132,9 +134,9 @@ class LoginFormState extends State<LoginForm> {
                   popupProps: const PopupProps.menu(
                       showSearchBox: true,
                       searchDelay: Duration(milliseconds: 150)),
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownDecoratorProps: DropDownDecoratorProps(
                       dropdownSearchDecoration:
-                          InputDecoration(labelText: "Schule auswählen")),
+                          InputDecoration(labelText: AppLocalizations.of(context)!.selectSchool)),
                   selectedItem: dropDownSelectedItem,
                   enabled: !widget.relogin,
                   onChanged: (value) {
@@ -149,11 +151,11 @@ class LoginFormState extends State<LoginForm> {
                 TextFormField(
                   controller: usernameController,
                   autocorrect: false,
-                  decoration: const InputDecoration(
-                      labelText: "vorname.nachname (oder Kürzel)"),
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.authUsernameHint),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Bitte fülle dieses Feld aus';
+                      return AppLocalizations.of(context)!.authValidationError;
                     }
                     return null;
                   },
@@ -165,12 +167,12 @@ class LoginFormState extends State<LoginForm> {
                   controller: passwordController,
                   autocorrect: false,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "Passwort",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.authPasswordHint,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Bitte fülle dieses Feld aus';
+                      return AppLocalizations.of(context)!.authValidationError;
                     }
                     return null;
                   },
@@ -187,7 +189,7 @@ class LoginFormState extends State<LoginForm> {
                           value: countlyAgree,
                           title: RichText(
                             text: TextSpan(
-                              text: 'Anonyme Bugreports mit ',
+                              text: AppLocalizations.of(context)!.authSendBugReports,
                               style: DefaultTextStyle.of(context).style,
                               children: <TextSpan>[
                                 TextSpan(
@@ -201,7 +203,7 @@ class LoginFormState extends State<LoginForm> {
                                         Uri.parse("https://countly.com/lite")),
                                 ),
                                 const TextSpan(
-                                  text: ' senden',
+                                  text: ')',
                                 ),
                               ],
                             ),
@@ -221,11 +223,11 @@ class LoginFormState extends State<LoginForm> {
                           value: dseAgree,
                           title: RichText(
                             text: TextSpan(
-                              text: 'Ich stimme der ',
+                              text: AppLocalizations.of(context)!.authIAccept,
                               style: DefaultTextStyle.of(context).style,
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: 'Datenschutzerklärung',
+                                  text: AppLocalizations.of(context)!.authTermsOfService,
                                   style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -234,8 +236,8 @@ class LoginFormState extends State<LoginForm> {
                                     ..onTap = () => launchUrl(Uri.parse(
                                         "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
                                 ),
-                                const TextSpan(
-                                  text: ' von lanis-mobile zu.',
+                                TextSpan(
+                                  text: AppLocalizations.of(context)!.authOfLanisMobile,
                                 ),
                               ],
                             ),
@@ -262,7 +264,7 @@ class LoginFormState extends State<LoginForm> {
                           }
                         }
                       : null,
-                  child: const Text('Anmelden'),
+                  child: Text(AppLocalizations.of(context)!.logIn),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -270,7 +272,7 @@ class LoginFormState extends State<LoginForm> {
                     TextButton(
                         onPressed: () => launchUrl(Uri.parse(
                             "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
-                        child: const Text("Passwort zurücksetzen"))
+                        child: Text(AppLocalizations.of(context)!.authResetPassword))
                   ],
                 )
               ],

@@ -76,9 +76,46 @@
   "reallyReset": "Wirklich zurücksetzen?",
   "allSettingsWillBeLost": "Alle Einstellungen werden Gelöscht.",
   "cancel": "Abbrechen",
+  "logInTitle": "Anmeldung",
+  "logIn": "Anmelden",
+  "selectSchool": "Schule auswählen",
+  "authUsernameHint": "vorname.nachname (oder Kürzel)",
+  "authPasswordHint": "Passwort",
+  "authValidationError": "Bitte fülle dieses Feld aus.",
+  "authSendBugReports": "Anonyme Bugreports senden (",
+  "authIAccept": "Ich stimme der ",
+  "authTermsOfService": "Datenschutzerklärung",
+  "authOfLanisMobile": " von lanis-mobile zu.",
+  "authResetPassword": "Passwort zurücksetzen",
+
+  "setupNonStudentTitle": "Lehrkräfte oder Elternaccount",
+  "setupNonStudent": "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren.",
+  "setupFilterSubstitutionsTitle": "Vertretungen filtern",
+  "setupFilterSubstitutions": "Damit du die Vertretungen, die für dich bestimmt sind, schneller finden kannst, gibt es ein Filter-Feature! Der Filter sucht in den Einträgen nach deiner Klassenstufe, Klasse und Lehrer des Faches. Damit du mit dem Filter (und dem Anzeigen der Vertretungen) die bestmögliche Erfahrung hast, muss die Schule die Einträge vollständig angeben, z. B. haben manche Schulen nicht die Lehrer der Fächer in ihren Einträgen richtig angegeben und geben stattdessen die Vertretung oder nichts an.",
+  "setupSubstitutionsFilterSettings": "Filtereinstellungen",
+  "setupPushNotificationsTitle": "Push Benachrichtigungen",
+  "setupPushNotifications": "Mit Benachrichtigungen weißt du direkt, ob und welche Vertretungen es für dich gibt. Du kannst auch einstellen wie oft die App nach neuen Vertretungen checkt, aber manchmal wird das Checken durch aktivierten Energiesparmodus oder anderen Faktoren verhindert.",
+  "setupReadyTitle": "Du bist jetzt bereit!",
+  "setupReady": "Du kannst lanis-mobile jetzt verwenden. Wenn die App dir gefällt, kannst du gerne eine Bewertung im Play Store machen.",
+
+
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoPersonalSchoolSupport": "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
   "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.",
-  "settingsInfoTelemetry": "Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben."
+  "settingsInfoTelemetry": "Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben.",
+
+  "introWelcomeTitle": "Willkommen",
+  "introForStudentsByStudentsTitle": "Von Schülern. Für Schüler.",
+  "introCustomizeTitle": "Anpassung",
+  "introSchoolPortalTitle": "Das Schulportal Hessen",
+  "introAnalyticsTitle": "Fehlerbehebungen und Analyse",
+  "introHaveFunTitle": "Worauf wartest du?",
+
+  "introWelcome": "lanis-mobile hilft bei den täglichen Aufgaben des Schulportals. Ob Vertretungsplan oder Kalender, Nachrichten oder Kurshefte. Mit lanis-mobile kannst du effizienter und einfacher lernen.",
+  "introForStudentsByStudents": "Diese Anwendung wird von Schülern entwickelt, die das Schulportal Hessen nutzen.\n\nDank an alle Entwickler und Bug Reporter!",
+  "introCustomize": "In den Einstellungen kannst du die App auf deine Bedürfnisse anpassen.",
+  "introSchoolPortal": "Das Schulportal ist Modular aufgebaut. Das bedeutet, dass deine Schule vielleicht nicht alle Features der App unterstützt oder die App nicht alle Features deiner Schule.",
+  "introAnalytics": "Wegen der modularen Natur des Schulportals kann es vereinzelt zu Problem für deine Schule kommen. Sende uns in diesem Fall bitte einen Fehlerbericht. Wenn die App intern einen Fehler erkennt wird dieser auch automatisch anonym an die Entwickler gesendet um eine möglichst robuste Anwendung zur schaffen.",
+  "introHaveFun": "Melde dich jetzt an um lanis-mobile zu nutzen. Verwende dafür die Logindaten, die du Normalerweise für die Webseite des Schulportals verwendest."
 }

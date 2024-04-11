@@ -32,7 +32,7 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
           },
           dotsDecorator:
               DotsDecorator(activeColor: Theme.of(context).colorScheme.primary),
-          pages: intoScreenPageViewModels);
+          pages: intoScreenPageViewModels(context));
     } else if (currentPage == "login") {
       return Scaffold(
         body: LoginForm(
@@ -52,14 +52,14 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
             Navigator.pop(context);
           });
         },
-        pages: setupScreenPageViewModels,
+        pages: setupScreenPageViewModels(context),
         dotsFlex: 2,
         dotsDecorator:
             DotsDecorator(activeColor: Theme.of(context).colorScheme.primary),
       );
     }
 
-    return const Center(child: Text("Etwas ist schief gelaufen!"));
+    return const Center(child: Text("This should not happen"));
   }
 
   @override
