@@ -1,11 +1,11 @@
-name: iOS-ipa-build
+name: unsigned-ipa-build
 
 on:
   workflow_dispatch:
 
 jobs:
   build-ios:
-    name:  iOS Build
+    name:  iOS Build (experimental/unsigned)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,7 +20,7 @@ jobs:
       - run: pod repo update
         working-directory: app/ios
 
-      - run: flutter build ios --release --no-codesign
+      - run: flutter build ios --release --no-codesign --no-tree-shake-icons
         working-directory: app/
 
       - run: mkdir Payload
