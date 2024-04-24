@@ -7,7 +7,7 @@ enum SPHAppEnum {
   meinUnterricht("meinunterricht.php", "Mein Unterricht", true,
       AppSupportStatus.supported),
   stundenplan(
-      "stundenplan.php", "Stundenplan", false, AppSupportStatus.workedOn),
+      "stundenplan.php", "Stundenplan", true, AppSupportStatus.supported),
   dateispeicher(
       "dateispeicher.php", "Dateispeicher", false, AppSupportStatus.supported);
 
@@ -21,10 +21,10 @@ enum SPHAppEnum {
 }
 
 enum AppSupportStatus {
-  supported("Unterstützt"),
-  unsupported("nicht Unterstützt"),
-  planned("Geplant"),
-  workedOn("in Arbeit");
+  supported("Supportet"),
+  unsupported("Unsupportet"),
+  planned("Planned"),
+  workedOn("Worked on"),;
 
   final String text;
   const AppSupportStatus(this.text);
