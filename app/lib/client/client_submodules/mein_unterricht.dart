@@ -347,7 +347,11 @@ class MeinUnterrichtParser {
         var examSection = document.getElementById("klausuren");
         var lists = examSection?.children;
 
-        lists?.forEach((element) {
+        if (lists![0].text.contains("Diese Kursmappe beinhaltet leider noch keine Leistungskontrollen!")) {
+          return;
+        }
+
+        for (var element in lists) {
           String exams = "";
 
           final elements = element.querySelectorAll("ul li");
@@ -367,7 +371,7 @@ class MeinUnterrichtParser {
             "title": element.querySelector("h1,h2,h3,h4,h5,h6")?.text.trim(),
             "value": exams == "" ? "Keine Daten!" : exams
           });
-        });
+        }
       }();
 
       return result;
