@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -358,6 +359,11 @@ class _HomePageState extends State<HomePage> {
                         ),
                       )
                     : null,
+                actions: [
+                  if (kDebugMode) IconButton(onPressed: (){
+                    throw ErrorDescription("Test Error in debug mode");
+                  }, icon: const Icon(Icons.nearby_error))
+                ],
               ),
               body: doesSupportAnyApplet
                   ? destinations[selectedDestinationDrawer].body
