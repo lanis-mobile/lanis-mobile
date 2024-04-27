@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/client_submodules/substitutions.dart';
 
 import '../marquee.dart';
 
 class SubstitutionListTile extends StatelessWidget {
-  final Map<String, dynamic> substitutionData;
+  final Substitution substitutionData;
   const SubstitutionListTile({super.key, required this.substitutionData});
 
   bool doesNoticeExist(String? info) {
@@ -40,18 +41,18 @@ class SubstitutionListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      dense: (doesNoticeExist(substitutionData["Vertreter"]) &&
-          doesNoticeExist(substitutionData["Lehrer"]) &&
-          doesNoticeExist(substitutionData["Raum"]) &&
-          doesNoticeExist(substitutionData["Fach"]) &&
-          doesNoticeExist(substitutionData["Hinweis"])),
+      dense: (doesNoticeExist(substitutionData.vertreter) &&
+          doesNoticeExist(substitutionData.lehrer) &&
+          doesNoticeExist(substitutionData.raum) &&
+          doesNoticeExist(substitutionData.fach) &&
+          doesNoticeExist(substitutionData.hinweis)),
       title: Padding(
         padding: const EdgeInsets.only(top: 2),
-        child: (substitutionData['Art'] != null)
+        child: (substitutionData.art != null)
             ? MarqueeWidget(
                 direction: Axis.horizontal,
                 child: Text(
-                  substitutionData['Art'],
+                  substitutionData.art!,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               )
@@ -63,33 +64,33 @@ class SubstitutionListTile extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(
                 top: 0,
-                bottom: (doesNoticeExist(substitutionData["Vertreter"]) &&
-                        doesNoticeExist(substitutionData["Lehrer"]) &&
-                        doesNoticeExist(substitutionData["Raum"]) &&
-                        !doesNoticeExist(substitutionData["Fach"]))
+                bottom: (doesNoticeExist(substitutionData.vertreter) &&
+                        doesNoticeExist(substitutionData.lehrer) &&
+                        doesNoticeExist(substitutionData.raum) &&
+                        !doesNoticeExist(substitutionData.fach))
                     ? 12
                     : 0),
             child: Column(
               children: [
                 getSubstitutionInfo(context, "Vertreter",
-                        substitutionData["Vertreter"], Icons.person) ??
+                        substitutionData.vertreter, Icons.person) ??
                     const SizedBox.shrink(),
-                getSubstitutionInfo(context, "Lehrer",
-                        substitutionData["Lehrer"], Icons.school) ??
+                getSubstitutionInfo(context, "Lehrer", substitutionData.lehrer,
+                        Icons.school) ??
                     const SizedBox.shrink(),
-                getSubstitutionInfo(context, "Raum", substitutionData["Raum"],
-                        Icons.room) ??
+                getSubstitutionInfo(
+                        context, "Raum", substitutionData.raum, Icons.room) ??
                     const SizedBox.shrink(),
               ],
             ),
           ),
-          if (!doesNoticeExist(substitutionData["Hinweis"])) ...[
+          if (!doesNoticeExist(substitutionData.hinweis)) ...[
             Padding(
               padding: EdgeInsets.only(
                   right: 30,
                   left: 30,
                   top: 2,
-                  bottom: doesNoticeExist(substitutionData["Fach"]) ? 12 : 0),
+                  bottom: doesNoticeExist(substitutionData.fach) ? 12 : 0),
               child: Column(
                 children: [
                   Row(
@@ -101,7 +102,7 @@ class SubstitutionListTile extends StatelessWidget {
                       Flexible(
                         fit: FlexFit.loose,
                         child: Text(
-                          substitutionData["Hinweis"],
+                          substitutionData.hinweis!,
                           overflow: TextOverflow.visible,
                           softWrap: true,
                         ),
@@ -116,25 +117,25 @@ class SubstitutionListTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (!doesNoticeExist(substitutionData["Klasse"])) ...[
+              if (!doesNoticeExist(substitutionData.klasse)) ...[
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.30,
                   child: MarqueeWidget(
                       child: Text(
-                    substitutionData["Klasse"],
+                    substitutionData.klasse!,
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                 ),
               ],
-              if (!doesNoticeExist(substitutionData["Fach"])) ...[
+              if (!doesNoticeExist(substitutionData.fach)) ...[
                 Text(
-                  substitutionData["Fach"],
+                  substitutionData.fach!,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
-              if (!doesNoticeExist(substitutionData['Stunde'])) ...[
+              if (!doesNoticeExist(substitutionData.stunde)) ...[
                 Text(
-                  substitutionData['Stunde'],
+                  substitutionData.stunde,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ]

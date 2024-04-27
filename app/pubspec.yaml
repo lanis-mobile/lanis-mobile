@@ -64,6 +64,7 @@ dependencies:
   syncfusion_flutter_calendar: ^25.1.35
   flutter_localizations:
     sdk: flutter
+  logger: ^2.2.0
 
 flutter_launcher_icons:
   android: false

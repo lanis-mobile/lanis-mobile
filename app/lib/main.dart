@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:countly_flutter_np/countly_flutter.dart';
+import 'package:crypto/crypto.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -72,6 +74,14 @@ void main() async {
       CountlyConfig config = CountlyConfig("https://lanis-mobile.$duckDNS",
           "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
       config.enableCrashReporting();
+
+      config.setCustomCrashSegment({
+        "school_id_storage":
+            await globalStorage.read(key: StorageKey.userSchoolID),
+        "account_is_student":
+            jsonDecode(await globalStorage.read(key: StorageKey.userData))
+                .containsKey("klasse"),
+      });
       await Countly.initWithConfig(config);
 
       String schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
@@ -117,7 +127,7 @@ class App extends StatelessWidget {
                 valueListenable: ThemeModeNotifier.notifier,
                 builder: (_, mode, __) {
                   return MaterialApp(
-                    title: 'lanis mobile',
+                    title: 'Lanis Mobile',
                     theme: theme.lightTheme,
                     darkTheme: theme.darkTheme,
                     themeMode: mode,

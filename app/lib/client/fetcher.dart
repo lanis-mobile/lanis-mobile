@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import '../view/vertretungsplan/filterlogic.dart' as filterlogic;
 
 import 'client.dart';
 import 'connection_checker.dart';
@@ -80,26 +78,8 @@ class SubstitutionsFetcher extends Fetcher {
   SubstitutionsFetcher(super.validCacheDuration);
 
   @override
-  Future<dynamic> _get() async {
-    debugPrint("Fetching substitution plan");
-    final substitutionPlan = await client.substitutions.getAllSubstitutions();
-    debugPrint("Fetched substitution plan");
-
-    final Map filteredSubstitutionPlan = {"length": 0, "days": []};
-
-    for (int i = 0; i < substitutionPlan["dates"].length; i++) {
-      final filteredEntries =
-          await filterlogic.filter(substitutionPlan["entries"][i]);
-      if (filteredEntries.isNotEmpty) {
-        filteredSubstitutionPlan["days"].add(
-            {"date": substitutionPlan["dates"][i], "entries": filteredEntries});
-      }
-    }
-
-    filteredSubstitutionPlan["length"] =
-        filteredSubstitutionPlan["days"].length;
-
-    return Future.value(filteredSubstitutionPlan);
+  Future<SubstitutionPlan> _get() async {
+    return await client.substitutions.getAllSubstitutions();
   }
 }
 

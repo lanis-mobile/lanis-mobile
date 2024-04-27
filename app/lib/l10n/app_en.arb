@@ -23,6 +23,7 @@
   "noSupportOpenInBrowser": "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
   "noInternetConnection": "No internet connection. Some data is still available.",
 
+  "errorOccurred": "An error occurred",
   "supported": "supported",
   "unsupported": "unsupported",
   "theme": "Theme",

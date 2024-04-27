@@ -19,20 +19,30 @@ class SubstitutionsParser {
     dio = dioClient;
   }
 
-  Future<Map<String, List<dynamic>>> getVplanNonAJAX() async {
+  Future<String> getSubstitutionPlanDocument() async {
+    try {
+      final response = await dio
+          .get("https://start.schulportal.hessen.de/vertretungsplan.php");
+      return response.data;
+    } on SocketException {
+      throw NetworkException();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  SubstitutionPlan parseVplanNonAJAX(String documentString) {
     debugPrint("Trying to get substitution plan using non-JSON parser");
     DateFormat eingabeFormat = DateFormat('dd_MM_yyyy');
-    final Map<String, List<dynamic>> fullPlan = {"dates": [], "entries": []};
-    final document = parse((await dio
-            .get("https://start.schulportal.hessen.de/vertretungsplan.php"))
-        .data);
+    final SubstitutionPlan fullPlan = SubstitutionPlan();
+    final document = parse(documentString);
     final dates = document
         .querySelectorAll("[data-tag]")
         .map((element) => element.attributes["data-tag"]!);
     for (var date in dates) {
-      final parsedDate = eingabeFormat.parse(date);
-      fullPlan["dates"]!.add(date.replaceAll("_", "."));
-      var entries = [];
+      DateTime parsedDate = eingabeFormat.parse(date);
+      SubstitutionDay substitutionDay =
+          SubstitutionDay(date: parsedDate.format('dd.MM.yyyy'));
       final vtable = document.querySelector("#vtable$date");
       if (vtable == null) {
         return fullPlan;
@@ -44,41 +54,39 @@ class SubstitutionsParser {
       for (var row in vtable.querySelectorAll("tbody tr").where(
           (element) => element.querySelectorAll("td[colspan]").isEmpty)) {
         final fields = row.querySelectorAll("td");
-        var entry = {
-          "Stunde": headers.contains("Stunde")
-              ? fields[headers.indexOf("Stunde")].text.trim()
-              : "",
-          "Klasse": headers.contains("Klasse")
-              ? fields[headers.indexOf("Klasse")].text.trim()
-              : "",
-          "Vertreter": headers.contains("Vertretung")
-              ? fields[headers.indexOf("Vertretung")].text.trim()
-              : "",
-          "Lehrer": headers.contains("Lehrer")
-              ? fields[headers.indexOf("Lehrer")].text.trim()
-              : "",
-          "Art": headers.contains("Art")
-              ? fields[headers.indexOf("Art")].text.trim()
-              : "",
-          "Fach": headers.contains("Fach")
-              ? fields[headers.indexOf("Fach")].text.trim()
-              : "",
-          "Raum": headers.contains("Raum")
-              ? fields[headers.indexOf("Raum")].text.trim()
-              : "",
-          "Hinweis": headers.contains("Hinweis")
-              ? fields[headers.indexOf("Hinweis")].text.trim()
-              : "",
-          "Tag": parsedDate.format('dd.MM.yyyy')
-        };
-        entries.add(entry);
+        substitutionDay.add(Substitution(
+            tag: parsedDate.format('dd.MM.yyyy'),
+            tag_en: date,
+            stunde: fields[headers.indexOf("Stunde")].text.trim(),
+            fach: headers.contains("Fach")
+                ? fields[headers.indexOf("Fach")].text.trim()
+                : null,
+            art: headers.contains("Art")
+                ? fields[headers.indexOf("Art")].text.trim()
+                : null,
+            raum: headers.contains("Raum")
+                ? fields[headers.indexOf("Raum")].text.trim()
+                : null,
+            hinweis: headers.contains("Hinweis")
+                ? fields[headers.indexOf("Hinweis")].text.trim()
+                : null,
+            lehrer: headers.contains("Lehrer")
+                ? fields[headers.indexOf("Lehrer")].text.trim()
+                : null,
+            vertreter: headers.contains("Vertretung")
+                ? fields[headers.indexOf("Vertretung")].text.trim()
+                : null,
+            klasse: headers.contains("Klasse")
+                ? fields[headers.indexOf("Klasse")].text.trim()
+                : null));
       }
-      fullPlan["entries"]!.add(entries);
+      fullPlan.add(substitutionDay);
     }
+    fullPlan.removeEmptyDays();
     return fullPlan;
   }
 
-  Future<dynamic> getSubstitutionsAJAX(String date) async {
+  Future<SubstitutionDay> getSubstitutionsAJAX(String date) async {
     debugPrint("Trying to get substitution plan for $date");
 
     try {
@@ -96,7 +104,29 @@ class SubstitutionsParser {
               "Sec-Fetch-Site": "same-origin",
             },
           ));
-      return jsonDecode(response.toString());
+      return SubstitutionDay(
+          date: date,
+          substitutions: (jsonDecode(response.toString()) as List)
+              .map((e) => Substitution(
+                  tag: e["Tag"],
+                  tag_en: e["Tag_en"],
+                  stunde: e["Stunde"],
+                  vertreter: e["Vertreter"],
+                  lehrer: e["Lehrer"],
+                  klasse: e["Klasse"],
+                  klasse_alt: e["Klasse_alt"],
+                  fach: e["Fach"],
+                  fach_alt: e["Fach_alt"],
+                  raum: e["Raum"],
+                  raum_alt: e["Raum_alt"],
+                  hinweis: e["Hinweis"],
+                  hinweis2: e["Hinweis2"],
+                  art: e["Art"],
+                  Lehrerkuerzel: e["Lehrerkuerzel"],
+                  Vertreterkuerzel: e["Vertreterkuerzel"],
+                  lerngruppe: e["Lerngruppe"],
+                  hervorgehoben: e["_hervorgehoben"]))
+              .toList());
     } on SocketException {
       debugPrint("Substitution plan error: -3");
       throw NetworkException();
@@ -106,18 +136,16 @@ class SubstitutionsParser {
     }
   }
 
-  Future<List<String>> getSubstitutionDates() async {
+  ///Returns a list of all available substitution dates in the format "dd.MM.yyyy"
+  ///
+  /// If the list is empty, the substitution plan is either empty or in non-AJAX format
+  List<String> getSubstitutionDates(String document) {
     try {
-      final response = await dio
-          .get('https://start.schulportal.hessen.de/vertretungsplan.php');
-
-      String text = response.toString();
-
-      if (text.contains("Fehler - Schulportal Hessen - ")) {
+      if (document.contains("Fehler - Schulportal Hessen - ")) {
         throw UnauthorizedException();
       } else {
         RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
-        Iterable<RegExpMatch> matches = datePattern.allMatches(text);
+        Iterable<RegExpMatch> matches = datePattern.allMatches(document);
 
         List<String> uniqueDates = [];
 
@@ -143,7 +171,7 @@ class SubstitutionsParser {
     }
   }
 
-  Future<dynamic> getAllSubstitutions({skipCheck = false}) async {
+  Future<SubstitutionPlan> getAllSubstitutions({skipCheck = false}) async {
     if (!skipCheck) {
       if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         throw NotSupportedException();
@@ -151,23 +179,106 @@ class SubstitutionsParser {
     }
 
     try {
-      var dates = await getSubstitutionDates();
+      String document = await getSubstitutionPlanDocument();
+      var dates = getSubstitutionDates(document);
 
       if (dates.isEmpty) {
-        return getVplanNonAJAX();
+        return parseVplanNonAJAX(document);
       }
 
-      final Map fullPlan = {"dates": [], "entries": []};
+      final fullPlan = SubstitutionPlan();
 
       for (String date in dates) {
-        var plan = await getSubstitutionsAJAX(date);
-
-        fullPlan["dates"].add(date);
-        fullPlan["entries"].add(List.from(plan));
+        SubstitutionDay plan = await getSubstitutionsAJAX(date);
+        fullPlan.add(plan);
       }
+      fullPlan.removeEmptyDays();
       return fullPlan;
     } catch (e) {
       throw LoggedOffOrUnknownException();
     }
+  }
+}
+
+/// A data class to store a single substitution information
+class Substitution {
+  ///String of the format "dd.MM.yyyy"
+  final String tag;
+
+  ///String of the format "yyyy-MM-dd"
+  final String tag_en;
+
+  ///String of the format "1" or "1 - 2"
+  final String stunde;
+  final String? vertreter;
+  final String? lehrer;
+  final String? klasse;
+  final String? klasse_alt;
+  final String? fach;
+  final String? fach_alt;
+  final String? raum;
+  final String? raum_alt;
+  final String? hinweis;
+  final String? hinweis2;
+  final String? art;
+  final String? Lehrerkuerzel;
+  final String? Vertreterkuerzel;
+  final lerngruppe;
+  final List? hervorgehoben;
+
+  Substitution(
+      {required this.tag,
+      required this.tag_en,
+      required this.stunde,
+      this.vertreter,
+      this.lehrer,
+      this.klasse,
+      this.klasse_alt,
+      this.fach,
+      this.fach_alt,
+      this.raum,
+      this.raum_alt,
+      this.hinweis,
+      this.hinweis2,
+      this.art,
+      this.Lehrerkuerzel,
+      this.Vertreterkuerzel,
+      this.lerngruppe,
+      this.hervorgehoben});
+}
+
+/// A data class to store all substitution information for a single day
+class SubstitutionDay {
+  final String date;
+  final List<Substitution> substitutions;
+
+  SubstitutionDay({required this.date, List<Substitution>? substitutions})
+      : substitutions = substitutions ?? [];
+
+  void add(Substitution substitution) {
+    substitutions.add(substitution);
+  }
+}
+
+/// A data class to store all substitution information available
+class SubstitutionPlan {
+  final List<SubstitutionDay> days;
+
+  SubstitutionPlan({List<SubstitutionDay>? days}) : days = days ?? [];
+
+  void add(SubstitutionDay substitutionDay) {
+    days.add(substitutionDay);
+  }
+
+  List<Substitution> get allSubstitutions {
+    List<Substitution> allSubs = [];
+    for (var day in days) {
+      allSubs.addAll(day.substitutions);
+    }
+    return allSubs;
+  }
+
+  void removeEmptyDays() {
+    days.removeWhere((day) => day.substitutions.isEmpty);
   }
 }
