@@ -4,6 +4,8 @@ import 'package:sph_plan/shared/unicode.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../client/logger.dart';
+
 class FormatPattern {
   late final RegExp regExp;
   late final String? startTag;
@@ -213,8 +215,7 @@ class FormattedText extends StatelessWidget {
             child: InkWell(
               onTap: () async {
                 if (!await launchUrl(Uri.parse(attributes["href"]!))) {
-                  debugPrint(
-                      '${attributes["href"]} konnte nicht geöffnet werden.');
+                  logger.w('${attributes["href"]} konnte nicht geöffnet werden.');
                 }
               },
               borderRadius: BorderRadius.circular(6),

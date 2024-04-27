@@ -3,6 +3,7 @@
         android:label="Lanis"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true"
     >
         <activity
             android:name=".MainActivity"
@@ -51,6 +52,7 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
 
     <!-- Provide required visibility configuration for API level 30 and above -->
     <queries>

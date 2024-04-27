@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
@@ -8,17 +7,17 @@ import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../client/client.dart';
+import '../client/logger.dart';
 import '../client/storage.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      debugPrint(
-          " >>>>>>>>>>>>>>>>>>>>>>>>>>>> Background fetch triggered <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+      logger.i("Background fetch triggered");
       await performBackgroundFetch();
     } catch (e) {
-      debugPrint(e.toString());
+      logger.f(e.toString());
     }
     return Future.value(true);
   });
@@ -65,8 +64,7 @@ Future<void> performBackgroundFetch() async {
       }
     }
   } on LanisException {
-    debugPrint("Exception in backgroundFetch");
-    // former status-codes ignored
+    logger.w("Error occurred in background service");
   }
 }
 

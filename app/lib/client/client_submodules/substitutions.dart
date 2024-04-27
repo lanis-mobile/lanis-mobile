@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client.dart';
@@ -32,7 +31,6 @@ class SubstitutionsParser {
   }
 
   SubstitutionPlan parseVplanNonAJAX(String documentString) {
-    debugPrint("Trying to get substitution plan using non-JSON parser");
     DateFormat eingabeFormat = DateFormat('dd_MM_yyyy');
     final SubstitutionPlan fullPlan = SubstitutionPlan();
     final document = parse(documentString);
@@ -87,8 +85,6 @@ class SubstitutionsParser {
   }
 
   Future<SubstitutionDay> getSubstitutionsAJAX(String date) async {
-    debugPrint("Trying to get substitution plan for $date");
-
     try {
       final response = await dio.post(
           "https://start.schulportal.hessen.de/vertretungsplan.php",
@@ -128,10 +124,8 @@ class SubstitutionsParser {
                   hervorgehoben: e["_hervorgehoben"]))
               .toList());
     } on SocketException {
-      debugPrint("Substitution plan error: -3");
       throw NetworkException();
     } catch (e) {
-      debugPrint("Substitution plan error: -4");
       throw LoggedOffOrUnknownException();
     }
   }

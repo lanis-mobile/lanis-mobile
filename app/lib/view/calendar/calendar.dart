@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../client/logger.dart';
 import '../../shared/widgets/error_view.dart';
 
 class CalendarAnsicht extends StatefulWidget {
@@ -261,7 +262,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 child: Linkify(
                   onOpen: (link) async {
                     if (!await launchUrl(Uri.parse(link.url))) {
-                      debugPrint("${link.url} konnte nicht geöffnet werden.");
+                      logger.w("${link.url} konnte nicht geöffnet werden.");
                     }
                   },
                   text: calendarData.data["description"]

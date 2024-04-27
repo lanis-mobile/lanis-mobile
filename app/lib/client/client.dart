@@ -25,6 +25,7 @@ import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 import 'connection_checker.dart';
 import 'fetcher.dart';
+import 'logger.dart';
 
 class SPHclient {
   String username = "";
@@ -101,7 +102,7 @@ class SPHclient {
 
   ///Logs the user in and fetches the necessary metadata.
   Future<void> login({userLogin = false}) async {
-    debugPrint("Trying to log in");
+    logger.i("Trying to log in");
 
     if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
@@ -125,7 +126,6 @@ class SPHclient {
       await getSchoolTheme();
 
       await cryptor.start(dio);
-      debugPrint("Encryption connected");
 
       return;
     } on SocketException {
@@ -151,7 +151,7 @@ class SPHclient {
     } on StateError {
       return;
     }
-    debugPrint("Refreshing session");
+    logger.i("Refreshing session");
     try {
       await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
           queryParameters: {"name": sid},

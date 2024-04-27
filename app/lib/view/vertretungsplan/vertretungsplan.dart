@@ -179,7 +179,6 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
             );
           }
 
-          debugPrint("HELLO: !${snapshot.data!}");
           // GlobalKeys for RefreshIndicator and Refresh-FAB
           globalKeys += List.generate(snapshot.data?.content.days.length,
               (index) => GlobalKey<RefreshIndicatorState>());
