@@ -372,7 +372,7 @@ class MeinUnterrichtParser {
 
       return result;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -437,7 +437,7 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -574,7 +574,7 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -631,7 +631,7 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 }

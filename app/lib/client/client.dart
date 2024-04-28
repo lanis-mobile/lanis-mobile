@@ -144,7 +144,7 @@ class SPHclient {
     } on LanisException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -259,7 +259,7 @@ class SPHclient {
     } on WrongCredentialsException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 

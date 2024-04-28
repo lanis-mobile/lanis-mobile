@@ -44,7 +44,7 @@ class CalendarParser {
     } on SocketException {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -74,7 +74,7 @@ class CalendarParser {
     } on SocketException {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 }

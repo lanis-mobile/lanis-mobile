@@ -1,8 +1,24 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
+import '../../client/client_submodules/substitutions.dart';
+
+EntryFilter parseEntryFilter(Map<String, dynamic> json) {
+  return json.map((key, value) {
+    if (value is bool) {
+      return MapEntry(key, value);
+    } else if (value is List<dynamic>) {
+      return MapEntry(key, List<String>.from(value));
+    } else {
+      throw Exception('Unexpected type for value in EntryFilter');
+    }
+  });
+}
 
 class FilterSettingsScreen extends StatefulWidget {
   const FilterSettingsScreen({super.key});
@@ -24,14 +40,43 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(onPressed: (){
-                  client.substitutions.localFilter = {};
-                  client.substitutions.saveFilterToStorage();
-                  Navigator.pop(context);
-                }, child: const Text("Zurücksetzen")),
-                ElevatedButton(onPressed: (){
-                  throw UnimplementedError(); //todo
-                }, child: const Text("Automatisch Festlegen")),
+                ElevatedButton(
+                    onPressed: () {
+                      client.substitutions.localFilter = {};
+                      client.substitutions.saveFilterToStorage();
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Zurücksetzen")),
+                ElevatedButton(
+                    onPressed: () async {
+                      final dio = Dio();
+                      final response = await dio.post(
+                        "https://lanis-mobile-api.alessioc42.workers.dev/api/filter/generate",
+                        options: Options(
+                          headers: {
+                            "Content-type": "application/json",
+                          },
+                        ),
+                        data: jsonEncode({
+                          "schoolID": client.schoolID,
+                          "loginName": client.username,
+                          "classString": client.userData["klasse"]??"",
+                          "classLevel": client.userData["stufe"]??""
+                        })
+                      );
+                      final data = jsonDecode(response.toString());
+                      if (data["success"]) {
+                        final filterResponse = data["result"]["task"];
+                        client.substitutions.localFilter = Map<String, EntryFilter>.from(filterResponse).map((key, value) {
+                          return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
+                        });
+                        client.substitutions.saveFilterToStorage();
+                        Navigator.pop(context);
+                      } else {
+                        throw UnimplementedError();
+                      }
+                    },
+                    child: const Text("Automatisch Festlegen")),
               ],
             ),
             const SubstitutionFilterEditor(objKey: "Klasse", title: 'Klasse'),
@@ -39,15 +84,16 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
             const SubstitutionFilterEditor(objKey: "Lehrer", title: 'Lehrer'),
             const SubstitutionFilterEditor(objKey: "Raum", title: 'Raum'),
             const SubstitutionFilterEditor(objKey: "Art", title: 'Art'),
-            const SubstitutionFilterEditor(objKey: "Vertreter", title: "Vertreter"),
+            const SubstitutionFilterEditor(
+                objKey: "Vertreter", title: "Vertreter"),
             const ListTile(
               leading: Icon(Icons.help),
               title: Text("Wie es Funktioniert?"),
-              subtitle: Text("Wenn du einen Filter hinzufügst, werden nur noch Einträge angezeigt, die den Filter enthalten. Wenn du mehrere Filter hinzufügst, werden nur noch Einträge angezeigt, die alle/einen Filter enthalten."),
+              subtitle: Text(
+                  "Wenn du einen Filter hinzufügst, werden nur noch Einträge angezeigt, die den Filter enthalten. Wenn du mehrere Filter hinzufügst, werden nur noch Einträge angezeigt, die alle/einen Filter enthalten."),
             )
           ],
-        )
-    );
+        ));
   }
 }
 
@@ -58,7 +104,8 @@ class SubstitutionFilterEditor extends StatefulWidget {
   const SubstitutionFilterEditor({required this.objKey, required this.title});
 
   @override
-  _SubstitutionFilterEditorState createState() => _SubstitutionFilterEditorState();
+  _SubstitutionFilterEditorState createState() =>
+      _SubstitutionFilterEditorState();
 }
 
 class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
@@ -67,7 +114,8 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
   @override
   void initState() {
     super.initState();
-    strict = client.substitutions.localFilter[widget.objKey]?["strict"] ?? false;
+    strict =
+        client.substitutions.localFilter[widget.objKey]?["strict"] ?? false;
   }
 
   @override
@@ -81,7 +129,8 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 8),
-                  child: Text(widget.title, style: const TextStyle(fontSize: 18)),
+                  child:
+                      Text(widget.title, style: const TextStyle(fontSize: 18)),
                 ),
                 ActionChip(
                   label: strict ? const Text("All") : const Text("One"),
@@ -89,7 +138,8 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
                   onPressed: () {
                     setState(() {
                       strict = !strict;
-                      client.substitutions.localFilter[widget.objKey]?["strict"] = strict;
+                      client.substitutions.localFilter[widget.objKey]
+                          ?["strict"] = strict;
                       client.substitutions.saveFilterToStorage();
                     });
                   },
@@ -97,7 +147,9 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
               ],
             ),
             ChipsInput<String>(
-              initialValue: client.substitutions.localFilter[widget.objKey]?["filter"] ?? [],
+              initialValue: client.substitutions.localFilter[widget.objKey]
+                      ?["filter"] ??
+                  [],
               enabled: true,
               autocorrect: false,
               decoration: const InputDecoration(
@@ -108,8 +160,11 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
                 return [query];
               },
               onChanged: (data) {
-                client.substitutions.localFilter[widget.objKey] = {};
-                client.substitutions.localFilter[widget.objKey]?["filter"] = data;
+                client.substitutions.localFilter[widget.objKey] = {
+                  "strict": strict
+                };
+                client.substitutions.localFilter[widget.objKey]?["filter"] =
+                    data;
                 client.substitutions.saveFilterToStorage();
               },
               chipBuilder: (context, state, profile) {
@@ -127,7 +182,6 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
               },
             )
           ],
-        )
-    );
+        ));
   }
 }

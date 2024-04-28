@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client.dart';
@@ -20,10 +21,7 @@ typedef SubstitutionFilter = Map<String, EntryFilter>;
 class SubstitutionsParser {
   late Dio dio;
   late SPHclient client;
-  SubstitutionFilter localFilter = {"Klasse": {
-    "strict": true,
-    "filter": ["E"]
-  }};
+  SubstitutionFilter localFilter = {};
 
   SubstitutionsParser(Dio dioClient, this.client) {
     dio = dioClient;
@@ -137,7 +135,7 @@ class SubstitutionsParser {
     } on SocketException {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -172,7 +170,7 @@ class SubstitutionsParser {
     } on SocketException {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -203,7 +201,7 @@ class SubstitutionsParser {
       fullPlan.removeEmptyDays();
       return fullPlan;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 

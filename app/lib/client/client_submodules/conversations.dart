@@ -53,7 +53,7 @@ class ConversationsParser {
     } on LanisException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
