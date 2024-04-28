@@ -6,17 +6,24 @@ import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/client/storage.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
+import '../logger.dart';
 
-typedef SubstitutionFilter = Map<String, List<String>>;
+/// {"strict": Bool, "filter": List<[String]>}
+typedef EntryFilter = Map<String, dynamic>;
+typedef SubstitutionFilter = Map<String, EntryFilter>;
 
 
 class SubstitutionsParser {
   late Dio dio;
   late SPHclient client;
-  SubstitutionFilter defaultFilter = {};
+  SubstitutionFilter localFilter = {"Klasse": {
+    "strict": true,
+    "filter": ["E"]
+  }};
 
   SubstitutionsParser(Dio dioClient, this.client) {
     dio = dioClient;
@@ -182,7 +189,7 @@ class SubstitutionsParser {
 
       if (dates.isEmpty) {
         SubstitutionPlan plan = parseVplanNonAJAX(document);
-        if (filtered) plan.filterAll(defaultFilter);
+        if (filtered) plan.filterAll(localFilter);
         return plan;
       }
 
@@ -192,12 +199,21 @@ class SubstitutionsParser {
         SubstitutionDay plan = await getSubstitutionsAJAX(date);
         fullPlan.add(plan);
       }
-      if (filtered) fullPlan.filterAll(defaultFilter);
+      if (filtered) fullPlan.filterAll(localFilter);
       fullPlan.removeEmptyDays();
       return fullPlan;
     } catch (e) {
       throw LoggedOffOrUnknownException();
     }
+  }
+
+  void loadFilterFromStorage() async {
+    String? filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
+    localFilter = jsonDecode(filterString);
+  }
+
+  void saveFilterToStorage() async {
+    await globalStorage.write(key: StorageKey.substitutionsFilter, value: jsonEncode(localFilter));
   }
 }
 
@@ -250,26 +266,29 @@ class Substitution {
 
   bool passesFilter(SubstitutionFilter substitutionsFilter) {
     Map<String, Function> filterFunctions = {
-      "Klasse": (filter) => filterElement(klasse, filter),
-      "Fach": (filter) => filterElement(fach, filter),
-      "Fach_alt": (filter) => filterElement(fach_alt, filter),
-      "Lehrer": (filter) => filterElement(lehrer, filter),
-      "Raum": (filter) => filterElement(raum, filter),
-      "Art": (filter) => filterElement(art, filter),
-      "Hinweis": (filter) => filterElement(hinweis, filter),
-      "Vertreter": (filter) => filterElement(vertreter, filter),
-      "Stunde": (filter) => filterElement(stunde, filter),
-      "Lehrerkuerzel": (filter) => filterElement(Lehrerkuerzel, filter),
-      "Vertreterkuerzel": (filter) => filterElement(Vertreterkuerzel, filter),
-      "Klasse_alt": (filter) => filterElement(klasse_alt, filter),
-      "Raum_alt": (filter) => filterElement(raum_alt, filter),
-      "Hinweis2": (filter) => filterElement(hinweis2, filter),
-      "Lerngruppe": (filter) => filterElement(lerngruppe, filter),
+      "Klasse": (filter) => filterElement(klasse, filter["filter"], filter["strict"]),
+      "Fach": (filter) => filterElement(fach, filter["filter"], filter["strict"]),
+      "Fach_alt": (filter) => filterElement(fach_alt, filter["filter"], filter["strict"]),
+      "Lehrer": (filter) => filterElement(lehrer, filter["filter"], filter["strict"]),
+      "Raum": (filter) => filterElement(raum, filter["filter"], filter["strict"]),
+      "Art": (filter) => filterElement(art, filter["filter"], filter["strict"]),
+      "Hinweis": (filter) => filterElement(hinweis, filter["filter"], filter["strict"]),
+      "Vertreter": (filter) => filterElement(vertreter, filter["filter"], filter["strict"]),
+      "Stunde": (filter) => filterElement(stunde, filter["filter"], filter["strict"]),
+      "Lehrerkuerzel": (filter) => filterElement(Lehrerkuerzel, filter["filter"], filter["strict"]),
+      "Vertreterkuerzel": (filter) => filterElement(Vertreterkuerzel, filter["filter"], filter["strict"]),
+      "Klasse_alt": (filter) => filterElement(klasse_alt, filter["filter"], filter["strict"]),
+      "Raum_alt": (filter) => filterElement(raum_alt, filter["filter"], filter["strict"]),
+      "Hinweis2": (filter) => filterElement(hinweis2, filter["filter"], filter["strict"]),
+      "Lerngruppe": (filter) => filterElement(lerngruppe, filter["filter"], filter["strict"]),
     };
 
     for (var key in substitutionsFilter.keys) {
       final filter = substitutionsFilter[key];
-      if (filterFunctions.containsKey(key) && !filterFunctions[key]!(filter!)) {
+      if (filter == null || filter["filter"] == null || filter["filter"].isEmpty) {
+        continue;
+      }
+      if (filterFunctions.containsKey(key) && !filterFunctions[key]!(filter)) {
         return false;
       }
     }
@@ -277,9 +296,12 @@ class Substitution {
   }
 
   ///returns true if the value contains all of the filter elements
-  bool filterElement(String? value, List<String> filter) {
+  bool filterElement(String? value, List<String> filter, bool? strict) {
     if (value == null) {
       return false;
+    }
+    if (!(strict??true)) {
+      return filter.any((element) => value.contains(element));
     }
     for (var singleFilter in filter) {
       if (!value.contains(singleFilter)) {

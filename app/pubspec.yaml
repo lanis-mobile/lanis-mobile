@@ -65,6 +65,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   logger: ^2.2.0
+  chips_input: ^0.1.0
 
 flutter_launcher_icons:
   android: false

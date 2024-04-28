@@ -53,6 +53,15 @@ class SPHclient {
   Future<void> prepareDio() async {
     jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+        options.headers.addAll({
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        });
+        return handler.next(options); //continue
+      },
+    ));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);

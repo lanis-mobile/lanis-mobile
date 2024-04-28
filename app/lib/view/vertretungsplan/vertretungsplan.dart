@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../shared/widgets/error_view.dart';
+import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {
   const VertretungsplanAnsicht({super.key});
@@ -256,6 +257,14 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           const SizedBox(
             height: 10,
           ),
+          FloatingActionButton(onPressed: () => {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FilterSettingsScreen(),
+              ),
+            ).then((value) => substitutionsFetcher.fetchData(forceRefresh: true))
+          }, child: const Icon(Icons.filter_alt),)
         ],
       ),
     );

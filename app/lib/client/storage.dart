@@ -18,9 +18,7 @@ enum StorageKey {
   ///Fast Navigation menu JSON [client.getSupportedApps]
   userSupportedApplets,
 
-  substitutionsFilterKlassenStufe,
-  substitutionsFilterKlasse,
-  substitutionsFilterLehrerKuerzel,
+  substitutionsFilter,
 
   lastPushMessageHash,
   lastAppVersion,
@@ -66,12 +64,8 @@ extension on StorageKey {
         return "theme";
       case StorageKey.lastPushMessageHash:
         return "last-notifications-hash";
-      case StorageKey.substitutionsFilterKlassenStufe:
-        return "filter-klassenStufe";
-      case StorageKey.substitutionsFilterKlasse:
-        return "filter-klasse";
-      case StorageKey.substitutionsFilterLehrerKuerzel:
-        return "filter-lehrerKuerzel";
+      case StorageKey.substitutionsFilter:
+        return "{}";
     }
   }
 
