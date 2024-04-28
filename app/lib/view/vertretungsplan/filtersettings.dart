@@ -93,31 +93,50 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                     child: Text(AppLocalizations.of(context)!.reset)),
                 ElevatedButton(
                     onPressed: () async {
-                      final dio = Dio();
-                      final response = await dio.post(
-                        "$apiURL/api/filter/generate",
-                        options: Options(
-                          headers: {
-                            "Content-type": "application/json",
-                          },
-                        ),
-                        data: jsonEncode({
-                          "schoolID": client.schoolID,
-                          "loginName": client.username,
-                          "classString": client.userData["klasse"]??"",
-                          "classLevel": client.userData["stufe"]??""
-                        })
-                      );
-                      final data = jsonDecode(response.toString());
-                      if (data["success"]) {
-                        final filterResponse = data["result"]["task"];
-                        client.substitutions.localFilter = Map<String, EntryFilter>.from(filterResponse).map((key, value) {
-                          return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
-                        });
-                        client.substitutions.saveFilterToStorage();
-                        Navigator.pop(context);
-                      } else {
-                        throw UnimplementedError();
+                      try {
+                        final dio = Dio();
+                        final response = await dio.post(
+                            "$apiURL/api/filter/generate",
+                            options: Options(
+                              headers: {
+                                "Content-type": "application/json",
+                              },
+                            ),
+                            data: jsonEncode({
+                              "schoolID": client.schoolID,
+                              "loginName": client.username,
+                              "classString": client.userData["klasse"]??"",
+                              "classLevel": client.userData["stufe"]??""
+                            })
+                        );
+                        final data = jsonDecode(response.toString());
+                        if (data["success"]) {
+                          final filterResponse = data["result"]["task"];
+                          client.substitutions.localFilter = Map<String, EntryFilter>.from(filterResponse).map((key, value) {
+                            return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
+                          });
+                          client.substitutions.saveFilterToStorage();
+                          Navigator.pop(context);
+                        } else {
+                          //caught to open modal
+                          throw Error();
+                        }
+                      } catch (e) {
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(AppLocalizations.of(context)!.error),
+                              content: Text(AppLocalizations.of(context)!.errorInAutoSet),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            )
+                        );
                       }
                     },
                     child: Text(AppLocalizations.of(context)!.autoSet)),
@@ -140,7 +159,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
             )
           ],
         ));
-  }
+    }
 }
 
 class SubstitutionFilterEditor extends StatefulWidget {
