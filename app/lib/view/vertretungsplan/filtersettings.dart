@@ -111,15 +111,20 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                         );
                         final data = jsonDecode(response.toString());
                         if (data["success"]) {
-                          final filterResponse = data["result"]["task"];
-                          client.substitutions.localFilter = Map<String, EntryFilter>.from(filterResponse).map((key, value) {
-                            return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
-                          });
-                          client.substitutions.saveFilterToStorage();
+                          if (!(data["result"] == null)) {
+                            final filterResponse = data["result"]["task"];
+                            client.substitutions.localFilter = Map<String, EntryFilter>.from(filterResponse).map((key, value) {
+                              return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
+                            });
+                            client.substitutions.saveFilterToStorage();
+                          } else {
+                            //message with scaffoldmessenger to indicate that there is no data
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.autoSetToEmpty)));
+                          }
                           Navigator.pop(context);
                         } else {
                           //caught to open modal
-                          throw Error();
+                          throw ErrorDescription("API request had no success");
                         }
                       } catch (e) {
                         showDialog(
@@ -150,6 +155,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
             const SubstitutionFilterEditor(objKey: "Vertreter", title: "Vertreter"),
             const SubstitutionFilterEditor(objKey: "Lehrerkuerzel", title: "Lehrerkürzel"),
             const SubstitutionFilterEditor(objKey: "Vertreterkuerzel", title: "Vertreterkürzel"),
+            const SubstitutionFilterEditor(objKey: "Hinweis", title: "Hinweis"),
             const SubstitutionFilterEditor(objKey: "Fach_alt", title: "Fach (Alt)"),
             const SubstitutionFilterEditor(objKey: "Raum_alt", title: "Raum (Alt)"),
             ListTile(
