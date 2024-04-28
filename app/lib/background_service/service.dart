@@ -30,7 +30,7 @@ Future<void> performBackgroundFetch() async {
   try {
     await client.login();
     final vPlan =
-        await client.substitutions.getAllSubstitutions(skipCheck: true);
+        await client.substitutions.getAllSubstitutions(skipCheck: true, filtered: true);
     List<Substitution> allSubstitutions = vPlan.allSubstitutions;
     String messageBody = "";
 

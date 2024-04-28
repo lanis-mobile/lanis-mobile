@@ -10,9 +10,13 @@ import 'package:sph_plan/client/client.dart';
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 
+typedef SubstitutionFilter = Map<String, List<String>>;
+
+
 class SubstitutionsParser {
   late Dio dio;
   late SPHclient client;
+  SubstitutionFilter defaultFilter = {};
 
   SubstitutionsParser(Dio dioClient, this.client) {
     dio = dioClient;
@@ -165,7 +169,7 @@ class SubstitutionsParser {
     }
   }
 
-  Future<SubstitutionPlan> getAllSubstitutions({skipCheck = false}) async {
+  Future<SubstitutionPlan> getAllSubstitutions({required bool filtered, skipCheck = false}) async {
     if (!skipCheck) {
       if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         throw NotSupportedException();
@@ -177,7 +181,9 @@ class SubstitutionsParser {
       var dates = getSubstitutionDates(document);
 
       if (dates.isEmpty) {
-        return parseVplanNonAJAX(document);
+        SubstitutionPlan plan = parseVplanNonAJAX(document);
+        if (filtered) plan.filterAll(defaultFilter);
+        return plan;
       }
 
       final fullPlan = SubstitutionPlan();
@@ -186,6 +192,7 @@ class SubstitutionsParser {
         SubstitutionDay plan = await getSubstitutionsAJAX(date);
         fullPlan.add(plan);
       }
+      if (filtered) fullPlan.filterAll(defaultFilter);
       fullPlan.removeEmptyDays();
       return fullPlan;
     } catch (e) {
@@ -193,6 +200,7 @@ class SubstitutionsParser {
     }
   }
 }
+
 
 /// A data class to store a single substitution information
 class Substitution {
@@ -239,6 +247,47 @@ class Substitution {
       this.Vertreterkuerzel,
       this.lerngruppe,
       this.hervorgehoben});
+
+  bool passesFilter(SubstitutionFilter substitutionsFilter) {
+    Map<String, Function> filterFunctions = {
+      "Klasse": (filter) => filterElement(klasse, filter),
+      "Fach": (filter) => filterElement(fach, filter),
+      "Fach_alt": (filter) => filterElement(fach_alt, filter),
+      "Lehrer": (filter) => filterElement(lehrer, filter),
+      "Raum": (filter) => filterElement(raum, filter),
+      "Art": (filter) => filterElement(art, filter),
+      "Hinweis": (filter) => filterElement(hinweis, filter),
+      "Vertreter": (filter) => filterElement(vertreter, filter),
+      "Stunde": (filter) => filterElement(stunde, filter),
+      "Lehrerkuerzel": (filter) => filterElement(Lehrerkuerzel, filter),
+      "Vertreterkuerzel": (filter) => filterElement(Vertreterkuerzel, filter),
+      "Klasse_alt": (filter) => filterElement(klasse_alt, filter),
+      "Raum_alt": (filter) => filterElement(raum_alt, filter),
+      "Hinweis2": (filter) => filterElement(hinweis2, filter),
+      "Lerngruppe": (filter) => filterElement(lerngruppe, filter),
+    };
+
+    for (var key in substitutionsFilter.keys) {
+      final filter = substitutionsFilter[key];
+      if (filterFunctions.containsKey(key) && !filterFunctions[key]!(filter!)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  ///returns true if the value contains all of the filter elements
+  bool filterElement(String? value, List<String> filter) {
+    if (value == null) {
+      return false;
+    }
+    for (var singleFilter in filter) {
+      if (!value.contains(singleFilter)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 /// A data class to store all substitution information for a single day
@@ -251,6 +300,10 @@ class SubstitutionDay {
 
   void add(Substitution substitution) {
     substitutions.add(substitution);
+  }
+
+  void filterAll(SubstitutionFilter filter) {
+    substitutions.removeWhere((element) => !element.passesFilter(filter));
   }
 }
 
@@ -274,5 +327,12 @@ class SubstitutionPlan {
 
   void removeEmptyDays() {
     days.removeWhere((day) => day.substitutions.isEmpty);
+  }
+
+  void filterAll(SubstitutionFilter filter) {
+    for (var day in days) {
+      day.filterAll(filter);
+    }
+    removeEmptyDays();
   }
 }

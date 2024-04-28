@@ -79,7 +79,7 @@ class SubstitutionsFetcher extends Fetcher {
 
   @override
   Future<SubstitutionPlan> _get() async {
-    return await client.substitutions.getAllSubstitutions();
+    return await client.substitutions.getAllSubstitutions(filtered: true);
   }
 }
 
