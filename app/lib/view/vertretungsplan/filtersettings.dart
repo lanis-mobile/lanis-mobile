@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
@@ -28,11 +29,55 @@ class FilterSettingsScreen extends StatefulWidget {
 }
 
 class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
+  String apiURL = "https://lanis-mobile-api.alessioc42.workers.dev";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Vertretungsplan Filter"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.developer_mode),
+              tooltip: "Development mode",
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Dev API URL'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Text("Change the URL to the autoset provider here to test your implementation before making a pr for your school"),
+                          ),
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                apiURL = value;
+                              });
+                            },
+                            controller: TextEditingController(text: apiURL),
+                            decoration: const InputDecoration(hintText: "Enter new API URL"),
+                          )
+                        ],
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Update'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            )
+          ],
         ),
         body: ListView(
           padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
@@ -51,7 +96,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                     onPressed: () async {
                       final dio = Dio();
                       final response = await dio.post(
-                        "https://lanis-mobile-api.alessioc42.workers.dev/api/filter/generate",
+                        "$apiURL/api/filter/generate",
                         options: Options(
                           headers: {
                             "Content-type": "application/json",
@@ -84,8 +129,11 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
             const SubstitutionFilterEditor(objKey: "Lehrer", title: 'Lehrer'),
             const SubstitutionFilterEditor(objKey: "Raum", title: 'Raum'),
             const SubstitutionFilterEditor(objKey: "Art", title: 'Art'),
-            const SubstitutionFilterEditor(
-                objKey: "Vertreter", title: "Vertreter"),
+            const SubstitutionFilterEditor(objKey: "Vertreter", title: "Vertreter"),
+            const SubstitutionFilterEditor(objKey: "Lehrerkuerzel", title: "Lehrerkürzel"),
+            const SubstitutionFilterEditor(objKey: "Vertreterkuerzel", title: "Vertreterkürzel"),
+            const SubstitutionFilterEditor(objKey: "Fach_alt", title: "Fach (Alt)"),
+            const SubstitutionFilterEditor(objKey: "Raum_alt", title: "Raum (Alt)"),
             const ListTile(
               leading: Icon(Icons.help),
               title: Text("Wie es Funktioniert?"),

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client.dart';
@@ -11,7 +10,6 @@ import 'package:sph_plan/client/storage.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../logger.dart';
 
 /// {"strict": Bool, "filter": List<[String]>}
 typedef EntryFilter = Map<String, dynamic>;
@@ -278,7 +276,6 @@ class Substitution {
       "Klasse_alt": (filter) => filterElement(klasse_alt, filter["filter"], filter["strict"]),
       "Raum_alt": (filter) => filterElement(raum_alt, filter["filter"], filter["strict"]),
       "Hinweis2": (filter) => filterElement(hinweis2, filter["filter"], filter["strict"]),
-      "Lerngruppe": (filter) => filterElement(lerngruppe, filter["filter"], filter["strict"]),
     };
 
     for (var key in substitutionsFilter.keys) {
