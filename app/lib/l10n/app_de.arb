@@ -99,7 +99,6 @@
   "setupReadyTitle": "Du bist jetzt bereit!",
   "setupReady": "Du kannst lanis-mobile jetzt verwenden. Wenn die App dir gefällt, kannst du gerne eine Bewertung im Play Store machen.",
 
-
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoPersonalSchoolSupport": "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
@@ -118,5 +117,13 @@
   "introCustomize": "In den Einstellungen kannst du die App auf deine Bedürfnisse anpassen.",
   "introSchoolPortal": "Das Schulportal ist Modular aufgebaut. Das bedeutet, dass deine Schule vielleicht nicht alle Features der App unterstützt oder die App nicht alle Features deiner Schule.",
   "introAnalytics": "Wegen der modularen Natur des Schulportals kann es vereinzelt zu Problem für deine Schule kommen. Sende uns in diesem Fall bitte einen Fehlerbericht. Wenn die App intern einen Fehler erkennt wird dieser auch automatisch anonym an die Entwickler gesendet um eine möglichst robuste Anwendung zur schaffen.",
-  "introHaveFun": "Melde dich jetzt an um lanis-mobile zu nutzen. Verwende dafür die Logindaten, die du Normalerweise für die Webseite des Schulportals verwendest."
+  "introHaveFun": "Melde dich jetzt an um lanis-mobile zu nutzen. Verwende dafür die Logindaten, die du Normalerweise für die Webseite des Schulportals verwendest.",
+
+  "substitutionsFilter": "Vertretungsplan Filter",
+  "developmentMode": "Entwicklungsmodus",
+  "developmentModeHint": "Ändern Sie hier die URL zum Autoset-Anbieter, um Ihre Implementierung zu testen, bevor Sie eine PR für Ihre Schule erstellen.",
+  "reset": "Zurücksetzen",
+  "autoSet": "Automatisch Festlegen",
+  "howItWorks": "Wie es Funktioniert",
+  "howItWorksText": "Wenn du einen Filter hinzufügst, werden nur die Einträge angezeigt, die den Filter enthalten. Wenn du mehrere Filter hinzufügst, werden nur die Einträge angezeigt, die alle/einen der Filter enthalten. Die automatische Konfiguration muss pro Schule durchgeführt werden. (Füge deine hinzu, wenn es nicht funktioniert.)"
 }

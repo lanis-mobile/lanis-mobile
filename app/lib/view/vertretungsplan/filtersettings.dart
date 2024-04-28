@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
@@ -35,23 +34,23 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Vertretungsplan Filter"),
+          title: Text(AppLocalizations.of(context)!.substitutionsFilter),
           actions: [
             IconButton(
               icon: const Icon(Icons.developer_mode),
-              tooltip: "Development mode",
+              tooltip: AppLocalizations.of(context)!.developmentMode,
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Dev API URL'),
+                      title: Text(AppLocalizations.of(context)!.developmentMode),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: Text("Change the URL to the autoset provider here to test your implementation before making a pr for your school"),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(AppLocalizations.of(context)!.developmentModeHint),
                           ),
                           TextField(
                             onChanged: (value) {
@@ -60,13 +59,13 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                               });
                             },
                             controller: TextEditingController(text: apiURL),
-                            decoration: const InputDecoration(hintText: "Enter new API URL"),
+                            decoration: const InputDecoration(hintText: "edit API url"),
                           )
                         ],
                       ),
                       actions: <Widget>[
                         TextButton(
-                          child: const Text('Update'),
+                          child: const Text("OK"),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
@@ -91,7 +90,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                       client.substitutions.saveFilterToStorage();
                       Navigator.pop(context);
                     },
-                    child: const Text("Zurücksetzen")),
+                    child: Text(AppLocalizations.of(context)!.reset)),
                 ElevatedButton(
                     onPressed: () async {
                       final dio = Dio();
@@ -121,7 +120,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                         throw UnimplementedError();
                       }
                     },
-                    child: const Text("Automatisch Festlegen")),
+                    child: Text(AppLocalizations.of(context)!.autoSet)),
               ],
             ),
             const SubstitutionFilterEditor(objKey: "Klasse", title: 'Klasse'),
@@ -134,11 +133,10 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
             const SubstitutionFilterEditor(objKey: "Vertreterkuerzel", title: "Vertreterkürzel"),
             const SubstitutionFilterEditor(objKey: "Fach_alt", title: "Fach (Alt)"),
             const SubstitutionFilterEditor(objKey: "Raum_alt", title: "Raum (Alt)"),
-            const ListTile(
-              leading: Icon(Icons.help),
-              title: Text("Wie es Funktioniert?"),
-              subtitle: Text(
-                  "Wenn du einen Filter hinzufügst, werden nur noch Einträge angezeigt, die den Filter enthalten. Wenn du mehrere Filter hinzufügst, werden nur noch Einträge angezeigt, die alle/einen Filter enthalten."),
+            ListTile(
+              leading: const Icon(Icons.help),
+              title: Text(AppLocalizations.of(context)!.howItWorks),
+              subtitle: Text(AppLocalizations.of(context)!.howItWorksText)
             )
           ],
         ));
@@ -149,7 +147,7 @@ class SubstitutionFilterEditor extends StatefulWidget {
   final String objKey;
   final String title;
 
-  const SubstitutionFilterEditor({required this.objKey, required this.title});
+  const SubstitutionFilterEditor({super.key, required this.objKey, required this.title});
 
   @override
   _SubstitutionFilterEditorState createState() =>
