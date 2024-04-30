@@ -47,7 +47,7 @@ dependencies:
   styled_text: ^8.1.0
   linkify: ^5.0.0
   introduction_screen: ^3.1.12
-  flutter_svg: ^2.0.9
+  flutter_svg: ^2.0.10+1
   dropdown_search: ^5.0.6
   countly_flutter_np: ^24.1.1
   dynamic_color: ^1.6.9
@@ -66,6 +66,7 @@ dependencies:
     sdk: flutter
   logger: ^2.2.0
   chips_input: ^0.1.0
+  simple_shadow: ^0.3.1
 
 flutter_launcher_icons:
   android: false
