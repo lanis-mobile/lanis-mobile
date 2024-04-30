@@ -145,26 +145,11 @@ class _StartupScreenState extends State<StartupScreen> {
       imageBuilder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
             ? const ColorFilter.matrix([
-                -1,
-                0,
-                0,
-                0,
-                255,
-                0,
-                -1,
-                0,
-                0,
-                255,
-                0,
-                0,
-                -1,
-                0,
-                255,
-                0,
-                0,
-                0,
-                1,
-                0
+                -1, 0, 0, 0,
+                255, 0, -1, 0,
+                0, 255, 0, 0,
+                -1, 0, 255, 0,
+                0, 0, 1, 0
               ])
             : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
         child: Image(
@@ -175,36 +160,48 @@ class _StartupScreenState extends State<StartupScreen> {
     );
   }
 
-  Widget appLogo() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(80.0),
-            child: LayoutBuilder(builder: (context, constraints) {
-              return SimpleShadow(
-                color: Theme.of(context).colorScheme.surfaceTint,
-                opacity: 0.25,
-                sigma: 6,
-                offset: const Offset(4, 8),
-                child: SvgPicture.asset(
-                  "assets/startup.svg",
-                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
-                  fit: BoxFit.contain,
-                  width: constraints.maxWidth.clamp(0, 350),
-                  height: constraints.maxWidth.clamp(0, 350),
-                ),
-              );
-            }),
+  Widget appLogo(double horizontal, double vertical) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
+      child: LayoutBuilder(builder: (context, constraints) {
+        return SimpleShadow(
+          color: Theme.of(context).colorScheme.surfaceTint,
+          opacity: 0.25,
+          sigma: 6,
+          offset: const Offset(4, 8),
+          child: SvgPicture.asset(
+            "assets/startup.svg",
+            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+            fit: BoxFit.contain,
+            width: constraints.maxWidth.clamp(0, 300),
+            height: constraints.maxHeight.clamp(0, 250),
           ),
-        )
-      ],
+        );
+      }),
     );
   }
 
-  Widget tipText() {
-    return Text("siopfjksopdf");
+  Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
+    return Container(
+        decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withAlpha(85),
+                blurRadius: 18,
+                spreadRadius: 1,
+              )
+            ],
+            borderRadius: BorderRadius.circular(16.0)),
+        padding: padding,
+        margin: margin,
+        width: width,
+        child: Text(
+          "Wussten Sie, dass Sie entführt werden, wenn Sie noch keine Bewertung abgegeben haben?",
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+          textAlign: TextAlign.center,
+        ),
+    );
   }
 
   Widget errorButtons() {
@@ -240,16 +237,51 @@ class _StartupScreenState extends State<StartupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            schoolLogo(),
-            appLogo(),
-            const LinearProgressIndicator()
-          ],
-        ),
-      ),
-    );
+        body: SafeArea(
+            child: MediaQuery.of(context).orientation == Orientation.portrait
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      schoolLogo(),
+                      Column(
+                        children: [
+                          appLogo(80.0, 20.0),
+                          tipText(
+                              const EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 12.0),
+                              const EdgeInsets.symmetric(horizontal: 36.0), null)
+                        ],
+                      ),
+                      const LinearProgressIndicator()
+                    ],
+                  )
+                : Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      schoolLogo(),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              appLogo(0.0, 0.0),
+                              SizedBox.fromSize(
+                                size: const Size(48.0, 0.0),
+                              ),
+                              tipText(
+                                  const EdgeInsets.symmetric(
+                                      vertical: 16.0, horizontal: 12.0),
+                                  const EdgeInsets.only(), 250)
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [LinearProgressIndicator()],
+                      )
+                    ],
+                  )));
   }
 }
