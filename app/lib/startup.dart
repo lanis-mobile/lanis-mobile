@@ -9,6 +9,7 @@ import 'package:sph_plan/view/login/screen.dart';
 
 import 'client/client.dart';
 import 'client/fetcher.dart';
+import 'client/logger.dart';
 
 /// Just a collection of possible messages for the bottom progress indicator, so we that we have not magic strings.
 class Message {
@@ -201,7 +202,7 @@ class _StartupScreenState extends State<StartupScreen> {
     } on CredentialsIncompleteException {
       openWelcomeScreen();
     } on LanisException catch (e, stack) {
-      debugPrint(stack.toString());
+      logger.e(stack.toString());
       errors[Step.login] = e;
       isError.value = true;
       progress.set(Step.login, Status.error);

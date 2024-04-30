@@ -3,11 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:countly_flutter_np/countly_flutter.dart';
-import 'package:crypto/crypto.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -68,7 +65,7 @@ void main() async {
     }
 
     await initializeDateFormatting();
-    if (kDebugMode &&
+    if (!kDebugMode &&
         (await globalStorage.read(key: StorageKey.settingsUseCountly)) ==
             "true") {
       const String duckDNS =
@@ -76,13 +73,13 @@ void main() async {
       CountlyConfig config = CountlyConfig("https://lanis-mobile.$duckDNS",
           "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
       config.enableCrashReporting();
-      final uuid = await getDeviceId();
-      debugPrint("DEVICE UUID: $uuid");
-      config.setDeviceId(await getDeviceId());
 
       config.setCustomCrashSegment({
-        "school_id_storage": await globalStorage.read(key: StorageKey.userSchoolID),
-        "account_is_student": jsonDecode(await globalStorage.read(key: StorageKey.userData)).containsKey("klasse"),
+        "school_id_storage":
+            await globalStorage.read(key: StorageKey.userSchoolID),
+        "account_is_student":
+            jsonDecode(await globalStorage.read(key: StorageKey.userData))
+                .containsKey("klasse"),
       });
       await Countly.initWithConfig(config);
 
@@ -107,27 +104,6 @@ void main() async {
       await Countly.recordDartError(obj, stack);
     }
   });
-}
-
-
-String hashUUID(String input) {
-  final hash = sha256.convert(utf8.encode(input)).toString();
-  //only allow numbers and letters
-  return hash.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').substring(0, 20);
-}
-
-Future<String> getDeviceId() async {
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  if (Platform.isAndroid) {
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    return hashUUID(androidInfo.serialNumber);
-  } else if (Platform.isIOS) {
-    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-    String preHash = iosInfo.identifierForVendor ?? iosInfo.model + iosInfo.localizedModel + iosInfo.systemName + iosInfo.utsname.machine;
-    return hashUUID(preHash);
-  } else {
-    throw UnsupportedError('Unsupported platform');
-  }
 }
 
 class App extends StatelessWidget {

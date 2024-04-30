@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/widgets/marquee.dart';
 
 class SubstitutionGridTile extends StatelessWidget {
-  final Map<String, dynamic> substitutionData;
+  final Substitution substitutionData;
   const SubstitutionGridTile({super.key, required this.substitutionData});
 
   bool doesNoticeExist(String? info) {
-    return (info == null || info == "" || info == "---");
+    return (info == null || info.trim() == "" || info == "---");
   }
 
-  Widget? getSubstitutionInfo(
+  Widget? substitutionInfoWithIcon(
       BuildContext context, String key, String? value, IconData icon) {
     if (doesNoticeExist(value)) {
       return null;
@@ -46,10 +47,10 @@ class SubstitutionGridTile extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: (substitutionData['Art'] != null)
+            child: (substitutionData.art != null)
                 ? MarqueeWidget(
                     child: Text(
-                    substitutionData['Art'],
+                    substitutionData.art!,
                     style: Theme.of(context).textTheme.titleLarge,
                   ))
                 : null,
@@ -57,33 +58,33 @@ class SubstitutionGridTile extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(
                 top: 0,
-                bottom: (doesNoticeExist(substitutionData["Vertreter"]) &&
-                        doesNoticeExist(substitutionData["Lehrer"]) &&
-                        doesNoticeExist(substitutionData["Raum"]) &&
-                        !doesNoticeExist(substitutionData["Fach"]))
+                bottom: (doesNoticeExist(substitutionData.vertreter) &&
+                        doesNoticeExist(substitutionData.lehrer) &&
+                        doesNoticeExist(substitutionData.raum) &&
+                        !doesNoticeExist(substitutionData.fach))
                     ? 12
                     : 0),
             child: Column(
               children: [
-                getSubstitutionInfo(context, "Vertreter",
-                        substitutionData["Vertreter"], Icons.person) ??
+                substitutionInfoWithIcon(context, "Vertreter",
+                        substitutionData.vertreter, Icons.person) ??
                     const SizedBox.shrink(),
-                getSubstitutionInfo(context, "Lehrer",
-                        substitutionData["Lehrer"], Icons.school) ??
+                substitutionInfoWithIcon(context, "Lehrer",
+                        substitutionData.lehrer, Icons.school) ??
                     const SizedBox.shrink(),
-                getSubstitutionInfo(context, "Raum", substitutionData["Raum"],
-                        Icons.room) ??
+                substitutionInfoWithIcon(
+                        context, "Raum", substitutionData.raum, Icons.room) ??
                     const SizedBox.shrink(),
               ],
             ),
           ),
-          if (!doesNoticeExist(substitutionData["Hinweis"])) ...[
+          if (!doesNoticeExist(substitutionData.hinweis)) ...[
             Padding(
               padding: EdgeInsets.only(
                   right: 30,
                   left: 30,
                   top: 2,
-                  bottom: doesNoticeExist(substitutionData["Fach"]) ? 12 : 0),
+                  bottom: doesNoticeExist(substitutionData.fach) ? 12 : 0),
               child: Column(
                 children: [
                   Row(
@@ -98,9 +99,9 @@ class SubstitutionGridTile extends StatelessWidget {
                             direction: Axis.horizontal,
                             animationDuration: Duration(
                                 milliseconds:
-                                    substitutionData["Hinweis"].length * 130),
+                                    substitutionData.hinweis!.length * 130),
                             child: Text(
-                              substitutionData["Hinweis"],
+                              substitutionData.hinweis!,
                             ),
                           )),
                     ],
@@ -113,28 +114,26 @@ class SubstitutionGridTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              if (!doesNoticeExist(substitutionData["Klasse"])) ...[
-                if (!doesNoticeExist(substitutionData["Klasse"])) ...[
-                  SizedBox(
-                    width: 230,
-                    child: MarqueeWidget(
-                      child: Text(
-                        substitutionData["Klasse"],
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
+              if (!doesNoticeExist(substitutionData.klasse)) ...[
+                SizedBox(
+                  width: 230,
+                  child: MarqueeWidget(
+                    child: Text(
+                      substitutionData.klasse!,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  )
-                ],
+                  ),
+                )
               ],
-              if (!doesNoticeExist(substitutionData["Fach"])) ...[
+              if (!doesNoticeExist(substitutionData.fach)) ...[
                 Text(
-                  substitutionData["Fach"],
+                  substitutionData.fach!,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
-              if (!doesNoticeExist(substitutionData['Stunde'])) ...[
+              if (!doesNoticeExist(substitutionData.stunde)) ...[
                 Text(
-                  substitutionData['Stunde'],
+                  substitutionData.stunde,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ]

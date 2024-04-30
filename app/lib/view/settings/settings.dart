@@ -116,11 +116,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context: context,
               builder: (BuildContext context) => AlertDialog(
                 title: Text(AppLocalizations.of(context)!.reallyReset),
-                content: Text(AppLocalizations.of(context)!.allSettingsWillBeLost),
+                content:
+                    Text(AppLocalizations.of(context)!.allSettingsWillBeLost),
                 actions: <Widget>[
                   TextButton(
-                    onPressed: () => Navigator.pop(context, AppLocalizations.of(context)!.cancel),
-                    child:  Text(AppLocalizations.of(context)!.cancel),
+                    onPressed: () => Navigator.pop(
+                        context, AppLocalizations.of(context)!.cancel),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   TextButton(
                     onPressed: () {

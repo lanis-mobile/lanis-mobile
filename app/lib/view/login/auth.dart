@@ -7,7 +7,6 @@ import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-
 import '../../client/client.dart';
 import '../../client/storage.dart';
 
@@ -135,8 +134,9 @@ class LoginFormState extends State<LoginForm> {
                       showSearchBox: true,
                       searchDelay: Duration(milliseconds: 150)),
                   dropdownDecoratorProps: DropDownDecoratorProps(
-                      dropdownSearchDecoration:
-                          InputDecoration(labelText: AppLocalizations.of(context)!.selectSchool)),
+                      dropdownSearchDecoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.selectSchool)),
                   selectedItem: dropDownSelectedItem,
                   enabled: !widget.relogin,
                   onChanged: (value) {
@@ -152,7 +152,8 @@ class LoginFormState extends State<LoginForm> {
                   controller: usernameController,
                   autocorrect: false,
                   decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.authUsernameHint),
+                      labelText:
+                          AppLocalizations.of(context)!.authUsernameHint),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return AppLocalizations.of(context)!.authValidationError;
@@ -189,7 +190,8 @@ class LoginFormState extends State<LoginForm> {
                           value: countlyAgree,
                           title: RichText(
                             text: TextSpan(
-                              text: AppLocalizations.of(context)!.authSendBugReports,
+                              text: AppLocalizations.of(context)!
+                                  .authSendBugReports,
                               style: DefaultTextStyle.of(context).style,
                               children: <TextSpan>[
                                 TextSpan(
@@ -227,7 +229,8 @@ class LoginFormState extends State<LoginForm> {
                               style: DefaultTextStyle.of(context).style,
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: AppLocalizations.of(context)!.authTermsOfService,
+                                  text: AppLocalizations.of(context)!
+                                      .authTermsOfService,
                                   style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -237,7 +240,8 @@ class LoginFormState extends State<LoginForm> {
                                         "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
                                 ),
                                 TextSpan(
-                                  text: AppLocalizations.of(context)!.authOfLanisMobile,
+                                  text: AppLocalizations.of(context)!
+                                      .authOfLanisMobile,
                                 ),
                               ],
                             ),
@@ -272,7 +276,8 @@ class LoginFormState extends State<LoginForm> {
                     TextButton(
                         onPressed: () => launchUrl(Uri.parse(
                             "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
-                        child: Text(AppLocalizations.of(context)!.authResetPassword))
+                        child: Text(
+                            AppLocalizations.of(context)!.authResetPassword))
                   ],
                 )
               ],

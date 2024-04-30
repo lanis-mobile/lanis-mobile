@@ -23,6 +23,7 @@
   "noSupportOpenInBrowser": "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
   "noInternetConnection": "No internet connection. Some data is still available.",
 
+  "errorOccurred": "An error occurred",
   "supported": "supported",
   "unsupported": "unsupported",
   "theme": "Theme",
@@ -116,5 +117,15 @@
   "introCustomize": "You can customize the app to your needs in the settings.",
   "introSchoolPortal": "The school portal has a modular structure. This means that your school may not support all the features of the app or the app may not support all the features of your school.",
   "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report. If the app detects an error internally, this is also automatically sent anonymously to the developers in order to create an application that is as robust as possible.",
-  "introHaveFun": "Login now to use lanis-mobile. Use the login credentials that you normally use for the school portal website."
+  "introHaveFun": "Login now to use lanis-mobile. Use the login credentials that you normally use for the school portal website.",
+
+  "substitutionsFilter": "Substitutions filter",
+  "developmentMode": "Development mode",
+  "developmentModeHint": "Change the URL to the autoset provider here to test your implementation before creating a PR for your school.",
+  "reset": "Reset",
+  "autoSet": "Set automatically",
+  "howItWorks": "How it works",
+  "howItWorksText": "If you add a filter, only the entries that contain the filter are displayed. If you add several filters, only the entries that contain all/one of the filters are displayed. The automatic configuration must be done per school. (Add yours if it does not work).",
+  "errorInAutoSet": "An error has occurred during the automatic configuration of the filter. The reason for this could be that your school is not directly supported. Consider adding your school. Visit the GitHub repository.",
+  "autoSetToEmpty": "The filter was automatically emptied."
 }
