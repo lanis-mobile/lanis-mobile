@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -194,13 +193,45 @@ class _StartupScreenState extends State<StartupScreen> {
 
   Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
     List<Widget> toolTips = <Widget>[
-      const Text("Wussten Sie, dass......"),
       Text.rich(TextSpan(
-        text: "Wussten Sie, dass....",
+        text: AppLocalizations.of(context)!.startUpMessage1,
         children: [
-          toolTipIcon(Icons.filter_alt)
+          toolTipIcon(Icons.code)
         ]
-      ))
+      )),
+      Text.rich(TextSpan(
+        text: AppLocalizations.of(context)!.startUpMessage2,
+        children: [
+          toolTipIcon(Icons.people)
+        ]
+      )),
+      Text(AppLocalizations.of(context)!.startUpMessage3),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage4,
+          children: [
+            toolTipIcon(Icons.star)
+          ]
+      )),
+      Text(AppLocalizations.of(context)!.startUpMessage5),
+      Text(AppLocalizations.of(context)!.startUpMessage6),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage7,
+          children: [
+            toolTipIcon(Icons.favorite)
+          ]
+      )),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage8,
+          children: [
+            toolTipIcon(Icons.code)
+          ]
+      )),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage9,
+          children: [
+            toolTipIcon(Icons.settings)
+          ]
+      )),
     ];
 
     return Container(
