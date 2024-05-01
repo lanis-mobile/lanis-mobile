@@ -119,6 +119,12 @@
   "introAnalytics": "Wegen der modularen Natur des Schulportals kann es vereinzelt zu Problem für deine Schule kommen. Sende uns in diesem Fall bitte einen Fehlerbericht. Wenn die App intern einen Fehler erkennt wird dieser auch automatisch anonym an die Entwickler gesendet um eine möglichst robuste Anwendung zur schaffen.",
   "introHaveFun": "Melde dich jetzt an um lanis-mobile zu nutzen. Verwende dafür die Logindaten, die du Normalerweise für die Webseite des Schulportals verwendest.",
 
+  "startupNoConnection": "Keine Internetverbindung!",
+  "startupError": "Kritischer Fehler!",
+  "startupErrorMessage": "Ein kritischer Fehler ist während dem Login aufgetreten! Du kannst es erneut versuchen oder melde den fettgeschriebenen Fehler.",
+  "startupRetryButton": "Erneut versuchen",
+  "startupReportButton": "Melden",
+
   "substitutionsFilter": "Vertretungsplan Filter",
   "developmentMode": "Entwicklungsmodus",
   "developmentModeHint": "Ändern Sie hier die URL zum Autoset-Anbieter, um Ihre Implementierung zu testen, bevor Sie eine PR für Ihre Schule erstellen.",

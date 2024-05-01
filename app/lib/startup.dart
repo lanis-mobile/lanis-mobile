@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -8,6 +11,8 @@ import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'client/client.dart';
 import 'client/logger.dart';
@@ -20,9 +25,7 @@ class StartupScreen extends StatefulWidget {
 }
 
 class _StartupScreenState extends State<StartupScreen> {
-  ValueNotifier<bool> noConnection = ValueNotifier<bool>(false);
-  //ValueNotifier<bool> isError = ValueNotifier<bool>(false);
-  final ValueNotifier<LanisException?> error = ValueNotifier<LanisException?>(null);
+  LanisException? error;
 
   // We need to load storage first, so we have to wait before everything.
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
@@ -77,7 +80,7 @@ class _StartupScreenState extends State<StartupScreen> {
     try {
       await client.login();
 
-      if (error.value == null) {
+      if (error == null) {
         whatsNew().then((value) {
           if (value != null) {
             Navigator.push(
@@ -103,9 +106,13 @@ class _StartupScreenState extends State<StartupScreen> {
       openWelcomeScreen();
     } on LanisException catch (e, stack) {
       logger.e(stack.toString());
-      if (e is NoConnectionException) {
-        noConnection.value = true;
-      }
+      error = e;
+      showDialog(
+          context: context,
+          builder: (context) {
+            return errorDialog();
+          }
+      );
     }
   }
 
@@ -181,7 +188,21 @@ class _StartupScreenState extends State<StartupScreen> {
     );
   }
 
+  WidgetSpan toolTipIcon(IconData icon) {
+    return WidgetSpan(child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.onPrimary,));
+  }
+
   Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
+    List<Widget> toolTips = <Widget>[
+      const Text("Wussten Sie, dass......"),
+      Text.rich(TextSpan(
+        text: "Wussten Sie, dass....",
+        children: [
+          toolTipIcon(Icons.filter_alt)
+        ]
+      ))
+    ];
+
     return Container(
         decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primary,
@@ -196,42 +217,50 @@ class _StartupScreenState extends State<StartupScreen> {
         padding: padding,
         margin: margin,
         width: width,
-        child: Text(
-          "Wussten Sie, dass Sie entführt werden, wenn Sie noch keine Bewertung abgegeben haben?",
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimary),
           textAlign: TextAlign.center,
-        ),
+          child: toolTips.elementAt(Random().nextInt(toolTips.length)),
+        )
     );
   }
 
-  Widget errorButtons() {
-    return ValueListenableBuilder(
-        valueListenable: error,
-        builder: (context, _error, _) {
-          if (_error != null) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: OutlinedButton(
-                        onPressed: () async {
-                          // Reset
-                          error.value = null;
-                          noConnection.value = false;
+  Widget errorDialog() {
+    return AlertDialog(
+      //
+      icon: error is NoConnectionException //
+          ? const Icon(Icons.wifi_off)
+          : const Icon(Icons.error),
+      title: Text(error is NoConnectionException
+          ? AppLocalizations.of(context)!.startupNoConnection
+          : AppLocalizations.of(context)!.startupError),
+      content: error is! NoConnectionException
+          ? Text.rich(TextSpan(
+              text: AppLocalizations.of(context)!.startupErrorMessage,
+              children: [
+                  TextSpan(
+                      text: "\n\n${error.runtimeType}: ${error!.cause}",
+                      style: Theme.of(context).textTheme.labelLarge)
+                ]))
+          : null,
+      actions: [
+        if (error is! NoConnectionException) ...[
+          OutlinedButton(
+              onPressed: () {
+                launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
+              },
+              child: Text(AppLocalizations.of(context)!.startupReportButton))
+        ],
+        FilledButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
 
-                          await performLogin();
-                        },
-                        child: const Text("Erneut versuchen")),
-                  )
-                ],
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        });
+              error = null;
+              await performLogin();
+            },
+            child: Text(AppLocalizations.of(context)!.startupRetryButton)),
+      ],
+    );
   }
 
   @override
