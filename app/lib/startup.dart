@@ -108,6 +108,7 @@ class _StartupScreenState extends State<StartupScreen> {
       error = e;
       showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) {
             return errorDialog();
           }
@@ -205,7 +206,12 @@ class _StartupScreenState extends State<StartupScreen> {
           toolTipIcon(Icons.people)
         ]
       )),
-      Text(AppLocalizations.of(context)!.startUpMessage3),
+      Text.rich(TextSpan(
+        text: AppLocalizations.of(context)!.startUpMessage3,
+        children: [
+          toolTipIcon(Icons.filter_alt)
+        ]
+      )),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage4,
           children: [
@@ -258,8 +264,7 @@ class _StartupScreenState extends State<StartupScreen> {
 
   Widget errorDialog() {
     return AlertDialog(
-      //
-      icon: error is NoConnectionException //
+      icon: error is NoConnectionException
           ? const Icon(Icons.wifi_off)
           : const Icon(Icons.error),
       title: Text(error is NoConnectionException
@@ -276,11 +281,18 @@ class _StartupScreenState extends State<StartupScreen> {
           : null,
       actions: [
         if (error is! NoConnectionException) ...[
+          TextButton(
+              onPressed: () {
+                launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
+              },
+              child: const Text("GitHub")
+          ),
           OutlinedButton(
               onPressed: () {
                 launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
               },
-              child: Text(AppLocalizations.of(context)!.startupReportButton))
+              child: Text(AppLocalizations.of(context)!.startupReportButton)
+          ),
         ],
         FilledButton(
             onPressed: () async {
