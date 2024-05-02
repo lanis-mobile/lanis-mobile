@@ -8,17 +8,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../client/client.dart';
 import '../../client/client_submodules/substitutions.dart';
 
-EntryFilter parseEntryFilter(Map<String, dynamic> json) {
-  return json.map((key, value) {
-    if (value is bool) {
-      return MapEntry(key, value);
-    } else if (value is List<dynamic>) {
-      return MapEntry(key, List<String>.from(value));
-    } else {
-      throw Exception('Unexpected type for value in EntryFilter');
-    }
-  });
-}
 
 class FilterSettingsScreen extends StatefulWidget {
   const FilterSettingsScreen({super.key});
@@ -119,6 +108,8 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                             client.substitutions.saveFilterToStorage();
                           } else {
                             //message with scaffoldmessenger to indicate that there is no data
+                            client.substitutions.localFilter = {};
+                            client.substitutions.saveFilterToStorage();
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.autoSetToEmpty)));
                           }
                           Navigator.pop(context);
