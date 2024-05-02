@@ -1,73 +1,19 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:simple_shadow/simple_shadow.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'client/client.dart';
-import 'client/fetcher.dart';
-import 'client/logger.dart';
-
-/// Just a collection of possible messages for the bottom progress indicator, so we that we have not magic strings.
-class Message {
-  static String initialise = "Initialisieren...";
-  static String login = "Einloggen...";
-  static String load = "Lade Apps...";
-  static String finalise = "Finalisieren...";
-  static String error = "Beim Laden ist ein Fehler passiert!";
-  static String wrongCredentials = "Falsche Anmeldedaten!";
-  static String loginTimeout = "Zu oft falsch eingeloggt!";
-}
-
-/// Status of each step
-enum Status {
-  waiting,
-  loading,
-  finished,
-  error;
-}
-
-/// Collection of steps so we don't have magic strings.
-class Step {
-  static String login = "Login";
-// The rest is now dynamic, gotten by [client.applets]
-}
-
-/// More advanced class, so we can have a tidy and clean progress indicator of the steps.
-class ProgressNotifier with ChangeNotifier {
-  final Map<String, Status> _steps = {};
-
-  Map<String, Status> get steps => _steps;
-
-  void set(String step, Status status) {
-    _steps[step] = status;
-    notifyListeners();
-  }
-
-  void reset() {
-    _steps.updateAll((_, value) => value = Status.waiting);
-    notifyListeners();
-  }
-
-  ProgressNotifier(List<String> steps) {
-    for (String step in steps) {
-      _steps.addEntries([MapEntry(step, Status.waiting)]);
-    }
-  }
-}
-
-/// Possible applet which will be fetched by [fetchApplet].
-class Applet {
-  final Fetcher? fetcher;
-  final String step;
-  final String finishMessage;
-
-  Applet(
-      {required this.fetcher, required this.step, required this.finishMessage});
-}
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});
@@ -77,16 +23,7 @@ class StartupScreen extends StatefulWidget {
 }
 
 class _StartupScreenState extends State<StartupScreen> {
-  ValueNotifier<String> loadingMessage =
-      ValueNotifier<String>(Message.initialise);
-
-  final List<Applet> appletFetchers = [];
-  final List<String> steps = [Step.login];
-  late final ProgressNotifier progress;
-
-  ValueNotifier<bool> noConnection = ValueNotifier<bool>(false);
-  ValueNotifier<bool> isError = ValueNotifier<bool>(false);
-  final Map<String, LanisException?> errors = {Step.login: null};
+  LanisException? error;
 
   // We need to load storage first, so we have to wait before everything.
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
@@ -128,33 +65,6 @@ class _StartupScreenState extends State<StartupScreen> {
     );
   }
 
-  Future<void> fetchApplet(Applet applet) async {
-    progress.set(applet.step, Status.loading);
-
-    await applet.fetcher!.fetchData(forceRefresh: true);
-
-    await for (dynamic data in applet.fetcher!.stream) {
-      if (data.status == FetcherStatus.error) {
-        progress.set(applet.step, Status.error);
-        loadingMessage.value = Message.error;
-        isError.value = true;
-        errors[applet.step] = data.content;
-
-        if (data.content is NoConnectionException) {
-          noConnection.value = true;
-        }
-
-        return;
-      } else if (data.status == FetcherStatus.done) {
-        progress.set(applet.step, Status.finished);
-        loadingMessage.value = applet.finishMessage;
-        break;
-      }
-    }
-
-    progress.set(applet.step, Status.finished);
-  }
-
   Future<void> performLogin() async {
     // Step 1
     // It doesn't show it immediately but a lot faster than before.
@@ -165,19 +75,10 @@ class _StartupScreenState extends State<StartupScreen> {
       return;
     }
 
-    loadingMessage.value = Message.login;
-    progress.set(Step.login, Status.loading);
     try {
       await client.login();
-      progress.set(Step.login, Status.finished);
 
-      loadingMessage.value = Message.load;
-
-      await Future.wait(List.generate(appletFetchers.length,
-          (index) => fetchApplet(appletFetchers[index])));
-
-      if (!isError.value) {
-        loadingMessage.value = Message.finalise;
+      if (error == null) {
         whatsNew().then((value) {
           if (value != null) {
             Navigator.push(
@@ -201,54 +102,15 @@ class _StartupScreenState extends State<StartupScreen> {
       openWelcomeScreen();
     } on CredentialsIncompleteException {
       openWelcomeScreen();
-    } on LanisException catch (e, stack) {
-      logger.e(stack.toString());
-      errors[Step.login] = e;
-      isError.value = true;
-      progress.set(Step.login, Status.error);
-
-      if (e is NoConnectionException) {
-        noConnection.value = true;
-      }
-
-      loadingMessage.value = Message.error;
-
-      if (e is WrongCredentialsException) {
-        if (e is LoginTimeoutException) {
-          loadingMessage.value = "${Message.loginTimeout} (${e.time}s)";
-        } else {
-          loadingMessage.value = Message.wrongCredentials;
-        }
-      } else {
-        loadingMessage.value = Message.error;
-      }
-    }
-  }
-
-  // Handy functions
-  IconData getIcon(Status status) {
-    switch (status) {
-      case Status.finished:
-        return Icons.check;
-      case Status.waiting:
-        return Icons.pending_outlined;
-      case Status.loading:
-        return Icons.sync;
-      case Status.error:
-        return Icons.error_outline;
-    }
-  }
-
-  String getProgressMessage(Status status) {
-    switch (status) {
-      case Status.finished:
-        return "Fertig";
-      case Status.waiting:
-        return "Warten";
-      case Status.loading:
-        return "Laden";
-      case Status.error:
-        return "Fehler";
+    } on LanisException catch (e) {
+      error = e;
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return errorDialog();
+          }
+      );
     }
   }
 
@@ -257,7 +119,6 @@ class _StartupScreenState extends State<StartupScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       client.loadFromStorage().then((_) {
         finishedLoadingStorage.value = true;
-        progress = ProgressNotifier(steps);
         performLogin();
       });
     });
@@ -289,26 +150,11 @@ class _StartupScreenState extends State<StartupScreen> {
       imageBuilder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
             ? const ColorFilter.matrix([
-                -1,
-                0,
-                0,
-                0,
-                255,
-                0,
-                -1,
-                0,
-                0,
-                255,
-                0,
-                0,
-                -1,
-                0,
-                255,
-                0,
-                0,
-                0,
-                1,
-                0
+                -1, 0, 0, 0,
+                255, 0, -1, 0,
+                0, 255, 0, 0,
+                -1, 0, 255, 0,
+                0, 0, 1, 0
               ])
             : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
         child: Image(
@@ -319,178 +165,141 @@ class _StartupScreenState extends State<StartupScreen> {
     );
   }
 
-  Widget currentSteps() {
+  Widget appLogo(double horizontal, double vertical) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Container(
-          decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary,
-              borderRadius: BorderRadius.circular(16.0)),
-          padding: const EdgeInsets.all(12.0),
-          margin: const EdgeInsets.symmetric(horizontal: 84),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ValueListenableBuilder(
-                  valueListenable: finishedLoadingStorage,
-                  builder: (context, finishedLoadingStorage, _) {
-                    if (finishedLoadingStorage) {
-                      // Show all steps like login, vp, ...
-                      return ListenableBuilder(
-                          listenable: progress,
-                          builder: (context, _) {
-                            return ListView.separated(
-                                shrinkWrap: true,
-                                itemCount: steps.length,
-                                separatorBuilder: (context, index) {
-                                  return const SizedBox(
-                                    height: 8,
-                                  );
-                                },
-                                itemBuilder: (context, index) {
-                                  final String step = steps[index];
-                                  final Status status = progress.steps[step]!;
-                                  return Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 4.0),
-                                            child: Icon(
-                                              getIcon(status),
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSecondary,
-                                            ),
-                                          ),
-                                          Text(step,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge
-                                                  ?.copyWith(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .onSecondary)),
-                                        ],
-                                      ),
-                                      Text(getProgressMessage(status),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSecondary))
-                                    ],
-                                  );
-                                });
-                          });
-                    }
-                    // Show only that client.loadFromStorage() is being executed.
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Lade gespeicherte Daten...",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSecondary))
-                      ],
-                    );
-                  })
-            ],
-          )),
+      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
+      child: LayoutBuilder(builder: (context, constraints) {
+        return SimpleShadow(
+          color: Theme.of(context).colorScheme.surfaceTint,
+          opacity: 0.25,
+          sigma: 6,
+          offset: const Offset(4, 8),
+          child: SvgPicture.asset(
+            "assets/startup.svg",
+            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+            fit: BoxFit.contain,
+            width: constraints.maxWidth.clamp(0, 300),
+            height: constraints.maxHeight.clamp(0, 250),
+          ),
+        );
+      }),
     );
   }
 
-  Widget errorButtons() {
-    return ValueListenableBuilder(
-        valueListenable: isError,
-        builder: (context, _isError, _) {
-          if (_isError) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: OutlinedButton(
-                        onPressed: () async {
-                          // Reset
-                          progress.reset();
-                          errors.updateAll((key, value) => value = null);
-                          isError.value = false;
-                          noConnection.value = false;
-                          loadingMessage.value = "Initialisieren...";
-
-                          await performLogin();
-                        },
-                        child: const Text("Erneut versuchen")),
-                  )
-                ],
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        });
+  WidgetSpan toolTipIcon(IconData icon) {
+    return WidgetSpan(child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.onPrimary,));
   }
 
-  /// The bottom thing that shows a message and a "big" progress indicator.
-  Widget progressIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(16.0)),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          margin: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              ValueListenableBuilder(
-                  valueListenable: loadingMessage,
-                  builder: (context, _loadingMessage, _) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Text(_loadingMessage,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
-                              ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary)),
-                    );
-                  }),
-              ValueListenableBuilder(
-                  valueListenable: isError,
-                  builder: (context, _isError, _) {
-                    if (_isError) {
-                      return Icon(
-                        Icons.error,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      );
-                    }
-                    return SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    );
-                  })
+  Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
+    List<Widget> toolTips = <Widget>[
+      Text.rich(TextSpan(
+        text: AppLocalizations.of(context)!.startUpMessage1,
+        children: [
+          toolTipIcon(Icons.code)
+        ]
+      )),
+      Text.rich(TextSpan(
+        text: AppLocalizations.of(context)!.startUpMessage2,
+        children: [
+          toolTipIcon(Icons.people)
+        ]
+      )),
+      Text.rich(TextSpan(
+        text: AppLocalizations.of(context)!.startUpMessage3,
+        children: [
+          toolTipIcon(Icons.filter_alt)
+        ]
+      )),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage4,
+          children: [
+            toolTipIcon(Icons.star)
+          ]
+      )),
+      Text(AppLocalizations.of(context)!.startUpMessage5),
+      Text(AppLocalizations.of(context)!.startUpMessage6),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage7,
+          children: [
+            toolTipIcon(Icons.favorite)
+          ]
+      )),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage8,
+          children: [
+            toolTipIcon(Icons.code)
+          ]
+      )),
+      Text.rich(TextSpan(
+          text: AppLocalizations.of(context)!.startUpMessage9,
+          children: [
+            toolTipIcon(Icons.settings)
+          ]
+      )),
+    ];
+
+    return Container(
+        decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withAlpha(85),
+                blurRadius: 18,
+                spreadRadius: 1,
+              )
             ],
+            borderRadius: BorderRadius.circular(16.0)),
+        padding: padding,
+        margin: margin,
+        width: width,
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+          textAlign: TextAlign.center,
+          child: toolTips.elementAt(Random().nextInt(toolTips.length)),
+        )
+    );
+  }
+
+  Widget errorDialog() {
+    return AlertDialog(
+      icon: error is NoConnectionException
+          ? const Icon(Icons.wifi_off)
+          : const Icon(Icons.error),
+      title: Text(error is NoConnectionException
+          ? AppLocalizations.of(context)!.startupNoConnection
+          : AppLocalizations.of(context)!.startupError),
+      content: error is! NoConnectionException
+          ? Text.rich(TextSpan(
+              text: AppLocalizations.of(context)!.startupErrorMessage,
+              children: [
+                  TextSpan(
+                      text: "\n\n${error.runtimeType}: ${error!.cause}",
+                      style: Theme.of(context).textTheme.labelLarge)
+                ]))
+          : null,
+      actions: [
+        if (error is! NoConnectionException) ...[
+          TextButton(
+              onPressed: () {
+                launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
+              },
+              child: const Text("GitHub")
           ),
-        ),
+          OutlinedButton(
+              onPressed: () {
+                launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
+              },
+              child: Text(AppLocalizations.of(context)!.startupReportButton)
+          ),
+        ],
+        FilledButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+
+              error = null;
+              await performLogin();
+            },
+            child: Text(AppLocalizations.of(context)!.startupRetryButton)),
       ],
     );
   }
@@ -498,50 +307,51 @@ class _StartupScreenState extends State<StartupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            schoolLogo(),
-            Column(
-              children: [
-                // Greeting message
-                Container(
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16.0)),
-                    padding: const EdgeInsets.all(12.0),
-                    child: ValueListenableBuilder(
-                      valueListenable: noConnection,
-                      builder: (context, noConnection, _) {
-                        if (noConnection) {
-                          return Text("Keine Verbindung!",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary));
-                        }
-                        return Text("Willkommen zurück!",
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary));
-                      },
-                    )),
-                currentSteps(),
-                errorButtons(),
-              ],
-            ),
-            progressIndicator()
-          ],
-        ),
-      ),
-    );
+        body: SafeArea(
+            child: MediaQuery.of(context).orientation == Orientation.portrait
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      schoolLogo(),
+                      Column(
+                        children: [
+                          appLogo(80.0, 20.0),
+                          tipText(
+                              const EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 12.0),
+                              const EdgeInsets.symmetric(horizontal: 36.0), null)
+                        ],
+                      ),
+                      const LinearProgressIndicator()
+                    ],
+                  )
+                : Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      schoolLogo(),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              appLogo(0.0, 0.0),
+                              SizedBox.fromSize(
+                                size: const Size(48.0, 0.0),
+                              ),
+                              tipText(
+                                  const EdgeInsets.symmetric(
+                                      vertical: 16.0, horizontal: 12.0),
+                                  const EdgeInsets.only(), 250)
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [LinearProgressIndicator()],
+                      )
+                    ],
+                  )));
   }
 }

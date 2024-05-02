@@ -119,6 +119,22 @@
   "introAnalytics": "Wegen der modularen Natur des Schulportals kann es vereinzelt zu Problem für deine Schule kommen. Sende uns in diesem Fall bitte einen Fehlerbericht. Wenn die App intern einen Fehler erkennt wird dieser auch automatisch anonym an die Entwickler gesendet um eine möglichst robuste Anwendung zur schaffen.",
   "introHaveFun": "Melde dich jetzt an um lanis-mobile zu nutzen. Verwende dafür die Logindaten, die du Normalerweise für die Webseite des Schulportals verwendest.",
 
+  "startupNoConnection": "Keine Internetverbindung!",
+  "startupError": "Kritischer Fehler!",
+  "startupErrorMessage": "Ein kritischer Fehler ist während dem Login aufgetreten! Du kannst es erneut versuchen oder melde den fettgeschriebenen Fehler.",
+  "startupRetryButton": "Erneut versuchen",
+  "startupReportButton": "Melden",
+
+  "startUpMessage1": "Wenn dir das Projekt gefällt, dann schau doch mal auf GitHub vorbei!",
+  "startUpMessage2": "Wusstest du schon, dass Lanis-Mobile von Leuten wie dir, Schülern, entwickelt wird?",
+  "startUpMessage3": "Du kannst den Vertretungsplan ganz einfach unter dem Filter-Menü auf deine eigenen Kurse reduzieren.",
+  "startUpMessage4": "Wenn dir die App gefällt, dann bewerte uns doch auf Google Play.",
+  "startUpMessage5": "Fehlt etwas an der App? Kann etwas besser gemacht werden? Schreibe uns einfach über GitHub Issues. Auch kleine Dinge sind wichtig.",
+  "startUpMessage6": "Lanis-Mobile wird inzwischen von Leuten an über 50 Schulen in ganz Hessen verwendet.",
+  "startUpMessage7": "Danke, dass du Lanis-Mobile verwendest.",
+  "startUpMessage8": "Lanis-Mobile ist Open Source und wird von Schülern entwickelt. Wenn du helfen möchtest, dann schau doch mal auf GitHub vorbei.",
+  "startUpMessage9": "Du kannst die App auf deine Bedürfnisse anpassen. Schau doch mal in den Einstellungen vorbei.",
+
   "substitutionsFilter": "Vertretungsplan Filter",
   "developmentMode": "Entwicklungsmodus",
   "developmentModeHint": "Ändern Sie hier die URL zum Autoset-Anbieter, um Ihre Implementierung zu testen, bevor Sie eine PR für Ihre Schule erstellen.",

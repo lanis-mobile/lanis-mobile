@@ -119,6 +119,22 @@
   "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report. If the app detects an error internally, this is also automatically sent anonymously to the developers in order to create an application that is as robust as possible.",
   "introHaveFun": "Login now to use lanis-mobile. Use the login credentials that you normally use for the school portal website.",
 
+  "startupNoConnection": "No internet connection!",
+  "startupError": "Critical error!",
+  "startupErrorMessage": "A critical error occurred during the login! You can retry it or report the bold error message.",
+  "startupRetryButton": "Retry",
+  "startupReportButton": "Report",
+
+  "startUpMessage1": "If you like the project, have a look at GitHub!",
+  "startUpMessage2": "Did you know that Lanis-Mobile is being developed by people like you, students?",
+  "startUpMessage3": "You can easily reduce the substitution plan to your own courses under the filter menu.",
+  "startUpMessage4": "If you like the app, please rate us on Google Play.",
+  "startUpMessage5": "Is there anything missing from the app? Can something be made better? Just write to us via GitHub Issues. Even small things are important.",
+  "startUpMessage6": "Lanis-Mobile is now used by people at over 50 schools throughout Hesse.",
+  "startUpMessage7": "Thank you for using Lanis-Mobile.",
+  "startUpMessage8": "Lanis-Mobile is open source and developed by students. If you would like to help, please have a look at GitHub.",
+  "startUpMessage9": "You can custumize the app to your needs in the settings.",
+
   "substitutionsFilter": "Substitutions filter",
   "developmentMode": "Development mode",
   "developmentModeHint": "Change the URL to the autoset provider here to test your implementation before creating a PR for your school.",
