@@ -10,11 +10,23 @@ import 'package:sph_plan/client/storage.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
+import '../logger.dart';
 
 /// {"strict": Bool, "filter": List<[String]>}
 typedef EntryFilter = Map<String, dynamic>;
 typedef SubstitutionFilter = Map<String, EntryFilter>;
 
+EntryFilter parseEntryFilter(Map<String, dynamic> json) {
+  return json.map((key, value) {
+    if (value is bool) {
+      return MapEntry(key, value);
+    } else if (value is List<dynamic>) {
+      return MapEntry(key, List<String>.from(value));
+    } else {
+      throw Exception('Unexpected type for value in EntryFilter');
+    }
+  });
+}
 
 class SubstitutionsParser {
   late Dio dio;
@@ -205,7 +217,10 @@ class SubstitutionsParser {
 
   void loadFilterFromStorage() async {
     String? filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
-    localFilter = jsonDecode(filterString);
+    logger.i(filterString);
+    localFilter = Map<String, EntryFilter>.from(jsonDecode(filterString)).map((key, value) {
+      return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
+    });
   }
 
   void saveFilterToStorage() async {

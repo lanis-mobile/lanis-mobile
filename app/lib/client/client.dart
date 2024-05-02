@@ -106,6 +106,8 @@ class SPHclient {
 
     fetchers = GlobalFetcher();
 
+    substitutions.loadFilterFromStorage();
+
     return;
   }
 
@@ -347,6 +349,7 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
+    substitutions.localFilter = {};
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);

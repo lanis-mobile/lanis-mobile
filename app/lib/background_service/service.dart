@@ -29,7 +29,6 @@ Future<void> performBackgroundFetch() async {
   await client.loadFromStorage();
   try {
     await client.login();
-    client.substitutions.loadFilterFromStorage();
     final vPlan =
         await client.substitutions.getAllSubstitutions(skipCheck: true, filtered: true);
     List<Substitution> allSubstitutions = vPlan.allSubstitutions;
