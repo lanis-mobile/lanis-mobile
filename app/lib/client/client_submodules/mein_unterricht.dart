@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/client.dart';
 
@@ -21,8 +20,6 @@ class MeinUnterrichtParser {
     if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       throw NotSupportedException();
     }
-
-    debugPrint("Get Mein Unterricht overview");
 
     var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
 
@@ -140,7 +137,6 @@ class MeinUnterrichtParser {
       }
     }();
 
-    debugPrint("Successfully got Mein Unterricht.");
     return result;
   }
 
@@ -376,7 +372,7 @@ class MeinUnterrichtParser {
 
       return result;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -441,7 +437,7 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -578,7 +574,7 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -635,7 +631,7 @@ class MeinUnterrichtParser {
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 }

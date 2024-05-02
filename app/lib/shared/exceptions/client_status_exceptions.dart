@@ -34,11 +34,10 @@ class NetworkException implements LanisException {
   NetworkException([this.cause = "Netzwerkfehler"]);
 }
 
-class LoggedOffOrUnknownException implements LanisException {
+class UnknownException implements LanisException {
   @override
   String cause;
-  LoggedOffOrUnknownException(
-      [this.cause = "Unbekannter Fehler! Bist du eingeloggt?"]);
+  UnknownException([this.cause = "Unbekannter Fehler!"]);
 }
 
 class UnauthorizedException implements LanisException {

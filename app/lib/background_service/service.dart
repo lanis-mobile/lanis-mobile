@@ -1,24 +1,23 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../client/client.dart';
+import '../client/logger.dart';
 import '../client/storage.dart';
-import '../view/vertretungsplan/filterlogic.dart' as filter_logic;
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      debugPrint(
-          " >>>>>>>>>>>>>>>>>>>>>>>>>>>> Background fetch triggered <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+      logger.i("Background fetch triggered");
       await performBackgroundFetch();
     } catch (e) {
-      debugPrint(e.toString());
+      logger.f(e.toString());
     }
     return Future.value(true);
   });
@@ -31,24 +30,17 @@ Future<void> performBackgroundFetch() async {
   try {
     await client.login();
     final vPlan =
-        await client.substitutions.getAllSubstitutions(skipCheck: true);
-    final List combinedVPlan = [];
-
-    for (List plan in vPlan["entries"]) {
-      combinedVPlan.addAll(plan);
-    }
-
-    final filteredPlan = await filter_logic.filter(combinedVPlan);
-
+        await client.substitutions.getAllSubstitutions(skipCheck: true, filtered: true);
+    List<Substitution> allSubstitutions = vPlan.allSubstitutions;
     String messageBody = "";
 
-    for (final entry in filteredPlan) {
+    for (final entry in allSubstitutions) {
       final time =
-          "${weekDayGer(entry["Tag"])} ${entry["Stunde"].replaceAll(" - ", "/")}";
-      final type = entry["Art"] ?? "";
-      final subject = entry["Fach"] ?? "";
-      final teacher = entry["Lehrer"] ?? "";
-      final classInfo = entry["Klasse"] ?? "";
+          "${weekDayGer(entry.tag)} ${entry.stunde.replaceAll(" - ", "/")}";
+      final type = entry.art ?? "";
+      final subject = entry.fach ?? "";
+      final teacher = entry.lehrer ?? "";
+      final classInfo = entry.klasse ?? "";
 
       // Concatenate non-null values with separator "-"
       final entryText = [time, type, subject, teacher, classInfo]
@@ -66,13 +58,13 @@ Future<void> performBackgroundFetch() async {
 
       if (!(await isMessageAlreadySent(messageUUID))) {
         await sendMessage(
-            "${filteredPlan.length} Einträge im Vertretungsplan", messageBody);
+            "${allSubstitutions.length} Einträge im Vertretungsplan",
+            messageBody);
         await markMessageAsSent(messageUUID);
       }
     }
   } on LanisException {
-    debugPrint("Exception in backgroundFetch");
-    // former status-codes ignored
+    logger.w("Error occurred in background service");
   }
 }
 

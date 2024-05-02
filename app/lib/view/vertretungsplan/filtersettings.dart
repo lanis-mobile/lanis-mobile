@@ -1,123 +1,249 @@
-import 'dart:async';
+import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:chips_input/chips_input.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'filterlogic.dart';
+import '../../client/client.dart';
+import '../../client/client_submodules/substitutions.dart';
 
-class FilterPlan extends StatelessWidget {
-  static const double padding = 10.0;
-  FilterPlan({super.key}) {
-    loadConfiguration();
-  }
 
-  final _klassenStufeController = TextEditingController();
-  final _klassenController = TextEditingController();
-  final _lehrerKuerzelController = TextEditingController();
+class FilterSettingsScreen extends StatefulWidget {
+  const FilterSettingsScreen({super.key});
 
-  void loadConfiguration() async {
-    final filterQueries = await getFilter();
+  @override
+  State<StatefulWidget> createState() => _FilterSettingsScreenState();
+}
 
-    _klassenStufeController.text = filterQueries["klassenStufe"];
-    _klassenController.text = filterQueries["klasse"];
-    _lehrerKuerzelController.text = filterQueries["lehrerKuerzel"];
-  }
+class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
+  String apiURL = "https://lanis-mobile-api.alessioc42.workers.dev";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Filter anpassen'),
+          title: Text(AppLocalizations.of(context)!.substitutionsFilter),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.developer_mode),
+              tooltip: AppLocalizations.of(context)!.developmentMode,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(AppLocalizations.of(context)!.developmentMode),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(AppLocalizations.of(context)!.developmentModeHint),
+                          ),
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                apiURL = value;
+                              });
+                            },
+                            controller: TextEditingController(text: apiURL),
+                            decoration: const InputDecoration(hintText: "edit API url"),
+                          )
+                        ],
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text("OK"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            )
+          ],
         ),
         body: ListView(
+          padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
           children: [
-            FilterElements(
-              klassenStufeController: _klassenStufeController,
-              klassenController: _klassenController,
-              lehrerKuerzelController: _lehrerKuerzelController,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      client.substitutions.localFilter = {};
+                      client.substitutions.saveFilterToStorage();
+                      Navigator.pop(context);
+                    },
+                    child: Text(AppLocalizations.of(context)!.reset)),
+                ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        final dio = Dio();
+                        final response = await dio.post(
+                            "$apiURL/api/filter/generate",
+                            options: Options(
+                              headers: {
+                                "Content-type": "application/json",
+                              },
+                            ),
+                            data: jsonEncode({
+                              "schoolID": client.schoolID,
+                              "loginName": client.username,
+                              "classString": client.userData["klasse"]??"",
+                              "classLevel": client.userData["stufe"]??""
+                            })
+                        );
+                        final data = jsonDecode(response.toString());
+                        if (data["success"]) {
+                          if (!(data["result"] == null)) {
+                            final filterResponse = data["result"]["task"];
+                            client.substitutions.localFilter = Map<String, EntryFilter>.from(filterResponse).map((key, value) {
+                              return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
+                            });
+                            client.substitutions.saveFilterToStorage();
+                          } else {
+                            //message with scaffoldmessenger to indicate that there is no data
+                            client.substitutions.localFilter = {};
+                            client.substitutions.saveFilterToStorage();
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.autoSetToEmpty)));
+                          }
+                          Navigator.pop(context);
+                        } else {
+                          //caught to open modal
+                          throw ErrorDescription("API request had no success");
+                        }
+                      } catch (e) {
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(AppLocalizations.of(context)!.error),
+                              content: Text(AppLocalizations.of(context)!.errorInAutoSet),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            )
+                        );
+                      }
+                    },
+                    child: Text(AppLocalizations.of(context)!.autoSet)),
+              ],
             ),
-            const Padding(
-              padding: EdgeInsets.all(padding),
-              child: Card(
-                child: ListTile(
-                  title: Text(
-                    "Hinweis",
-                    style: TextStyle(fontSize: 22),
-                  ),
-                  subtitle: Text(
-                      "Da manche Schulen ihre Vertretungsplaneinträge nicht vollständig angeben, kann es sein, dass du bestimmte Einträge, die eigentlich für dich bestimmt sind, mit dem Filter nicht findest, weil sie nicht die Klasse oder den Lehrer enthalten. Wende dich an deine Schulleitung/Schul-IT, um dieses Problem zu beheben. "),
-                ),
-              ),
-            ),
+            const SubstitutionFilterEditor(objKey: "Klasse", title: 'Klasse'),
+            const SubstitutionFilterEditor(objKey: "Fach", title: 'Fach'),
+            const SubstitutionFilterEditor(objKey: "Lehrer", title: 'Lehrer'),
+            const SubstitutionFilterEditor(objKey: "Raum", title: 'Raum'),
+            const SubstitutionFilterEditor(objKey: "Art", title: 'Art'),
+            const SubstitutionFilterEditor(objKey: "Vertreter", title: "Vertreter"),
+            const SubstitutionFilterEditor(objKey: "Lehrerkuerzel", title: "Lehrerkürzel"),
+            const SubstitutionFilterEditor(objKey: "Vertreterkuerzel", title: "Vertreterkürzel"),
+            const SubstitutionFilterEditor(objKey: "Hinweis", title: "Hinweis"),
+            const SubstitutionFilterEditor(objKey: "Fach_alt", title: "Fach (Alt)"),
+            const SubstitutionFilterEditor(objKey: "Raum_alt", title: "Raum (Alt)"),
+            ListTile(
+              leading: const Icon(Icons.help),
+              title: Text(AppLocalizations.of(context)!.howItWorks),
+              subtitle: Text(AppLocalizations.of(context)!.howItWorksText)
+            )
           ],
         ));
-  }
+    }
 }
 
-class FilterElements extends StatefulWidget {
-  final TextEditingController klassenStufeController;
-  final TextEditingController klassenController;
-  final TextEditingController lehrerKuerzelController;
-  const FilterElements(
-      {super.key,
-      required this.klassenStufeController,
-      required this.klassenController,
-      required this.lehrerKuerzelController});
+class SubstitutionFilterEditor extends StatefulWidget {
+  final String objKey;
+  final String title;
+
+  const SubstitutionFilterEditor({super.key, required this.objKey, required this.title});
 
   @override
-  State<FilterElements> createState() => _FilterElementsState();
+  _SubstitutionFilterEditorState createState() =>
+      _SubstitutionFilterEditorState();
 }
 
-class _FilterElementsState extends State<FilterElements> {
-  static const double padding = 10.0;
+class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
+  bool strict = false;
 
-  Timer? _debounceTimer;
-
-  void _onTypingFinished(String text) {
-    if (_debounceTimer != null) {
-      _debounceTimer!.cancel();
-    }
-
-    _debounceTimer = Timer(const Duration(milliseconds: 1500), () async {
-      await setFilter(widget.klassenStufeController.text,
-          widget.klassenController.text, widget.lehrerKuerzelController.text);
-    });
+  @override
+  void initState() {
+    super.initState();
+    strict =
+        client.substitutions.localFilter[widget.objKey]?["strict"] ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(padding),
-          child: TextFormField(
-              controller: widget.klassenStufeController,
-              onChanged: _onTypingFinished,
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child:
+                      Text(widget.title, style: const TextStyle(fontSize: 18)),
+                ),
+                ActionChip(
+                  label: strict ? const Text("All") : const Text("One"),
+                  padding: const EdgeInsets.only(top: 0, bottom: 0),
+                  onPressed: () {
+                    setState(() {
+                      strict = !strict;
+                      client.substitutions.localFilter[widget.objKey]
+                          ?["strict"] = strict;
+                      client.substitutions.saveFilterToStorage();
+                    });
+                  },
+                )
+              ],
+            ),
+            ChipsInput<String>(
+              initialValue: client.substitutions.localFilter[widget.objKey]
+                      ?["filter"] ??
+                  [],
+              enabled: true,
+              autocorrect: false,
               decoration: const InputDecoration(
-                  labelText: 'Klassenstufe (z.B. 7; 8; E; Q)')),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(padding),
-          child: TextFormField(
-              controller: widget.klassenController,
-              onChanged: _onTypingFinished,
-              decoration: const InputDecoration(
-                  labelText: 'Klasse (z.B. a; b; GA; RA; 1/2; 3/4)')),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(padding),
-          child: TextFormField(
-              controller: widget.lehrerKuerzelController,
-              onChanged: _onTypingFinished,
-              decoration: const InputDecoration(
-                  labelText: 'Lehrerkürzel (z.B. Abc; XYZ; Müller)')),
-        ),
-        const ListTile(
-          leading: Icon(Icons.info_outline),
-          title: Text("Mehrere Filter"),
-          subtitle: Text(
-              "Du kannst mehrere Filter mit einem \";\" trennen. Beispiel: 7; 8; Q"),
-        )
-      ],
-    );
+                labelText: "Edit Filter",
+              ),
+              findSuggestions: (String query) {
+                if (query.trim().isEmpty) return [];
+                return [query];
+              },
+              onChanged: (data) {
+                client.substitutions.localFilter[widget.objKey] = {
+                  "strict": strict
+                };
+                client.substitutions.localFilter[widget.objKey]?["filter"] =
+                    data;
+                client.substitutions.saveFilterToStorage();
+              },
+              chipBuilder: (context, state, profile) {
+                return InputChip(
+                  key: ObjectKey(profile),
+                  label: Text(profile),
+                  onDeleted: () => state.deleteChip(profile),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                );
+              },
+              suggestionBuilder: (context, query) {
+                return ListTile(
+                  title: Text('"$query" hinzufügen'),
+                );
+              },
+            )
+          ],
+        ));
   }
 }

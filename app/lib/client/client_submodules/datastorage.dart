@@ -83,7 +83,7 @@ class DataStorageParser {
     } on NoConnectionException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 

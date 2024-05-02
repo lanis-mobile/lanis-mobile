@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
@@ -21,8 +20,6 @@ class CalendarParser {
     if (!client.doesSupportFeature(SPHAppEnum.kalender)) {
       throw NotSupportedException();
     }
-
-    debugPrint("Trying to get calendar...");
 
     try {
       final response = await dio.post(
@@ -45,11 +42,9 @@ class CalendarParser {
           ));
       return jsonDecode(response.toString());
     } on SocketException {
-      debugPrint("Calendar: -3");
       throw NetworkException();
     } catch (e) {
-      debugPrint("Calendar: -4");
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -79,7 +74,7 @@ class CalendarParser {
     } on SocketException {
       throw NetworkException();
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 }

@@ -11,6 +11,7 @@ import '../../shared/types/conversations.dart';
 import '../client.dart';
 import '../connection_checker.dart';
 import '../cryptor.dart';
+import '../logger.dart';
 
 class ConversationsParser {
   late Dio dio;
@@ -25,7 +26,7 @@ class ConversationsParser {
       throw NotSupportedException();
     }
 
-    debugPrint("Get new conversation data. Invisible: $invisible.");
+    logger.i("Get new conversation data. Invisible: $invisible.");
     try {
       final response =
           await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
@@ -53,7 +54,7 @@ class ConversationsParser {
     } on LanisException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 

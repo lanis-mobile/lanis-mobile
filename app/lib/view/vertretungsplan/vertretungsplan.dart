@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/client/fetcher.dart';
-import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_gridtile.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_listtile.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../shared/widgets/error_view.dart';
-import '../login/screen.dart';
 import 'filtersettings.dart';
 
 class VertretungsplanAnsicht extends StatefulWidget {
@@ -48,13 +46,16 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     );
   }
 
-  List<Widget> getSubstitutionViews(dynamic data) {
+  List<Widget> getSubstitutionViews(SubstitutionPlan substitutionPlan) {
     double deviceWidth = MediaQuery.of(context).size.width;
 
     List<Widget> substitutionViews = [];
 
-    for (int dayIndex = 0; dayIndex < data["length"]; dayIndex++) {
-      final int entriesLength = data["days"][dayIndex]["entries"].length;
+    for (int dayIndex = 0;
+        dayIndex < substitutionPlan.days.length;
+        dayIndex++) {
+      final int entriesLength =
+          substitutionPlan.days[dayIndex].substitutions.length;
 
       substitutionViews.add(RefreshIndicator(
         key: globalKeys[dayIndex + 1],
@@ -78,8 +79,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
 
                     return Card(
                       child: SubstitutionGridTile(
-                          substitutionData: data["days"][dayIndex]["entries"]
-                              [entryIndex]),
+                          substitutionData: substitutionPlan
+                              .days[dayIndex].substitutions[entryIndex]),
                     );
                   },
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -101,8 +102,8 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Card(
                         child: SubstitutionListTile(
-                            substitutionData: data["days"][dayIndex]["entries"]
-                                [entryIndex]),
+                            substitutionData: substitutionPlan
+                                .days[dayIndex].substitutions[entryIndex]),
                       ),
                     );
                   },
@@ -128,17 +129,17 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     return errorWidgets;
   }
 
-  List<Tab> getTabs(dynamic fullVplan) {
+  List<Tab> getTabs(SubstitutionPlan fullVplan) {
     List<Tab> tabs = [];
 
-    for (Map day in fullVplan["days"]) {
-      String entryCount = day["entries"].length.toString();
+    for (SubstitutionDay day in fullVplan.days) {
+      String entryCount = day.substitutions.length.toString();
       tabs.add(Tab(
         icon: Badge(
           label: Text(entryCount),
           child: const Icon(Icons.calendar_today),
         ),
-        text: formatDate(day["date"]),
+        text: formatDate(day.date),
       ));
     }
 
@@ -151,15 +152,25 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       body: StreamBuilder<FetcherResponse>(
         stream: substitutionsFetcher.stream,
         builder: (context, snapshot) {
-          if (snapshot.data?.status == FetcherStatus.error &&
-              snapshot.data?.content ==
-                  CredentialsIncompleteException().cause) {
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const WelcomeLoginScreen()));
-            });
+          if (snapshot.hasError) {
+            return Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 60),
+                Padding(
+                  padding: const EdgeInsets.all(35),
+                  child: Text(
+                    AppLocalizations.of(context)!.errorOccurred,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting ||
@@ -170,11 +181,11 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           }
 
           // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys += List.generate(snapshot.data?.content["length"],
+          globalKeys += List.generate(snapshot.data?.content.days.length,
               (index) => GlobalKey<RefreshIndicatorState>());
 
           // If there are no entries.
-          if (snapshot.data?.content["length"] == 0) {
+          if (snapshot.data?.content.days.length == 0) {
             return RefreshIndicator(
               key: globalKeys[0],
               onRefresh: () async {
@@ -208,7 +219,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
 
           // Vp could have multiple dates, so we need to set it dynamically.
           _tabController = TabController(
-              length: snapshot.data?.content["length"], vsync: this);
+              length: snapshot.data?.content.days.length, vsync: this);
 
           return Column(
             children: [
@@ -246,18 +257,14 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           const SizedBox(
             height: 10,
           ),
-          FloatingActionButton(
-            heroTag: "FilterSubstitutions",
-            onPressed: () {
-              substitutionsFetcher.fetchData();
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => FilterPlan()))
-                  .then((_) => setState(() {
-                        substitutionsFetcher.fetchData(forceRefresh: true);
-                      }));
-            },
-            child: const Icon(Icons.filter_alt),
-          ),
+          FloatingActionButton(onPressed: () => {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FilterSettingsScreen(),
+              ),
+            ).then((value) => substitutionsFetcher.fetchData(forceRefresh: true))
+          }, child: const Icon(Icons.filter_alt),)
         ],
       ),
     );

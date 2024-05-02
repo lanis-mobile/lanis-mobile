@@ -25,6 +25,7 @@ import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 import 'connection_checker.dart';
 import 'fetcher.dart';
+import 'logger.dart';
 
 class SPHclient {
   String username = "";
@@ -52,6 +53,15 @@ class SPHclient {
   Future<void> prepareDio() async {
     jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+        options.headers.addAll({
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        });
+        return handler.next(options); //continue
+      },
+    ));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
@@ -96,12 +106,14 @@ class SPHclient {
 
     fetchers = GlobalFetcher();
 
+    substitutions.loadFilterFromStorage();
+
     return;
   }
 
   ///Logs the user in and fetches the necessary metadata.
   Future<void> login({userLogin = false}) async {
-    debugPrint("Trying to log in");
+    logger.i("Trying to log in");
 
     if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
@@ -125,7 +137,6 @@ class SPHclient {
       await getSchoolTheme();
 
       await cryptor.start(dio);
-      debugPrint("Encryption connected");
 
       return;
     } on SocketException {
@@ -135,7 +146,7 @@ class SPHclient {
     } on LanisException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -151,7 +162,7 @@ class SPHclient {
     } on StateError {
       return;
     }
-    debugPrint("Refreshing session");
+    logger.i("Refreshing session");
     try {
       await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
           queryParameters: {"name": sid},
@@ -250,7 +261,7 @@ class SPHclient {
     } on WrongCredentialsException {
       rethrow;
     } catch (e) {
-      throw LoggedOffOrUnknownException();
+      throw UnknownException();
     }
   }
 
@@ -338,6 +349,7 @@ class SPHclient {
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
+    substitutions.localFilter = {};
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);
