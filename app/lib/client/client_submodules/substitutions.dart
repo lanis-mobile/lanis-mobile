@@ -10,7 +10,6 @@ import 'package:sph_plan/client/storage.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../logger.dart';
 
 /// {"strict": Bool, "filter": List<[String]>}
 typedef EntryFilter = Map<String, dynamic>;
@@ -217,7 +216,6 @@ class SubstitutionsParser {
 
   void loadFilterFromStorage() async {
     String? filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
-    logger.i(filterString);
     localFilter = Map<String, EntryFilter>.from(jsonDecode(filterString)).map((key, value) {
       return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
     });

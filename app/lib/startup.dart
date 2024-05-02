@@ -14,7 +14,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'client/client.dart';
-import 'client/logger.dart';
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});
@@ -103,8 +102,7 @@ class _StartupScreenState extends State<StartupScreen> {
       openWelcomeScreen();
     } on CredentialsIncompleteException {
       openWelcomeScreen();
-    } on LanisException catch (e, stack) {
-      logger.e(stack.toString());
+    } on LanisException catch (e) {
       error = e;
       showDialog(
           context: context,
