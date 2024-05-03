@@ -4,3 +4,10 @@ class SearchEntry {
 
   SearchEntry({required this.id, required this.name});
 }
+
+enum ChatType {
+  noAnswerAllowed,
+  privateAnswerOnly,
+  groupOnly,
+  openChat
+}

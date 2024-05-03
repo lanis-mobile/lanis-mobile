@@ -122,9 +122,9 @@ class ConversationsParser {
   /// [message] supports Lanis-styled text.
   ///
   /// If successful, it returns `true`.
-  Future<dynamic> replyToConversation(String headId, int sender, bool groupOnly, bool privateAnswerOnly, String message) async {
+  Future<dynamic> replyToConversation(String headId, String sender, String groupOnly, String privateAnswerOnly, String message) async {
     final Map replyData = {
-      "to": sender.toString(),
+      "to": sender,
       "groupOnly": groupOnly,
       "privateAnswerOnly": privateAnswerOnly,
       "message": message,

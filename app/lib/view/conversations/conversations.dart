@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:sph_plan/view/conversations/detailed_conversation.dart';
 
 import '../../client/client.dart';
 import '../../client/fetcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
+import 'chat.dart';
 
 class ConversationsAnsicht extends StatefulWidget {
   const ConversationsAnsicht({super.key});
@@ -31,6 +33,9 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
   dynamic invisibleConversations;
 
   late TabController _tabController;
+
+  final TextEditingController receivers = TextEditingController();
+  final TextEditingController subject = TextEditingController();
 
   @override
   void initState() {
@@ -156,12 +161,17 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                     } else {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          /*MaterialPageRoute(
                               builder: (context) => DetailedConversationAnsicht(
                                     uniqueID: conversations[index]
                                         ["Uniquid"], // nice typo Lanis
                                     title: conversations[index]["Betreff"],
-                                  )));
+                                  ))*/
+                          MaterialPageRoute(
+                              builder: (context) => ConversationsChat(uniqueID: conversations[index]
+                              ["Uniquid"], // nice typo Lanis
+                                title: conversations[index]["Betreff"],))
+                      );
                     }
                   },
                   customBorder: RoundedRectangleBorder(
@@ -231,13 +241,74 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               })
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _refreshVisibleKey.currentState?.show();
-          _refreshInvisibleKey.currentState?.show();
-        },
-        heroTag: "RefreshConversations",
-        child: const Icon(Icons.refresh),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        distance: 70,
+        type: ExpandableFabType.up,
+          children: [
+            FloatingActionButton.extended(
+              heroTag: null,
+              icon: const Icon(Icons.speaker_notes_off),
+              label: Text("Hinweis"),
+              onPressed: () {},
+            ),
+            FloatingActionButton.extended(
+              heroTag: null,
+              icon: const Icon(Icons.mic),
+              label: Text("Mitteilung"),
+              onPressed: () {},
+            ),
+            FloatingActionButton.extended(
+              heroTag: null,
+              icon: const Icon(Icons.forum),
+              label: const Text("Gruppenchat"),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Neuen Gruppenchat erstellen"),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: receivers,
+                            decoration: const InputDecoration(
+                                hintText: 'Lehrer-IDs'
+                            ),
+                          ),
+                          TextField(
+                            controller: subject,
+                            decoration: const InputDecoration(
+                                hintText: 'Betreff'
+                            ),
+                          )
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () async {
+                              dynamic response = await client.conversations.createConversation(
+                                  ["l-221938"],
+                                  "groupOnly",
+                                  "Nachricht anfangen aus App",
+                                  "test"
+                              );
+                              print(response);
+                            },
+                            child: const Text("Erstellen")
+                        )
+                      ],
+                    )
+                );
+              },
+            ),
+            FloatingActionButton.extended(
+              heroTag: null,
+              icon: const Icon(Icons.groups),
+              label: Text("Offener Chat"),
+              onPressed: () {},
+            ),
+          ]
       ),
     );
   }
