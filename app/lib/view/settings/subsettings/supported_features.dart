@@ -30,7 +30,7 @@ class _SupportedFeaturesOverviewScreenState
     setState(() {
       featureListListTiles.clear();
 
-      for (var value in client.supportedApps) {
+      for (var value in client.travelMenu) {
         featureListListTiles.add(ListTile(
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),

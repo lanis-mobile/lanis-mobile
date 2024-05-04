@@ -34,7 +34,7 @@ class SPHclient {
   String schoolName = "";
 
   dynamic userData = {};
-  List<dynamic> supportedApps = [];
+  List<dynamic> travelMenu = [];
   Timer? preventLogoutTimer;
 
   late Cryptor cryptor = Cryptor();
@@ -101,9 +101,6 @@ class SPHclient {
 
     userData = jsonDecode(await globalStorage.read(key: StorageKey.userData));
 
-    supportedApps = jsonDecode(
-        await globalStorage.read(key: StorageKey.userSupportedApplets));
-
     fetchers = GlobalFetcher();
 
     substitutions.loadFilterFromStorage();
@@ -133,6 +130,7 @@ class SPHclient {
       if (userLogin) {
         await fetchRedundantData();
       }
+      travelMenu = await getTravelMenu();
       fetchers = GlobalFetcher();
       await getSchoolTheme();
 
@@ -181,13 +179,9 @@ class SPHclient {
         key: StorageKey.userSchoolName, value: schoolName);
 
     userData = await fetchUserData();
-    supportedApps = await getSupportedApps();
 
     await globalStorage.write(
         key: StorageKey.userData, value: jsonEncode(userData));
-
-    await globalStorage.write(
-        key: StorageKey.userSupportedApplets, value: jsonEncode(supportedApps));
   }
 
   ///Fetches the school's accent color and saves it to the storage.
@@ -273,7 +267,7 @@ class SPHclient {
   }
 
   ///returns the lanis fast navigation menubar.
-  Future<dynamic> getSupportedApps() async {
+  Future<dynamic> getTravelMenu() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps");
     return jsonDecode(response.data.toString())["entrys"];
@@ -281,7 +275,7 @@ class SPHclient {
 
   ///check weather the user is able to use a feature of the application.
   bool doesSupportFeature(SPHAppEnum feature) {
-    var app = supportedApps
+    var app = travelMenu
         .where((element) => element["link"].toString() == feature.php)
         .singleOrNull;
     if (app == null) return false;

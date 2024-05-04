@@ -17,17 +17,26 @@ class TimetableParser {
   Future<Element?> getTableBody() async {
     final redirectedRequest =
         await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
+
+    if (redirectedRequest.headers["location"] == null) {
+      return null;
+    }
+
     final response = await dio.get(
-        "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]![0]}");
+        "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]?[0]}");
 
     var document = parse(response.data);
     return document.querySelector("#all tbody");
   }
 
-  Future<List> getPlan() async {
+  Future<List<Day>?> getPlan() async {
     final tbody = await getTableBody();
-
-    return parseRoomPlan(tbody!);
+    if (tbody == null) return null;
+    try {
+      return parseRoomPlan(tbody);
+    } catch (e) {
+      return null;
+    }
   }
 
   List<Day> parseRoomPlan(Element tbody) {

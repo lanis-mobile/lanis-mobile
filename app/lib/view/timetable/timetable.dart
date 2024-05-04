@@ -46,10 +46,13 @@ class _TimetableAnsichtState extends State<TimetableAnsicht>
       body: StreamBuilder<FetcherResponse>(
         stream: timetableFetcher.stream,
         builder: (context, snapshot) {
-          if (snapshot.data?.content == null) {
+          if (snapshot.data?.status == FetcherStatus.fetching) {
             return const Center(
               child: CircularProgressIndicator(),
             );
+          }
+          if (snapshot.data?.content == null || snapshot.data?.status == FetcherStatus.error) {
+            return const Center(child: Text("Fehler beim Laden"));
           }
           return SfCalendar(
             view: CalendarView.day,
