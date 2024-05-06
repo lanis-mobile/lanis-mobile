@@ -215,7 +215,8 @@ class SubstitutionsParser {
   }
 
   void loadFilterFromStorage() async {
-    String? filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
+    String filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
+    if (filterString == "") return;
     localFilter = Map<String, EntryFilter>.from(jsonDecode(filterString)).map((key, value) {
       return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
     });
