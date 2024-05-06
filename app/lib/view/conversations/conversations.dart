@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:sph_plan/view/conversations/detailed_conversation.dart';
+import 'package:sph_plan/shared/types/conversations.dart';
 
 import '../../client/client.dart';
 import '../../client/fetcher.dart';
@@ -34,8 +34,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
 
   late TabController _tabController;
 
-  final TextEditingController receivers = TextEditingController();
-  final TextEditingController subject = TextEditingController();
+  final TextEditingController receiversController = TextEditingController();
+  final TextEditingController subjectController = TextEditingController();
 
   @override
   void initState() {
@@ -161,12 +161,6 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                     } else {
                       Navigator.push(
                           context,
-                          /*MaterialPageRoute(
-                              builder: (context) => DetailedConversationAnsicht(
-                                    uniqueID: conversations[index]
-                                        ["Uniquid"], // nice typo Lanis
-                                    title: conversations[index]["Betreff"],
-                                  ))*/
                           MaterialPageRoute(
                               builder: (context) => ConversationsChat(uniqueID: conversations[index]
                               ["Uniquid"], // nice typo Lanis
@@ -186,6 +180,61 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         },
       ),
     );
+  }
+
+  void showCreationDialog(ChatType chatType) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Neuen Gruppenchat erstellen"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(chatType.description),
+              TextField(
+                controller: receiversController,
+                decoration: const InputDecoration(
+                    hintText: 'Empfänger-IDs'
+                ),
+              ),
+              TextField(
+                controller: subjectController,
+                decoration: const InputDecoration(
+                    hintText: 'Betreff'
+                ),
+              )
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Zurück")
+            ),
+            FilledButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ConversationsChat(
+                      title: subjectController.text,
+                      creationData: PartialChat(
+                          type: chatType,
+                          subject: subjectController.text,
+                          receivers: receiversController.text.split(";")
+                      ),
+                    )),
+                  );
+                },
+                child: const Text("Erstellen")
+            ),
+          ],
+        )
+    ).then((value) {
+      subjectController.clear();
+      receiversController.clear();
+    });
   }
 
   @override
@@ -245,68 +294,41 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
       floatingActionButton: ExpandableFab(
         distance: 70,
         type: ExpandableFabType.up,
+          openButtonBuilder: RotateFloatingActionButtonBuilder(
+            child: const Icon(Icons.add)
+          ),
           children: [
             FloatingActionButton.extended(
               heroTag: null,
               icon: const Icon(Icons.speaker_notes_off),
-              label: Text("Hinweis"),
-              onPressed: () {},
+              label: const Text("Hinweis"),
+              onPressed: () {
+                showCreationDialog(ChatType.noAnswerAllowed);
+              },
             ),
             FloatingActionButton.extended(
               heroTag: null,
               icon: const Icon(Icons.mic),
-              label: Text("Mitteilung"),
-              onPressed: () {},
+              label: const Text("Mitteilung"),
+              onPressed: () {
+                showCreationDialog(ChatType.privateAnswerOnly);
+              },
             ),
             FloatingActionButton.extended(
               heroTag: null,
               icon: const Icon(Icons.forum),
               label: const Text("Gruppenchat"),
               onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Neuen Gruppenchat erstellen"),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextField(
-                            controller: receivers,
-                            decoration: const InputDecoration(
-                                hintText: 'Lehrer-IDs'
-                            ),
-                          ),
-                          TextField(
-                            controller: subject,
-                            decoration: const InputDecoration(
-                                hintText: 'Betreff'
-                            ),
-                          )
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                            onPressed: () async {
-                              dynamic response = await client.conversations.createConversation(
-                                  ["l-221938"],
-                                  "groupOnly",
-                                  "Nachricht anfangen aus App",
-                                  "test"
-                              );
-                              print(response);
-                            },
-                            child: const Text("Erstellen")
-                        )
-                      ],
-                    )
-                );
+                showCreationDialog(ChatType.groupOnly);
               },
             ),
             FloatingActionButton.extended(
               heroTag: null,
               icon: const Icon(Icons.groups),
-              label: Text("Offener Chat"),
-              onPressed: () {},
+              label: const Text("Offener Chat"),
+              onPressed: () {
+                showCreationDialog(ChatType.openChat);
+              },
             ),
           ]
       ),

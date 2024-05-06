@@ -11,10 +11,11 @@ import '../../shared/types/conversations.dart';
 import '../../shared/widgets/error_view.dart';
 
 class ConversationsChat extends StatefulWidget {
-  final String uniqueID;
+  final String? uniqueID;
   final String? title;
+  final PartialChat? creationData;
 
-  const ConversationsChat({super.key, required this.uniqueID, required this.title,});
+  const ConversationsChat({super.key, required this.title, this.uniqueID, this.creationData});
 
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
@@ -23,6 +24,8 @@ class ConversationsChat extends StatefulWidget {
 class _ConversationsChatState extends State<ConversationsChat> {
   late final Future<dynamic> _conversationFuture = _initConversation();
 
+  String? uniqueId;
+
   late final String groupOnly;
   late final String privateAnswerOnly;
 
@@ -30,7 +33,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
   final Map<String, types.User> _users = {};
   final _me = const types.User(id: 'me');
 
-  int parseDateString(String date) {
+  int _parseDateString(String date) {
     if (date.contains("heute")) {
       DateTime now = DateTime.now();
       DateTime conversation = DateFormat("H:m").parse(date.substring(6));
@@ -46,9 +49,25 @@ class _ConversationsChatState extends State<ConversationsChat> {
     }
   }
 
-  Future<void> _sendMessage(types.PartialText message, String groupOnly, String privateAnswerOnly) async {
+  Future<bool> _pushMessage(String message) async {
+    late final bool result;
+    if (uniqueId != null) {
+      result = await client.conversations.replyToConversation(
+          uniqueId!,
+          "all",
+          groupOnly,
+          privateAnswerOnly,
+          message
+      );
+    } else {
+      final dynamic newConversation = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, message);
+      result = newConversation["back"];
+      if (result) uniqueId = newConversation["id"];
+    }
+    return result;
+  }
 
-
+  Future<void> _sendMessage(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _me,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -60,19 +79,32 @@ class _ConversationsChatState extends State<ConversationsChat> {
       _messages.insert(0, textMessage);
     });
 
-    bool result = await client.conversations.replyToConversation(
-      widget.uniqueID,
-      "all",
-        groupOnly,
-        privateAnswerOnly,
-        message.text
-    );
+    final bool result = await _pushMessage(message.text);
 
     setState(() {
       if (result) {
         _messages[_messages.indexOf(textMessage)] = _messages[_messages.indexOf(textMessage)].copyWith(status: types.Status.sent);
       } else {
         _messages[_messages.indexOf(textMessage)] = _messages[_messages.indexOf(textMessage)].copyWith(status: types.Status.error);
+        if (uniqueId == null) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  icon: const Icon(Icons.error),
+                  title: const Text("Es konnte keine neue Konversation erstellt werden!"),
+                  actions: [
+                    FilledButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Ok")
+                    ),
+                  ],
+                );
+              }
+          );
+        }
       }
     });
   }
@@ -98,7 +130,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
       text: content,
       author: user,
       id: message["Uniquid"],
-      createdAt: parseDateString(message["Datum"]),
+      createdAt: _parseDateString(message["Datum"]),
       status: types.Status.sent
     );
   }
@@ -112,7 +144,13 @@ class _ConversationsChatState extends State<ConversationsChat> {
   }
 
   Future<void> _initConversation() async {
-    dynamic response = await client.conversations.getSingleConversation(widget.uniqueID);
+    if (widget.uniqueID == null) {
+      return;
+    }
+
+    uniqueId = widget.uniqueID!;
+
+    dynamic response = await client.conversations.getSingleConversation(uniqueId!);
 
     groupOnly = response["groupOnly"];
     privateAnswerOnly = response["privateAnswerOnly"];
@@ -140,11 +178,39 @@ class _ConversationsChatState extends State<ConversationsChat> {
               return Chat(
                 messages: _messages,
                 onSendPressed: (types.PartialText message) async {
-                  await _sendMessage(
-                    message,
-                    groupOnly,
-                    privateAnswerOnly
-                  );
+                  if (uniqueId == null) {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            icon: const Icon(Icons.question_mark),
+                            title: const Text("Bist du dir sicher?"),
+                            content: const Text("Mit dieser Nachricht erstellst du eine neue Konversation!"),
+                            actions: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Zurück")
+                              ),
+                              FilledButton(
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    await _sendMessage(
+                                        message
+                                    );
+                                  },
+                                  child: const Text("Erstellen")
+                              ),
+                            ],
+                          );
+                        }
+                    );
+                  } else {
+                    await _sendMessage(
+                        message
+                    );
+                  }
                 },
                 user: _me,
                 showUserNames: true,

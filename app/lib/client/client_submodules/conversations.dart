@@ -213,7 +213,7 @@ class ConversationsParser {
         )
     );
 
-    return json.decode(response.data)["back"]; // "back" should be bool, id is Uniquid
+    return json.decode(response.data); // "back" should be bool, id is Uniquid
   }
 
   /// Searches for teacher using at least 2 chars.
