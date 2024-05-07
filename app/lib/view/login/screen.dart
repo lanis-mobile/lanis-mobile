@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:sph_plan/view/login/setup_screen_page_view_models.dart';
 import 'auth.dart';
@@ -24,14 +26,15 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
     if (currentPage == "intro") {
       return IntroductionScreen(
           next: const Icon(Icons.arrow_forward),
-          done: const Text("zum Login"),
+          done: const Text("Login"),
           onDone: () {
             setState(() {
               currentPage = "login";
             });
           },
-          dotsDecorator:
-              DotsDecorator(activeColor: Theme.of(context).colorScheme.primary),
+          dotsDecorator: const DotsDecorator(
+            spacing: EdgeInsets.all(2.0),
+          ),
           pages: intoScreenPageViewModels(context));
     } else if (currentPage == "login") {
       return Scaffold(
@@ -52,10 +55,12 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
             Navigator.pop(context);
           });
         },
+        dotsDecorator: DotsDecorator(
+          spacing: const EdgeInsets.all(2.0),
+          activeColor: Theme.of(context).colorScheme.primary
+        ),
         pages: setupScreenPageViewModels(context),
         dotsFlex: 2,
-        dotsDecorator:
-            DotsDecorator(activeColor: Theme.of(context).colorScheme.primary),
       );
     }
 

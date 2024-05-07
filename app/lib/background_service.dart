@@ -24,10 +24,14 @@ void callbackDispatcher() {
 }
 
 Future<void> performBackgroundFetch() async {
-  var client = SPHclient();
-  await client.prepareDio();
-  await client.loadFromStorage();
   try {
+    var client = SPHclient();
+    await client.prepareDio();
+    await client.loadFromStorage();
+    if (client.username == "" || client.password == "") {
+      logger.w("No credentials found, aborting background fetch");
+      return;
+    }
     await client.login(backgroundFetch: true);
     final vPlan =
         await client.substitutions.getAllSubstitutions(skipLoginCheck: true, filtered: true);
