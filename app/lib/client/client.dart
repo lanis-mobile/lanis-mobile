@@ -33,7 +33,7 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
-  dynamic userData = {};
+  Map<String, String> userData = {};
   List<dynamic> travelMenu = [];
   Timer? preventLogoutTimer;
 
@@ -99,8 +99,6 @@ class SPHclient {
 
     schoolName = await globalStorage.read(key: StorageKey.userSchoolName);
 
-    userData = jsonDecode(await globalStorage.read(key: StorageKey.userData));
-
     fetchers = GlobalFetcher();
 
     substitutions.loadFilterFromStorage();
@@ -109,9 +107,7 @@ class SPHclient {
   }
 
   ///Logs the user in and fetches the necessary metadata.
-  Future<void> login({userLogin = false}) async {
-    logger.i("Trying to log in");
-
+  Future<void> login({userLogin = false, backgroundFetch = false}) async {
     if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
     }
@@ -130,7 +126,10 @@ class SPHclient {
       if (userLogin) {
         await fetchRedundantData();
       }
-      travelMenu = await getTravelMenu();
+      if (!backgroundFetch) {
+        travelMenu = await getTravelMenu();
+        userData = await fetchUserData();
+      }
       fetchers = GlobalFetcher();
       await getSchoolTheme();
 
@@ -177,11 +176,6 @@ class SPHclient {
     schoolName = schoolInfo["Name"];
     await globalStorage.write(
         key: StorageKey.userSchoolName, value: schoolName);
-
-    userData = await fetchUserData();
-
-    await globalStorage.write(
-        key: StorageKey.userData, value: jsonEncode(userData));
   }
 
   ///Fetches the school's accent color and saves it to the storage.
@@ -298,7 +292,7 @@ class SPHclient {
   }
 
   ///parsed personal information of the user.
-  Future<dynamic> fetchUserData() async {
+  Future<Map<String, String>> fetchUserData() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
     var document = parse(response.data);
@@ -306,7 +300,7 @@ class SPHclient {
         document.querySelector("div.col-md-12 table.table.table-striped tbody");
 
     if (userDataTableBody != null) {
-      var result = {};
+      Map<String, String> result = {};
 
       var rows = userDataTableBody.querySelectorAll("tr");
       for (var row in rows) {

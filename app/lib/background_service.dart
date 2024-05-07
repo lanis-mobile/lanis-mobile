@@ -6,9 +6,9 @@ import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:workmanager/workmanager.dart';
 
-import '../client/client.dart';
-import '../client/logger.dart';
-import '../client/storage.dart';
+import 'client/client.dart';
+import 'client/logger.dart';
+import 'client/storage.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -28,9 +28,9 @@ Future<void> performBackgroundFetch() async {
   await client.prepareDio();
   await client.loadFromStorage();
   try {
-    await client.login();
+    await client.login(backgroundFetch: true);
     final vPlan =
-        await client.substitutions.getAllSubstitutions(skipCheck: true, filtered: true);
+        await client.substitutions.getAllSubstitutions(skipLoginCheck: true, filtered: true);
     List<Substitution> allSubstitutions = vPlan.allSubstitutions;
     String messageBody = "";
 

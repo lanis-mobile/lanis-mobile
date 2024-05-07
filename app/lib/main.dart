@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
-import 'background_service/service.dart' as background_service;
+import 'background_service.dart' as background_service;
 
 void main() async {
   ErrorWidget.builder = (FlutterErrorDetails details) {
