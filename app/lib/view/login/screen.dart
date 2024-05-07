@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:sph_plan/view/login/setup_screen_page_view_models.dart';
 import 'auth.dart';
@@ -13,8 +11,10 @@ class WelcomeLoginScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _WelcomeLoginScreenState();
 }
 
+enum PageType { intro, login, setup }
+
 class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
-  String currentPage = "intro";
+  PageType currentPage = PageType.intro;
   List<String> schoolList = [];
 
   @override
@@ -23,30 +23,30 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
   }
 
   Widget buildBody() {
-    if (currentPage == "intro") {
+    if (currentPage == PageType.intro) {
       return IntroductionScreen(
           next: const Icon(Icons.arrow_forward),
           done: const Text("Login"),
           onDone: () {
             setState(() {
-              currentPage = "login";
+              currentPage = PageType.login;
             });
           },
           dotsDecorator: const DotsDecorator(
             spacing: EdgeInsets.all(2.0),
           ),
           pages: intoScreenPageViewModels(context));
-    } else if (currentPage == "login") {
+    } else if (currentPage == PageType.login) {
       return Scaffold(
         body: LoginForm(
           afterLogin: () {
             setState(() {
-              currentPage = "setup";
+              currentPage = PageType.setup;
             });
           },
         ),
       );
-    } else if (currentPage == "setup") {
+    } else if (currentPage == PageType.setup) {
       return IntroductionScreen(
         done: const Text("Fertig"),
         showNextButton: false,
