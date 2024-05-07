@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
+import '../../client/logger.dart';
 import '../../client/storage.dart';
 
 class LoginForm extends StatefulWidget {
@@ -40,11 +42,20 @@ class LoginFormState extends State<LoginForm> {
   String dropDownSelectedItem = "Max Planck Schule - Rüsselsheim (5182)";
 
   Future<void> loadSchoolList() async {
-    final String data = await DefaultAssetBundle.of(context)
-        .loadString("assets/school_list.json");
-
+    final dio = Dio();
+    final response = await dio.get(
+        "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist");
+    List<dynamic> data = jsonDecode(response.data);
+    List<String> result = [];
+    for (var elem in data) {
+      for (var schule in elem['Schulen']) {
+        String name = schule['Name'].replaceAll("-", " ");
+        result.add('$name - ${schule['Ort']} (${schule['Id']})');
+      }
+    }
+    result.sort();
     setState(() {
-      schoolList = List<String>.from(jsonDecode(data));
+      schoolList = result;
     });
   }
 
