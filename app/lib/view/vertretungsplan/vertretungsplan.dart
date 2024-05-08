@@ -36,13 +36,13 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     substitutionsFetcher.fetchData();
   }
 
-  Widget noticeWidget(int entriesLength) {
+  Widget lastWidget({required int entriesLength, required DateTime lastEdit} ) {
     String title = entriesLength != 0
         ? AppLocalizations.of(context)!.noFurtherEntries
         : AppLocalizations.of(context)!.noEntries;
     return ListTile(
       title: Text(title, style: const TextStyle(fontSize: 22)),
-      subtitle: Text(AppLocalizations.of(context)!.substitutionsEndCardMessage),
+      subtitle: Text(AppLocalizations.of(context)!.substitutionsEndCardMessage+lastEdit.toString()),
     );
   }
 
@@ -71,9 +71,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                     if (entryIndex == entriesLength) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: padding),
-                        child: Card(
-                          child: noticeWidget(entriesLength),
-                        ),
+                        child: lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
                       );
                     }
 
@@ -92,9 +90,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                     if (entryIndex == entriesLength) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: padding),
-                        child: Card(
-                          child: noticeWidget(entriesLength),
-                        ),
+                        child: lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
                       );
                     }
 

@@ -44,7 +44,7 @@ class SubstitutionsParser {
     } on SocketException {
       throw NetworkException();
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -152,34 +152,28 @@ class SubstitutionsParser {
   ///
   /// If the list is empty, the substitution plan is either empty or in non-AJAX format
   List<String> getSubstitutionDates(String document) {
-    try {
-      if (document.contains("Fehler - Schulportal Hessen - ")) {
-        throw UnauthorizedException();
-      } else {
-        RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
-        Iterable<RegExpMatch> matches = datePattern.allMatches(document);
+    if (document.contains("Fehler - Schulportal Hessen - ")) {
+      throw UnauthorizedException();
+    } else {
+      RegExp datePattern = RegExp(r'data-tag="(\d{2})\.(\d{2})\.(\d{4})"');
+      Iterable<RegExpMatch> matches = datePattern.allMatches(document);
 
-        List<String> uniqueDates = [];
+      List<String> uniqueDates = [];
 
-        for (RegExpMatch match in matches) {
-          int day = int.parse(match.group(1) ?? "00");
-          int month = int.parse(match.group(2) ?? "00");
-          int year = int.parse(match.group(3) ?? "00");
-          DateTime extractedDate = DateTime(year, month, day);
+      for (RegExpMatch match in matches) {
+        int day = int.parse(match.group(1) ?? "00");
+        int month = int.parse(match.group(2) ?? "00");
+        int year = int.parse(match.group(3) ?? "00");
+        DateTime extractedDate = DateTime(year, month, day);
 
-          String dateString = extractedDate.format("dd.MM.yyyy");
+        String dateString = extractedDate.format("dd.MM.yyyy");
 
-          if (!uniqueDates.any((date) => date == dateString)) {
-            uniqueDates.add(dateString);
-          }
+        if (!uniqueDates.any((date) => date == dateString)) {
+          uniqueDates.add(dateString);
         }
-
-        return uniqueDates;
       }
-    } on SocketException {
-      throw NetworkException();
-    } catch (e) {
-      throw UnknownException();
+
+      return uniqueDates;
     }
   }
 
@@ -192,6 +186,7 @@ class SubstitutionsParser {
 
     try {
       String document = await getSubstitutionPlanDocument();
+      DateTime? lastEdit = parseLastEditDate(document);
       var dates = getSubstitutionDates(document);
 
       if (dates.isEmpty) {
@@ -201,6 +196,7 @@ class SubstitutionsParser {
       }
 
       final fullPlan = SubstitutionPlan();
+      fullPlan.lastUpdated = lastEdit ?? DateTime.now();
       List<Future<SubstitutionDay>> futures = dates.map((date) => getSubstitutionsAJAX(date)).toList();
       List<SubstitutionDay> plans = await Future.wait(futures);
       for (SubstitutionDay plan in plans) {
@@ -210,7 +206,7 @@ class SubstitutionsParser {
       fullPlan.removeEmptyDays();
       return fullPlan;
     } catch (e) {
-      throw UnknownException();
+      rethrow;
     }
   }
 
@@ -224,6 +220,21 @@ class SubstitutionsParser {
 
   void saveFilterToStorage() async {
     await globalStorage.write(key: StorageKey.substitutionsFilter, value: jsonEncode(localFilter));
+  }
+
+  ///parses a the first occurence of a string this type into a DateTime object
+  ///"Letzte Aktualisierung: 08.05.2024 um 13:35:30 Uhr"
+  DateTime? parseLastEditDate(String document) {
+    RegExp lastEditPattern = RegExp(r'Letzte Aktualisierung: (\d{2})\.(\d{2})\.(\d{4}) um (\d{2}):(\d{2}):(\d{2}) Uhr');
+    RegExpMatch? match = lastEditPattern.firstMatch(document);
+    if (match == null) return null;
+    int day = int.parse(match.group(1) ?? "00");
+    int month = int.parse(match.group(2) ?? "00");
+    int year = int.parse(match.group(3) ?? "00");
+    int hour = int.parse(match.group(4) ?? "00");
+    int minute = int.parse(match.group(5) ?? "00");
+    int second = int.parse(match.group(6) ?? "00");
+    return DateTime(year, month, day, hour, minute, second);
   }
 }
 
@@ -341,6 +352,8 @@ class SubstitutionDay {
 /// A data class to store all substitution information available
 class SubstitutionPlan {
   final List<SubstitutionDay> days;
+  SubstitutionFetchType fetchType = SubstitutionFetchType.unknown;
+  DateTime lastUpdated = DateTime.now();
 
   SubstitutionPlan({List<SubstitutionDay>? days}) : days = days ?? [];
 
@@ -366,4 +379,10 @@ class SubstitutionPlan {
     }
     removeEmptyDays();
   }
+}
+
+enum SubstitutionFetchType {
+  ajax,
+  nonAjax,
+  unknown,
 }
