@@ -1,3 +1,4 @@
+import 'package:chips_input/chips_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:sph_plan/shared/types/conversations.dart';
@@ -34,7 +35,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
 
   late TabController _tabController;
 
-  final TextEditingController receiversController = TextEditingController();
+  final List<String> receivers = [];
   final TextEditingController subjectController = TextEditingController();
 
   @override
@@ -183,6 +184,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
   }
 
   void showCreationDialog(ChatType chatType) {
+    final List<SearchEntry> searchEntries = [];
+    
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -191,10 +194,41 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(chatType.description),
-              TextField(
-                controller: receiversController,
-                decoration: const InputDecoration(
-                    hintText: 'Empfänger-IDs'
+              Flexible(
+                child: ChipsInput<String>(
+                  enabled: true,
+                  autocorrect: false,
+                  decoration: const InputDecoration(
+                    labelText: "Empfänger-IDs",
+                  ),
+                  findSuggestions: (String query) async {
+                    if (query.trim().isEmpty) {
+                      return [];
+                    }
+
+                    final List<SearchEntry> entries = await client.conversations.searchTeacher(query);
+                    searchEntries.addAll(entries);
+                    return entries.map((e) => e.name).toList();
+                  },
+                  onChanged: (data) {
+                    receivers.clear();
+                    for (String entry in data) {
+                      receivers.add(searchEntries.firstWhere((element) => element.name == entry).id);
+                    }
+                  },
+                  chipBuilder: (context, state, profile) {
+                    return InputChip(
+                      key: ObjectKey(profile),
+                      label: Text(profile),
+                      onDeleted: () => state.deleteChip(profile),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    );
+                  },
+                  suggestionBuilder: (context, query) {
+                    return ListTile(
+                      title: Text('"$query" hinzufügen'),
+                    );
+                  },
                 ),
               ),
               TextField(
@@ -222,7 +256,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                       creationData: PartialChat(
                           type: chatType,
                           subject: subjectController.text,
-                          receivers: receiversController.text.split(";")
+                          receivers: receivers
                       ),
                     )),
                   );
@@ -233,7 +267,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
         )
     ).then((value) {
       subjectController.clear();
-      receiversController.clear();
+      receivers.clear();
     });
   }
 
