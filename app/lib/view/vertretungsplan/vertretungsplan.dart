@@ -1,3 +1,4 @@
+import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
@@ -37,12 +38,18 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
   }
 
   Widget lastWidget({required int entriesLength, required DateTime lastEdit} ) {
-    String title = entriesLength != 0
-        ? AppLocalizations.of(context)!.noFurtherEntries
-        : AppLocalizations.of(context)!.noEntries;
     return ListTile(
-      title: Text(title, style: const TextStyle(fontSize: 22)),
-      subtitle: Text(AppLocalizations.of(context)!.substitutionsEndCardMessage+lastEdit.toString()),
+      title: Center(
+        child: Text(
+        AppLocalizations.of(context)!.noFurtherEntries,
+        style: const TextStyle(fontSize: 22)),
+      ),
+      subtitle: Center(
+        child: Text(
+        AppLocalizations.of(context)!.substitutionsEndCardMessage(lastEdit.format('dd.MM.yyyy HH:mm')),
+        textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 
