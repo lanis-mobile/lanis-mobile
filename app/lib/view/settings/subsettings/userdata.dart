@@ -26,7 +26,7 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
   void loadUserData() {
     setState(() {
       userDataListTiles.clear();
-      (client.userData ?? []).forEach((key, value) {
+      (client.userData).forEach((key, value) {
         userDataListTiles.add(ListTile(
           title: Text(value),
           subtitle: Text(toBeginningOfSentenceCase(key)!),

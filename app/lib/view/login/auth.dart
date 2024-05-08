@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -34,18 +35,36 @@ class LoginFormState extends State<LoginForm> {
   bool countlyAgree = false;
 
   String selectedSchoolID = "5182";
-  List<String> schoolList = [
-    "Error: Not able to load schools. Use school id instead!"
-  ];
+  List<String> schoolList = [];
   String dropDownSelectedItem = "Max Planck Schule - Rüsselsheim (5182)";
 
   Future<void> loadSchoolList() async {
-    final String data = await DefaultAssetBundle.of(context)
-        .loadString("assets/school_list.json");
-
-    setState(() {
-      schoolList = List<String>.from(jsonDecode(data));
-    });
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+          "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist");
+      List<dynamic> data = jsonDecode(response.data);
+      List<String> result = [];
+      for (var elem in data) {
+        for (var schule in elem['Schulen']) {
+          String name = schule['Name'].replaceAll("-", " ").replaceAll("\n", " ");
+          result.add('$name - ${schule['Ort']} (${schule['Id']})');
+        }
+      }
+      result.sort();
+      setState(() {
+        schoolList = result;
+      });
+    } catch (e) {
+      // Show a SnackBar to inform the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.authFailedLoadingSchools),
+          duration: const Duration(seconds: 10),
+        ),
+      );
+      Future.delayed(const Duration(seconds: 10), loadSchoolList);
+    }
   }
 
   void login(String username, String password, String schoolID) async {

@@ -33,8 +33,8 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
-  dynamic userData = {};
-  List<dynamic> supportedApps = [];
+  Map<String, String> userData = {};
+  List<dynamic> travelMenu = [];
   Timer? preventLogoutTimer;
 
   late Cryptor cryptor = Cryptor();
@@ -99,11 +99,6 @@ class SPHclient {
 
     schoolName = await globalStorage.read(key: StorageKey.userSchoolName);
 
-    userData = jsonDecode(await globalStorage.read(key: StorageKey.userData));
-
-    supportedApps = jsonDecode(
-        await globalStorage.read(key: StorageKey.userSupportedApplets));
-
     fetchers = GlobalFetcher();
 
     substitutions.loadFilterFromStorage();
@@ -112,9 +107,7 @@ class SPHclient {
   }
 
   ///Logs the user in and fetches the necessary metadata.
-  Future<void> login({userLogin = false}) async {
-    logger.i("Trying to log in");
-
+  Future<void> login({userLogin = false, backgroundFetch = false}) async {
     if (!(await connectionChecker.hasInternetAccess)) {
       throw NoConnectionException();
     }
@@ -132,6 +125,10 @@ class SPHclient {
 
       if (userLogin) {
         await fetchRedundantData();
+      }
+      if (!backgroundFetch) {
+        travelMenu = await getTravelMenu();
+        userData = await fetchUserData();
       }
       fetchers = GlobalFetcher();
       await getSchoolTheme();
@@ -179,15 +176,6 @@ class SPHclient {
     schoolName = schoolInfo["Name"];
     await globalStorage.write(
         key: StorageKey.userSchoolName, value: schoolName);
-
-    userData = await fetchUserData();
-    supportedApps = await getSupportedApps();
-
-    await globalStorage.write(
-        key: StorageKey.userData, value: jsonEncode(userData));
-
-    await globalStorage.write(
-        key: StorageKey.userSupportedApplets, value: jsonEncode(supportedApps));
   }
 
   ///Fetches the school's accent color and saves it to the storage.
@@ -273,7 +261,7 @@ class SPHclient {
   }
 
   ///returns the lanis fast navigation menubar.
-  Future<dynamic> getSupportedApps() async {
+  Future<dynamic> getTravelMenu() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps");
     return jsonDecode(response.data.toString())["entrys"];
@@ -281,7 +269,7 @@ class SPHclient {
 
   ///check weather the user is able to use a feature of the application.
   bool doesSupportFeature(SPHAppEnum feature) {
-    var app = supportedApps
+    var app = travelMenu
         .where((element) => element["link"].toString() == feature.php)
         .singleOrNull;
     if (app == null) return false;
@@ -304,7 +292,7 @@ class SPHclient {
   }
 
   ///parsed personal information of the user.
-  Future<dynamic> fetchUserData() async {
+  Future<Map<String, String>> fetchUserData() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
     var document = parse(response.data);
@@ -312,7 +300,7 @@ class SPHclient {
         document.querySelector("div.col-md-12 table.table.table-striped tbody");
 
     if (userDataTableBody != null) {
-      var result = {};
+      Map<String, String> result = {};
 
       var rows = userDataTableBody.querySelectorAll("tr");
       for (var row in rows) {

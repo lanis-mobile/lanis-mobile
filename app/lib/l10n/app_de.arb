@@ -88,6 +88,7 @@
   "authTermsOfService": "Datenschutzerklärung",
   "authOfLanisMobile": " von lanis-mobile zu.",
   "authResetPassword": "Passwort zurücksetzen",
+  "authFailedLoadingSchools": "Fehler beim Laden der Schulen. Erneut versuchen in 10 Sekunden...",
 
   "setupNonStudentTitle": "Lehrkräfte oder Elternaccount",
   "setupNonStudent": "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren.",

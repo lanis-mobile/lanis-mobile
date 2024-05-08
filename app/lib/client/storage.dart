@@ -15,9 +15,6 @@ enum StorageKey {
   userSchoolName,
   userData,
 
-  ///Fast Navigation menu JSON [client.getSupportedApps]
-  userSupportedApplets,
-
   substitutionsFilter,
 
   lastPushMessageHash,
@@ -50,8 +47,6 @@ extension on StorageKey {
         return "schoolName";
       case StorageKey.userData:
         return "userData";
-      case StorageKey.userSupportedApplets:
-        return "supportedApps";
       case StorageKey.schoolImageLocation:
         return "schoolImageLocation";
       case StorageKey.schoolLogoLocation:
@@ -81,8 +76,6 @@ extension on StorageKey {
         return "0.0.0";
       case StorageKey.userData:
         return "{}";
-      case StorageKey.userSupportedApplets:
-        return "[]";
       case StorageKey.settingsPushServiceOngoing:
         return "false";
       case StorageKey.settingsSelectedColor:

@@ -183,8 +183,8 @@ class SubstitutionsParser {
     }
   }
 
-  Future<SubstitutionPlan> getAllSubstitutions({required bool filtered, skipCheck = false}) async {
-    if (!skipCheck) {
+  Future<SubstitutionPlan> getAllSubstitutions({required bool filtered, skipLoginCheck = false}) async {
+    if (!skipLoginCheck) {
       if (!client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
         throw NotSupportedException();
       }
@@ -201,9 +201,9 @@ class SubstitutionsParser {
       }
 
       final fullPlan = SubstitutionPlan();
-
-      for (String date in dates) {
-        SubstitutionDay plan = await getSubstitutionsAJAX(date);
+      List<Future<SubstitutionDay>> futures = dates.map((date) => getSubstitutionsAJAX(date)).toList();
+      List<SubstitutionDay> plans = await Future.wait(futures);
+      for (SubstitutionDay plan in plans) {
         fullPlan.add(plan);
       }
       if (filtered) fullPlan.filterAll(localFilter);
@@ -215,7 +215,8 @@ class SubstitutionsParser {
   }
 
   void loadFilterFromStorage() async {
-    String? filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
+    String filterString = await globalStorage.read(key: StorageKey.substitutionsFilter);
+    if (filterString == "") return;
     localFilter = Map<String, EntryFilter>.from(jsonDecode(filterString)).map((key, value) {
       return MapEntry(key, parseEntryFilter(Map<String, dynamic>.from(value)));
     });
