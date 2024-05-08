@@ -352,7 +352,6 @@ class SubstitutionDay {
 /// A data class to store all substitution information available
 class SubstitutionPlan {
   final List<SubstitutionDay> days;
-  SubstitutionFetchType fetchType = SubstitutionFetchType.unknown;
   DateTime lastUpdated = DateTime.now();
 
   SubstitutionPlan({List<SubstitutionDay>? days}) : days = days ?? [];
@@ -379,10 +378,4 @@ class SubstitutionPlan {
     }
     removeEmptyDays();
   }
-}
-
-enum SubstitutionFetchType {
-  ajax,
-  nonAjax,
-  unknown,
 }
