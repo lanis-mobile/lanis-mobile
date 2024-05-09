@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
 
+import '../format_text.dart';
 import '../marquee.dart';
 
 class SubstitutionListTile extends StatelessWidget {
@@ -34,7 +35,7 @@ class SubstitutionListTile extends StatelessWidget {
               )
             ],
           ),
-          Text(value!)
+              SubstitutionsFormattedText(value!, Theme.of(context).textTheme.bodyMedium!)
         ]));
   }
 
@@ -144,5 +145,39 @@ class SubstitutionListTile extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Takes a string with eventual html tags and applies the necessary formatting according to the tags.
+/// Tags may only occur at the beginning or end of the string.
+///
+/// Tags include: <b>, <i>, <del>
+class SubstitutionsFormattedText extends StatelessWidget {
+  final String data;
+  final TextStyle style;
+
+  const SubstitutionsFormattedText(this.data, this.style);
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(text: _format(data, style));
+  }
+
+  TextSpan _format(String data, TextStyle style) {
+    if (data.startsWith("<b>") && data.endsWith("</b>")) {
+      return TextSpan(
+          text: data.substring(3, data.length - 4),
+          style: style.copyWith(fontWeight: FontWeight.bold));
+    } else if (data.startsWith("<i>") && data.endsWith("</i>")) {
+      return TextSpan(
+          text: data.substring(3, data.length - 4),
+          style: style.copyWith(fontStyle: FontStyle.italic));
+    } else if (data.startsWith("<del>") && data.endsWith("</del>")) {
+      return TextSpan(
+          text: data.substring(5, data.length - 6),
+          style: style.copyWith(decoration: TextDecoration.lineThrough));
+    } else {
+      return TextSpan(text: data, style: style);
+    }
   }
 }
