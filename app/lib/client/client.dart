@@ -54,6 +54,23 @@ class SPHclient {
     jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
     dio.interceptors.add(InterceptorsWrapper(
+      onResponse: (Response response, ResponseInterceptorHandler handler) {
+        if (response.data != null) {
+          connectionChecker.status = ConnectionStatus.connected;
+        } else {
+          connectionChecker.status = ConnectionStatus.disconnected;
+        }
+        return handler.next(response);
+      },
+      onError: (DioException error, ErrorInterceptorHandler handler) {
+        if (error.type == DioExceptionType.connectionTimeout ||
+            error.type == DioExceptionType.receiveTimeout) {
+          connectionChecker.status = ConnectionStatus.disconnected;
+        }
+        return handler.next(error);
+      },
+    ));
+    dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
         options.headers.addAll({
           'Cache-Control': 'no-cache',
@@ -108,7 +125,7 @@ class SPHclient {
 
   ///Logs the user in and fetches the necessary metadata.
   Future<void> login({userLogin = false, backgroundFetch = false}) async {
-    if (!(await connectionChecker.hasInternetAccess)) {
+    if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
 
@@ -121,7 +138,7 @@ class SPHclient {
 
       preventLogoutTimer?.cancel();
       preventLogoutTimer = Timer.periodic(
-          const Duration(seconds: 60), (timer) => preventLogout());
+          const Duration(seconds: 10), (timer) => preventLogout());
 
       if (userLogin) {
         await fetchRedundantData();
