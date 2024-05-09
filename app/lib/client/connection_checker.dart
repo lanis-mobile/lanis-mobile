@@ -13,6 +13,10 @@ class CustomConnectionChecker {
 
   Stream<ConnectionStatus> get statusStream => _statusController.stream;
 
+  CustomConnectionChecker() {
+    testConnection();
+  }
+
   set status(ConnectionStatus status) {
     _status = status;
     _statusController.add(status);
