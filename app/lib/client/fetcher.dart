@@ -32,7 +32,7 @@ abstract class Fetcher {
   Fetcher(this.validCacheDuration) {
     if (validCacheDuration != null) {
       Timer.periodic(validCacheDuration!, (timer) async {
-        if (await connectionChecker.hasInternetAccess) {
+        if (await connectionChecker.connected) {
           await fetchData(forceRefresh: true);
         }
       });
@@ -42,7 +42,7 @@ abstract class Fetcher {
   void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
 
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
-    if (!(await connectionChecker.hasInternetAccess)) {
+    if (!(await connectionChecker.connected)) {
       if (isEmpty) {
         _addResponse(FetcherResponse(
             status: FetcherStatus.error, content: NoConnectionException()));

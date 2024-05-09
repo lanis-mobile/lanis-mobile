@@ -71,7 +71,7 @@ class ConversationsParser {
   }
 
   Future<dynamic> getSingleConversation(String uniqueID) async {
-    if (!(await connectionChecker.hasInternetAccess)) {
+    if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
 

@@ -17,7 +17,6 @@ import 'package:sph_plan/view/timetable/timetable.dart';
 import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/client/connection_checker.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class Destination {
   final Icon icon;
@@ -329,15 +328,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<InternetStatus>(
-        stream: connectionChecker.onStatusChange,
+    return StreamBuilder<ConnectionStatus>(
+        stream: connectionChecker.statusStream,
         builder: (context, network) {
           return Scaffold(
               appBar: AppBar(
                 title: Text(doesSupportAnyApplet
                     ? destinations[selectedDestinationDrawer].label(context)
                     : AppLocalizations.of(context)!.openLanisInBrowser),
-                bottom: network.data == InternetStatus.disconnected
+                bottom: network.data == ConnectionStatus.disconnected
                     ? PreferredSize(
                         preferredSize: const Size.fromHeight(40),
                         child: Padding(
