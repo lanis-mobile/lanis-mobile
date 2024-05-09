@@ -72,7 +72,7 @@
   "invisible": "Invisible",
   "unknown": "Unknown",
   "message": "Message",
-  "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.",
+  "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.\nLast edited: {time}",
   "logout": "Reset application | Logout",
   "reallyReset": "Really reset?",
   "allSettingsWillBeLost": "All settings will be lost!",
