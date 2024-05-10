@@ -12,7 +12,7 @@ import '../../shared/widgets/error_view.dart';
 
 class ConversationsChat extends StatefulWidget {
   final String? uniqueID;
-  final String? title;
+  final String title;
   final PartialChat? creationData;
 
   const ConversationsChat({super.key, required this.title, this.uniqueID, this.creationData});
@@ -28,6 +28,9 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   late final String groupOnly;
   late final String privateAnswerOnly;
+  bool? noReply;
+
+  late final String? replyReceiver;
 
   final List<types.Message> _messages = [];
   final Map<String, types.User> _users = {};
@@ -155,12 +158,23 @@ class _ConversationsChatState extends State<ConversationsChat> {
     groupOnly = response["groupOnly"];
     privateAnswerOnly = response["privateAnswerOnly"];
 
+    noReply = response["noAnswerAllowed"] == "ja" ? true : false;
+
+    if (privateAnswerOnly == "ja" && response["own"] == false) {
+      replyReceiver = response["username"];
+    } else {
+      replyReceiver = null;
+    }
+
     _initMessages(response);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
       body: FutureBuilder(
           future: _conversationFuture,
           builder: (context, snapshot) {
@@ -177,6 +191,14 @@ class _ConversationsChatState extends State<ConversationsChat> {
               }
               return Chat(
                 messages: _messages,
+                customBottomWidget: noReply == true || noReply == null ? const SizedBox.shrink() : null,
+                /*listBottomWidget: Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    "Deine Nachricht kommt nur an $replyReceiver an",
+                    textAlign: TextAlign.center,
+                  ),
+                ),*/ // --> TODO: Move it under the BottomWidget, when I make a custom one.
                 onSendPressed: (types.PartialText message) async {
                   if (uniqueId == null) {
                     showDialog(
