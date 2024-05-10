@@ -58,7 +58,7 @@ Future<void> performBackgroundFetch() async {
       final messageUUID = generateUUID(messageBody);
 
       messageBody +=
-          "Letztes Update erhalten: ${DateFormat.Hm().format(DateTime.now())}";
+          "Zuletzt editiert: ${DateFormat.Hm().format(vPlan.lastUpdated)}";
 
       if (!(await isMessageAlreadySent(messageUUID))) {
         await sendMessage(

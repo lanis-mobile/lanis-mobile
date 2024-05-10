@@ -49,7 +49,7 @@ class CalendarParser {
   }
 
   Future<dynamic> getEvent(String id) async {
-    if (!(await connectionChecker.hasInternetAccess)) {
+    if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
 

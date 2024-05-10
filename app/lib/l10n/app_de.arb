@@ -72,7 +72,7 @@
   "invisible": "Ausgeblendet",
   "unknown": "Unbekannt",
   "message": "Nachricht",
-  "substitutionsEndCardMessage": "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden.",
+  "substitutionsEndCardMessage": "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden.\nLetzte Aktualisierung: {time}",
   "logout": "App zurücksetzen | Ausloggen",
   "reallyReset": "Wirklich zurücksetzen?",
   "allSettingsWillBeLost": "Alle Einstellungen werden Gelöscht.",

@@ -49,25 +49,6 @@ Zu den Automatisch erfassten daten Gehören:
 
 Dies ist für die weitere Entwicklung der App notwendig, da verschiedene Accounts sich in der App sehr unterschiedlich verhalten. Das Analysetool erleichtert die Anpassung 
 
-### App-Interner Fehlerbericht
-
-Benutzer haben die Möglichkeit, innerhalb der Anwendung einen Fehlerbericht direkt an die Entwickler zu senden. Ein solcher Fehlerbericht gibt den Entwicklern viel mehr Informationen über das Problem, indem Metadaten (optional), die für die Reproduktion des Problems hilfreich sind, an den Bericht angehängt werden. Ein Bericht besteht aus:
- - Schule des Nutzers
- - Login Name des Nutzers
- - Fehlerbeschreibung
- - Kontaktinformation
- - Metadaten (optional)
-   - Benutzerdaten
-     - Name
-     - Geburtsdatum
-     - Klasse
-     - Geschlecht
-   - vollständiger Vertretungsplan der Schule
-   - aussagekräftiger Ausschnitt des Schulkalenders (von vor einem Halben Jahr bis in einem Jahr)
-   - detaillierte Informationen über die Kurse des Schülers
-
-Die Fehlerbericht-Funktion wird über Cloudflare Workers gehostet. Zugang zu der Datenbank haben nur ausgewählte Entwickler der Anwendung. Daten werden nur nach ausdrücklicher Zustimmung des Nutzers mit dritten geteilt. 
-
 ## Verschlüsselung
 Jegliche Kommunikation mit den Lanis-Servern, der Countly-Instanz oder dem Bugreport-Server erfolgt ausschließlich mit HTTPS-Verschlüsselung.
 

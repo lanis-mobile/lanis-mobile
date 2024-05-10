@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/widgets/marquee.dart';
+import 'substitutions_listtile.dart';
 
 class SubstitutionGridTile extends StatelessWidget {
   final Substitution substitutionData;
@@ -17,9 +18,9 @@ class SubstitutionGridTile extends StatelessWidget {
     }
 
     return Padding(
-        padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
+      child:
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
             children: [
               Padding(
@@ -32,8 +33,8 @@ class SubstitutionGridTile extends StatelessWidget {
               )
             ],
           ),
-          Text(value!)
-        ]));
+          SubstitutionsFormattedText(value!, Theme.of(context).textTheme.bodyMedium!)
+      ]));
   }
 
   @override
