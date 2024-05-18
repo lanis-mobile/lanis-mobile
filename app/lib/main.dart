@@ -180,16 +180,16 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
                         text: Trace.from(details.stack!).terse.toString()));
                   },
                   style: ButtonStyle(
-                    overlayColor: MaterialStateProperty.resolveWith((states) {
+                    overlayColor: WidgetStateProperty.resolveWith((states) {
                       return Colors.redAccent;
                     }),
                     foregroundColor:
-                        MaterialStateProperty.resolveWith((states) {
+                        WidgetStateProperty.resolveWith((states) {
                       return Colors.white;
                     }),
                     backgroundColor:
-                        MaterialStateProperty.resolveWith((states) {
-                      if (states.contains(MaterialState.pressed)) {
+                        WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.pressed)) {
                         return Colors.redAccent;
                       }
                       return Colors.red;
