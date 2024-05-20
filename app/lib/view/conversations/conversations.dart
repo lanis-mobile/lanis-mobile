@@ -35,7 +35,10 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
 
   late TabController _tabController;
 
+  List<String> receiverNames = [];
   final List<String> receivers = [];
+  final List<SearchEntry> searchEntries = [];
+
   final TextEditingController subjectController = TextEditingController();
 
   @override
@@ -163,7 +166,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ConversationsChat(uniqueID: conversations[index]
+                              builder: (context) => ConversationsChat(id: conversations[index]
                               ["Uniquid"], // nice typo Lanis
                                 title: conversations[index]["Betreff"],))
                       );
@@ -184,12 +187,10 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
   }
 
   void showCreationDialog(ChatType chatType) {
-    final List<SearchEntry> searchEntries = [];
-    
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Neuen Gruppenchat erstellen"),
+          title: const Text("Neue Konversation erstellen"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -198,6 +199,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                 child: ChipsInput<String>(
                   enabled: true,
                   autocorrect: false,
+                  initialValue: receiverNames,
                   decoration: const InputDecoration(
                     labelText: "Empfänger-IDs",
                   ),
@@ -211,6 +213,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                     return entries.map((e) => e.name).toList();
                   },
                   onChanged: (data) {
+                    receiverNames = data;
                     receivers.clear();
                     for (String entry in data) {
                       receivers.add(searchEntries.firstWhere((element) => element.name == entry).id);
@@ -240,6 +243,18 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             ],
           ),
           actions: [
+            IconButton(
+                onPressed: () {
+                  subjectController.clear();
+
+                  setState(() {
+                    receivers.clear();
+                    receiverNames = [];
+                    searchEntries.clear();
+                  });
+                },
+                icon: const Icon(Icons.format_clear)
+            ),
             ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
@@ -265,10 +280,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             ),
           ],
         )
-    ).then((value) {
-      subjectController.clear();
-      receivers.clear();
-    });
+    );
   }
 
   @override
