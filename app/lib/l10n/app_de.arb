@@ -146,5 +146,6 @@
   "errorInAutoSet": "Bei der automatischen Konfiguration des Filters ist ein Fehler aufgetreten. Der Grund dafür könnte sein, dass deine Schule nicht direkt unterstützt wird. Überlege, deine Schule hinzuzufügen. Besuche dazu das GitHub Repository.",
   "autoSetToEmpty": "Der Filter wurde automatisch geleert.",
   "addFilter": "Filter hinzufügen",
-  "addSpecificFilter": "\"{filter}\" hinzufügen"
+  "addSpecificFilter": "\"{filter}\" hinzufügen",
+  "tryAgain": "Erneut versuchen"
 }

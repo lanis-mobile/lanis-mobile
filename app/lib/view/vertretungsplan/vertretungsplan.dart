@@ -1,11 +1,11 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_gridtile.dart';
 import 'package:sph_plan/shared/widgets/substitutions/substitutions_listtile.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../shared/widgets/error_view.dart';
@@ -37,17 +37,17 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     substitutionsFetcher.fetchData();
   }
 
-  Widget lastWidget({required int entriesLength, required DateTime lastEdit} ) {
+  Widget lastWidget({required int entriesLength, required DateTime lastEdit}) {
     return ListTile(
       title: Center(
-        child: Text(
-        AppLocalizations.of(context)!.noFurtherEntries,
-        style: const TextStyle(fontSize: 22)),
+        child: Text(AppLocalizations.of(context)!.noFurtherEntries,
+            style: const TextStyle(fontSize: 22)),
       ),
       subtitle: Center(
         child: Text(
-        AppLocalizations.of(context)!.substitutionsEndCardMessage(lastEdit.format('dd.MM.yyyy HH:mm')),
-        textAlign: TextAlign.center,
+          AppLocalizations.of(context)!
+              .substitutionsEndCardMessage(lastEdit.format('dd.MM.yyyy HH:mm')),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -78,7 +78,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                     if (entryIndex == entriesLength) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: padding),
-                        child: lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
+                        child: lastWidget(
+                            entriesLength: entriesLength,
+                            lastEdit: substitutionPlan.lastUpdated),
                       );
                     }
 
@@ -97,7 +99,9 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
                     if (entryIndex == entriesLength) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: padding),
-                        child: lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
+                        child: lastWidget(
+                            entriesLength: entriesLength,
+                            lastEdit: substitutionPlan.lastUpdated),
                       );
                     }
 
@@ -155,95 +159,77 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
       body: StreamBuilder<FetcherResponse>(
         stream: substitutionsFetcher.stream,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 60),
-                Padding(
-                  padding: const EdgeInsets.all(35),
-                  child: Text(
-                    AppLocalizations.of(context)!.errorOccurred,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ));
-          }
+          if (snapshot.data?.status == FetcherStatus.error) {
+            return ErrorView(
+                data: snapshot.data!.content,
+                name: "Kalender",
+                fetcher: substitutionsFetcher);
+          } else if (snapshot.data?.status == FetcherStatus.fetching ||
+              snapshot.data == null) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            // GlobalKeys for RefreshIndicator and Refresh-FAB
+            globalKeys += List.generate(snapshot.data?.content.days.length,
+                (index) => GlobalKey<RefreshIndicatorState>());
 
-          if (snapshot.connectionState == ConnectionState.waiting ||
-              snapshot.data?.status == FetcherStatus.fetching) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys += List.generate(snapshot.data?.content.days.length,
-              (index) => GlobalKey<RefreshIndicatorState>());
-
-          // If there are no entries.
-          if (snapshot.data?.content.days.length == 0) {
-            return RefreshIndicator(
-              key: globalKeys[0],
-              onRefresh: () async {
-                substitutionsFetcher.fetchData(forceRefresh: true);
-              },
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverFillRemaining(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.sentiment_dissatisfied, size: 60),
-                        Padding(
-                          padding: const EdgeInsets.all(35),
-                          child: Text(AppLocalizations.of(context)!.noEntries,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              )),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
-          }
-
-          // Vp could have multiple dates, so we need to set it dynamically.
-          _tabController = TabController(
-              length: snapshot.data?.content.days.length, vsync: this);
-
-          return Column(
-            children: [
-              TabBar(
-                  isScrollable: true,
-                  controller: _tabController,
-                  tabs: getTabs(snapshot.data?.content)),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    if (snapshot.data?.status == FetcherStatus.error) ...[
-                      ...getErrorWidgets(snapshot.data?.content)
-                    ] else ...[
-                      ...getSubstitutionViews(snapshot.data?.content)
-                    ]
+            // If there are no entries.
+            if (snapshot.data?.content.days.length == 0) {
+              return RefreshIndicator(
+                key: globalKeys[0],
+                onRefresh: () async {
+                  substitutionsFetcher.fetchData(forceRefresh: true);
+                },
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.sentiment_dissatisfied, size: 60),
+                          Padding(
+                            padding: const EdgeInsets.all(35),
+                            child: Text(AppLocalizations.of(context)!.noEntries,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
-              )
-            ],
-          );
+              );
+            }
+
+            // Vp could have multiple dates, so we need to set it dynamically.
+            _tabController = TabController(
+                length: snapshot.data?.content.days.length, vsync: this);
+
+            return Column(
+              children: [
+                TabBar(
+                    isScrollable: true,
+                    controller: _tabController,
+                    tabs: getTabs(snapshot.data?.content)),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      if (snapshot.data?.status == FetcherStatus.error) ...[
+                        ...getErrorWidgets(snapshot.data?.content)
+                      ] else ...[
+                        ...getSubstitutionViews(snapshot.data?.content)
+                      ]
+                    ],
+                  ),
+                )
+              ],
+            );
+          }
         },
       ),
       floatingActionButton: Column(
@@ -260,14 +246,18 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
           const SizedBox(
             height: 10,
           ),
-          FloatingActionButton(onPressed: () => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const FilterSettingsScreen(),
-              ),
-            ).then((value) => substitutionsFetcher.fetchData(forceRefresh: true))
-          }, child: const Icon(Icons.filter_alt),)
+          FloatingActionButton(
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FilterSettingsScreen(),
+                ),
+              ).then(
+                  (value) => substitutionsFetcher.fetchData(forceRefresh: true))
+            },
+            child: const Icon(Icons.filter_alt),
+          )
         ],
       ),
     );

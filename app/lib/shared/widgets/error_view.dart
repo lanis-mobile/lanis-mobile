@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/fetcher.dart';
 import '../exceptions/client_status_exceptions.dart';
@@ -37,52 +38,20 @@ class ErrorView extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(10),
                 child: Text(
-                    "Es gab wohl ein Problem, bitte sende einen Fehlerbericht!",
+                    "Es gab wohl ein Problem, bitte sende uns einen Fehlerbericht!",
                     textAlign: TextAlign.center,
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               Text("Problem: ${data.cause}"),
-              Padding(
+              if (fetcher != null) Padding(
                 padding: const EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FilledButton(
-                        onPressed: () {
-                          if (data is NoConnectionException) {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text("Hinweis"),
-                                    content: const Text(
-                                        "Sende nur einen Fehlerbericht, wenn du dir zu 100% sicher bist, dass es nicht vom fehlenden Internet ausgelöst wird."),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("Zurück")),
-                                    ],
-                                  );
-                                });
-                            return;
-                          }
-                        },
-                        child: const Text("Fehlerbericht senden")),
-                    if (fetcher != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: OutlinedButton(
-                            onPressed: () async {
-                              fetcher!.fetchData(forceRefresh: true);
-                            },
-                            child: const Text("Erneut versuchen")),
-                      )
-                    ]
-                  ],
-                ),
+                child: OutlinedButton(
+                    onPressed: () async {
+                      fetcher!.fetchData(forceRefresh: true);
+                    },
+                    child: Text(AppLocalizations.of(context)!.tryAgain)
+                )
               ),
             ],
           ),
