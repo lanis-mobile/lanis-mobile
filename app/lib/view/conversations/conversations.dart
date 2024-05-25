@@ -41,6 +41,12 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
 
     super.initState();
   }
+  
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
     if (mounted) {
