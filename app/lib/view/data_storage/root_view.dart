@@ -26,6 +26,12 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
     loadItems();
   }
 
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   void loadItems() async {
     try {
       var items = await client.dataStorage.getRoot();

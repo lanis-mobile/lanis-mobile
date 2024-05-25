@@ -44,6 +44,12 @@ class _UploadScreenState extends State<UploadScreen> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _addedFiles.dispose();
+    super.dispose();
+  }
+
   void showSnackbar({required String text, SnackBarAction? action}) {
     if (mounted) {
       // Hide the current SnackBar if one is already visible.

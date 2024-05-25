@@ -114,6 +114,14 @@ class LoginFormState extends State<LoginForm> {
   }
 
   @override
+  void dispose() {
+    schoolIDController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.relogin) {
       dropDownSelectedItem = "${client.schoolName} (${client.schoolID})";

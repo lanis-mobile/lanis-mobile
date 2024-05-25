@@ -37,6 +37,12 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
     substitutionsFetcher.fetchData();
   }
 
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+
   Widget lastWidget({required int entriesLength, required DateTime lastEdit}) {
     return ListTile(
       title: Center(

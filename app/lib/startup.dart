@@ -28,6 +28,7 @@ class _StartupScreenState extends State<StartupScreen> {
   // We need to load storage first, so we have to wait before everything.
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
 
+
   void openWelcomeScreen() {
     Navigator.push(
       context,
@@ -66,9 +67,6 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   Future<void> performLogin() async {
-    // Step 1
-    // It doesn't show it immediately but a lot faster than before.
-    // I think this check is enough.
     await client.prepareDio();
     if (client.username == "") {
       openWelcomeScreen();
@@ -126,6 +124,12 @@ class _StartupScreenState extends State<StartupScreen> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    finishedLoadingStorage.dispose();
+    super.dispose();
+  }
+  
   /// Either school image or app version.
   Widget schoolLogo() {
     var darkMode = Theme.of(context).brightness == Brightness.dark;
