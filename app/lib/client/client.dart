@@ -4,12 +4,14 @@ import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:html/parser.dart';
+import 'package:platform_proxy/platform_proxy.dart';
 import 'package:sph_plan/client/client_submodules/datastorage.dart';
 import 'package:sph_plan/client/client_submodules/mein_unterricht.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -51,6 +53,21 @@ class SPHclient {
   late GlobalFetcher fetchers;
 
   Future<void> prepareDio() async {
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      HttpClient http = HttpClient();
+      var platformProxy = PlatformProxy();
+      http.findProxy = (uri) {
+        String proxy = 'DIRECT';
+        platformProxy.getPlatformProxies(url: uri.toString()).then((proxies) {
+          if (proxies.isNotEmpty) {
+            proxy = proxies.first.pacString;
+          }
+        });
+        return proxy;
+      };
+      return http;
+    };
+
     jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
     dio.interceptors.add(InterceptorsWrapper(
