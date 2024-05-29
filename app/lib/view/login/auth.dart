@@ -40,8 +40,7 @@ class LoginFormState extends State<LoginForm> {
 
   Future<void> loadSchoolList() async {
     try {
-      final dio = Dio();
-      final response = await dio.get(
+      final response = await client.dio.get(
           "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist");
       List<dynamic> data = jsonDecode(response.data);
       List<String> result = [];

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 
+import 'client.dart';
+
 CustomConnectionChecker connectionChecker = CustomConnectionChecker();
 
 enum ConnectionStatus { connected, disconnected }
@@ -8,7 +10,6 @@ enum ConnectionStatus { connected, disconnected }
 class CustomConnectionChecker {
   ConnectionStatus _status = ConnectionStatus.disconnected;
   final _statusController = StreamController<ConnectionStatus>.broadcast();
-  final dio = Dio();
   DateTime lastRequest = DateTime.now().subtract(const Duration(seconds: 5));
 
   Stream<ConnectionStatus> get statusStream => _statusController.stream;
@@ -41,7 +42,7 @@ class CustomConnectionChecker {
 
   Future<bool> testConnection() async {
     try {
-      await dio.post("https://start.schulportal.hessen.de/ajax_login.php");
+      await client.dio.post("https://start.schulportal.hessen.de/ajax_login.php");
       status = ConnectionStatus.connected;
       return true;
     } catch (e) {

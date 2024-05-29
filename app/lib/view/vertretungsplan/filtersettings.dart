@@ -83,8 +83,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                 ElevatedButton(
                     onPressed: () async {
                       try {
-                        final dio = Dio();
-                        final response = await dio.post(
+                        final response = await client.dio.post(
                             "$apiURL/api/filter/generate",
                             options: Options(
                               headers: {
