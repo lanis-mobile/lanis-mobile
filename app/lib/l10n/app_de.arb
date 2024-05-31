@@ -147,5 +147,6 @@
   "autoSetToEmpty": "Der Filter wurde automatisch geleert.",
   "addFilter": "Filter hinzufügen",
   "addSpecificFilter": "\"{filter}\" hinzufügen",
-  "tryAgain": "Erneut versuchen"
+  "tryAgain": "Erneut versuchen",
+  "refreshComplete": "Aktualisierung abgeschlossen"
 }

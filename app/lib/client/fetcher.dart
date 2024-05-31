@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
+import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
@@ -28,10 +30,11 @@ abstract class Fetcher<T> {
   late Timer timer;
   late Duration? validCacheDuration;
   bool isEmpty = true;
+  StorageKey? storageKey;
 
   ValueStream<FetcherResponse<T>> get stream => _controller.stream;
 
-  Fetcher(this.validCacheDuration) {
+  Fetcher(this.validCacheDuration, {this.storageKey}) {
     if (validCacheDuration != null) {
       Timer.periodic(validCacheDuration!, (timer) async {
         if (await connectionChecker.connected) {
@@ -60,6 +63,8 @@ abstract class Fetcher<T> {
         _addResponse(
             FetcherResponse<T>(status: FetcherStatus.done, content: data));
         isEmpty = false;
+        if (storageKey == null) return;
+        globalStorage.write(key: storageKey!, value: jsonEncode(data));
         return;
       }).catchError((ex) async {
         if (!secondTry) {
@@ -77,8 +82,7 @@ abstract class Fetcher<T> {
 }
 
 class SubstitutionsFetcher extends Fetcher<SubstitutionPlan> {
-  SubstitutionsFetcher(super.validCacheDuration);
-
+  SubstitutionsFetcher(super.validCacheDuration, {super.storageKey});
   @override
   Future<SubstitutionPlan> _get() async {
     return await client.substitutions.getAllSubstitutions(filtered: true);
@@ -86,7 +90,7 @@ class SubstitutionsFetcher extends Fetcher<SubstitutionPlan> {
 }
 
 class MeinUnterrichtFetcher extends Fetcher<dynamic> {
-  MeinUnterrichtFetcher(super.validCacheDuration);
+  MeinUnterrichtFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -95,7 +99,7 @@ class MeinUnterrichtFetcher extends Fetcher<dynamic> {
 }
 
 class VisibleConversationsFetcher extends Fetcher<dynamic> {
-  VisibleConversationsFetcher(super.validCacheDuration);
+  VisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -104,7 +108,7 @@ class VisibleConversationsFetcher extends Fetcher<dynamic> {
 }
 
 class InvisibleConversationsFetcher extends Fetcher<dynamic> {
-  InvisibleConversationsFetcher(super.validCacheDuration);
+  InvisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -113,7 +117,7 @@ class InvisibleConversationsFetcher extends Fetcher<dynamic> {
 }
 
 class CalendarFetcher extends Fetcher<dynamic> {
-  CalendarFetcher(super.validCacheDuration);
+  CalendarFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -129,7 +133,7 @@ class CalendarFetcher extends Fetcher<dynamic> {
 }
 
 class TimeTableFetcher extends Fetcher<List<List<StdPlanFach>>?> {
-  TimeTableFetcher(super.validCacheDuration);
+  TimeTableFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<List<List<StdPlanFach>>?> _get() {
@@ -147,7 +151,7 @@ class GlobalFetcher {
 
   GlobalFetcher() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
+      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5), storageKey: StorageKey.lastSubstitutionData);
     }
     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       meinUnterrichtFetcher =
@@ -163,7 +167,7 @@ class GlobalFetcher {
       calendarFetcher = CalendarFetcher(null);
     }
     if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
-      timeTableFetcher = TimeTableFetcher(null);
+      timeTableFetcher = TimeTableFetcher(null, storageKey: StorageKey.lastTimetableData);
     }
   }
 }

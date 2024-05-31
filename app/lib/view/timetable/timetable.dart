@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../shared/types/fach.dart';
@@ -112,6 +113,18 @@ class _TimetableAnsichtState extends State<TimetableAnsicht>
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await timetableFetcher.fetchData(forceRefresh: true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.refreshComplete),
+              duration: const Duration(milliseconds: 300),
+            ),
+          );
+        },
+        child: const Icon(Icons.refresh),
+      )
     );
   }
 }

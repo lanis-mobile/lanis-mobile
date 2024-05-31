@@ -22,6 +22,10 @@ enum StorageKey {
   schoolImageLocation,
   schoolLogoLocation,
   schoolAccentColor,
+
+  //these keys store JSON strings containing the serialised Fetcher Data for offline use
+  lastSubstitutionData,
+  lastTimetableData,
 }
 
 extension on StorageKey {
@@ -60,7 +64,11 @@ extension on StorageKey {
       case StorageKey.lastPushMessageHash:
         return "last-notifications-hash";
       case StorageKey.substitutionsFilter:
-        return "{}";
+        return "{}"; // that should be "substitutions-filter". Keeping it due to user consistency because changing would result in a clear of the filter
+      case StorageKey.lastSubstitutionData:
+        return "last-substitution-data";
+      case StorageKey.lastTimetableData:
+        return "last-timetable-data";
     }
   }
 
