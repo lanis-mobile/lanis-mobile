@@ -330,6 +330,48 @@ class Substitution {
     }
     return true;
   }
+
+  Map<String, dynamic> toJson() => {
+    'tag': tag,
+    'tag_en': tag_en,
+    'stunde': stunde,
+    'vertreter': vertreter,
+    'lehrer': lehrer,
+    'klasse': klasse,
+    'klasse_alt': klasse_alt,
+    'fach': fach,
+    'fach_alt': fach_alt,
+    'raum': raum,
+    'raum_alt': raum_alt,
+    'hinweis': hinweis,
+    'hinweis2': hinweis2,
+    'art': art,
+    'Lehrerkuerzel': Lehrerkuerzel,
+    'Vertreterkuerzel': Vertreterkuerzel,
+    'lerngruppe': lerngruppe,
+    'hervorgehoben': hervorgehoben,
+  };
+
+  Substitution.fromJson(Map<String, dynamic> json)
+      : tag = json['tag'],
+        tag_en = json['tag_en'],
+        stunde = json['stunde'],
+        vertreter = json['vertreter'],
+        lehrer = json['lehrer'],
+        klasse = json['klasse'],
+        klasse_alt = json['klasse_alt'],
+        fach = json['fach'],
+        fach_alt = json['fach_alt'],
+        raum = json['raum'],
+        raum_alt = json['raum_alt'],
+        hinweis = json['hinweis'],
+        hinweis2 = json['hinweis2'],
+        art = json['art'],
+        Lehrerkuerzel = json['Lehrerkuerzel'],
+        Vertreterkuerzel = json['Vertreterkuerzel'],
+        lerngruppe = json['lerngruppe'],
+        hervorgehoben = json['hervorgehoben'];
+
 }
 
 /// A data class to store all substitution information for a single day
@@ -347,6 +389,17 @@ class SubstitutionDay {
   void filterAll(SubstitutionFilter filter) {
     substitutions.removeWhere((element) => !element.passesFilter(filter));
   }
+
+  Map<String, dynamic> toJson() => {
+    'date': date,
+    'substitutions': substitutions.map((s) => s.toJson()).toList(),
+  };
+
+  SubstitutionDay.fromJson(Map<String, dynamic> json)
+      : date = json['date'],
+        substitutions = (json['substitutions'] as List)
+            .map((i) => Substitution.fromJson(i))
+            .toList();
 }
 
 /// A data class to store all substitution information available
@@ -378,4 +431,15 @@ class SubstitutionPlan {
     }
     removeEmptyDays();
   }
+
+  Map<String, dynamic> toJson() => {
+    'days': days.map((d) => d.toJson()).toList(),
+    'lastUpdated': lastUpdated.toIso8601String(),
+  };
+
+  SubstitutionPlan.fromJson(Map<String, dynamic> json)
+      : days = (json['days'] as List)
+      .map((i) => SubstitutionDay.fromJson(i))
+      .toList(),
+        lastUpdated = DateTime.parse(json['lastUpdated']);
 }

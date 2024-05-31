@@ -33,6 +33,18 @@ class StdPlanFach {
     };
   }
 
+  factory StdPlanFach.fromJson(Map<String, dynamic> json) {
+    return StdPlanFach(
+        name: json["name"],
+        raum: json["raum"],
+        lehrer: json["lehrer"],
+        badge: json["badge"],
+        duration: json["duration"],
+        startTime: json["startTime"],
+        endTime: json["endTime"]
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other is StdPlanFach) {
