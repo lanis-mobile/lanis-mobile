@@ -167,7 +167,7 @@ class _VertretungsplanAnsichtState extends State<VertretungsplanAnsicht>
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error) {
             return ErrorView(
-                data: snapshot.data!.content,
+                error: snapshot.data!.error!,
                 name: "Kalender",
                 fetcher: substitutionsFetcher);
           } else if (snapshot.data?.status == FetcherStatus.fetching ||

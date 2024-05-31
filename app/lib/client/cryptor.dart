@@ -176,25 +176,18 @@ class Cryptor {
   }
 
   String decryptEncodedTags(String htmlString) {
-    // Definiere das Muster für das <encoded> Tag
     RegExp exp = RegExp(r'<encoded>(.*?)<\/encoded>');
 
-    // Verwende die replaceAll-Funktion, um alle Übereinstimmungen zu ersetzen
     String replacedHtml = htmlString.replaceAllMapped(exp, (match) {
-      // Extrahiere den Inhalt zwischen <encoded> und </encoded>
       String? encodedContent = match.group(1);
-
-      // Entschlüssle den Inhalt und ersetze das Tag
       String? decryptedContent = decryptString(encodedContent!);
-
-      // Gib den ersetzen String zurück
       return decryptedContent ?? "";
     });
 
     return replacedHtml;
   }
 
-  // Use this to start allowing Lanis to return encrypted messages.
+  /// Initialize RSA encryption and authentication.
   Future<void> start(Dio dioClient) async {
     dio = dioClient;
 
