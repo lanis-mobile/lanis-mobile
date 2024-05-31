@@ -288,7 +288,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error) {
             return ErrorView(
-                data: snapshot.data!.content,
+                error: snapshot.data!.error!,
                 name: "Kalender",
                 fetcher: calendarFetcher);
           } else if (snapshot.data?.status == FetcherStatus.fetching ||
@@ -407,9 +407,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                             showDragHandle: true,
                                             builder: (context) {
                                               return ErrorView(
-                                                data: ex,
+                                                error: ex,
                                                 name: "einem Kalenderereignis",
-                                                fetcher: null,
                                               );
                                             });
                                       }

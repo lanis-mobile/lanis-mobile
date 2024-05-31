@@ -208,7 +208,7 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
                   return ErrorView(
-                      data: snapshot.data?.content,
+                      error: snapshot.data!.error!,
                       name: AppLocalizations.of(context)!.messages,
                       fetcher: visibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching ||

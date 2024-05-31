@@ -151,9 +151,8 @@ class _DetailedConversationAnsichtState
               if (snapshot.hasError) {
                 if (snapshot.error is LanisException) {
                   return ErrorView(
-                    data: snapshot.error as LanisException,
+                    error: snapshot.data!.error!,
                     name: "einer einzelnen Nachricht",
-                    fetcher: null,
                   );
                 }
               }

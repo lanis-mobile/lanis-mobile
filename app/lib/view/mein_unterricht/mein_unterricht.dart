@@ -273,19 +273,18 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    if (snapshot.data?.status == FetcherStatus.error &&
-                        snapshot.data?.content is LanisException) ...[
+                    if (snapshot.data?.status == FetcherStatus.error) ...[
                       ErrorView(
-                        data: snapshot.data?.content as LanisException,
+                        error: snapshot.data!.error!,
                         name: "Mein Unterricht",
                         fetcher: meinUnterrichtFetcher,
                       ),
                       ErrorView(
-                          data: snapshot.data?.content as LanisException,
+                          error: snapshot.data!.error!,
                           name: "Mein Unterricht",
                           fetcher: meinUnterrichtFetcher),
                       ErrorView(
-                          data: snapshot.data?.content as LanisException,
+                          error: snapshot.data!.error!,
                           name: "Mein Unterricht",
                           fetcher: meinUnterrichtFetcher)
                     ] else if (snapshot.data?.status ==
