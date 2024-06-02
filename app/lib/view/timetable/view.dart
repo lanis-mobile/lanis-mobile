@@ -17,7 +17,7 @@ class StaticTimetableView extends StatefulWidget {
   const StaticTimetableView({super.key, this.data, this.lanisException, this.fetcher, required this.refresh, required this.loading});
 
   @override
-  _StaticTimetableViewState createState() => _StaticTimetableViewState();
+  State<StatefulWidget> createState() => _StaticTimetableViewState();
 }
 
 class _StaticTimetableViewState extends State<StaticTimetableView> {

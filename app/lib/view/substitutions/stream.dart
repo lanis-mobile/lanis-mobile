@@ -32,14 +32,14 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           return StaticSubstitutionsView(
             lanisException: snapshot.data?.error,
             fetcher: substitutionsFetcher,
-            refresh: substitutionsFetcher.fetchData,
+            refresh: () => substitutionsFetcher.fetchData(forceRefresh: true),
             loading: false,
           );
         }  else {
           return StaticSubstitutionsView(
             plan: snapshot.data?.content,
             fetcher: substitutionsFetcher,
-            refresh: substitutionsFetcher.fetchData,
+            refresh: () => substitutionsFetcher.fetchData(forceRefresh: true),
             loading: snapshot.data?.status == FetcherStatus.fetching ||
                 snapshot.data == null,
           );
