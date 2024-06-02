@@ -35,19 +35,13 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
             refresh: substitutionsFetcher.fetchData,
             loading: false,
           );
-        } else if (snapshot.data?.status == FetcherStatus.fetching ||
-            snapshot.data == null) {
-          return StaticSubstitutionsView(
-            fetcher: substitutionsFetcher,
-            refresh: substitutionsFetcher.fetchData,
-            loading: true,
-          );
-        } else {
+        }  else {
           return StaticSubstitutionsView(
             plan: snapshot.data?.content,
             fetcher: substitutionsFetcher,
             refresh: substitutionsFetcher.fetchData,
-            loading: false,
+            loading: snapshot.data?.status == FetcherStatus.fetching ||
+                snapshot.data == null,
           );
         }
       },
