@@ -35,6 +35,8 @@ Future<void> performBackgroundFetch() async {
     await client.login(backgroundFetch: true);
     final vPlan =
         await client.substitutions.getAllSubstitutions(skipLoginCheck: true, filtered: true);
+    await globalStorage.write(
+        key: StorageKey.lastSubstitutionData, value: jsonEncode(vPlan));
     List<Substitution> allSubstitutions = vPlan.allSubstitutions;
     String messageBody = "";
 

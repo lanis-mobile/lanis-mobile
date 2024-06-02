@@ -20,7 +20,6 @@ import 'package:sph_plan/view/timetable/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'client/client.dart';
-import 'client/logger.dart';
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});
@@ -461,12 +460,3 @@ class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
