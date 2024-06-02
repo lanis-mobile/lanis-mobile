@@ -18,7 +18,7 @@ class StaticSubstitutionsView extends StatefulWidget {
   final Fetcher? fetcher;
   final Future<void> Function() refresh;
   final bool loading;
-  const StaticSubstitutionsView({super.key, this.plan, this.lanisException, this.fetcher, required this.refresh, required this.loading});
+  const StaticSubstitutionsView({super.key, this.plan, this.lanisException, this.fetcher, required this.refresh, this.loading = false});
 
   @override
   State<StatefulWidget> createState() => _StaticSubstitutionsViewState();

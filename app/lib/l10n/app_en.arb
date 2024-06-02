@@ -148,5 +148,6 @@
   "addFilter": "Add filter",
   "addSpecificFilter": "Add \"{filter}\"",
   "tryAgain": "Try again",
-  "refreshComplete": "Refresh complete"
+  "refreshComplete": "Refresh complete",
+  "offline": "Offline"
 }

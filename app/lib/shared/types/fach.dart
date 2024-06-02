@@ -39,9 +39,9 @@ class StdPlanFach {
         raum: json["raum"],
         lehrer: json["lehrer"],
         badge: json["badge"],
-        duration: int.parse(json["duration"]),
-        startTime: (int.parse(json["startTime"][0]), int.parse(json["startTime"][1])),
-        endTime: (int.parse(json["endTime"][0]), int.parse(json["endTime"][1]))
+        duration: json["duration"],
+        startTime: (json["startTime"][0], json["startTime"][1]),
+        endTime: (json["endTime"][0], json["endTime"][1])
     );
   }
 

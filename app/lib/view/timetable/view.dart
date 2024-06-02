@@ -14,7 +14,7 @@ class StaticTimetableView extends StatefulWidget {
   final TimeTableFetcher? fetcher;
   final Future<void> Function() refresh;
   final bool loading;
-  const StaticTimetableView({super.key, this.data, this.lanisException, this.fetcher, required this.refresh, required this.loading});
+  const StaticTimetableView({super.key, this.data, this.lanisException, this.fetcher, required this.refresh, this.loading = false});
 
   @override
   State<StatefulWidget> createState() => _StaticTimetableViewState();
