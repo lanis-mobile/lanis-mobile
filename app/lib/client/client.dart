@@ -53,20 +53,27 @@ class SPHclient {
   late GlobalFetcher fetchers;
 
   Future<void> prepareDio() async {
-    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      HttpClient http = HttpClient();
-      var platformProxy = PlatformProxy();
-      http.findProxy = (uri) {
-        String proxy = 'DIRECT';
-        platformProxy.getPlatformProxies(url: uri.toString()).then((proxies) {
-          if (proxies.isNotEmpty) {
-            proxy = proxies.first.pacString;
-          }
-        });
-        return proxy;
-      };
-      return http;
-    };
+    Future<HttpClient> createHttpClient() async {
+      HttpClient client = HttpClient();
+      final platformProxy = PlatformProxy();
+      final proxies = await platformProxy.getPlatformProxies(url: "https://start.schulportal.hessen.de");
+      if (proxies.isNotEmpty) {
+        logger.i("Using proxy: ${proxies.first.pacString}");
+        client.findProxy = (uri) {
+          return proxies.first.pacString;
+        };
+      }
+      return client;
+    }
+    try {
+      final httpClient = await createHttpClient();
+
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () => httpClient,
+      );
+    } catch (error, stacktrace) {
+      logger.e("Error while setting up proxy", error: error, stackTrace: stacktrace);
+    }
 
     jar = CookieJar();
     dio.interceptors.add(CookieManager(jar));
