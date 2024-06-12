@@ -413,7 +413,7 @@ class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
             ),
             body: StaticSubstitutionsView(
                 plan: substitutionData,
-                refresh: () async {},
+                refresh: null,
                 )
             )
           )
@@ -432,7 +432,7 @@ class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
                 ),
                 body: StaticTimetableView(
                   data: timetableData,
-                  refresh: () async {},
+                  refresh: null,
                 )
             )
             )

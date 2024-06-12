@@ -39,7 +39,7 @@ class _TimetableViewState extends State<TimetableView> {
       }
         return StaticTimetableView(
             refresh: () => timetableFetcher.fetchData(forceRefresh: true),
-            loading: snapshot.data?.status == FetcherStatus.fetching,
+            loading: snapshot.data?.status == FetcherStatus.fetching || snapshot.data?.status == null,
             data: snapshot.data?.content,
             fetcher: timetableFetcher,
           );

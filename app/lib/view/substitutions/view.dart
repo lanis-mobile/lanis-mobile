@@ -16,7 +16,7 @@ class StaticSubstitutionsView extends StatefulWidget {
   final SubstitutionPlan? plan;
   final LanisException? lanisException;
   final Fetcher? fetcher;
-  final Future<void> Function() refresh;
+  final Future<void> Function()? refresh;
   final bool loading;
   const StaticSubstitutionsView({super.key, this.plan, this.lanisException, this.fetcher, required this.refresh, this.loading = false});
 
@@ -69,7 +69,8 @@ class _StaticSubstitutionsViewState extends State<StaticSubstitutionsView> with 
 
       substitutionViews.add(RefreshIndicator(
         key: globalKeys[dayIndex + 1],
-        onRefresh: widget.refresh,
+        notificationPredicate: widget.refresh != null ? (_) => true : (_) => false, // Hide refresh indicator without bloating the code
+        onRefresh: widget.refresh == null ? () async {} : widget.refresh!,
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
           child: (deviceWidth > 505)
@@ -155,7 +156,8 @@ class _StaticSubstitutionsViewState extends State<StaticSubstitutionsView> with 
               (index) => GlobalKey<RefreshIndicatorState>());
       return RefreshIndicator(
         key: globalKeys[0],
-        onRefresh: widget.refresh,
+        notificationPredicate: widget.refresh != null ? (_) => true : (_) => false,
+        onRefresh: widget.refresh == null ? () async {} : widget.refresh!,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -210,28 +212,30 @@ class _StaticSubstitutionsViewState extends State<StaticSubstitutionsView> with 
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            onPressed: () => {
-              for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys)
-                {globalKey.currentState?.show()}
-            },
-            heroTag: "RefreshSubstitutions",
-            child: const Icon(Icons.refresh),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          FloatingActionButton(
-            onPressed: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FilterSettingsScreen(),
-                ),
-              ).then((value) => widget.refresh())
-            },
-            child: const Icon(Icons.filter_alt),
-          )
+          if (widget.refresh != null) ...[
+            FloatingActionButton(
+              onPressed: () => {
+                for (GlobalKey<RefreshIndicatorState> globalKey in globalKeys)
+                  {globalKey.currentState?.show()}
+              },
+              heroTag: "RefreshSubstitutions",
+              child: const Icon(Icons.refresh),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            FloatingActionButton(
+              onPressed: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FilterSettingsScreen(),
+                  ),
+                ).then((value) => widget.refresh!())
+              },
+              child: const Icon(Icons.filter_alt),
+            )
+          ],
         ],
       ),
     );

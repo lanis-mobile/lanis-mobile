@@ -12,7 +12,7 @@ class StaticTimetableView extends StatefulWidget {
   final List<List<StdPlanFach>>? data;
   final LanisException? lanisException;
   final TimeTableFetcher? fetcher;
-  final Future<void> Function() refresh;
+  final Future<void> Function()? refresh;
   final bool loading;
   const StaticTimetableView({super.key, this.data, this.lanisException, this.fetcher, required this.refresh, this.loading = false});
 
@@ -119,15 +119,17 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       },
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: getBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: widget.refresh,
-        child: const Icon(Icons.refresh),
-      ),
+        body: getBody(),
+        floatingActionButton: widget.refresh != null
+            ? FloatingActionButton(
+                onPressed: widget.refresh!,
+                child: const Icon(Icons.refresh),
+              )
+            : null
     );
   }
 }
