@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
+import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
+import '../shared/types/fach.dart';
 import 'client.dart';
 import 'connection_checker.dart';
 
@@ -14,22 +17,24 @@ enum FetcherStatus {
   error;
 }
 
-class FetcherResponse {
+class FetcherResponse<T> {
   late final FetcherStatus status;
-  late final dynamic content;
+  late final T? content;
+  late final LanisException? error;
 
-  FetcherResponse({required this.status, this.content});
+  FetcherResponse({required this.status, this.content, this.error});
 }
 
-abstract class Fetcher {
-  final BehaviorSubject<FetcherResponse> _controller = BehaviorSubject();
+abstract class Fetcher<T> {
+  final BehaviorSubject<FetcherResponse<T>> _controller = BehaviorSubject();
   late Timer timer;
   late Duration? validCacheDuration;
   bool isEmpty = true;
+  StorageKey? storageKey;
 
-  ValueStream<FetcherResponse> get stream => _controller.stream;
+  ValueStream<FetcherResponse<T>> get stream => _controller.stream;
 
-  Fetcher(this.validCacheDuration) {
+  Fetcher(this.validCacheDuration, {this.storageKey}) {
     if (validCacheDuration != null) {
       Timer.periodic(validCacheDuration!, (timer) async {
         if (await connectionChecker.connected) {
@@ -39,13 +44,13 @@ abstract class Fetcher {
     }
   }
 
-  void _addResponse(final FetcherResponse data) => _controller.sink.add(data);
+  void _addResponse(final FetcherResponse<T> data) => _controller.sink.add(data);
 
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
     if (!(await connectionChecker.connected)) {
       if (isEmpty) {
         _addResponse(FetcherResponse(
-            status: FetcherStatus.error, content: NoConnectionException()));
+            status: FetcherStatus.error, error: NoConnectionException()));
       }
 
       return;
@@ -56,8 +61,10 @@ abstract class Fetcher {
 
       _get().then((data) async {
         _addResponse(
-            FetcherResponse(status: FetcherStatus.done, content: data));
+            FetcherResponse<T>(status: FetcherStatus.done, content: data));
         isEmpty = false;
+        if (storageKey == null) return;
+        globalStorage.write(key: storageKey!, value: jsonEncode(data));
         return;
       }).catchError((ex) async {
         if (!secondTry) {
@@ -66,25 +73,24 @@ abstract class Fetcher {
           return;
         }
         _addResponse(
-            FetcherResponse(status: FetcherStatus.error, content: ex.cause));
+            FetcherResponse<T>(status: FetcherStatus.error, error: ex));
       }, test: (e) => e is LanisException);
     }
   }
 
-  Future<dynamic> _get();
+  Future<T> _get();
 }
 
-class SubstitutionsFetcher extends Fetcher {
-  SubstitutionsFetcher(super.validCacheDuration);
-
+class SubstitutionsFetcher extends Fetcher<SubstitutionPlan> {
+  SubstitutionsFetcher(super.validCacheDuration, {super.storageKey});
   @override
   Future<SubstitutionPlan> _get() async {
     return await client.substitutions.getAllSubstitutions(filtered: true);
   }
 }
 
-class MeinUnterrichtFetcher extends Fetcher {
-  MeinUnterrichtFetcher(super.validCacheDuration);
+class MeinUnterrichtFetcher extends Fetcher<dynamic> {
+  MeinUnterrichtFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -92,8 +98,8 @@ class MeinUnterrichtFetcher extends Fetcher {
   }
 }
 
-class VisibleConversationsFetcher extends Fetcher {
-  VisibleConversationsFetcher(super.validCacheDuration);
+class VisibleConversationsFetcher extends Fetcher<dynamic> {
+  VisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -101,8 +107,8 @@ class VisibleConversationsFetcher extends Fetcher {
   }
 }
 
-class InvisibleConversationsFetcher extends Fetcher {
-  InvisibleConversationsFetcher(super.validCacheDuration);
+class InvisibleConversationsFetcher extends Fetcher<dynamic> {
+  InvisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -110,8 +116,8 @@ class InvisibleConversationsFetcher extends Fetcher {
   }
 }
 
-class CalendarFetcher extends Fetcher {
-  CalendarFetcher(super.validCacheDuration);
+class CalendarFetcher extends Fetcher<dynamic> {
+  CalendarFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
@@ -126,11 +132,11 @@ class CalendarFetcher extends Fetcher {
   }
 }
 
-class TimeTableFetcher extends Fetcher {
-  TimeTableFetcher(super.validCacheDuration);
+class TimeTableFetcher extends Fetcher<List<List<StdPlanFach>>?> {
+  TimeTableFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
-  Future<dynamic> _get() {
+  Future<List<List<StdPlanFach>>?> _get() {
     return client.timetable.getPlan();
   }
 }
@@ -145,7 +151,7 @@ class GlobalFetcher {
 
   GlobalFetcher() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5));
+      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5), storageKey: StorageKey.lastSubstitutionData);
     }
     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       meinUnterrichtFetcher =
@@ -161,7 +167,7 @@ class GlobalFetcher {
       calendarFetcher = CalendarFetcher(null);
     }
     if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
-      timeTableFetcher = TimeTableFetcher(null);
+      timeTableFetcher = TimeTableFetcher(null, storageKey: StorageKey.lastTimetableData);
     }
   }
 }

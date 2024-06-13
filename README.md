@@ -41,7 +41,7 @@ Wir sind offen für neue Colaborator. Aber auch wenn du nicht coden kannst, bist
 - [x] Nachrichten
 - [x] Datenspeicher
 - [x] Stundenplan
-- [ ] Offline support?
+- [x] Offline views
 
 Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
 

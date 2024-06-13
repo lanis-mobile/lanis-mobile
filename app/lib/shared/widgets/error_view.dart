@@ -5,20 +5,20 @@ import '../../client/fetcher.dart';
 import '../exceptions/client_status_exceptions.dart';
 
 class ErrorView extends StatelessWidget {
-  late final LanisException data;
+  late final LanisException error;
   late final Fetcher? fetcher;
   late final String name;
   ErrorView(
       {super.key,
-      required this.data,
+      required this.error,
       required this.name,
-      required this.fetcher});
+      this.fetcher});
   ErrorView.fromCode(
       {super.key,
       required int data,
       required this.name,
       required this.fetcher}) {
-    this.data = LanisException.fromCode(data);
+    this.error = LanisException.fromCode(data);
   }
 
   @override
@@ -43,7 +43,7 @@ class ErrorView extends StatelessWidget {
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-              Text("Problem: ${data.cause}"),
+              Text("Problem: ${error.cause}"),
               if (fetcher != null) Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: OutlinedButton(

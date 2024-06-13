@@ -147,5 +147,7 @@
   "autoSetToEmpty": "The filter was automatically emptied.",
   "addFilter": "Add filter",
   "addSpecificFilter": "Add \"{filter}\"",
-  "tryAgain": "Try again"
+  "tryAgain": "Try again",
+  "refreshComplete": "Refresh complete",
+  "offline": "Offline"
 }
