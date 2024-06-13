@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:chips_input/chips_input.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 
 import '../../client/client.dart';
 import '../../client/client_submodules/substitutions.dart';
@@ -172,12 +172,30 @@ class SubstitutionFilterEditor extends StatefulWidget {
 
 class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
   bool strict = false;
+  late List<Tag> filterTags;
 
   @override
   void initState() {
     super.initState();
     strict =
         client.substitutions.localFilter[widget.objKey]?["strict"] ?? false;
+    List<String> filterStrings = (client.substitutions.localFilter[widget.objKey]?["filter"]??[]);
+    filterTags = filterStrings.map((e) => Tag(e)).toList();
+  }
+
+  @override
+  void dispose() {
+    filterTags.clear();
+    super.dispose();
+  }
+
+  void overrideFilter(List<String> data) {
+    client.substitutions.localFilter[widget.objKey] = {
+      "strict": strict
+    };
+    client.substitutions.localFilter[widget.objKey]?["filter"] =
+        data;
+    client.substitutions.saveFilterToStorage();
   }
 
   @override
@@ -208,42 +226,43 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
                 )
               ],
             ),
-            ChipsInput<String>(
-              initialValue: client.substitutions.localFilter[widget.objKey]
-                      ?["filter"] ??
-                  [],
-              enabled: true,
-              autocorrect: false,
-              decoration: const InputDecoration(
-                labelText: "Edit Filter",
+            FlutterTagging<Tag>(
+              initialItems: filterTags,
+              textFieldConfiguration: TextFieldConfiguration(
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.addFilter,
+                  labelText: AppLocalizations.of(context)!.addFilter,
+                ),
               ),
+              configureChip: (tag) {
+                return ChipConfiguration(
+                  label: Text(tag.name),
+                );
+              },
+              configureSuggestion: (tag) {
+                return SuggestionConfiguration(
+                  title: Text(AppLocalizations.of(context)!.addSpecificFilter(tag.name))
+                );
+              },
               findSuggestions: (String query) {
-                if (query.trim().isEmpty) return [];
-                return [query];
+                query = query.trim();
+                if (query.isEmpty) return <Tag>[];
+                return <Tag>[Tag(query)];
               },
-              onChanged: (data) {
-                client.substitutions.localFilter[widget.objKey] = {
-                  "strict": strict
-                };
-                client.substitutions.localFilter[widget.objKey]?["filter"] =
-                    data;
-                client.substitutions.saveFilterToStorage();
-              },
-              chipBuilder: (context, state, profile) {
-                return InputChip(
-                  key: ObjectKey(profile),
-                  label: Text(profile),
-                  onDeleted: () => state.deleteChip(profile),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                );
-              },
-              suggestionBuilder: (context, query) {
-                return ListTile(
-                  title: Text('"$query" hinzufügen'),
-                );
+              onChanged: () {
+                overrideFilter(filterTags.map((e) => e.name).toList());
               },
             )
           ],
         ));
   }
+}
+
+class Tag extends Taggable {
+  final String name;
+
+  const Tag(this.name);
+
+  @override
+  List<Object> get props => [name];
 }

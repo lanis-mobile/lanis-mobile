@@ -144,5 +144,7 @@
   "howItWorks": "How it works",
   "howItWorksText": "If you add a filter, only the entries that contain the filter are displayed. If you add several filters, only the entries that contain all/one of the filters are displayed. The automatic configuration must be done per school. (Add yours if it does not work).",
   "errorInAutoSet": "An error has occurred during the automatic configuration of the filter. The reason for this could be that your school is not directly supported. Consider adding your school. Visit the GitHub repository.",
-  "autoSetToEmpty": "The filter was automatically emptied."
+  "autoSetToEmpty": "The filter was automatically emptied.",
+  "addFilter": "Add filter",
+  "addSpecificFilter": "Add \"{filter}\""
 }
