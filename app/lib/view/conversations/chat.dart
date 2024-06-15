@@ -1,6 +1,5 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/widgets/dynamic_appbar.dart';
@@ -9,53 +8,7 @@ import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/conversations.dart';
 import '../../shared/widgets/error_view.dart';
-
-enum MessageStatus {
-  sending(Icons.pending),
-  sent(Icons.check_circle),
-  error(Icons.error);
-
-  final IconData icon;
-
-  const MessageStatus(this.icon);
-}
-
-enum MessageState {
-  first,
-  series;
-}
-
-class Message {
-  final String text;
-  final bool own;
-  final String? author;
-  final DateTime date;
-  final MessageState state;
-  MessageStatus status;
-
-  Message({required this.text, required this.own, required this.date, required this.author, required this.state, required this.status});
-}
-
-class DateHeader {
-  final DateTime date;
-  const DateHeader({required this.date});
-}
-
-class AuthorHeader {
-  final String author;
-  const AuthorHeader({required this.author});
-}
-
-class ConversationSettings {
-  final String id; // uniqueId
-  final bool groupChat;
-  final bool onlyPrivateAnswers;
-  final bool noReply;
-  final bool own;
-  final String? author;
-
-  const ConversationSettings({required this.id, required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.own, this.author});
-}
+import 'chat_classes.dart';
 
 class ConversationsChat extends StatefulWidget {
   final String? id; // uniqueId
@@ -78,6 +31,8 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   ConversationSettings? settings;
 
+  late final int receiverCount;
+
   final List<dynamic> chat = [];
 
   static DateTime parseDateString(String date) {
@@ -97,6 +52,8 @@ class _ConversationsChatState extends State<ConversationsChat> {
   }
 
   Future<void> newConversation(String text) async {
+    receiverCount = widget.creationData!.receivers.length;
+
     final textMessage = Message(
       text: text,
       own: true,
@@ -185,7 +142,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
     });
   }
 
-  Message parseMessage(dynamic message, MessageState position) {
+  Message addMessage(dynamic message, MessageState position) {
     final contentParsed = parse(message["Inhalt"]);
     final content = contentParsed.body!.text;
 
@@ -199,15 +156,17 @@ class _ConversationsChatState extends State<ConversationsChat> {
     );
   }
 
-  void initMessages(dynamic unparsedMessages) {
+  void parseMessages(dynamic unparsedMessages) {
     DateTime date = parseDateString(unparsedMessages["Datum"]);
     String author = unparsedMessages["username"];
     MessageState position = MessageState.first;
-    
+
+    final Set<String> authors = {author};
+
     chat.addAll([
       DateHeader(date: date),
       AuthorHeader(author: author),
-      parseMessage(unparsedMessages, position)
+      addMessage(unparsedMessages, position)
     ]);
 
     late DateTime currentDate;
@@ -222,19 +181,19 @@ class _ConversationsChatState extends State<ConversationsChat> {
       }
 
       if (date.isSameDay(currentDate) && current["username"] == author) {
-        chat.add(parseMessage(current, position));
+        chat.add(addMessage(current, position));
       } else if (date.isSameDay(currentDate) && current["username"] != author) {
         author = current["username"];
         chat.addAll([
           AuthorHeader(author: author),
-          parseMessage(current, position)
+          addMessage(current, position)
         ]);
       } else if (!date.isSameDay(currentDate) && current["username"] == author) {
         date = currentDate;
         chat.addAll([
           DateHeader(date: date),
           AuthorHeader(author: author),
-          parseMessage(current, position)
+          addMessage(current, position)
         ]);
       } else {
         date = currentDate;
@@ -242,10 +201,14 @@ class _ConversationsChatState extends State<ConversationsChat> {
         chat.addAll([
           DateHeader(date: date),
           AuthorHeader(author: author),
-          parseMessage(current, position)
+          addMessage(current, position)
         ]);
       }
+
+      authors.add(author);
     }
+
+    receiverCount = authors.length;
   }
 
   Future<void> initConversation() async {
@@ -270,7 +233,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
       own: response["own"]
     );
 
-    initMessages(response);
+    parseMessages(response);
   }
 
   Widget AuthorHeaderBuilder(AuthorHeader header) {
@@ -284,103 +247,45 @@ class _ConversationsChatState extends State<ConversationsChat> {
   }
 
   Widget BubbleBuilder(Message message) {
-    // TODO: Restructure BubbleBuilder!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // TODO: IMPLEMENT LANIS-STYLE FORMATTING
     // TODO: DIFFERENT COLOURS ON MORE THAN 2 RECEIVERS
     // TODO: HOLD TO COPY
-    const double nipWidth = 12.0;
-    const double horizontalPadding = 8.0;
-    const double horizontalMargin = 14.0;
-
-    final double combinedMargin = message.state == MessageState.first ? horizontalMargin + nipWidth : horizontalMargin;
-
-    late final Color color;
-    late final CrossAxisAlignment crossAxisAlignment;
-    late final TextStyle messageTextStyle;
-    late final CustomClipper<Path> firstPositionStyle;
-    final TextStyle dateTextStyle = Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurface);
-    late final EdgeInsets margin;
-    late final TextAlign textAlign;
-
-    if (message.own) {
-      color = Theme.of(context).colorScheme.primary;
-      crossAxisAlignment = CrossAxisAlignment.end;
-      messageTextStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onPrimary);
-      firstPositionStyle = ChatBubbleClipper1(
-        type: BubbleType.sendBubble,
-        nipWidth: nipWidth,
-        nipHeight: 14,
-        radius: 20,
-        nipRadius: 4
-      );
-      margin = EdgeInsets.only(
-          top: 8,
-          bottom: 8,
-          left: horizontalMargin,
-          right: combinedMargin
-      );
-      textAlign = TextAlign.end;
-    } else {
-      color = Theme.of(context).colorScheme.secondary;
-      crossAxisAlignment = CrossAxisAlignment.start;
-      messageTextStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondary);
-      firstPositionStyle = ChatBubbleClipper1(
-        nipWidth: nipWidth,
-        nipHeight: 14,
-        radius: 20,
-        nipRadius: 4
-      );
-      margin = EdgeInsets.only(
-          top: 8,
-          bottom: 8,
-          left: combinedMargin,
-          right: horizontalMargin
-      );
-      textAlign = TextAlign.start;
-    }
-
-    final EdgeInsets padding = EdgeInsets.only(
-        left: message.state == MessageState.first ? horizontalPadding : horizontalPadding + nipWidth,
-        right: message.state == MessageState.first ? horizontalPadding : horizontalPadding + nipWidth,
-        bottom: 8.0
-    );
-
     return Padding(
-      padding: padding,
+      padding: BubbleStructure.getPadding(message.state == MessageState.first),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: crossAxisAlignment,
+        crossAxisAlignment: BubbleStructure.getAlignment(message.own),
         children: [
           ClipPath(
-            clipper: message.state == MessageState.first ? firstPositionStyle : null,
+            clipper: message.state == MessageState.first ? BubbleStructure.getFirstStateClipper(message.own) : null,
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 maxWidth: 350, //TODO: MAKE IT DYNAMIC TO SCREEN
               ),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: message.state != MessageState.first ? BorderRadius.circular(20.0) : null
+                  color: BubbleStyle.getColor(context, message.own),
+                  borderRadius: message.state != MessageState.first ? BubbleStructure.radius : null
                 ),
                 child: Padding(
-                  padding: margin,
-                  child: SelectableText(
+                  padding: BubbleStructure.getMargin(message.state == MessageState.first, message.own),
+                  child: Text(
                     message.text,
-                    style: messageTextStyle,
-                    textAlign: textAlign,
+                    style: BubbleStyle.getTextStyle(context, message.own),
+                    textAlign: TextAlign.start,
                   ),
                 ),
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? combinedMargin : horizontalMargin),
+            padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? BubbleStructure.compensatedMargin : BubbleStructure.horizontalMargin),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   DateFormat("HH:mm").format(message.date),
-                  style: dateTextStyle,
+                  style: BubbleStyle.getDateTextStyle(context),
                 ),
                 if (message.own) ...[
                   Padding(
