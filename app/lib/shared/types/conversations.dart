@@ -1,8 +1,13 @@
-class SearchEntry {
+import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
+
+class ReceiverEntry extends Taggable {
   final String id;
   final String name;
 
-  SearchEntry({required this.id, required this.name});
+  const ReceiverEntry(this.id, this.name);
+
+  @override
+  List<Object> get props => [name];
 }
 
 class PartialChat {

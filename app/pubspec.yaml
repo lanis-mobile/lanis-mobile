@@ -57,7 +57,7 @@ dependencies:
   mime: ^1.0.4
   flutter_native_splash: ^2.3.10
   table_calendar: ^3.0.9
-  intl: ^0.18.1
+  intl: ^0.19.0
   cached_network_image: ^3.3.1
   file_icon: ^1.0.0
   syncfusion_flutter_calendar: ^25.1.35
@@ -66,6 +66,9 @@ dependencies:
   logger: ^2.2.0
   simple_shadow: ^0.3.1
   flutter_tagging_plus: ^4.0.2
+  flutter_expandable_fab: ^2.0.0
+  flutter_chat_bubble: ^2.0.2
+  flutter_custom_clippers: ^2.1.0
 
 # Should may be removed in the future. This is a temporary fix for the issue with the intl package due to `dart_date` not being updated.
 dependency_overrides:

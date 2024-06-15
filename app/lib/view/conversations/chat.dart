@@ -1,4 +1,6 @@
+import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/widgets/dynamic_appbar.dart';
@@ -9,27 +11,50 @@ import '../../shared/types/conversations.dart';
 import '../../shared/widgets/error_view.dart';
 
 enum MessageStatus {
-  sending,
-  sent,
-  error
+  sending(Icons.pending),
+  sent(Icons.check_circle),
+  error(Icons.error);
+
+  final IconData icon;
+
+  const MessageStatus(this.icon);
+}
+
+enum MessageState {
+  first,
+  series;
 }
 
 class Message {
   final String text;
   final bool own;
+  final String? author;
   final DateTime date;
+  final MessageState state;
   MessageStatus status;
 
-  Message({required this.text, required this.own, required this.date, required this.status});
+  Message({required this.text, required this.own, required this.date, required this.author, required this.state, required this.status});
+}
+
+class DateHeader {
+  final DateTime date;
+  const DateHeader({required this.date});
+}
+
+class AuthorHeader {
+  final String author;
+  const AuthorHeader({required this.author});
 }
 
 class ConversationSettings {
   final String id; // uniqueId
-  final String groupChat;
-  final String onlyPrivateAnswers;
+  final bool groupChat;
+  final bool onlyPrivateAnswers;
   final bool noReply;
+  final bool own;
+  final String? author;
 
-  const ConversationSettings({required this.id, required this.groupChat, required this.onlyPrivateAnswers, required this.noReply});
+  const ConversationSettings({required this.id, required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.own, this.author});
 }
 
 class ConversationsChat extends StatefulWidget {
@@ -53,9 +78,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   ConversationSettings? settings;
 
-  late final String? replyReceiver;
-
-  final List<Message> messages = [];
+  final List<dynamic> chat = [];
 
   static DateTime parseDateString(String date) {
     if (date.contains("heute")) {
@@ -75,29 +98,35 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   Future<void> newConversation(String text) async {
     final textMessage = Message(
-        text: text,
-        own: true,
-        date: DateTime.now(),
-        status: MessageStatus.sending
+      text: text,
+      own: true,
+      date: DateTime.now(),
+      author: null,
+      state: MessageState.first,
+      status: MessageStatus.sending,
     );
+
     setState(() {
-      messages.add(textMessage);
+      chat.addAll([
+        DateHeader(date: DateTime.now()),
+        textMessage
+      ]);
     });
 
-    print(widget.creationData!.receivers);
     final dynamic newConversation = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, text);
 
     final bool result = newConversation["back"];
     if (result) {
-      messages.last.status = MessageStatus.sent;
+      chat.last.status = MessageStatus.sent;
       settings = ConversationSettings(
-          id: newConversation["id"],
-          groupChat: widget.creationData!.type == ChatType.groupOnly ? "ja" : "nein",
-          onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly ? "ja" : "nein",
-          noReply: false
+        id: newConversation["id"],
+        groupChat: widget.creationData!.type == ChatType.groupOnly,
+        onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly,
+        noReply: false,
+        own: true
       );
     } else {
-      messages.last.status = MessageStatus.error;
+      chat.last.status = MessageStatus.error;
       showDialog(
           context: context,
           builder: (context) {
@@ -120,76 +149,107 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   Future<void> sendMessage(String text) async {
     final textMessage = Message(
-      text: text,
-      own: true,
-      date: DateTime.now(),
-      status: MessageStatus.sending
-    );
+        text: text,
+        own: true,
+        date: DateTime.now(),
+        author: null,
+        state: MessageState.first,
+        status: MessageStatus.sending,
+    ); // TODO: position
+
     setState(() {
-      messages.add(textMessage);
+      if (chat.last.date.isToday()) {
+        chat.add(textMessage);
+      } else {
+        chat.addAll([
+          DateHeader(date: DateTime.now()),
+          textMessage
+        ]);
+      }
     });
 
     final bool result = await client.conversations.replyToConversation(
         settings!.id,
         "all",
-        settings!.groupChat,
-        settings!.onlyPrivateAnswers,
+        settings!.groupChat ? "ja" : "nein",
+        settings!.onlyPrivateAnswers ? "ja" : "nein",
         text
     );
 
     setState(() {
       if (result) {
-        messages.last.status = MessageStatus.sent;
-        print(result);
+        chat.last.status = MessageStatus.sent;
       } else {
-        messages.last.status = MessageStatus.error;
+        chat.last.status = MessageStatus.error;
       }
     });
   }
 
-  Message parseMessage(dynamic message) {
+  Message parseMessage(dynamic message, MessageState position) {
     final contentParsed = parse(message["Inhalt"]);
     final content = contentParsed.body!.text;
-
-    /*if (!(_users.containsKey(message["Sender"]))) {
-      _users[message["Sender"]] = types.User(
-          id: message["Sender"],
-          firstName: message["username"]);
-    }*/
-
-    /*late final types.User user;
-    if () {
-      user = _me;
-    } else {
-      user = _users[message["Sender"]]!;
-    }*/
 
     return Message(
       text: content,
       own: message["own"],
+      author: message["username"],
       date: parseDateString(message["Datum"]),
-      status: MessageStatus.sent
+      state: position,
+      status: MessageStatus.sent,
     );
-    /*return types.TextMessage(
-      text: content,
-      author: user,
-      id: message["Uniquid"],
-      createdAt: _parseDateString(message["Datum"]),
-      status: types.Status.sent
-    );*/
   }
 
   void initMessages(dynamic unparsedMessages) {
-    messages.add(parseMessage(unparsedMessages));
+    DateTime date = parseDateString(unparsedMessages["Datum"]);
+    String author = unparsedMessages["username"];
+    MessageState position = MessageState.first;
+    
+    chat.addAll([
+      DateHeader(date: date),
+      AuthorHeader(author: author),
+      parseMessage(unparsedMessages, position)
+    ]);
 
-    for (dynamic unparsed in unparsedMessages["reply"]) {
-      messages.add(parseMessage(unparsed));
+    late DateTime currentDate;
+    for (dynamic current in unparsedMessages["reply"]) {
+      currentDate = parseDateString(current["Datum"]);
+
+      position = MessageState.first;
+      if (current["username"] == author) {
+        if (date.isSameDay(currentDate)) {
+          position = MessageState.series;
+        }
+      }
+
+      if (date.isSameDay(currentDate) && current["username"] == author) {
+        chat.add(parseMessage(current, position));
+      } else if (date.isSameDay(currentDate) && current["username"] != author) {
+        author = current["username"];
+        chat.addAll([
+          AuthorHeader(author: author),
+          parseMessage(current, position)
+        ]);
+      } else if (!date.isSameDay(currentDate) && current["username"] == author) {
+        date = currentDate;
+        chat.addAll([
+          DateHeader(date: date),
+          AuthorHeader(author: author),
+          parseMessage(current, position)
+        ]);
+      } else {
+        date = currentDate;
+        author = current["username"];
+        chat.addAll([
+          DateHeader(date: date),
+          AuthorHeader(author: author),
+          parseMessage(current, position)
+        ]);
+      }
     }
   }
 
   Future<void> initConversation() async {
     if (widget.id == null) {
-      print(widget.creationData!.subject);
       return;
     }
 
@@ -202,29 +262,152 @@ class _ConversationsChatState extends State<ConversationsChat> {
     }*/
 
     settings = ConversationSettings(
-        id: widget.id!,
-        groupChat: response["groupOnly"],
-        onlyPrivateAnswers: response["privateAnswerOnly"],
-        noReply: response["noAnswerAllowed"] == "ja" ? true : false
+      id: widget.id!,
+      groupChat: response["groupOnly"] == "ja",
+      onlyPrivateAnswers: response["privateAnswerOnly"] == "ja",
+      noReply: response["noAnswerAllowed"] == "ja" ? true : false,
+      author: response["username"],
+      own: response["own"]
     );
 
     initMessages(response);
   }
 
-  Widget bubble(Message message) {
-    return Row(
-      mainAxisAlignment: message.own ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: [
-        SelectableText(
-          message.text,
-        ),
-        Text("${message.date.hour}:${message.date.minute}")
-      ],
+  Widget AuthorHeaderBuilder(AuthorHeader header) {
+    return Text(header.author);
+    // TODO: STYLING
+  }
+
+  Widget DateHeaderBuilder(DateHeader header) {
+    return Text(DateFormat("d. MMMM y").format(header.date));
+    // TODO: STYLING
+  }
+
+  Widget BubbleBuilder(Message message) {
+    // TODO: Restructure BubbleBuilder!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO: IMPLEMENT LANIS-STYLE FORMATTING
+    // TODO: DIFFERENT COLOURS ON MORE THAN 2 RECEIVERS
+    // TODO: HOLD TO COPY
+    const double nipWidth = 12.0;
+    const double horizontalPadding = 8.0;
+    const double horizontalMargin = 14.0;
+
+    final double combinedMargin = message.state == MessageState.first ? horizontalMargin + nipWidth : horizontalMargin;
+
+    late final Color color;
+    late final CrossAxisAlignment crossAxisAlignment;
+    late final TextStyle messageTextStyle;
+    late final CustomClipper<Path> firstPositionStyle;
+    final TextStyle dateTextStyle = Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurface);
+    late final EdgeInsets margin;
+    late final TextAlign textAlign;
+
+    if (message.own) {
+      color = Theme.of(context).colorScheme.primary;
+      crossAxisAlignment = CrossAxisAlignment.end;
+      messageTextStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onPrimary);
+      firstPositionStyle = ChatBubbleClipper1(
+        type: BubbleType.sendBubble,
+        nipWidth: nipWidth,
+        nipHeight: 14,
+        radius: 20,
+        nipRadius: 4
+      );
+      margin = EdgeInsets.only(
+          top: 8,
+          bottom: 8,
+          left: horizontalMargin,
+          right: combinedMargin
+      );
+      textAlign = TextAlign.end;
+    } else {
+      color = Theme.of(context).colorScheme.secondary;
+      crossAxisAlignment = CrossAxisAlignment.start;
+      messageTextStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondary);
+      firstPositionStyle = ChatBubbleClipper1(
+        nipWidth: nipWidth,
+        nipHeight: 14,
+        radius: 20,
+        nipRadius: 4
+      );
+      margin = EdgeInsets.only(
+          top: 8,
+          bottom: 8,
+          left: combinedMargin,
+          right: horizontalMargin
+      );
+      textAlign = TextAlign.start;
+    }
+
+    final EdgeInsets padding = EdgeInsets.only(
+        left: message.state == MessageState.first ? horizontalPadding : horizontalPadding + nipWidth,
+        right: message.state == MessageState.first ? horizontalPadding : horizontalPadding + nipWidth,
+        bottom: 8.0
+    );
+
+    return Padding(
+      padding: padding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: crossAxisAlignment,
+        children: [
+          ClipPath(
+            clipper: message.state == MessageState.first ? firstPositionStyle : null,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 350, //TODO: MAKE IT DYNAMIC TO SCREEN
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: message.state != MessageState.first ? BorderRadius.circular(20.0) : null
+                ),
+                child: Padding(
+                  padding: margin,
+                  child: SelectableText(
+                    message.text,
+                    style: messageTextStyle,
+                    textAlign: textAlign,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? combinedMargin : horizontalMargin),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  DateFormat("HH:mm").format(message.date),
+                  style: dateTextStyle,
+                ),
+                if (message.own) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Icon(
+                      Icons.circle,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 3,),
+                  ),
+                  Icon(
+                    message.status.icon,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 12,
+                  )
+                ]
+              ],
+            )
+          )
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // TODO: See Receivers
+
     return Scaffold(
       body: FutureBuilder(
           future: _conversationFuture,
@@ -240,6 +423,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
                   );
                 }
               }
+
               return Stack(
                 alignment: Alignment.bottomLeft,
                 fit: StackFit.loose,
@@ -251,25 +435,40 @@ class _ConversationsChatState extends State<ConversationsChat> {
                         scrollController: _scrollController,
                         title: Text(widget.title),
                         expanded: [
-                          Text(widget.title)
+                          Text(widget.title),
+                          if (settings != null && settings!.onlyPrivateAnswers && !settings!.own) ...[
+                            Text("${settings!.author} kann nur deine Nachrichten sehen!")
+                          ]
                         ],
-                      ),
+                      ), // TODO: Correctly style App Bar
                       SliverList.builder(
-                        itemCount: messages.length,
+                        itemCount: chat.length,
                         itemBuilder: (context, index) {
-                          return bubble(messages[index]);
+                          if (chat[index] is Message) {
+                            return BubbleBuilder(chat[index]);
+                          } else if (chat[index] is DateHeader) {
+                            return DateHeaderBuilder(chat[index]);
+                          } else {
+                            return AuthorHeaderBuilder(chat[index]);
+                          }
                         },
                       ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 60,
+                        ),
+                      )
                     ],
                   ),
                   Container(
                     color: Theme.of(context).colorScheme.surface,
+                    height: 60,
                     child: Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: _messageField,
-                          ),
+                          ), // TODO: RichTextField as separate Dialog or so, bc Nachrichten is more used like handicapped E-Mails
                         ),
                         ValueListenableBuilder(
                             valueListenable: _deactivateSendButton,
@@ -293,55 +492,6 @@ class _ConversationsChatState extends State<ConversationsChat> {
                   )
                 ],
               );
-              /*
-              * return Chat(
-                messages: _messages,
-                customBottomWidget: noReply == true || noReply == null ? const SizedBox.shrink() : null,
-                /*listBottomWidget: Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Text(
-                    "Deine Nachricht kommt nur an $replyReceiver an",
-                    textAlign: TextAlign.center,
-                  ),
-                ),*/ // --> TODO: Move it under the BottomWidget, when I make a custom one.
-                onSendPressed: (types.PartialText message) async {
-                  if (uniqueId == null) {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            icon: const Icon(Icons.question_mark),
-                            title: const Text("Bist du dir sicher?"),
-                            content: const Text("Mit dieser Nachricht erstellst du eine neue Konversation!"),
-                            actions: [
-                              ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text("Zurück")
-                              ),
-                              FilledButton(
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                    await _sendMessage(
-                                        message
-                                    );
-                                  },
-                                  child: const Text("Erstellen")
-                              ),
-                            ],
-                          );
-                        }
-                    );
-                  } else {
-                    await _sendMessage(
-                        message
-                    );
-                  }
-                },
-                user: _me,
-                showUserNames: true,
-              );*/
             }
             // Waiting content
             return const Center(

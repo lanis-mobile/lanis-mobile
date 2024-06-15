@@ -223,6 +223,8 @@ class ConversationsParser {
   /// Returns false if no one was found or a error happened.
   /// On success, returns list of `SearchEntry`.
   Future<dynamic> searchTeacher(String name) async {
+    print(name);
+
     if (name.length < 2) {
       return false;
     }
@@ -245,12 +247,12 @@ class ConversationsParser {
     final data = json.decode(response.data);
 
     if (data["items"] != null && data["items"].isNotEmpty) {
-      final List<SearchEntry> teacherEntries = [];
+      final List<ReceiverEntry> teacherEntries = [];
 
       for (final teacher in data["items"]) {
-        teacherEntries.add(SearchEntry(
-            id: teacher["id"]!,
-            name: teacher["text"]!
+        teacherEntries.add(ReceiverEntry(
+            teacher["id"]!,
+            teacher["text"]!
         ));
       }
 

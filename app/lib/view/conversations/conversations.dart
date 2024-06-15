@@ -1,6 +1,6 @@
-import 'package:chips_input/chips_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 import 'package:sph_plan/shared/types/conversations.dart';
 
 import '../../client/client.dart';
@@ -8,6 +8,12 @@ import '../../client/fetcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
 import 'chat.dart';
+
+class TriggerRebuild with ChangeNotifier {
+  void trigger() {
+    notifyListeners();
+  }
+}
 
 class ConversationsAnsicht extends StatefulWidget {
   const ConversationsAnsicht({super.key});
@@ -18,12 +24,12 @@ class ConversationsAnsicht extends StatefulWidget {
 
 class _ConversationsAnsichtState extends State<ConversationsAnsicht>
     with TickerProviderStateMixin {
+  static const double padding = 12.0;
+
   final InvisibleConversationsFetcher invisibleConversationsFetcher =
       client.fetchers.invisibleConversationsFetcher;
   final VisibleConversationsFetcher visibleConversationsFetcher =
       client.fetchers.visibleConversationsFetcher;
-
-  static const double padding = 12.0;
 
   final GlobalKey<RefreshIndicatorState> _refreshVisibleKey =
       GlobalKey<RefreshIndicatorState>();
@@ -35,11 +41,9 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
 
   late TabController _tabController;
 
-  List<String> receiverNames = [];
-  final List<String> receivers = [];
-  final List<SearchEntry> searchEntries = [];
-
   final TextEditingController subjectController = TextEditingController();
+  final List<ReceiverEntry> receivers = [];
+  final TriggerRebuild rebuildSearch = TriggerRebuild();
 
   @override
   void initState() {
@@ -195,44 +199,36 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(chatType.description),
-              Flexible(
-                child: ChipsInput<String>(
-                  enabled: true,
-                  autocorrect: false,
-                  initialValue: receiverNames,
-                  decoration: const InputDecoration(
-                    labelText: "Empfänger-IDs",
-                  ),
-                  findSuggestions: (String query) async {
-                    if (query.trim().isEmpty) {
-                      return [];
-                    }
+              ListenableBuilder(
+                listenable: rebuildSearch,
+                builder: (context, widget) {
+                  return FlutterTagging<ReceiverEntry>(
+                    initialItems: receivers,
+                    textFieldConfiguration: const TextFieldConfiguration(
+                      decoration: InputDecoration(
+                        hintText: "z. B. Namen oder Abkürzungen",
+                        labelText: "Empfänger hinzufügen",
+                      ),
+                    ),
+                    configureChip: (tag) {
+                      return ChipConfiguration(
+                          label: Text(tag.name)
+                      );
+                    },
+                    configureSuggestion: (tag) {
+                      return SuggestionConfiguration(
+                          title: Text(tag.name)
+                      );
+                    },
+                    findSuggestions: (query) async {
+                      query = query.trim();
+                      if (query.isEmpty) return <ReceiverEntry>[];
 
-                    final List<SearchEntry> entries = await client.conversations.searchTeacher(query);
-                    searchEntries.addAll(entries);
-                    return entries.map((e) => e.name).toList();
-                  },
-                  onChanged: (data) {
-                    receiverNames = data;
-                    receivers.clear();
-                    for (String entry in data) {
-                      receivers.add(searchEntries.firstWhere((element) => element.name == entry).id);
-                    }
-                  },
-                  chipBuilder: (context, state, profile) {
-                    return InputChip(
-                      key: ObjectKey(profile),
-                      label: Text(profile),
-                      onDeleted: () => state.deleteChip(profile),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    );
-                  },
-                  suggestionBuilder: (context, query) {
-                    return ListTile(
-                      title: Text('"$query" hinzufügen'),
-                    );
-                  },
-                ),
+                      final dynamic result = await client.conversations.searchTeacher(query);
+                      return result == false ? <ReceiverEntry>[] : result;
+                    },
+                  );
+                }
               ),
               TextField(
                 controller: subjectController,
@@ -246,12 +242,8 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
             IconButton(
                 onPressed: () {
                   subjectController.clear();
-
-                  setState(() {
-                    receivers.clear();
-                    receiverNames = [];
-                    searchEntries.clear();
-                  });
+                  receivers.clear();
+                  rebuildSearch.trigger();
                 },
                 icon: const Icon(Icons.format_clear)
             ),
@@ -271,10 +263,12 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                       creationData: PartialChat(
                           type: chatType,
                           subject: subjectController.text,
-                          receivers: receivers
+                          receivers: receivers.map((entry) => entry.id).toList()
                       ),
                     )),
                   );
+                  subjectController.clear();
+                  receivers.clear();
                 },
                 child: const Text("Erstellen")
             ),
