@@ -6,23 +6,39 @@ import 'package:sph_plan/client/storage.dart';
 class Themes {
   final ThemeData? lightTheme;
   final ThemeData? darkTheme;
+  final ThemeData? amoledTheme;
 
-  Themes(this.lightTheme, this.darkTheme);
+  Themes(this.lightTheme, this.darkTheme, this.amoledTheme);
 
   static Themes getNewTheme(Color seedColor) {
     // The basic theme, global theme data changes should be put here.
-    ThemeData basicTheme(Brightness brightness) {
-      return ThemeData(
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
-        inputDecorationTheme:
-            const InputDecorationTheme(border: OutlineInputBorder()),
-      );
+    String selectedTheme = get();
+    if (selectedTheme == "amoled") {
+      ThemeData basicTheme(Brightness brightness) {
+        return ThemeData(
+          useMaterial3: false,
+          primaryColor: Colors.black,
+          cardColor: const Color(0xFF1A1A1A),
+
+          brightness: Brightness.dark,
+
+        );
+      }
+    } else {
+      ThemeData basicTheme(Brightness brightness) {
+        return ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: seedColor, brightness: brightness),
+          inputDecorationTheme:
+              const InputDecorationTheme(border: OutlineInputBorder()),
+        );
+      }
     }
 
     return Themes(
       basicTheme(Brightness.light),
       basicTheme(Brightness.dark),
+      basicTheme(Brightness.dark)
     );
   }
 
@@ -45,12 +61,17 @@ class Themes {
   };
 
   // Will be later set by DynamicColorBuilder in main.dart App().
-  static Themes dynamicTheme = Themes(null, null);
+  static Themes dynamicTheme = Themes(null, null, null);
 
   // Will be set by ColorModeNotifier.init() or _getSchoolTheme() in client.dart.
-  static Themes schoolTheme = Themes(null, null);
+  static Themes schoolTheme = Themes(null, null, null);
 
   static Themes standardTheme = getNewTheme(Colors.deepPurple);
+
+  static String get() {
+    String theme =  globalStorage.read(key: StorageKey.settingsSelectedTheme) as String;
+    return theme;
+  }
 }
 
 class ColorModeNotifier {
@@ -96,6 +117,8 @@ class ThemeModeNotifier {
       notifier.value = ThemeMode.dark;
     } else if (theme == "light") {
       notifier.value = ThemeMode.light;
+    } else if (theme == "amoled") {
+      notifier.value = ThemeMode.dark;
     } else {
       notifier.value = ThemeMode.system;
     }
