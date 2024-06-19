@@ -29,6 +29,7 @@
   "theme": "Thema",
   "lightMode": "Heller Modus",
   "darkMode": "Dunkler Modus",
+  "amoledMode": "Amoled Modus",
   "systemMode": "System Modus",
   "accentColor": "Akzent Farbe",
   "standard": "Standart",

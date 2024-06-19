@@ -29,6 +29,7 @@
   "theme": "Theme",
   "lightMode": "Light mode",
   "darkMode": "Dark mode",
+  "amoledMode": "Amoled mode",
   "systemMode": "System mode",
   "accentColor": "Accent color",
   "standard": "Standard",

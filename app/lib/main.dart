@@ -117,6 +117,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
       if (lightDynamic != null && darkDynamic != null) {
+
         Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
         if (globalStorage.prefs.getString("color") == "dynamic") {
           ColorModeNotifier.set("dynamic", Themes.dynamicTheme);

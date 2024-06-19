@@ -127,6 +127,17 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               },
             ),
             RadioListTile(
+              title: Text(AppLocalizations.of(context)!.amoledMode),
+              value: "amoled",
+              groupValue: _selectedTheme,
+              onChanged: (value) {
+                setState(() {
+                  _selectedTheme = value.toString();
+                  ThemeModeNotifier.set(_selectedTheme);
+                });
+              },
+            ),
+            RadioListTile(
               title: Text(AppLocalizations.of(context)!.systemMode),
               value: "system",
               groupValue: _selectedTheme,
