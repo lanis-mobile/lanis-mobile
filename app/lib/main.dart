@@ -97,7 +97,6 @@ void main() async {
     ThemeModeNotifier.init();
     ColorModeNotifier.init();
 
-    WidgetsFlutterBinding.ensureInitialized();
     HttpProxy httpProxy = await HttpProxy.createHttpProxy();
     HttpOverrides.global=httpProxy;
 
