@@ -18,6 +18,7 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background_service.dart' as background_service;
+import 'package:http_proxy/http_proxy.dart';
 
 void main() async {
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -95,6 +96,9 @@ void main() async {
 
     ThemeModeNotifier.init();
     ColorModeNotifier.init();
+
+    HttpProxy httpProxy = await HttpProxy.createHttpProxy();
+    HttpOverrides.global=httpProxy;
 
     runApp(const App());
   }, (obj, stack) async {
