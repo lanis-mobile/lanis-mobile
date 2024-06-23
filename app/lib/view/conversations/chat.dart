@@ -304,6 +304,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
               child: GestureDetector(
                 onLongPress: () async {
                   tapped.value = false;
+                  HapticFeedback.vibrate();
                   await Clipboard.setData(ClipboardData(text: message.text));
                   showSnackbar("Nachricht wurde kopiert!");
                   controller.value = 0;
