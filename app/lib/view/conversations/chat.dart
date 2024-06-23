@@ -277,7 +277,6 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
 
   Widget MessageBuilder(Message message) {
     // TODO: IMPLEMENT LANIS-STYLE FORMATTING
-    // TODO: HOLD TO COPY
     ValueNotifier<bool> tapped = ValueNotifier(false);
     final AnimationController controller = AnimationController(vsync: this);
 
