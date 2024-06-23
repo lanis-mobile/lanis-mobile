@@ -143,7 +143,7 @@ class BubbleStyle {
     if (own) {
       return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.primaryFixed : Theme.of(context).colorScheme.primaryFixed;
     } else {
-      return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondaryFixed : Theme.of(context).colorScheme.secondaryFixed;
+      return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondaryFixed : Theme.of(context).colorScheme.surfaceContainerHigh;
     }
   }
 

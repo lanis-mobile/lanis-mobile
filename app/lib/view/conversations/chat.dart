@@ -317,6 +317,9 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                   await Future.delayed(const Duration(milliseconds: 150));
                   tapped.value = false;
                 },
+                onTapCancel: () async {
+                  tapped.value = false;
+                },
                 child: Animate(
                   autoPlay: false,
                   effects: const [ShimmerEffect(
