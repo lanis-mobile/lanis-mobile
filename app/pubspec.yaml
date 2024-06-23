@@ -69,6 +69,7 @@ dependencies:
   flutter_expandable_fab: ^2.0.0
   flutter_chat_bubble: ^2.0.2
   flutter_custom_clippers: ^2.1.0
+  color_hash: ^1.0.1
 
 # Should may be removed in the future. This is a temporary fix for the issue with the intl package due to `dart_date` not being updated.
 dependency_overrides:

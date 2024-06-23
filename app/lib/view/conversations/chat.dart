@@ -29,9 +29,9 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   final ValueNotifier<bool> _deactivateSendButton = ValueNotifier<bool>(false);
 
-  ConversationSettings? settings;
+  final Map<String, TextStyle> textStyles = {};
 
-  late final int receiverCount;
+  ConversationSettings? settings;
 
   final List<dynamic> chat = [];
 
@@ -51,8 +51,14 @@ class _ConversationsChatState extends State<ConversationsChat> {
     }
   }
 
+  void addAuthorTextStyles(final List<String> authors) {
+    for (final String author in authors) {
+      textStyles[author] = BubbleStyle.getAuthorTextStyle(context, author);
+    }
+  }
+
   Future<void> newConversation(String text) async {
-    receiverCount = widget.creationData!.receivers.length;
+    addAuthorTextStyles(widget.creationData!.receivers);
 
     final textMessage = Message(
       text: text,
@@ -161,11 +167,14 @@ class _ConversationsChatState extends State<ConversationsChat> {
     String author = unparsedMessages["username"];
     MessageState position = MessageState.first;
 
-    final Set<String> authors = {author};
+    final Set<String> authors = {};
+
+    if (unparsedMessages["own"] != true) {
+      authors.add(author);
+    }
 
     chat.addAll([
       DateHeader(date: date),
-      AuthorHeader(author: author),
       addMessage(unparsedMessages, position)
     ]);
 
@@ -185,14 +194,12 @@ class _ConversationsChatState extends State<ConversationsChat> {
       } else if (date.isSameDay(currentDate) && current["username"] != author) {
         author = current["username"];
         chat.addAll([
-          AuthorHeader(author: author),
           addMessage(current, position)
         ]);
       } else if (!date.isSameDay(currentDate) && current["username"] == author) {
         date = currentDate;
         chat.addAll([
           DateHeader(date: date),
-          AuthorHeader(author: author),
           addMessage(current, position)
         ]);
       } else {
@@ -200,15 +207,16 @@ class _ConversationsChatState extends State<ConversationsChat> {
         author = current["username"];
         chat.addAll([
           DateHeader(date: date),
-          AuthorHeader(author: author),
           addMessage(current, position)
         ]);
       }
 
-      authors.add(author);
+      if (current["own"] != true) {
+        authors.add(author);
+      }
     }
 
-    receiverCount = authors.length;
+    addAuthorTextStyles(authors.toList());
   }
 
   Future<void> initConversation() async {
@@ -236,11 +244,6 @@ class _ConversationsChatState extends State<ConversationsChat> {
     parseMessages(response);
   }
 
-  Widget AuthorHeaderBuilder(AuthorHeader header) {
-    return Text(header.author);
-    // TODO: STYLING
-  }
-
   Widget DateHeaderBuilder(DateHeader header) {
     return Text(DateFormat("d. MMMM y").format(header.date));
     // TODO: STYLING
@@ -248,7 +251,6 @@ class _ConversationsChatState extends State<ConversationsChat> {
 
   Widget BubbleBuilder(Message message) {
     // TODO: IMPLEMENT LANIS-STYLE FORMATTING
-    // TODO: DIFFERENT COLOURS ON MORE THAN 2 RECEIVERS
     // TODO: HOLD TO COPY
     return Padding(
       padding: BubbleStructure.getPadding(message.state == MessageState.first),
@@ -256,6 +258,12 @@ class _ConversationsChatState extends State<ConversationsChat> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: BubbleStructure.getAlignment(message.own),
         children: [
+          if (message.state == MessageState.first && !message.own) ...[
+            Text(
+                message.author!,
+              style: textStyles[message.author],
+            )
+          ],
           ClipPath(
             clipper: message.state == MessageState.first ? BubbleStructure.getFirstStateClipper(message.own) : null,
             child: ConstrainedBox(
@@ -285,7 +293,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
               children: [
                 Text(
                   DateFormat("HH:mm").format(message.date),
-                  style: BubbleStyle.getDateTextStyle(context),
+                  style: BubbleStyle.getDateTextStyle(context)
                 ),
                 if (message.own) ...[
                   Padding(
@@ -351,10 +359,8 @@ class _ConversationsChatState extends State<ConversationsChat> {
                         itemBuilder: (context, index) {
                           if (chat[index] is Message) {
                             return BubbleBuilder(chat[index]);
-                          } else if (chat[index] is DateHeader) {
-                            return DateHeaderBuilder(chat[index]);
                           } else {
-                            return AuthorHeaderBuilder(chat[index]);
+                            return DateHeaderBuilder(chat[index]);
                           }
                         },
                       ),

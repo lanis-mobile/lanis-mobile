@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:color_hash/color_hash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
@@ -93,11 +96,56 @@ class BubbleStructure {
 }
 
 class BubbleStyle {
-  static Color getColor(final BuildContext context, final bool own) => own ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary;
+  late final Color color;
+  late final TextStyle textStyle;
+  late final TextStyle dateTextStyle;
+
+  static final Random random = Random();
+
+  static TextStyle getAuthorTextStyle(final BuildContext context, final String author) {
+    final double hue = HSLColor.fromColor(Theme.of(context).colorScheme.primary).hue;
+    late final minHue;
+    late final maxHue;
+
+    if (hue < 40) {
+      minHue = hue;
+      maxHue = hue + 40;
+    } else if (hue > 320) {
+      minHue = hue - 40;
+      maxHue = hue;
+    } else {
+      minHue = hue - 40;
+      maxHue = hue + 40;
+    }
+
+    double saturation = int.parse(author.hashCode.toString()[0]) * 0.1;
+    if (saturation < 0.4) {
+      saturation = 0.4;
+    }
+
+    final double lightness = Theme.of(context).brightness == Brightness.dark ? 0.7 : 0.3;
+
+    Color color = ColorHash(author, hue: (minHue, maxHue), saturation: saturation, lightness: lightness).toColor();
+
+    return Theme.of(context).textTheme.labelLarge!.copyWith(color: color);
+  }
+
+  static Color getColor(final BuildContext context, final bool own) {
+    if (own) {
+      return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primaryFixedDim;
+    } else {
+      return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.secondaryFixed;
+    }
+  }
 
   static TextStyle getTextStyle(final BuildContext context, final bool own) {
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
-    return own ? textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimary) : textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondary);
+
+    if (own) {
+      return Theme.of(context).brightness == Brightness.dark ?textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimary) : textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimaryFixedVariant);
+    } else {
+      return Theme.of(context).brightness == Brightness.dark ?textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondary) : textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondaryFixed);
+    }
   }
 
   static TextStyle getDateTextStyle (final BuildContext context) => Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurface);
