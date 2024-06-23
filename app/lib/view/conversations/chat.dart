@@ -245,15 +245,25 @@ class _ConversationsChatState extends State<ConversationsChat> {
   }
 
   Widget DateHeaderBuilder(DateHeader header) {
-    return Text(DateFormat("d. MMMM y").format(header.date));
-    // TODO: STYLING
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Card(
+          margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: Text(DateFormat("d. MMMM y", Localizations.localeOf(context).languageCode).format(header.date)),
+          ),
+        )
+      ],
+    );
   }
 
   Widget BubbleBuilder(Message message) {
     // TODO: IMPLEMENT LANIS-STYLE FORMATTING
     // TODO: HOLD TO COPY
     return Padding(
-      padding: BubbleStructure.getPadding(message.state == MessageState.first),
+      padding: BubbleStructure.getMargin(message.state),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: BubbleStructure.getAlignment(message.own),
@@ -276,7 +286,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
                   borderRadius: message.state != MessageState.first ? BubbleStructure.radius : null
                 ),
                 child: Padding(
-                  padding: BubbleStructure.getMargin(message.state == MessageState.first, message.own),
+                  padding: BubbleStructure.getPadding(message.state == MessageState.first, message.own),
                   child: Text(
                     message.text,
                     style: BubbleStyle.getTextStyle(context, message.own),
@@ -287,7 +297,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? BubbleStructure.compensatedMargin : BubbleStructure.horizontalMargin),
+            padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? BubbleStructure.compensatedPadding : BubbleStructure.horizontalPadding),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -320,7 +330,6 @@ class _ConversationsChatState extends State<ConversationsChat> {
   @override
   Widget build(BuildContext context) {
     // TODO: See Receivers
-
     return Scaffold(
       body: FutureBuilder(
           future: _conversationFuture,

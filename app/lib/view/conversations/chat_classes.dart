@@ -54,9 +54,9 @@ class AuthorHeader {
 
 class BubbleStructure {
   static const double nipWidth = 12.0;
-  static const double horizontalMargin = 14.0;
-  static const double compensatedMargin = horizontalMargin + nipWidth;
-  static const double horizontalPadding = 8.0;
+  static const double horizontalPadding = 14.0;
+  static const double compensatedPadding = horizontalPadding + nipWidth;
+  static const double horizontalMargin = 8.0;
   static BorderRadius radius = BorderRadius.circular(20.0);
 
   static CrossAxisAlignment getAlignment(final bool own) {
@@ -73,24 +73,24 @@ class BubbleStructure {
     );
   }
 
-  static EdgeInsets getMargin(final bool nipCompensation, final bool own) {
-    final double margin = nipCompensation ? compensatedMargin : horizontalMargin;
+  static EdgeInsets getPadding(final bool nipCompensation, final bool own) {
+    final double margin = nipCompensation ? compensatedPadding : horizontalPadding;
 
     return EdgeInsets.only(
         top: 8,
         bottom: 8,
-        left: own ? horizontalMargin : margin,
-        right: own ? margin : horizontalMargin
+        left: own ? horizontalPadding : margin,
+        right: own ? margin : horizontalPadding
     );
   }
 
-  static EdgeInsets getPadding(final bool nipCompensation) {
-    final double combinedPadding = nipCompensation ? horizontalPadding : horizontalPadding + nipWidth;
+  static EdgeInsets getMargin(final MessageState state) {
+    final double combinedMargin = state == MessageState.first ? horizontalMargin : horizontalMargin + nipWidth;
 
     return EdgeInsets.only(
-        left: combinedPadding,
-        right: combinedPadding,
-        bottom: 8.0
+        left: combinedMargin,
+        right: combinedMargin,
+        top: state == MessageState.first ? 8.0 : 2.0
     );
   }
 }
