@@ -1,5 +1,7 @@
+import 'package:flutter/services.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/widgets/dynamic_appbar.dart';
@@ -21,7 +23,7 @@ class ConversationsChat extends StatefulWidget {
   State<ConversationsChat> createState() => _ConversationsChatState();
 }
 
-class _ConversationsChatState extends State<ConversationsChat> {
+class _ConversationsChatState extends State<ConversationsChat> with TickerProviderStateMixin {
   late final Future<dynamic> _conversationFuture = initConversation();
 
   final TextEditingController _messageField = TextEditingController();
@@ -48,6 +50,20 @@ class _ConversationsChatState extends State<ConversationsChat> {
       return yesterday.copyWith(hour: conversation.hour, minute: conversation.minute, second: 0);
     } else {
       return DateFormat("d.M.y H:m").parse(date);
+    }
+  }
+
+  void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
+    if (mounted) {
+      // Hide the current SnackBar if one is already visible.
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(text),
+          duration: Duration(seconds: seconds, milliseconds: milliseconds),
+        ),
+      );
     }
   }
 
@@ -259,43 +275,79 @@ class _ConversationsChatState extends State<ConversationsChat> {
     );
   }
 
-  Widget BubbleBuilder(Message message) {
+  Widget MessageBuilder(Message message) {
     // TODO: IMPLEMENT LANIS-STYLE FORMATTING
     // TODO: HOLD TO COPY
+    ValueNotifier<bool> tapped = ValueNotifier(false);
+    final AnimationController controller = AnimationController(vsync: this);
+
     return Padding(
       padding: BubbleStructure.getMargin(message.state),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: BubbleStructure.getAlignment(message.own),
         children: [
+          // Author name
           if (message.state == MessageState.first && !message.own) ...[
             Text(
                 message.author!,
               style: textStyles[message.author],
             )
           ],
+          // Message bubble
           ClipPath(
             clipper: message.state == MessageState.first ? BubbleStructure.getFirstStateClipper(message.own) : null,
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 maxWidth: 350, //TODO: MAKE IT DYNAMIC TO SCREEN
               ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: BubbleStyle.getColor(context, message.own),
-                  borderRadius: message.state != MessageState.first ? BubbleStructure.radius : null
-                ),
-                child: Padding(
-                  padding: BubbleStructure.getPadding(message.state == MessageState.first, message.own),
-                  child: Text(
-                    message.text,
-                    style: BubbleStyle.getTextStyle(context, message.own),
-                    textAlign: TextAlign.start,
+              child: GestureDetector(
+                onLongPress: () async {
+                  tapped.value = false;
+                  await Clipboard.setData(ClipboardData(text: message.text));
+                  showSnackbar("Nachricht wurde kopiert!");
+                  controller.value = 0;
+                  controller.forward();
+                },
+                onTapDown: (_) async {
+                  await Future.delayed(const Duration(milliseconds: 50));
+                  tapped.value = true;
+                },
+                onTapUp: (_) async {
+                  await Future.delayed(const Duration(milliseconds: 150));
+                  tapped.value = false;
+                },
+                child: Animate(
+                  autoPlay: false,
+                  effects: const [ShimmerEffect(
+                    duration: Duration(milliseconds: 600)
+                  )],
+                  controller: controller,
+                  child: ValueListenableBuilder(
+                    valueListenable: tapped,
+                    builder: (context, value, _) {
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: value ? BubbleStyle.getPressedColor(context, message.own) : BubbleStyle.getColor(context, message.own),
+                          borderRadius: message.state != MessageState.first ? BubbleStructure.radius : null
+                        ),
+                        child: Padding(
+                          padding: BubbleStructure.getPadding(message.state == MessageState.first, message.own),
+                          child: Text(
+                            message.text,
+                            style: BubbleStyle.getTextStyle(context, message.own),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                      );
+                    }
                   ),
                 ),
               ),
             ),
           ),
+
+          // Date text
           Padding(
             padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? BubbleStructure.compensatedPadding : BubbleStructure.horizontalPadding),
             child: Row(
@@ -367,7 +419,7 @@ class _ConversationsChatState extends State<ConversationsChat> {
                         itemCount: chat.length,
                         itemBuilder: (context, index) {
                           if (chat[index] is Message) {
-                            return BubbleBuilder(chat[index]);
+                            return MessageBuilder(chat[index]);
                           } else {
                             return DateHeaderBuilder(chat[index]);
                           }

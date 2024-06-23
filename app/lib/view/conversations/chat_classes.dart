@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:color_hash/color_hash.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
@@ -135,6 +136,14 @@ class BubbleStyle {
       return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primaryFixedDim;
     } else {
       return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.secondaryFixed;
+    }
+  }
+
+  static Color getPressedColor(final BuildContext context, final bool own) {
+    if (own) {
+      return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.primaryFixed : Theme.of(context).colorScheme.primaryFixed;
+    } else {
+      return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondaryFixed : Theme.of(context).colorScheme.secondaryFixed;
     }
   }
 
