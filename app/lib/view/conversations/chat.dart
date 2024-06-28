@@ -1,10 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dart_date/dart_date.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
-import 'package:sph_plan/shared/widgets/dynamic_appbar.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
@@ -25,17 +24,39 @@ class ConversationsChat extends StatefulWidget {
 
 class _ConversationsChatState extends State<ConversationsChat> with TickerProviderStateMixin {
   late final Future<dynamic> _conversationFuture = initConversation();
+  late final AnimationController appBarController;
 
-  final TextEditingController _messageField = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  final TextEditingController messageField = TextEditingController();
+  final ScrollController scrollController = ScrollController();
 
-  final ValueNotifier<bool> _deactivateSendButton = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> deactivateSendButton = ValueNotifier<bool>(false);
 
   final Map<String, TextStyle> textStyles = {};
 
   ConversationSettings? settings;
 
   final List<dynamic> chat = [];
+
+  @override
+  void initState() {
+    appBarController = AnimationController(vsync: this);
+    scrollController.addListener(animateAppBarTitle);
+    animateAppBarTitle();
+
+    super.initState();
+  }
+
+  animateAppBarTitle() {
+    if (!scrollController.hasClients) return;
+
+    const appBarHeight = 56.0;
+
+    if (scrollController.offset >= appBarHeight && appBarController.value == 0) {
+      appBarController.value = 1;
+    } else if (scrollController.offset == 0 && appBarController.value == 1) {
+      appBarController.reverse();
+    }
+  }
 
   static DateTime parseDateString(String date) {
     if (date.contains("heute")) {
@@ -384,7 +405,6 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    // TODO: See Receivers
     return Scaffold(
       body: FutureBuilder(
           future: _conversationFuture,
@@ -406,18 +426,60 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                 fit: StackFit.loose,
                 children: [
                   CustomScrollView(
-                    controller: _scrollController,
+                    controller: scrollController,
                     slivers: [
-                      DynamicAppBar(
-                        scrollController: _scrollController,
-                        title: Text(widget.title),
-                        expanded: [
-                          Text(widget.title),
-                          if (settings != null && settings!.onlyPrivateAnswers && !settings!.own) ...[
-                            Text("${settings!.author} kann nur deine Nachrichten sehen!")
-                          ]
-                        ],
-                      ), // TODO: Correctly style App Bar
+                      SliverAppBar(
+                        title: Animate(
+                          effects: const [FadeEffect(
+                              curve: Curves.easeIn,
+                          )],
+                          value: 0,
+                          autoPlay: false,
+                          controller: appBarController,
+                          child: Text(widget.title),
+                        ),
+                        snap: true,
+                        floating: true,
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Flexible(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Text(
+                                        widget.title,
+                                        style: Theme.of(context).textTheme.headlineMedium,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (settings != null && settings!.onlyPrivateAnswers && !settings!.own) ...[
+                                Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                                  margin: const EdgeInsets.only(top: 16.0),
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.surfaceContainerHigh
+                                  ),
+                                  child: Text(
+                                    "${settings!.author} kann nur deine Nachrichten sehen!",
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              ]
+                            ],
+                          ),
+                        ),
+                      ),
                       SliverList.builder(
                         itemCount: chat.length,
                         itemBuilder: (context, index) {
@@ -442,22 +504,22 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                       children: [
                         Expanded(
                           child: TextField(
-                            controller: _messageField,
+                            controller: messageField,
                           ), // TODO: RichTextField as separate Dialog or so, bc Nachrichten is more used like handicapped E-Mails
                         ),
                         ValueListenableBuilder(
-                            valueListenable: _deactivateSendButton,
+                            valueListenable: deactivateSendButton,
                             builder: (context, deactivated, _) {
                               return IconButton(
                                 icon: const Icon(Icons.send),
                                 onPressed: deactivated ? null : () async {
-                                  _deactivateSendButton.value = true;
+                                  deactivateSendButton.value = true;
                                   if (settings == null) {
-                                    await newConversation(_messageField.text);
+                                    await newConversation(messageField.text);
                                   } else {
-                                    await sendMessage(_messageField.text);
+                                    await sendMessage(messageField.text);
                                   }
-                                  _deactivateSendButton.value = false;
+                                  deactivateSendButton.value = false;
                                 },
                               );
                             }

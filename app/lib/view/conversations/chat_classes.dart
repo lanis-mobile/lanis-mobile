@@ -1,8 +1,7 @@
 import 'dart:math';
 
-import 'package:color_hash/color_hash.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:color_hash/color_hash.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
 

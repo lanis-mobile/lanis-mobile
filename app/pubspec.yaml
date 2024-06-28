@@ -68,7 +68,6 @@ dependencies:
   flutter_tagging_plus: ^4.0.2
   flutter_expandable_fab: ^2.0.0
   flutter_chat_bubble: ^2.0.2
-  flutter_custom_clippers: ^2.1.0
   color_hash: ^1.0.1
   flutter_animate: ^4.5.0
 
