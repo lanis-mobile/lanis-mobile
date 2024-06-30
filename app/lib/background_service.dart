@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -55,10 +56,25 @@ Future<void> setupBackgroundService() async {
   if (Platform.isIOS) {
     logger.i("iOS detected, using one-off task");
     try {
+      String executionTime = await globalStorage.read(
+          key: StorageKey.settingsPushServiceIOSTime);
+      final timeList = executionTime.split(":");
+      TimeOfDay time = TimeOfDay(hour: int.parse(timeList[0]), minute: int.parse(timeList[1]));
+      DateTime now = DateTime.now();
+      DateTime scheduledTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+
+      if (scheduledTime.isBefore(now)) {
+        scheduledTime = scheduledTime.add(const Duration(days: 1));
+      }
+
+      while (scheduledTime.weekday == DateTime.saturday || scheduledTime.weekday == DateTime.sunday) {
+        scheduledTime = scheduledTime.add(const Duration(days: 1));
+      }
+
       await Workmanager().registerOneOffTask(uniqueName, uniqueName,
-      constraints: constraints,
-      initialDelay: const Duration(hours: 5),
-    );
+        constraints: constraints,
+        initialDelay: scheduledTime.difference(now),
+      );
     } catch (e, s) {
       logger.e(e, stackTrace: s);
     }
@@ -83,61 +99,66 @@ void onDidReceiveLocalNotification(
     int id, String? title, String? body, String? payload) {
   logger.i("Received local notification with id $id, title $title, body $body, payload $payload");
 }
+
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
       logger.i("Background fetch triggered");
-      initializeNotifications();
-      var client = SPHclient();
-      await client.prepareDio();
-      await client.loadFromStorage();
-      if (client.username == "" || client.password == "") {
-        logger.w("No credentials found, aborting background fetch");
-        return Future.value(true);
-      }
-      await client.login(backgroundFetch: true);
-      final vPlan =
-      await client.substitutions.getAllSubstitutions(skipLoginCheck: true, filtered: true);
-      await globalStorage.write(
-          key: StorageKey.lastSubstitutionData, value: jsonEncode(vPlan));
-      List<Substitution> allSubstitutions = vPlan.allSubstitutions;
-      String messageBody = "";
-
-      for (final entry in allSubstitutions) {
-        final time =
-            "${weekDayGer(entry.tag)} ${entry.stunde.replaceAll(" - ", "/")}";
-        final type = entry.art ?? "";
-        final subject = entry.fach ?? "";
-        final teacher = entry.lehrer ?? "";
-        final classInfo = entry.klasse ?? "";
-
-        // Concatenate non-null values with separator "-"
-        final entryText = [time, type, subject, teacher, classInfo]
-            .where((e) => e.isNotEmpty)
-            .join(" - ");
-
-        messageBody += "$entryText\n";
-      }
-
-      if (messageBody != "") {
-        final messageUUID = generateUUID(messageBody);
-
-        messageBody +=
-        "Zuletzt editiert: ${DateFormat.Hm().format(vPlan.lastUpdated)}";
-
-        if (!(await isMessageAlreadySent(messageUUID))) {
-          await sendMessage(
-              "${allSubstitutions.length} Einträge im Vertretungsplan",
-              messageBody);
-          await markMessageAsSent(messageUUID);
-        }
-      }
+      await updateNotifications();
+      return Future.value(true);
     } catch (e) {
       logger.f(e.toString());
     }
     return Future.value(true);
   });
+}
+
+Future<void> updateNotifications() async {
+  initializeNotifications();
+  var client = SPHclient();
+  await client.prepareDio();
+  await client.loadFromStorage();
+  if (client.username == "" || client.password == "") {
+    logger.w("No credentials found, aborting background fetch");
+  }
+  await client.login(backgroundFetch: true);
+  final vPlan =
+  await client.substitutions.getAllSubstitutions(skipLoginCheck: true, filtered: true);
+  await globalStorage.write(
+      key: StorageKey.lastSubstitutionData, value: jsonEncode(vPlan));
+  List<Substitution> allSubstitutions = vPlan.allSubstitutions;
+  String messageBody = "";
+
+  for (final entry in allSubstitutions) {
+    final time =
+        "${weekDayGer(entry.tag)} ${entry.stunde.replaceAll(" - ", "/")}";
+    final type = entry.art ?? "";
+    final subject = entry.fach ?? "";
+    final teacher = entry.lehrer ?? "";
+    final classInfo = entry.klasse ?? "";
+
+    // Concatenate non-null values with separator "-"
+    final entryText = [time, type, subject, teacher, classInfo]
+        .where((e) => e.isNotEmpty)
+        .join(" - ");
+
+    messageBody += "$entryText\n";
+  }
+
+  if (messageBody != "") {
+    final messageUUID = generateUUID(messageBody);
+
+    messageBody +=
+    "Zuletzt editiert: ${DateFormat.Hm().format(vPlan.lastUpdated)}";
+
+    if (!(await isMessageAlreadySent(messageUUID))) {
+      await sendMessage(
+          "${allSubstitutions.length} Einträge im Vertretungsplan",
+          messageBody);
+      await markMessageAsSent(messageUUID);
+    }
+  }
 }
 
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
