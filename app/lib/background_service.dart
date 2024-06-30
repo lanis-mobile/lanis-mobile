@@ -32,7 +32,7 @@ Future<void> setupBackgroundService() async {
 
   await Workmanager().initialize(callbackDispatcher,
       isInDebugMode: kDebugMode);
-  const uniqueName = "sphplanfetchservice-alessioc42-github-io";
+  const uniqueName = "notificationservice";
   final constraints = Constraints(
       networkType: NetworkType.connected,
       requiresBatteryNotLow: true,
@@ -54,21 +54,41 @@ Future<void> setupBackgroundService() async {
   }
   if (Platform.isIOS) {
     logger.i("iOS detected, using one-off task");
-    await Workmanager().registerOneOffTask(uniqueName, uniqueName,
+    try {
+      await Workmanager().registerOneOffTask(uniqueName, uniqueName,
       constraints: constraints,
-      initialDelay: const Duration(minutes: 5),
+      initialDelay: const Duration(hours: 5),
     );
+    } catch (e, s) {
+      logger.e(e, stackTrace: s);
+    }
   }
 }
 
+Future<void> initializeNotifications() async {
+  FlutterLocalNotificationsPlugin().initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@drawable/ic_launcher'),
+      iOS: DarwinInitializationSettings(
+        onDidReceiveLocalNotification: onDidReceiveLocalNotification,
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true
+      )
+    ),
+  );
+}
 
+void onDidReceiveLocalNotification(
+    int id, String? title, String? body, String? payload) {
+  logger.i("Received local notification with id $id, title $title, body $body, payload $payload");
+}
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
       logger.i("Background fetch triggered");
-      sendMessage("DEBUG TEST", "Substitutions fetcher called!");
-      /* todo: uncomment before PR
+      initializeNotifications();
       var client = SPHclient();
       await client.prepareDio();
       await client.loadFromStorage();
@@ -113,7 +133,6 @@ void callbackDispatcher() {
           await markMessageAsSent(messageUUID);
         }
       }
-      */
     } catch (e) {
       logger.f(e.toString());
     }
@@ -121,9 +140,9 @@ void callbackDispatcher() {
   });
 }
 
-
 Future<void> sendMessage(String title, String message, {int id = 0}) async {
-  bool ongoingMessage =
+  try {
+    bool ongoingMessage =
       (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) ==
           "true";
 
@@ -134,13 +153,17 @@ Future<void> sendMessage(String title, String message, {int id = 0}) async {
       priority: Priority.high,
       styleInformation: BigTextStyleInformation(message),
       ongoing: ongoingMessage,
-      icon: "@drawable/ic_launcher");
+      );
   const iOSDetails = DarwinNotificationDetails(
-      presentAlert: false, presentBadge: true
+      presentAlert: false, presentBadge: true,
+      
   );
   var platformDetails = NotificationDetails(android: androidDetails, iOS: iOSDetails);
   await FlutterLocalNotificationsPlugin()
       .show(id, title, message, platformDetails);
+  } catch (e,s) {
+    logger.e(e, stackTrace: s);
+  }
 }
 
 String generateUUID(String input) {

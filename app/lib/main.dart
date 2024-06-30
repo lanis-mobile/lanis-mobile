@@ -25,6 +25,7 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     await setupBackgroundService();
+    await initializeNotifications();
 
     await initializeDateFormatting();
     if (!kDebugMode &&
