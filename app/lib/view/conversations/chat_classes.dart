@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:color_hash/color_hash.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
+import 'package:sph_plan/shared/widgets/format_text.dart';
 
 class ConversationSettings {
   final String id; // uniqueId
@@ -104,8 +105,8 @@ class BubbleStyle {
 
   static TextStyle getAuthorTextStyle(final BuildContext context, final String author) {
     final double hue = HSLColor.fromColor(Theme.of(context).colorScheme.primary).hue;
-    late final minHue;
-    late final maxHue;
+    late final double minHue;
+    late final double maxHue;
 
     if (hue < 40) {
       minHue = hue;
@@ -150,11 +151,37 @@ class BubbleStyle {
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
 
     if (own) {
-      return Theme.of(context).brightness == Brightness.dark ?textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimary) : textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimaryFixedVariant);
+      return Theme.of(context).brightness == Brightness.dark ? textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimary, decorationColor: Theme.of(context).colorScheme.onPrimary)
+          : textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimaryFixedVariant, decorationColor: Theme.of(context).colorScheme.onPrimaryFixedVariant);
     } else {
-      return Theme.of(context).brightness == Brightness.dark ?textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondary) : textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondaryFixed);
+      return Theme.of(context).brightness == Brightness.dark ? textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondary, decorationColor: Theme.of(context).colorScheme.onSecondary)
+          : textStyle.copyWith(color: Theme.of(context).colorScheme.onSecondaryFixed, decorationColor: Theme.of(context).colorScheme.onSecondaryFixed);
     }
   }
 
-  static TextStyle getDateTextStyle (final BuildContext context) => Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurface);
+  static TextStyle getDateTextStyle(final BuildContext context) => Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurface);
+
+  static FormatStyle getFormatStyle(final BuildContext context, final bool own) {
+    final bool darkMode = Theme.of(context).brightness == Brightness.dark;
+
+    if (own) {
+      return FormatStyle(
+          textStyle: BubbleStyle.getTextStyle(context, own),
+          timeColor: darkMode ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.primary,
+          linkBackground: darkMode ? Theme.of(context).colorScheme.inversePrimary.withOpacity(0.25) : Theme.of(context).colorScheme.primary.withOpacity(0.25),
+          linkForeground: darkMode ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.primary,
+          codeBackground: darkMode ? Theme.of(context).colorScheme.secondaryFixed.withOpacity(0.4) :  Theme.of(context).colorScheme.secondaryFixed.withOpacity(0.4),
+          codeForeground: darkMode ? Theme.of(context).colorScheme.onSecondaryFixed : Theme.of(context).colorScheme.onSecondaryFixed
+      );
+    } else {
+      return FormatStyle(
+          textStyle: BubbleStyle.getTextStyle(context, own),
+          timeColor: darkMode ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.primary.withOpacity(0.75),
+          linkBackground: darkMode ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.35) : Theme.of(context).colorScheme.primaryFixedDim.withOpacity(0.75),
+          linkForeground: darkMode ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.primary,
+          codeBackground: darkMode ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.15) : Theme.of(context).colorScheme.secondaryFixedDim.withOpacity(0.75),
+          codeForeground: darkMode ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.onSecondaryFixedVariant
+      );
+    }
+  }
 }

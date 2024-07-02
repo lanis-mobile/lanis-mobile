@@ -8,6 +8,7 @@ import '../../client/fetcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
 import 'chat.dart';
+import 'detailed_conversation.dart';
 
 class TriggerRebuild with ChangeNotifier {
   void trigger() {
@@ -175,6 +176,15 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                                 title: conversations[index]["Betreff"],))
                       );
                     }
+                  },
+                  onLongPress: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DetailedConversationAnsicht(
+                              uniqueID: conversations[index]["Uniquid"],
+                              title: conversations[index]["Betreff"],))
+                    );
                   },
                   customBorder: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),

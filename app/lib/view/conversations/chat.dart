@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/shared/widgets/format_text.dart';
+import 'package:sph_plan/view/conversations/send.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
@@ -29,7 +32,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
   final TextEditingController messageField = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-  final ValueNotifier<bool> deactivateSendButton = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
 
   final Map<String, TextStyle> textStyles = {};
 
@@ -147,18 +150,19 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     }
   }
 
-  Future<void> sendMessage(String text) async {
+  Future<void> sendMessage(String text, {bool? offline, bool? success, bool? other}) async {
     final textMessage = Message(
         text: text,
-        own: true,
+        own: other == true && kDebugMode ? false : true,
         date: DateTime.now(),
-        author: null,
+        author: other == true && kDebugMode ? "Debug Person" : null,
         state: MessageState.first,
         status: MessageStatus.sending,
-    ); // TODO: position
+    );
 
     setState(() {
-      if (chat.last.date.isToday()) {
+      DateTime lastMessageDate = chat.last.date;
+      if (lastMessageDate.isToday) {
         chat.add(textMessage);
       } else {
         chat.addAll([
@@ -168,13 +172,18 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
       }
     });
 
-    final bool result = await client.conversations.replyToConversation(
-        settings!.id,
-        "all",
-        settings!.groupChat ? "ja" : "nein",
-        settings!.onlyPrivateAnswers ? "ja" : "nein",
-        text
-    );
+    late final bool result;
+    if (kDebugMode && offline == true) {
+      result = success!;
+    } else {
+      result = await client.conversations.replyToConversation(
+          settings!.id,
+          "all",
+          settings!.groupChat ? "ja" : "nein",
+          settings!.onlyPrivateAnswers ? "ja" : "nein",
+          text
+      );
+    }
 
     setState(() {
       if (result) {
@@ -278,6 +287,8 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
       own: response["own"]
     );
 
+    isSendVisible.value = !settings!.noReply;
+
     parseMessages(response);
   }
 
@@ -297,7 +308,6 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
   }
 
   Widget MessageBuilder(Message message) {
-    // TODO: IMPLEMENT LANIS-STYLE FORMATTING
     ValueNotifier<bool> tapped = ValueNotifier(false);
     final AnimationController controller = AnimationController(vsync: this);
 
@@ -339,7 +349,14 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                   tapped.value = false;
                 },
                 onTapCancel: () async {
-                  tapped.value = false;
+                  setState(() {
+                    tapped.value = false;
+                  });
+                  if (kDebugMode) {
+                    setState(() {
+                      chat[chat.indexOf(message)].status = MessageStatus.sending;
+                    });
+                  }
                 },
                 child: Animate(
                   autoPlay: false,
@@ -357,11 +374,10 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                         ),
                         child: Padding(
                           padding: BubbleStructure.getPadding(message.state == MessageState.first, message.own),
-                          child: Text(
-                            message.text,
-                            style: BubbleStyle.getTextStyle(context, message.own),
-                            textAlign: TextAlign.start,
-                          ),
+                          child: FormattedText(
+                            text: message.text,
+                            formatStyle: BubbleStyle.getFormatStyle(context, message.own)
+                          )
                         ),
                       );
                     }
@@ -406,6 +422,31 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: ValueListenableBuilder(
+          valueListenable: isSendVisible,
+          builder: (context, isVisible, _) {
+            return Visibility(
+              visible: isVisible,
+              child: FloatingActionButton.extended(
+                label: const Text("Neue Nachricht"),
+                icon: const Icon(Icons.edit),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ConversationsSend()));
+              
+                  if (kDebugMode && result is List) {
+                    await sendMessage(result[0], offline: true, success: result[1], other: result[2]);
+                  } else if (result is String) {
+                    if (settings == null) {
+                      await newConversation(result);
+                    } else {
+                      await sendMessage(result);
+                    }
+                  }
+                },
+              ),
+            );
+          }
+      ),
       body: FutureBuilder(
           future: _conversationFuture,
           builder: (context, snapshot) {
@@ -421,110 +462,74 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                 }
               }
 
-              return Stack(
-                alignment: Alignment.bottomLeft,
-                fit: StackFit.loose,
-                children: [
-                  CustomScrollView(
-                    controller: scrollController,
-                    slivers: [
-                      SliverAppBar(
-                        title: Animate(
-                          effects: const [FadeEffect(
-                              curve: Curves.easeIn,
-                          )],
-                          value: 0,
-                          autoPlay: false,
-                          controller: appBarController,
-                          child: Text(widget.title),
-                        ),
-                        snap: true,
-                        floating: true,
-                      ),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Column(
+              return CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  SliverAppBar(
+                    title: Animate(
+                      effects: const [FadeEffect(
+                          curve: Curves.easeIn,
+                      )],
+                      value: 0,
+                      autoPlay: false,
+                      controller: appBarController,
+                      child: Text(widget.title),
+                    ),
+                    snap: true,
+                    floating: true,
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: Text(
-                                        widget.title,
-                                        style: Theme.of(context).textTheme.headlineMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (settings != null && settings!.onlyPrivateAnswers && !settings!.own) ...[
-                                Container(
-                                  alignment: Alignment.center,
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                                  margin: const EdgeInsets.only(top: 16.0),
-                                  decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.surfaceContainerHigh
-                                  ),
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                   child: Text(
-                                    "${settings!.author} kann nur deine Nachrichten sehen!",
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    widget.title,
+                                    style: Theme.of(context).textTheme.headlineMedium,
                                     textAlign: TextAlign.center,
                                   ),
-                                )
-                              ]
+                                ),
+                              ),
                             ],
                           ),
-                        ),
+                          if (settings != null && settings!.onlyPrivateAnswers && !settings!.own) ...[
+                            Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                              margin: const EdgeInsets.only(top: 16.0),
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHigh
+                              ),
+                              child: Text(
+                                "${settings!.author} kann nur deine Nachrichten sehen!",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          ]
+                        ],
                       ),
-                      SliverList.builder(
-                        itemCount: chat.length,
-                        itemBuilder: (context, index) {
-                          if (chat[index] is Message) {
-                            return MessageBuilder(chat[index]);
-                          } else {
-                            return DateHeaderBuilder(chat[index]);
-                          }
-                        },
-                      ),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 60,
-                        ),
-                      )
-                    ],
+                    ),
                   ),
-                  Container(
-                    color: Theme.of(context).colorScheme.surface,
-                    height: 60,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: messageField,
-                          ), // TODO: RichTextField as separate Dialog or so, bc Nachrichten is more used like handicapped E-Mails
-                        ),
-                        ValueListenableBuilder(
-                            valueListenable: deactivateSendButton,
-                            builder: (context, deactivated, _) {
-                              return IconButton(
-                                icon: const Icon(Icons.send),
-                                onPressed: deactivated ? null : () async {
-                                  deactivateSendButton.value = true;
-                                  if (settings == null) {
-                                    await newConversation(messageField.text);
-                                  } else {
-                                    await sendMessage(messageField.text);
-                                  }
-                                  deactivateSendButton.value = false;
-                                },
-                              );
-                            }
-                        )
-                      ],
+                  SliverList.builder(
+                    itemCount: chat.length,
+                    itemBuilder: (context, index) {
+                      if (chat[index] is Message) {
+                        return MessageBuilder(chat[index]);
+                      } else {
+                        return DateHeaderBuilder(chat[index]);
+                      }
+                    },
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 75,
                     ),
                   )
                 ],

@@ -44,7 +44,7 @@ dependencies:
   shared_preferences: ^2.2.2
   rxdart: ^0.27.7
   stack_trace: ^1.11.1
-  styled_text: ^8.1.0
+  styled_text: ^9.0.0-beta-4
   linkify: ^5.0.0
   introduction_screen: ^3.1.12
   flutter_svg: ^2.0.10+1
@@ -70,6 +70,8 @@ dependencies:
   flutter_chat_bubble: ^2.0.2
   color_hash: ^1.0.1
   flutter_animate: ^4.5.0
+  flutter_quill: ^9.1.1
+  quill_html_converter: ^9.3.2
 
 # Should may be removed in the future. This is a temporary fix for the issue with the intl package due to `dart_date` not being updated.
 dependency_overrides:
