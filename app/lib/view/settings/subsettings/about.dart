@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../client/client.dart';
+
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
 
@@ -28,31 +30,20 @@ class _AboutScreenState extends State<AboutScreen> {
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.about)),
       body: ListView(
         children: <Widget>[
+          Contributors(),
           ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Made with love by @alessioc42'),
+            leading: const Icon(Icons.code),
+            title: const Text('GitHub Repository'),
             onTap: () {
-              launchUrl(Uri.parse("https://github.com/alessioC42"));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Made with love by @kurwjan'),
-            onTap: () {
-              launchUrl(Uri.parse("https://github.com/kurwjan"));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Made with love by @CodeSpoof'),
-            onTap: () {
-              launchUrl(Uri.parse("https://github.com/CodeSpoof"));
+              launchUrl(
+                  Uri.parse("https://github.com/alessioC42/lanis-mobile"));
             },
           ),
           ListTile(
@@ -69,14 +60,6 @@ class _AboutScreenState extends State<AboutScreen> {
             onTap: () {
               launchUrl(Uri.parse(
                   "https://github.com/alessioC42/lanis-mobile/releases/latest"));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.code),
-            title: const Text('GitHub Repository'),
-            onTap: () {
-              launchUrl(
-                  Uri.parse("https://github.com/alessioC42/lanis-mobile"));
             },
           ),
           ListTile(
@@ -102,13 +85,74 @@ class _AboutScreenState extends State<AboutScreen> {
                     return AlertDialog(
                       title: const Text("App Information"),
                       content: Text(
-                          "appName: $appName\npackageName: $packageName\nversion: $version\nbuildNumber: $buildNumber\nisDebug: $kDebugMode\n isProfile: $kProfileMode\n isRelease: $kReleaseMode\n"),
+                          "appName: $appName\npackageName: $packageName\nversion: $version\nbuildNumber: $buildNumber\nisDebug: $kDebugMode\nisProfile: $kProfileMode\nisRelease: $kReleaseMode\n"),
                     );
                   });
             },
           )
         ],
       ),
+    );
+  }
+}
+
+/// List of contributors loaded from GitHub API, showing a loading indicator while fetching data
+class Contributors extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ContributorsState();
+}
+
+class _ContributorsState extends State<Contributors> {
+  dynamic contributors;
+  bool loading = true;
+  bool error = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  void loadData() async {
+    try {
+      final response = await client.dio.get('https://api.github.com/repos/alessioC42/lanis-mobile/contributors');
+      contributors = response.data;
+      setState(() {
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error) return const ListTile(title: Text('Error loading contributors'));
+    if (loading) return const LinearProgressIndicator();
+    List<ListTile> tiles = [];
+    for (var contributor in contributors!) {
+      tiles.add(ListTile(
+        leading: CircleAvatar(
+          backgroundImage: NetworkImage(contributor['avatar_url']),
+        ),
+        title: Text(contributor['login']),
+        subtitle: Text("${contributor['contributions']} commits"),
+        onTap: () {
+          launchUrl(Uri.parse(contributor['html_url']));
+        },
+      ));
+    }
+    return Column(
+      children: [
+        const ListTile(
+          leading:  Icon(Icons.people),
+          title: Text('Contributors'),
+        ),
+        Column(children: tiles),
+        const Divider()
+      ],
     );
   }
 }
