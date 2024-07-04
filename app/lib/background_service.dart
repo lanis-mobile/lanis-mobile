@@ -54,7 +54,6 @@ Future<void> setupBackgroundService() async {
 
   }
   if (Platform.isIOS) {
-    logger.i("iOS detected, using one-off task");
     try {
       String executionTime = await globalStorage.read(
           key: StorageKey.settingsPushServiceIOSTime);

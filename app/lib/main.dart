@@ -24,8 +24,10 @@ void main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    await setupBackgroundService();
-    await initializeNotifications();
+    if (!Platform.isIOS) {
+      await setupBackgroundService();
+      await initializeNotifications();
+    }
 
     await initializeDateFormatting();
     if (!kDebugMode &&
