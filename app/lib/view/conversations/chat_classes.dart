@@ -17,6 +17,12 @@ class ConversationSettings {
   const ConversationSettings({required this.id, required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.own, this.author});
 }
 
+class NewConversationSettings {
+  final Message firstMessage;
+  final ConversationSettings settings;
+  NewConversationSettings({required this.firstMessage, required this.settings});
+}
+
 class Message {
   final String text;
   final bool own;
@@ -29,13 +35,9 @@ class Message {
 }
 
 enum MessageStatus {
-  sending(Icons.pending),
-  sent(Icons.check_circle),
-  error(Icons.error);
-
-  final IconData icon;
-
-  const MessageStatus(this.icon);
+  sending,
+  sent,
+  error;
 }
 
 enum MessageState {
@@ -131,7 +133,11 @@ class BubbleStyle {
     return Theme.of(context).textTheme.labelLarge!.copyWith(color: color);
   }
 
-  static Color getColor(final BuildContext context, final bool own) {
+  static Color getColor(final BuildContext context, final bool own, final bool error) {
+    if (error) {
+      return Theme.of(context).colorScheme.error;
+    }
+
     if (own) {
       return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primaryFixedDim;
     } else {
@@ -139,7 +145,11 @@ class BubbleStyle {
     }
   }
 
-  static Color getPressedColor(final BuildContext context, final bool own) {
+  static Color getPressedColor(final BuildContext context, final bool own, final bool error) {
+    if (error) {
+      return Theme.of(context).colorScheme.error.withOpacity(0.75);
+    }
+
     if (own) {
       return Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.primaryFixed : Theme.of(context).colorScheme.primaryFixed;
     } else {
@@ -147,8 +157,12 @@ class BubbleStyle {
     }
   }
 
-  static TextStyle getTextStyle(final BuildContext context, final bool own) {
+  static TextStyle getTextStyle(final BuildContext context, final bool own, final bool error) {
     final TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!;
+
+    if (error) {
+      return textStyle.copyWith(color: Theme.of(context).colorScheme.onError);
+    }
 
     if (own) {
       return Theme.of(context).brightness == Brightness.dark ? textStyle.copyWith(color: Theme.of(context).colorScheme.onPrimary, decorationColor: Theme.of(context).colorScheme.onPrimary)
@@ -161,12 +175,23 @@ class BubbleStyle {
 
   static TextStyle getDateTextStyle(final BuildContext context) => Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurface);
 
-  static FormatStyle getFormatStyle(final BuildContext context, final bool own) {
+  static FormatStyle getFormatStyle(final BuildContext context, final bool own, final bool error) {
     final bool darkMode = Theme.of(context).brightness == Brightness.dark;
+
+    if (error) {
+      return FormatStyle(
+          textStyle: BubbleStyle.getTextStyle(context, own, error),
+          timeColor: Theme.of(context).colorScheme.errorContainer,
+          linkBackground: Theme.of(context).colorScheme.errorContainer.withOpacity(0.35),
+          linkForeground: Theme.of(context).colorScheme.errorContainer,
+          codeBackground: Theme.of(context).colorScheme.onError.withOpacity(0.15),
+          codeForeground: Theme.of(context).colorScheme.onError
+      );
+    }
 
     if (own) {
       return FormatStyle(
-          textStyle: BubbleStyle.getTextStyle(context, own),
+          textStyle: BubbleStyle.getTextStyle(context, own, error),
           timeColor: darkMode ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.primary,
           linkBackground: darkMode ? Theme.of(context).colorScheme.inversePrimary.withOpacity(0.25) : Theme.of(context).colorScheme.primary.withOpacity(0.25),
           linkForeground: darkMode ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.primary,
@@ -175,7 +200,7 @@ class BubbleStyle {
       );
     } else {
       return FormatStyle(
-          textStyle: BubbleStyle.getTextStyle(context, own),
+          textStyle: BubbleStyle.getTextStyle(context, own, error),
           timeColor: darkMode ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.primary.withOpacity(0.75),
           linkBackground: darkMode ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.35) : Theme.of(context).colorScheme.primaryFixedDim.withOpacity(0.75),
           linkForeground: darkMode ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.primary,

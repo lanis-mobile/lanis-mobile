@@ -10,16 +10,15 @@ import 'package:sph_plan/view/conversations/send.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/types/conversations.dart';
 import '../../shared/widgets/error_view.dart';
 import 'chat_classes.dart';
 
 class ConversationsChat extends StatefulWidget {
-  final String? id; // uniqueId
+  final String id; // uniqueId
   final String title;
-  final PartialChat? creationData;
+  final NewConversationSettings? newSettings;
 
-  const ConversationsChat({super.key, required this.title, this.id, this.creationData});
+  const ConversationsChat({super.key, required this.title, required this.id, this.newSettings});
 
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
@@ -36,7 +35,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
 
   final Map<String, TextStyle> textStyles = {};
 
-  ConversationSettings? settings;
+  late final ConversationSettings settings;
 
   final List<dynamic> chat = [];
 
@@ -97,59 +96,6 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     }
   }
 
-  Future<void> newConversation(String text) async {
-    addAuthorTextStyles(widget.creationData!.receivers);
-
-    final textMessage = Message(
-      text: text,
-      own: true,
-      date: DateTime.now(),
-      author: null,
-      state: MessageState.first,
-      status: MessageStatus.sending,
-    );
-
-    setState(() {
-      chat.addAll([
-        DateHeader(date: DateTime.now()),
-        textMessage
-      ]);
-    });
-
-    final dynamic newConversation = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, text);
-
-    final bool result = newConversation["back"];
-    if (result) {
-      chat.last.status = MessageStatus.sent;
-      settings = ConversationSettings(
-        id: newConversation["id"],
-        groupChat: widget.creationData!.type == ChatType.groupOnly,
-        onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly,
-        noReply: false,
-        own: true
-      );
-    } else {
-      chat.last.status = MessageStatus.error;
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              icon: const Icon(Icons.error),
-              title: const Text("Es konnte keine neue Konversation erstellt werden!"),
-              actions: [
-                FilledButton(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Ok")
-                ),
-              ],
-            );
-          }
-      );
-    }
-  }
-
   Future<void> sendMessage(String text, {bool? offline, bool? success, bool? other}) async {
     final textMessage = Message(
         text: text,
@@ -177,10 +123,10 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
       result = success!;
     } else {
       result = await client.conversations.replyToConversation(
-          settings!.id,
+          settings.id,
           "all",
-          settings!.groupChat ? "ja" : "nein",
-          settings!.onlyPrivateAnswers ? "ja" : "nein",
+          settings.groupChat ? "ja" : "nein",
+          settings.onlyPrivateAnswers ? "ja" : "nein",
           text
       );
     }
@@ -266,30 +212,35 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
   }
 
   Future<void> initConversation() async {
-    if (widget.id == null) {
-      return;
+    if (widget.newSettings == null) {
+      dynamic response = await client.conversations.getSingleConversation(widget.id);
+
+      /*if (privateAnswerOnly == "ja" && response["own"] == false) {
+        replyReceiver = response["username"];
+      } else {
+        replyReceiver = null;
+      }*/
+
+      settings = ConversationSettings(
+          id: widget.id,
+          groupChat: response["groupOnly"] == "ja",
+          onlyPrivateAnswers: response["privateAnswerOnly"] == "ja",
+          noReply: response["noAnswerAllowed"] == "ja" ? true : false,
+          author: response["username"],
+          own: response["own"]
+      );
+
+      parseMessages(response);
+    } else {
+      settings = widget.newSettings!.settings;
+
+      chat.addAll([
+        DateHeader(date: widget.newSettings!.firstMessage.date),
+        widget.newSettings!.firstMessage
+      ]);
     }
 
-    dynamic response = await client.conversations.getSingleConversation(widget.id!);
-
-    /*if (privateAnswerOnly == "ja" && response["own"] == false) {
-      replyReceiver = response["username"];
-    } else {
-      replyReceiver = null;
-    }*/
-
-    settings = ConversationSettings(
-      id: widget.id!,
-      groupChat: response["groupOnly"] == "ja",
-      onlyPrivateAnswers: response["privateAnswerOnly"] == "ja",
-      noReply: response["noAnswerAllowed"] == "ja" ? true : false,
-      author: response["username"],
-      own: response["own"]
-    );
-
-    isSendVisible.value = !settings!.noReply;
-
-    parseMessages(response);
+    isSendVisible.value = !settings.noReply;
   }
 
   Widget DateHeaderBuilder(DateHeader header) {
@@ -369,14 +320,14 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                     builder: (context, value, _) {
                       return DecoratedBox(
                         decoration: BoxDecoration(
-                          color: value ? BubbleStyle.getPressedColor(context, message.own) : BubbleStyle.getColor(context, message.own),
+                          color: value ? BubbleStyle.getPressedColor(context, message.own, message.status == MessageStatus.error) : BubbleStyle.getColor(context, message.own, message.status == MessageStatus.error),
                           borderRadius: message.state != MessageState.first ? BubbleStructure.radius : null
                         ),
                         child: Padding(
                           padding: BubbleStructure.getPadding(message.state == MessageState.first, message.own),
                           child: FormattedText(
                             text: message.text,
-                            formatStyle: BubbleStyle.getFormatStyle(context, message.own)
+                            formatStyle: BubbleStyle.getFormatStyle(context, message.own, message.status == MessageStatus.error)
                           )
                         ),
                       );
@@ -405,11 +356,30 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                       color: Theme.of(context).colorScheme.onSurface,
                       size: 3,),
                   ),
-                  Icon(
-                    message.status.icon,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 12,
-                  )
+                  if (message.status == MessageStatus.sending) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(left: 2.0),
+                      child: SizedBox(
+                        width: 10.0,
+                        height: 10.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                        )
+                      ),
+                    )
+                  ] else if (message.status == MessageStatus.error) ...[
+                    Icon(
+                      Icons.error,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 12,
+                    )
+                  ] else ...[
+                    Icon(
+                      Icons.check_circle,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 12,
+                    )
+                  ]
                 ]
               ],
             )
@@ -436,11 +406,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                   if (kDebugMode && result is List) {
                     await sendMessage(result[0], offline: true, success: result[1], other: result[2]);
                   } else if (result is String) {
-                    if (settings == null) {
-                      await newConversation(result);
-                    } else {
-                      await sendMessage(result);
-                    }
+                    await sendMessage(result);
                   }
                 },
               ),
@@ -498,7 +464,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                               ),
                             ],
                           ),
-                          if (settings != null && settings!.onlyPrivateAnswers && !settings!.own) ...[
+                          if (settings.onlyPrivateAnswers && !settings.own) ...[
                             Container(
                               alignment: Alignment.center,
                               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
@@ -507,7 +473,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                                   color: Theme.of(context).colorScheme.surfaceContainerHigh
                               ),
                               child: Text(
-                                "${settings!.author} kann nur deine Nachrichten sehen!",
+                                "${settings.author} kann nur deine Nachrichten sehen!",
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 textAlign: TextAlign.center,
                               ),

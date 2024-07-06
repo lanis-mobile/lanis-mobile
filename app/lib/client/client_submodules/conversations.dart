@@ -213,8 +213,6 @@ class ConversationsParser {
         )
     );
 
-    print(json.decode(response.data));
-
     return json.decode(response.data); // "back" should be bool, id is Uniquid
   }
 
@@ -223,8 +221,6 @@ class ConversationsParser {
   /// Returns false if no one was found or a error happened.
   /// On success, returns list of `SearchEntry`.
   Future<dynamic> searchTeacher(String name) async {
-    print(name);
-
     if (name.length < 2) {
       return false;
     }

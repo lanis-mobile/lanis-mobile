@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 
 class ReceiverEntry extends Taggable {
@@ -10,21 +11,23 @@ class ReceiverEntry extends Taggable {
   List<Object> get props => [name];
 }
 
-class PartialChat {
+class ChatCreationData {
   final ChatType type;
   final String subject;
   final List<String> receivers;
 
-  PartialChat({required this.type, required this.subject, required this.receivers});
+  ChatCreationData({required this.type, required this.subject, required this.receivers});
 }
 
 enum ChatType {
-  noAnswerAllowed("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed placerat euismod lacus."),
-  privateAnswerOnly("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed placerat euismod lacus."),
-  groupOnly("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed placerat euismod lacus."),
-  openChat("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed placerat euismod lacus.");
+  noAnswerAllowed("Keine Antwort auf diese Konversation wird möglich sein.", Icons.speaker_notes_off, "Hinweis"),
+  privateAnswerOnly("Antworten können nur von dir gesehen werden.", Icons.mic, "Mitteilung"),
+  groupOnly("Antworten können von jeden gesehen werden.", Icons.forum, "Gruppenchat"),
+  openChat("Antworten können von jeden oder nur von bestimmten Personen gesehen werden.", Icons.groups, "Offener Chat");
 
   final String description;
+  final IconData icon;
+  final String descriptiveName;
 
-  const ChatType(this.description);
+  const ChatType(this.description, this.icon, this.descriptiveName);
 }

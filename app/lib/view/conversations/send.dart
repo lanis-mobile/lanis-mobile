@@ -2,12 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
+import 'package:sph_plan/view/conversations/chat.dart';
 
+import '../../client/client.dart';
+import '../../client/connection_checker.dart';
 import '../../client/logger.dart';
-
+import '../../shared/types/conversations.dart';
+import 'chat_classes.dart';
 
 class ConversationsSend extends StatefulWidget {
-  const ConversationsSend({super.key});
+  final ChatCreationData? creationData;
+  const ConversationsSend({super.key, this.creationData});
 
   @override
   State<ConversationsSend> createState() => _ConversationsSendState();
@@ -84,6 +89,79 @@ class _ConversationsSendState extends State<ConversationsSend> {
     return text.substring(0, text.length-1);
   }
 
+  Future<void> newConversation(String text) async {
+    final bool status = await connectionChecker.connected;
+    if (!status) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              icon: const Icon(Icons.wifi_off),
+              title: const Text("Keine Verbindung!"),
+              actions: [
+                FilledButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Ok")
+                ),
+              ],
+            );
+          }
+      );
+      return;
+    }
+
+    final textMessage = Message(
+      text: text,
+      own: true,
+      date: DateTime.now(),
+      author: null,
+      state: MessageState.first,
+      status: MessageStatus.sent,
+    );
+
+    final dynamic newConversation = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, text);
+
+    final bool result = newConversation["back"];
+    if (result) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => ConversationsChat(
+              title: widget.creationData!.subject,
+              id: newConversation["id"],
+              newSettings: NewConversationSettings(
+                firstMessage: textMessage,
+                settings: ConversationSettings(
+                    id: newConversation["id"],
+                    groupChat: widget.creationData!.type == ChatType.groupOnly,
+                    onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly,
+                    noReply: false,
+                    own: true
+                )
+              )
+          )
+      ));
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              icon: const Icon(Icons.error),
+              title: const Text("Es konnte keine neue Konversation erstellt werden!"),
+              actions: [
+                FilledButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Ok")
+                ),
+              ],
+            );
+          }
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     late bool other;
@@ -126,11 +204,19 @@ class _ConversationsSendState extends State<ConversationsSend> {
           ],
           IconButton(
             onPressed: () { _controller.clear(); },
-            icon: const Icon(Icons.delete_forever),
+            icon: const Icon(Icons.backspace),
           ),
           IconButton(
             onPressed: () {
-              Navigator.pop(context, parseText(_controller.document.toDelta()));
+              final String text = parseText(_controller.document.toDelta());
+
+              if (text.isEmpty) return;
+
+              if (widget.creationData != null) {
+                newConversation(text);
+              } else {
+                Navigator.pop(context, text);
+              }
             },
             icon: const Icon(Icons.send),
           ),
