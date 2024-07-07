@@ -159,7 +159,6 @@ class ThemeModeNotifier {
     bool isToAmoled = theme == "amoled";
 
     // This if-else block is checking if the Theme is switching from Amoled to something else or vice versa
-    // Also restarting causes the App to close if the Dart debugger is attached but still works on debug Builds if Dart debugger got disconnected
     if (isFromAmoled && !isToAmoled) {
       bool? restart = await showRestartConfirmationBool(isFromAmoled, isToAmoled);
       if (restart == true) {
