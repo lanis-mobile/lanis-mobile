@@ -36,6 +36,7 @@
   "dynamicColor": "Dynamisch",
   "schoolColor": "Schulfarbe",
   "schoolColorOriginExplanation": "Deine Schule hat im SPH eine Akzentfarbe.",
+  "restartNeededForThemeSwitch": "Um zu diesem Thema zu wechseln wird ein Neustart benötigt.",
   "noAppleMessageSupport": "Auf deinem Endgerät (IOS / IpadOS) werden derzeit keine Benachrichtigungen unterstützt.",
   "sadlyNoSupport": "Leider keine Unterstützung",
   "systemPermissionForNotifications": "Systemberechtigung für Benachrichtigungen",
@@ -150,5 +151,7 @@
   "addSpecificFilter": "\"{filter}\" hinzufügen",
   "tryAgain": "Erneut versuchen",
   "refreshComplete": "Aktualisierung abgeschlossen",
-  "offline": "Offline"
+  "offline": "Offline",
+  "restart": "Neustarten",
+  "restart_question": "Neustarten?"
 }

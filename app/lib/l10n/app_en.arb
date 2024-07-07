@@ -36,6 +36,7 @@
   "dynamicColor": "Dynamic",
   "schoolColor": "School color",
   "schoolColorOriginExplanation": "Your school has an accent color in the SPH.",
+  "restartNeededForThemeSwitch": "To switch to this Theme the App needs to restart.",
   "noAppleMessageSupport": "Notifications are currently not supported on your end device (IOS / IpadOS).",
   "sadlyNoSupport": "Unfortunately no support",
   "systemPermissionForNotifications": "Authorization for notifications",
@@ -150,5 +151,7 @@
   "addSpecificFilter": "Add \"{filter}\"",
   "tryAgain": "Try again",
   "refreshComplete": "Refresh complete",
-  "offline": "Offline"
+  "offline": "Offline",
+  "restart": "Restart",
+  "restart_question": "Restart?"
 }

@@ -1,7 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 
 // Only a collection of themes
 // Used for ColorModeNotifier to set the app theme dynamically
@@ -150,9 +150,32 @@ class ThemeModeNotifier {
   }
 
   static void set(String theme) async {
-    await globalStorage.write(
-        key: StorageKey.settingsSelectedTheme, value: theme);
+    // Get previous Theme
+    String pTheme = await globalStorage.read(
+        key: StorageKey.settingsSelectedTheme);
     debugPrint("Setting Theme to: $theme");
-    _notify(theme);
+
+    bool isFromAmoled = pTheme == "amoled";
+    bool isToAmoled = theme == "amoled";
+
+    if (isFromAmoled && !isToAmoled) {
+      bool? restart = await showRestartConfirmationBool(isFromAmoled, isToAmoled);
+      if (restart == true) {
+        await globalStorage.write(
+            key: StorageKey.settingsSelectedTheme, value: theme);
+        Restart.restartApp();
+      }
+    } else if (!isFromAmoled && isToAmoled) {
+      bool? restart = await showRestartConfirmationBool(isFromAmoled, isToAmoled);
+      if (restart == true) {
+        await globalStorage.write(
+            key: StorageKey.settingsSelectedTheme, value: theme);
+        Restart.restartApp();
+      }
+    } else {
+      await globalStorage.write(
+          key: StorageKey.settingsSelectedTheme, value: theme);
+      _notify(theme);
+    }
   }
 }
