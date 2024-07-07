@@ -153,11 +153,12 @@ class ThemeModeNotifier {
     // Get previous Theme
     String pTheme = await globalStorage.read(
         key: StorageKey.settingsSelectedTheme);
-    debugPrint("Setting Theme to: $theme");
 
+    // Checks if the previous Theme or the target Theme is Amoled
     bool isFromAmoled = pTheme == "amoled";
     bool isToAmoled = theme == "amoled";
 
+    // This if-else block is checking if the Theme is switching from Amoled to something else or vice versa
     if (isFromAmoled && !isToAmoled) {
       bool? restart = await showRestartConfirmationBool(isFromAmoled, isToAmoled);
       if (restart == true) {

@@ -110,6 +110,7 @@ void main() async {
   });
 }
 
+// A global NavigatorKey to get context from outside of Widgets
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class App extends StatelessWidget {
