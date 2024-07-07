@@ -114,16 +114,6 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               groupValue: _selectedTheme,
               onChanged: (value) {
                 if (_selectedTheme == "amoled") {
-                  /*
-                   * This doesn't call setState() to prevent the Button from being selected because the App would to restart anyway.
-                   * This does not change the _selectedTheme to prevent the Button to be activated after a retry to press this Button.
-                   * The Button gets prevented from getting activated because if the User would cancel the operation this Button stays selected,
-                   * and if the User would confirm the operation the App gets restarted and the Button would get selected automatically,
-                   * so no need to activate this Button if the User is switching from Amoled
-                   * Theres also no need to change _selectedTheme because if the previous Theme was Amoled the App restarts anyway
-                   * and will get this Value from storage
-                   * The same applies also to dark & system
-                   */
                   String parseSelectedTheme = value.toString();
                   ThemeModeNotifier.set(parseSelectedTheme);
                 } else {
@@ -155,12 +145,6 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               value: "amoled",
               groupValue: _selectedTheme,
               onChanged: (value) {
-                /*
-                 * This Button will never be activated by clicking because switching to this Button would always need a restart
-                 * and would be automatically selected from storage.
-                 * Theres also no need to change _selectedTheme because if the previous Theme was Amoled the App restarts anyway
-                 * and will get this Value from Storage
-                 */
                 String parseSelectedTheme = value.toString();
                 ThemeModeNotifier.set(parseSelectedTheme);
               },
@@ -278,12 +262,10 @@ class _AppearanceElementsState extends State<AppearanceElements> {
   }
 }
 
-// The Restart Confirmation Popup (if the User cancels it returns false if not it returns true)
 Future<bool?> showRestartConfirmationBool(bool isFromAmoled, bool isToAmoled) {
   final completer = Completer<bool?>();
 
   return showDialog<bool>(
-    // This uses the NavigatorKey so theres no need to parse the context from themes.dart
     context: navigatorKey.currentState!.overlay!.context,
     builder: (context) => AlertDialog(
       title: Text(AppLocalizations.of(context)!.restart_question),
