@@ -1,12 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../../../main.dart';
 
 class AppearanceSettingsScreen extends StatelessWidget {
   const AppearanceSettingsScreen({super.key});
@@ -113,15 +109,10 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               value: "light",
               groupValue: _selectedTheme,
               onChanged: (value) {
-                if (_selectedTheme == "amoled") {
-                  String parseSelectedTheme = value.toString();
-                  ThemeModeNotifier.set(parseSelectedTheme);
-                } else {
-                  setState(() {
-                    _selectedTheme = value.toString();
-                    ThemeModeNotifier.set(_selectedTheme);
-                  });
-                }
+                setState(() {
+                  _selectedTheme = value.toString();
+                  ThemeModeNotifier.set(_selectedTheme);
+                });
               },
             ),
             RadioListTile(
@@ -129,15 +120,10 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               value: "dark",
               groupValue: _selectedTheme,
               onChanged: (value) {
-                if (_selectedTheme == "amoled") {
-                  String parseSelectedTheme = value.toString();
-                  ThemeModeNotifier.set(parseSelectedTheme);
-                } else {
-                  setState(() {
-                    _selectedTheme = value.toString();
-                    ThemeModeNotifier.set(_selectedTheme);
-                  });
-                }
+                setState(() {
+                  _selectedTheme = value.toString();
+                  ThemeModeNotifier.set(_selectedTheme);
+                });
               },
             ),
             RadioListTile(
@@ -145,8 +131,10 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               value: "amoled",
               groupValue: _selectedTheme,
               onChanged: (value) {
-                String parseSelectedTheme = value.toString();
-                ThemeModeNotifier.set(parseSelectedTheme);
+                setState(() {
+                  _selectedTheme = value.toString();
+                  ThemeModeNotifier.set(_selectedTheme);
+                });
               },
             ),
             RadioListTile(
@@ -154,15 +142,10 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               value: "system",
               groupValue: _selectedTheme,
               onChanged: (value) {
-                if (_selectedTheme == "amoled") {
-                  String parseSelectedTheme = value.toString();
-                  ThemeModeNotifier.set(parseSelectedTheme);
-                } else {
-                  setState(() {
-                    _selectedTheme = value.toString();
-                    ThemeModeNotifier.set(_selectedTheme);
-                  });
-                }
+                setState(() {
+                  _selectedTheme = value.toString();
+                  ThemeModeNotifier.set(_selectedTheme);
+                });
               },
             ),
           ],
@@ -260,32 +243,4 @@ class _AppearanceElementsState extends State<AppearanceElements> {
       ),
     );
   }
-}
-
-Future<bool?> showRestartConfirmationBool(bool isFromAmoled, bool isToAmoled) {
-  final completer = Completer<bool?>();
-
-  return showDialog<bool>(
-    context: navigatorKey.currentState!.overlay!.context,
-    builder: (context) => AlertDialog(
-      title: Text(AppLocalizations.of(context)!.restart_question),
-      content: Text(AppLocalizations.of(context)!.restartNeededForThemeSwitch),
-      actions: [
-        TextButton(
-          onPressed: () {
-            completer.complete(false);
-            Navigator.pop(context);
-          },
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        TextButton(
-          onPressed: () {
-            completer.complete(true);
-            Navigator.pop(context);
-          },
-          child: Text(AppLocalizations.of(context)!.restart),
-        ),
-      ],
-    ),
-  ).then((value) => completer.future);
 }

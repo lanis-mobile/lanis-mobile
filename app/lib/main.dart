@@ -110,8 +110,6 @@ void main() async {
   });
 }
 
-final navigatorKey = GlobalKey<NavigatorState>();
-
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -141,7 +139,6 @@ class App extends StatelessWidget {
                         AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
                     home: const StartupScreen(),
-                    navigatorKey: navigatorKey,
                   );
                 });
           });
