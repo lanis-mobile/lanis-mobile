@@ -108,9 +108,6 @@ class ColorModeNotifier {
     String schoolAccentColor =
         await globalStorage.read(key: StorageKey.schoolAccentColor);
 
-    //String theme =
-    //    await globalStorage.read(key: StorageKey.settingsSelectedTheme);
-
     if (schoolAccentColor != "") {
       int schoolColor = int.parse(schoolAccentColor);
 
