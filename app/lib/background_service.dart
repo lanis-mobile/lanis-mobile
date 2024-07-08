@@ -26,7 +26,7 @@ Future<void> setupBackgroundService() async {
       await Permission.notification.request();
     }
   });
-  if ((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted && enableNotifications) return;
+  if (!((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted && enableNotifications)) return;
 
   await Workmanager().cancelAll();
 
@@ -51,7 +51,6 @@ Future<void> setupBackgroundService() async {
         constraints: constraints,
         initialDelay: const Duration(minutes: 3)
     );
-
   }
   if (Platform.isIOS) {
     try {
