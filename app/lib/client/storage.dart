@@ -5,7 +5,6 @@ enum StorageKey {
   settingsPushService,
   settingsPushServiceIntervall,
   settingsPushServiceOngoing,
-  settingsPushServiceIOSTime,
   settingsUseCountly,
   settingsSelectedColor,
   settingsSelectedTheme,
@@ -36,8 +35,6 @@ extension on StorageKey {
         return "settings-push-service-on";
       case StorageKey.settingsPushServiceIntervall:
         return "settings-push-service-interval";
-      case StorageKey.settingsPushServiceIOSTime:
-        return "settings-push-service-ios-time";
       case StorageKey.settingsPushServiceOngoing:
         return "settings-push-service-notifications-ongoing";
       case StorageKey.settingsUseCountly:
@@ -81,8 +78,6 @@ extension on StorageKey {
         return "true";
       case StorageKey.settingsPushServiceIntervall:
         return "15";
-      case StorageKey.settingsPushServiceIOSTime:
-        return "7:40";
       case StorageKey.settingsUseCountly:
         return "true";
       case StorageKey.lastAppVersion:

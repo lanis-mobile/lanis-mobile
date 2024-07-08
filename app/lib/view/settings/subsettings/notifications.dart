@@ -38,8 +38,7 @@ class _NotificationElementsState extends State<NotificationElements> {
   bool _enableNotifications = true;
   int _androidNotificationInterval = 15;
   bool _androidNotificationsOngoing = false;
-  bool _androidNotificationPermissionGranted = false;
-  TimeOfDay _iOSUpdateTime = const TimeOfDay(hour: 7, minute: 40);
+  bool _androidNotificationPermissionGranted = true;
 
   Future<void> loadSettingsVars() async {
     _enableNotifications =
@@ -52,9 +51,6 @@ class _NotificationElementsState extends State<NotificationElements> {
         "true";
 
     _androidNotificationPermissionGranted = await Permission.notification.isGranted;
-    final String timeString = await globalStorage.read(key: StorageKey.settingsPushServiceIOSTime);
-    final List<String> timeList = timeString.split(":");
-    _iOSUpdateTime = TimeOfDay(hour: int.parse(timeList[0]), minute: int.parse(timeList[1]));
   }
 
   @override
@@ -67,7 +63,6 @@ class _NotificationElementsState extends State<NotificationElements> {
         _enableNotifications = _enableNotifications;
         _androidNotificationInterval = _androidNotificationInterval;
         _androidNotificationsOngoing = _androidNotificationsOngoing;
-        _iOSUpdateTime = _iOSUpdateTime;
 
         _androidNotificationPermissionGranted = _androidNotificationPermissionGranted;
       });
@@ -92,7 +87,7 @@ class _NotificationElementsState extends State<NotificationElements> {
         SwitchListTile(
           title: Text(AppLocalizations.of(context)!.pushNotifications),
           value: _enableNotifications,
-          onChanged: _androidNotificationPermissionGranted
+          onChanged: (_androidNotificationPermissionGranted || Platform.isIOS)
               ? (bool? value) async {
                   setState(() {
                     _enableNotifications = value!;
@@ -142,22 +137,10 @@ class _NotificationElementsState extends State<NotificationElements> {
                 value: _androidNotificationInterval.toString());
           },
         ),
-        if (Platform.isIOS) ListTile(
-          title: const Text("Time of day"),
-          subtitle: const Text("The time of day when the notifications are sent. Does only apply when the app is opened fairly often. "),
-          trailing: Text(_iOSUpdateTime.format(context), style: const TextStyle(fontSize: 20)),
-          onTap: () async {
-            final TimeOfDay? newTime = await showTimePicker(
-              context: context,
-              initialTime: _iOSUpdateTime,
-            );
-            if (newTime != null) {
-              setState(() {
-                _iOSUpdateTime = newTime;
-              });
-            }
-            globalStorage.write(key: StorageKey.settingsPushServiceIOSTime, value: "${_iOSUpdateTime.hour}:${_iOSUpdateTime.minute}");
-          },
+        if (Platform.isIOS) const ListTile(
+          title: Text("iOS Device"),
+          subtitle: Text("This feature is currently in public testing. Please be aware, that this feature may not work as expected. The update interval is a minimum of 30 minutes. An update every 30 minutes is not guaranteed."),
+          leading: Icon(Icons.info),
         )
       ],
     );

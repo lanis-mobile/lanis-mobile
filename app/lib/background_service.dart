@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,6 +33,7 @@ Future<void> setupBackgroundService() async {
   await Workmanager().initialize(callbackDispatcher,
       isInDebugMode: kDebugMode);
   const uniqueName = "notificationservice";
+  const uniqueNameIOS = "io.github.alessioc42.notificationservice";
   final constraints = Constraints(
       networkType: NetworkType.connected,
       requiresBatteryNotLow: true,
@@ -55,24 +55,9 @@ Future<void> setupBackgroundService() async {
   }
   if (Platform.isIOS) {
     try {
-      String executionTime = await globalStorage.read(
-          key: StorageKey.settingsPushServiceIOSTime);
-      final timeList = executionTime.split(":");
-      TimeOfDay time = TimeOfDay(hour: int.parse(timeList[0]), minute: int.parse(timeList[1]));
-      DateTime now = DateTime.now();
-      DateTime scheduledTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-
-      if (scheduledTime.isBefore(now)) {
-        scheduledTime = scheduledTime.add(const Duration(days: 1));
-      }
-
-      while (scheduledTime.weekday == DateTime.saturday || scheduledTime.weekday == DateTime.sunday) {
-        scheduledTime = scheduledTime.add(const Duration(days: 1));
-      }
-
-      await Workmanager().registerOneOffTask(uniqueName, uniqueName,
-        constraints: constraints,
-        initialDelay: scheduledTime.difference(now),
+      await Workmanager().registerPeriodicTask(uniqueNameIOS, uniqueNameIOS,
+          frequency: const Duration(days: 1),
+          constraints: constraints,
       );
     } catch (e, s) {
       logger.e(e, stackTrace: s);
@@ -81,6 +66,7 @@ Future<void> setupBackgroundService() async {
 }
 
 Future<void> initializeNotifications() async {
+  try {
   FlutterLocalNotificationsPlugin().initialize(
     const InitializationSettings(
       android: AndroidInitializationSettings('@drawable/ic_launcher'),
@@ -91,7 +77,9 @@ Future<void> initializeNotifications() async {
         requestSoundPermission: true
       )
     ),
-  );
+  );} catch (e, s) {
+    logger.e(e, stackTrace: s);
+  }
 }
 
 void onDidReceiveLocalNotification(
@@ -120,6 +108,7 @@ Future<void> updateNotifications() async {
   await client.loadFromStorage();
   if (client.username == "" || client.password == "") {
     logger.w("No credentials found, aborting background fetch");
+    return;
   }
   await client.login(backgroundFetch: true);
   final vPlan =

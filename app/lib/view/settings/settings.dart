@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/clear_cache.dart';
 import 'package:sph_plan/view/settings/subsettings/countly_analysis.dart';
@@ -65,7 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && !Platform.isIOS) ...[
+          if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) ...[
             ListTile(
               leading: const Icon(Icons.notifications),
               title: Text(AppLocalizations.of(context)!.notifications),

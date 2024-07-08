@@ -11,17 +11,18 @@ import flutter_local_notifications
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     
-    if #available(iOS 10.0, *) {
+    if #available(iOS 13.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
     
     FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { (registry) in
       GeneratedPluginRegistrant.register(with: registry)
     }
-      
+    
     WorkmanagerPlugin.registerTask(withIdentifier: "notificationservice")
-    // Set the minimum background fetch interval.
-    UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(60*40))
+    
+      WorkmanagerPlugin.registerPeriodicTask(withIdentifier: "io.github.alessioc42.notificationservice", frequency: NSNumber(value: 30 * 60))
+    UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(30 * 60))
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
