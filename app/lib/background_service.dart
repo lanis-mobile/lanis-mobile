@@ -18,15 +18,18 @@ Future<void> setupBackgroundService() async {
       await globalStorage.read(key: StorageKey.settingsPushService) ==
           "true";
 
-  PermissionStatus? notificationsPermissionStatus;
 
-  await Permission.notification.isDenied.then((value) async {
-    if (value) {
-      notificationsPermissionStatus =
-      await Permission.notification.request();
-    }
-  });
-  if (!((notificationsPermissionStatus ?? PermissionStatus.granted).isGranted && enableNotifications)) return;
+  if (Platform.isAndroid){
+    PermissionStatus? notificationsPermissionStatus;
+    await Permission.notification.isDenied.then((value) async {
+      if (value) {
+        notificationsPermissionStatus =
+        await Permission.notification.request();
+      }
+    });
+    if (!(notificationsPermissionStatus ?? PermissionStatus.granted).isGranted) return;
+  }
+  if (!enableNotifications) return;
 
   await Workmanager().cancelAll();
 
