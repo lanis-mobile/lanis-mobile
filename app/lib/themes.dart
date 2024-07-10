@@ -13,42 +13,41 @@ class Themes {
 
   static Themes getNewTheme(Color seedColor) {
     ThemeData basicTheme(Brightness brightness) {
-      if (globalStorage.prefs.getString("theme") == "amoled") {
-        // The amoled theme, global amoled theme data changes should be put here.
-        return ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
-            inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
-
-            // Amoled Background & Themes for required Components
-            scaffoldBackgroundColor: amoledColors["background"],
-            navigationBarTheme: NavigationBarThemeData(
-              backgroundColor: amoledColors["background"],
-            ),
-            navigationDrawerTheme: NavigationDrawerThemeData(
-              backgroundColor: amoledColors["background"],
-            ),
-            appBarTheme: AppBarTheme(
-              backgroundColor: amoledColors["background"],
-              surfaceTintColor: amoledColors["background"],
-            ),
-            dialogTheme: DialogTheme(
-              backgroundColor: amoledColors["secondary"],
-              surfaceTintColor: amoledColors["secondary"],
-            ),
-            bottomSheetTheme: BottomSheetThemeData(
-              backgroundColor: amoledColors["third"],
-              surfaceTintColor: amoledColors["third"],
-            )
-        );
-      } else {
+      //if (globalStorage.prefs.getString("theme") == "amoled") {
+      //  // The amoled theme, global amoled theme data changes should be put here.
+      //  return ThemeData(
+      //      colorScheme: ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
+      //      inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+//
+      //      // Amoled Background & Themes for required Components
+      //      scaffoldBackgroundColor: amoledColors["background"],
+      //      navigationBarTheme: NavigationBarThemeData(
+      //        backgroundColor: amoledColors["background"],
+      //      ),
+      //      navigationDrawerTheme: NavigationDrawerThemeData(
+      //        backgroundColor: amoledColors["background"],
+      //      ),
+      //      appBarTheme: AppBarTheme(
+      //        backgroundColor: amoledColors["background"],
+      //        surfaceTintColor: amoledColors["background"],
+      //      ),
+      //      dialogTheme: DialogTheme(
+      //        backgroundColor: amoledColors["secondary"],
+      //        surfaceTintColor: amoledColors["secondary"],
+      //      ),
+      //      bottomSheetTheme: BottomSheetThemeData(
+      //        backgroundColor: amoledColors["third"],
+      //        surfaceTintColor: amoledColors["third"],
+      //      )
+      //  );
+      //} else {
         // The basic theme, global theme data changes should be put here.
-        return ThemeData(
-          colorScheme:
-          ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
-          inputDecorationTheme:
-          const InputDecorationTheme(border: OutlineInputBorder()),
-        );
-      }
+      return ThemeData(
+        colorScheme:
+        ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
+        inputDecorationTheme:
+        const InputDecorationTheme(border: OutlineInputBorder()),
+      );
     }
 
     return Themes(
@@ -57,12 +56,12 @@ class Themes {
     );
   }
 
-  // Colors for Amoled Mode
-  static final Map<String, Color> amoledColors = {
-    "background": Colors.black,
-    "secondary": const Color(0xFF0f0f0f),
-    "third": const Color(0xFF0a0a0a),
-  };
+//  // Colors for Amoled Mode
+//  static final Map<String, Color> amoledColors = {
+//    "background": Colors.black,
+//    "secondary": const Color(0xFF0f0f0f),
+//    "third": const Color(0xFF0a0a0a),
+//  };
 
   static final Map<String, Themes> flutterColorThemes = {
     "pink": getNewTheme(Colors.pink),

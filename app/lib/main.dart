@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:sph_plan/startup.dart';
@@ -115,9 +116,46 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    amoled(Themes theme) {
+      // Colors for Amoled Mode
+      final Map<String, Color> amoledColors = {
+        "background": Colors.black,
+        "secondary": const Color(0xFF0f0f0f),
+        "third": const Color(0xFF0a0a0a),
+      };
+      String? currentTheme = globalStorage.prefs.getString("theme");
+      bool amoled = false;
+      if (currentTheme == "amoled") amoled = true;
+      if (amoled) {
+        return theme.darkTheme?.copyWith(
+          // Amoled Background & Themes for required Components
+            scaffoldBackgroundColor: amoledColors["background"],
+            navigationBarTheme: NavigationBarThemeData(
+              backgroundColor: amoledColors["background"],
+            ),
+            navigationDrawerTheme: NavigationDrawerThemeData(
+              backgroundColor: amoledColors["background"],
+            ),
+            appBarTheme: AppBarTheme(
+              backgroundColor: amoledColors["background"],
+              surfaceTintColor: amoledColors["background"],
+            ),
+            dialogTheme: DialogTheme(
+              backgroundColor: amoledColors["secondary"],
+              surfaceTintColor: amoledColors["secondary"],
+            ),
+            bottomSheetTheme: BottomSheetThemeData(
+              backgroundColor: amoledColors["third"],
+              surfaceTintColor: amoledColors["third"],
+            )
+        );
+      } else {
+        return theme.darkTheme;
+      }
+    }
+
     return DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
       if (lightDynamic != null && darkDynamic != null) {
-
         Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
         if (globalStorage.prefs.getString("color") == "dynamic") {
           ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
@@ -133,10 +171,10 @@ class App extends StatelessWidget {
                   return MaterialApp(
                     title: 'Lanis Mobile',
                     theme: theme.lightTheme,
-                    darkTheme: theme.darkTheme,
+                    darkTheme: amoled(theme),
                     themeMode: mode,
                     localizationsDelegates:
-                        AppLocalizations.localizationsDelegates,
+                    AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
                     home: const StartupScreen(),
                   );
