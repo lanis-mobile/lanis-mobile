@@ -12,6 +12,7 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 
 <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
 
+<p><h4>Iphone / Ipad via testflight: </h4>https://testflight.apple.com/join/THSFD13a</p>
 
 <details>
   <summary>Screenshots</summary>
