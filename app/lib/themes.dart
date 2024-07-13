@@ -111,17 +111,16 @@ class ThemeModeNotifier {
   static void set(String theme) async {
     await globalStorage.write(
         key: StorageKey.settingsSelectedTheme, value: theme);
-    debugPrint("Setting Theme to: $theme");
     _notify(theme);
   }
 }
 
 class AmoledNotifier {
   static ValueNotifier<bool> notifier =
-  ValueNotifier<bool>(false);
+    ValueNotifier<bool>(false);
 
   static void init() async {
-    String isAmoled = await globalStorage.read(key: StorageKey.settingsSelectedTheme);
+    String isAmoled = await globalStorage.read(key: StorageKey.settingsIsAmoled);
     notifier.value = bool.parse(isAmoled);
   }
 
