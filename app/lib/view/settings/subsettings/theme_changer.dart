@@ -29,6 +29,7 @@ class AppearanceElements extends StatefulWidget {
 class _AppearanceElementsState extends State<AppearanceElements> {
   String _selectedTheme = "system"; // Default theme
   String _selectedColor = "standard"; // Default color
+  bool _isAmoled = false;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
     // Idk if prefs is the right way but it's working.
     _selectedTheme = globalStorage.prefs.getString("theme") ?? "system";
     _selectedColor = globalStorage.prefs.getString("color") ?? "standard";
+    _isAmoled = bool.parse(globalStorage.prefs.getString("isAmoled") ?? "false");
   }
 
   RadioListTile colorListTile(
@@ -105,6 +107,17 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             RadioListTile(
+              title: Text(AppLocalizations.of(context)!.systemMode),
+              value: "system",
+              groupValue: _selectedTheme,
+              onChanged: (value) {
+                setState(() {
+                  _selectedTheme = value.toString();
+                  ThemeModeNotifier.set(_selectedTheme);
+                });
+              },
+            ),
+            RadioListTile(
               title: Text(AppLocalizations.of(context)!.lightMode),
               value: "light",
               groupValue: _selectedTheme,
@@ -126,30 +139,31 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                 });
               },
             ),
-            RadioListTile(
-              title: Text(AppLocalizations.of(context)!.amoledMode),
-              value: "amoled",
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value.toString();
-                  ThemeModeNotifier.set(_selectedTheme);
-                });
-              },
-            ),
-            RadioListTile(
-              title: Text(AppLocalizations.of(context)!.systemMode),
-              value: "system",
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value.toString();
-                  ThemeModeNotifier.set(_selectedTheme);
-                });
-              },
-            ),
+            Visibility(
+              visible: Theme.of(context).brightness == Brightness.dark,
+                child: Column(
+                  children: [
+                    const Divider(
+                      indent: 25,
+                      endIndent: 25,
+                      height: 15,
+                    ),
+                    CheckboxListTile(
+                        title: Text(AppLocalizations.of(context)!.amoledMode),
+                        value: _isAmoled,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (value) {
+                          setState(() {
+                            _isAmoled = value!;
+                            AmoledNotifier.set(_isAmoled);
+                          });
+                        }
+                    ),
+                  ],
+                )
+            )
           ],
-          const Divider(),
+          const SizedBox(height: 10.0),
           // Color mode, aka the primary color accent of the app
           ...[
             Text(

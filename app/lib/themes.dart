@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/storage.dart';
 
@@ -154,4 +152,55 @@ class ThemeModeNotifier {
     debugPrint("Setting Theme to: $theme");
     _notify(theme);
   }
+}
+
+class AmoledNotifier {
+  static ValueNotifier<bool> notifier =
+  ValueNotifier<bool>(false);
+
+  static void init() async {
+    String isAmoled = await globalStorage.read(key: StorageKey.settingsSelectedTheme);
+    notifier.value = bool.parse(isAmoled);
+  }
+
+  static void set(bool isAmoled) async {
+    await globalStorage.write(key: StorageKey.settingsIsAmoled, value: isAmoled.toString());
+    notifier.value = isAmoled;
+  }
+}
+
+getAmoledTheme(Themes theme, bool isAmoled) {
+  // Colors for Amoled Mode
+  final Map<String, Color> amoledColors = {
+    "background": Colors.black,
+    "secondary": const Color(0xFF0f0f0f),
+    "third": const Color(0xFF0a0a0a),
+  };
+
+  if (!isAmoled) {
+    return theme.darkTheme;
+  }
+
+  return theme.darkTheme?.copyWith(
+    // Amoled Background & Themes for required Components
+      scaffoldBackgroundColor: amoledColors["background"],
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: amoledColors["background"],
+      ),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: amoledColors["background"],
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: amoledColors["background"],
+        surfaceTintColor: amoledColors["background"],
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: amoledColors["secondary"],
+        surfaceTintColor: amoledColors["secondary"],
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: amoledColors["third"],
+        surfaceTintColor: amoledColors["third"],
+      )
+  );
 }
