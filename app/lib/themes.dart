@@ -10,13 +10,13 @@ class Themes {
   Themes(this.lightTheme, this.darkTheme);
 
   static Themes getNewTheme(Color seedColor) {
+    // The basic theme, global theme data changes should be put here.
     ThemeData basicTheme(Brightness brightness) {
-      // The basic theme, global theme data changes should be put here.
       return ThemeData(
         colorScheme:
-        ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
+          ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
         inputDecorationTheme:
-        const InputDecorationTheme(border: OutlineInputBorder()),
+          const InputDecorationTheme(border: OutlineInputBorder()),
       );
     }
 

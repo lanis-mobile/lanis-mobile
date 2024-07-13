@@ -318,7 +318,6 @@ class _HomePageState extends State<HomePage> {
       }
     }
     return NavigationBar(
-      //backgroundColor: Colors.black,
       destinations: barDestinations,
       selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
       onDestinationSelected: (int index) =>
