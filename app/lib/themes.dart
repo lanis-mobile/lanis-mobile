@@ -121,8 +121,9 @@ class AmoledNotifier {
       ValueNotifier<bool>(false);
 
   static void init() async {
-    String isAmoled = await globalStorage.read(
-        key: StorageKey.settingsIsAmoled);
+    String isAmoled =
+        await globalStorage.read(
+            key: StorageKey.settingsIsAmoled);
     notifier.value = bool.parse(isAmoled);
   }
 
