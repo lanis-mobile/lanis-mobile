@@ -67,6 +67,8 @@ dependencies:
   logger: ^2.2.0
   simple_shadow: ^0.3.1
   flutter_tagging_plus: ^4.0.2
+  app_settings: ^5.1.1
+  device_info_plus: ^10.1.0
 
 
 flutter_launcher_icons:
