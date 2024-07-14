@@ -96,6 +96,7 @@ void main() async {
 
     ThemeModeNotifier.init();
     ColorModeNotifier.init();
+    AmoledNotifier.init();
 
     HttpProxy httpProxy = await HttpProxy.createHttpProxy();
     HttpOverrides.global=httpProxy;
@@ -129,15 +130,20 @@ class App extends StatelessWidget {
             return ValueListenableBuilder<ThemeMode>(
                 valueListenable: ThemeModeNotifier.notifier,
                 builder: (_, mode, __) {
-                  return MaterialApp(
-                    title: 'Lanis Mobile',
-                    theme: theme.lightTheme,
-                    darkTheme: theme.darkTheme,
-                    themeMode: mode,
-                    localizationsDelegates:
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: AmoledNotifier.notifier,
+                    builder: (_, isAmoled, __) {
+                      return MaterialApp(
+                        title: 'Lanis Mobile',
+                        theme: theme.lightTheme,
+                        darkTheme: getAmoledTheme(theme, isAmoled),
+                        themeMode: mode,
+                        localizationsDelegates:
                         AppLocalizations.localizationsDelegates,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    home: const StartupScreen(),
+                        supportedLocales: AppLocalizations.supportedLocales,
+                        home: const StartupScreen(),
+                      );
+                    }
                   );
                 });
           });

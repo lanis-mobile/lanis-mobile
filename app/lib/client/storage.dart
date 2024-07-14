@@ -8,6 +8,7 @@ enum StorageKey {
   settingsUseCountly,
   settingsSelectedColor,
   settingsSelectedTheme,
+  settingsIsAmoled,
 
   userSchoolID,
   userUsername,
@@ -61,6 +62,8 @@ extension on StorageKey {
         return "color";
       case StorageKey.settingsSelectedTheme:
         return "theme";
+      case StorageKey.settingsIsAmoled:
+        return "isAmoled";
       case StorageKey.lastPushMessageHash:
         return "last-notifications-hash";
       case StorageKey.substitutionsFilter:
@@ -90,6 +93,8 @@ extension on StorageKey {
         return "standard";
       case StorageKey.settingsSelectedTheme:
         return "system";
+      case StorageKey.settingsIsAmoled:
+        return "false";
 
       default:
         return "";
