@@ -9,7 +9,6 @@ import '../../client/fetcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/widgets/error_view.dart';
 import 'chat.dart';
-import 'detailed_conversation.dart';
 
 class TriggerRebuild with ChangeNotifier {
   void trigger() {
@@ -17,14 +16,14 @@ class TriggerRebuild with ChangeNotifier {
   }
 }
 
-class ConversationsAnsicht extends StatefulWidget {
-  const ConversationsAnsicht({super.key});
+class ConversationsOverview extends StatefulWidget {
+  const ConversationsOverview({super.key});
 
   @override
-  State<StatefulWidget> createState() => _ConversationsAnsichtState();
+  State<StatefulWidget> createState() => _ConversationsOverviewState();
 }
 
-class _ConversationsAnsichtState extends State<ConversationsAnsicht>
+class _ConversationsOverviewState extends State<ConversationsOverview>
     with TickerProviderStateMixin {
   static const double padding = 12.0;
 
@@ -177,15 +176,6 @@ class _ConversationsAnsichtState extends State<ConversationsAnsicht>
                                 title: conversations[index]["Betreff"],))
                       );
                     }
-                  },
-                  onLongPress: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => DetailedConversationAnsicht(
-                              uniqueID: conversations[index]["Uniquid"],
-                              title: conversations[index]["Betreff"],))
-                    );
                   },
                   customBorder: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),

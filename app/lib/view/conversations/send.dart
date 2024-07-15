@@ -8,7 +8,7 @@ import '../../client/client.dart';
 import '../../client/connection_checker.dart';
 import '../../client/logger.dart';
 import '../../shared/types/conversations.dart';
-import 'chat_classes.dart';
+import 'shared.dart';
 
 class ConversationsSend extends StatefulWidget {
   final ChatCreationData? creationData;

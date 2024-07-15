@@ -11,7 +11,7 @@ import 'package:sph_plan/view/conversations/send.dart';
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/widgets/error_view.dart';
-import 'chat_classes.dart';
+import 'shared.dart';
 
 class ConversationsChat extends StatefulWidget {
   final String id; // uniqueId
@@ -41,6 +41,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
 
   @override
   void initState() {
+    // Make the app bar title disappear when scrolled to the top
     appBarController = AnimationController(vsync: this);
     scrollController.addListener(animateAppBarTitle);
     animateAppBarTitle();
@@ -76,23 +77,10 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     }
   }
 
-  void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
-    if (mounted) {
-      // Hide the current SnackBar if one is already visible.
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(text),
-          duration: Duration(seconds: seconds, milliseconds: milliseconds),
-        ),
-      );
-    }
-  }
-
   void addAuthorTextStyles(final List<String> authors) {
+    final ThemeData theme = Theme.of(context);
     for (final String author in authors) {
-      textStyles[author] = BubbleStyle.getAuthorTextStyle(context, author);
+      textStyles[author] = BubbleStyle.getAuthorTextStyle(theme, author);
     }
   }
 
@@ -243,152 +231,6 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     isSendVisible.value = !settings.noReply;
   }
 
-  Widget DateHeaderBuilder(DateHeader header) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Card(
-          margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            child: Text(DateFormat("d. MMMM y", Localizations.localeOf(context).languageCode).format(header.date)),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget MessageBuilder(Message message) {
-    ValueNotifier<bool> tapped = ValueNotifier(false);
-    final AnimationController controller = AnimationController(vsync: this);
-
-    return Padding(
-      padding: BubbleStructure.getMargin(message.state),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: BubbleStructure.getAlignment(message.own),
-        children: [
-          // Author name
-          if (message.state == MessageState.first && !message.own) ...[
-            Text(
-                message.author!,
-              style: textStyles[message.author],
-            )
-          ],
-          // Message bubble
-          ClipPath(
-            clipper: message.state == MessageState.first ? BubbleStructure.getFirstStateClipper(message.own) : null,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 350, //TODO: MAKE IT DYNAMIC TO SCREEN
-              ),
-              child: GestureDetector(
-                onLongPress: () async {
-                  tapped.value = false;
-                  HapticFeedback.vibrate();
-                  await Clipboard.setData(ClipboardData(text: message.text));
-                  showSnackbar("Nachricht wurde kopiert!");
-                  controller.value = 0;
-                  controller.forward();
-                },
-                onTapDown: (_) async {
-                  await Future.delayed(const Duration(milliseconds: 50));
-                  tapped.value = true;
-                },
-                onTapUp: (_) async {
-                  await Future.delayed(const Duration(milliseconds: 150));
-                  tapped.value = false;
-                },
-                onTapCancel: () async {
-                  setState(() {
-                    tapped.value = false;
-                  });
-                  if (kDebugMode) {
-                    setState(() {
-                      chat[chat.indexOf(message)].status = MessageStatus.sending;
-                    });
-                  }
-                },
-                child: Animate(
-                  autoPlay: false,
-                  effects: const [ShimmerEffect(
-                    duration: Duration(milliseconds: 600)
-                  )],
-                  controller: controller,
-                  child: ValueListenableBuilder(
-                    valueListenable: tapped,
-                    builder: (context, value, _) {
-                      return DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: value ? BubbleStyle.getPressedColor(context, message.own, message.status == MessageStatus.error) : BubbleStyle.getColor(context, message.own, message.status == MessageStatus.error),
-                          borderRadius: message.state != MessageState.first ? BubbleStructure.radius : null
-                        ),
-                        child: Padding(
-                          padding: BubbleStructure.getPadding(message.state == MessageState.first, message.own),
-                          child: FormattedText(
-                            text: message.text,
-                            formatStyle: BubbleStyle.getFormatStyle(context, message.own, message.status == MessageStatus.error)
-                          )
-                        ),
-                      );
-                    }
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Date text
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: message.state == MessageState.first ? BubbleStructure.compensatedPadding : BubbleStructure.horizontalPadding),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  DateFormat("HH:mm").format(message.date),
-                  style: BubbleStyle.getDateTextStyle(context)
-                ),
-                if (message.own) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: Icon(
-                      Icons.circle,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      size: 3,),
-                  ),
-                  if (message.status == MessageStatus.sending) ...[
-                    const Padding(
-                      padding: EdgeInsets.only(left: 2.0),
-                      child: SizedBox(
-                        width: 10.0,
-                        height: 10.0,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                        )
-                      ),
-                    )
-                  ] else if (message.status == MessageStatus.error) ...[
-                    Icon(
-                      Icons.error,
-                      color: Theme.of(context).colorScheme.error,
-                      size: 12,
-                    )
-                  ] else ...[
-                    Icon(
-                      Icons.check_circle,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 12,
-                    )
-                  ]
-                ]
-              ],
-            )
-          )
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -487,9 +329,10 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                     itemCount: chat.length,
                     itemBuilder: (context, index) {
                       if (chat[index] is Message) {
-                        return MessageBuilder(chat[index]);
+                        return MessageWidget(message: chat[index], textStyle: textStyles[chat[index].author]);
+                        //return MessageBuilder(chat[index]);
                       } else {
-                        return DateHeaderBuilder(chat[index]);
+                        return DateHeaderWidget(header: chat[index]);
                       }
                     },
                   ),
@@ -510,3 +353,173 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     );
   }
 }
+
+class DateHeaderWidget extends StatelessWidget {
+  final DateHeader header;
+  const DateHeaderWidget({super.key, required this.header});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Card(
+          margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: Text(DateFormat("d. MMMM y", Localizations.localeOf(context).languageCode).format(header.date)),
+          ),
+        )
+      ],
+    );
+  }
+}
+
+
+class MessageWidget extends StatefulWidget {
+  final Message message;
+  final TextStyle? textStyle;
+  const MessageWidget({super.key, required this.message, required this.textStyle});
+
+  @override
+  State<MessageWidget> createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends State<MessageWidget> with SingleTickerProviderStateMixin {
+  ValueNotifier<bool> tapped = ValueNotifier(false);
+  late final AnimationController controller;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(vsync: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: BubbleStructure.getMargin(widget.message.state),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: BubbleStructure.getAlignment(widget.message.own),
+        children: [
+          // Author name
+          if (widget.message.state == MessageState.first && !widget.message.own) ...[
+            Text(
+              widget.message.author!,
+              style: widget.textStyle,
+            )
+          ],
+
+          // Message bubble
+          ClipPath(
+            clipper: widget.message.state == MessageState.first ? BubbleStructure.getFirstStateClipper(widget.message.own) : null,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 350, //TODO: MAKE IT DYNAMIC TO SCREEN
+              ),
+              child: GestureDetector(
+                onLongPress: () async {
+                  tapped.value = false;
+                  HapticFeedback.vibrate();
+                  await Clipboard.setData(ClipboardData(text: widget.message.text));
+                  showSnackbar(context, "Nachricht wurde kopiert!");
+                  controller.value = 0;
+                  controller.forward();
+                },
+                onTapDown: (_) async {
+                  await Future.delayed(const Duration(milliseconds: 50));
+                  tapped.value = true;
+                },
+                onTapUp: (_) async {
+                  await Future.delayed(const Duration(milliseconds: 150));
+                  tapped.value = false;
+                },
+                onTapCancel: () async {
+                  setState(() {
+                    tapped.value = false;
+                  });
+                },
+                child: Animate(
+                  autoPlay: false,
+                  effects: const [ShimmerEffect(
+                      duration: Duration(milliseconds: 600),
+                  )],
+                  controller: controller,
+                  child: ValueListenableBuilder(
+                      valueListenable: tapped,
+                      builder: (context, isTapped, _) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                              color: isTapped ? BubbleStyles.getStyle(widget.message.own).pressedColor : BubbleStyles.getStyle(widget.message.own).mainColor,
+                              borderRadius: widget.message.state != MessageState.first ? BubbleStructure.radius : null,
+                          ),
+                          child: Padding(
+                              padding: BubbleStructure.getPadding(widget.message.state == MessageState.first, widget.message.own),
+                              child: FormattedText(
+                                  text: widget.message.text,
+                                  formatStyle: BubbleStyles.getStyle(widget.message.own).textFormatStyle
+                              )
+                          ),
+                        );
+                      }
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Date text
+          Padding(
+              padding: EdgeInsets.symmetric(horizontal: widget.message.state == MessageState.first ? BubbleStructure.compensatedPadding : BubbleStructure.horizontalPadding),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                      DateFormat("HH:mm").format(widget.message.date),
+                      style: BubbleStyles.getStyle(widget.message.own).dateTextStyle
+                  ),
+                  if (widget.message.own) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: Icon(
+                        Icons.circle,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 3,),
+                    ),
+                    if (widget.message.status == MessageStatus.sending) ...[
+                      const Padding(
+                        padding: EdgeInsets.only(left: 2.0),
+                        child: SizedBox(
+                            width: 10.0,
+                            height: 10.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                            )
+                        ),
+                      )
+                    ] else if (widget.message.status == MessageStatus.error) ...[
+                      Icon(
+                        Icons.error,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 12,
+                      )
+                    ] else ...[
+                      Icon(
+                        Icons.check_circle,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 12,
+                      )
+                    ]
+                  ]
+                ],
+              )
+          )
+        ],
+      ),
+    );
+  }
+}
+

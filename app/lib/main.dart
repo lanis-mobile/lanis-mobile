@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sph_plan/themes.dart';
+import 'package:sph_plan/view/conversations/shared.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:sph_plan/startup.dart';
 
@@ -125,6 +126,13 @@ class App extends StatelessWidget {
             return ValueListenableBuilder<ThemeMode>(
                 valueListenable: ThemeModeNotifier.notifier,
                 builder: (_, mode, __) {
+
+                  if (mode == ThemeMode.light || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.light) {
+                    BubbleStyles.init(theme.lightTheme!);
+                  } else if (mode == ThemeMode.dark || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.dark) {
+                    BubbleStyles.init(theme.darkTheme!);
+                  }
+
                   return MaterialApp(
                     title: 'Lanis Mobile',
                     theme: theme.lightTheme,
