@@ -6,6 +6,7 @@ import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/widgets/format_text.dart';
 import 'package:sph_plan/view/conversations/send.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
@@ -134,7 +135,7 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
         chat.last.status = MessageStatus.sent;
       } else {
         chat.last.status = MessageStatus.error;
-        showSnackbar(context, "Nachricht konnte nicht gesendet werden!");
+        showSnackbar(context, AppLocalizations.of(context)!.errorSendingMessage);
       }
     });
   }
@@ -245,7 +246,7 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
             return Visibility(
               visible: isVisible,
               child: FloatingActionButton.extended(
-                label: const Text("Neue Nachricht"),
+                label: Text(AppLocalizations.of(context)!.newMessage),
                 icon: const Icon(Icons.edit),
                 onPressed: () async {
                   await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ConversationsSend()));
@@ -292,14 +293,14 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
                                 builder: (context) {
                                   return AlertDialog(
                                     icon: const Icon(Icons.groups),
-                                    title: const Text("Offener Chat"),
-                                    content: const Text("Aktuell kann man in der App nur an allen Personen eine Nachricht schicken. Normalerweise könnte man auch nur an bestimmten Personen schreiben."),
+                                    title: Text(AppLocalizations.of(context)!.conversationTypeName(ChatType.openChat.name)),
+                                    content: Text(AppLocalizations.of(context)!.openChatWarning),
                                     actions: [
                                       FilledButton(
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
-                                          child: const Text("Zurück")
+                                          child: const Text("Ok")
                                       )
                                     ],
                                   );
@@ -339,7 +340,7 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
                                   color: Theme.of(context).colorScheme.surfaceContainerHigh
                               ),
                               child: Text(
-                                "${settings.author} kann nur deine Nachrichten sehen!",
+                                "${settings.author} ${AppLocalizations.of(context)!.privateConversation}",
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -454,7 +455,7 @@ class _MessageWidgetState extends State<MessageWidget> with SingleTickerProvider
                   tapped.value = false;
                   HapticFeedback.vibrate();
                   await Clipboard.setData(ClipboardData(text: widget.message.text));
-                  showSnackbar(context, "Nachricht wurde kopiert!");
+                  showSnackbar(context, AppLocalizations.of(context)!.copiedMessage);
                   controller.value = 0;
                   controller.forward();
                 },

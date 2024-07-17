@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:sph_plan/view/conversations/chat.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../client/connection_checker.dart';
@@ -95,7 +96,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
           builder: (context) {
             return AlertDialog(
               icon: const Icon(Icons.wifi_off),
-              title: const Text("Keine Verbindung!"),
+              title: Text(AppLocalizations.of(context)!.noInternetConnection),
               actions: [
                 FilledButton(
                     onPressed: () async {
@@ -144,7 +145,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
           builder: (context) {
             return AlertDialog(
               icon: const Icon(Icons.error),
-              title: const Text("Es konnte keine neue Konversation erstellt werden!"),
+              title: Text(AppLocalizations.of(context)!.errorCreatingConversation),
               actions: [
                 FilledButton(
                     onPressed: () async {
@@ -196,7 +197,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
             child: QuillEditor.basic(
                 configurations: QuillEditorConfigurations(
                   controller: _controller,
-                  placeholder: "Schreibe hier deine Nachricht...",
+                  placeholder: AppLocalizations.of(context)!.sendMessagePlaceholder,
                   padding: const EdgeInsets.symmetric(horizontal: 16.0)
                 )
             ),

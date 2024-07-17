@@ -203,7 +203,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Neue Konversation erstellen"),
+          title: Text(AppLocalizations.of(context)!.createNewConversation),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -214,8 +214,8 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: TextField(
                       controller: subjectController,
-                      decoration: const InputDecoration(
-                          hintText: 'Betreff',
+                      decoration: InputDecoration(
+                          hintText: AppLocalizations.of(context)!.subject,
                       ),
                     ),
                   ),
@@ -224,10 +224,10 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                     builder: (context, widget) {
                       return FlutterTagging<ReceiverEntry>(
                         initialItems: receivers,
-                        textFieldConfiguration: const TextFieldConfiguration(
+                        textFieldConfiguration: TextFieldConfiguration(
                           decoration: InputDecoration(
-                            hintText: "z. B. Namen oder Abkürzungen",
-                            labelText: "Empfänger hinzufügen",
+                            hintText: AppLocalizations.of(context)!.addReceiversHint,
+                            labelText: AppLocalizations.of(context)!.addReceivers,
                           ),
                         ),
                         onAdded: (receiverEntry) {
@@ -268,14 +268,14 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                   receivers.clear();
                   rebuildSearch.trigger();
                 },
-                tooltip: "Betreff und Empfänger zurücksetzen",
+                tooltip: AppLocalizations.of(context)!.createResetTooltip,
                 icon: const Icon(Icons.format_clear)
             ),
             ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text("Zurück")
+                child: Text(AppLocalizations.of(context)!.back)
             ),
             FilledButton(
                 onPressed: () async {
@@ -299,7 +299,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                     receivers.clear();
                   });
                 },
-                child: const Text("Erstellen")
+                child: Text(AppLocalizations.of(context)!.create)
             ),
           ],
         )
@@ -367,11 +367,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                 const List<ChatType> chatTypes = ChatType.values;
 
                 return AlertDialog(
-                  title: const Text("Konversationsart"),
+                  title: Text(AppLocalizations.of(context)!.conversationType),
                   actions: [
                     OutlinedButton(
                         onPressed: () { Navigator.of(context).pop(); },
-                        child: const Text("Zurück")
+                        child: Text(AppLocalizations.of(context)!.cancel)
                     )
                   ],
                   content: SizedBox(
@@ -388,11 +388,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                                 title: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(chatTypes[index].descriptiveName),
+                                    Text(AppLocalizations.of(context)!.conversationTypeName(chatTypes[index].name)),
                                     if (chatTypes[index] == ChatType.openChat) ...[
-                                      const Text(
-                                          "EXPERIMENTELL",
-                                        style: TextStyle(
+                                      Text(
+                                        AppLocalizations.of(context)!.experimental.toUpperCase(),
+                                        style: const TextStyle(
                                           fontSize: 10.0,
                                           fontWeight: FontWeight.bold
                                         ),
@@ -415,20 +415,25 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                                       color: Theme.of(context).colorScheme.surfaceContainerLow,
                                       padding: const EdgeInsets.all(12.0),
                                       child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            chatTypes[index].description,
+                                              AppLocalizations.of(context)!.conversationTypeDescription(chatTypes[index].name),
+                                            textAlign: TextAlign.start,
                                           ),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            children: [
-                                              FilledButton(
-                                                  onPressed: () {
-                                                    return showCreationDialog(chatTypes[index]);
-                                                  },
-                                                  child: const Text("Weiter")
-                                              ),
-                                            ],
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 8.0),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                FilledButton(
+                                                    onPressed: () {
+                                                      return showCreationDialog(chatTypes[index]);
+                                                    },
+                                                    child: Text(AppLocalizations.of(context)!.select)
+                                                ),
+                                              ],
+                                            ),
                                           )
                                         ],
                                       )

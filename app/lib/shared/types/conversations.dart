@@ -27,16 +27,14 @@ class CreationResponse {
 }
 
 enum ChatType {
-  noAnswerAllowed("Keine Antwort auf diese Konversation wird möglich sein.", Icons.speaker_notes_off, "Hinweis"),
-  privateAnswerOnly("Antworten können nur von dir gesehen werden.", Icons.mic, "Mitteilung"),
-  groupOnly("Antworten können von jeden gesehen werden.", Icons.forum, "Gruppenchat"),
-  openChat("Antworten können von jeden oder nur von bestimmten Personen gesehen werden, jedoch aktuell in der App kann man nur an jeden Nachrichten schreiben.", Icons.groups, "Offener Chat");
+  noAnswerAllowed(Icons.speaker_notes_off),
+  privateAnswerOnly(Icons.mic),
+  groupOnly( Icons.forum),
+  openChat(Icons.groups);
 
-  final String description;
   final IconData icon;
-  final String descriptiveName;
 
-  const ChatType(this.description, this.icon, this.descriptiveName);
+  const ChatType(this.icon);
 }
 
 class Conversation {
