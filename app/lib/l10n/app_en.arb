@@ -151,7 +151,7 @@
   "createResetTooltip": "Reset subject and receivers",
   "sendMessagePlaceholder": "Write your message here...",
   "newMessage": "New message",
-  "openChatWarning": "Currently in the app you can only write message to everyone. Normally you also could write to specific people.",
+  "openChatWarning": "Currently in the app you can only write messages to everyone. Normally you also could write to specific people.",
   "privateConversation": "can only see your message!",
   "copiedMessage": "Message was copied!",
   "errorSendingMessage": "Error occurred during sending the message!",
