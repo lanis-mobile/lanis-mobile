@@ -19,6 +19,7 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background_service.dart' as background_service;
+import 'package:http_proxy/http_proxy.dart';
 
 void main() async {
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -96,6 +97,10 @@ void main() async {
 
     ThemeModeNotifier.init();
     ColorModeNotifier.init();
+    AmoledNotifier.init();
+
+    HttpProxy httpProxy = await HttpProxy.createHttpProxy();
+    HttpOverrides.global=httpProxy;
 
     runApp(const App());
   }, (obj, stack) async {
@@ -126,22 +131,29 @@ class App extends StatelessWidget {
             return ValueListenableBuilder<ThemeMode>(
                 valueListenable: ThemeModeNotifier.notifier,
                 builder: (_, mode, __) {
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: AmoledNotifier.notifier,
+                    builder: (_, isAmoled, __) {
 
-                  if (mode == ThemeMode.light || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.light) {
-                    BubbleStyles.init(theme.lightTheme!);
-                  } else if (mode == ThemeMode.dark || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.dark) {
-                    BubbleStyles.init(theme.darkTheme!);
-                  }
+                      ThemeData darkTheme = getAmoledTheme(theme, isAmoled);
 
-                  return MaterialApp(
-                    title: 'Lanis Mobile',
-                    theme: theme.lightTheme,
-                    darkTheme: theme.darkTheme,
-                    themeMode: mode,
-                    localizationsDelegates:
+                      if (mode == ThemeMode.light || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.light) {
+                        BubbleStyles.init(theme.lightTheme!);
+                      } else if (mode == ThemeMode.dark || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.dark) {
+                        BubbleStyles.init(darkTheme);
+                      }
+
+                      return MaterialApp(
+                        title: 'Lanis Mobile',
+                        theme: theme.lightTheme,
+                        darkTheme: darkTheme,
+                        themeMode: mode,
+                        localizationsDelegates:
                         AppLocalizations.localizationsDelegates,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    home: const StartupScreen(),
+                        supportedLocales: AppLocalizations.supportedLocales,
+                        home: const StartupScreen(),
+                      );
+                    }
                   );
                 });
           });

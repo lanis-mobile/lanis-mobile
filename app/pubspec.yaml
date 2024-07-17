@@ -14,12 +14,13 @@ publish_to: 'none'
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.17.3+36
+version: 2.18.1+39
 
 environment:
   sdk: '>=3.1.3 <4.0.0'
 
 dependencies:
+  http_proxy: ^1.2.2
   flutter:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
@@ -60,12 +61,14 @@ dependencies:
   intl: ^0.19.0
   cached_network_image: ^3.3.1
   file_icon: ^1.0.0
-  syncfusion_flutter_calendar: ^25.1.35
+  syncfusion_flutter_calendar: ^26.1.35
   flutter_localizations:
     sdk: flutter
   logger: ^2.2.0
   simple_shadow: ^0.3.1
   flutter_tagging_plus: ^4.0.2
+  app_settings: ^5.1.1
+  device_info_plus: ^10.1.0
   flutter_expandable_fab: ^2.0.0
   flutter_chat_bubble: ^2.0.2
   color_hash: ^1.0.1
@@ -73,9 +76,6 @@ dependencies:
   flutter_quill: ^9.1.1
   quill_html_converter: ^9.3.2
 
-# Should may be removed in the future. This is a temporary fix for the issue with the intl package due to `dart_date` not being updated.
-dependency_overrides:
-  intl: ^0.18.1
 
 flutter_launcher_icons:
   android: false
@@ -242,7 +242,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.1
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

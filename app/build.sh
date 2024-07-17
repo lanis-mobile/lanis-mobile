@@ -1,6 +1,12 @@
 echo "Building selfsigned APK and AAB files"
-echo "Do not forget to update dependencies and version code before building und releasing"
-read -p "Press enter to continue"
+echo ">>> pub get"
+flutter pub get
+echo ">>> pub upgrade"
+flutter pub upgrade
+echo " pub outdated"
+flutter pub outdated
+echo ""
+read -p "Press enter to continue..."
 sleep 1
 mkdir artifacts
 

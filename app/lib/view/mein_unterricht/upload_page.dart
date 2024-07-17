@@ -44,6 +44,12 @@ class _UploadScreenState extends State<UploadScreen> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _addedFiles.dispose();
+    super.dispose();
+  }
+
   void showSnackbar({required String text, SnackBarAction? action}) {
     if (mounted) {
       // Hide the current SnackBar if one is already visible.
@@ -100,7 +106,7 @@ class _UploadScreenState extends State<UploadScreen> {
                   title: Text(widget.name),
                 ),
                 body: ErrorView(
-                    data: snapshot.error as LanisException,
+                    error: snapshot.error as LanisException,
                     name: "einer Abgabe",
                     fetcher: null),
               );
@@ -189,10 +195,10 @@ class _UploadScreenState extends State<UploadScreen> {
                                       return Scaffold(
                                         appBar: AppBar(),
                                         body: ErrorView(
-                                            data: ex,
+                                            error: ex,
                                             name:
                                                 "Hochladen von einer Datei/Dateien",
-                                            fetcher: null),
+                                            ),
                                       );
                                     }));
                                     return;
@@ -682,10 +688,10 @@ class _UploadScreenState extends State<UploadScreen> {
                                                         return Scaffold(
                                                           appBar: AppBar(),
                                                           body: ErrorView(
-                                                              data: ex,
+                                                              error: ex,
                                                               name:
                                                                   "Löschen einer Datei",
-                                                              fetcher: null),
+                                                              ),
                                                         );
                                                       }));
                                                       return;

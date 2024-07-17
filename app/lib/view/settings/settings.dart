@@ -1,3 +1,9 @@
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/material.dart';
+import 'package:app_settings/app_settings.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/clear_cache.dart';
 import 'package:sph_plan/view/settings/subsettings/countly_analysis.dart';
@@ -5,13 +11,11 @@ import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../shared/apps.dart';
 import '../login/screen.dart';
 import '../../client/client.dart';
 
-import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -21,6 +25,26 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool isAndroid13OrHigher = false;
+
+  setLocaleAllowed() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    if (androidInfo.version.sdkInt >= 33) {
+      setState(() {
+        isAndroid13OrHigher = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    if (Platform.isAndroid) {
+      setLocaleAllowed();
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,6 +132,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
             },
+          ),
+          if (isAndroid13OrHigher) ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(AppLocalizations.of(context)!.language),
+            onTap: () => AppSettings.openAppSettings(type: AppSettingsType.appLocale),
           ),
           ListTile(
             leading: const Icon(Icons.logout),

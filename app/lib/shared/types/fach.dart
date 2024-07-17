@@ -28,9 +28,21 @@ class StdPlanFach {
       "lehrer": lehrer,
       "badge": badge,
       "duration": duration,
-      "startTime": startTime,
-      "endTime": endTime
+      "startTime": [startTime.$1, startTime.$2],
+      "endTime": [endTime.$1, endTime.$2],
     };
+  }
+
+  factory StdPlanFach.fromJson(Map<String, dynamic> json) {
+    return StdPlanFach(
+        name: json["name"],
+        raum: json["raum"],
+        lehrer: json["lehrer"],
+        badge: json["badge"],
+        duration: json["duration"],
+        startTime: (json["startTime"][0], json["startTime"][1]),
+        endTime: (json["endTime"][0], json["endTime"][1])
+    );
   }
 
   @override

@@ -1,5 +1,6 @@
 {
   "locale": "en_US",
+  "language": "Language",
   "welcomeBack": "Welcome Back",
   "substitutions": "Substitutions",
   "calendar": "Calendar",
@@ -29,6 +30,7 @@
   "theme": "Theme",
   "lightMode": "Light mode",
   "darkMode": "Dark mode",
+  "amoledMode": "Amoled mode",
   "systemMode": "System mode",
   "accentColor": "Accent color",
   "standard": "Standard",
@@ -167,5 +169,8 @@
   "errorInAutoSet": "An error has occurred during the automatic configuration of the filter. The reason for this could be that your school is not directly supported. Consider adding your school. Visit the GitHub repository.",
   "autoSetToEmpty": "The filter was automatically emptied.",
   "addFilter": "Add filter",
-  "addSpecificFilter": "Add \"{filter}\""
+  "addSpecificFilter": "Add \"{filter}\"",
+  "tryAgain": "Try again",
+  "refreshComplete": "Refresh complete",
+  "offline": "Offline"
 }

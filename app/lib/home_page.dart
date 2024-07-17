@@ -13,8 +13,8 @@ import 'package:sph_plan/view/conversations/overview.dart';
 import 'package:sph_plan/view/data_storage/data_storage.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
 import 'package:sph_plan/view/settings/settings.dart';
-import 'package:sph_plan/view/timetable/timetable.dart';
-import 'package:sph_plan/view/vertretungsplan/vertretungsplan.dart';
+import 'package:sph_plan/view/timetable/stream.dart';
+import 'package:sph_plan/view/substitutions/stream.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/client/connection_checker.dart';
 
@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
         isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
         enableBottomNavigation: true,
         enableDrawer: true,
-        body: const VertretungsplanAnsicht()),
+        body: const SubstitutionsView()),
     Destination(
         label: (context) => AppLocalizations.of(context)!.calendar,
         icon: const Icon(Icons.calendar_today),
@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
       isSupported: client.doesSupportFeature(SPHAppEnum.stundenplan),
       enableBottomNavigation: true,
       enableDrawer: true,
-      body: const TimetableAnsicht(),
+      body: const TimetableView(),
     ),
     Destination(
         label: (context) => AppLocalizations.of(context)!.messages,

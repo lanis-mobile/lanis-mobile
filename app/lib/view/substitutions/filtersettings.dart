@@ -18,7 +18,7 @@ class FilterSettingsScreen extends StatefulWidget {
 
 class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
   String apiURL = "https://lanis-mobile-api.alessioc42.workers.dev";
-
+  bool loadingFilter = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +83,8 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                 ElevatedButton(
                     onPressed: () async {
                       try {
+                        if (loadingFilter) return;
+                        loadingFilter = true;
                         final dio = Dio();
                         final response = await dio.post(
                             "$apiURL/api/filter/generate",
