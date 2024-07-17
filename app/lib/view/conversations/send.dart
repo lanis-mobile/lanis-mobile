@@ -120,7 +120,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
       status: MessageStatus.sent,
     );
 
-    final CreationResponse response = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, text);
+    final CreationResponse response = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type?.name, widget.creationData!.subject, text);
 
     if (response.success) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(

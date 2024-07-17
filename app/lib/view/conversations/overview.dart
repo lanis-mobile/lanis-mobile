@@ -199,7 +199,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
     );
   }
 
-  void showCreationDialog(ChatType chatType) {
+  void showCreationDialog(ChatType? chatType) {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -306,6 +306,96 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
     );
   }
 
+  void showTypeChooser() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          const List<ChatType> chatTypes = ChatType.values;
+
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.conversationType),
+            actions: [
+              OutlinedButton(
+                  onPressed: () { Navigator.of(context).pop(); },
+                  child: Text(AppLocalizations.of(context)!.cancel)
+              )
+            ],
+            content: SizedBox(
+                width: double.maxFinite,
+                child: Theme(
+                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  child: ListView.builder(
+                      itemCount: ChatType.values.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: ExpansionTile(
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(AppLocalizations.of(context)!.conversationTypeName(chatTypes[index].name)),
+                                if (chatTypes[index] == ChatType.openChat) ...[
+                                  Text(
+                                    AppLocalizations.of(context)!.experimental.toUpperCase(),
+                                    style: const TextStyle(
+                                        fontSize: 10.0,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  )
+                                ]
+                              ],
+                            ),
+                            initiallyExpanded: index == 0 ? true : false,
+                            leading: Icon(chatTypes[index].icon),
+                            collapsedBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0)
+                            ),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0)
+                            ),
+                            children: [
+                              Container(
+                                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!.conversationTypeDescription(chatTypes[index].name),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            FilledButton(
+                                                onPressed: () {
+                                                  return showCreationDialog(chatTypes[index]);
+                                                },
+                                                child: Text(AppLocalizations.of(context)!.select)
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  )
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                  ),
+                )
+            ),
+          );
+        }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -330,7 +420,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
               builder: (context, snapshot) {
                 if (snapshot.data?.status == FetcherStatus.error) {
                   return ErrorView(
-                      data: snapshot.data?.content,
+                      error: snapshot.data?.content,
                       name: AppLocalizations.of(context)!.messages,
                       fetcher: visibleConversationsFetcher);
                 } else if (snapshot.data?.status == FetcherStatus.fetching ||
@@ -359,97 +449,26 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
               })
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                const List<ChatType> chatTypes = ChatType.values;
-
-                return AlertDialog(
-                  title: Text(AppLocalizations.of(context)!.conversationType),
-                  actions: [
-                    OutlinedButton(
-                        onPressed: () { Navigator.of(context).pop(); },
-                        child: Text(AppLocalizations.of(context)!.cancel)
-                    )
-                  ],
-                  content: SizedBox(
-                    width: double.maxFinite,
-                    child: Theme(
-                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                      child: ListView.builder(
-                          itemCount: ChatType.values.length,
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                              child: ExpansionTile(
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(AppLocalizations.of(context)!.conversationTypeName(chatTypes[index].name)),
-                                    if (chatTypes[index] == ChatType.openChat) ...[
-                                      Text(
-                                        AppLocalizations.of(context)!.experimental.toUpperCase(),
-                                        style: const TextStyle(
-                                          fontSize: 10.0,
-                                          fontWeight: FontWeight.bold
-                                        ),
-                                      )
-                                    ]
-                                  ],
-                                ),
-                                initiallyExpanded: index == 0 ? true : false,
-                                leading: Icon(chatTypes[index].icon),
-                                collapsedBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-                                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-                                collapsedShape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0)
-                                ),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0)
-                                ),
-                                children: [
-                                  Container(
-                                      color: Theme.of(context).colorScheme.surfaceContainerLow,
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                              AppLocalizations.of(context)!.conversationTypeDescription(chatTypes[index].name),
-                                            textAlign: TextAlign.start,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 8.0),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                FilledButton(
-                                                    onPressed: () {
-                                                      return showCreationDialog(chatTypes[index]);
-                                                    },
-                                                    child: Text(AppLocalizations.of(context)!.select)
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                  )
-                                ],
-                              ),
-                            );
-                          }
-                      ),
-                    )
-                  ),
-                );
-              }
+      floatingActionButton: FutureBuilder(
+        future: client.conversations.canChooseType(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return FloatingActionButton(
+              onPressed: () {
+                if (snapshot.data!) {
+                  showTypeChooser();
+                } else {
+                  showCreationDialog(null);
+                }
+              },
+              child: const Icon(Icons.edit),
+            );
+          }
+          return const FloatingActionButton(
+            onPressed: null,
+            child: Icon(Icons.edit),
           );
         },
-        child: const Icon(Icons.edit),
       )
     );
   }

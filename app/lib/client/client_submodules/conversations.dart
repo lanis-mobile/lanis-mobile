@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/foundation.dart';
+import 'package:html/parser.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
@@ -77,6 +78,8 @@ class ConversationsParser {
     }
 
     try {
+      canChooseType();
+
       final encryptedUniqueID = client.cryptor.encryptString(uniqueID);
 
       final response =
@@ -199,7 +202,7 @@ class ConversationsParser {
   ///  [text] also supports Lanis-styled text.
   ///
   ///  If successful, it returns true.
-  Future<CreationResponse> createConversation(List<String> receivers, String type, String subject, String text) async {
+  Future<CreationResponse> createConversation(List<String> receivers, String? type, String subject, String text) async {
     final List<Map<String, String>> createData = [
       {
         "name": "subject",
@@ -208,8 +211,15 @@ class ConversationsParser {
       {
         "name": "text",
         "value": text
-      }
+      },
     ];
+
+    if (type != null) {
+      createData.add({
+        "name": "Art",
+        "value": type
+      });
+    }
 
     for (final String receiver in receivers) {
       createData.add({
@@ -241,6 +251,23 @@ class ConversationsParser {
     final Map decoded = json.decode(response.data);
 
     return CreationResponse(success: decoded["back"], id: decoded["id"]); // "back" should be bool, id is Uniquid
+  }
+
+  Future<bool> canChooseType() async {
+    final html = await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+        options: Options(
+          headers: {
+            "Accept": "*/*",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+          },
+        )
+    );
+
+    final document = parse(html.data);
+
+    return document.querySelector("#MsgOptions") != null;
   }
 
   /// Searches for teacher using at least 2 chars.

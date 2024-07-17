@@ -263,8 +263,8 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
               if (snapshot.hasError) {
                 if (snapshot.error is LanisException) {
                   return ErrorView(
-                    data: snapshot.error as LanisException,
-                    name: "einer einzelnen Nachricht",
+                    error: snapshot.error as LanisException,
+                    name: AppLocalizations.of(context)!.singleMessages,
                     fetcher: null,
                   );
                 }

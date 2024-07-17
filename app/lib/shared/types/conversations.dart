@@ -12,7 +12,7 @@ class ReceiverEntry extends Taggable {
 }
 
 class ChatCreationData {
-  final ChatType type;
+  final ChatType? type;
   final String subject;
   final List<String> receivers;
 
