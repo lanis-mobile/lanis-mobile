@@ -56,6 +56,14 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
     super.initState();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    subjectController.dispose();
+    rebuildSearch.dispose();
+    _tabController.dispose();
+  }
+
   void showSnackbar(String text, {seconds = 1, milliseconds = 0}) {
     if (mounted) {
       // Hide the current SnackBar if one is already visible.
@@ -377,7 +385,22 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4.0),
                               child: ExpansionTile(
-                                title: Text(chatTypes[index].descriptiveName),
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(chatTypes[index].descriptiveName),
+                                    if (chatTypes[index] == ChatType.openChat) ...[
+                                      const Text(
+                                          "EXPERIMENTELL",
+                                        style: TextStyle(
+                                          fontSize: 10.0,
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      )
+                                    ]
+                                  ],
+                                ),
+                                initiallyExpanded: index == 0 ? true : false,
                                 leading: Icon(chatTypes[index].icon),
                                 collapsedBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
                                 backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,

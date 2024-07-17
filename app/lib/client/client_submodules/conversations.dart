@@ -71,7 +71,7 @@ class ConversationsParser {
     return jsonDecode(decryptedConversations);
   }
 
-  Future<dynamic> getSingleConversation(String uniqueID) async {
+  Future<Conversation> getSingleConversation(String uniqueID) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
@@ -105,7 +105,32 @@ class ConversationsParser {
         throw UnsaltedOrUnknownException();
       }
 
-      return jsonDecode(decryptedConversations);
+      final Map<String, dynamic> decoded = jsonDecode(decryptedConversations);
+
+      final UnparsedMessage parent = UnparsedMessage(
+          date: decoded["Datum"],
+          author: decoded["username"],
+          own: decoded["own"],
+          content: decoded["Inhalt"]
+      );
+
+      final List<UnparsedMessage> replies = [];
+      for (dynamic reply in decoded["reply"]) {
+        replies.add(UnparsedMessage(
+            date: reply["Datum"],
+            author: reply["username"],
+            own: reply["own"],
+            content: reply["Inhalt"]
+        ));
+      }
+
+      return Conversation(
+          groupChat: decoded["groupOnly"] == "ja",
+          onlyPrivateAnswers: decoded["privateAnswerOnly"] == "ja",
+          noReply: decoded["noAnswerAllowed"] == "ja",
+          parent: parent,
+          replies: replies
+      );
     } on (SocketException, DioException) {
       throw NetworkException();
     }
@@ -122,7 +147,7 @@ class ConversationsParser {
   /// [message] supports Lanis-styled text.
   ///
   /// If successful, it returns `true`.
-  Future<dynamic> replyToConversation(String headId, String sender, String groupOnly, String privateAnswerOnly, String message) async {
+  Future<bool> replyToConversation(String headId, String sender, String groupOnly, String privateAnswerOnly, String message) async {
     final Map replyData = {
       "to": sender,
       "groupOnly": groupOnly,
@@ -174,7 +199,7 @@ class ConversationsParser {
   ///  [text] also supports Lanis-styled text.
   ///
   ///  If successful, it returns true.
-  Future<dynamic> createConversation(List<String> receivers, String type, String subject, String text) async {
+  Future<CreationResponse> createConversation(List<String> receivers, String type, String subject, String text) async {
     final List<Map<String, String>> createData = [
       {
         "name": "subject",
@@ -213,7 +238,9 @@ class ConversationsParser {
         )
     );
 
-    return json.decode(response.data); // "back" should be bool, id is Uniquid
+    final Map decoded = json.decode(response.data);
+
+    return CreationResponse(success: decoded["back"], id: decoded["id"]); // "back" should be bool, id is Uniquid
   }
 
   /// Searches for teacher using at least 2 chars.

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dart_date/dart_date.dart';
@@ -10,6 +9,7 @@ import 'package:sph_plan/view/conversations/send.dart';
 
 import '../../client/client.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../shared/types/conversations.dart';
 import '../../shared/widgets/error_view.dart';
 import 'shared.dart';
 
@@ -24,7 +24,7 @@ class ConversationsChat extends StatefulWidget {
   State<ConversationsChat> createState() => _ConversationsChatState();
 }
 
-class _ConversationsChatState extends State<ConversationsChat> with TickerProviderStateMixin {
+class _ConversationsChatState extends State<ConversationsChat> with SingleTickerProviderStateMixin {
   late final Future<dynamic> _conversationFuture = initConversation();
   late final AnimationController appBarController;
 
@@ -47,6 +47,13 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     animateAppBarTitle();
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    appBarController.dispose();
+    scrollController.dispose();
   }
 
   animateAppBarTitle() {
@@ -84,13 +91,21 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
     }
   }
 
-  Future<void> sendMessage(String text, {bool? offline, bool? success, bool? other}) async {
+  Future<void> sendMessage(String text) async {
+    MessageState state = MessageState.first;
+    if (chat.last is Message) {
+      DateTime date = chat.last.date;
+      if (date.isToday) {
+        state = MessageState.series;
+      }
+    }
+
     final textMessage = Message(
         text: text,
-        own: other == true && kDebugMode ? false : true,
+        own: true,
         date: DateTime.now(),
-        author: other == true && kDebugMode ? "Debug Person" : null,
-        state: MessageState.first,
+        author: null,
+        state: state,
         status: MessageStatus.sending,
     );
 
@@ -106,77 +121,73 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
       }
     });
 
-    late final bool result;
-    if (kDebugMode && offline == true) {
-      result = success!;
-    } else {
-      result = await client.conversations.replyToConversation(
-          settings.id,
-          "all",
-          settings.groupChat ? "ja" : "nein",
-          settings.onlyPrivateAnswers ? "ja" : "nein",
-          text
-      );
-    }
+    final bool result = await client.conversations.replyToConversation(
+        settings.id,
+        "all",
+        settings.groupChat ? "ja" : "nein",
+        settings.onlyPrivateAnswers ? "ja" : "nein",
+        text
+    );
 
     setState(() {
       if (result) {
         chat.last.status = MessageStatus.sent;
       } else {
         chat.last.status = MessageStatus.error;
+        showSnackbar(context, "Nachricht konnte nicht gesendet werden!");
       }
     });
   }
 
-  Message addMessage(dynamic message, MessageState position) {
-    final contentParsed = parse(message["Inhalt"]);
+  Message addMessage(UnparsedMessage message, MessageState position) {
+    final contentParsed = parse(message.content);
     final content = contentParsed.body!.text;
 
     return Message(
       text: content,
-      own: message["own"],
-      author: message["username"],
-      date: parseDateString(message["Datum"]),
+      own: message.own,
+      author: message.author,
+      date: parseDateString(message.date),
       state: position,
       status: MessageStatus.sent,
     );
   }
 
-  void parseMessages(dynamic unparsedMessages) {
-    DateTime date = parseDateString(unparsedMessages["Datum"]);
-    String author = unparsedMessages["username"];
+  void parseMessages(Conversation unparsedMessages) {
+    DateTime date = parseDateString(unparsedMessages.parent.date);
+    String author = unparsedMessages.parent.author;
     MessageState position = MessageState.first;
 
     final Set<String> authors = {};
 
-    if (unparsedMessages["own"] != true) {
+    if (unparsedMessages.parent.own != true) {
       authors.add(author);
     }
 
     chat.addAll([
       DateHeader(date: date),
-      addMessage(unparsedMessages, position)
+      addMessage(unparsedMessages.parent, position)
     ]);
 
     late DateTime currentDate;
-    for (dynamic current in unparsedMessages["reply"]) {
-      currentDate = parseDateString(current["Datum"]);
+    for (UnparsedMessage current in unparsedMessages.replies) {
+      currentDate = parseDateString(current.date);
 
       position = MessageState.first;
-      if (current["username"] == author) {
+      if (current.author == author) {
         if (date.isSameDay(currentDate)) {
           position = MessageState.series;
         }
       }
 
-      if (date.isSameDay(currentDate) && current["username"] == author) {
+      if (date.isSameDay(currentDate) && current.author == author) {
         chat.add(addMessage(current, position));
-      } else if (date.isSameDay(currentDate) && current["username"] != author) {
-        author = current["username"];
+      } else if (date.isSameDay(currentDate) && current.author != author) {
+        author = current.author;
         chat.addAll([
           addMessage(current, position)
         ]);
-      } else if (!date.isSameDay(currentDate) && current["username"] == author) {
+      } else if (!date.isSameDay(currentDate) && current.author == author) {
         date = currentDate;
         chat.addAll([
           DateHeader(date: date),
@@ -184,14 +195,14 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
         ]);
       } else {
         date = currentDate;
-        author = current["username"];
+        author = current.author;
         chat.addAll([
           DateHeader(date: date),
           addMessage(current, position)
         ]);
       }
 
-      if (current["own"] != true) {
+      if (current.own != true) {
         authors.add(author);
       }
     }
@@ -201,21 +212,15 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
 
   Future<void> initConversation() async {
     if (widget.newSettings == null) {
-      dynamic response = await client.conversations.getSingleConversation(widget.id);
-
-      /*if (privateAnswerOnly == "ja" && response["own"] == false) {
-        replyReceiver = response["username"];
-      } else {
-        replyReceiver = null;
-      }*/
+      Conversation response = await client.conversations.getSingleConversation(widget.id);
 
       settings = ConversationSettings(
           id: widget.id,
-          groupChat: response["groupOnly"] == "ja",
-          onlyPrivateAnswers: response["privateAnswerOnly"] == "ja",
-          noReply: response["noAnswerAllowed"] == "ja" ? true : false,
-          author: response["username"],
-          own: response["own"]
+          groupChat: response.groupChat,
+          onlyPrivateAnswers: response.onlyPrivateAnswers,
+          noReply: response.noReply,
+          author: response.parent.author,
+          own: response.parent.own
       );
 
       parseMessages(response);
@@ -243,13 +248,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                 label: const Text("Neue Nachricht"),
                 icon: const Icon(Icons.edit),
                 onPressed: () async {
-                  final result = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ConversationsSend()));
-              
-                  if (kDebugMode && result is List) {
-                    await sendMessage(result[0], offline: true, success: result[1], other: result[2]);
-                  } else if (result is String) {
-                    await sendMessage(result);
-                  }
+                  await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ConversationsSend()));
                 },
               ),
             );
@@ -285,6 +284,31 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                     ),
                     snap: true,
                     floating: true,
+                    actions: settings.groupChat == false && settings.onlyPrivateAnswers == false && settings.noReply == false ? [
+                      IconButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    icon: const Icon(Icons.groups),
+                                    title: const Text("Offener Chat"),
+                                    content: const Text("Aktuell kann man in der App nur an allen Personen eine Nachricht schicken. Normalerweise könnte man auch nur an bestimmten Personen schreiben."),
+                                    actions: [
+                                      FilledButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Zurück")
+                                      )
+                                    ],
+                                  );
+                                }
+                            );
+                          },
+                          icon: const Icon(Icons.warning)
+                      )
+                    ] : null,
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
@@ -296,7 +320,7 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                             children: [
                               Flexible(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                   child: Text(
                                     widget.title,
                                     style: Theme.of(context).textTheme.headlineMedium,
@@ -330,7 +354,6 @@ class _ConversationsChatState extends State<ConversationsChat> with TickerProvid
                     itemBuilder: (context, index) {
                       if (chat[index] is Message) {
                         return MessageWidget(message: chat[index], textStyle: textStyles[chat[index].author]);
-                        //return MessageBuilder(chat[index]);
                       } else {
                         return DateHeaderWidget(header: chat[index]);
                       }
@@ -389,8 +412,6 @@ class _MessageWidgetState extends State<MessageWidget> with SingleTickerProvider
   ValueNotifier<bool> tapped = ValueNotifier(false);
   late final AnimationController controller;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -398,7 +419,15 @@ class _MessageWidgetState extends State<MessageWidget> with SingleTickerProvider
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final double size = MediaQuery.sizeOf(context).width - 200;
+
     return Padding(
       padding: BubbleStructure.getMargin(widget.message.state),
       child: Column(
@@ -417,8 +446,8 @@ class _MessageWidgetState extends State<MessageWidget> with SingleTickerProvider
           ClipPath(
             clipper: widget.message.state == MessageState.first ? BubbleStructure.getFirstStateClipper(widget.message.own) : null,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 350, //TODO: MAKE IT DYNAMIC TO SCREEN
+              constraints: BoxConstraints(
+                maxWidth: size.clamp(350, 600),
               ),
               child: GestureDetector(
                 onLongPress: () async {

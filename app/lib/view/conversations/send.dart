@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
@@ -6,7 +5,6 @@ import 'package:sph_plan/view/conversations/chat.dart';
 
 import '../../client/client.dart';
 import '../../client/connection_checker.dart';
-import '../../client/logger.dart';
 import '../../shared/types/conversations.dart';
 import 'shared.dart';
 
@@ -121,18 +119,17 @@ class _ConversationsSendState extends State<ConversationsSend> {
       status: MessageStatus.sent,
     );
 
-    final dynamic newConversation = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, text);
+    final CreationResponse response = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type.name, widget.creationData!.subject, text);
 
-    final bool result = newConversation["back"];
-    if (result) {
+    if (response.success) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => ConversationsChat(
               title: widget.creationData!.subject,
-              id: newConversation["id"],
+              id: response.id!,
               newSettings: NewConversationSettings(
                 firstMessage: textMessage,
                 settings: ConversationSettings(
-                    id: newConversation["id"],
+                    id: response.id!,
                     groupChat: widget.creationData!.type == ChatType.groupOnly,
                     onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly,
                     noReply: false,
@@ -164,11 +161,6 @@ class _ConversationsSendState extends State<ConversationsSend> {
 
   @override
   Widget build(BuildContext context) {
-    late bool other;
-    if (kDebugMode) {
-      other = false;
-    }
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -178,30 +170,6 @@ class _ConversationsSendState extends State<ConversationsSend> {
           icon: const Icon(Icons.arrow_back),
         ),
         actions: [
-          if (kDebugMode) ...[
-            IconButton(
-              onPressed: () {
-                other = !other;
-              },
-              icon: const Icon(Icons.transfer_within_a_station),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.pop(context, [parseText(_controller.document.toDelta()), false, other]);
-              },
-              icon: const Icon(Icons.cancel_schedule_send),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.pop(context, [parseText(_controller.document.toDelta()), true, other]);
-              },
-              icon: const Icon(Icons.schedule_send),
-            ),
-            IconButton(
-              onPressed: () { logger.d(parseText(_controller.document.toDelta())); },
-              icon: const Icon(Icons.print),
-            ),
-          ],
           IconButton(
             onPressed: () { _controller.clear(); },
             icon: const Icon(Icons.backspace),
