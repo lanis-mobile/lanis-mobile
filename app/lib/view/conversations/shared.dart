@@ -22,13 +22,13 @@ class ConversationSettings {
       this.author});
 }
 
-class Statistics {
+class ParticipationStatistics {
   final int countStudents;
   final int countTeachers;
   final int countParents;
   final List<String> knownParticipants;
 
-  const Statistics(
+  const ParticipationStatistics(
       {required this.countParents,
       required this.countStudents,
       required this.countTeachers,

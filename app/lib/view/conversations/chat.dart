@@ -39,7 +39,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   final Map<String, TextStyle> textStyles = {};
 
   late final ConversationSettings settings;
-  late final Statistics? statistics;
+  late final ParticipationStatistics? statistics;
 
   final List<dynamic> chat = [];
 
@@ -220,7 +220,7 @@ class _ConversationsChatState extends State<ConversationsChat>
         own: response.parent.own,
       );
 
-      statistics = Statistics(
+      statistics = ParticipationStatistics(
           countParents: response.countParents,
           countStudents: response.countStudents,
           countTeachers: response.countTeachers,
@@ -328,136 +328,12 @@ class _ConversationsChatState extends State<ConversationsChat>
                           if (statistics != null) ...[
                             IconButton(
                                 onPressed: () {
-                                  final Set<String> participants =
-                                      statistics!.knownParticipants.toSet();
-                                  participants.addAll(textStyles.keys);
-
                                   showDialog(
                                       context: context,
                                       builder: (context) {
-                                        return AlertDialog(
-                                          title: Text(
-                                              AppLocalizations.of(context)!
-                                                  .receivers),
-                                          content: SizedBox(
-                                              width: double.maxFinite,
-                                              child: CustomScrollView(
-                                                shrinkWrap: true,
-                                                slivers: [
-                                                  if (statistics != null) ...[
-                                                    SliverToBoxAdapter(
-                                                        child: Column(
-                                                      children: [
-                                                        ListTile(
-                                                          title: Text(
-                                                            AppLocalizations.of(
-                                                                    context)!
-                                                                .statistic,
-                                                            style: Theme.of(
-                                                                    context)
-                                                                .textTheme
-                                                                .titleMedium,
-                                                          ),
-                                                          leading: const Icon(
-                                                              Icons.numbers),
-                                                          contentPadding:
-                                                              EdgeInsets.zero,
-                                                        ),
-                                                        ListTile(
-                                                          title: Row(
-                                                            children: [
-                                                              Text(
-                                                                "${statistics!.countStudents}",
-                                                              ),
-                                                              Text(
-                                                                  " ${AppLocalizations.of(context)!.participants}"),
-                                                            ],
-                                                          ),
-                                                          leading: const Icon(
-                                                              Icons.person),
-                                                          visualDensity:
-                                                              VisualDensity
-                                                                  .compact,
-                                                        ),
-                                                        ListTile(
-                                                          title: Row(
-                                                            children: [
-                                                              Text(
-                                                                "${statistics!.countTeachers}",
-                                                              ),
-                                                              Text(
-                                                                  " ${AppLocalizations.of(context)!.supervisors}"),
-                                                            ],
-                                                          ),
-                                                          leading: const Icon(
-                                                              Icons.school),
-                                                          visualDensity:
-                                                              VisualDensity
-                                                                  .compact,
-                                                        ),
-                                                        ListTile(
-                                                          title: Row(
-                                                            children: [
-                                                              Text(
-                                                                "${statistics!.countParents}",
-                                                              ),
-                                                              Text(
-                                                                  " ${AppLocalizations.of(context)!.parents}"),
-                                                            ],
-                                                          ),
-                                                          leading: const Icon(Icons
-                                                              .supervisor_account),
-                                                          visualDensity:
-                                                              VisualDensity
-                                                                  .compact,
-                                                        ),
-                                                      ],
-                                                    )),
-                                                  ],
-                                                  SliverToBoxAdapter(
-                                                    child: ListTile(
-                                                      title: Text(
-                                                        AppLocalizations.of(
-                                                                context)!
-                                                            .knownReceivers,
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .titleMedium,
-                                                      ),
-                                                      leading: const Icon(
-                                                          Icons.people),
-                                                      contentPadding:
-                                                          EdgeInsets.zero,
-                                                    ),
-                                                  ),
-                                                  SliverList.builder(
-                                                    itemBuilder:
-                                                        (context, index) {
-                                                      return ListTile(
-                                                        title: Text(
-                                                          participants
-                                                              .elementAt(index),
-                                                        ),
-                                                        visualDensity:
-                                                            VisualDensity
-                                                                .compact,
-                                                      );
-                                                    },
-                                                    itemCount:
-                                                        participants.length,
-                                                  )
-                                                ],
-                                              )),
-                                          actions: [
-                                            FilledButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(AppLocalizations.of(
-                                                        context)!
-                                                    .back))
-                                          ],
-                                        );
+                                        return StatisticWidget(
+                                            statistics: statistics!,
+                                            otherParticipants: textStyles.keys);
                                       });
                                 },
                                 icon: const Icon(Icons.people)),
@@ -533,6 +409,108 @@ class _ConversationsChatState extends State<ConversationsChat>
                 child: CircularProgressIndicator(),
               );
             }));
+  }
+}
+
+class StatisticWidget extends StatelessWidget {
+  final ParticipationStatistics statistics;
+  final Iterable<String> otherParticipants;
+
+  const StatisticWidget(
+      {super.key, required this.statistics, required this.otherParticipants});
+
+  @override
+  Widget build(BuildContext context) {
+    final Set<String> participants = statistics.knownParticipants.toSet();
+    participants.addAll(otherParticipants);
+
+    return AlertDialog(
+      title: Text(AppLocalizations.of(context)!.receivers),
+      content: SizedBox(
+          width: double.maxFinite,
+          child: CustomScrollView(
+            shrinkWrap: true,
+            slivers: [
+              SliverToBoxAdapter(
+                  child: Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      AppLocalizations.of(context)!.statistic,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    leading: const Icon(Icons.numbers),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Text(
+                          "${statistics.countStudents}",
+                        ),
+                        Text(" ${AppLocalizations.of(context)!.participants}"),
+                      ],
+                    ),
+                    leading: const Icon(Icons.person),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Text(
+                          "${statistics.countTeachers}",
+                        ),
+                        Text(" ${AppLocalizations.of(context)!.supervisors}"),
+                      ],
+                    ),
+                    leading: const Icon(Icons.school),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Text(
+                          "${statistics.countParents}",
+                        ),
+                        Text(" ${AppLocalizations.of(context)!.parents}"),
+                      ],
+                    ),
+                    leading: const Icon(Icons.supervisor_account),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              )),
+              SliverToBoxAdapter(
+                child: ListTile(
+                  title: Text(
+                    AppLocalizations.of(context)!.knownReceivers,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  leading: const Icon(Icons.people),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              SliverList.builder(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(
+                      participants.elementAt(index),
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  );
+                },
+                itemCount: participants.length,
+              )
+            ],
+          )),
+      actions: [
+        FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text(AppLocalizations.of(context)!.back))
+      ],
+    );
   }
 }
 
