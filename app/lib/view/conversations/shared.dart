@@ -13,7 +13,13 @@ class ConversationSettings {
   final bool own;
   final String? author;
 
-  const ConversationSettings({required this.id, required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.own, this.author});
+  const ConversationSettings(
+      {required this.id,
+      required this.groupChat,
+      required this.onlyPrivateAnswers,
+      required this.noReply,
+      required this.own,
+      this.author});
 }
 
 class Statistics {
@@ -22,12 +28,17 @@ class Statistics {
   final int countParents;
   final List<String> knownParticipants;
 
-  const Statistics({ required this.countParents, required this.countStudents, required this.countTeachers, required this.knownParticipants});
+  const Statistics(
+      {required this.countParents,
+      required this.countStudents,
+      required this.countTeachers,
+      required this.knownParticipants});
 }
 
 class NewConversationSettings {
   final Message firstMessage;
   final ConversationSettings settings;
+
   NewConversationSettings({required this.firstMessage, required this.settings});
 }
 
@@ -39,7 +50,13 @@ class Message {
   final MessageState state;
   MessageStatus status;
 
-  Message({required this.text, required this.own, required this.date, required this.author, required this.state, required this.status});
+  Message(
+      {required this.text,
+      required this.own,
+      required this.date,
+      required this.author,
+      required this.state,
+      required this.status});
 }
 
 enum MessageStatus {
@@ -55,6 +72,7 @@ enum MessageState {
 
 class DateHeader {
   final DateTime date;
+
   const DateHeader({required this.date});
 }
 
@@ -75,29 +93,29 @@ class BubbleStructure {
         nipWidth: nipWidth,
         nipHeight: 14,
         radius: 20,
-        nipRadius: 4
-    );
+        nipRadius: 4);
   }
 
   static EdgeInsets getPadding(final bool nipCompensation, final bool own) {
-    final double margin = nipCompensation ? compensatedPadding : horizontalPadding;
+    final double margin =
+        nipCompensation ? compensatedPadding : horizontalPadding;
 
     return EdgeInsets.only(
         top: 8,
         bottom: 8,
         left: own ? horizontalPadding : margin,
-        right: own ? margin : horizontalPadding
-    );
+        right: own ? margin : horizontalPadding);
   }
 
   static EdgeInsets getMargin(final MessageState state) {
-    final double combinedMargin = state == MessageState.first ? horizontalMargin : horizontalMargin + nipWidth;
+    final double combinedMargin = state == MessageState.first
+        ? horizontalMargin
+        : horizontalMargin + nipWidth;
 
     return EdgeInsets.only(
         left: combinedMargin,
         right: combinedMargin,
-        top: state == MessageState.first ? 8.0 : 2.0
-    );
+        top: state == MessageState.first ? 8.0 : 2.0);
   }
 }
 
@@ -107,68 +125,77 @@ abstract class BubbleStyles {
 
   static void init(final ThemeData theme) {
     final TextStyle baseTextStyle = theme.textTheme.bodyMedium!;
-    final TextStyle dateTextStyle = theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurface);
+    final TextStyle dateTextStyle =
+        theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurface);
 
     if (theme.brightness == Brightness.dark) {
       other = BubbleStyle(
           mainColor: theme.colorScheme.inversePrimary,
           pressedColor: theme.colorScheme.inversePrimary.withOpacity(0.65),
-          mainTextStyle: baseTextStyle.copyWith(color: theme.colorScheme.onSurface, decorationColor: theme.colorScheme.onPrimary),
+          mainTextStyle: baseTextStyle.copyWith(
+              color: theme.colorScheme.onSurface,
+              decorationColor: theme.colorScheme.onPrimary),
           dateTextStyle: dateTextStyle,
           textFormatStyle: FormatStyle(
-              textStyle: baseTextStyle.copyWith(color: theme.colorScheme.onSurface, decorationColor: theme.colorScheme.onPrimary),
+              textStyle: baseTextStyle.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  decorationColor: theme.colorScheme.onPrimary),
               timeColor: theme.colorScheme.primary,
               linkBackground: theme.colorScheme.primaryFixedDim,
               linkForeground: theme.colorScheme.onPrimaryFixedVariant,
               codeBackground: theme.colorScheme.primaryContainer,
-              codeForeground: theme.colorScheme.onPrimaryContainer
-          )
-      );
+              codeForeground: theme.colorScheme.onPrimaryContainer));
 
-        own = BubbleStyle(
+      own = BubbleStyle(
           mainColor: theme.colorScheme.surfaceContainerHighest,
           pressedColor: theme.colorScheme.surfaceContainerHigh,
-          mainTextStyle: baseTextStyle.copyWith(color: theme.colorScheme.onSurface, decorationColor: theme.colorScheme.onSecondary),
+          mainTextStyle: baseTextStyle.copyWith(
+              color: theme.colorScheme.onSurface,
+              decorationColor: theme.colorScheme.onSecondary),
           dateTextStyle: dateTextStyle,
           textFormatStyle: FormatStyle(
-              textStyle: baseTextStyle.copyWith(color: theme.colorScheme.onSurface, decorationColor: theme.colorScheme.onSecondary),
+              textStyle: baseTextStyle.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  decorationColor: theme.colorScheme.onSecondary),
               timeColor: theme.colorScheme.secondaryFixed,
               linkBackground: theme.colorScheme.secondaryFixedDim,
               linkForeground: theme.colorScheme.onSecondaryFixedVariant,
               codeBackground: theme.colorScheme.secondaryContainer,
-              codeForeground: theme.colorScheme.onSecondaryContainer
-          )
-      );
+              codeForeground: theme.colorScheme.onSecondaryContainer));
     } else {
       other = BubbleStyle(
           mainColor: theme.colorScheme.primaryFixed,
           pressedColor: theme.colorScheme.primaryFixed.withOpacity(0.65),
-          mainTextStyle: baseTextStyle.copyWith(color: theme.colorScheme.onPrimaryFixedVariant, decorationColor: theme.colorScheme.onPrimaryFixedVariant),
+          mainTextStyle: baseTextStyle.copyWith(
+              color: theme.colorScheme.onPrimaryFixedVariant,
+              decorationColor: theme.colorScheme.onPrimaryFixedVariant),
           dateTextStyle: dateTextStyle,
           textFormatStyle: FormatStyle(
-              textStyle: baseTextStyle.copyWith(color: theme.colorScheme.onPrimaryFixedVariant, decorationColor: theme.colorScheme.onPrimaryFixedVariant),
+              textStyle: baseTextStyle.copyWith(
+                  color: theme.colorScheme.onPrimaryFixedVariant,
+                  decorationColor: theme.colorScheme.onPrimaryFixedVariant),
               timeColor: theme.colorScheme.primary,
               linkBackground: theme.colorScheme.primaryFixedDim,
               linkForeground: theme.colorScheme.onPrimaryFixedVariant,
               codeBackground: theme.colorScheme.primary.withOpacity(0.3),
-              codeForeground: theme.colorScheme.onPrimaryFixedVariant
-          )
-      );
+              codeForeground: theme.colorScheme.onPrimaryFixedVariant));
 
-        own = BubbleStyle(
+      own = BubbleStyle(
           mainColor: theme.colorScheme.surfaceContainer,
           pressedColor: theme.colorScheme.surfaceContainerLow,
-          mainTextStyle: baseTextStyle.copyWith(color: theme.colorScheme.onSecondaryFixed, decorationColor: theme.colorScheme.onSecondaryFixed),
+          mainTextStyle: baseTextStyle.copyWith(
+              color: theme.colorScheme.onSecondaryFixed,
+              decorationColor: theme.colorScheme.onSecondaryFixed),
           dateTextStyle: dateTextStyle,
           textFormatStyle: FormatStyle(
-              textStyle: baseTextStyle.copyWith(color: theme.colorScheme.onSecondaryFixed, decorationColor: theme.colorScheme.onSecondaryFixed),
+              textStyle: baseTextStyle.copyWith(
+                  color: theme.colorScheme.onSecondaryFixed,
+                  decorationColor: theme.colorScheme.onSecondaryFixed),
               timeColor: theme.colorScheme.primary,
               linkBackground: theme.colorScheme.secondaryFixedDim,
               linkForeground: theme.colorScheme.onSecondaryFixedVariant,
               codeBackground: theme.colorScheme.primaryContainer,
-              codeForeground: theme.colorScheme.onPrimaryContainer
-          )
-      );
+              codeForeground: theme.colorScheme.onPrimaryContainer));
     }
   }
 
@@ -184,7 +211,8 @@ class BubbleStyle {
   final TextStyle dateTextStyle;
   final FormatStyle textFormatStyle;
 
-  static TextStyle getAuthorTextStyle(final ThemeData theme, final String author) {
+  static TextStyle getAuthorTextStyle(
+      final ThemeData theme, final String author) {
     final double hue = HSLColor.fromColor(theme.colorScheme.primary).hue;
     late final double minHue;
     late final double maxHue;
@@ -207,21 +235,23 @@ class BubbleStyle {
 
     final double lightness = theme.brightness == Brightness.dark ? 0.7 : 0.3;
 
-    Color color = ColorHash(author, hue: (minHue, maxHue), saturation: saturation, lightness: lightness).toColor();
+    Color color = ColorHash(author,
+            hue: (minHue, maxHue), saturation: saturation, lightness: lightness)
+        .toColor();
 
     return theme.textTheme.labelLarge!.copyWith(color: color);
   }
 
-  const BubbleStyle({
-    required this.mainColor,
-    required this.pressedColor,
-    required this.mainTextStyle,
-    required this.dateTextStyle,
-    required this.textFormatStyle
-  });
+  const BubbleStyle(
+      {required this.mainColor,
+      required this.pressedColor,
+      required this.mainTextStyle,
+      required this.dateTextStyle,
+      required this.textFormatStyle});
 }
 
-void showSnackbar(final BuildContext context, final String text, {seconds = 1, milliseconds = 0}) {
+void showSnackbar(final BuildContext context, final String text,
+    {seconds = 1, milliseconds = 0}) {
   if (context.mounted) {
     // Hide the current SnackBar if one is already visible.
     ScaffoldMessenger.of(context).hideCurrentSnackBar();

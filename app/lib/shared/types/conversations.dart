@@ -16,7 +16,8 @@ class ChatCreationData {
   final String subject;
   final List<String> receivers;
 
-  ChatCreationData({required this.type, required this.subject, required this.receivers});
+  ChatCreationData(
+      {required this.type, required this.subject, required this.receivers});
 }
 
 class CreationResponse {
@@ -29,7 +30,7 @@ class CreationResponse {
 enum ChatType {
   noAnswerAllowed(Icons.speaker_notes_off),
   privateAnswerOnly(Icons.mic),
-  groupOnly( Icons.forum),
+  groupOnly(Icons.forum),
   openChat(Icons.groups);
 
   final IconData icon;
@@ -52,7 +53,16 @@ class Conversation {
   final UnparsedMessage parent;
   final List<UnparsedMessage> replies;
 
-  const Conversation({required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.parent, required this.countParents, required this.countStudents, required this.countTeachers, required this.knownParticipants, this.replies = const []});
+  const Conversation(
+      {required this.groupChat,
+      required this.onlyPrivateAnswers,
+      required this.noReply,
+      required this.parent,
+      required this.countParents,
+      required this.countStudents,
+      required this.countTeachers,
+      required this.knownParticipants,
+      this.replies = const []});
 }
 
 class UnparsedMessage {
@@ -61,5 +71,9 @@ class UnparsedMessage {
   final bool own;
   final String content;
 
-  const UnparsedMessage({required this.date, required this.author, required this.own, required this.content});
+  const UnparsedMessage(
+      {required this.date,
+      required this.author,
+      required this.own,
+      required this.content});
 }

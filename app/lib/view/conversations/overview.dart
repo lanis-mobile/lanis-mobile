@@ -179,10 +179,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ConversationsChat(id: conversations[index]
-                              ["Uniquid"], // nice typo Lanis
-                                title: conversations[index]["Betreff"],))
-                      );
+                              builder: (context) => ConversationsChat(
+                                    id: conversations[index]
+                                        ["Uniquid"], // nice typo Lanis
+                                    title: conversations[index]["Betreff"],
+                                  )));
                     }
                   },
                   customBorder: RoundedRectangleBorder(
@@ -203,108 +204,111 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context)!.createNewConversation),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: TextField(
-                      controller: subjectController,
-                      decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.subject,
-                      ),
-                    ),
-                  ),
-                  ListenableBuilder(
-                    listenable: rebuildSearch,
-                    builder: (context, widget) {
-                      return FlutterTagging<ReceiverEntry>(
-                        initialItems: receivers,
-                        textFieldConfiguration: TextFieldConfiguration(
+              title: Text(AppLocalizations.of(context)!.createNewConversation),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: TextField(
+                          controller: subjectController,
                           decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context)!.addReceiversHint,
-                            labelText: AppLocalizations.of(context)!.addReceivers,
+                            hintText: AppLocalizations.of(context)!.subject,
                           ),
                         ),
-                        onAdded: (receiverEntry) {
-                          return receiverEntry;
-                        },
-                        configureChip: (tag) {
-                          return ChipConfiguration(
-                              label: Text(tag.name),
-                          );
-                        },
-                        configureSuggestion: (tag) {
-                          return SuggestionConfiguration(
-                              title: Text(tag.name)
-                          );
-                        },
-                        findSuggestions: (query) async {
-                          if (!(await connectionChecker.connected)) {
-                            return <ReceiverEntry>[];
-                          }
-
-                          query = query.trim();
-                          if (query.isEmpty) return <ReceiverEntry>[];
-              
-                          final dynamic result = await client.conversations.searchTeacher(query);
-                          return result == false ? <ReceiverEntry>[] : result;
-                        },
-                      );
-                    }
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  subjectController.clear();
-                  receivers.clear();
-                  rebuildSearch.trigger();
-                },
-                tooltip: AppLocalizations.of(context)!.createResetTooltip,
-                icon: const Icon(Icons.format_clear)
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(AppLocalizations.of(context)!.back)
-            ),
-            FilledButton(
-                onPressed: () async {
-                  if (subjectController.text.isEmpty || receivers.isEmpty) {
-                    return;
-                  }
-
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ConversationsSend(
-                      creationData: ChatCreationData(
-                          type: chatType,
-                          subject: subjectController.text,
-                          receivers: receivers.map((entry) => entry.id).toList()
                       ),
-                    )),
-                  ).then((_) {
-                    subjectController.clear();
-                    receivers.clear();
-                    visibleConversationsFetcher.fetchData(forceRefresh: true);
-                  });
-                },
-                child: Text(AppLocalizations.of(context)!.create)
-            ),
-          ],
-        )
-    );
+                      ListenableBuilder(
+                          listenable: rebuildSearch,
+                          builder: (context, widget) {
+                            return FlutterTagging<ReceiverEntry>(
+                              initialItems: receivers,
+                              textFieldConfiguration: TextFieldConfiguration(
+                                decoration: InputDecoration(
+                                  hintText: AppLocalizations.of(context)!
+                                      .addReceiversHint,
+                                  labelText: AppLocalizations.of(context)!
+                                      .addReceivers,
+                                ),
+                              ),
+                              onAdded: (receiverEntry) {
+                                return receiverEntry;
+                              },
+                              configureChip: (tag) {
+                                return ChipConfiguration(
+                                  label: Text(tag.name),
+                                );
+                              },
+                              configureSuggestion: (tag) {
+                                return SuggestionConfiguration(
+                                    title: Text(tag.name));
+                              },
+                              findSuggestions: (query) async {
+                                if (!(await connectionChecker.connected)) {
+                                  return <ReceiverEntry>[];
+                                }
+
+                                query = query.trim();
+                                if (query.isEmpty) return <ReceiverEntry>[];
+
+                                final dynamic result = await client
+                                    .conversations
+                                    .searchTeacher(query);
+                                return result == false
+                                    ? <ReceiverEntry>[]
+                                    : result;
+                              },
+                            );
+                          }),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                IconButton(
+                    onPressed: () {
+                      subjectController.clear();
+                      receivers.clear();
+                      rebuildSearch.trigger();
+                    },
+                    tooltip: AppLocalizations.of(context)!.createResetTooltip,
+                    icon: const Icon(Icons.format_clear)),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(AppLocalizations.of(context)!.back)),
+                FilledButton(
+                    onPressed: () async {
+                      if (subjectController.text.isEmpty || receivers.isEmpty) {
+                        return;
+                      }
+
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ConversationsSend(
+                                  creationData: ChatCreationData(
+                                      type: chatType,
+                                      subject: subjectController.text,
+                                      receivers: receivers
+                                          .map((entry) => entry.id)
+                                          .toList()),
+                                )),
+                      ).then((_) {
+                        subjectController.clear();
+                        receivers.clear();
+                        visibleConversationsFetcher.fetchData(
+                            forceRefresh: true);
+                      });
+                    },
+                    child: Text(AppLocalizations.of(context)!.create)),
+              ],
+            ));
   }
 
   void showTypeChooser() {
@@ -317,14 +321,16 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
             title: Text(AppLocalizations.of(context)!.conversationType),
             actions: [
               OutlinedButton(
-                  onPressed: () { Navigator.of(context).pop(); },
-                  child: Text(AppLocalizations.of(context)!.cancel)
-              )
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(AppLocalizations.of(context)!.cancel))
             ],
             content: SizedBox(
                 width: double.maxFinite,
                 child: Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
                   child: ListView.builder(
                       itemCount: ChatType.values.length,
                       shrinkWrap: true,
@@ -335,142 +341,151 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                             title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(AppLocalizations.of(context)!.conversationTypeName(chatTypes[index].name)),
+                                Text(AppLocalizations.of(context)!
+                                    .conversationTypeName(
+                                        chatTypes[index].name)),
                                 if (chatTypes[index] == ChatType.openChat) ...[
                                   Text(
-                                    AppLocalizations.of(context)!.experimental.toUpperCase(),
+                                    AppLocalizations.of(context)!
+                                        .experimental
+                                        .toUpperCase(),
                                     style: const TextStyle(
                                         fontSize: 10.0,
-                                        fontWeight: FontWeight.bold
-                                    ),
+                                        fontWeight: FontWeight.bold),
                                   )
                                 ]
                               ],
                             ),
                             initiallyExpanded: index == 0 ? true : false,
                             leading: Icon(chatTypes[index].icon),
-                            collapsedBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            collapsedBackgroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHigh,
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHigh,
                             collapsedShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0)
-                            ),
+                                borderRadius: BorderRadius.circular(8.0)),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0)
-                            ),
+                                borderRadius: BorderRadius.circular(8.0)),
                             children: [
                               Container(
-                                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerLow,
                                   padding: const EdgeInsets.all(12.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        AppLocalizations.of(context)!.conversationTypeDescription(chatTypes[index].name),
+                                        AppLocalizations.of(context)!
+                                            .conversationTypeDescription(
+                                                chatTypes[index].name),
                                         textAlign: TextAlign.start,
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.only(top: 8.0),
+                                        padding:
+                                            const EdgeInsets.only(top: 8.0),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
                                           children: [
                                             FilledButton(
                                                 onPressed: () {
-                                                  return showCreationDialog(chatTypes[index]);
+                                                  return showCreationDialog(
+                                                      chatTypes[index]);
                                                 },
-                                                child: Text(AppLocalizations.of(context)!.select)
-                                            ),
+                                                child: Text(AppLocalizations.of(
+                                                        context)!
+                                                    .select)),
                                           ],
                                         ),
                                       )
                                     ],
-                                  )
-                              )
+                                  ))
                             ],
                           ),
                         );
-                      }
-                  ),
-                )
-            ),
+                      }),
+                )),
           );
-        }
-    );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TabBar(
-        controller: _tabController,
-        tabs: [
-          Tab(
-            text: AppLocalizations.of(context)!.visible,
-            icon: const Icon(Icons.visibility),
-          ),
-          Tab(
-            text: AppLocalizations.of(context)!.invisible,
-            icon: const Icon(Icons.visibility_off),
-          )
-        ],
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          StreamBuilder(
-              stream: visibleConversationsFetcher.stream,
-              builder: (context, snapshot) {
-                if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView(
-                      error: snapshot.data?.content,
-                      name: AppLocalizations.of(context)!.messages,
-                      fetcher: visibleConversationsFetcher);
-                } else if (snapshot.data?.status == FetcherStatus.fetching ||
-                    snapshot.data == null) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  return conversationsView(context, snapshot.data?.content,
-                      visibleConversationsFetcher, _refreshVisibleKey);
-                }
-              }),
-          StreamBuilder(
-              stream: invisibleConversationsFetcher.stream,
-              builder: (context, snapshot) {
-                if (snapshot.data?.status == FetcherStatus.error) {
-                  return ErrorView.fromCode(
-                      data: snapshot.data?.content,
-                      name: AppLocalizations.of(context)!.messages,
-                      fetcher: invisibleConversationsFetcher);
-                } else if (snapshot.data?.status == FetcherStatus.fetching ||
-                    snapshot.data == null) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  return conversationsView(context, snapshot.data?.content,
-                      invisibleConversationsFetcher, _refreshInvisibleKey);
-                }
-              })
-        ],
-      ),
-      floatingActionButton: FutureBuilder(
-        future: client.conversations.canChooseType(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return FloatingActionButton(
-              onPressed: () {
-                if (snapshot.data!) {
-                  showTypeChooser();
-                } else {
-                  showCreationDialog(null);
-                }
-              },
-              child: const Icon(Icons.edit),
+        appBar: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(
+              text: AppLocalizations.of(context)!.visible,
+              icon: const Icon(Icons.visibility),
+            ),
+            Tab(
+              text: AppLocalizations.of(context)!.invisible,
+              icon: const Icon(Icons.visibility_off),
+            )
+          ],
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            StreamBuilder(
+                stream: visibleConversationsFetcher.stream,
+                builder: (context, snapshot) {
+                  if (snapshot.data?.status == FetcherStatus.error) {
+                    return ErrorView(
+                        error: snapshot.data?.content,
+                        name: AppLocalizations.of(context)!.messages,
+                        fetcher: visibleConversationsFetcher);
+                  } else if (snapshot.data?.status == FetcherStatus.fetching ||
+                      snapshot.data == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return conversationsView(context, snapshot.data?.content,
+                        visibleConversationsFetcher, _refreshVisibleKey);
+                  }
+                }),
+            StreamBuilder(
+                stream: invisibleConversationsFetcher.stream,
+                builder: (context, snapshot) {
+                  if (snapshot.data?.status == FetcherStatus.error) {
+                    return ErrorView.fromCode(
+                        data: snapshot.data?.content,
+                        name: AppLocalizations.of(context)!.messages,
+                        fetcher: invisibleConversationsFetcher);
+                  } else if (snapshot.data?.status == FetcherStatus.fetching ||
+                      snapshot.data == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return conversationsView(context, snapshot.data?.content,
+                        invisibleConversationsFetcher, _refreshInvisibleKey);
+                  }
+                })
+          ],
+        ),
+        floatingActionButton: FutureBuilder(
+          future: client.conversations.canChooseType(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return FloatingActionButton(
+                onPressed: () {
+                  if (snapshot.data!) {
+                    showTypeChooser();
+                  } else {
+                    showCreationDialog(null);
+                  }
+                },
+                child: const Icon(Icons.edit),
+              );
+            }
+            return const FloatingActionButton(
+              onPressed: null,
+              child: Icon(Icons.edit),
             );
-          }
-          return const FloatingActionButton(
-            onPressed: null,
-            child: Icon(Icons.edit),
-          );
-        },
-      )
-    );
+          },
+        ));
   }
 }

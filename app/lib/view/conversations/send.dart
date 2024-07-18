@@ -11,6 +11,7 @@ import 'shared.dart';
 
 class ConversationsSend extends StatefulWidget {
   final ChatCreationData? creationData;
+
   const ConversationsSend({super.key, this.creationData});
 
   @override
@@ -28,10 +29,9 @@ class _ConversationsSendState extends State<ConversationsSend> {
       final Operation operation = operations[i];
       String current = operation.value;
 
-      if (operation.attributes == null){
+      if (operation.attributes == null) {
         current = operation.value;
       } else {
-
         for (MapEntry attribute in operation.attributes!.entries) {
           switch (attribute.key) {
             case "bold":
@@ -69,7 +69,8 @@ class _ConversationsSendState extends State<ConversationsSend> {
       }
 
       if (i != operations.length - 1) {
-        final Map<String, dynamic>? nextAttributes = operations[i + 1].attributes;
+        final Map<String, dynamic>? nextAttributes =
+            operations[i + 1].attributes;
 
         if (nextAttributes != null && nextAttributes.containsKey("list")) {
           if (current.contains("\u000A")) {
@@ -85,7 +86,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
       text += current;
     }
 
-    return text.substring(0, text.length-1);
+    return text.substring(0, text.length - 1);
   }
 
   Future<void> newConversation(String text) async {
@@ -102,12 +103,10 @@ class _ConversationsSendState extends State<ConversationsSend> {
                     onPressed: () async {
                       Navigator.pop(context);
                     },
-                    child: const Text("Ok")
-                ),
+                    child: const Text("Ok")),
               ],
             );
-          }
-      );
+          });
       return;
     }
 
@@ -120,7 +119,12 @@ class _ConversationsSendState extends State<ConversationsSend> {
       status: MessageStatus.sent,
     );
 
-    final CreationResponse response = await client.conversations.createConversation(widget.creationData!.receivers, widget.creationData!.type?.name, widget.creationData!.subject, text);
+    final CreationResponse response = await client.conversations
+        .createConversation(
+            widget.creationData!.receivers,
+            widget.creationData!.type?.name,
+            widget.creationData!.subject,
+            text);
 
     if (response.success) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -128,141 +132,135 @@ class _ConversationsSendState extends State<ConversationsSend> {
               title: widget.creationData!.subject,
               id: response.id!,
               newSettings: NewConversationSettings(
-                firstMessage: textMessage,
-                settings: ConversationSettings(
-                    id: response.id!,
-                    groupChat: widget.creationData!.type == ChatType.groupOnly,
-                    onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly,
-                    noReply: widget.creationData!.type == ChatType.noAnswerAllowed,
-                    own: true
-                )
-              )
-          )
-      ));
+                  firstMessage: textMessage,
+                  settings: ConversationSettings(
+                      id: response.id!,
+                      groupChat:
+                          widget.creationData!.type == ChatType.groupOnly,
+                      onlyPrivateAnswers: widget.creationData!.type ==
+                          ChatType.privateAnswerOnly,
+                      noReply:
+                          widget.creationData!.type == ChatType.noAnswerAllowed,
+                      own: true)))));
     } else {
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               icon: const Icon(Icons.error),
-              title: Text(AppLocalizations.of(context)!.errorCreatingConversation),
+              title:
+                  Text(AppLocalizations.of(context)!.errorCreatingConversation),
               actions: [
                 FilledButton(
                     onPressed: () async {
                       Navigator.pop(context);
                     },
-                    child: const Text("Ok")
-                ),
+                    child: const Text("Ok")),
               ],
             );
-          }
-      );
+          });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context, null);
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () { _controller.clear(); },
-            icon: const Icon(Icons.backspace),
-          ),
-          IconButton(
+        appBar: AppBar(
+          leading: IconButton(
             onPressed: () {
-              final String text = parseText(_controller.document.toDelta());
-
-              if (text.isEmpty) return;
-
-              if (widget.creationData != null) {
-                newConversation(text);
-              } else {
-                Navigator.pop(context, text);
-              }
+              Navigator.pop(context, null);
             },
-            icon: const Icon(Icons.send),
+            icon: const Icon(Icons.arrow_back),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: QuillEditor.basic(
-                configurations: QuillEditorConfigurations(
-                  controller: _controller,
-                  placeholder: AppLocalizations.of(context)!.sendMessagePlaceholder,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0)
-                )
+          actions: [
+            IconButton(
+              onPressed: () {
+                _controller.clear();
+              },
+              icon: const Icon(Icons.backspace),
             ),
-          ),
-          QuillToolbar(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Wrap(
-                  children: [
-                    QuillToolbarHistoryButton(
-                      isUndo: true,
+            IconButton(
+              onPressed: () {
+                final String text = parseText(_controller.document.toDelta());
+
+                if (text.isEmpty) return;
+
+                if (widget.creationData != null) {
+                  newConversation(text);
+                } else {
+                  Navigator.pop(context, text);
+                }
+              },
+              icon: const Icon(Icons.send),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: QuillEditor.basic(
+                  configurations: QuillEditorConfigurations(
                       controller: _controller,
-                    ),
-                    QuillToolbarHistoryButton(
-                      isUndo: false,
-                      controller: _controller,
-                    ),
-                    QuillToolbarClearFormatButton(
-                      controller: _controller,
-                    ),
-                    QuillToolbarToggleStyleButton(
-                      options: const QuillToolbarToggleStyleButtonOptions(),
-                      controller: _controller,
-                      attribute: Attribute.bold,
-                    ),
-                    QuillToolbarToggleStyleButton(
-                      options: const QuillToolbarToggleStyleButtonOptions(),
-                      controller: _controller,
-                      attribute: Attribute.italic,
-                    ),
-                    QuillToolbarToggleStyleButton(
-                      controller: _controller,
-                      attribute: Attribute.underline,
-                    ),
-                    QuillToolbarToggleStyleButton(
+                      placeholder:
+                          AppLocalizations.of(context)!.sendMessagePlaceholder,
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0))),
+            ),
+            QuillToolbar(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Wrap(
+                    children: [
+                      QuillToolbarHistoryButton(
+                        isUndo: true,
                         controller: _controller,
-                        attribute: Attribute.strikeThrough
-                    ),
-                    QuillToolbarToggleStyleButton(
-                      controller: _controller,
-                      attribute: Attribute.inlineCode,
-                    ),
-                    QuillToolbarToggleStyleButton(
-                      controller: _controller,
-                      attribute: Attribute.ul,
-                    ),
-                    QuillToolbarToggleStyleButton(
+                      ),
+                      QuillToolbarHistoryButton(
+                        isUndo: false,
                         controller: _controller,
-                        attribute: Attribute.superscript
-                    ),
-                    QuillToolbarToggleStyleButton(
+                      ),
+                      QuillToolbarClearFormatButton(
                         controller: _controller,
-                        attribute: Attribute.subscript
-                    ),
-                  ],
+                      ),
+                      QuillToolbarToggleStyleButton(
+                        options: const QuillToolbarToggleStyleButtonOptions(),
+                        controller: _controller,
+                        attribute: Attribute.bold,
+                      ),
+                      QuillToolbarToggleStyleButton(
+                        options: const QuillToolbarToggleStyleButtonOptions(),
+                        controller: _controller,
+                        attribute: Attribute.italic,
+                      ),
+                      QuillToolbarToggleStyleButton(
+                        controller: _controller,
+                        attribute: Attribute.underline,
+                      ),
+                      QuillToolbarToggleStyleButton(
+                          controller: _controller,
+                          attribute: Attribute.strikeThrough),
+                      QuillToolbarToggleStyleButton(
+                        controller: _controller,
+                        attribute: Attribute.inlineCode,
+                      ),
+                      QuillToolbarToggleStyleButton(
+                        controller: _controller,
+                        attribute: Attribute.ul,
+                      ),
+                      QuillToolbarToggleStyleButton(
+                          controller: _controller,
+                          attribute: Attribute.superscript),
+                      QuillToolbarToggleStyleButton(
+                          controller: _controller,
+                          attribute: Attribute.subscript),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      )
-    );
+          ],
+        ));
   }
 }

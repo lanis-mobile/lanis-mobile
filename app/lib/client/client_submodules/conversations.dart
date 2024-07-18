@@ -112,8 +112,7 @@ class ConversationsParser {
           date: decoded["Datum"],
           author: decoded["username"],
           own: decoded["own"],
-          content: decoded["Inhalt"]
-      );
+          content: decoded["Inhalt"]);
 
       final List<UnparsedMessage> replies = [];
       for (dynamic reply in decoded["reply"]) {
@@ -121,8 +120,7 @@ class ConversationsParser {
             date: reply["Datum"],
             author: reply["username"],
             own: reply["own"],
-            content: reply["Inhalt"]
-        ));
+            content: reply["Inhalt"]));
       }
 
       int countStudents = decoded["statistik"]["teilnehmer"];
@@ -136,16 +134,17 @@ class ConversationsParser {
         countParents++;
       }
 
-
       final List<String> knownParticipants = [decoded["username"]];
       if (decoded["empf"] is List) {
         for (String receiver in decoded["empf"]) {
-          knownParticipants.add(parse(receiver).querySelector("span")!.text.substring(1));
+          knownParticipants
+              .add(parse(receiver).querySelector("span")!.text.substring(1));
         }
       }
 
       if (decoded["WeitereEmpfaenger"] != "") {
-        final others  = parse(decoded["WeitereEmpfaenger"]).querySelectorAll("span");
+        final others =
+            parse(decoded["WeitereEmpfaenger"]).querySelectorAll("span");
         for (final other in others) {
           knownParticipants.add(other.text.trim());
         }
@@ -160,8 +159,7 @@ class ConversationsParser {
           countTeachers: countTeachers,
           countParents: countParents,
           knownParticipants: knownParticipants,
-          replies: replies
-      );
+          replies: replies);
     } on (SocketException, DioException) {
       throw NetworkException();
     }
@@ -178,7 +176,8 @@ class ConversationsParser {
   /// [message] supports Lanis-styled text.
   ///
   /// If successful, it returns `true`.
-  Future<bool> replyToConversation(String headId, String sender, String groupOnly, String privateAnswerOnly, String message) async {
+  Future<bool> replyToConversation(String headId, String sender,
+      String groupOnly, String privateAnswerOnly, String message) async {
     final Map replyData = {
       "to": sender,
       "groupOnly": groupOnly,
@@ -189,25 +188,26 @@ class ConversationsParser {
 
     String encrypted = client.cryptor.encryptString(json.encode(replyData));
 
-    final response = await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-        data: {
-          "a": "reply",
-          "c": encrypted,
-        },
-        options: Options(
-          headers: {
-            "Accept": "*/*",
-            "Content-Type":
-            "application/x-www-form-urlencoded; charset=UTF-8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        )
-    );
+    final response =
+        await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+            data: {
+              "a": "reply",
+              "c": encrypted,
+            },
+            options: Options(
+              headers: {
+                "Accept": "*/*",
+                "Content-Type":
+                    "application/x-www-form-urlencoded; charset=UTF-8",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "X-Requested-With": "XMLHttpRequest",
+              },
+            ));
 
-    return json.decode(response.data)["back"]; // "back" should be bool, id is Uniquid
+    return json
+        .decode(response.data)["back"]; // "back" should be bool, id is Uniquid
   }
 
   /// Creates a new conversation.
@@ -230,68 +230,59 @@ class ConversationsParser {
   ///  [text] also supports Lanis-styled text.
   ///
   ///  If successful, it returns true.
-  Future<CreationResponse> createConversation(List<String> receivers, String? type, String subject, String text) async {
+  Future<CreationResponse> createConversation(
+      List<String> receivers, String? type, String subject, String text) async {
     final List<Map<String, String>> createData = [
-      {
-        "name": "subject",
-        "value": subject
-      },
-      {
-        "name": "text",
-        "value": text
-      },
+      {"name": "subject", "value": subject},
+      {"name": "text", "value": text},
     ];
 
     if (type != null) {
-      createData.add({
-        "name": "Art",
-        "value": type
-      });
+      createData.add({"name": "Art", "value": type});
     }
 
     for (final String receiver in receivers) {
-      createData.add({
-        "name": "to[]",
-        "value": receiver
-      });
+      createData.add({"name": "to[]", "value": receiver});
     }
 
     String encrypted = client.cryptor.encryptString(json.encode(createData));
 
-    final response = await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-        data: {
-          "a": "newmessage",
-          "c": encrypted,
-        },
-        options: Options(
-          headers: {
-            "Accept": "*/*",
-            "Content-Type":
-            "application/x-www-form-urlencoded; charset=UTF-8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        )
-    );
+    final response =
+        await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+            data: {
+              "a": "newmessage",
+              "c": encrypted,
+            },
+            options: Options(
+              headers: {
+                "Accept": "*/*",
+                "Content-Type":
+                    "application/x-www-form-urlencoded; charset=UTF-8",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "X-Requested-With": "XMLHttpRequest",
+              },
+            ));
 
     final Map decoded = json.decode(response.data);
 
-    return CreationResponse(success: decoded["back"], id: decoded["id"]); // "back" should be bool, id is Uniquid
+    return CreationResponse(
+        success: decoded["back"],
+        id: decoded["id"]); // "back" should be bool, id is Uniquid
   }
 
   Future<bool> canChooseType() async {
-    final html = await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
-        options: Options(
-          headers: {
-            "Accept": "*/*",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-          },
-        )
-    );
+    final html =
+        await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+            options: Options(
+              headers: {
+                "Accept": "*/*",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+              },
+            ));
 
     final document = parse(html.data);
 
@@ -307,20 +298,17 @@ class ConversationsParser {
       return false;
     }
 
-    final response = await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
-        queryParameters: {
-          "a": "searchRecipt",
-          "q": name
-        },
-        options: Options(
-          headers: {
-            "Accept": "*/*",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-          },
-        )
-    );
+    final response =
+        await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+            queryParameters: {"a": "searchRecipt", "q": name},
+            options: Options(
+              headers: {
+                "Accept": "*/*",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+              },
+            ));
 
     final data = json.decode(response.data);
 
@@ -328,10 +316,7 @@ class ConversationsParser {
       final List<ReceiverEntry> teacherEntries = [];
 
       for (final teacher in data["items"]) {
-        teacherEntries.add(ReceiverEntry(
-            teacher["id"]!,
-            teacher["text"]!
-        ));
+        teacherEntries.add(ReceiverEntry(teacher["id"]!, teacher["text"]!));
       }
 
       return teacherEntries;
