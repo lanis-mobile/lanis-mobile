@@ -159,6 +159,12 @@
   "copiedMessage": "Message was copied!",
   "errorSendingMessage": "Error occurred during sending the message!",
   "errorCreatingConversation": "Couldn't create new conversation!",
+  "receivers": "Receivers",
+  "statistic": "Statistic",
+  "participants": "Participants",
+  "supervisors": "Supervisors",
+  "parents": "Parents",
+  "knownReceivers": "Known receivers",
 
   "substitutionsFilter": "Substitutions filter",
   "developmentMode": "Development mode",

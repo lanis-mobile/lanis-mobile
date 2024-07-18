@@ -78,8 +78,6 @@ class ConversationsParser {
     }
 
     try {
-      canChooseType();
-
       final encryptedUniqueID = client.cryptor.encryptString(uniqueID);
 
       final response =
@@ -127,11 +125,41 @@ class ConversationsParser {
         ));
       }
 
+      int countStudents = decoded["statistik"]["teilnehmer"];
+      int countTeachers = decoded["statistik"]["betreuer"];
+      int countParents = decoded["statistik"]["eltern"];
+      if (decoded["SenderArt"] == "Teilnehmer") {
+        countStudents++;
+      } else if (decoded["SenderArt"] == "Betreuer") {
+        countTeachers++;
+      } else {
+        countParents++;
+      }
+
+
+      final List<String> knownParticipants = [decoded["username"]];
+      if (decoded["empf"] is List) {
+        for (String receiver in decoded["empf"]) {
+          knownParticipants.add(parse(receiver).querySelector("span")!.text.substring(1));
+        }
+      }
+
+      if (decoded["WeitereEmpfaenger"] != "") {
+        final others  = parse(decoded["WeitereEmpfaenger"]).querySelectorAll("span");
+        for (final other in others) {
+          knownParticipants.add(other.text.trim());
+        }
+      }
+
       return Conversation(
           groupChat: decoded["groupOnly"] == "ja",
           onlyPrivateAnswers: decoded["privateAnswerOnly"] == "ja",
           noReply: decoded["noAnswerAllowed"] == "ja",
           parent: parent,
+          countStudents: countStudents,
+          countTeachers: countTeachers,
+          countParents: countParents,
+          knownParticipants: knownParticipants,
           replies: replies
       );
     } on (SocketException, DioException) {

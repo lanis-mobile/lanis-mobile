@@ -43,10 +43,16 @@ class Conversation {
 
   final bool noReply;
 
+  final int countStudents;
+  final int countTeachers;
+  final int countParents;
+
+  final List<String> knownParticipants;
+
   final UnparsedMessage parent;
   final List<UnparsedMessage> replies;
 
-  const Conversation({required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.parent, this.replies = const []});
+  const Conversation({required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.parent, required this.countParents, required this.countStudents, required this.countTeachers, required this.knownParticipants, this.replies = const []});
 }
 
 class UnparsedMessage {

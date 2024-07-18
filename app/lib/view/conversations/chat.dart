@@ -37,6 +37,7 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
   final Map<String, TextStyle> textStyles = {};
 
   late final ConversationSettings settings;
+  late final Statistics? statistics;
 
   final List<dynamic> chat = [];
 
@@ -221,12 +222,21 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
           onlyPrivateAnswers: response.onlyPrivateAnswers,
           noReply: response.noReply,
           author: response.parent.author,
-          own: response.parent.own
+          own: response.parent.own,
+      );
+
+      statistics = Statistics(
+          countParents: response.countParents,
+          countStudents: response.countStudents,
+          countTeachers: response.countTeachers,
+          knownParticipants: response.knownParticipants
       );
 
       parseMessages(response);
     } else {
       settings = widget.newSettings!.settings;
+
+      statistics = null;
 
       chat.addAll([
         DateHeader(date: widget.newSettings!.firstMessage.date),
@@ -234,7 +244,11 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
       ]);
     }
 
-    isSendVisible.value = !settings.noReply;
+    if (settings.own) {
+      isSendVisible.value = true;
+    } else {
+      isSendVisible.value = !settings.noReply;
+    }
   }
 
   @override
@@ -285,31 +299,138 @@ class _ConversationsChatState extends State<ConversationsChat> with SingleTicker
                     ),
                     snap: true,
                     floating: true,
-                    actions: settings.groupChat == false && settings.onlyPrivateAnswers == false && settings.noReply == false ? [
-                      IconButton(
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    icon: const Icon(Icons.groups),
-                                    title: Text(AppLocalizations.of(context)!.conversationTypeName(ChatType.openChat.name)),
-                                    content: Text(AppLocalizations.of(context)!.openChatWarning),
-                                    actions: [
-                                      FilledButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("Ok")
-                                      )
-                                    ],
-                                  );
-                                }
-                            );
-                          },
-                          icon: const Icon(Icons.warning)
-                      )
-                    ] : null,
+                    actions: [
+                      if (settings.groupChat == false && settings.onlyPrivateAnswers == false && settings.noReply == false) ...[
+                        IconButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      icon: const Icon(Icons.groups),
+                                      title: Text(AppLocalizations.of(context)!.conversationTypeName(ChatType.openChat.name)),
+                                      content: Text(AppLocalizations.of(context)!.openChatWarning),
+                                      actions: [
+                                        FilledButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text("Ok")
+                                        )
+                                      ],
+                                    );
+                                  }
+                              );
+                            },
+                            icon: const Icon(Icons.warning)
+                        )
+                      ],
+                      if (statistics != null) ...[
+                        IconButton(
+                            onPressed: () {
+                              final Set<String> participants = statistics!.knownParticipants.toSet();
+                              participants.addAll(textStyles.keys);
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text(AppLocalizations.of(context)!.receivers),
+                                      content: SizedBox(
+                                          width: double.maxFinite,
+                                          child: CustomScrollView(
+                                            shrinkWrap: true,
+                                            slivers: [
+                                              if (statistics != null) ...[
+                                                SliverToBoxAdapter(
+                                                    child: Column(
+                                                      children: [
+                                                        ListTile(
+                                                          title: Text(
+                                                            AppLocalizations.of(context)!.statistic,
+                                                            style: Theme.of(context).textTheme.titleMedium,
+                                                          ),
+                                                          leading: const Icon(Icons.numbers),
+                                                          contentPadding: EdgeInsets.zero,
+                                                        ),
+                                                        ListTile(
+                                                          title: Row(
+                                                            children: [
+                                                              Text(
+                                                                "${statistics!.countStudents}",
+                                                              ),
+                                                              Text(" ${AppLocalizations.of(context)!.participants}"),
+                                                            ],
+                                                          ),
+                                                          leading: const Icon(Icons.person),
+                                                          visualDensity: VisualDensity.compact,
+                                                        ),
+                                                        ListTile(
+                                                          title: Row(
+                                                            children: [
+                                                              Text(
+                                                                "${statistics!.countTeachers}",
+                                                              ),
+                                                              Text(" ${AppLocalizations.of(context)!.supervisors}"),
+                                                            ],
+                                                          ),
+                                                          leading: const Icon(Icons.school),
+                                                          visualDensity: VisualDensity.compact,
+                                                        ),
+                                                        ListTile(
+                                                          title: Row(
+                                                            children: [
+                                                              Text(
+                                                                "${statistics!.countParents}",
+                                                              ),
+                                                              Text(" ${AppLocalizations.of(context)!.parents}"),
+                                                            ],
+                                                          ),
+                                                          leading: const Icon(Icons.supervisor_account),
+                                                          visualDensity: VisualDensity.compact,
+                                                        ),
+                                                      ],
+                                                    )
+                                                ),
+                                              ],
+                                              SliverToBoxAdapter(
+                                                child: ListTile(
+                                                  title: Text(
+                                                    AppLocalizations.of(context)!.knownReceivers,
+                                                    style: Theme.of(context).textTheme.titleMedium,
+                                                  ),
+                                                  leading: const Icon(Icons.people),
+                                                  contentPadding: EdgeInsets.zero,
+                                                ),
+                                              ),
+                                              SliverList.builder(
+                                                itemBuilder: (context, index) {
+                                                  return ListTile(
+                                                    title: Text(participants.elementAt(index),),
+                                                    visualDensity: VisualDensity.compact,
+                                                  );
+                                                },
+                                                itemCount: participants.length,
+                                              )
+                                            ],
+                                          )
+                                      ),
+                                      actions: [
+                                        FilledButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text(AppLocalizations.of(context)!.back)
+                                        )
+                                      ],
+                                    );
+                                  }
+                              );
+                            },
+                            icon: const Icon(Icons.people)
+                        ),
+                      ]
+                    ]
                   ),
                   SliverToBoxAdapter(
                     child: Padding(

@@ -16,6 +16,15 @@ class ConversationSettings {
   const ConversationSettings({required this.id, required this.groupChat, required this.onlyPrivateAnswers, required this.noReply, required this.own, this.author});
 }
 
+class Statistics {
+  final int countStudents;
+  final int countTeachers;
+  final int countParents;
+  final List<String> knownParticipants;
+
+  const Statistics({ required this.countParents, required this.countStudents, required this.countTeachers, required this.knownParticipants});
+}
+
 class NewConversationSettings {
   final Message firstMessage;
   final ConversationSettings settings;

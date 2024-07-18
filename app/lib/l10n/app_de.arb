@@ -159,6 +159,12 @@
   "copiedMessage": "Nachricht wurde kopiert!",
   "errorSendingMessage": "Nachricht konnte nicht gesendet werden!",
   "errorCreatingConversation": "Es konnte keine neue Konversation erstellt werden!",
+  "receivers": "Empfänger",
+  "statistic": "Statistik",
+  "participants": "Teilnehmer",
+  "supervisors": "Betreuer",
+  "parents": "Eltern",
+  "knownReceivers": "Bekannte Empfänger",
 
   "substitutionsFilter": "Vertretungsplan Filter",
   "developmentMode": "Entwicklungsmodus",

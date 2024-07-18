@@ -133,7 +133,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
                     id: response.id!,
                     groupChat: widget.creationData!.type == ChatType.groupOnly,
                     onlyPrivateAnswers: widget.creationData!.type == ChatType.privateAnswerOnly,
-                    noReply: false,
+                    noReply: widget.creationData!.type == ChatType.noAnswerAllowed,
                     own: true
                 )
               )

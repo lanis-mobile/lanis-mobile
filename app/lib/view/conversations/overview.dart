@@ -297,6 +297,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                   ).then((_) {
                     subjectController.clear();
                     receivers.clear();
+                    visibleConversationsFetcher.fetchData(forceRefresh: true);
                   });
                 },
                 child: Text(AppLocalizations.of(context)!.create)
