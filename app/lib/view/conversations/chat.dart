@@ -257,9 +257,13 @@ class _ConversationsChatState extends State<ConversationsChat>
                   label: Text(AppLocalizations.of(context)!.newMessage),
                   icon: const Icon(Icons.edit),
                   onPressed: () async {
-                    await Navigator.of(context).push(MaterialPageRoute(
+                    final result = await Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => const ConversationsSend()));
-                  },
+
+                    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+
+                    await sendMessage(result);
+                    },
                 ),
               );
             }),
