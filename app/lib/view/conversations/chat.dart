@@ -35,6 +35,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   final ScrollController scrollController = ScrollController();
 
   final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(false);
 
   final Map<String, TextStyle> textStyles = {};
 
@@ -45,12 +46,12 @@ class _ConversationsChatState extends State<ConversationsChat>
 
   @override
   void initState() {
-    // Make the app bar title disappear when scrolled to the top
+    super.initState();
     appBarController = AnimationController(vsync: this);
     scrollController.addListener(animateAppBarTitle);
+    scrollController.addListener(toggleScrollToBottomFab);
     animateAppBarTitle();
-
-    super.initState();
+    toggleScrollToBottomFab();
   }
 
   @override
@@ -58,6 +59,15 @@ class _ConversationsChatState extends State<ConversationsChat>
     super.dispose();
     appBarController.dispose();
     scrollController.dispose();
+  }
+
+  void toggleScrollToBottomFab() {
+    if (!scrollController.hasClients) return;
+
+    final maxScrollExtent = scrollController.position.maxScrollExtent;
+    final currentScrollPosition = scrollController.position.pixels;
+
+    isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
   }
 
   animateAppBarTitle() {
@@ -248,7 +258,32 @@ class _ConversationsChatState extends State<ConversationsChat>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: ValueListenableBuilder(
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          ValueListenableBuilder(
+            valueListenable: isScrollToBottomVisible,
+            builder: (context, isVisible, _) {
+              return Visibility(
+                visible: isVisible,
+                child: FloatingActionButton.small(
+                  onPressed: () {
+                    scrollController.animateTo(
+                      scrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  child: const Icon(Icons.keyboard_arrow_down),
+                ),
+              );
+            },
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          ValueListenableBuilder(
             valueListenable: isSendVisible,
             builder: (context, isVisible, _) {
               return Visibility(
@@ -263,157 +298,166 @@ class _ConversationsChatState extends State<ConversationsChat>
                     scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
                     await sendMessage(result);
-                    },
+                  },
                 ),
               );
-            }),
-        body: FutureBuilder(
-            future: _conversationFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.waiting) {
-                // Error content
-                if (snapshot.hasError) {
-                  if (snapshot.error is LanisException) {
-                    return ErrorView(
-                      error: snapshot.error as LanisException,
-                      name: AppLocalizations.of(context)!.singleMessages,
-                      fetcher: null,
-                    );
-                  }
-                }
-
-                return CustomScrollView(
-                  controller: scrollController,
-                  slivers: [
-                    SliverAppBar(
-                        title: Animate(
-                          effects: const [
-                            FadeEffect(
-                              curve: Curves.easeIn,
-                            )
-                          ],
-                          value: 0,
-                          autoPlay: false,
-                          controller: appBarController,
-                          child: Text(widget.title),
-                        ),
-                        snap: true,
-                        floating: true,
-                        actions: [
-                          if (settings.groupChat == false &&
-                              settings.onlyPrivateAnswers == false &&
-                              settings.noReply == false) ...[
-                            IconButton(
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          icon: const Icon(Icons.groups),
-                                          title: Text(
-                                              AppLocalizations.of(context)!
-                                                  .conversationTypeName(
-                                                      ChatType.openChat.name)),
-                                          content: Text(
-                                              AppLocalizations.of(context)!
-                                                  .openChatWarning),
-                                          actions: [
-                                            FilledButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text("Ok"))
-                                          ],
-                                        );
-                                      });
-                                },
-                                icon: const Icon(Icons.warning))
-                          ],
-                          if (statistics != null) ...[
-                            IconButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => StatisticWidget(
-                                          statistics: statistics!,
-                                          otherParticipants: textStyles.keys,
-                                          conversationTitle: widget.title),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.people)),
-                          ]
-                        ]),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0),
-                                    child: Text(
-                                      widget.title,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (settings.onlyPrivateAnswers &&
-                                !settings.own) ...[
-                              Container(
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 12.0),
-                                margin: const EdgeInsets.only(top: 16.0),
-                                decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHigh),
-                                child: Text(
-                                  "${settings.author} ${AppLocalizations.of(context)!.privateConversation}",
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            ]
-                          ],
-                        ),
-                      ),
-                    ),
-                    SliverList.builder(
-                      itemCount: chat.length,
-                      itemBuilder: (context, index) {
-                        if (chat[index] is Message) {
-                          return MessageWidget(
-                              message: chat[index],
-                              textStyle: textStyles[chat[index].author]);
-                        } else {
-                          return DateHeaderWidget(header: chat[index]);
-                        }
-                      },
-                    ),
-                    const SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 75,
-                      ),
-                    )
-                  ],
+            },
+          ),
+        ],
+      ),
+      body: FutureBuilder(
+        future: _conversationFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.waiting) {
+            // Error content
+            if (snapshot.hasError) {
+              if (snapshot.error is LanisException) {
+                return ErrorView(
+                  error: snapshot.error as LanisException,
+                  name: AppLocalizations.of(context)!.singleMessages,
+                  fetcher: null,
                 );
               }
-              // Waiting content
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }));
+            }
+
+            return CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                SliverAppBar(
+                  title: Animate(
+                    effects: const [
+                      FadeEffect(
+                        curve: Curves.easeIn,
+                      )
+                    ],
+                    value: 0,
+                    autoPlay: false,
+                    controller: appBarController,
+                    child: Text(widget.title),
+                  ),
+                  snap: true,
+                  floating: true,
+                  actions: [
+                    if (settings.groupChat == false &&
+                        settings.onlyPrivateAnswers == false &&
+                        settings.noReply == false) ...[
+                      IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                icon: const Icon(Icons.groups),
+                                title: Text(
+                                    AppLocalizations.of(context)!
+                                        .conversationTypeName(
+                                        ChatType.openChat.name)),
+                                content: Text(
+                                    AppLocalizations.of(context)!
+                                        .openChatWarning),
+                                actions: [
+                                  FilledButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text("Ok"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.warning),
+                      ),
+                    ],
+                    if (statistics != null) ...[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => StatisticWidget(
+                                  statistics: statistics!,
+                                  otherParticipants: textStyles.keys,
+                                  conversationTitle: widget.title),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.people),
+                      ),
+                    ],
+                  ],
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
+                                child: Text(
+                                  widget.title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (settings.onlyPrivateAnswers && !settings.own) ...[
+                          Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 12.0),
+                            margin: const EdgeInsets.only(top: 16.0),
+                            decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHigh),
+                            child: Text(
+                              "${settings.author} ${AppLocalizations.of(context)!.privateConversation}",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                SliverList.builder(
+                  itemCount: chat.length,
+                  itemBuilder: (context, index) {
+                    if (chat[index] is Message) {
+                      return MessageWidget(
+                          message: chat[index],
+                          textStyle: textStyles[chat[index].author]);
+                    } else {
+                      return DateHeaderWidget(header: chat[index]);
+                    }
+                  },
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 75,
+                  ),
+                ),
+              ],
+            );
+          }
+          // Waiting content
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
+    );
   }
 }
 
