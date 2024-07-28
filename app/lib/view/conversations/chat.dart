@@ -332,13 +332,14 @@ class _ConversationsChatState extends State<ConversationsChat>
                           if (statistics != null) ...[
                             IconButton(
                                 onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return StatisticWidget(
-                                            statistics: statistics!,
-                                            otherParticipants: textStyles.keys);
-                                      });
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => StatisticWidget(
+                                          statistics: statistics!,
+                                          otherParticipants: textStyles.keys,
+                                          conversationTitle: widget.title),
+                                    ),
+                                  );
                                 },
                                 icon: const Icon(Icons.people)),
                           ]
@@ -417,103 +418,78 @@ class _ConversationsChatState extends State<ConversationsChat>
 }
 
 class StatisticWidget extends StatelessWidget {
+  final String conversationTitle;
   final ParticipationStatistics statistics;
   final Iterable<String> otherParticipants;
 
   const StatisticWidget(
-      {super.key, required this.statistics, required this.otherParticipants});
+      {super.key, required this.statistics, required this.otherParticipants, required this.conversationTitle});
+
+  Widget statisticsHeaderRow(BuildContext context, Icon icon, String title, int count) {
+    return Column(
+      children: [
+        icon,
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Text(
+          count.toString(),
+          style: Theme.of(context).textTheme.bodyMedium,
+        )
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final Set<String> participants = statistics.knownParticipants.toSet();
     participants.addAll(otherParticipants);
 
-    return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.receivers),
-      content: SizedBox(
-          width: double.maxFinite,
-          child: CustomScrollView(
-            shrinkWrap: true,
-            slivers: [
-              SliverToBoxAdapter(
-                  child: Column(
-                children: [
-                  ListTile(
-                    title: Text(
-                      AppLocalizations.of(context)!.statistic,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    leading: const Icon(Icons.numbers),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          "${statistics.countStudents}",
-                        ),
-                        Text(" ${AppLocalizations.of(context)!.participants}"),
-                      ],
-                    ),
-                    leading: const Icon(Icons.person),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          "${statistics.countTeachers}",
-                        ),
-                        Text(" ${AppLocalizations.of(context)!.supervisors}"),
-                      ],
-                    ),
-                    leading: const Icon(Icons.school),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          "${statistics.countParents}",
-                        ),
-                        Text(" ${AppLocalizations.of(context)!.parents}"),
-                      ],
-                    ),
-                    leading: const Icon(Icons.supervisor_account),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
-              )),
-              SliverToBoxAdapter(
-                child: ListTile(
-                  title: Text(
-                    AppLocalizations.of(context)!.knownReceivers,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  leading: const Icon(Icons.people),
-                  contentPadding: EdgeInsets.zero,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.receivers),
+      ),
+      body: ListView(
+        children: [
+          const SizedBox(height: 30,),
+          Center(
+            child: Column(
+              children: [
+                const Icon(Icons.groups_outlined, size: 60,),
+                Text(
+                  conversationTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              ),
-              SliverList.builder(
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(
-                      participants.elementAt(index),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  );
-                },
-                itemCount: participants.length,
-              )
+              ],
+            )
+          ),
+          const Divider(),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const SizedBox(width: 20,),
+              Expanded(child: statisticsHeaderRow(context, const Icon(Icons.person), AppLocalizations.of(context)!.participants, statistics.countStudents)),
+              Expanded(child: statisticsHeaderRow(context, const Icon(Icons.school), AppLocalizations.of(context)!.supervisors, statistics.countTeachers)),
+              Expanded(child: statisticsHeaderRow(context, const Icon(Icons.supervisor_account), AppLocalizations.of(context)!.parents, statistics.countParents)),
+              const SizedBox(width: 20,),
             ],
-          )),
-      actions: [
-        FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(AppLocalizations.of(context)!.back))
-      ],
+          ),
+          const Divider(),
+          const SizedBox(height: 10,),
+          Center(
+            child: Text(AppLocalizations.of(context)!.knownReceivers, style: Theme.of(context).textTheme.titleMedium),
+          ),
+          const SizedBox(height: 5,),
+          for (final String participant in participants) ...[
+            ListTile(
+              title: Text(participant),
+              leading: const Icon(Icons.person),
+            )
+          ]
+        ],
+      ),
     );
   }
 }
