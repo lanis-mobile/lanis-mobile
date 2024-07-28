@@ -78,41 +78,8 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
     }
   }
 
-  Widget infoCard(context) => ListTile(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 3,
-              child: Text(
-                AppLocalizations.of(context)!.noFurtherEntries,
-                style: const TextStyle(fontSize: 21),
-              ),
-            ),
-          ],
-        ),
-      );
 
-  Widget infoCardInvisibility(context) => ListTile(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 3,
-              child: Text(
-                AppLocalizations.of(context)!.note,
-                style: const TextStyle(fontSize: 21),
-              ),
-            ),
-          ],
-        ),
-        subtitle: Text(
-          AppLocalizations.of(context)!.notificationsNote,
-          style: const TextStyle(fontSize: 17),
-        ),
-      );
-
-  Widget getConversationWidget(Map<String, dynamic> conversation) {
+  ListTile getConversationWidget(Map<String, dynamic> conversation) {
     return ListTile(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -163,6 +130,24 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
       child: ListView.builder(
         itemCount: conversations.length + 1,
         itemBuilder: (context, index) {
+          if (index == conversations.length) {
+            return ListTile(
+                title: Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.noFurtherEntries,
+                    style: const TextStyle(fontSize: 21),
+                  ),
+                ),
+              subtitle: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.notificationsNote,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ),
+            );
+          }
+
           return Padding(
             padding: EdgeInsets.only(
               left: padding,
@@ -172,27 +157,22 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
             ),
             child: Card(
               child: InkWell(
-                  onTap: () {
-                    if (index == conversations.length) {
-                      showSnackbar("(:");
-                    } else {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ConversationsChat(
-                                    id: conversations[index]
-                                        ["Uniquid"], // nice typo Lanis
-                                    title: conversations[index]["Betreff"],
-                                  )));
-                    }
-                  },
-                  customBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: index == conversations.length
-                      ? _tabController.index == 0
-                          ? infoCard(context)
-                          : infoCardInvisibility(context)
-                      : getConversationWidget(conversations[index])),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ConversationsChat(
+                        id: conversations[index]
+                        ["Uniquid"], // nice typo Lanis
+                        title: conversations[index]["Betreff"],
+                      ),
+                    ),
+                  );
+                },
+                customBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: getConversationWidget(conversations[index]),
+              ),
             ),
           );
         },
@@ -201,114 +181,122 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
   }
 
   void showCreationDialog(ChatType? chatType) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text(AppLocalizations.of(context)!.createNewConversation),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: TextField(
-                          controller: subjectController,
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context)!.subject,
-                          ),
-                        ),
-                      ),
-                      ListenableBuilder(
-                          listenable: rebuildSearch,
-                          builder: (context, widget) {
-                            return FlutterTagging<ReceiverEntry>(
-                              initialItems: receivers,
-                              textFieldConfiguration: TextFieldConfiguration(
-                                decoration: InputDecoration(
-                                  hintText: AppLocalizations.of(context)!
-                                      .addReceiversHint,
-                                  labelText: AppLocalizations.of(context)!
-                                      .addReceivers,
-                                ),
-                              ),
-                              onAdded: (receiverEntry) {
-                                return receiverEntry;
-                              },
-                              configureChip: (tag) {
-                                return ChipConfiguration(
-                                  label: Text(tag.name),
-                                );
-                              },
-                              configureSuggestion: (tag) {
-                                return SuggestionConfiguration(
-                                    title: Text(tag.name));
-                              },
-                              findSuggestions: (query) async {
-                                if (!(await connectionChecker.connected)) {
-                                  return <ReceiverEntry>[];
-                                }
-
-                                query = query.trim();
-                                if (query.isEmpty) return <ReceiverEntry>[];
-
-                                final dynamic result = await client
-                                    .conversations
-                                    .searchTeacher(query);
-                                return result == false
-                                    ? <ReceiverEntry>[]
-                                    : result;
-                              },
-                            );
-                          }),
-                    ],
-                  ),
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.createNewConversation),
+          actions: [
+            IconButton(
+              onPressed: () {
+                subjectController.clear();
+                receivers.clear();
+                rebuildSearch.trigger();
+              },
+              tooltip: AppLocalizations.of(context)!.createResetTooltip,
+              icon: const Icon(Icons.clear_all),
+            ),
+          ],
+        ),
+        body: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(padding),
+              child: TextField(
+                controller: subjectController,
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.subject,
                 ),
               ),
-              actions: [
-                IconButton(
-                    onPressed: () {
-                      subjectController.clear();
-                      receivers.clear();
-                      rebuildSearch.trigger();
-                    },
-                    tooltip: AppLocalizations.of(context)!.createResetTooltip,
-                    icon: const Icon(Icons.format_clear)),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(AppLocalizations.of(context)!.back)),
-                FilledButton(
-                    onPressed: () async {
-                      if (subjectController.text.isEmpty || receivers.isEmpty) {
-                        return;
-                      }
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: padding, right: padding, bottom: padding),
+            child: ListenableBuilder(
+              listenable: rebuildSearch,
+              builder: (context, widget) {
+                return FlutterTagging<ReceiverEntry>(
+                  initialItems: receivers,
+                  textFieldConfiguration: TextFieldConfiguration(
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!
+                          .addReceiversHint,
+                      labelText: AppLocalizations.of(context)!
+                          .addReceivers,
+                    ),
+                  ),
+                  onAdded: (receiverEntry) {
+                    return receiverEntry;
+                  },
+                  configureChip: (tag) {
+                    return ChipConfiguration(
+                      label: Text(tag.name),
+                    );
+                  },
+                  configureSuggestion: (tag) {
+                    return SuggestionConfiguration(
+                      title: Text(tag.name),
+                    );
+                  },
+                  findSuggestions: (query) async {
+                    if (!(await connectionChecker.connected)) {
+                      return <ReceiverEntry>[];
+                    }
 
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ConversationsSend(
-                                  creationData: ChatCreationData(
-                                      type: chatType,
-                                      subject: subjectController.text,
-                                      receivers: receivers
-                                          .map((entry) => entry.id)
-                                          .toList()),
-                                )),
-                      ).then((_) {
+                    query = query.trim();
+                    if (query.isEmpty) return <ReceiverEntry>[];
+
+                    final dynamic result = await client
+                        .conversations
+                        .searchTeacher(query);
+                    return result == false
+                        ? <ReceiverEntry>[]
+                        : result;
+                  },
+                );
+              },
+            ),),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(AppLocalizations.of(context)!.back),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    if (subjectController.text.isEmpty || receivers.isEmpty) {
+                      return;
+                    }
+
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ConversationsSend(
+                            creationData: ChatCreationData(
+                                type: chatType,
+                                subject: subjectController.text,
+                                receivers: receivers
+                                    .map((entry) => entry.id)
+                                    .toList()),
+                          )),
+                    ).then((_) {
                         subjectController.clear();
                         receivers.clear();
-                        visibleConversationsFetcher.fetchData(
-                            forceRefresh: true);
-                      });
-                    },
-                    child: Text(AppLocalizations.of(context)!.create)),
+                        visibleConversationsFetcher.fetchData(forceRefresh: true);
+                      },
+                    );
+                  },
+                  child: Text(AppLocalizations.of(context)!.create),
+                ),
               ],
-            ));
+            ),
+          ],
+        ),
+      ))
+    );
   }
 
   void showTypeChooser() {

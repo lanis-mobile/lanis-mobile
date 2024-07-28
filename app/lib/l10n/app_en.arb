@@ -146,7 +146,7 @@
   "experimental": "Experimental",
   "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Replies won't be possible.} privateAnswerOnly{Replies can only be seen by you.} groupOnly{Replies can be seen by everyone.} openChat{Replies can be seen by everyone or only specific people, but currently in the app you can only write replies to everyone.} other{Error}}",
   "conversationTypeName": "{conversationTypeName, select, noAnswerAllowed{Hint} privateAnswerOnly{Notice} groupOnly{Group Chat} openChat{Open Chat} other{Fehler}}",
-  "createNewConversation": "Create new Conversation",
+  "createNewConversation": "New Conversation",
   "subject": "Subject",
   "select": "Select",
   "addReceivers": "Add receiver",

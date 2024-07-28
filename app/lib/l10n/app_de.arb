@@ -146,7 +146,7 @@
   "experimental": "Experimentell",
   "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Keine Antwort auf diese Konversation wird möglich sein.} privateAnswerOnly{Antworten können nur von dir gesehen werden.} groupOnly{Antworten können von jeden gesehen werden.} openChat{Antworten können von jeden oder nur von bestimmten Personen gesehen werden, jedoch aktuell in der App kann man nur an jeden Nachrichten schreiben.} other{Fehler}}",
   "conversationTypeName": "{conversationTypeName, select, noAnswerAllowed{Hinweis} privateAnswerOnly{Mitteilung} groupOnly{Gruppenchat} openChat{Offener Chat} other{Fehler}}",
-  "createNewConversation": "Neue Konversation erstellen",
+  "createNewConversation": "Neue Konversation",
   "subject": "Betreff",
   "select": "Auswählen",
   "addReceivers": "Empfänger hinzufügen",
