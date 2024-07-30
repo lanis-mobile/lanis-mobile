@@ -166,18 +166,12 @@ class _ConversationsSendState extends State<ConversationsSend> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context, null);
-            },
-            icon: const Icon(Icons.arrow_back),
-          ),
           actions: [
             IconButton(
               onPressed: () {
                 _controller.clear();
               },
-              icon: const Icon(Icons.backspace),
+              icon: const Icon(Icons.delete_forever),
             ),
             IconButton(
               onPressed: () {

@@ -17,6 +17,7 @@ import '../logger.dart';
 class ConversationsParser {
   late Dio dio;
   late SPHclient client;
+  bool? canChooseTypeCached;
 
   ConversationsParser(Dio dioClient, this.client) {
     dio = dioClient;
@@ -273,6 +274,10 @@ class ConversationsParser {
   }
 
   Future<bool> canChooseType() async {
+    if (canChooseTypeCached != null) {
+      return canChooseTypeCached!;
+    }
+
     final html =
         await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
             options: Options(
@@ -286,16 +291,17 @@ class ConversationsParser {
 
     final document = parse(html.data);
 
-    return document.querySelector("#MsgOptions") != null;
+    canChooseTypeCached = document.querySelector("#MsgOptions") != null;
+
+    return canChooseTypeCached!;
   }
 
-  /// Searches for teacher using at least 2 chars.
+  /// Searches for teachers using at least 2 chars.
   ///
-  /// Returns false if no one was found or a error happened.
-  /// On success, returns list of `SearchEntry`.
-  Future<dynamic> searchTeacher(String name) async {
-    if (name.length < 2) {
-      return false;
+  /// Returns an empty list or a list of [ReceiverEntry].
+  Future<List<ReceiverEntry>> searchTeacher(String name) async {
+    if (name.length < 2 || !(await connectionChecker.connected)) {
+      return [];
     }
 
     final response =
@@ -310,18 +316,24 @@ class ConversationsParser {
               },
             ));
 
+    /// total_count (don't need), incomplete_results (?, don't need),
+    /// items => type: (lul, sus for students?, parents?),
+    ///          id: (l-xxxx..., s-xxx.... for students?, parents?),
+    ///          logo: (font awesome icons like: fa fa-user),
+    ///          text: (name)
+    ///       or empty
     final data = json.decode(response.data);
 
     if (data["items"] != null && data["items"].isNotEmpty) {
       final List<ReceiverEntry> teacherEntries = [];
 
       for (final teacher in data["items"]) {
-        teacherEntries.add(ReceiverEntry(teacher["id"]!, teacher["text"]!));
+        teacherEntries.add(ReceiverEntry.fromJson(teacher));
       }
 
       return teacherEntries;
     }
 
-    return false;
+    return [];
   }
 }

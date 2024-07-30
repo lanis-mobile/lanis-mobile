@@ -35,7 +35,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   final ScrollController scrollController = ScrollController();
 
   final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(true);
 
   final Map<String, TextStyle> textStyles = {};
 
@@ -275,6 +275,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                       curve: Curves.easeOut,
                     );
                   },
+                  heroTag: "small",
                   child: const Icon(Icons.keyboard_arrow_down),
                 ),
               );

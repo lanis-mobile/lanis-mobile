@@ -9,6 +9,10 @@ class ReceiverEntry extends Taggable {
 
   @override
   List<Object> get props => [name];
+
+  ReceiverEntry.fromJson(Map<String, dynamic> json)
+    : id = json["id"] as String,
+      name = json["text"] as String;
 }
 
 class ChatCreationData {
