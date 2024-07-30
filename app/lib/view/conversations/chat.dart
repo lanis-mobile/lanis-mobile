@@ -35,7 +35,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   final ScrollController scrollController = ScrollController();
 
   final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(false);
 
   final Map<String, TextStyle> textStyles = {};
 
@@ -50,8 +50,6 @@ class _ConversationsChatState extends State<ConversationsChat>
     appBarController = AnimationController(vsync: this);
     scrollController.addListener(animateAppBarTitle);
     scrollController.addListener(toggleScrollToBottomFab);
-    animateAppBarTitle();
-    toggleScrollToBottomFab();
   }
 
   @override
@@ -62,8 +60,6 @@ class _ConversationsChatState extends State<ConversationsChat>
   }
 
   void toggleScrollToBottomFab() {
-    if (!scrollController.hasClients) return;
-
     final maxScrollExtent = scrollController.position.maxScrollExtent;
     final currentScrollPosition = scrollController.position.pixels;
 
@@ -71,8 +67,6 @@ class _ConversationsChatState extends State<ConversationsChat>
   }
 
   animateAppBarTitle() {
-    if (!scrollController.hasClients) return;
-
     const appBarHeight = 56.0;
 
     if (scrollController.offset >= appBarHeight &&
@@ -321,135 +315,141 @@ class _ConversationsChatState extends State<ConversationsChat>
               }
             }
 
-            return CustomScrollView(
-              controller: scrollController,
-              slivers: [
-                SliverAppBar(
-                  title: Animate(
-                    effects: const [
-                      FadeEffect(
-                        curve: Curves.easeIn,
-                      )
+            return NotificationListener<ScrollMetricsNotification>(
+              onNotification: (_) {
+                toggleScrollToBottomFab();
+                return false;
+              },
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  SliverAppBar(
+                    title: Animate(
+                      effects: const [
+                        FadeEffect(
+                          curve: Curves.easeIn,
+                        )
+                      ],
+                      value: 0,
+                      autoPlay: false,
+                      controller: appBarController,
+                      child: Text(widget.title),
+                    ),
+                    snap: true,
+                    floating: true,
+                    actions: [
+                      if (settings.groupChat == false &&
+                          settings.onlyPrivateAnswers == false &&
+                          settings.noReply == false) ...[
+                        IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  icon: const Icon(Icons.groups),
+                                  title: Text(
+                                      AppLocalizations.of(context)!
+                                          .conversationTypeName(
+                                          ChatType.openChat.name)),
+                                  content: Text(
+                                      AppLocalizations.of(context)!
+                                          .openChatWarning),
+                                  actions: [
+                                    FilledButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Ok"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.warning),
+                        ),
+                      ],
+                      if (statistics != null) ...[
+                        IconButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => StatisticWidget(
+                                    statistics: statistics!,
+                                    otherParticipants: textStyles.keys,
+                                    conversationTitle: widget.title),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.people),
+                        ),
+                      ],
                     ],
-                    value: 0,
-                    autoPlay: false,
-                    controller: appBarController,
-                    child: Text(widget.title),
                   ),
-                  snap: true,
-                  floating: true,
-                  actions: [
-                    if (settings.groupChat == false &&
-                        settings.onlyPrivateAnswers == false &&
-                        settings.noReply == false) ...[
-                      IconButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                icon: const Icon(Icons.groups),
-                                title: Text(
-                                    AppLocalizations.of(context)!
-                                        .conversationTypeName(
-                                        ChatType.openChat.name)),
-                                content: Text(
-                                    AppLocalizations.of(context)!
-                                        .openChatWarning),
-                                actions: [
-                                  FilledButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text("Ok"),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0),
+                                  child: Text(
+                                    widget.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium,
+                                    textAlign: TextAlign.center,
                                   ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        icon: const Icon(Icons.warning),
-                      ),
-                    ],
-                    if (statistics != null) ...[
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => StatisticWidget(
-                                  statistics: statistics!,
-                                  otherParticipants: textStyles.keys,
-                                  conversationTitle: widget.title),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.people),
-                      ),
-                    ],
-                  ],
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0),
-                                child: Text(
-                                  widget.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium,
-                                  textAlign: TextAlign.center,
                                 ),
+                              ),
+                            ],
+                          ),
+                          if (settings.onlyPrivateAnswers && !settings.own) ...[
+                            Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 12.0),
+                              margin: const EdgeInsets.only(top: 16.0),
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHigh),
+                              child: Text(
+                                "${settings.author} ${AppLocalizations.of(context)!.privateConversation}",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ],
-                        ),
-                        if (settings.onlyPrivateAnswers && !settings.own) ...[
-                          Container(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 12.0),
-                            margin: const EdgeInsets.only(top: 16.0),
-                            decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHigh),
-                            child: Text(
-                              "${settings.author} ${AppLocalizations.of(context)!.privateConversation}",
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                SliverList.builder(
-                  itemCount: chat.length,
-                  itemBuilder: (context, index) {
-                    if (chat[index] is Message) {
-                      return MessageWidget(
-                          message: chat[index],
-                          textStyle: textStyles[chat[index].author]);
-                    } else {
-                      return DateHeaderWidget(header: chat[index]);
-                    }
-                  },
-                ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 75,
+                  SliverList.builder(
+                    itemCount: chat.length,
+                    itemBuilder: (context, index) {
+                      if (chat[index] is Message) {
+                        return MessageWidget(
+                            message: chat[index],
+                            textStyle: textStyles[chat[index].author]);
+                      } else {
+                        return DateHeaderWidget(header: chat[index]);
+                      }
+                    },
                   ),
-                ),
-              ],
+                  const SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 75,
+                    ),
+                  ),
+                ],
+              ),
             );
           }
           // Waiting content
