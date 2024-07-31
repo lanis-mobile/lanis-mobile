@@ -264,7 +264,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                     return SuggestionConfiguration(
                         title: Text(entry.name),
                         leading: Icon(entry.isTeacher ? Icons.school : Icons.person),
-                        subtitle: Text(AppLocalizations.of(context)!.teacher),
+                        subtitle: entry.isTeacher ? Text(AppLocalizations.of(context)!.teacher) : null,
                     );
                   },
                   configureChip: (entry) {
