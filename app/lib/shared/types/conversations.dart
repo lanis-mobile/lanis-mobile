@@ -4,15 +4,17 @@ import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 class ReceiverEntry extends Taggable {
   final String id;
   final String name;
+  final bool isTeacher;
 
-  const ReceiverEntry(this.id, this.name);
+  const ReceiverEntry(this.id, this.name, this.isTeacher);
 
   @override
   List<Object> get props => [name];
 
   ReceiverEntry.fromJson(Map<String, dynamic> json)
     : id = json["id"] as String,
-      name = json["text"] as String;
+      name = json["text"] as String,
+      isTeacher = json["type"] == "lul";
 }
 
 class ChatCreationData {

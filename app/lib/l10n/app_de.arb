@@ -79,6 +79,9 @@
   "logout": "App zurücksetzen | Ausloggen",
   "reallyReset": "Wirklich zurücksetzen?",
   "allSettingsWillBeLost": "Alle Einstellungen werden Gelöscht.",
+  "loading": "Lade...",
+  "teacher": "Lehrer",
+  "clearAll": "Alles löschen",
   "cancel": "Abbrechen",
   "actionContinue": "Weiter",
   "back": "Zurück",
@@ -165,6 +168,7 @@
   "supervisors": "Betreuer",
   "parents": "Eltern",
   "knownReceivers": "Bekannte Empfänger",
+  "noPersonFound": "Keine Person gefunden!",
 
   "substitutionsFilter": "Vertretungsplan Filter",
   "developmentMode": "Entwicklungsmodus",

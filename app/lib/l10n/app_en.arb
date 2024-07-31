@@ -79,6 +79,9 @@
   "logout": "Reset application | Logout",
   "reallyReset": "Really reset?",
   "allSettingsWillBeLost": "All settings will be lost!",
+  "loading": "Loading...",
+  "teacher": "Teacher",
+  "clearAll": "Clear all",
   "cancel": "Cancel",
   "actionContinue": "Continue",
   "back": "Back",
@@ -165,6 +168,7 @@
   "supervisors": "Supervisors",
   "parents": "Parents",
   "knownReceivers": "Known receivers",
+  "noPersonFound": "No person found!",
 
   "substitutionsFilter": "Substitutions filter",
   "developmentMode": "Development mode",

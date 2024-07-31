@@ -317,8 +317,8 @@ class ConversationsParser {
             ));
 
     /// total_count (don't need), incomplete_results (?, don't need),
-    /// items => type: (lul, sus for students?, parents?),
-    ///          id: (l-xxxx..., s-xxx.... for students?, parents?),
+    /// items => type: (lul, sus for students?, parents?, groups?),
+    ///          id: (l-xxxx..., s-xxx.... for students?, parents?, groups?),
     ///          logo: (font awesome icons like: fa fa-user),
     ///          text: (name)
     ///       or empty
