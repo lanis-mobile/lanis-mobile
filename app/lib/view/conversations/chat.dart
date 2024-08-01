@@ -377,7 +377,6 @@ class _ConversationsChatState extends State<ConversationsChat>
                               MaterialPageRoute(
                                 builder: (context) => StatisticWidget(
                                     statistics: statistics!,
-                                    otherParticipants: textStyles.keys,
                                     conversationTitle: widget.title),
                               ),
                             );
@@ -465,10 +464,9 @@ class _ConversationsChatState extends State<ConversationsChat>
 class StatisticWidget extends StatelessWidget {
   final String conversationTitle;
   final ParticipationStatistics statistics;
-  final Iterable<String> otherParticipants;
 
   const StatisticWidget(
-      {super.key, required this.statistics, required this.otherParticipants, required this.conversationTitle});
+      {super.key, required this.statistics, required this.conversationTitle});
 
   Widget statisticsHeaderRow(BuildContext context, Icon icon, String title, int count) {
     return Column(
@@ -488,9 +486,6 @@ class StatisticWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Set<String> participants = statistics.knownParticipants.toSet();
-    participants.addAll(otherParticipants);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.receivers),
@@ -498,39 +493,48 @@ class StatisticWidget extends StatelessWidget {
       body: ListView(
         children: [
           const SizedBox(height: 30,),
-          Center(
-            child: Column(
-              children: [
-                const Icon(Icons.groups_outlined, size: 60,),
-                Text(
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(Icons.groups_outlined, size: 60,),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Text(
                   conversationTitle,
                   style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
                 ),
-              ],
-            )
-          ),
-          const Divider(),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              const SizedBox(width: 20,),
-              Expanded(child: statisticsHeaderRow(context, const Icon(Icons.person), AppLocalizations.of(context)!.participants, statistics.countStudents)),
-              Expanded(child: statisticsHeaderRow(context, const Icon(Icons.school), AppLocalizations.of(context)!.supervisors, statistics.countTeachers)),
-              Expanded(child: statisticsHeaderRow(context, const Icon(Icons.supervisor_account), AppLocalizations.of(context)!.parents, statistics.countParents)),
-              const SizedBox(width: 20,),
+              ),
             ],
           ),
-          const Divider(),
-          const SizedBox(height: 10,),
-          Center(
-            child: Text(AppLocalizations.of(context)!.knownReceivers, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 30,),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.person), AppLocalizations.of(context)!.participants, statistics.countStudents)),
+                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.school), AppLocalizations.of(context)!.supervisors, statistics.countTeachers)),
+                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.supervisor_account), AppLocalizations.of(context)!.parents, statistics.countParents)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 15,),
+          Text(
+              AppLocalizations.of(context)!.knownReceivers,
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
           ),
           const SizedBox(height: 5,),
-          for (final String participant in participants) ...[
+          for (final KnownParticipant participant in statistics.knownParticipants) ...[
             ListTile(
-              title: Text(participant),
-              leading: const Icon(Icons.person),
+              title: Text(participant.name),
+              leading: Icon(participant.type.icon),
             )
           ]
         ],

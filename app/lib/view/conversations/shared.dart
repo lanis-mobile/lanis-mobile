@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:color_hash/color_hash.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
+import 'package:sph_plan/shared/types/conversations.dart';
 import 'package:sph_plan/shared/widgets/format_text.dart';
 
 class ConversationSettings {
@@ -26,7 +27,7 @@ class ParticipationStatistics {
   final int countStudents;
   final int countTeachers;
   final int countParents;
-  final List<String> knownParticipants;
+  final List<KnownParticipant> knownParticipants;
 
   const ParticipationStatistics(
       {required this.countParents,

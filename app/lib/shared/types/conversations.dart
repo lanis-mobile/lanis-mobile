@@ -14,7 +14,7 @@ class ReceiverEntry extends Taggable {
   ReceiverEntry.fromJson(Map<String, dynamic> json)
     : id = json["id"] as String,
       name = json["text"] as String,
-      isTeacher = json["type"] == "lul";
+      isTeacher = json["type"] == "lul"; // TODO: Use PersonType in future when I have more info
 }
 
 class ChatCreationData {
@@ -44,6 +44,27 @@ enum ChatType {
   const ChatType(this.icon);
 }
 
+enum PersonType {
+  teacher(Icons.school),
+  parent(Icons.supervisor_account),
+  group(Icons.group),
+  other(Icons.person); // Unknown or student
+
+  final IconData icon;
+
+  const PersonType(this.icon);
+
+  static PersonType fromJson(String type) {
+    if (type == "Betreuer") {
+      return PersonType.teacher;
+    } else if (type == "Eltern") {
+      return PersonType.parent;
+    }
+
+    return PersonType.other;
+  }
+}
+
 class Conversation {
   final bool groupChat;
   final bool onlyPrivateAnswers;
@@ -54,7 +75,7 @@ class Conversation {
   final int countTeachers;
   final int countParents;
 
-  final List<String> knownParticipants;
+  final List<KnownParticipant> knownParticipants;
 
   final UnparsedMessage parent;
   final List<UnparsedMessage> replies;
@@ -82,4 +103,23 @@ class UnparsedMessage {
       required this.author,
       required this.own,
       required this.content});
+}
+
+class KnownParticipant {
+  final String name;
+  final PersonType type;
+
+  const KnownParticipant({
+    required this.name,
+    required this.type
+  });
+
+  // lazy way to make Set<> work.
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is KnownParticipant && other.hashCode == hashCode;
+  }
 }

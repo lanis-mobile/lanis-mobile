@@ -107,16 +107,16 @@ class ConversationsParser {
         throw UnsaltedOrUnknownException();
       }
 
-      final Map<String, dynamic> decoded = jsonDecode(decryptedConversations);
+      final Map<String, dynamic> conversation = jsonDecode(decryptedConversations);
 
       final UnparsedMessage parent = UnparsedMessage(
-          date: decoded["Datum"],
-          author: decoded["username"],
-          own: decoded["own"],
-          content: decoded["Inhalt"]);
+          date: conversation["Datum"],
+          author: conversation["username"],
+          own: conversation["own"],
+          content: conversation["Inhalt"]);
 
       final List<UnparsedMessage> replies = [];
-      for (dynamic reply in decoded["reply"]) {
+      for (dynamic reply in conversation["reply"]) {
         replies.add(UnparsedMessage(
             date: reply["Datum"],
             author: reply["username"],
@@ -124,42 +124,57 @@ class ConversationsParser {
             content: reply["Inhalt"]));
       }
 
-      int countStudents = decoded["statistik"]["teilnehmer"];
-      int countTeachers = decoded["statistik"]["betreuer"];
-      int countParents = decoded["statistik"]["eltern"];
-      if (decoded["SenderArt"] == "Teilnehmer") {
+      int countStudents = conversation["statistik"]["teilnehmer"];
+      int countTeachers = conversation["statistik"]["betreuer"];
+      int countParents = conversation["statistik"]["eltern"];
+      if (conversation["SenderArt"] == "Teilnehmer") {
         countStudents++;
-      } else if (decoded["SenderArt"] == "Betreuer") {
+      } else if (conversation["SenderArt"] == "Betreuer") {
         countTeachers++;
       } else {
         countParents++;
       }
 
-      final List<String> knownParticipants = [decoded["username"]];
-      if (decoded["empf"] is List) {
-        for (String receiver in decoded["empf"]) {
-          knownParticipants
-              .add(parse(receiver).querySelector("span")!.text.substring(1));
+      final Set<KnownParticipant> knownParticipants = {
+        KnownParticipant(
+            name: conversation["username"],
+            type: PersonType.fromJson(conversation["SenderArt"])
+        )
+      };
+
+      for (Map reply in conversation["reply"]) {
+        knownParticipants.add(
+          KnownParticipant(
+              name: reply["username"],
+              type: PersonType.fromJson(reply["SenderArt"])
+          )
+        );
+      }
+
+      if (conversation["empf"] is List) {
+        for (String receiver in conversation["empf"]) {
+          final String name = parse(receiver).querySelector("span")!.text.substring(1);
+          knownParticipants.add(KnownParticipant(name: name, type: PersonType.other));
         }
       }
 
-      if (decoded["WeitereEmpfaenger"] != "") {
+      if (conversation["WeitereEmpfaenger"] != "") {
         final others =
-            parse(decoded["WeitereEmpfaenger"]).querySelectorAll("span");
+            parse(conversation["WeitereEmpfaenger"]).querySelectorAll("span");
         for (final other in others) {
-          knownParticipants.add(other.text.trim());
+          knownParticipants.add(KnownParticipant(name: other.text.trim(), type: PersonType.group));
         }
       }
 
       return Conversation(
-          groupChat: decoded["groupOnly"] == "ja",
-          onlyPrivateAnswers: decoded["privateAnswerOnly"] == "ja",
-          noReply: decoded["noAnswerAllowed"] == "ja",
+          groupChat: conversation["groupOnly"] == "ja",
+          onlyPrivateAnswers: conversation["privateAnswerOnly"] == "ja",
+          noReply: conversation["noAnswerAllowed"] == "ja",
           parent: parent,
           countStudents: countStudents,
           countTeachers: countTeachers,
           countParents: countParents,
-          knownParticipants: knownParticipants,
+          knownParticipants: knownParticipants.toList(),
           replies: replies);
     } on (SocketException, DioException) {
       throw NetworkException();
