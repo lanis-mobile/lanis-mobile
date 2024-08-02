@@ -192,9 +192,9 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                 builder: (context, snapshot) {
                   if (snapshot.data?.status == FetcherStatus.error) {
                     return ErrorView(
-                        error: snapshot.data?.content,
+                        error: snapshot.data!.error!,
                         name: AppLocalizations.of(context)!.messages,
-                        fetcher: visibleConversationsFetcher);
+                        retry: retryFetcher(visibleConversationsFetcher));
                   } else if (snapshot.data?.status == FetcherStatus.fetching ||
                       snapshot.data == null) {
                     return const Center(child: CircularProgressIndicator());
@@ -207,10 +207,10 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                 stream: invisibleConversationsFetcher.stream,
                 builder: (context, snapshot) {
                   if (snapshot.data?.status == FetcherStatus.error) {
-                    return ErrorView.fromCode(
-                        data: snapshot.data?.content,
+                    return ErrorView(
+                        error: snapshot.data!.error!,
                         name: AppLocalizations.of(context)!.messages,
-                        fetcher: invisibleConversationsFetcher);
+                        retry: retryFetcher(invisibleConversationsFetcher),);
                   } else if (snapshot.data?.status == FetcherStatus.fetching ||
                       snapshot.data == null) {
                     return const Center(child: CircularProgressIndicator());
@@ -221,29 +221,20 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
                 })
           ],
         ),
-        floatingActionButton: FutureBuilder(
-          future: client.conversations.canChooseType(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return FloatingActionButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) {
-                        if (snapshot.data!) {
-                          return const TypeChooser();
-                        }
-                        return const CreateConversation(chatType: null);
-                      })
-                  );
-                },
-                child: const Icon(Icons.edit),
-              );
-            }
-            return const FloatingActionButton(
-              onPressed: null,
-              child: Icon(Icons.edit),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final bool canChooseType = await client.conversations.canChooseType();
+
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) {
+                  if (canChooseType) {
+                    return const TypeChooser();
+                  }
+                  return const CreateConversation(chatType: null);
+                })
             );
           },
+          child: const Icon(Icons.edit),
         ));
   }
 }
@@ -445,7 +436,7 @@ class _CreateConversationState extends State<CreateConversation> {
                     if (connectionChecker.status == ConnectionStatus.disconnected) {
                       return ListTile(
                         leading: const Icon(Icons.wifi_off),
-                        title: Text(AppLocalizations.of(context)!.offline),
+                        title: Text(AppLocalizations.of(context)!.noInternetConnection2),
                       );
                     }
 

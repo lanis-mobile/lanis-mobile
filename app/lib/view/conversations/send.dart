@@ -97,7 +97,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
           builder: (context) {
             return AlertDialog(
               icon: const Icon(Icons.wifi_off),
-              title: Text(AppLocalizations.of(context)!.offline),
+              title: Text(AppLocalizations.of(context)!.noInternetConnection2),
               actions: [
                 FilledButton(
                     onPressed: () async {

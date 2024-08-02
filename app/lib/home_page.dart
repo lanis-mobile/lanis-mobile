@@ -350,7 +350,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               Text(
                                 AppLocalizations.of(context)!
-                                    .noInternetConnection,
+                                    .noInternetConnection1,
                                 style: Theme.of(context).textTheme.labelLarge,
                               ),
                             ],

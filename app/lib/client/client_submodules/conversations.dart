@@ -178,6 +178,10 @@ class ConversationsParser {
           replies: replies);
     } on (SocketException, DioException) {
       throw NetworkException();
+    } on LanisException {
+      rethrow;
+    } catch (e) {
+      throw UnknownException();
     }
   }
 
@@ -194,36 +198,44 @@ class ConversationsParser {
   /// If successful, it returns `true`.
   Future<bool> replyToConversation(String headId, String sender,
       String groupOnly, String privateAnswerOnly, String message) async {
-    final Map replyData = {
-      "to": sender,
-      "groupOnly": groupOnly,
-      "privateAnswerOnly": privateAnswerOnly,
-      "message": message,
-      "replyToMsg": headId,
-    };
+    try {
+      final Map replyData = {
+        "to": sender,
+        "groupOnly": groupOnly,
+        "privateAnswerOnly": privateAnswerOnly,
+        "message": message,
+        "replyToMsg": headId,
+      };
 
-    String encrypted = client.cryptor.encryptString(json.encode(replyData));
+      String encrypted = client.cryptor.encryptString(json.encode(replyData));
 
-    final response =
-        await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-            data: {
-              "a": "reply",
-              "c": encrypted,
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          data: {
+            "a": "reply",
+            "c": encrypted,
+          },
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
             },
-            options: Options(
-              headers: {
-                "Accept": "*/*",
-                "Content-Type":
-                    "application/x-www-form-urlencoded; charset=UTF-8",
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "cors",
-                "Sec-Fetch-Site": "same-origin",
-                "X-Requested-With": "XMLHttpRequest",
-              },
-            ));
+          ));
 
-    return json
-        .decode(response.data)["back"]; // "back" should be bool, id is Uniquid
+      return json
+          .decode(response.data)["back"]; // "back" should be bool, id is Uniquid
+    } on (SocketException, DioException) {
+      throw NetworkException();
+    } on LanisException {
+      rethrow;
+    } catch (e) {
+      throw UnknownException();
+    }
   }
 
   /// Creates a new conversation.
@@ -248,67 +260,81 @@ class ConversationsParser {
   ///  If successful, it returns true.
   Future<CreationResponse> createConversation(
       List<String> receivers, String? type, String subject, String text) async {
-    final List<Map<String, String>> createData = [
-      {"name": "subject", "value": subject},
-      {"name": "text", "value": text},
-    ];
+    try {
+      final List<Map<String, String>> createData = [
+        {"name": "subject", "value": subject},
+        {"name": "text", "value": text},
+      ];
 
-    if (type != null) {
-      createData.add({"name": "Art", "value": type});
-    }
+      if (type != null) {
+        createData.add({"name": "Art", "value": type});
+      }
 
-    for (final String receiver in receivers) {
-      createData.add({"name": "to[]", "value": receiver});
-    }
+      for (final String receiver in receivers) {
+        createData.add({"name": "to[]", "value": receiver});
+      }
 
-    String encrypted = client.cryptor.encryptString(json.encode(createData));
+      String encrypted = client.cryptor.encryptString(json.encode(createData));
 
-    final response =
-        await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
-            data: {
-              "a": "newmessage",
-              "c": encrypted,
+      final response =
+      await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+          data: {
+            "a": "newmessage",
+            "c": encrypted,
+          },
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
             },
-            options: Options(
-              headers: {
-                "Accept": "*/*",
-                "Content-Type":
-                    "application/x-www-form-urlencoded; charset=UTF-8",
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "cors",
-                "Sec-Fetch-Site": "same-origin",
-                "X-Requested-With": "XMLHttpRequest",
-              },
-            ));
+          ));
 
-    final Map decoded = json.decode(response.data);
+      final Map decoded = json.decode(response.data);
 
-    return CreationResponse(
-        success: decoded["back"],
-        id: decoded["id"]); // "back" should be bool, id is Uniquid
+      return CreationResponse(
+          success: decoded["back"],
+          id: decoded["id"]); // "back" should be bool, id is Uniquid
+    } on (SocketException, DioException) {
+      throw NetworkException();
+    } on LanisException {
+      rethrow;
+    } catch (e) {
+      throw UnknownException();
+    }
   }
 
   Future<bool> canChooseType() async {
-    if (canChooseTypeCached != null) {
+    try {
+      if (canChooseTypeCached != null) {
+        return canChooseTypeCached!;
+      }
+
+      final html =
+      await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none",
+            },
+          ));
+
+      final document = parse(html.data);
+
+      canChooseTypeCached = document.querySelector("#MsgOptions") != null;
+
       return canChooseTypeCached!;
+    } on (SocketException, DioException) {
+      throw NetworkException();
+    } catch (e) {
+      throw UnknownException();
     }
-
-    final html =
-        await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
-            options: Options(
-              headers: {
-                "Accept": "*/*",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-              },
-            ));
-
-    final document = parse(html.data);
-
-    canChooseTypeCached = document.querySelector("#MsgOptions") != null;
-
-    return canChooseTypeCached!;
   }
 
   /// Searches for teachers using at least 2 chars.
@@ -319,36 +345,42 @@ class ConversationsParser {
       return [];
     }
 
-    final response =
-        await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
-            queryParameters: {"a": "searchRecipt", "q": name},
-            options: Options(
-              headers: {
-                "Accept": "*/*",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-              },
-            ));
+    try {
+      final response =
+      await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+          queryParameters: {"a": "searchRecipt", "q": name},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none",
+            },
+          ));
 
-    /// total_count (don't need), incomplete_results (?, don't need),
-    /// items => type: (lul, sus for students?, parents?, groups?),
-    ///          id: (l-xxxx..., s-xxx.... for students?, parents?, groups?),
-    ///          logo: (font awesome icons like: fa fa-user),
-    ///          text: (name)
-    ///       or empty
-    final data = json.decode(response.data);
+      /// total_count (don't need), incomplete_results (?, don't need),
+      /// items => type: (lul, sus for students?, parents?, groups?),
+      ///          id: (l-xxxx..., s-xxx.... for students?, parents?, groups?),
+      ///          logo: (font awesome icons like: fa fa-user),
+      ///          text: (name)
+      ///       or empty
+      final data = json.decode(response.data);
 
-    if (data["items"] != null && data["items"].isNotEmpty) {
-      final List<ReceiverEntry> teacherEntries = [];
+      if (data["items"] != null && data["items"].isNotEmpty) {
+        final List<ReceiverEntry> teacherEntries = [];
 
-      for (final teacher in data["items"]) {
-        teacherEntries.add(ReceiverEntry.fromJson(teacher));
+        for (final teacher in data["items"]) {
+          teacherEntries.add(ReceiverEntry.fromJson(teacher));
+        }
+
+        return teacherEntries;
       }
 
-      return teacherEntries;
+      return [];
+    } on (SocketException, DioException) {
+      throw NetworkException();
+    } catch (e) {
+      throw UnknownException();
     }
-
-    return [];
   }
 }

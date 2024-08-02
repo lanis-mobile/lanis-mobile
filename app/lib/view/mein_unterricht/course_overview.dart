@@ -621,7 +621,6 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
           body: ErrorView.fromCode(
             data: data,
             name: "einen Kurs",
-            fetcher: null,
           ));
     }
 

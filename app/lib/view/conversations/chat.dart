@@ -310,7 +310,16 @@ class _ConversationsChatState extends State<ConversationsChat>
                 return ErrorView(
                   error: snapshot.error as LanisException,
                   name: AppLocalizations.of(context)!.singleMessages,
-                  fetcher: null,
+                  showAppBar: true,
+                  retry: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => ConversationsChat(
+                          title: widget.title,
+                          id: widget.id,
+                          newSettings: widget.newSettings,
+                      ))
+                    );
+                  },
                 );
               }
             }

@@ -23,8 +23,10 @@
   "appInformation": "App information",
 
   "noSupportOpenInBrowser": "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
-  "noInternetConnection": "No internet connection. Some data is still available.",
+  "noInternetConnection1": "No internet connection. Some data is still available.",
+  "noInternetConnection2": "No internet connection!",
 
+  "reportError": "A problem occurred. Please report it in case of repeated occurrence.",
   "errorOccurred": "An error occurred",
   "supported": "supported",
   "unsupported": "unsupported",
@@ -129,7 +131,6 @@
   "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report. If the app detects an error internally, this is also automatically sent anonymously to the developers in order to create an application that is as robust as possible.",
   "introHaveFun": "Login now to use lanis-mobile. Use the login credentials that you normally use for the school portal website.",
 
-  "startupNoConnection": "No internet connection!",
   "startupError": "Critical error!",
   "startupErrorMessage": "A critical error occurred during the login! You can retry it or report the bold error message.",
   "startupRetryButton": "Retry",
