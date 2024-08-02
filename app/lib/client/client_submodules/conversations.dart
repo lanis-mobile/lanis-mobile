@@ -309,6 +309,10 @@ class ConversationsParser {
   }
 
   Future<bool> canChooseType() async {
+    if (!(await connectionChecker.connected)) {
+      throw NoConnectionException();
+    }
+
     try {
       if (canChooseTypeCached != null) {
         return canChooseTypeCached!;

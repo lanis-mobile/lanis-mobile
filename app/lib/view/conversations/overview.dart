@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
+import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/types/conversations.dart';
 import 'package:sph_plan/view/conversations/send.dart';
 
@@ -223,7 +224,12 @@ class _ConversationsOverviewState extends State<ConversationsOverview>
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final bool canChooseType = await client.conversations.canChooseType();
+            bool canChooseType;
+            try {
+              canChooseType = await client.conversations.canChooseType();
+            } on NoConnectionException {
+              return;
+            }
 
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) {
