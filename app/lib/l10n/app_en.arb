@@ -147,7 +147,7 @@
 
   "conversationType": "Conversation Type",
   "experimental": "Experimental",
-  "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Replies won't be possible.} privateAnswerOnly{Replies can only be seen by you.} groupOnly{Replies can be seen by everyone.} openChat{Replies can be seen by everyone or only specific people, but currently in the app you can only write replies to everyone.} other{Error}}",
+  "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Replies won't be possible.} privateAnswerOnly{Replies can only be seen by you.} groupOnly{Replies can be seen by everyone.} openChat{Replies can be seen by everyone or only specific people. The latter is currently not possible in the app.} other{Error}}",
   "conversationTypeName": "{conversationTypeName, select, noAnswerAllowed{Hint} privateAnswerOnly{Notice} groupOnly{Group Chat} openChat{Open Chat} other{Fehler}}",
   "createNewConversation": "New Conversation",
   "subject": "Subject",
@@ -157,7 +157,7 @@
   "createResetTooltip": "Reset subject and receivers",
   "sendMessagePlaceholder": "Write your message here...",
   "newMessage": "New message",
-  "openChatWarning": "Currently in the app you can only write messages to everyone. Normally you also could write to specific people.",
+  "openChatWarning": "Currently in the app you can only write messages to everyone. Normally you also could write to specific people if you have the required permissions.",
   "privateConversation": "can only see your message!",
   "copiedMessage": "Message was copied!",
   "errorSendingMessage": "Error occurred during sending the message!",

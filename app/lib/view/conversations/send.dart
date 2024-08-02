@@ -97,7 +97,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
           builder: (context) {
             return AlertDialog(
               icon: const Icon(Icons.wifi_off),
-              title: Text(AppLocalizations.of(context)!.noInternetConnection),
+              title: Text(AppLocalizations.of(context)!.offline),
               actions: [
                 FilledButton(
                     onPressed: () async {
@@ -127,7 +127,12 @@ class _ConversationsSendState extends State<ConversationsSend> {
             text);
 
     if (response.success) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
+      client.fetchers.invisibleConversationsFetcher.fetchData(forceRefresh: true);
+
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => ConversationsChat(
               title: widget.creationData!.subject,
               id: response.id!,
