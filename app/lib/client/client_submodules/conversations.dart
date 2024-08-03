@@ -309,15 +309,15 @@ class ConversationsParser {
   }
 
   Future<bool> canChooseType() async {
+    if (canChooseTypeCached != null) {
+      return canChooseTypeCached!;
+    }
+
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
 
     try {
-      if (canChooseTypeCached != null) {
-        return canChooseTypeCached!;
-      }
-
       final html =
       await dio.get("https://start.schulportal.hessen.de/nachrichten.php",
           options: Options(
