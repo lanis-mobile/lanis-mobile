@@ -12,7 +12,11 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 
 <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
 
+<a href='https://apps.apple.com/de/app/lanis-mobile/id6511247743?l=en-GB'>
+  <img alt='Jetzt im App Store' src='https://alessioc42.github.io/lanis-mobile/assets/ios-badge.svg' style='height: 61px'/>
+</a>
 
+<p></p>
 <details>
   <summary>Screenshots</summary>
 <div style="text-align: center;">
@@ -44,12 +48,6 @@ Wir sind offen für neue Colaborator. Aber auch wenn du nicht coden kannst, bist
 - [x] Offline views
 
 Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
-
-
-## IOS/IpadOS support
-Die App ist zwar noch nicht im App Store, es kann jedoch eine .IPA Datei unter "releases" heruntergeladen und installiert werden. Dabei finden keine automatischen Updates statt.
-
-iOS wurde bisher ausschließlich durch die Immanuel Kant Schule (5181) getestet.
 
 ## Mitarbeit
 [Schulkonfiguration der Vertretungspläne](https://github.com/alessioC42/lanis-mobile-autoconfig)

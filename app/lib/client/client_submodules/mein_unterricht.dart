@@ -7,6 +7,7 @@ import 'package:sph_plan/client/client.dart';
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/upload.dart';
+import '../logger.dart';
 
 class MeinUnterrichtParser {
   late Dio dio;
@@ -29,113 +30,107 @@ class MeinUnterrichtParser {
     var document = parse(encryptedHTML);
 
     //Aktuelle Einträge
-    () {
-      var schoolClasses = document.querySelectorAll("tr.printable");
-      for (var schoolClass in schoolClasses) {
-        var teacher = schoolClass.querySelector(".teacher");
+    var schoolClasses = document.querySelectorAll("tr.printable");
+    for (var schoolClass in schoolClasses) {
+      var teacher = schoolClass.querySelector(".teacher");
 
-        if (schoolClass.querySelector(".datum") != null) {
-          result["aktuell"]?.add({
-            "name": schoolClass.querySelector(".name")?.text.trim(),
-            "teacher": {
-              "short": teacher
-                  ?.getElementsByClassName(
-                      "btn btn-primary dropdown-toggle btn-xs")[0]
-                  .text
-                  .trim(),
-              "name":
-                  teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
-            },
-            "thema": {
-              "title": schoolClass.querySelector(".thema")?.text.trim(),
-              "date": schoolClass.querySelector(".datum")?.text.trim()
-            },
-            "data": {
-              "entry": schoolClass.attributes["data-entry"],
-              "book": schoolClass.attributes["data-entry"]
-            },
-            "_courseURL":
-                schoolClass.querySelector("td>h3>a")?.attributes["href"]
-          });
-        }
-
-        //sort by date
-        result["aktuell"]?.sort((a, b) {
-          var aDate = a["thema"]["date"];
-          var bDate = b["thema"]["date"];
-
-          var aDateTime = DateTime(int.parse(aDate.split(".")[2]),
-              int.parse(aDate.split(".")[1]), int.parse(aDate.split(".")[0]));
-          var bDateTime = DateTime(int.parse(bDate.split(".")[2]),
-              int.parse(bDate.split(".")[1]), int.parse(bDate.split(".")[0]));
-
-          return bDateTime.compareTo(aDateTime);
+      if (schoolClass.querySelector(".datum") != null) {
+        result["aktuell"]?.add({
+          "name": schoolClass.querySelector(".name")?.text.trim(),
+          "teacher": {
+            "short": teacher
+                ?.getElementsByClassName(
+                    "btn btn-primary dropdown-toggle btn-xs")[0]
+                .text
+                .trim(),
+            "name":
+                teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
+          },
+          "thema": {
+            "title": schoolClass.querySelector(".thema")?.text.trim(),
+            "date": schoolClass.querySelector(".datum")?.text.trim()
+          },
+          "data": {
+            "entry": schoolClass.attributes["data-entry"],
+            "book": schoolClass.attributes["data-entry"]
+          },
+          "_courseURL":
+              schoolClass.querySelector("td>h3>a")?.attributes["href"]
         });
       }
-    }();
+
+      //sort by date
+      result["aktuell"]?.sort((a, b) {
+        var aDate = a["thema"]["date"];
+        var bDate = b["thema"]["date"];
+
+        var aDateTime = DateTime(int.parse(aDate.split(".")[2]),
+            int.parse(aDate.split(".")[1]), int.parse(aDate.split(".")[0]));
+        var bDateTime = DateTime(int.parse(bDate.split(".")[2]),
+            int.parse(bDate.split(".")[1]), int.parse(bDate.split(".")[0]));
+
+        return bDateTime.compareTo(aDateTime);
+      });
+    }
 
     //Anwesenheiten
     var anwesendDOM = document.getElementById("anwesend");
-    () {
-      var thead = anwesendDOM?.querySelector("thead>tr");
-      var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
+    var thead = anwesendDOM?.querySelector("thead>tr");
+    var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
-      var keys = [];
-      thead?.children.forEach((element) => keys.add(element.text.trim()));
+    var keys = [];
+    thead?.children.forEach((element) => keys.add(element.text.trim()));
 
-      tbody?.forEach((elem) {
-        var textElements = [];
-        for (var i = 0; i < elem.children.length; i++) {
-          var element = elem.children[i];
-          element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+    tbody?.forEach((elem) {
+      var textElements = [];
+      for (var i = 0; i < elem.children.length; i++) {
+        var element = elem.children[i];
+        element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
 
-          if (keys[i] != "Kurs") {
-            textElements.add(element.text.trim());
-          } else {
-            textElements.add(element.text.trim());
-          }
+        if (keys[i] != "Kurs") {
+          textElements.add(element.text.trim());
+        } else {
+          textElements.add(element.text.trim());
         }
+      }
 
-        var rowEntry = {};
+      var rowEntry = {};
 
-        for (int i = 0; i < keys.length; i++) {
-          var key = keys[i];
-          var value = textElements[i];
+      for (int i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var value = textElements[i];
 
-          rowEntry[key] = value;
-        }
+        rowEntry[key] = value;
+      }
 
-        //get url of course
-        var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
-        rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
+      //get url of course
+      var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
+      rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
 
-        result["anwesenheiten"]?.add(rowEntry);
-      });
-    }();
+      result["anwesenheiten"]?.add(rowEntry);
+    });
 
     //Kursmappen
     var kursmappenDOM = document.getElementById("mappen");
-    () {
-      var parsedMappen = [];
+    var parsedMappen = [];
 
-      var mappen = kursmappenDOM?.getElementsByClassName("row")[0].children;
-
-      if (mappen != null) {
-        for (var mappe in mappen) {
-          parsedMappen.add({
-            "title": mappe.getElementsByTagName("h2")[0].text.trim(),
-            "teacher": mappe
-                .querySelector("div.btn-group>button")
-                ?.attributes["title"],
-            "_courseURL":
-                mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
-          });
-        }
-        result["kursmappen"] = parsedMappen;
-      } else {
-        result["kursmappen"] = [];
+    final row = kursmappenDOM?.getElementsByClassName("row");
+    var mappen = row!.isEmpty ? null : row[0].children;
+    if (mappen != null) {
+      for (var mappe in mappen) {
+        parsedMappen.add({
+          "title": mappe.getElementsByTagName("h2")[0].text.trim(),
+          "teacher": mappe
+              .querySelector("div.btn-group>button")
+              ?.attributes["title"],
+          "_courseURL":
+              mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
+        });
       }
-    }();
+      result["kursmappen"] = parsedMappen;
+    } else {
+      result["kursmappen"] = [];
+    }
 
     return result;
   }
