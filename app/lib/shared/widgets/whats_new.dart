@@ -8,26 +8,28 @@ import '../../client/logger.dart';
 import '../../client/storage.dart';
 
 Future<String?> whatsNew() async {
-  final String currentVersion = await PackageInfo.fromPlatform()
-      .then((PackageInfo packageInfo) => packageInfo.version);
+  final packageInfo = await PackageInfo.fromPlatform();
+  
+  final String currentVersion = packageInfo.version;
+  final String buildNumber = packageInfo.buildNumber;
+
   final String storedVersion =
       await globalStorage.read(key: StorageKey.lastAppVersion);
   if (currentVersion != storedVersion) {
-    logger.i("New Version detected: $currentVersion");
     await globalStorage.write(
         key: StorageKey.lastAppVersion, value: currentVersion);
 
-    String releaseNotes = await getReleaseMarkDown();
+    String releaseNotes = await getReleaseMarkDown("v$currentVersion+$buildNumber");
     return releaseNotes;
   } else {
     return null;
   }
 }
 
-Future<String> getReleaseMarkDown() async {
+Future<String> getReleaseMarkDown(String gitHubReleaseTag) async {
   try {
     final response = await client.dio.get(
-        'https://api.github.com/repos/alessioc42/lanis-mobile/releases/latest');
+        'https://api.github.com/repos/alessioc42/lanis-mobile/releases/tags/$gitHubReleaseTag');
     return (response.data['body']);
   } catch (e) {
     return "Fehler, beim Laden der Update Details.";
