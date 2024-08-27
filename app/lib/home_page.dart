@@ -13,6 +13,7 @@ import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/conversations/overview.dart';
 import 'package:sph_plan/view/data_storage/data_storage.dart';
 import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
+import 'package:sph_plan/view/moodle.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/timetable/stream.dart';
 import 'package:sph_plan/view/substitutions/stream.dart';
@@ -110,6 +111,18 @@ class _HomePageState extends State<HomePage> {
                   builder: (context) => const DataStorageAnsicht()),
             )),
     Destination(
+        label: (context) => AppLocalizations.of(context)!.openMoodle,
+        icon: const Icon(Icons.open_in_new),
+        selectedIcon: const Icon(Icons.open_in_new),
+        isSupported: true,
+        enableBottomNavigation: false,
+        enableDrawer: true,
+        action: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Moodle())
+        )),
+    Destination(
         label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
@@ -121,15 +134,6 @@ class _HomePageState extends State<HomePage> {
             launchUrl(Uri.parse(response));
           });
         }),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.openMoodleLogin,
-        icon: const Icon(Icons.open_in_new),
-        selectedIcon: const Icon(Icons.open_in_new),
-        isSupported: true,
-        enableBottomNavigation: false,
-        enableDrawer: true,
-        action: (context) => launchUrl(
-            Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"))),
     Destination(
         label: (context) => AppLocalizations.of(context)!.settings,
         icon: const Icon(Icons.settings),
