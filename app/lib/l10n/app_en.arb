@@ -1,4 +1,4 @@
-{
+
   "locale": "en_US",
   "language": "Language",
   "welcomeBack": "Welcome Back",
@@ -144,7 +144,7 @@
   "startUpMessage6": "Lanis-Mobile is now used by people at over 50 schools throughout Hesse.",
   "startUpMessage7": "Thank you for using Lanis-Mobile.",
   "startUpMessage8": "Lanis-Mobile is open source and developed by students. If you would like to help, please have a look at GitHub.",
-  "startUpMessage9": "You can custumize the app to your needs in the settings.",
+  "startUpMessage9": "You can customize the app to your needs in the settings.",
 
   "conversationType": "Conversation Type",
   "experimental": "Experimental",
