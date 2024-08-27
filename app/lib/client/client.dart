@@ -33,6 +33,8 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
+  String? singleSignOnToken;
+
   Map<String, String> userData = {};
   List<dynamic> travelMenu = [];
   Timer? preventLogoutTimer;
@@ -244,6 +246,11 @@ class SPHclient {
             parse(response1.data).getElementById("authErrorLocktime");
 
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
+          if (singleSignOnToken == null) {
+            final String setCookie = response1.headers.map["set-cookie"]![0];
+            singleSignOnToken = setCookie.substring(setCookie.indexOf("=") + 1, setCookie.indexOf(";"));
+          }
+
           //credits are valid
           final response2 =
               await dioHttp.get("https://connect.schulportal.hessen.de");
@@ -355,6 +362,7 @@ class SPHclient {
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
     substitutions.localFilter = {};
+    singleSignOnToken = null;
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);
