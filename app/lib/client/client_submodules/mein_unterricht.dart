@@ -7,7 +7,6 @@ import 'package:sph_plan/client/client.dart';
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/upload.dart';
-import '../logger.dart';
 
 class MeinUnterrichtParser {
   late Dio dio;

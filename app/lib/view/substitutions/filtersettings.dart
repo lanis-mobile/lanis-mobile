@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 
 import '../../client/client.dart';
 import '../../client/client_submodules/substitutions.dart';
+import 'chips_input.dart';
 
 
 class FilterSettingsScreen extends StatefulWidget {
@@ -174,20 +174,16 @@ class SubstitutionFilterEditor extends StatefulWidget {
 
 class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
   bool strict = false;
-  late List<Tag> filterTags;
+  late List<String> filterTags;
 
   @override
   void initState() {
     super.initState();
-    strict =
-        client.substitutions.localFilter[widget.objKey]?["strict"] ?? false;
-    List<String> filterStrings = (client.substitutions.localFilter[widget.objKey]?["filter"]??[]);
-    filterTags = filterStrings.map((e) => Tag(e)).toList();
+    strict = client.substitutions.localFilter[widget.objKey]?["strict"] ?? false;
   }
 
   @override
   void dispose() {
-    filterTags.clear();
     super.dispose();
   }
 
@@ -228,43 +224,14 @@ class _SubstitutionFilterEditorState extends State<SubstitutionFilterEditor> {
                 )
               ],
             ),
-            FlutterTagging<Tag>(
-              initialItems: filterTags,
-              textFieldConfiguration: TextFieldConfiguration(
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.addFilter,
-                  labelText: AppLocalizations.of(context)!.addFilter,
-                ),
-              ),
-              configureChip: (tag) {
-                return ChipConfiguration(
-                  label: Text(tag.name),
-                );
+            StringListEditor(
+              initialValues: client.substitutions.localFilter[widget.objKey]?["filter"]??[],
+              onChanged: (data) {
+                filterTags = data;
+                overrideFilter(data);
               },
-              configureSuggestion: (tag) {
-                return SuggestionConfiguration(
-                  title: Text(AppLocalizations.of(context)!.addSpecificFilter(tag.name))
-                );
-              },
-              findSuggestions: (String query) {
-                query = query.trim();
-                if (query.isEmpty) return <Tag>[];
-                return <Tag>[Tag(query)];
-              },
-              onChanged: () {
-                overrideFilter(filterTags.map((e) => e.name).toList());
-              },
-            )
+            ),
           ],
         ));
   }
-}
-
-class Tag extends Taggable {
-  final String name;
-
-  const Tag(this.name);
-
-  @override
-  List<Object> get props => [name];
 }
