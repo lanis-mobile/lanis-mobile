@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webview_inapp/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../client/client.dart';
@@ -17,7 +17,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   ValueNotifier<int> progressIndicator = ValueNotifier(0);
 
   InAppWebViewController? webViewController;
-   PullToRefreshController? pullToRefreshController;
+  PullToRefreshController? pullToRefreshController;
 
   @override
   void initState() {

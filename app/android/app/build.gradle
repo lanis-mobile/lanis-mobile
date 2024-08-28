@@ -88,5 +88,5 @@ dependencies {
     implementation 'androidx.window:window:1.0.0'
     implementation 'androidx.window:window-java:1.0.0'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation("com.google.android.material:material:1.13.0-alpha05")
+    implementation 'com.google.android.material:material:1.12.0'
 }
