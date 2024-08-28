@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_inapp/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../client/client.dart';
 
@@ -75,6 +76,64 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Moodle"),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                if (await canLaunchUrl(Uri.parse("moodlemobile://https://${client.username}@mo${client.schoolID}.schulportal.hessen.de"))) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          icon: const Icon(Icons.warning),
+                          title: Text("In der Moodle App öffnen"),
+                          content: Text("Möglicherweise könnte deine Schule inkompatibel mit der App sein!"),
+                          actions: [
+                            OutlinedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(AppLocalizations.of(context)!.back)
+                            ),
+                            FilledButton(
+                                onPressed: () {
+                                  launchUrl(Uri.parse("moodlemobile://https://${client.username}@mo${client.schoolID}.schulportal.hessen.de"));
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(AppLocalizations.of(context)!.actionContinue)
+                            )
+                          ],
+                        );
+                      }
+                  );
+                } else {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          icon: const Icon(Icons.exit_to_app),
+                          title: Text("In der Moodle App öffnen"),
+                          content: Text("Die Moodle App ist genauso wie lanis-mobile für mobile Endgeräte optimiert. Installiere die App und komme wieder hierher, um direkt zum Login geschickt zu werden."),
+                          actions: [
+                            TextButton(
+                                onPressed: () { launchUrl(Uri.parse("https://apps.apple.com/de/app/moodle/id633359593")); },
+                                child: const Text("App Store")
+                            ),
+                            TextButton(
+                                onPressed: () { launchUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.moodle.moodlemobile")); },
+                                child: const Text("Play Store")
+                            ),
+                            FilledButton(
+                                onPressed: () { Navigator.of(context).pop(); },
+                                child: Text(AppLocalizations.of(context)!.back)
+                            ),
+                          ],
+                        );
+                      });
+                }
+
+                },
+              icon: const Icon(Icons.exit_to_app))
+        ],
       ),
       body: Stack(
         children: [
@@ -118,11 +177,12 @@ class _MoodleWebViewState extends State<MoodleWebView> {
             onLoadStop: (controller, url) {
               pullToRefreshController!.endRefreshing();
               progressIndicator.value = 0;
-
+            },
+            onPageCommitVisible: (controller, uri) {
               // Hack to enable pull to refresh in Moodle.
               controller.evaluateJavascript(
                   source:
-                      "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
+                  "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
 
               // Hide logout buttons.
               controller.evaluateJavascript(

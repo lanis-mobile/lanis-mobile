@@ -13,7 +13,7 @@
          running.
          
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
-    <style name="NormalTheme" parent="Theme.Material3.Light.NoActionBar">
+    <style name="NormalTheme" parent="Theme.Material3.DynamicColors.Light.NoActionBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
 </resources>
