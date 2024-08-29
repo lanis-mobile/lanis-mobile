@@ -361,6 +361,7 @@ class SPHclient {
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
     substitutions.localFilter = {};
+    singleSignOnToken = null;
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);
