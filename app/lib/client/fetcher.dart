@@ -98,21 +98,12 @@ class MeinUnterrichtFetcher extends Fetcher<dynamic> {
   }
 }
 
-class VisibleConversationsFetcher extends Fetcher<dynamic> {
-  VisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
+class ConversationsFetcher extends Fetcher<dynamic> {
+  ConversationsFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
   Future<dynamic> _get() {
-    return client.conversations.getOverview(false);
-  }
-}
-
-class InvisibleConversationsFetcher extends Fetcher<dynamic> {
-  InvisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
-
-  @override
-  Future<dynamic> _get() {
-    return client.conversations.getOverview(true);
+    return client.conversations.getOverview();
   }
 }
 
@@ -144,8 +135,7 @@ class TimeTableFetcher extends Fetcher<List<List<StdPlanFach>>?> {
 class GlobalFetcher {
   late final SubstitutionsFetcher substitutionsFetcher;
   late final MeinUnterrichtFetcher meinUnterrichtFetcher;
-  late final VisibleConversationsFetcher visibleConversationsFetcher;
-  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
+  late final ConversationsFetcher conversationsFetcher;
   late final CalendarFetcher calendarFetcher;
   late final TimeTableFetcher timeTableFetcher;
 
@@ -158,10 +148,8 @@ class GlobalFetcher {
           MeinUnterrichtFetcher(const Duration(minutes: 20));
     }
     if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-      visibleConversationsFetcher =
-          VisibleConversationsFetcher(const Duration(minutes: 5));
-      invisibleConversationsFetcher =
-          InvisibleConversationsFetcher(const Duration(minutes: 5));
+      conversationsFetcher =
+          ConversationsFetcher(const Duration(minutes: 5));
     }
     if (client.doesSupportFeature(SPHAppEnum.kalender)) {
       calendarFetcher = CalendarFetcher(null);

@@ -23,18 +23,18 @@ class ConversationsParser {
     dio = dioClient;
   }
 
-  Future<dynamic> getOverview(bool invisible) async {
+  Future<dynamic> getOverview() async {
     if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
       throw NotSupportedException();
     }
 
-    logger.i("Get new conversation data. Invisible: $invisible.");
+    logger.i("Get new conversation data.");
     try {
       final response =
           await dio.post("https://start.schulportal.hessen.de/nachrichten.php",
               data: {
                 "a": "headers",
-                "getType": invisible ? "unvisibleOnly" : "visibleOnly",
+                "getType": "All", // "unvisibleOnly", "visibleOnly" also possible
                 "last": "0"
               },
               options: Options(
