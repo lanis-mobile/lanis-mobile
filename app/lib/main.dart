@@ -148,7 +148,7 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
                   )),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 35),
+              padding: const EdgeInsets.only(bottom: 35, left: 20, right: 20),
               child: Text(
                 "Problem: ${details.exception.toString()}",
                 textAlign: TextAlign.center,
