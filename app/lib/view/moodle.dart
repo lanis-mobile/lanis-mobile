@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_inapp/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../client/client.dart';
 
@@ -16,6 +16,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   ValueNotifier<bool> canGoBack = ValueNotifier(false);
   ValueNotifier<bool> canGoForward = ValueNotifier(false);
   ValueNotifier<int> progressIndicator = ValueNotifier(0);
+  ValueNotifier<bool> hideWebView = ValueNotifier(false);
 
   InAppWebViewController? webViewController;
   PullToRefreshController? pullToRefreshController;
@@ -60,15 +61,15 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
     pullToRefreshController ??= PullToRefreshController(
         settings: PullToRefreshSettings(
-          color: Theme.of(context).colorScheme.primary,
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainer
-        ),
-          onRefresh: () async {
-            webViewController?.reload();
-          });
+            color: Theme.of(context).colorScheme.primary,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer),
+        onRefresh: () async {
+          webViewController?.reload();
+        });
 
     pullToRefreshController!.setColor(Theme.of(context).colorScheme.primary);
-    pullToRefreshController!.setBackgroundColor(Theme.of(context).colorScheme.surfaceContainer);
+    pullToRefreshController!
+        .setBackgroundColor(Theme.of(context).colorScheme.surfaceContainer);
   }
 
   @override
@@ -76,135 +77,95 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Moodle"),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                if (await canLaunchUrl(Uri.parse("moodlemobile://https://${client.username}@mo${client.schoolID}.schulportal.hessen.de"))) {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          icon: const Icon(Icons.warning),
-                          title: Text("In der Moodle App öffnen"),
-                          content: Text("Möglicherweise könnte deine Schule inkompatibel mit der App sein!"),
-                          actions: [
-                            OutlinedButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text(AppLocalizations.of(context)!.back)
-                            ),
-                            FilledButton(
-                                onPressed: () {
-                                  launchUrl(Uri.parse("moodlemobile://https://${client.username}@mo${client.schoolID}.schulportal.hessen.de"));
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text(AppLocalizations.of(context)!.actionContinue)
-                            )
-                          ],
-                        );
-                      }
-                  );
-                } else {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          icon: const Icon(Icons.exit_to_app),
-                          title: Text("In der Moodle App öffnen"),
-                          content: Text("Die Moodle App ist genauso wie lanis-mobile für mobile Endgeräte optimiert. Installiere die App und komme wieder hierher, um direkt zum Login geschickt zu werden."),
-                          actions: [
-                            TextButton(
-                                onPressed: () { launchUrl(Uri.parse("https://apps.apple.com/de/app/moodle/id633359593")); },
-                                child: const Text("App Store")
-                            ),
-                            TextButton(
-                                onPressed: () { launchUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.moodle.moodlemobile")); },
-                                child: const Text("Play Store")
-                            ),
-                            FilledButton(
-                                onPressed: () { Navigator.of(context).pop(); },
-                                child: Text(AppLocalizations.of(context)!.back)
-                            ),
-                          ],
-                        );
-                      });
-                }
-
-                },
-              icon: const Icon(Icons.exit_to_app))
-        ],
+        leading: IconButton(
+            onPressed: () async {
+              hideWebView.value = true;
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back)
+        ),
       ),
       body: Stack(
         children: [
-          InAppWebView(
-            pullToRefreshController: pullToRefreshController,
-            initialUrlRequest: URLRequest(
-                url: WebUri(
-                    "https://mo${client.schoolID}.schulportal.hessen.de")),
-            initialSettings: InAppWebViewSettings(transparentBackground: true),
-            onWebViewCreated: (controller) {
-              webViewController = controller;
-            },
-            shouldOverrideUrlLoading: (controller, navigationAction) async {
-              final WebUri uri = navigationAction.request.url!;
+          ValueListenableBuilder(
+            valueListenable: hideWebView,
+            builder: (context, hide, _) {
+              return Visibility(
+                visible: !hide,
+                child: InAppWebView(
+                  pullToRefreshController: pullToRefreshController,
+                  initialUrlRequest: URLRequest(
+                      url: WebUri(
+                          "https://mo${client.schoolID}.schulportal.hessen.de")),
+                  initialSettings: InAppWebViewSettings(transparentBackground: true),
+                  onWebViewCreated: (controller) {
+                    webViewController = controller;
+                  },
+                  shouldOverrideUrlLoading: (controller, navigationAction) async {
+                    final WebUri uri = navigationAction.request.url!;
 
-              if (uri.rawValue.contains(".schulportal.hessen.de/login/logout.php") || uri.rawValue.contains(".schulportal.hessen.de/index.php?logout=all")) {
-                return NavigationActionPolicy.CANCEL;
-              }
+                    if (uri.rawValue
+                            .contains(".schulportal.hessen.de/login/logout.php") ||
+                        uri.rawValue.contains(
+                            ".schulportal.hessen.de/index.php?logout=all")) {
+                      return NavigationActionPolicy.CANCEL;
+                    }
 
-              if (!uri.rawValue.contains(".schulportal.hessen.de")) {
-                await launchUrl(uri);
+                    if (!uri.rawValue.contains(".schulportal.hessen.de")) {
+                      await launchUrl(uri);
 
-                return NavigationActionPolicy.CANCEL;
-              }
+                      return NavigationActionPolicy.CANCEL;
+                    }
 
-              return NavigationActionPolicy.ALLOW;
-            },
-            onLoadStart: (controller, uri) async {
-              if (await controller.canGoBack()) {
-                canGoBack.value = true;
-              } else {
-                canGoBack.value = false;
-              }
+                    return NavigationActionPolicy.ALLOW;
+                  },
+                  onLoadStart: (controller, uri) async {
+                    if (await controller.canGoBack()) {
+                      canGoBack.value = true;
+                    } else {
+                      canGoBack.value = false;
+                    }
 
-              if (await controller.canGoForward()) {
-                canGoForward.value = true;
-              } else {
-                canGoForward.value = false;
-              }
-            },
-            onLoadStop: (controller, url) {
-              pullToRefreshController!.endRefreshing();
-              progressIndicator.value = 0;
-            },
-            onPageCommitVisible: (controller, uri) {
-              // Hack to enable pull to refresh in Moodle.
-              controller.evaluateJavascript(
-                  source:
-                  "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
+                    if (await controller.canGoForward()) {
+                      canGoForward.value = true;
+                    } else {
+                      canGoForward.value = false;
+                    }
+                  },
+                  onLoadStop: (controller, url) {
+                    pullToRefreshController!.endRefreshing();
+                    progressIndicator.value = 0;
+                  },
+                  onPageCommitVisible: (controller, uri) {
+                    // Hack to enable pull to refresh in Moodle.
+                    controller.evaluateJavascript(
+                        source:
+                            "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
 
-              // Hide logout buttons.
-              controller.evaluateJavascript(
-                  source: '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";'''
+                    // Hide logout buttons.
+                    controller.evaluateJavascript(
+                        source:
+                            '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
+                    controller.evaluateJavascript(
+                        source:
+                            '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
+                  },
+                  onProgressChanged: (controller, progress) {
+                    if (progress == 100) {
+                      pullToRefreshController!.endRefreshing();
+                      progressIndicator.value = 0;
+                      return;
+                    }
+
+                    progressIndicator.value = progress;
+                  },
+                  onReceivedError: (controller, request, error) {
+                    pullToRefreshController!.endRefreshing();
+                    progressIndicator.value = 0;
+                  },
+                ),
               );
-              controller.evaluateJavascript(
-                  source: '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";'''
-              );
-            },
-            onProgressChanged: (controller, progress) {
-              if (progress == 100) {
-                pullToRefreshController!.endRefreshing();
-                progressIndicator.value = 0;
-                return;
-              }
-
-              progressIndicator.value = progress;
-            },
-            onReceivedError: (controller, request, error) {
-              pullToRefreshController!.endRefreshing();
-              progressIndicator.value = 0;
-            },
+            }
           ),
         ],
       ),
@@ -233,6 +194,13 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                     }
                   },
                   icon: const Icon(Icons.refresh)),
+              IconButton(
+                  onPressed: () async {
+                    if (webViewController != null) {
+                      await Clipboard.setData(ClipboardData(text: (await webViewController!.getUrl())!.rawValue));
+                    }
+                  },
+                  icon: const Icon(Icons.link)),
               const Spacer(),
               ValueListenableBuilder(
                   valueListenable: canGoBack,

@@ -34,6 +34,16 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <provider
+                android:name="com.pichillilorenzo.webview_inapp_android.InAppWebViewFileProvider"
+                android:authorities="${applicationId}.webview_inapp_android.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths" />
+        </provider>
+
         <service
                 android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"
                 android:permission="android.permission.BIND_JOB_SERVICE"
@@ -71,10 +81,6 @@
         <!-- If your application checks for inAppBrowserView launch mode support -->
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="moodlemobile" />
         </intent>
     </queries>
 </manifest>
