@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
         action: (context) => Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MoodleWebView())
+                builder: (context) => const MoodleWebView())
         )),
     Destination(
         label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
