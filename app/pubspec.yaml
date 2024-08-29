@@ -20,10 +20,7 @@ environment:
   sdk: '>=3.1.3 <4.0.0'
 
 dependencies:
-  http_proxy:
-    git:
-      url: https://github.com/Rajala1404/http_proxy.git
-      ref: master
+  http_proxy: ^1.2.2
   flutter:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
