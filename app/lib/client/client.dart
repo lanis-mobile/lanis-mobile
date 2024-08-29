@@ -247,8 +247,15 @@ class SPHclient {
 
         if (response1.headers.value(HttpHeaders.locationHeader) != null) {
           if (singleSignOnToken == null) {
-            final String setCookie = response1.headers.map["set-cookie"]![0];
-            singleSignOnToken = setCookie.substring(setCookie.indexOf("=") + 1, setCookie.indexOf(";"));
+            final List<String>? cookies = response1.headers.map["set-cookie"];
+
+            if (cookies != null) {
+              for (int i = 0; i < response1.headers.map["set-cookie"]!.length; i++) {
+                if (cookies[i].contains("SPH-Session")) {
+                  singleSignOnToken = cookies[i].substring(cookies[i].indexOf("=") + 1, cookies[i].indexOf(";"));
+                }
+              }
+            }
           }
 
           //credits are valid
