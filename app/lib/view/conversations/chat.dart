@@ -22,6 +22,11 @@ class ConversationsChat extends StatefulWidget {
   const ConversationsChat(
       {super.key, required this.title, required this.id, this.newSettings});
 
+  ConversationsChat.fromEntry(OverviewEntry entry)
+      : id = entry.id
+      , title = entry.title
+      , newSettings = null;
+
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
 }

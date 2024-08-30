@@ -123,3 +123,29 @@ class KnownParticipant {
     return other is KnownParticipant && other.hashCode == hashCode;
   }
 }
+
+class OverviewEntry {
+  final String id;
+  final String title;
+  final String? shortName;
+  final String date;
+  final bool unread;
+  final bool hidden;
+
+  const OverviewEntry({
+    required this.id,
+    required this.title,
+    required this.shortName,
+    required this.date,
+    required this.unread,
+    required this.hidden,
+  });
+
+  OverviewEntry.fromJson(Map<String, dynamic> json)
+      : id = json["Uniquid"] as String
+      , title = json["Betreff"] as String
+      , shortName = json["kuerzel"] as String?
+      , date = json["Datum"] as String
+      , unread = (json["unread"] as int?) != null && (json["unread"] as int?) == 1
+      , hidden = json["Papierkorb"] as String == "ja";
+}

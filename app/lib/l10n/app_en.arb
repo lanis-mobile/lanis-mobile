@@ -72,7 +72,7 @@
   "noFurtherEntries": "No further entries!",
   "noEntries": "No Entries!",
   "note": "Note",
-  "notificationsNote": "You can hide conversations in SPH. These conversations are automatically deleted after a period of time, but are shown again when there is new activity.",
+  "notificationsNote": "You can hide conversations which will be automatically deleted after a period of time, but are shown again when there is new activity.",
   "visible": "Visible",
   "invisible": "Invisible",
   "unknown": "Unknown",

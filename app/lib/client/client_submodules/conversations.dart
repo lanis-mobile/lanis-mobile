@@ -17,15 +17,23 @@ import '../logger.dart';
 class ConversationsParser {
   late Dio dio;
   late SPHclient client;
-  bool? canChooseTypeCached;
+
+  bool? cachedCanChooseType;
+  List<OverviewEntry> cachedEntries = [];
+
+  bool showHidden = false;
 
   ConversationsParser(Dio dioClient, this.client) {
     dio = dioClient;
   }
 
-  Future<dynamic> getOverview() async {
+  Future<List<OverviewEntry>> getOverview({bool onlyFilter = false}) async {
     if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
       throw NotSupportedException();
+    }
+
+    if (onlyFilter) {
+      return applyFilters();
     }
 
     logger.i("Get new conversation data.");
@@ -49,8 +57,17 @@ class ConversationsParser {
                 },
               ));
 
-      return compute(
+      final dynamic json = await compute(
           computeJson, [response.toString(), client.cryptor.key.bytes]);
+
+      List<OverviewEntry> entries = [];
+      for (final entry in json) {
+        entries.add(OverviewEntry.fromJson(entry));
+      }
+
+      cachedEntries = entries;
+
+      return applyFilters();
     } on (SocketException, DioException) {
       throw NetworkException();
     } on LanisException {
@@ -71,6 +88,14 @@ class ConversationsParser {
     }
 
     return jsonDecode(decryptedConversations);
+  }
+
+  List<OverviewEntry> applyFilters() {
+    if (showHidden == true) {
+      return cachedEntries;
+    }
+
+    return cachedEntries.where((entry) => entry.hidden == false).toList();
   }
 
   Future<Conversation> getSingleConversation(String uniqueID) async {
@@ -309,8 +334,8 @@ class ConversationsParser {
   }
 
   Future<bool> canChooseType() async {
-    if (canChooseTypeCached != null) {
-      return canChooseTypeCached!;
+    if (cachedCanChooseType != null) {
+      return cachedCanChooseType!;
     }
 
     if (!(await connectionChecker.connected)) {
@@ -331,9 +356,9 @@ class ConversationsParser {
 
       final document = parse(html.data);
 
-      canChooseTypeCached = document.querySelector("#MsgOptions") != null;
+      cachedCanChooseType = document.querySelector("#MsgOptions") != null;
 
-      return canChooseTypeCached!;
+      return cachedCanChooseType!;
     } on (SocketException, DioException) {
       throw NetworkException();
     } catch (e) {

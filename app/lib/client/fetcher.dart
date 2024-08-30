@@ -6,6 +6,7 @@ import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/shared/types/conversations.dart';
 
 import '../shared/types/fach.dart';
 import 'client.dart';
@@ -102,8 +103,15 @@ class ConversationsFetcher extends Fetcher<dynamic> {
   ConversationsFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
-  Future<dynamic> _get() {
+  Future<List<OverviewEntry>> _get() {
     return client.conversations.getOverview();
+  }
+
+  void filter() {
+    _addResponse(FetcherResponse<List<OverviewEntry>>(
+      status: FetcherStatus.done,
+      content: client.conversations.applyFilters()
+    ));
   }
 }
 
