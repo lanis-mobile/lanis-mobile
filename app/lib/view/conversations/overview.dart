@@ -19,10 +19,8 @@ class ConversationsOverview extends StatefulWidget {
 class _ConversationsOverviewState extends State<ConversationsOverview> {
   final ConversationsFetcher conversationsFetcher =
       client.fetchers.conversationsFetcher;
-
   final GlobalKey<RefreshIndicatorState> _refreshKey =
       GlobalKey<RefreshIndicatorState>();
-
   final ValueNotifier<bool> showHidden = ValueNotifier(false);
 
   @override
@@ -36,14 +34,18 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        bottom: const PreferredSize(
-          preferredSize: Size(double.maxFinite, 18),
+        bottom: PreferredSize(
+          preferredSize: const Size(double.maxFinite, 18),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
             child: SearchBar(
-              autoFocus: false,
-              hintText: "Titel, Lehrer, Datum, ...",
-              trailing: [
+              hintText: "Betreff, Lehrer, Datum, ...",
+              textInputAction: TextInputAction.search,
+              onSubmitted: (String text) {
+                client.conversations.filter.searchText = text;
+                client.conversations.filter.supply();
+              },
+              trailing: const [
                 Padding(
                   padding: EdgeInsets.only(right: 12.0),
                   child: Icon(Icons.search),
@@ -74,7 +76,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                       itemBuilder: (context, index) {
                         if (index == snapshot.data?.content.length) {
                           return Padding(
-                            padding: const EdgeInsets.only(left: 6.0, right: 6.0, top: 12.0, bottom: 16.0),
+                            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 12.0, bottom: 16.0),
                             child: Column(
                               children: [
                                 Text(
@@ -92,7 +94,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                         }
 
                         return ConversationTile(
-                          entry: snapshot.data?.content[index]
+                          entry: snapshot.data?.content[index],
                         );
                       }
                   ),
@@ -109,8 +111,8 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                   heroTag: "visibility",
                   onPressed: () async {
                     showHidden.value = !showHidden.value;
-                    client.conversations.showHidden = showHidden.value;
-                    client.fetchers.conversationsFetcher.filter();
+                    client.conversations.filter.showHidden = showHidden.value;
+                    client.conversations.filter.supply();
                   },
                   child: show ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off),
                 );
@@ -160,83 +162,123 @@ class _ConversationTileState extends State<ConversationTile> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Card(
-              color: widget.entry.hidden
-                  ? Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75)
-                  : null,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ConversationsChat.fromEntry(widget.entry),
-                    ),
-                  );
-                },
-                customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (widget.entry.hidden) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 64.0),
-                            child: Icon(
-                              Icons.visibility_off,
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.25)
-                                  : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.6),
-                              size: 65,
+            child: Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.startToEnd,
+              confirmDismiss: (_) async => widget.entry.hidden
+                  ? await client.conversations.showConversation(widget.entry.id)
+                  : await client.conversations.hideConversation(widget.entry.id),
+              onDismissed: (_) {
+                client.conversations.filter.toggleEntry(widget.entry.id, hidden: true);
+              },
+              background: DecoratedBox(
+                decoration: BoxDecoration(
+                    color: widget.entry.hidden ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                    borderRadius: BorderRadius.circular(12)
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        widget.entry.hidden ? Icons.visibility : Icons.visibility_off,
+                        color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError,
+                      ),
+                      const SizedBox(width: 4.0,),
+                      Text(
+                          widget.entry.hidden
+                              ? AppLocalizations.of(context)!.conversationShow
+                              : AppLocalizations.of(context)!.conversationHide,
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              child: Card(
+                color: widget.entry.hidden
+                    ? Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75)
+                    : null,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          if (widget.entry.unread == true) {
+                            client.conversations.filter.toggleEntry(widget.entry.id, unread: true);
+                          }
+
+                          return ConversationsChat.fromEntry(widget.entry);
+                        },
+                      ),
+                    );
+                  },
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (widget.entry.hidden) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 64.0),
+                              child: Icon(
+                                Icons.visibility_off,
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.25)
+                                    : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.6),
+                                size: 65,
+                              ),
                             ),
+                          ],
+                        ),
+                      ],
+                      Badge(
+                        smallSize: widget.entry.unread ? 9 : 0,
+                        child: ListTile(
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                flex: 3,
+                                child: Text(
+                                  widget.entry.title,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  widget.entry.shortName ?? "ERROR",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: widget.entry.shortName != null
+                                      ? Theme.of(context).textTheme.titleMedium
+                                      : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    widget.entry.date,
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
-                    Badge(
-                      smallSize: widget.entry.unread ? 9 : 0,
-                      child: ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              flex: 3,
-                              child: Text(
-                                widget.entry.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                widget.entry.shortName ?? "ERROR",
-                                overflow: TextOverflow.ellipsis,
-                                style: widget.entry.shortName != null
-                                    ? Theme.of(context).textTheme.titleMedium
-                                    : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
-                              ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  widget.entry.date,
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

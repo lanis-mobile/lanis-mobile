@@ -17,23 +17,18 @@ import '../logger.dart';
 class ConversationsParser {
   late Dio dio;
   late SPHclient client;
+  late OverviewFiltering filter;
 
   bool? cachedCanChooseType;
-  List<OverviewEntry> cachedEntries = [];
-
-  bool showHidden = false;
 
   ConversationsParser(Dio dioClient, this.client) {
     dio = dioClient;
+    filter = OverviewFiltering();
   }
 
-  Future<List<OverviewEntry>> getOverview({bool onlyFilter = false}) async {
+  Future<List<OverviewEntry>> getOverview() async {
     if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
       throw NotSupportedException();
-    }
-
-    if (onlyFilter) {
-      return applyFilters();
     }
 
     logger.i("Get new conversation data.");
@@ -65,9 +60,9 @@ class ConversationsParser {
         entries.add(OverviewEntry.fromJson(entry));
       }
 
-      cachedEntries = entries;
+      filter.entries = entries;
 
-      return applyFilters();
+      return filter.filteredAndSearched(entries);
     } on (SocketException, DioException) {
       throw NetworkException();
     } on LanisException {
@@ -90,12 +85,64 @@ class ConversationsParser {
     return jsonDecode(decryptedConversations);
   }
 
-  List<OverviewEntry> applyFilters() {
-    if (showHidden == true) {
-      return cachedEntries;
+  Future<bool> hideConversation(String id) async {
+    if (!(await connectionChecker.connected)) {
+      return false;
     }
 
-    return cachedEntries.where((entry) => entry.hidden == false).toList();
+    try {
+      final response = await dio.post(
+          "https://start.schulportal.hessen.de/nachrichten.php",
+          data: {"a": "deleteAll", "uniqid": id},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          )
+      );
+
+      return bool.parse(response.data);
+    } on (SocketException, DioException) {
+      throw NetworkException();
+    } catch (e) {
+      throw UnknownException();
+    }
+  }
+
+  Future<bool> showConversation(String id) async {
+    if (!(await connectionChecker.connected)) {
+      return false;
+    }
+
+    try {
+      final response = await dio.post(
+          "https://start.schulportal.hessen.de/nachrichten.php",
+          data: {"a": "recycleMsg", "uniqid": id},
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          )
+      );
+
+      return bool.parse(response.data);
+    } on (SocketException, DioException) {
+      throw NetworkException();
+    } catch (e) {
+      throw UnknownException();
+    }
   }
 
   Future<Conversation> getSingleConversation(String uniqueID) async {
@@ -411,5 +458,53 @@ class ConversationsParser {
     } catch (e) {
       throw UnknownException();
     }
+  }
+}
+
+class OverviewFiltering {
+  List<OverviewEntry> entries = [];
+
+  bool showHidden = false;
+  String searchText = "";
+
+  OverviewFiltering();
+
+  void supply() {
+    client.fetchers.conversationsFetcher.supply(filteredAndSearched(entries));
+  }
+
+  void toggleEntry(String id, {bool? hidden, bool? unread}) {
+    final index = entries.indexWhere((entry) => entry.id == id);
+    entries.replaceRange(index, index + 1, [entries[index].copyWith(
+        hidden: hidden == null || hidden == false ? null : !entries[index].hidden,
+        unread: unread == null || unread == false ? null : !entries[index].unread,
+    )]);
+
+    supply();
+  }
+
+  List<OverviewEntry> filteredAndSearched(List<OverviewEntry> entries) {
+    return searched(filtered(entries));
+  }
+
+  List<OverviewEntry> filtered(List<OverviewEntry> entries) {
+    if (showHidden == true) {
+      return entries;
+    }
+
+    return entries.where((entry) => entry.hidden == false).toList();
+  }
+
+  List<OverviewEntry> searched(List<OverviewEntry> entries) {
+    return entries
+        .where((entry) =>
+    entry.title.toLowerCase().contains(searchText.toLowerCase()) ||
+        (entry.shortName != null &&
+            entry.shortName!
+                .toLowerCase()
+                .contains(searchText.toLowerCase())) ||
+        entry.date.toLowerCase().contains(searchText.toLowerCase()) ||
+        entry.fullName.toLowerCase().contains(searchText.toLowerCase()))
+        .toList();
   }
 }

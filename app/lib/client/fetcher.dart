@@ -107,10 +107,10 @@ class ConversationsFetcher extends Fetcher<dynamic> {
     return client.conversations.getOverview();
   }
 
-  void filter() {
+  void supply(final List<OverviewEntry> content) {
     _addResponse(FetcherResponse<List<OverviewEntry>>(
-      status: FetcherStatus.done,
-      content: client.conversations.applyFilters()
+        status: FetcherStatus.done,
+      content: content
     ));
   }
 }

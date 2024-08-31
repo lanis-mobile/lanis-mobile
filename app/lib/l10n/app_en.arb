@@ -72,7 +72,7 @@
   "noFurtherEntries": "No further entries!",
   "noEntries": "No Entries!",
   "note": "Note",
-  "notificationsNote": "You can hide conversations which will be automatically deleted after a period of time, but are shown again when there is new activity.",
+  "notificationsNote": "By swiping a conversation tile to the right, you can hide it and it will be deleted when everyone hides it. When new activity occurs, it will be shown again.",
   "visible": "Visible",
   "invisible": "Invisible",
   "unknown": "Unknown",
@@ -146,6 +146,9 @@
   "startUpMessage8": "Lanis-Mobile is open source and developed by students. If you would like to help, please have a look at GitHub.",
   "startUpMessage9": "You can customize the app to your needs in the settings.",
 
+  "conversationHide": "Hide",
+  "conversationShow": "Show",
+  "hideNote": "If the conversations receives new replies, it will be shown again. After every receiver hides it, it will be deleted.",
   "conversationType": "Conversation Type",
   "experimental": "Experimental",
   "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Replies won't be possible.} privateAnswerOnly{Replies can only be seen by you.} groupOnly{Replies can be seen by everyone.} openChat{Replies can be seen by everyone or only specific people. The latter is currently not possible in the app.} other{Error}}",

@@ -18,14 +18,17 @@ class ConversationsChat extends StatefulWidget {
   final String id; // uniqueId
   final String title;
   final NewConversationSettings? newSettings;
+  final bool hidden;
 
   const ConversationsChat(
-      {super.key, required this.title, required this.id, this.newSettings});
+      {super.key, required this.title, required this.id, this.newSettings,
+        this.hidden = false});
 
   ConversationsChat.fromEntry(OverviewEntry entry)
       : id = entry.id
       , title = entry.title
-      , newSettings = null;
+      , newSettings = null
+      , hidden = entry.hidden;
 
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
@@ -47,6 +50,8 @@ class _ConversationsChatState extends State<ConversationsChat>
   late final ConversationSettings settings;
   late final ParticipationStatistics? statistics;
 
+  late bool hidden;
+
   final List<dynamic> chat = [];
 
   @override
@@ -55,6 +60,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     appBarController = AnimationController(vsync: this);
     scrollController.addListener(animateAppBarTitle);
     scrollController.addListener(toggleScrollToBottomFab);
+    hidden = widget.hidden;
   }
 
   @override
@@ -384,6 +390,55 @@ class _ConversationsChatState extends State<ConversationsChat>
                           icon: const Icon(Icons.warning),
                         ),
                       ],
+                      IconButton(
+                          onPressed: () async {
+                            if (hidden == true) {
+                              final result = await client.conversations.showConversation(widget.id);
+
+                              if (result) {
+                                setState(() {
+                                  hidden = false;
+                                });
+                                client.conversations.filter.toggleEntry(widget.id, hidden: true);
+                              }
+
+                              return;
+                            }
+
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  icon: const Icon(Icons.visibility_off),
+                                  title: Text(AppLocalizations.of(context)!.conversationHide),
+                                  content: Text(AppLocalizations.of(context)!.hideNote),
+                                  actions: [
+                                    OutlinedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(AppLocalizations.of(context)!.back)
+                                    ),
+                                    FilledButton(
+                                        onPressed: () async {
+                                          final result = await client.conversations.hideConversation(widget.id);
+
+                                          if (result) {
+                                            setState(() {
+                                              hidden = true;
+                                            });
+                                            client.conversations.filter.toggleEntry(widget.id, hidden: true);
+                                          }
+
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(AppLocalizations.of(context)!.conversationHide)
+                                    )
+                                  ],
+                                )
+                            );
+                          },
+                          icon: hidden ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off)
+                      ),
                       if (statistics != null) ...[
                         IconButton(
                           onPressed: () {

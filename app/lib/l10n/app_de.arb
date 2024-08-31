@@ -72,7 +72,7 @@
   "noFurtherEntries": "Keine weiteren Einträge!",
   "noEntries": "Keine Einträge!",
   "note": "Hinweis",
-  "notificationsNote": "Du kannst Unterhaltungen ausblenden, die sich automatisch nach einer Zeit löschen, werden jedoch wieder bei neuer Aktivität eingeblendet.",
+  "notificationsNote": "Durch das Streichen einer Unterhaltungskachel nach rechts, wird sie ausgeblendet und wenn jeder sie ausblendet gelöscht. Bei wiederkehrender Aktivität wird sie wieder eingeblendet.",
   "visible": "Eingeblendet",
   "invisible": "Ausgeblendet",
   "unknown": "Unbekannt",
@@ -146,6 +146,9 @@
   "startUpMessage8": "Lanis-Mobile ist Open Source und wird von Schülern entwickelt. Wenn du helfen möchtest, dann schau doch mal auf GitHub vorbei.",
   "startUpMessage9": "Du kannst die App auf deine Bedürfnisse anpassen. Schau doch mal in den Einstellungen vorbei.",
 
+  "conversationHide": "Ausblenden",
+  "conversationShow": "Einblenden",
+  "hideNote": "Wenn wieder auf die Konversation geantwortet wird, blendet die sich wieder ein. Nachdem alle die Nachricht ausgeblendet haben, wird die gelöscht.",
   "conversationType": "Konversationsart",
   "experimental": "Experimentell",
   "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Antworten sind nicht möglich.} privateAnswerOnly{Antworten können nur von dir gesehen werden.} groupOnly{Antworten können von jeden gesehen werden.} openChat{Antworten können von jeden oder nur von bestimmten Personen gesehen werden, was aktuell in der App nicht möglich ist.} other{Fehler}}",
