@@ -229,44 +229,36 @@ class SPHclient {
     dioHttp.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
 
-    try {
-      if (username != "" && password != "" && schoolID != "") {
-        final response1 = await dioHttp.post(
-            "https://login.schulportal.hessen.de/?i=$schoolID",
-            queryParameters: {
-              "user": '$schoolID.$username',
-              "user2": username,
-              "password": password
-            },
-            options: Options(contentType: "application/x-www-form-urlencoded"));
+    if (username != "" && password != "" && schoolID != "") {
+      final response1 = await dioHttp.post(
+          "https://login.schulportal.hessen.de/?i=$schoolID",
+          queryParameters: {
+            "user": '$schoolID.$username',
+            "user2": username,
+            "password": password
+          },
+          options: Options(contentType: "application/x-www-form-urlencoded"));
 
-        final loginTimeout =
-            parse(response1.data).getElementById("authErrorLocktime");
+      final loginTimeout =
+          parse(response1.data).getElementById("authErrorLocktime");
 
-        if (response1.headers.value(HttpHeaders.locationHeader) != null) {
-          //credits are valid
-          final response2 =
-              await dioHttp.get("https://connect.schulportal.hessen.de");
+      if (response1.headers.value(HttpHeaders.locationHeader) != null) {
+        //credits are valid
+        final response2 =
+            await dioHttp.get("https://connect.schulportal.hessen.de");
 
-          String location2 =
-              response2.headers.value(HttpHeaders.locationHeader) ?? "";
+        String location2 =
+            response2.headers.value(HttpHeaders.locationHeader) ?? "";
 
-          return location2;
-        } else if (loginTimeout != null) {
-          throw LoginTimeoutException(loginTimeout.text,
-              "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du ${loginTimeout.text}s warten!");
-        } else {
-          throw WrongCredentialsException();
-        }
+        return location2;
+      } else if (loginTimeout != null) {
+        throw LoginTimeoutException(loginTimeout.text,
+            "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du ${loginTimeout.text}s warten!");
       } else {
-        throw CredentialsIncompleteException();
+        throw WrongCredentialsException();
       }
-    } on CredentialsIncompleteException {
-      rethrow;
-    } on WrongCredentialsException {
-      rethrow;
-    } catch (e) {
-      throw UnknownException();
+    } else {
+      throw CredentialsIncompleteException();
     }
   }
 

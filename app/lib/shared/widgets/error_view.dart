@@ -62,7 +62,9 @@ class ErrorView extends StatelessWidget {
                         const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               if (error is! NoConnectionException) ...[
-                Text("Problem: ${error.cause}"),
+                Padding(padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Text("Problem: ${error.cause}"),
+                ),
               ],
               const SizedBox(height: 24,),
               if (retry != null) FilledButton(

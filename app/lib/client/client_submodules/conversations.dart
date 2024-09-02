@@ -75,16 +75,20 @@ class ConversationsParser {
 
   // Move decrypting and decoding away from the main thread to avoid freezing.
   static dynamic computeJson(List<dynamic> args) {
-    final Map<String, dynamic> encryptedJSON = jsonDecode(args[0]);
+    try {
+      final Map<String, dynamic> encryptedJSON = jsonDecode(args[0]);
 
-    final String? decryptedConversations = Cryptor.decryptWithKeyString(
-        encryptedJSON["rows"], encrypt.Key(args[1]));
+      final String? decryptedConversations = Cryptor.decryptWithKeyString(
+          encryptedJSON["rows"], encrypt.Key(args[1]));
 
-    if (decryptedConversations == null) {
-      throw UnsaltedOrUnknownException();
+      if (decryptedConversations == null) {
+        throw UnsaltedOrUnknownException();
+      }
+
+      return jsonDecode(decryptedConversations);
+    } catch (e) {
+      throw LanisException("Error computing the response from the SPH. This is most likely due to an teacher account we cannot support sufficiently.");
     }
-
-    return jsonDecode(decryptedConversations);
   }
 
   /// Hides the conversation
