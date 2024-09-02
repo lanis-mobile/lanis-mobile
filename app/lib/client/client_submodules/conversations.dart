@@ -145,6 +145,14 @@ class ConversationsParser {
     }
   }
 
+  String fixUsername(String username) {
+    if (!username.contains("fa-user")) {
+      return username;
+    }
+
+    return parse(username).querySelector("span")!.text.trim();
+  }
+
   Future<Conversation> getSingleConversation(String uniqueID) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
@@ -183,7 +191,7 @@ class ConversationsParser {
 
       final UnparsedMessage parent = UnparsedMessage(
           date: conversation["Datum"],
-          author: conversation["username"],
+          author: fixUsername(conversation["username"]),
           own: conversation["own"],
           content: conversation["Inhalt"]);
 
@@ -191,7 +199,7 @@ class ConversationsParser {
       for (dynamic reply in conversation["reply"]) {
         replies.add(UnparsedMessage(
             date: reply["Datum"],
-            author: reply["username"],
+            author: fixUsername(reply["username"]),
             own: reply["own"],
             content: reply["Inhalt"]));
       }
@@ -209,7 +217,7 @@ class ConversationsParser {
 
       final Set<KnownParticipant> knownParticipants = {
         KnownParticipant(
-            name: conversation["username"],
+            name: fixUsername(conversation["username"]),
             type: PersonType.fromJson(conversation["SenderArt"])
         )
       };
@@ -217,7 +225,7 @@ class ConversationsParser {
       for (Map reply in conversation["reply"]) {
         knownParticipants.add(
           KnownParticipant(
-              name: reply["username"],
+              name: fixUsername(reply["username"]),
               type: PersonType.fromJson(reply["SenderArt"])
           )
         );
@@ -230,7 +238,7 @@ class ConversationsParser {
         }
       }
 
-      if (conversation["WeitereEmpfaenger"] != "") {
+      if (conversation["WeitereEmpfaenger"] != "" && conversation["WeitereEmpfaenger"] != null) {
         final others =
             parse(conversation["WeitereEmpfaenger"]).querySelectorAll("span");
         for (final other in others) {

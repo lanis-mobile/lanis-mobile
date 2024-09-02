@@ -168,6 +168,6 @@ class OverviewEntry {
       fullName: fullName ?? this.fullName,
       date: date ?? this.date,
       unread: unread ?? this.unread,
-      hidden: hidden ?? this.hidden
+      hidden: hidden ?? this.hidden,
   );
 }

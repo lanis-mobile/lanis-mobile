@@ -296,8 +296,8 @@ class _ConversationTileState extends State<ConversationTile> {
                               child: Icon(
                                 Icons.visibility_off,
                                 color: Theme.of(context).brightness == Brightness.dark
-                                    ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.25)
-                                    : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.6),
+                                    ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.4)
+                                    : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75),
                                 size: 65,
                               ),
                             ),
@@ -318,27 +318,27 @@ class _ConversationTileState extends State<ConversationTile> {
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                               ),
-                              Flexible(
-                                child: Text(
-                                  widget.entry.shortName ?? "ERROR",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: widget.entry.shortName != null
-                                      ? Theme.of(context).textTheme.titleMedium
-                                      : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
+                              if (widget.entry.shortName != null) ...[
+                                Flexible(
+                                  child: Text(
+                                    widget.entry.shortName!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: widget.entry.shortName != null
+                                        ? Theme.of(context).textTheme.titleMedium
+                                        : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
+                                  ),
                                 ),
-                              ),
+                              ]
                             ],
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          subtitle: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    widget.entry.date,
-                                  )
-                                ],
+                              Text(
+                                widget.entry.date,
+                              ),
+                              Text(
+                                widget.entry.fullName,
                               ),
                             ],
                           ),
