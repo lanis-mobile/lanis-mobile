@@ -72,7 +72,7 @@ android {
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             shrinkResources false //important to keep the notification icon in release mode
         }
     }
