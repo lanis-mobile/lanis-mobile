@@ -146,6 +146,8 @@
   "startUpMessage8": "Lanis-Mobile ist Open Source und wird von Schülern entwickelt. Wenn du helfen möchtest, dann schau doch mal auf GitHub vorbei.",
   "startUpMessage9": "Du kannst die App auf deine Bedürfnisse anpassen. Schau doch mal in den Einstellungen vorbei.",
 
+  "searchHint": "Betreff, Lehrer, Datum, Kürzel, ...",
+  "individualSearchHint": "{individualSearchHint, select, subject{Betreff...} schedule{Datum...} name{Lehrer...} other{Fehler}}",
   "conversationHide": "Ausblenden",
   "conversationShow": "Einblenden",
   "hideNote": "Wenn wieder auf die Konversation geantwortet wird, blendet die sich wieder ein. Nachdem alle die Nachricht ausgeblendet haben, wird die gelöscht.",

@@ -146,6 +146,8 @@
   "startUpMessage8": "Lanis-Mobile is open source and developed by students. If you would like to help, please have a look at GitHub.",
   "startUpMessage9": "You can customize the app to your needs in the settings.",
 
+  "searchHint": "Subject, teacher, date, ...",
+  "individualSearchHint": "{individualSearchHint, select, subject{Subject...} schedule{Date...} name{Teacher...} other{Fehler}}",
   "conversationHide": "Hide",
   "conversationShow": "Show",
   "hideNote": "If the conversations receives new replies, it will be shown again. After every receiver hides it, it will be deleted.",

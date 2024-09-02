@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/client/client_submodules/conversations.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/types/conversations.dart';
 
@@ -17,11 +18,25 @@ class ConversationsOverview extends StatefulWidget {
 }
 
 class _ConversationsOverviewState extends State<ConversationsOverview> {
+  static const individualIcons = {
+    SearchFunction.subject:   Icon(Icons.subject),
+    SearchFunction.name:      Icon(Icons.person),
+    SearchFunction.schedule:  Icon(Icons.calendar_today)
+  };
+
+  static final individualControllers = {
+    SearchFunction.subject:   TextEditingController(),
+    SearchFunction.name:      TextEditingController(),
+    SearchFunction.schedule:  TextEditingController()
+  };
+
   final ConversationsFetcher conversationsFetcher =
       client.fetchers.conversationsFetcher;
   final GlobalKey<RefreshIndicatorState> _refreshKey =
       GlobalKey<RefreshIndicatorState>();
   final ValueNotifier<bool> showHidden = ValueNotifier(false);
+
+  bool expand = false;
 
   @override
   void initState() {
@@ -35,23 +50,56 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     return Scaffold(
       appBar: AppBar(
         bottom: PreferredSize(
-          preferredSize: const Size(double.maxFinite, 18),
+          preferredSize: Size(double.maxFinite, expand ? 200 : 16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-            child: SearchBar(
-              hintText: "Betreff, Lehrer, Datum, ...",
-              textInputAction: TextInputAction.search,
-              onSubmitted: (String text) {
-                client.conversations.filter.searchText = text;
-                client.conversations.filter.supply();
-              },
-              trailing: const [
-                Padding(
-                  padding: EdgeInsets.only(right: 12.0),
-                  child: Icon(Icons.search),
-                )
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 0, bottom: 8),
+            child: Column(
+              children: [
+                if (expand) ...[
+                 ...List<Padding>.generate(
+                   client.conversations.filter.individual.length,
+                     (i) {
+                       SearchFunction function = client.conversations.filter.individual.keys.elementAt(i);
+
+                        return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: SearchBar(
+                              hintText: AppLocalizations.of(context)!.individualSearchHint(function.name),
+                              textInputAction: TextInputAction.search,
+                              controller: individualControllers[function],
+                              onSubmitted: (String text) {
+                                client.conversations.filter.individual[function] = text;
+                                client.conversations.filter.supply();
+                              },
+                              leading: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: individualIcons[function],
+                              ),
+                            ),
+                        );
+                     }
+                 )
+                ],
+                SearchBar(
+                  hintText: AppLocalizations.of(context)!.searchHint,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (String text) {
+                    client.conversations.filter.searchText = text;
+                    client.conversations.filter.supply();
+                  },
+                  trailing: [
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            expand = !expand;
+                          });
+                        },
+                        icon: expand ? const Icon(Icons.expand_less) : const Icon(Icons.expand_more)
+                    )
+                  ],
+                ),
               ],
-            ),
+            )
           ),
         ),
       ),

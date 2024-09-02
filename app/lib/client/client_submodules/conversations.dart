@@ -461,11 +461,38 @@ class ConversationsParser {
   }
 }
 
+enum SearchFunction {
+  subject,
+  schedule, // can't just use date bc of l10n
+  name;
+
+  static final functions = {
+    SearchFunction.subject: (OverviewEntry entry, String search) =>
+        entry.title.toLowerCase().contains(search.toLowerCase()),
+    SearchFunction.name: (OverviewEntry entry, String search) =>
+        (entry.shortName != null &&
+            entry.shortName!.toLowerCase().contains(search.toLowerCase())) ||
+        entry.fullName.toLowerCase().contains(search.toLowerCase()),
+    SearchFunction.schedule: (OverviewEntry entry, String search) =>
+        entry.date.toLowerCase().contains(search.toLowerCase()),
+  };
+
+  perform(OverviewEntry entry, String search) {
+    return functions[this]!(entry, search);
+  }
+}
+
 class OverviewFiltering {
   List<OverviewEntry> entries = [];
 
   bool showHidden = false;
   String searchText = "";
+
+  final individual = {
+    SearchFunction.subject: "",
+    SearchFunction.name: "",
+    SearchFunction.schedule: "",
+  };
 
   OverviewFiltering();
 
@@ -495,16 +522,31 @@ class OverviewFiltering {
     return entries.where((entry) => entry.hidden == false).toList();
   }
 
+  List<OverviewEntry> individualSearched(List<OverviewEntry> entries, SearchFunction function) {
+    return entries.where((entry) => function.perform(entry, individual[function]!)).toList();
+  }
+
   List<OverviewEntry> searched(List<OverviewEntry> entries) {
-    return entries
-        .where((entry) =>
-    entry.title.toLowerCase().contains(searchText.toLowerCase()) ||
-        (entry.shortName != null &&
-            entry.shortName!
-                .toLowerCase()
-                .contains(searchText.toLowerCase())) ||
-        entry.date.toLowerCase().contains(searchText.toLowerCase()) ||
-        entry.fullName.toLowerCase().contains(searchText.toLowerCase()))
-        .toList();
+    List<OverviewEntry> newEntries = [];
+
+    for (int i = 0; i < entries.length; i++) {
+      bool add = false;
+      for (final function in SearchFunction.values) {
+        if (function.perform(entries[i], searchText)) {
+          add = true;
+          break;
+        }
+      }
+
+      if (add) {
+        newEntries.add(entries[i]);
+      }
+    }
+
+    for (final function in individual.keys) {
+      newEntries = individualSearched(newEntries, function);
+    }
+
+    return newEntries;
   }
 }
