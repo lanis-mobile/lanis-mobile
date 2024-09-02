@@ -24,6 +24,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     SearchFunction.schedule:  Icon(Icons.calendar_today)
   };
 
+  static final TextEditingController searchController = TextEditingController();
   static final individualControllers = {
     SearchFunction.subject:   TextEditingController(),
     SearchFunction.name:      TextEditingController(),
@@ -75,6 +76,16 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: individualIcons[function],
                               ),
+                              trailing: [
+                                IconButton(
+                                    onPressed: () {
+                                      client.conversations.filter.individual[function] = "";
+                                      individualControllers[function]!.clear();
+                                      client.conversations.filter.supply();
+                                    },
+                                    icon: const Icon(Icons.delete)
+                                )
+                              ],
                             ),
                         );
                      }
@@ -83,11 +94,20 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                 SearchBar(
                   hintText: AppLocalizations.of(context)!.searchHint,
                   textInputAction: TextInputAction.search,
+                  controller: searchController,
                   onSubmitted: (String text) {
                     client.conversations.filter.searchText = text;
                     client.conversations.filter.supply();
                   },
                   trailing: [
+                    IconButton(
+                        onPressed: () {
+                          client.conversations.filter.searchText = "";
+                          searchController.clear();
+                          client.conversations.filter.supply();
+                        },
+                        icon: const Icon(Icons.delete)
+                    ),
                     IconButton(
                         onPressed: () {
                           setState(() {
