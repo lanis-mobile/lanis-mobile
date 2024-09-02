@@ -26,6 +26,7 @@ class ConversationsParser {
     filter = OverviewFiltering();
   }
 
+  /// Gets the entries which you can see in the overview.
   Future<List<OverviewEntry>> getOverview() async {
     if (!(client.doesSupportFeature(SPHAppEnum.nachrichten))) {
       throw NotSupportedException();
@@ -72,6 +73,7 @@ class ConversationsParser {
     }
   }
 
+  // Move decrypting and decoding away from the main thread to avoid freezing.
   static dynamic computeJson(List<dynamic> args) {
     final Map<String, dynamic> encryptedJSON = jsonDecode(args[0]);
 
@@ -85,6 +87,8 @@ class ConversationsParser {
     return jsonDecode(decryptedConversations);
   }
 
+  /// Hides the conversation
+  /// [id] is the **"Uniquid"** of the conversation.
   Future<bool> hideConversation(String id) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
@@ -115,6 +119,8 @@ class ConversationsParser {
     }
   }
 
+  /// Shows a hidden conversation.
+  /// [id] is the **"Uniquid"** of the conversation.
   Future<bool> showConversation(String id) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
@@ -145,6 +151,7 @@ class ConversationsParser {
     }
   }
 
+  // Sometimes usernames are the same as "SenderName", a HTML-Element.
   String fixUsername(String username) {
     if (!username.contains("fa-user")) {
       return username;
@@ -153,6 +160,7 @@ class ConversationsParser {
     return parse(username).querySelector("span")!.text.trim();
   }
 
+  /// Gets a whole single conversation with statistics.
   Future<Conversation> getSingleConversation(String uniqueID) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
@@ -469,9 +477,10 @@ class ConversationsParser {
   }
 }
 
+/// Collection of filter functions for the search.
 enum SearchFunction {
   subject,
-  schedule, // can't just use date bc of l10n
+  schedule, // can't use "date" bc of l10n
   name;
 
   static final functions = {
@@ -485,12 +494,15 @@ enum SearchFunction {
         entry.date.toLowerCase().contains(search.toLowerCase()),
   };
 
-  perform(OverviewEntry entry, String search) {
+  call(OverviewEntry entry, String search) {
     return functions[this]!(entry, search);
   }
 }
 
+/// A useful class to directly modify the most recent downloaded overview stream,
+/// so it's fast.
 class OverviewFiltering {
+  /// Cached overview entries set by a [getOverview] call.
   List<OverviewEntry> entries = [];
 
   bool showHidden = false;
@@ -507,7 +519,7 @@ class OverviewFiltering {
   void supply() {
     client.fetchers.conversationsFetcher.supply(filteredAndSearched(entries));
   }
-
+  
   void toggleEntry(String id, {bool? hidden, bool? unread}) {
     final index = entries.indexWhere((entry) => entry.id == id);
     entries.replaceRange(index, index + 1, [entries[index].copyWith(
@@ -522,6 +534,7 @@ class OverviewFiltering {
     return searched(filtered(entries));
   }
 
+  /// Show all conversations or just non-hidden ones.
   List<OverviewEntry> filtered(List<OverviewEntry> entries) {
     if (showHidden == true) {
       return entries;
@@ -531,16 +544,17 @@ class OverviewFiltering {
   }
 
   List<OverviewEntry> individualSearched(List<OverviewEntry> entries, SearchFunction function) {
-    return entries.where((entry) => function.perform(entry, individual[function]!)).toList();
+    return entries.where((entry) => function.call(entry, individual[function]!)).toList();
   }
 
   List<OverviewEntry> searched(List<OverviewEntry> entries) {
     List<OverviewEntry> newEntries = [];
 
+    // Basic search which often is enough.
     for (int i = 0; i < entries.length; i++) {
       bool add = false;
       for (final function in SearchFunction.values) {
-        if (function.perform(entries[i], searchText)) {
+        if (function.call(entries[i], searchText)) {
           add = true;
           break;
         }
@@ -551,6 +565,7 @@ class OverviewFiltering {
       }
     }
 
+    // Search with the expanded precision search.
     for (final function in individual.keys) {
       newEntries = individualSearched(newEntries, function);
     }
