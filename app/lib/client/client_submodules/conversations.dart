@@ -87,7 +87,7 @@ class ConversationsParser {
 
   Future<bool> hideConversation(String id) async {
     if (!(await connectionChecker.connected)) {
-      return false;
+      throw NoConnectionException();
     }
 
     try {
@@ -117,7 +117,7 @@ class ConversationsParser {
 
   Future<bool> showConversation(String id) async {
     if (!(await connectionChecker.connected)) {
-      return false;
+      throw NoConnectionException();
     }
 
     try {

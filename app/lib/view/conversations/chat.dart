@@ -88,6 +88,42 @@ class _ConversationsChatState extends State<ConversationsChat>
     }
   }
 
+  void showErrorDialog() {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          icon: const Icon(Icons.error),
+          title: Text(AppLocalizations.of(context)!.errorOccurred),
+          actions: [
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(AppLocalizations.of(context)!.back)
+            )
+          ],
+        )
+    );
+  }
+
+  void showNoInternetDialog() {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          icon: const Icon(Icons.wifi_off),
+          title: Text(AppLocalizations.of(context)!.noInternetConnection2),
+          actions: [
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(AppLocalizations.of(context)!.back)
+            )
+          ],
+        )
+    );
+  }
+
   static DateTime parseDateString(String date) {
     if (date.contains("heute")) {
       DateTime now = DateTime.now();
@@ -393,9 +429,19 @@ class _ConversationsChatState extends State<ConversationsChat>
                       IconButton(
                           onPressed: () async {
                             if (hidden == true) {
-                              final result = await client.conversations.showConversation(widget.id);
+                              bool result;
+                              try {
+                                result = await client.conversations.showConversation(widget.id);
+                              } on NoConnectionException {
+                                showNoInternetDialog();
+                                return;
+                              }
 
-                              if (result) {
+
+                              if (!result) {
+                                showErrorDialog();
+                                return;
+                              } else {
                                 setState(() {
                                   hidden = false;
                                 });
@@ -420,9 +466,18 @@ class _ConversationsChatState extends State<ConversationsChat>
                                     ),
                                     FilledButton(
                                         onPressed: () async {
-                                          final result = await client.conversations.hideConversation(widget.id);
+                                          bool result = false;
+                                          try {
+                                            result = await client.conversations.hideConversation(widget.id);
+                                          } on NoConnectionException {
+                                            showNoInternetDialog();
+                                            return;
+                                          }
 
-                                          if (result) {
+                                          if (!result) {
+                                            showErrorDialog();
+                                            return;
+                                          } else {
                                             setState(() {
                                               hidden = true;
                                             });

@@ -213,9 +213,28 @@ class _ConversationTileState extends State<ConversationTile> {
             child: Dismissible(
               key: UniqueKey(),
               direction: DismissDirection.startToEnd,
-              confirmDismiss: (_) async => widget.entry.hidden
-                  ? await client.conversations.showConversation(widget.entry.id)
-                  : await client.conversations.hideConversation(widget.entry.id),
+              confirmDismiss: (_) async {
+                try {
+                  final result = widget.entry.hidden
+                      ? await client.conversations.showConversation(widget.entry.id)
+                      : await client.conversations.hideConversation(widget.entry.id);
+
+                  if (!result) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!.errorOccurred),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  }
+
+                  return result;
+                } on NoConnectionException {
+                  return false;
+                }
+              },
               onDismissed: (_) {
                 client.conversations.filter.toggleEntry(widget.entry.id, hidden: true);
               },
