@@ -225,152 +225,147 @@ class _ConversationTileState extends State<ConversationTile> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 88,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Dismissible(
-              key: UniqueKey(),
-              direction: DismissDirection.startToEnd,
-              confirmDismiss: (_) async {
-                try {
-                  final result = widget.entry.hidden
-                      ? await client.conversations.showConversation(widget.entry.id)
-                      : await client.conversations.hideConversation(widget.entry.id);
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        child: Dismissible(
+          key: UniqueKey(),
+          direction: DismissDirection.startToEnd,
+          confirmDismiss: (_) async {
+            try {
+              final result = widget.entry.hidden
+                  ? await client.conversations.showConversation(widget.entry.id)
+                  : await client.conversations.hideConversation(widget.entry.id);
 
-                  if (!result) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              if (!result) {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(AppLocalizations.of(context)!.errorOccurred),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                  }
-
-                  return result;
-                } on NoConnectionException {
-                  return false;
-                }
-              },
-              onDismissed: (_) {
-                client.conversations.filter.toggleEntry(widget.entry.id, hidden: true);
-              },
-              background: DecoratedBox(
-                decoration: BoxDecoration(
-                    color: widget.entry.hidden ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
-                    borderRadius: BorderRadius.circular(12)
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        widget.entry.hidden ? Icons.visibility : Icons.visibility_off,
-                        color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError,
-                      ),
-                      const SizedBox(width: 4.0,),
-                      Text(
-                          widget.entry.hidden
-                              ? AppLocalizations.of(context)!.conversationShow
-                              : AppLocalizations.of(context)!.conversationHide,
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError),
-                      )
-                    ],
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.errorOccurred),
+                    duration: const Duration(seconds: 1),
                   ),
-                ),
-              ),
-              child: Card(
-                color: widget.entry.hidden
-                    ? Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75)
-                    : null,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          if (widget.entry.unread == true) {
-                            client.conversations.filter.toggleEntry(widget.entry.id, unread: true);
-                          }
+                );
+              }
 
-                          return ConversationsChat.fromEntry(widget.entry);
-                        },
-                      ),
-                    );
-                  },
-                  customBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (widget.entry.hidden) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 64.0),
-                              child: Icon(
-                                Icons.visibility_off,
-                                color: Theme.of(context).brightness == Brightness.dark
-                                    ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.4)
-                                    : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75),
-                                size: 65,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      Badge(
-                        smallSize: widget.entry.unread ? 9 : 0,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                flex: 3,
-                                child: Text(
-                                  widget.entry.title,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              if (widget.entry.shortName != null) ...[
-                                Flexible(
-                                  child: Text(
-                                    widget.entry.shortName!,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: widget.entry.shortName != null
-                                        ? Theme.of(context).textTheme.titleMedium
-                                        : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
-                                  ),
-                                ),
-                              ]
-                            ],
-                          ),
-                          subtitle: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                widget.entry.date,
-                              ),
-                              Text(
-                                widget.entry.fullName,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+              return result;
+            } on NoConnectionException {
+              return false;
+            }
+          },
+          onDismissed: (_) {
+            client.conversations.filter.toggleEntry(widget.entry.id, hidden: true);
+          },
+          background: DecoratedBox(
+            decoration: BoxDecoration(
+                color: widget.entry.hidden ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                borderRadius: BorderRadius.circular(12)
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Row(
+                children: [
+                  Icon(
+                    widget.entry.hidden ? Icons.visibility : Icons.visibility_off,
+                    color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError,
                   ),
-                ),
+                  const SizedBox(width: 4.0,),
+                  Text(
+                    widget.entry.hidden
+                        ? AppLocalizations.of(context)!.conversationShow
+                        : AppLocalizations.of(context)!.conversationHide,
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError),
+                  )
+                ],
               ),
             ),
           ),
-        ],
+          child: Card(
+            color: widget.entry.hidden
+                ? Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75)
+                : null,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      if (widget.entry.unread == true) {
+                        client.conversations.filter.toggleEntry(widget.entry.id, unread: true);
+                      }
+
+                      return ConversationsChat.fromEntry(widget.entry);
+                    },
+                  ),
+                );
+              },
+              customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (widget.entry.hidden) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 64.0),
+                          child: Icon(
+                            Icons.visibility_off,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.4)
+                                : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75),
+                            size: 65,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  Badge(
+                    smallSize: widget.entry.unread ? 9 : 0,
+                    child: ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            flex: 3,
+                            child: Text(
+                              widget.entry.title,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+                          if (widget.entry.shortName != null) ...[
+                            Flexible(
+                              child: Text(
+                                widget.entry.shortName!,
+                                overflow: TextOverflow.ellipsis,
+                                style: widget.entry.shortName != null
+                                    ? Theme.of(context).textTheme.titleMedium
+                                    : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
+                              ),
+                            ),
+                          ]
+                        ],
+                      ),
+                      subtitle: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.entry.date,
+                          ),
+                          Text(
+                            widget.entry.fullName,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
