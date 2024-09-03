@@ -1,7 +1,7 @@
 # Lanis Mobile
 Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertretungsplan, "Mein Unterricht", Nachrichten und den Schulkalender mit mehr Geplant. 
 
-**Einsatz an über 130 Schulen in Hessen mit über Tausend Nutzern**
+**Einsatz an über 200 Schulen in Hessen mit über Tausend Nutzern**
 
 <p align="center">
     <img src="https://github.com/alessioC42/lanis-mobile/assets/84250128/19d30436-32f7-4cbe-b78e-f2fee3583c28" width="60%">
@@ -13,7 +13,7 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
 
 <a href='https://apps.apple.com/de/app/lanis-mobile/id6511247743?l=en-GB'>
-  <img alt='Jetzt im App Store' src='https://alessioc42.github.io/lanis-mobile/assets/ios-badge.svg' style='height: 61px'/>
+  <img alt='Jetzt im App Store' src='https://lanis-mobile.github.io/lanis-mobile/assets/ios-badge.svg' style='height: 61px'/>
 </a>
 
 <p></p>
