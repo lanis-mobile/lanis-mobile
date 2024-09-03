@@ -13,7 +13,7 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
 
 <a href='https://apps.apple.com/de/app/lanis-mobile/id6511247743?l=en-GB'>
-  <img alt='Jetzt im App Store' src='https://lanis-mobile.github.io/lanis-mobile/assets/ios-badge.svg' style='height: 61px'/>
+  <img alt='Jetzt im App Store' src='https://lanis-mobile.github.io/assets/ios-badge.svg' style='height: 61px'/>
 </a>
 
 <p></p>
