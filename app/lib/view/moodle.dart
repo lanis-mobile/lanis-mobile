@@ -25,22 +25,6 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   PullToRefreshController? pullToRefreshController;
 
   Future<void> setCookies() async {
-    final cookies = await client.jar
-        .loadForRequest(Uri.parse("https://start.schulportal.hessen.de"));
-    String? sessionToken;
-    for (int i = 0; i < cookies.length; i++) {
-      if (cookies[i].name == "sid") {
-        sessionToken = cookies[i].value;
-      }
-    }
-
-    if (sessionToken == null) {
-      error.value =
-          "Der Session-Token der jetzigen Sitzung konnte nicht abgerufen werden!";
-      hideWebView.value = true;
-      return;
-    }
-
     CookieManager cookieManager = CookieManager.instance();
     cookieManager.deleteAllCookies();
 
@@ -53,7 +37,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     cookieManager.setCookie(
         url: WebUri("https://schulportal.hessen.de"),
         name: "sid",
-        value: sessionToken,
+        value: client.sessionToken!,
         isSecure: true,
         domain: ".hessen.de");
     cookieManager.setCookie(
@@ -70,6 +54,13 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
     if (client.singleSignOnToken == null) {
       error.value = "Der SSO-Token konnte nicht abgerufen werden!";
+      hideWebView.value = true;
+      return;
+    }
+
+    if (client.sessionToken == null) {
+      error.value =
+      "Der Session-Token der jetzigen Sitzung konnte nicht abgerufen werden!";
       hideWebView.value = true;
       return;
     }
@@ -125,82 +116,88 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                   return ValueListenableBuilder(
                       valueListenable: hideWebView,
                       builder: (context, hide, _) {
-                        return Visibility(
-                          visible: !hide,
-                          child: InAppWebView(
-                            pullToRefreshController: pullToRefreshController,
-                            initialUrlRequest: URLRequest(
-                                url: WebUri(
-                                    "https://mo${client.schoolID}.schulportal.hessen.de")),
-                            initialSettings: InAppWebViewSettings(
-                                transparentBackground: true),
-                            onWebViewCreated: (controller) {
-                              webViewController = controller;
-                            },
-                            shouldOverrideUrlLoading:
-                                (controller, navigationAction) async {
-                              final WebUri uri = navigationAction.request.url!;
-
-                              if (uri.rawValue.contains(
-                                      ".schulportal.hessen.de/login/logout.php") ||
-                                  uri.rawValue.contains(
-                                      ".schulportal.hessen.de/index.php?logout=all")) {
-                                return NavigationActionPolicy.CANCEL;
-                              }
-
-                              if (!uri.rawValue
-                                  .contains(".schulportal.hessen.de")) {
-                                await launchUrl(uri);
-
-                                return NavigationActionPolicy.CANCEL;
-                              }
-
-                              return NavigationActionPolicy.ALLOW;
-                            },
-                            onLoadStart: (controller, uri) async {
-                              if (await controller.canGoBack()) {
-                                canGoBack.value = true;
-                              } else {
-                                canGoBack.value = false;
-                              }
-
-                              if (await controller.canGoForward()) {
-                                canGoForward.value = true;
-                              } else {
-                                canGoForward.value = false;
-                              }
-                            },
-                            onLoadStop: (controller, url) {
-                              pullToRefreshController!.endRefreshing();
-                              progressIndicator.value = 0;
-                            },
-                            onPageCommitVisible: (controller, uri) {
-                              // Hack to enable pull to refresh in Moodle.
-                              controller.evaluateJavascript(
-                                  source:
-                                      "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
-
-                              // Hide logout buttons.
-                              controller.evaluateJavascript(
-                                  source:
-                                      '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
-                              controller.evaluateJavascript(
-                                  source:
-                                      '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
-                            },
-                            onProgressChanged: (controller, progress) {
-                              if (progress == 100) {
+                        return PopScope(
+                          canPop: false,
+                          onPopInvoked: (_) async {
+                            webViewController!.goBack();
+                          },
+                          child: Visibility(
+                            visible: !hide,
+                            child: InAppWebView(
+                              pullToRefreshController: pullToRefreshController,
+                              initialUrlRequest: URLRequest(
+                                  url: WebUri(
+                                      "https://mo${client.schoolID}.schulportal.hessen.de")),
+                              initialSettings: InAppWebViewSettings(
+                                  transparentBackground: true),
+                              onWebViewCreated: (controller) {
+                                webViewController = controller;
+                              },
+                              shouldOverrideUrlLoading:
+                                  (controller, navigationAction) async {
+                                final WebUri uri = navigationAction.request.url!;
+                          
+                                if (uri.rawValue.contains(
+                                        ".schulportal.hessen.de/login/logout.php") ||
+                                    uri.rawValue.contains(
+                                        ".schulportal.hessen.de/index.php?logout=all")) {
+                                  return NavigationActionPolicy.CANCEL;
+                                }
+                          
+                                if (!uri.rawValue
+                                    .contains(".schulportal.hessen.de")) {
+                                  await launchUrl(uri);
+                          
+                                  return NavigationActionPolicy.CANCEL;
+                                }
+                          
+                                return NavigationActionPolicy.ALLOW;
+                              },
+                              onLoadStart: (controller, uri) async {
+                                if (await controller.canGoBack()) {
+                                  canGoBack.value = true;
+                                } else {
+                                  canGoBack.value = false;
+                                }
+                          
+                                if (await controller.canGoForward()) {
+                                  canGoForward.value = true;
+                                } else {
+                                  canGoForward.value = false;
+                                }
+                              },
+                              onLoadStop: (controller, url) {
                                 pullToRefreshController!.endRefreshing();
                                 progressIndicator.value = 0;
-                                return;
-                              }
-
-                              progressIndicator.value = progress;
-                            },
-                            onReceivedError: (controller, request, error) {
-                              pullToRefreshController!.endRefreshing();
-                              progressIndicator.value = 0;
-                            },
+                              },
+                              onPageCommitVisible: (controller, uri) {
+                                // Hack to enable pull to refresh in Moodle.
+                                controller.evaluateJavascript(
+                                    source:
+                                        "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
+                          
+                                // Hide logout buttons.
+                                controller.evaluateJavascript(
+                                    source:
+                                        '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
+                                controller.evaluateJavascript(
+                                    source:
+                                        '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
+                              },
+                              onProgressChanged: (controller, progress) {
+                                if (progress == 100) {
+                                  pullToRefreshController!.endRefreshing();
+                                  progressIndicator.value = 0;
+                                  return;
+                                }
+                          
+                                progressIndicator.value = progress;
+                              },
+                              onReceivedError: (controller, request, error) {
+                                pullToRefreshController!.endRefreshing();
+                                progressIndicator.value = 0;
+                              },
+                            ),
                           ),
                         );
                       });
