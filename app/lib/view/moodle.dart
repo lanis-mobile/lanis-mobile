@@ -118,8 +118,14 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                       builder: (context, hide, _) {
                         return PopScope(
                           canPop: false,
-                          onPopInvoked: (_) async {
-                            webViewController!.goBack();
+                          onPopInvokedWithResult: (bool res, _) async {
+                            final canGoBack = await webViewController!.canGoBack();
+                            if (canGoBack) {
+                              webViewController!.goBack();
+                            } else {
+                              hideWebView.value = true;
+                              Navigator.of(context).pop();
+                            }
                           },
                           child: Visibility(
                             visible: !hide,
