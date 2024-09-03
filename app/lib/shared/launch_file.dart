@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../client/client.dart';
 
@@ -17,6 +19,7 @@ void launchFile(BuildContext context, String url, String filename,
           ),
         );
       });
+
   client.downloadFile(url, filename).then((filepath) {
     Navigator.of(context).pop();
 
@@ -24,12 +27,25 @@ void launchFile(BuildContext context, String url, String filename,
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
-                title: const Text("Fehler!"),
+                title: Text("${AppLocalizations.of(context)!.error}!"),
+                icon: const Icon(Icons.error),
                 content: Text(
-                    "Beim Download der Datei $filename ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                    AppLocalizations.of(context)!.reportError),
                 actions: [
                   TextButton(
-                    child: const Text('OK'),
+                      onPressed: () {
+                        launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
+                      },
+                      child: const Text("GitHub")
+                  ),
+                  OutlinedButton(
+                      onPressed: () {
+                        launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
+                      },
+                      child: Text(AppLocalizations.of(context)!.startupReportButton)
+                  ),
+                  FilledButton(
+                    child: const Text('Ok'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
