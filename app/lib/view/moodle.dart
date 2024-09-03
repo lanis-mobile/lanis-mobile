@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:webview_inapp/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' as dio;
 
 import '../client/client.dart';
+import '../shared/launch_file.dart';
 import '../shared/widgets/error_view.dart';
 
 class MoodleWebView extends StatefulWidget {
@@ -23,6 +25,8 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
   InAppWebViewController? webViewController;
   PullToRefreshController? pullToRefreshController;
+
+  bool firstPageLoaded = false;
 
   Future<void> setCookies() async {
     CookieManager cookieManager = CookieManager.instance();
@@ -119,12 +123,16 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         return PopScope(
                           canPop: false,
                           onPopInvokedWithResult: (bool res, _) async {
+                            if (res) {
+                              return;
+                            }
+
                             final canGoBack = await webViewController!.canGoBack();
                             if (canGoBack) {
                               webViewController!.goBack();
                             } else {
                               hideWebView.value = true;
-                              Navigator.of(context).pop();
+                              Navigator.pop(context);
                             }
                           },
                           child: Visibility(
@@ -172,7 +180,35 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                   canGoForward.value = false;
                                 }
                               },
-                              onLoadStop: (controller, url) {
+                              onLoadStop: (controller, url) async {
+                                if (!firstPageLoaded) {
+                                  final moodleCookie1 = await CookieManager.instance().getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MoodleSession");
+                                  final dioCookie1 = dio.Cookie(moodleCookie1!.name, moodleCookie1.value);
+                                  dioCookie1.httpOnly = false;
+                                  dioCookie1.secure = true;
+                                  dioCookie1.domain = "mo${client.schoolID}.schulportal.hessen.de";
+                                  dioCookie1.path = "/";
+
+                                  final moodleCookie2 = await CookieManager.instance().getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MOODLEID1_");
+                                  final dioCookie2 = dio.Cookie(moodleCookie2!.name, moodleCookie2.value);
+                                  dioCookie2.httpOnly = false;
+                                  dioCookie2.secure = true;
+                                  dioCookie2.domain = "mo${client.schoolID}.schulportal.hessen.de";
+                                  dioCookie2.path = "/";
+
+                                  final moodleCookie3 = await CookieManager.instance().getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "mo-prod01");
+                                  final dioCookie3 = dio.Cookie(moodleCookie3!.name, moodleCookie3.value);
+                                  dioCookie3.httpOnly = true;
+                                  dioCookie3.secure = true;
+                                  dioCookie3.domain = ".hessen.de";
+                                  dioCookie3.path = "/";
+
+                                  await client.jar.saveFromResponse(Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"), [dioCookie1, dioCookie2]);
+                                  await client.jar.saveFromResponse(Uri.parse("https://start.schulportal.hessen.de"), [dioCookie3]);
+
+                                  firstPageLoaded = true;
+                                }
+
                                 pullToRefreshController!.endRefreshing();
                                 progressIndicator.value = 0;
                               },
@@ -202,6 +238,14 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                               onReceivedError: (controller, request, error) {
                                 pullToRefreshController!.endRefreshing();
                                 progressIndicator.value = 0;
+                              },
+                              onDownloadStartRequest: (controller, request) async {
+                                String url = request.url.rawValue;
+                                String filename = request.suggestedFilename ?? client.generateUniqueHash(request.url.rawValue);
+
+                                double fileSize = request.contentLength / 1000000;
+                                launchFile(context, url,
+                                    filename, "${fileSize.toStringAsFixed(2)} MB", () {});
                               },
                             ),
                           ),
