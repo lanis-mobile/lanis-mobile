@@ -17,6 +17,8 @@ class MoodleWebView extends StatefulWidget {
 }
 
 class _MoodleWebViewState extends State<MoodleWebView> {
+  static CookieManager cookieManager = CookieManager.instance();
+
   ValueNotifier<bool> canGoBack = ValueNotifier(false);
   ValueNotifier<bool> canGoForward = ValueNotifier(false);
   ValueNotifier<int> progressIndicator = ValueNotifier(0);
@@ -29,7 +31,6 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   bool firstPageLoaded = false;
 
   Future<void> setCookies() async {
-    CookieManager cookieManager = CookieManager.instance();
     cookieManager.deleteAllCookies();
 
     cookieManager.setCookie(
@@ -182,22 +183,37 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                               },
                               onLoadStop: (controller, url) async {
                                 if (!firstPageLoaded) {
-                                  final moodleCookie1 = await CookieManager.instance().getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MoodleSession");
-                                  final dioCookie1 = dio.Cookie(moodleCookie1!.name, moodleCookie1.value);
+                                  final moodleCookie1 = await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MoodleSession");
+                                  if (moodleCookie1 == null) {
+                                    error.value =
+                                    "Der Moodle-Session-Token konnte nicht abgeruft werden!";
+                                    hideWebView.value = true;
+                                    return;
+                                  }
+
+                                  final dioCookie1 = dio.Cookie(moodleCookie1.name, moodleCookie1.value);
                                   dioCookie1.httpOnly = false;
                                   dioCookie1.secure = true;
                                   dioCookie1.domain = "mo${client.schoolID}.schulportal.hessen.de";
                                   dioCookie1.path = "/";
 
-                                  final moodleCookie2 = await CookieManager.instance().getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MOODLEID1_");
+                                  final moodleCookie2 = await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MOODLEID1_");
+                                  // Can't check if moodleCookie2 is null bc for some reason it's always null but it isn't.
                                   final dioCookie2 = dio.Cookie(moodleCookie2!.name, moodleCookie2.value);
                                   dioCookie2.httpOnly = false;
                                   dioCookie2.secure = true;
                                   dioCookie2.domain = "mo${client.schoolID}.schulportal.hessen.de";
                                   dioCookie2.path = "/";
 
-                                  final moodleCookie3 = await CookieManager.instance().getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "mo-prod01");
-                                  final dioCookie3 = dio.Cookie(moodleCookie3!.name, moodleCookie3.value);
+                                  final moodleCookie3 = await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "mo-prod01");
+                                  if (moodleCookie3 == null) {
+                                    error.value =
+                                    "Der 'mo-prod01' Cookie konnte nicht abgeruft werden!";
+                                    hideWebView.value = true;
+                                    return;
+                                  }
+
+                                  final dioCookie3 = dio.Cookie(moodleCookie3.name, moodleCookie3.value);
                                   dioCookie3.httpOnly = true;
                                   dioCookie3.secure = true;
                                   dioCookie3.domain = ".hessen.de";
