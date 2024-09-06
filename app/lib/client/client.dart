@@ -33,6 +33,9 @@ class SPHclient {
   String schoolID = "";
   String schoolName = "";
 
+  String? singleSignOnToken;
+  String? sessionToken;
+
   Map<String, String> userData = {};
   List<dynamic> travelMenu = [];
   Timer? preventLogoutTimer;
@@ -135,6 +138,13 @@ class SPHclient {
     try {
       String loginURL = await getLoginURL();
       await dio.get(loginURL);
+      final cookies = await client.jar
+          .loadForRequest(Uri.parse("https://start.schulportal.hessen.de"));
+      for (int i = 0; i < cookies.length; i++) {
+        if (cookies[i].name == "sid") {
+          sessionToken = cookies[i].value;
+        }
+      }
 
       preventLogoutTimer?.cancel();
       preventLogoutTimer = Timer.periodic(
@@ -243,6 +253,18 @@ class SPHclient {
           parse(response1.data).getElementById("authErrorLocktime");
 
       if (response1.headers.value(HttpHeaders.locationHeader) != null) {
+        if (singleSignOnToken == null) {
+          final List<String>? cookies = response1.headers.map["set-cookie"];
+
+          if (cookies != null) {
+            for (int i = 0; i < response1.headers.map["set-cookie"]!.length; i++) {
+              if (cookies[i].contains("SPH-Session")) {
+                singleSignOnToken = cookies[i].substring(cookies[i].indexOf("=") + 1, cookies[i].indexOf(";"));
+              }
+            }
+          }
+        }
+
         //credits are valid
         final response2 =
             await dioHttp.get("https://connect.schulportal.hessen.de");
@@ -342,11 +364,16 @@ class SPHclient {
       }
     }
 
+    dio.interceptors.removeWhere((element) => element is CookieManager);
     jar.deleteAll();
+    dio.interceptors.add(CookieManager(jar));
+
     globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
     substitutions.localFilter = {};
+    singleSignOnToken = null;
+    sessionToken = null;
 
     var tempDir = await getTemporaryDirectory();
     await deleteSubfoldersAndFiles(tempDir);
