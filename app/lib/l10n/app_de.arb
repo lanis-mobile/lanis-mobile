@@ -184,5 +184,6 @@
   "addSpecificFilter": "\"{filter}\" hinzufügen",
   "tryAgain": "Erneut versuchen",
   "refreshComplete": "Aktualisierung abgeschlossen",
-  "offline": "Offline"
+  "offline": "Offline",
+  "noAppToOpen": "Lanis-Mobile konnte keine App finden, um die angegebene Datei zu öffnen."
 }
