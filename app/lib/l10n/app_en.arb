@@ -185,5 +185,8 @@
   "tryAgain": "Try again",
   "refreshComplete": "Refresh complete",
   "offline": "Offline",
-  "noAppToOpen": "Lanis-Mobile could not find any App to open the specified File in."
+  "noAppToOpen": "Lanis-Mobile could not find any App to open the specified File in.",
+  "searchSchools": "Search by name, city or id",
+  "noSchoolsFound": "No schools found.",
+  "schoolCountString": "{count, plural, =0{No schools} one{1 school} other{{count} schools}}"
 }
