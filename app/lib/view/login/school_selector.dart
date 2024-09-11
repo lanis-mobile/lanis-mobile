@@ -102,7 +102,10 @@ class _SchoolSelectorState extends State<SchoolSelector> {
                 children: [
                   Padding(padding: const EdgeInsets.all(8.0),
                     child: SearchBar(
-                      leading: const Icon(Icons.search),
+                      leading: const Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Icon(Icons.search),
+                      ),
                       controller: searchController,
                       hintText: AppLocalizations.of(context)!.searchSchools,
                       autoFocus: true,
