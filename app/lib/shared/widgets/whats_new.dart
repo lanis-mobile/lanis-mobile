@@ -28,7 +28,7 @@ Future<String?> whatsNew() async {
 Future<String> getReleaseMarkDown(String gitHubReleaseTag) async {
   try {
     final response = await client.dio.get(
-        'https://api.github.com/repos/alessioc42/lanis-mobile/releases/tags/$gitHubReleaseTag');
+        'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/tags/$gitHubReleaseTag');
     return (response.data['body']);
   } catch (e) {
     return "Fehler, beim Laden der Update Details.";
