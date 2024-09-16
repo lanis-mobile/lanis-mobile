@@ -5,11 +5,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/fach.dart';
+import '../../shared/types/timetable.dart';
 import '../../shared/widgets/error_view.dart';
 
 /// Core UI for the [Timetable] data.
 class StaticTimetableView extends StatefulWidget {
-  final List<List<StdPlanFach>>? data;
+  final TimeTable? data;
   final LanisException? lanisException;
   final TimeTableFetcher? fetcher;
   final Future<void> Function()? refresh;
@@ -78,7 +79,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
           final helperIDs =
           appointment.id.split("-").map(int.parse).toList();
           final StdPlanFach selected =
-          (widget.data![helperIDs[0]][helperIDs[1]]);
+          (widget.data!.planForOwn![helperIDs[0]][helperIDs[1]]);
 
           showModalBottomSheet(
               context: context,
@@ -135,12 +136,12 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
 }
 
 class TimeTableDataSource extends CalendarDataSource {
-  TimeTableDataSource(List<List<StdPlanFach>> data) {
+  TimeTableDataSource(TimeTable data) {
     final now = DateTime.now();
 
     var events = <Appointment>[];
 
-    for (var (dayIndex, day) in data.indexed) {
+    for (var (dayIndex, day) in data.planForOwn!.indexed) {
       dayIndex += 1;
       // Calculate the difference between the current weekday and the dayIndex
       var diff = dayIndex - now.weekday;

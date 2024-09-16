@@ -2,9 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/shared/types/fach.dart';
+import '../../shared/types/timetable.dart';
 import '../client.dart';
 
 typedef Day = List<StdPlanFach>;
+
+enum TimeTableType { ALL, OWN }
 
 class TimetableParser {
   late Dio dio;
@@ -14,7 +17,7 @@ class TimetableParser {
     dio = dioClient;
   }
 
-  Future<Element?> getTableBody() async {
+  Future<Document?> getTimetableDocument() async {
     final redirectedRequest =
         await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
 
@@ -25,15 +28,32 @@ class TimetableParser {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]?[0]}");
 
-    var document = parse(response.data);
-    return document.querySelector("#all tbody");
+    return parse(response.data);
   }
 
-  Future<List<Day>?> getPlan() async {
-    final tbody = await getTableBody();
-    if (tbody == null) return null;
+  Future<Element?> getTableBody(Document document, {TimeTableType timeTableType = TimeTableType.ALL}) async {
+    switch (timeTableType) {
+      case TimeTableType.ALL:
+        return document.querySelector("#all tbody");
+      case TimeTableType.OWN:
+        return document.querySelector("#own tbody");
+    }
+  }
+
+  Future<TimeTable?> getPlan() async {
+    final Document? document = await getTimetableDocument();
+    if (document == null) return null;
+
+    final tbodyAll = await getTableBody(document, timeTableType: TimeTableType.ALL);
+    final tbodyOwn = await getTableBody(document, timeTableType: TimeTableType.OWN);
+    final parsedAll = parseRoomPlan(tbodyAll!);
+    final parsedOwn = parseRoomPlan(tbodyOwn!);
+
     try {
-      return parseRoomPlan(tbody);
+      return TimeTable(
+        planForAll: parsedAll,
+        planForOwn: parsedOwn,
+      );
     } catch (e) {
       return null;
     }
