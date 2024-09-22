@@ -68,7 +68,6 @@ class _StartupScreenState extends State<StartupScreen> {
                     MaterialPageRoute(builder: (context) => const HomePage()),
                   );
                 },
-                relogin: true,
               ))),
     );
   }

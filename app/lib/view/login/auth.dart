@@ -1,10 +1,7 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -13,9 +10,8 @@ import '../../client/storage.dart';
 
 class LoginForm extends StatefulWidget {
   final Function() afterLogin;
-  final bool relogin;
 
-  const LoginForm({super.key, required this.afterLogin, this.relogin = false});
+  const LoginForm({super.key, required this.afterLogin});
 
   @override
   LoginFormState createState() {
@@ -34,38 +30,6 @@ class LoginFormState extends State<LoginForm> {
   bool dseAgree = false;
   bool countlyAgree = false;
 
-  String selectedSchoolID = "5182";
-  List<String> schoolList = [];
-  String dropDownSelectedItem = "Max Planck Schule - Rüsselsheim (5182)";
-
-  Future<void> loadSchoolList() async {
-    try {
-      final dio = Dio();
-      final response = await dio.get(
-          "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist");
-      List<dynamic> data = jsonDecode(response.data);
-      List<String> result = [];
-      for (var elem in data) {
-        for (var schule in elem['Schulen']) {
-          String name = schule['Name'].replaceAll("-", " ").replaceAll("\n", " ");
-          result.add('$name - ${schule['Ort']} (${schule['Id']})');
-        }
-      }
-      result.sort();
-      setState(() {
-        schoolList = result;
-      });
-    } catch (e) {
-      // Show a SnackBar to inform the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.authFailedLoadingSchools),
-          duration: const Duration(seconds: 10),
-        ),
-      );
-      Future.delayed(const Duration(seconds: 10), loadSchoolList);
-    }
-  }
 
   void login(String username, String password, String schoolID) async {
     showDialog(
@@ -110,7 +74,6 @@ class LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    loadSchoolList();
   }
 
   @override
@@ -123,13 +86,6 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.relogin) {
-      dropDownSelectedItem = "${client.schoolName} (${client.schoolID})";
-      selectedSchoolID = client.schoolID;
-      dseAgree = true;
-      usernameController.text = client.username;
-    }
-
     return Padding(
       padding: const EdgeInsets.all(padding),
       child: Form(
@@ -156,27 +112,19 @@ class LoginFormState extends State<LoginForm> {
                 const SizedBox(
                   height: padding * 5,
                 ),
-                DropdownSearch(
-                  popupProps: const PopupProps.menu(
-                      showSearchBox: true,
-                      searchDelay: Duration(milliseconds: 150)),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.selectSchool)),
-                  selectedItem: dropDownSelectedItem,
-                  enabled: !widget.relogin,
-                  onChanged: (value) {
-                    dropDownSelectedItem = value;
-                    selectedSchoolID = extractNumber(value);
+                SchoolSelector(
+                  controller: schoolIDController,
+                  outContext: context,
+                  onSchoolSelected: () {
+                    setState(() {});
                   },
-                  items: schoolList,
                 ),
                 const SizedBox(
                   height: padding,
                 ),
                 TextFormField(
                   controller: usernameController,
+                  enabled: schoolIDController.text != "",
                   autocorrect: false,
                   decoration: InputDecoration(
                       labelText:
@@ -193,6 +141,7 @@ class LoginFormState extends State<LoginForm> {
                 ),
                 TextFormField(
                   controller: passwordController,
+                  enabled: schoolIDController.text.isNotEmpty,
                   autocorrect: false,
                   obscureText: true,
                   decoration: InputDecoration(
@@ -209,11 +158,11 @@ class LoginFormState extends State<LoginForm> {
                   height: padding,
                 ),
                 Visibility(
-                  visible: !widget.relogin,
                   child: Column(
                     children: [
                       ExcludeSemantics(
                         child: CheckboxListTile(
+                          enabled: schoolIDController.text.isNotEmpty,
                           value: countlyAgree,
                           title: RichText(
                             text: TextSpan(
@@ -249,6 +198,7 @@ class LoginFormState extends State<LoginForm> {
                       ),
                       ExcludeSemantics(
                         child: CheckboxListTile(
+                          enabled: schoolIDController.text.isNotEmpty,
                           value: dseAgree,
                           title: RichText(
                             text: TextSpan(
@@ -291,7 +241,7 @@ class LoginFormState extends State<LoginForm> {
                       ? () {
                           if (_formKey.currentState!.validate()) {
                             login(usernameController.text,
-                                passwordController.text, selectedSchoolID);
+                                passwordController.text, schoolIDController.text);
                           }
                         }
                       : null,
@@ -301,8 +251,8 @@ class LoginFormState extends State<LoginForm> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        onPressed: () => launchUrl(Uri.parse(
-                            "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=$selectedSchoolID")),
+                        onPressed: schoolIDController.text.isNotEmpty ? () => launchUrl(Uri.parse(
+                            "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=${schoolIDController.text}")) : null,
                         child: Text(
                             AppLocalizations.of(context)!.authResetPassword))
                   ],

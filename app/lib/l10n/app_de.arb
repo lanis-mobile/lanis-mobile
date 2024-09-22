@@ -185,5 +185,9 @@
   "tryAgain": "Erneut versuchen",
   "refreshComplete": "Aktualisierung abgeschlossen",
   "offline": "Offline",
-  "noAppToOpen": "Lanis-Mobile konnte keine App finden, um die angegebene Datei zu öffnen."
+  "noAppToOpen": "Lanis-Mobile konnte keine App finden, um die angegebene Datei zu öffnen.",
+  "searchSchools": "Suche nach Name, Ort oder Schulnummer",
+  "noSchoolsFound": "Keine Schulen gefunden.",
+  "schoolCountString": "{count, plural, =0{Keine Schulen} one{1 Schule} other{{count} Schulen}}"
+
 }
