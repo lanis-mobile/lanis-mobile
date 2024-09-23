@@ -222,7 +222,7 @@ class _StaticSubstitutionsViewState extends State<StaticSubstitutionsView> with 
               child: const Icon(Icons.refresh),
             ),
             const SizedBox(
-              height: 10,
+              height: 8,
             ),
             FloatingActionButton(
               onPressed: () => {

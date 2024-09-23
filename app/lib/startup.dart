@@ -10,7 +10,6 @@ import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/shared/types/fach.dart';
 import 'package:sph_plan/shared/types/timetable.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/login/auth.dart';
@@ -421,7 +420,7 @@ class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
       }));
     }
     if (timetableJson != "") {
-      timetableData = TimeTable.fromJson(jsonDecode(timetableJson).map((e) => List<StdPlanFach>.from(e.map((e) => StdPlanFach.fromJson(e)))));
+      timetableData = TimeTable.fromJson(jsonDecode(timetableJson));
 
       appletList.add(appletListTile(AppLocalizations.of(context)!.timeTable, Icons.calendar_today, () {
         Navigator.push(

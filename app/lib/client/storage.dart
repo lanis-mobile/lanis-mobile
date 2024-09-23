@@ -71,7 +71,7 @@ extension on StorageKey {
       case StorageKey.lastSubstitutionData:
         return "last-substitution-data";
       case StorageKey.lastTimetableData:
-        return "last-timetable-data";
+        return "last-timetable-data-both";
     }
   }
 
