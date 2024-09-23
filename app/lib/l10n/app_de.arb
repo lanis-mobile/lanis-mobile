@@ -88,6 +88,7 @@
   "actionContinue": "Weiter",
   "back": "Zurück",
   "create": "Erstellen",
+  "refresh": "Aktualisieren",
   "logInTitle": "Anmeldung",
   "logIn": "Anmelden",
   "selectSchool": "Schule auswählen",
@@ -187,6 +188,8 @@
   "noAppToOpen": "Lanis-Mobile konnte keine App finden, um die angegebene Datei zu öffnen.",
   "searchSchools": "Suche nach Name, Ort oder Schulnummer",
   "noSchoolsFound": "Keine Schulen gefunden.",
-  "schoolCountString": "{count, plural, =0{Keine Schulen} one{1 Schule} other{{count} Schulen}}"
+  "schoolCountString": "{count, plural, =0{Keine Schulen} one{1 Schule} other{{count} Schulen}}",
 
+  "timetableSwitchToPersonal": "Wechsel zum Persönlichen Stundenplan",
+  "timetableSwitchToClass": "Wechsel zum Klassen Stundenplan"
 }

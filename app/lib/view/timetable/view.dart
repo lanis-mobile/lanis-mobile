@@ -148,12 +148,16 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
           children: [
             if (widget.refresh != null) FloatingActionButton(
               heroTag: "refresh",
+              tooltip: AppLocalizations.of(context)!.refresh,
               onPressed: widget.refresh!,
               child: const Icon(Icons.refresh),
             ),
             const SizedBox(height: 8),
             FloatingActionButton(
               heroTag: "toggle",
+              tooltip: selectedType == TimeTableType.ALL
+                  ? AppLocalizations.of(context)!.timetableSwitchToPersonal
+                  : AppLocalizations.of(context)!.timetableSwitchToClass,
               onPressed: toggleSelectedPlan,
               child: Icon(selectedType == TimeTableType.ALL
                   ? Icons.person
