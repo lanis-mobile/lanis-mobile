@@ -155,7 +155,7 @@ class SubstitutionsFormattedText extends StatelessWidget {
   final String data;
   final TextStyle style;
 
-  const SubstitutionsFormattedText(this.data, this.style);
+  const SubstitutionsFormattedText(this.data, this.style, {super.key});
 
   @override
   Widget build(BuildContext context) {

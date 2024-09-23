@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
-import '../../client/storage.dart';
 
 class LoginForm extends StatefulWidget {
   final Function() afterLogin;
