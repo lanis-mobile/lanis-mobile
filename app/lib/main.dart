@@ -1,10 +1,6 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'package:countly_flutter_np/countly_flutter.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/view/conversations/shared.dart';
@@ -18,60 +14,24 @@ import 'package:http_proxy/http_proxy.dart';
 
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return errorWidget(details);
   };
 
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  await initializeNotifications();
+  await setupBackgroundService();
 
-    await initializeNotifications();
-    await setupBackgroundService();
+  await initializeDateFormatting();
 
-    await initializeDateFormatting();
-    if (!kDebugMode &&
-        (await globalStorage.read(key: StorageKey.settingsUseCountly)) ==
-            "true") {
-      const String duckDNS =
-          "duckdns.org"; //so web crawlers do not parse the URL from gh
-      CountlyConfig config = CountlyConfig("https://lanis-mobile.$duckDNS",
-          "4e7059ab732b4db3baaf75a6b3e1eef6d4aa3927");
-      config.enableCrashReporting();
+  ThemeModeNotifier.init();
+  ColorModeNotifier.init();
+  AmoledNotifier.init();
 
-      config.setCustomCrashSegment({
-        "school_id_storage":
-            await globalStorage.read(key: StorageKey.userSchoolID),
-        "account_is_student":
-            jsonDecode(await globalStorage.read(key: StorageKey.userData))
-                .containsKey("klasse"),
-      });
-      await Countly.initWithConfig(config);
+  HttpProxy httpProxy = await HttpProxy.createHttpProxy();
+  HttpOverrides.global=httpProxy;
 
-      String schoolID = await globalStorage.read(key: StorageKey.userSchoolID);
-      if (schoolID != "") {
-        Countly.instance.views.startView(schoolID);
-      }
-
-      FlutterError.onError = (errorDetails) async {
-        Countly.recordDartError(errorDetails.exception, errorDetails.stack!);
-      };
-    }
-
-    ThemeModeNotifier.init();
-    ColorModeNotifier.init();
-    AmoledNotifier.init();
-
-    HttpProxy httpProxy = await HttpProxy.createHttpProxy();
-    HttpOverrides.global=httpProxy;
-
-    runApp(const App());
-  }, (obj, stack) async {
-    if (!kDebugMode &&
-        await globalStorage.read(key: StorageKey.settingsUseCountly) ==
-            "true") {
-      await Countly.recordDartError(obj, stack);
-    }
-  });
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
