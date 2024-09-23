@@ -4,6 +4,7 @@ import 'package:webview_inapp/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+
 import '../client/client.dart';
 import '../shared/launch_file.dart';
 
@@ -23,10 +24,36 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   ValueNotifier<bool> hideWebView = ValueNotifier(false);
   ValueNotifier<bool> loggedIn = ValueNotifier(false);
 
+  String? error;
+  WebUri? errorUrl;
+  bool errorDuringLogin = false;
+
+  bool reachedLogin = false;
+
   InAppWebViewController? webViewController;
   PullToRefreshController? pullToRefreshController;
 
-  bool openedSchoolLogin = false;
+  void refresh() {
+    if (webViewController != null) {
+      if (errorDuringLogin) {
+        errorDuringLogin = false;
+        loggedIn.value = false;
+      }
+
+      if (error != null) {
+        webViewController!.loadUrl(urlRequest: URLRequest(
+            url: errorUrl
+        ));
+
+        error = null;
+        errorUrl = null;
+
+        return;
+      }
+
+      webViewController!.reload();
+    }
+  }
 
   @override
   void initState() {
@@ -44,9 +71,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
         settings: PullToRefreshSettings(
             color: Theme.of(context).colorScheme.primary,
             backgroundColor: Theme.of(context).colorScheme.surfaceContainer),
-        onRefresh: () async {
-          webViewController?.reload();
-        });
+        onRefresh: refresh);
 
     pullToRefreshController!.setColor(Theme.of(context).colorScheme.primary);
     pullToRefreshController!
@@ -67,6 +92,80 @@ class _MoodleWebViewState extends State<MoodleWebView> {
         ),
         body: Stack(
           children: [
+            if (error != null) ...[
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.warning, size: 60,),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Text(
+                          AppLocalizations.of(context)!.errorOccurredWebsite,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(12)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                              child: Text(
+                                AppLocalizations.of(context)!.error,
+                                style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8,),
+                          Flexible(
+                            child: Text(
+                              error ?? "",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4,),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(12)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                              child: Text(
+                                "URL",
+                                style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8,),
+                          Flexible(
+                            child: Text(
+                              errorUrl?.rawValue ?? "Unknown error",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             ValueListenableBuilder(
                 valueListenable: hideWebView,
                 builder: (context, hide, _) {
@@ -90,9 +189,11 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                       child: InAppWebView(
                         pullToRefreshController: pullToRefreshController,
                         initialUrlRequest: URLRequest(
-                            url: WebUri("https://start.schulportal.hessen.de/${client.schoolID}")),
+                            url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de")),
                         initialSettings: InAppWebViewSettings(
-                            transparentBackground: true),
+                            transparentBackground: true,
+                          disableDefaultErrorPage: true
+                        ),
                         onWebViewCreated: (controller) {
                           webViewController = controller;
                         },
@@ -135,7 +236,16 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         },
                         onPageCommitVisible: (controller, uri) {
                           if (!loggedIn.value) {
-                            if (uri!.rawValue.contains("login")) {
+                            if (!reachedLogin && uri!.rawValue.contains("singleSignOn") && !uri.rawValue.contains(client.schoolID)) {
+                              controller.loadUrl(
+                                  urlRequest: URLRequest(
+                                      url: WebUri("${uri.rawValue}&i=${client.schoolID}")
+                                  )
+                              );
+                              reachedLogin = true;
+                            }
+
+                            if (reachedLogin) {
                               controller.evaluateJavascript(
                                   source:
                                   """
@@ -150,17 +260,11 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                   setTimeout(function() {
                                     document.querySelector('#tlogin').click();
                                   }, 250);
-                                  """
+                                """
                               );
                             }
-                            
-                            if (uri.rawValue.contains("index.php")) {
-                              controller.loadUrl(urlRequest: URLRequest(
-                                url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de")
-                              ));
-                            }
 
-                            if (uri.rawValue.contains("mo${client.schoolID}")) {
+                            if (reachedLogin && uri!.rawValue.contains("mo${client.schoolID}")) {
                               loggedIn.value = true;
                             }
                           }
@@ -187,7 +291,17 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
                           progressIndicator.value = progress;
                         },
-                        onReceivedError: (controller, request, error) {
+                        onReceivedError: (controller, request, response) {
+                          setState(() {
+                            error = response.description;
+                            errorUrl = request.url;
+                          });
+
+                          if (loggedIn.value == false) {
+                            errorDuringLogin = true;
+                            loggedIn.value = true;
+                          }
+
                           pullToRefreshController!.endRefreshing();
                           progressIndicator.value = 0;
                         },
@@ -237,7 +351,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                             const CircularProgressIndicator(),
                             const SizedBox(height: 24,),
                             Text(
-                                AppLocalizations.of(context)!.logInTitle,
+                              AppLocalizations.of(context)!.logInTitle,
                               style: Theme.of(context).textTheme.labelLarge,
                             )
                           ],
@@ -270,11 +384,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                 Row(
                   children: [
                     IconButton(
-                        onPressed: () {
-                          if (webViewController != null) {
-                            webViewController!.reload();
-                          }
-                        },
+                        onPressed: refresh,
                         icon: const Icon(Icons.refresh)),
                     IconButton(
                         onPressed: () async {
