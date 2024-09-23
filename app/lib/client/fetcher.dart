@@ -8,6 +8,7 @@ import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
 import '../shared/types/fach.dart';
+import '../shared/types/timetable.dart';
 import 'client.dart';
 import 'connection_checker.dart';
 
@@ -132,11 +133,11 @@ class CalendarFetcher extends Fetcher<dynamic> {
   }
 }
 
-class TimeTableFetcher extends Fetcher<List<List<StdPlanFach>>?> {
+class TimeTableFetcher extends Fetcher<TimeTable?> {
   TimeTableFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
-  Future<List<List<StdPlanFach>>?> _get() {
+  Future<TimeTable?> _get() {
     return client.timetable.getPlan();
   }
 }
