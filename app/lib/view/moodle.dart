@@ -106,9 +106,9 @@ class _MoodleWebViewState extends State<MoodleWebView> {
           children: [
             ValueListenableBuilder(
                 valueListenable: error,
-                builder: (context, _error, _) {
-                  return _error != null
-                      ? ErrorView(error: LanisException(_error), name: "Moodle")
+                builder: (context, error, _) {
+                  return error != null
+                      ? ErrorView(error: LanisException(error), name: "Moodle")
                       : const SizedBox.shrink();
                 }),
             FutureBuilder(
@@ -272,8 +272,8 @@ class _MoodleWebViewState extends State<MoodleWebView> {
         ),
         bottomNavigationBar: ValueListenableBuilder(
           valueListenable: error,
-          builder: (context, _error, _) {
-            return _error == null
+          builder: (context, error, _) {
+            return error == null
                 ? Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

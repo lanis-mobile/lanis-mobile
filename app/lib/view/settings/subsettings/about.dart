@@ -38,7 +38,7 @@ class _AboutScreenState extends State<AboutScreen> {
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.about)),
       body: ListView(
         children: <Widget>[
-          Contributors(),
+          const Contributors(),
           ListTile(
             leading: const Icon(Icons.code),
             title: const Text('GitHub Repository'),
@@ -99,6 +99,8 @@ class _AboutScreenState extends State<AboutScreen> {
 
 /// List of contributors loaded from GitHub API, showing a loading indicator while fetching data
 class Contributors extends StatefulWidget {
+  const Contributors({super.key});
+
   @override
   State<StatefulWidget> createState() => _ContributorsState();
 }

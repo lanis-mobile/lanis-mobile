@@ -5,7 +5,6 @@ enum StorageKey {
   settingsPushService,
   settingsPushServiceIntervall,
   settingsPushServiceOngoing,
-  settingsUseCountly,
   settingsSelectedColor,
   settingsSelectedTheme,
   settingsIsAmoled,
@@ -38,8 +37,6 @@ extension on StorageKey {
         return "settings-push-service-interval";
       case StorageKey.settingsPushServiceOngoing:
         return "settings-push-service-notifications-ongoing";
-      case StorageKey.settingsUseCountly:
-        return "enable-countly";
       case StorageKey.userSchoolID:
         return "schoolID";
       case StorageKey.lastAppVersion:
@@ -81,8 +78,6 @@ extension on StorageKey {
         return "true";
       case StorageKey.settingsPushServiceIntervall:
         return "15";
-      case StorageKey.settingsUseCountly:
-        return "true";
       case StorageKey.lastAppVersion:
         return "0.0.0";
       case StorageKey.userData:

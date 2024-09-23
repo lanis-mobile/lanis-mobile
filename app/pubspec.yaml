@@ -55,7 +55,6 @@ dependencies:
   linkify: ^5.0.0
   introduction_screen: ^3.1.12
   flutter_svg: ^2.0.10+1
-  countly_flutter_np: ^24.1.1
   dynamic_color: ^1.6.9
   flutter_markdown: ^0.7.1
   file_picker: ^8.0.3

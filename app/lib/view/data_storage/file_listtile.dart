@@ -79,11 +79,10 @@ class SearchFileListTile extends StatefulWidget {
   final BuildContext context;
 
   const SearchFileListTile(
-      {Key? key,
+      {super.key,
       required this.context,
       required this.name,
-      required this.downloadUrl})
-      : super(key: key);
+      required this.downloadUrl});
 
   @override
   _SearchFileListTileState createState() => _SearchFileListTileState();
