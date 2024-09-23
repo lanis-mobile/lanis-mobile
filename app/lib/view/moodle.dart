@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:io' as io;
 
 
 import '../client/client.dart';
@@ -32,6 +33,16 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
   InAppWebViewController? webViewController;
   PullToRefreshController? pullToRefreshController;
+
+  io.Cookie translateCookie(Cookie cookie) {
+    var target = io.Cookie(cookie.name, cookie.value);
+    target.domain = cookie.domain;
+    target.path = cookie.path;
+    target.secure = cookie.isSecure!;
+    target.httpOnly = cookie.isHttpOnly!;
+
+    return target;
+  }
 
   void refresh() {
     if (webViewController != null) {
@@ -234,7 +245,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                           pullToRefreshController!.endRefreshing();
                           progressIndicator.value = 0;
                         },
-                        onPageCommitVisible: (controller, uri) {
+                        onPageCommitVisible: (controller, uri) async {
                           if (!loggedIn.value) {
                             if (!reachedLogin && uri!.rawValue.contains("singleSignOn") && !uri.rawValue.contains(client.schoolID)) {
                               controller.loadUrl(
@@ -266,6 +277,17 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
                             if (reachedLogin && uri!.rawValue.contains("mo${client.schoolID}")) {
                               loggedIn.value = true;
+
+                              List<io.Cookie> cookies = [
+                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MoodleSession"))!),
+                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MOODLEID1_"))!),
+                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "mo-prod01"))!)
+                              ];
+
+                              await client.jar.saveFromResponse(
+                                  Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"),
+                                  cookies
+                              );
                             }
                           }
 
