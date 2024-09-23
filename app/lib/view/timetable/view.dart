@@ -3,13 +3,15 @@ import 'package:sph_plan/client/fetcher.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../client/client_submodules/timetable.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/fach.dart';
+import '../../shared/types/timetable.dart';
 import '../../shared/widgets/error_view.dart';
 
 /// Core UI for the [Timetable] data.
 class StaticTimetableView extends StatefulWidget {
-  final List<List<StdPlanFach>>? data;
+  final TimeTable? data;
   final LanisException? lanisException;
   final TimeTableFetcher? fetcher;
   final Future<void> Function()? refresh;
@@ -21,6 +23,8 @@ class StaticTimetableView extends StatefulWidget {
 }
 
 class _StaticTimetableViewState extends State<StaticTimetableView> {
+  TimeTableType selectedType = TimeTableType.OWN;
+  // todo create settings to set the default view
 
   Widget modalSheetItem(String content, IconData icon) {
     return Padding(
@@ -68,7 +72,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       timeSlotViewSettings: const TimeSlotViewSettings(
         timeFormat: "HH:mm",
       ),
-      dataSource: TimeTableDataSource(widget.data!),
+      dataSource: TimeTableDataSource(getSelectedPlan()),
       minDate: DateTime.now(),
       maxDate: DateTime.now().add(const Duration(days: 7)),
       onTap: (details) {
@@ -78,7 +82,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
           final helperIDs =
           appointment.id.split("-").map(int.parse).toList();
           final StdPlanFach selected =
-          (widget.data![helperIDs[0]][helperIDs[1]]);
+          (getSelectedPlan()[helperIDs[0]][helperIDs[1]]);
 
           showModalBottomSheet(
               context: context,
@@ -120,27 +124,54 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
     );
   }
 
+  List<Day> getSelectedPlan() {
+    if (selectedType == TimeTableType.OWN) {
+      return widget.data!.planForOwn!;
+    }
+    return widget.data!.planForAll!;
+  }
+
+  void toggleSelectedPlan() {
+    setState(() {
+      selectedType = selectedType == TimeTableType.ALL
+          ? TimeTableType.OWN
+          : TimeTableType.ALL;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: getBody(),
-        floatingActionButton: widget.refresh != null
-            ? FloatingActionButton(
-                onPressed: widget.refresh!,
-                child: const Icon(Icons.refresh),
-              )
-            : null
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (widget.refresh != null) FloatingActionButton(
+              heroTag: "refresh",
+              onPressed: widget.refresh!,
+              child: const Icon(Icons.refresh),
+            ),
+            const SizedBox(height: 8),
+            FloatingActionButton(
+              heroTag: "toggle",
+              onPressed: toggleSelectedPlan,
+              child: Icon(selectedType == TimeTableType.ALL
+                  ? Icons.person
+                  : Icons.people),
+            ),
+          ],
+        )
     );
   }
 }
 
 class TimeTableDataSource extends CalendarDataSource {
-  TimeTableDataSource(List<List<StdPlanFach>> data) {
+  TimeTableDataSource(List<Day>? data) {
     final now = DateTime.now();
 
     var events = <Appointment>[];
 
-    for (var (dayIndex, day) in data.indexed) {
+    for (var (dayIndex, day) in data!.indexed) {
       dayIndex += 1;
       // Calculate the difference between the current weekday and the dayIndex
       var diff = dayIndex - now.weekday;

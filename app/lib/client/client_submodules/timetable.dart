@@ -2,9 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/shared/types/fach.dart';
+import '../../shared/types/timetable.dart';
 import '../client.dart';
 
 typedef Day = List<StdPlanFach>;
+
+enum TimeTableType { ALL, OWN }
 
 class TimetableParser {
   late Dio dio;
@@ -14,7 +17,7 @@ class TimetableParser {
     dio = dioClient;
   }
 
-  Future<Element?> getTableBody() async {
+  Future<Document?> getTimetableDocument() async {
     final redirectedRequest =
         await dio.get("https://start.schulportal.hessen.de/stundenplan.php");
 
@@ -24,16 +27,32 @@ class TimetableParser {
 
     final response = await dio.get(
         "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]?[0]}");
-
-    var document = parse(response.data);
-    return document.querySelector("#all tbody");
+    return parse(response.data);
   }
 
-  Future<List<Day>?> getPlan() async {
-    final tbody = await getTableBody();
-    if (tbody == null) return null;
+  Future<Element?> getTableBody(Document document, {TimeTableType timeTableType = TimeTableType.ALL}) async {
+    switch (timeTableType) {
+      case TimeTableType.ALL:
+        return document.querySelector("#all tbody");
+      case TimeTableType.OWN:
+        return document.querySelector("#own tbody");
+    }
+  }
+
+  Future<TimeTable?> getPlan() async {
+    final Document? document = await getTimetableDocument();
+    if (document == null) return null;
+
+    final tbodyAll = await getTableBody(document, timeTableType: TimeTableType.ALL);
+    final tbodyOwn = await getTableBody(document, timeTableType: TimeTableType.OWN);
+    final parsedAll = parseRoomPlan(tbodyAll!);
+    final parsedOwn = parseRoomPlan(tbodyOwn!);
+
     try {
-      return parseRoomPlan(tbody);
+      return TimeTable(
+        planForAll: parsedAll,
+        planForOwn: parsedOwn,
+      );
     } catch (e) {
       return null;
     }
@@ -57,6 +76,8 @@ class TimetableParser {
     List<List<bool>> alreadyParsed = List.generate(
         timeSlots.length + 1, (_) => List.generate(5, (_) => false));
 
+    bool timeslotOffsetFirstRow = tbody.children[0].children[0].text.trim() != "";
+
     for (var (rowIndex, rowElement) in tbody.children.indexed) {
       if (rowIndex == 0) continue; // skip first empty row
       for (var (colIndex, colElement) in rowElement.children.indexed) {
@@ -64,7 +85,7 @@ class TimetableParser {
         final int rowSpan = int.parse(colElement.attributes["rowspan"] ?? "1");
 
         var actualDay = colIndex - 1;
-        //actualDay sould be the first where alreadyParsed is false
+        //actualDay should be the first where alreadyParsed is false
         while (alreadyParsed[rowIndex][actualDay]) {
           actualDay++;
         }
@@ -74,14 +95,14 @@ class TimetableParser {
         }
 
         result[actualDay]
-            .addAll(parseSingeEntry(colElement, rowIndex, timeSlots));
+            .addAll(parseSingeEntry(colElement, rowIndex, timeSlots, timeslotOffsetFirstRow));
       }
     }
     return result;
   }
 
   List<StdPlanFach> parseSingeEntry(
-      Element cell, int y, List<((int, int), (int, int))> timeSlots) {
+      Element cell, int y, List<((int, int), (int, int))> timeSlots, bool timeslotOffsetFirstRow) {
     List<StdPlanFach> result = [];
     for (var row in cell.querySelectorAll(".stunde")) {
       var name = row.querySelector("b")?.text.trim();
@@ -91,8 +112,8 @@ class TimetableParser {
       var lehrer = row.querySelector("small")?.text.trim();
       var badge = row.querySelector(".badge")?.text.trim();
       var duration = int.parse(row.parent!.attributes["rowspan"]!);
-      var startTime = timeSlots[y - 1].$1;
-      var endTime = timeSlots[y - 1 + duration - 1].$2;
+      var startTime = timeslotOffsetFirstRow ? timeSlots[y].$1 : timeSlots[y - 1].$1;
+      var endTime = timeslotOffsetFirstRow ? timeSlots[y + duration - 1].$2 : timeSlots[y - 1 + duration - 1].$2;
 
       result.add(StdPlanFach(
           name: name,
