@@ -19,22 +19,29 @@ class ConversationsOverview extends StatefulWidget {
 
 class _ConversationsOverviewState extends State<ConversationsOverview> {
   static const individualIcons = {
-    SearchFunction.subject:   Icon(Icons.subject),
-    SearchFunction.name:      Icon(Icons.person),
-    SearchFunction.schedule:  Icon(Icons.calendar_today)
+    SearchFunction.subject: Icon(Icons.subject),
+    SearchFunction.name: Icon(Icons.person),
+    SearchFunction.schedule: Icon(Icons.calendar_today)
   };
 
   static final TextEditingController searchController = TextEditingController();
   static final individualControllers = {
-    SearchFunction.subject:   TextEditingController(),
-    SearchFunction.name:      TextEditingController(),
-    SearchFunction.schedule:  TextEditingController()
+    SearchFunction.subject: TextEditingController(),
+    SearchFunction.name: TextEditingController(),
+    SearchFunction.schedule: TextEditingController()
+  };
+
+  static var removeButton = false;
+  static var removeButtons = {
+    SearchFunction.subject: false,
+    SearchFunction.name: false,
+    SearchFunction.schedule: false
   };
 
   final ConversationsFetcher conversationsFetcher =
       client.fetchers.conversationsFetcher;
   final GlobalKey<RefreshIndicatorState> _refreshKey =
-      GlobalKey<RefreshIndicatorState>();
+  GlobalKey<RefreshIndicatorState>();
   final ValueNotifier<bool> showHidden = ValueNotifier(false);
 
   bool expand = false;
@@ -49,80 +56,128 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: Size(double.maxFinite, expand ? 200 : 16),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 0, bottom: 8),
-            child: Column(
-              children: [
-                if (expand) ...[
-                 ...List<Padding>.generate(
-                   client.conversations.filter.individual.length,
-                     (i) {
-                       SearchFunction function = client.conversations.filter.individual.keys.elementAt(i);
+        appBar: AppBar(
+          bottom: PreferredSize(
+            preferredSize: Size(double.maxFinite, expand ? 200 : 16),
+            child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 8.0, right: 8.0, top: 0, bottom: 8),
+                child: Column(
+                  children: [
+                    if (expand) ...[
+                      ...List<Padding>.generate(
+                          client.conversations.filter.individual.length, (i) {
+                        SearchFunction function = client
+                            .conversations.filter.individual.keys
+                            .elementAt(i);
+
+                        filterFunction(String text) {
+                          client.conversations.filter.individual[function] =
+                              text;
+                          client.conversations.filter.supply();
+
+                          if (text.isEmpty) {
+                            setState(() {
+                              removeButtons[function] = false;
+                            });
+                          }
+
+                          if (removeButtons[function] == false &&
+                              text.isNotEmpty) {
+                            setState(() {
+                              removeButtons[function] = true;
+                            });
+                          }
+                        }
 
                         return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: SearchBar(
-                              hintText: AppLocalizations.of(context)!.individualSearchHint(function.name),
-                              textInputAction: TextInputAction.search,
-                              controller: individualControllers[function],
-                              onSubmitted: (String text) {
-                                client.conversations.filter.individual[function] = text;
-                                client.conversations.filter.supply();
-                              },
-                              leading: Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: individualIcons[function],
-                              ),
-                              trailing: [
-                                IconButton(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: SearchBar(
+                            hintText: AppLocalizations.of(context)!
+                                .individualSearchHint(function.name),
+                            textInputAction: TextInputAction.search,
+                            controller: individualControllers[function],
+                            onSubmitted: filterFunction,
+                            onChanged: filterFunction,
+                            leading: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: individualIcons[function],
+                            ),
+                            trailing: [
+                              Visibility(
+                                visible: removeButtons[function]!,
+                                child: IconButton(
                                     onPressed: () {
-                                      client.conversations.filter.individual[function] = "";
+                                      client.conversations.filter
+                                          .individual[function] = "";
                                       individualControllers[function]!.clear();
                                       client.conversations.filter.supply();
+
+                                      setState(() {
+                                        removeButtons[function] = false;
+                                      });
                                     },
-                                    icon: const Icon(Icons.delete)
-                                )
-                              ],
-                            ),
+                                    icon: const Icon(Icons.delete)),
+                              )
+                            ],
+                          ),
                         );
-                     }
-                 )
-                ],
-                SearchBar(
-                  hintText: AppLocalizations.of(context)!.searchHint,
-                  textInputAction: TextInputAction.search,
-                  controller: searchController,
-                  onSubmitted: (String text) {
-                    client.conversations.filter.searchText = text;
-                    client.conversations.filter.supply();
-                  },
-                  trailing: [
-                    IconButton(
-                        onPressed: () {
-                          client.conversations.filter.searchText = "";
-                          searchController.clear();
-                          client.conversations.filter.supply();
-                        },
-                        icon: const Icon(Icons.delete)
-                    ),
-                    IconButton(
-                        onPressed: () {
+                      })
+                    ],
+                    SearchBar(
+                      hintText: AppLocalizations.of(context)!.searchHint,
+                      textInputAction: TextInputAction.search,
+                      controller: searchController,
+                      onSubmitted: (String text) {
+                        client.conversations.filter.searchText = text;
+                        client.conversations.filter.supply();
+                      },
+                      onChanged: (String text) {
+                        client.conversations.filter.searchText = text;
+                        client.conversations.filter.supply();
+
+                        if (text.isEmpty) {
                           setState(() {
-                            expand = !expand;
+                            removeButton = false;
                           });
-                        },
-                        icon: expand ? const Icon(Icons.expand_less) : const Icon(Icons.expand_more)
-                    )
+                        }
+
+                        if (removeButton == false && text.isNotEmpty) {
+                          setState(() {
+                            removeButton = true;
+                          });
+                        }
+                      },
+                      trailing: [
+                        Visibility(
+                          visible: removeButton,
+                          child: IconButton(
+                              onPressed: () {
+                                client.conversations.filter.searchText = "";
+                                searchController.clear();
+                                client.conversations.filter.supply();
+
+                                setState(() {
+                                  removeButton = false;
+                                });
+                              },
+                              icon: const Icon(Icons.delete)),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                expand = !expand;
+                              });
+                            },
+                            icon: expand
+                                ? const Icon(Icons.expand_less)
+                                : const Icon(Icons.expand_more))
+                      ],
+                    ),
                   ],
-                ),
-              ],
-            )
+                )),
           ),
         ),
-      ),
         body: StreamBuilder(
             stream: conversationsFetcher.stream,
             builder: (context, snapshot) {
@@ -131,7 +186,8 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                     error: snapshot.data!.error!,
                     name: AppLocalizations.of(context)!.messages,
                     retry: retryFetcher(conversationsFetcher));
-              } else if (snapshot.data?.status == FetcherStatus.fetching || snapshot.data == null) {
+              } else if (snapshot.data?.status == FetcherStatus.fetching ||
+                  snapshot.data == null) {
                 return const Center(child: CircularProgressIndicator());
               } else {
                 return RefreshIndicator(
@@ -144,15 +200,21 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                       itemBuilder: (context, index) {
                         if (index == snapshot.data?.content.length) {
                           return Padding(
-                            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 12.0, bottom: 16.0),
+                            padding: const EdgeInsets.only(
+                                left: 12.0,
+                                right: 12.0,
+                                top: 12.0,
+                                bottom: 16.0),
                             child: Column(
                               children: [
                                 Text(
-                                  AppLocalizations.of(context)!.noFurtherEntries,
+                                  AppLocalizations.of(context)!
+                                      .noFurtherEntries,
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 Text(
-                                  AppLocalizations.of(context)!.notificationsNote,
+                                  AppLocalizations.of(context)!
+                                      .notificationsNote,
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   textAlign: TextAlign.center,
                                 ),
@@ -164,8 +226,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                         return ConversationTile(
                           entry: snapshot.data?.content[index],
                         );
-                      }
-                  ),
+                      }),
                 );
               }
             }),
@@ -173,20 +234,23 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             ValueListenableBuilder(
-              valueListenable: showHidden,
-              builder: (context, show, _) {
-                return FloatingActionButton(
-                  heroTag: "visibility",
-                  onPressed: () async {
-                    showHidden.value = !showHidden.value;
-                    client.conversations.filter.showHidden = showHidden.value;
-                    client.conversations.filter.supply();
-                  },
-                  child: show ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off),
-                );
-              }
+                valueListenable: showHidden,
+                builder: (context, show, _) {
+                  return FloatingActionButton(
+                    heroTag: "visibility",
+                    onPressed: () async {
+                      showHidden.value = !showHidden.value;
+                      client.conversations.filter.showHidden = showHidden.value;
+                      client.conversations.filter.supply();
+                    },
+                    child: show
+                        ? const Icon(Icons.visibility)
+                        : const Icon(Icons.visibility_off),
+                  );
+                }),
+            const SizedBox(
+              height: 10,
             ),
-            const SizedBox(height: 10,),
             FloatingActionButton(
               onPressed: () async {
                 bool canChooseType;
@@ -196,14 +260,13 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                   return;
                 }
 
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      if (canChooseType) {
-                        return const TypeChooser();
-                      }
-                      return const CreateConversation(chatType: null);
-                    })
-                );
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  if (canChooseType) {
+                    return const TypeChooser();
+                  }
+                  return const CreateConversation(chatType: null);
+                }));
               },
               child: const Icon(Icons.edit),
             ),
@@ -214,6 +277,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
 class ConversationTile extends StatefulWidget {
   final OverviewEntry entry;
+
   const ConversationTile({super.key, required this.entry});
 
   @override
@@ -221,15 +285,26 @@ class ConversationTile extends StatefulWidget {
 }
 
 class _ConversationTileState extends State<ConversationTile> {
+  ValueNotifier<bool> dismissing = ValueNotifier(false);
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 88,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: SizedBox(
+        height: 72,
         child: Dismissible(
           key: UniqueKey(),
           direction: DismissDirection.startToEnd,
+          onUpdate: (details) {
+            if (details.progress <= 0.002) {
+              dismissing.value = false;
+            }
+
+            if (details.progress > 0.002) {
+              dismissing.value = true;
+            }
+          },
           confirmDismiss: (_) async {
             try {
               final result = widget.entry.hidden
@@ -253,115 +328,159 @@ class _ConversationTileState extends State<ConversationTile> {
             }
           },
           onDismissed: (_) {
-            client.conversations.filter.toggleEntry(widget.entry.id, hidden: true);
+            dismissing.value = false;
+            client.conversations.filter
+                .toggleEntry(widget.entry.id, hidden: true);
           },
           background: DecoratedBox(
             decoration: BoxDecoration(
-                color: widget.entry.hidden ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
-                borderRadius: BorderRadius.circular(12)
-            ),
+                color: widget.entry.hidden
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+                borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Row(
                 children: [
                   Icon(
                     widget.entry.hidden ? Icons.visibility : Icons.visibility_off,
-                    color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError,
+                    color: widget.entry.hidden
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onError,
                   ),
-                  const SizedBox(width: 4.0,),
+                  const SizedBox(
+                    width: 4.0,
+                  ),
                   Text(
                     widget.entry.hidden
                         ? AppLocalizations.of(context)!.conversationShow
                         : AppLocalizations.of(context)!.conversationHide,
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(color: widget.entry.hidden ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onError),
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: widget.entry.hidden
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onError),
                   )
                 ],
               ),
             ),
           ),
-          child: Card(
-            color: widget.entry.hidden
-                ? Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75)
-                : null,
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      if (widget.entry.unread == true) {
-                        client.conversations.filter.toggleEntry(widget.entry.id, unread: true);
-                      }
+          child: ValueListenableBuilder(
+            valueListenable: dismissing,
+            builder: (context, isDismissing, _) => Card(
+              margin: const EdgeInsets.all(0),
+              color: widget.entry.hidden
+                  ? Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerLow
+                  .withOpacity(0.75)
+                  : null,
+              shape: isDismissing
+                  ? const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(12.0),
+                    bottomRight: Radius.circular(12.0)),
+              )
+                  : null,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        if (widget.entry.unread == true) {
+                          client.conversations.filter
+                              .toggleEntry(widget.entry.id, unread: true);
+                        }
 
-                      return ConversationsChat.fromEntry(widget.entry);
-                    },
-                  ),
-                );
-              },
-              customBorder: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (widget.entry.hidden) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 64.0),
-                          child: Icon(
-                            Icons.visibility_off,
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.4)
-                                : Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75),
-                            size: 65,
-                          ),
-                        ),
-                      ],
+                        return ConversationsChat.fromEntry(widget.entry);
+                      },
                     ),
-                  ],
-                  Badge(
-                    smallSize: widget.entry.unread ? 9 : 0,
-                    child: ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  );
+                },
+                customBorder: isDismissing
+                    ? const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(12.0),
+                      bottomRight: Radius.circular(12.0)),
+                )
+                    : RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (widget.entry.hidden) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Flexible(
-                            flex: 3,
-                            child: Text(
-                              widget.entry.title,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyLarge,
+                          Padding(
+                            padding: const EdgeInsets.only(right: 64.0),
+                            child: Icon(
+                              Icons.visibility_off,
+                              color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHigh
+                                  .withOpacity(0.4)
+                                  : Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerLow
+                                  .withOpacity(0.75),
+                              size: 65,
                             ),
                           ),
-                          if (widget.entry.shortName != null) ...[
+                        ],
+                      ),
+                    ],
+                    Badge(
+                      smallSize: widget.entry.unread ? 9 : 0,
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
                             Flexible(
+                              flex: 3,
                               child: Text(
-                                widget.entry.shortName!,
+                                widget.entry.title,
                                 overflow: TextOverflow.ellipsis,
-                                style: widget.entry.shortName != null
-                                    ? Theme.of(context).textTheme.titleMedium
-                                    : Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.error),
+                                style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ),
-                          ]
-                        ],
-                      ),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            widget.entry.date,
-                          ),
-                          Text(
-                            widget.entry.fullName,
-                          ),
-                        ],
+                            if (widget.entry.shortName != null) ...[
+                              Flexible(
+                                child: Text(
+                                  widget.entry.shortName!,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: widget.entry.shortName != null
+                                      ? Theme.of(context).textTheme.titleMedium
+                                      : Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .error),
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                        subtitle: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              widget.entry.date,
+                            ),
+                            Text(
+                              widget.entry.fullName,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -370,5 +489,3 @@ class _ConversationTileState extends State<ConversationTile> {
     );
   }
 }
-
-

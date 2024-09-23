@@ -109,6 +109,9 @@ class ConversationsFetcher extends Fetcher<dynamic> {
 
   /// Force pushes a new supply for the stream.
   void supply(final List<OverviewEntry> content) {
+    print("######################");
+    print("supply");
+
     _addResponse(FetcherResponse<List<OverviewEntry>>(
         status: FetcherStatus.done,
       content: content
