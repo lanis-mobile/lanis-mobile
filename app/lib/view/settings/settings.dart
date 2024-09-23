@@ -6,7 +6,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/clear_cache.dart';
-import 'package:sph_plan/view/settings/subsettings/countly_analysis.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
@@ -109,17 +108,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const ClearCacheScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.analytics),
-            title: Text(AppLocalizations.of(context)!.telemetry),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const CountlySettingsScreen()),
               );
             },
           ),

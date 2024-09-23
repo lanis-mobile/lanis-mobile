@@ -28,7 +28,6 @@ class LoginFormState extends State<LoginForm> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool dseAgree = false;
-  bool countlyAgree = false;
 
 
   void login(String username, String password, String schoolID) async {
@@ -158,79 +157,39 @@ class LoginFormState extends State<LoginForm> {
                   height: padding,
                 ),
                 Visibility(
-                  child: Column(
-                    children: [
-                      ExcludeSemantics(
-                        child: CheckboxListTile(
-                          enabled: schoolIDController.text.isNotEmpty,
-                          value: countlyAgree,
-                          title: RichText(
-                            text: TextSpan(
+                  child: ExcludeSemantics(
+                    child: CheckboxListTile(
+                      enabled: schoolIDController.text.isNotEmpty,
+                      value: dseAgree,
+                      title: RichText(
+                        text: TextSpan(
+                          text: AppLocalizations.of(context)!.authIAccept,
+                          style: DefaultTextStyle.of(context).style,
+                          children: <TextSpan>[
+                            TextSpan(
                               text: AppLocalizations.of(context)!
-                                  .authSendBugReports,
-                              style: DefaultTextStyle.of(context).style,
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: 'Countly',
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () => launchUrl(
-                                        Uri.parse("https://countly.com/lite")),
-                                ),
-                                const TextSpan(
-                                  text: ')',
-                                ),
-                              ],
+                                  .authTermsOfService,
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () => launchUrl(Uri.parse(
+                                    "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
                             ),
-                          ),
-                          onChanged: (val) async {
-                            setState(() {
-                              countlyAgree = val!;
-                            });
-                            await globalStorage.write(
-                                key: StorageKey.settingsUseCountly,
-                                value: val.toString());
-                          },
+                            TextSpan(
+                              text: AppLocalizations.of(context)!
+                                  .authOfLanisMobile,
+                            ),
+                          ],
                         ),
                       ),
-                      ExcludeSemantics(
-                        child: CheckboxListTile(
-                          enabled: schoolIDController.text.isNotEmpty,
-                          value: dseAgree,
-                          title: RichText(
-                            text: TextSpan(
-                              text: AppLocalizations.of(context)!.authIAccept,
-                              style: DefaultTextStyle.of(context).style,
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: AppLocalizations.of(context)!
-                                      .authTermsOfService,
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () => launchUrl(Uri.parse(
-                                        "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
-                                ),
-                                TextSpan(
-                                  text: AppLocalizations.of(context)!
-                                      .authOfLanisMobile,
-                                ),
-                              ],
-                            ),
-                          ),
-                          onChanged: (val) {
-                            setState(() {
-                              dseAgree = val!;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
+                      onChanged: (val) {
+                        setState(() {
+                          dseAgree = val!;
+                        });
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(
