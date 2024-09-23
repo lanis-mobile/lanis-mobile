@@ -27,7 +27,6 @@ class TimetableParser {
 
     final response = await dio.get(
         "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]?[0]}");
-
     return parse(response.data);
   }
 
@@ -77,6 +76,8 @@ class TimetableParser {
     List<List<bool>> alreadyParsed = List.generate(
         timeSlots.length + 1, (_) => List.generate(5, (_) => false));
 
+    bool timeslotOffsetFirstRow = tbody.children[0].children[0].text.trim() != "";
+
     for (var (rowIndex, rowElement) in tbody.children.indexed) {
       if (rowIndex == 0) continue; // skip first empty row
       for (var (colIndex, colElement) in rowElement.children.indexed) {
@@ -84,7 +85,7 @@ class TimetableParser {
         final int rowSpan = int.parse(colElement.attributes["rowspan"] ?? "1");
 
         var actualDay = colIndex - 1;
-        //actualDay sould be the first where alreadyParsed is false
+        //actualDay should be the first where alreadyParsed is false
         while (alreadyParsed[rowIndex][actualDay]) {
           actualDay++;
         }
@@ -94,14 +95,14 @@ class TimetableParser {
         }
 
         result[actualDay]
-            .addAll(parseSingeEntry(colElement, rowIndex, timeSlots));
+            .addAll(parseSingeEntry(colElement, rowIndex, timeSlots, timeslotOffsetFirstRow));
       }
     }
     return result;
   }
 
   List<StdPlanFach> parseSingeEntry(
-      Element cell, int y, List<((int, int), (int, int))> timeSlots) {
+      Element cell, int y, List<((int, int), (int, int))> timeSlots, bool timeslotOffsetFirstRow) {
     List<StdPlanFach> result = [];
     for (var row in cell.querySelectorAll(".stunde")) {
       var name = row.querySelector("b")?.text.trim();
@@ -111,8 +112,8 @@ class TimetableParser {
       var lehrer = row.querySelector("small")?.text.trim();
       var badge = row.querySelector(".badge")?.text.trim();
       var duration = int.parse(row.parent!.attributes["rowspan"]!);
-      var startTime = timeSlots[y - 1].$1;
-      var endTime = timeSlots[y - 1 + duration - 1].$2;
+      var startTime = timeslotOffsetFirstRow ? timeSlots[y].$1 : timeSlots[y - 1].$1;
+      var endTime = timeslotOffsetFirstRow ? timeSlots[y + duration - 1].$2 : timeSlots[y - 1 + duration - 1].$2;
 
       result.add(StdPlanFach(
           name: name,
