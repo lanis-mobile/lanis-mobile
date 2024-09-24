@@ -102,11 +102,7 @@ class Storage {
   final secureStorage =
       const FlutterSecureStorage(aOptions: AndroidOptions.defaultOptions);
 
-  Storage() {
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
+  Future<void> initialize() async {
     prefs = await SharedPreferences.getInstance();
   }
 
@@ -131,9 +127,6 @@ class Storage {
   }
 
   Future<String> read({required StorageKey key, secure = false}) async {
-    // Ensure that prefs is initialized before accessing it
-    await _initialize();
-
     if (secure) {
       return Future.value((await secureStorage.read(
               key: key.key, aOptions: _getAndroidOptions())) ??
