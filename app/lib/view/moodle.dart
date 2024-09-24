@@ -225,8 +225,15 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                             return NavigationActionPolicy.CANCEL;
                           }
 
+                          if (reachedLogin && uri.rawValue.contains('start.schulportal.hessen.de')) {
+                            hideWebView.value = true;
+                            Navigator.pop(context);
+                            return NavigationActionPolicy.CANCEL;
+                          }
+
                           if (!uri.rawValue
                               .contains(".schulportal.hessen.de")) {
+
                             await launchUrl(uri);
 
                             return NavigationActionPolicy.CANCEL;
