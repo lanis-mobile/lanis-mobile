@@ -5,7 +5,7 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:sph_plan/view/settings/subsettings/about.dart';
-import 'package:sph_plan/view/settings/subsettings/clear_cache.dart';
+import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/supported_features.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
@@ -107,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const ClearCacheScreen()),
+                    builder: (context) => const CacheScreen()),
               );
             },
           ),

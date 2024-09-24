@@ -110,6 +110,7 @@ class SPHclient {
   ///
   ///Has to be called before [login] to ensure that no [CredentialsIncompleteException] is thrown.
   Future<void> loadFromStorage() async {
+    await deleteFilesOlderThan(const Duration(days: 7));
     username = await globalStorage.read(key: StorageKey.userUsername);
     password =
         await globalStorage.read(key: StorageKey.userPassword, secure: true);
@@ -120,8 +121,6 @@ class SPHclient {
     fetchers = GlobalFetcher();
 
     substitutions.loadFilterFromStorage();
-
-    return;
   }
 
   ///Logs the user in and fetches the necessary metadata.
@@ -145,7 +144,7 @@ class SPHclient {
         await fetchRedundantData();
       }
       if (!backgroundFetch) {
-        travelMenu = await getTravelMenu();
+        travelMenu = await getFastTravelMenu();
         userData = await fetchUserData();
       }
       fetchers = GlobalFetcher();
@@ -271,7 +270,7 @@ class SPHclient {
   }
 
   ///returns the lanis fast navigation menubar.
-  Future<dynamic> getTravelMenu() async {
+  Future<dynamic> getFastTravelMenu() async {
     final response = await dio.get(
         "https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps");
     return jsonDecode(response.data.toString())["entrys"];
@@ -356,7 +355,7 @@ class SPHclient {
     await deleteSubfoldersAndFiles(tempDir);
   }
 
-  // This function generates a unique hash for a given source string
+  /// This function generates a unique hash for a given source string
   String generateUniqueHash(String source) {
     var bytes = utf8.encode(source);
     var digest = sha256.convert(bytes);
@@ -369,7 +368,7 @@ class SPHclient {
 
   /// This function checks if a file exists in the temporary directory downloaded by [downloadFile]
   Future<bool> doesFileExist(String url, String filename) async {
-    var tempDir = await getTemporaryDirectory();
+    var tempDir = await getFileCacheDirectory();
     String urlHash = generateUniqueHash(url);
     String folderPath = "${tempDir.path}/$urlHash";
     String filePath = "$folderPath/$filename";
@@ -378,13 +377,23 @@ class SPHclient {
     return existingFile.existsSync();
   }
 
+  Future<Directory> getFileCacheDirectory() async {
+    var tempDir = await getTemporaryDirectory();
+    String path = "${tempDir.path}/document_cache";
+    Directory dir = Directory(path);
+    if (!dir.existsSync()) {
+      dir.createSync();
+    }
+    return dir;
+  }
+
   ///downloads a file from an URL and returns the path of the file.
   ///
   ///The file is stored in the temporary directory of the device.
   ///So calling the same URL twice will result in the same file and one Download.
   Future<String> downloadFile(String url, String filename) async {
     try {
-      var tempDir = await getTemporaryDirectory();
+      var tempDir = await getFileCacheDirectory();
       String urlHash = generateUniqueHash(url);
       String folderPath = "${tempDir.path}/$urlHash";
       String savePath = "$folderPath/$filename";
@@ -414,6 +423,19 @@ class SPHclient {
       return savePath;
     } catch (e) {
       return "";
+    }
+  }
+  
+  Future<void> deleteFilesOlderThan(Duration duration) async {
+    var tempDir = await getFileCacheDirectory();
+    var files = tempDir.listSync(recursive: true);
+    for (var file in files) {
+      if (file is File) {
+        var stat = file.statSync();
+        if (DateTime.now().difference(stat.modified).compareTo(duration) > 0) {
+          file.deleteSync();
+        }
+      }
     }
   }
 }

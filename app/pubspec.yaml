@@ -34,7 +34,7 @@ dependencies:
   cookie_jar: ^4.0.8
   dio: ^5.3.3
   html: ^0.15.4
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.0
   flutter_local_notifications: ^17.1.2
   workmanager: # better solution is required!
     git:
@@ -65,7 +65,7 @@ dependencies:
   intl: ^0.19.0
   cached_network_image: ^3.3.1
   file_icon: ^1.0.0
-  syncfusion_flutter_calendar: ^26.1.35
+  syncfusion_flutter_calendar: ^27.1.48
   flutter_localizations:
     sdk: flutter
   logger: ^2.2.0
