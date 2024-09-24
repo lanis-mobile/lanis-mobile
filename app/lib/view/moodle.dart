@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io' as io;
 
-
 import '../client/client.dart';
 import '../shared/launch_file.dart';
 
@@ -87,6 +86,11 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     pullToRefreshController!.setColor(Theme.of(context).colorScheme.primary);
     pullToRefreshController!
         .setBackgroundColor(Theme.of(context).colorScheme.surfaceContainer);
+  }
+
+  /// replaces ' with \'
+  String _sanitizeCredentialsForJavaScript(String source) {
+    return source.replaceAll("'", "\\'");
   }
 
   @override
@@ -261,11 +265,11 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                   source:
                                   """
                                   setTimeout(function() {
-                                    document.querySelector('#username2').value = '${client.username}';
+                                    document.querySelector('#username2').value = '${_sanitizeCredentialsForJavaScript(client.username)}';
                                   }, 250);
                                   
                                   setTimeout(function() {
-                                    document.querySelector('#inputPassword').value = '${client.password}';
+                                    document.querySelector('#inputPassword').value = '${_sanitizeCredentialsForJavaScript(client.password)}';
                                   }, 250);
                                   
                                   setTimeout(function() {
