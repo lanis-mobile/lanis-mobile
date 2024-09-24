@@ -1,6 +1,6 @@
 // Copy this file and adjust. DON'T PUT THE FILE IN THIS PROJECT! DON'T EVEN ADD THIS TO YOUR GIT!
-// Attach --dart-define-from-file=PATH_TO_YOUR_COPY to your run/build command.
-// Don't forget to remove comments and note that these values will be constants.
+// Attach --dart-define-from-file=PATH_TO_YOUR_COPY to your run arguments.
+// Don't forget to remove comments and note that these values will be constants (it will be always applied at the beginning).
 
 {
   "ID":                "SCHOOLID",
