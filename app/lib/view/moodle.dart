@@ -23,6 +23,8 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   ValueNotifier<int> progressIndicator = ValueNotifier(0);
   ValueNotifier<bool> hideWebView = ValueNotifier(false);
   ValueNotifier<bool> loggedIn = ValueNotifier(false);
+  ValueNotifier<String> currentPageTitle = ValueNotifier("");
+
 
   String? error;
   WebUri? errorUrl;
@@ -249,6 +251,9 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                           pullToRefreshController!.endRefreshing();
                           progressIndicator.value = 0;
                         },
+                        onTitleChanged: (controller, title) {
+                          currentPageTitle.value = title ?? "";
+                        },
                         onPageCommitVisible: (controller, uri) async {
                           if (!loggedIn.value) {
                             if (!reachedLogin && uri!.rawValue.contains("singleSignOn") && !uri.rawValue.contains(client.schoolID)) {
@@ -421,7 +426,16 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                           }
                         },
                         icon: const Icon(Icons.link)),
-                    const Spacer(),
+                    Expanded(
+                      child: Center(
+                          child: ValueListenableBuilder(valueListenable: currentPageTitle, builder: (context, title, _) =>
+                              Text(title,
+                                style: Theme.of(context).textTheme.labelLarge,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          )
+                      ),
+                    ),
                     ValueListenableBuilder(
                         valueListenable: canGoBack,
                         builder: (context, can, _) {
