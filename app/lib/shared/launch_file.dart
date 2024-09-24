@@ -4,7 +4,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../client/client.dart';
-import '../client/logger.dart';
 
 
 void launchFile(BuildContext context, String url, String filename,
@@ -56,7 +55,6 @@ void launchFile(BuildContext context, String url, String filename,
               ));
     } else {
       final result = await OpenFile.open(filepath);
-      logger.i(result.message);
       //sketchy, but "open_file" left us no other choice
       if (result.message.contains("No APP found to open this file")) {
         showDialog(

@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ClearCacheScreen extends StatelessWidget {
-  const ClearCacheScreen({super.key});
+import '../../../client/client.dart';
+
+class CacheScreen extends StatelessWidget {
+  const CacheScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +47,7 @@ class _BodyState extends State<Body> {
   }
 
   void clearCache() async {
-    final dir = await getTemporaryDirectory();
+    final dir = await client.getFileCacheDirectory();
     dir.deleteSync(recursive: true);
     setState(() {
       cacheStats = dirStatSync(dir.path);
@@ -56,7 +57,7 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-    getTemporaryDirectory().then((dir) {
+    client.getFileCacheDirectory().then((dir) {
       setState(() {
         cacheStats = dirStatSync(dir.path);
       });
@@ -110,7 +111,7 @@ class _BodyState extends State<Body> {
               },
             );
           },
-        )
+        ),
       ],
     );
   }

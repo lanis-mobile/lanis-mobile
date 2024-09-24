@@ -115,7 +115,7 @@
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoPersonalSchoolSupport": "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
-  "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.",
+  "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben. Dateien werden automatisch nach 7 Tagen gelöscht.",
 
   "introWelcomeTitle": "Willkommen",
   "introForStudentsByStudentsTitle": "Von Schülern. Für Schüler.",

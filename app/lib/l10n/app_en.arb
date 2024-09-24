@@ -115,7 +115,7 @@
   "settingsInfoUserData": "All user data is stored on the Lanis servers.",
   "settingsInfoPersonalSchoolSupport": "Every school has different apps. Your school has the apps listed here. Not all apps are supported by this app. If an app does not work as expected, please contact the developer of the app. There is probably a problem with your school that can be fixed.",
   "settingsInfoNotifications": "The frequency and time at which the substitution plan is updated depends on various factors relating to the end device. In battery-saving mode, for example, the substitution plan is often not updated.",
-  "settingsInfoClearCache": "All files that you have ever downloaded form the cache. You can empty it here to free up storage space.",
+  "settingsInfoClearCache": "All files that you have ever downloaded form the cache. You can empty it here to free up storage space. Documents older than 7 days are automatically deleted.",
 
   "introWelcomeTitle": "Welcome",
   "introForStudentsByStudentsTitle": "By students for students",
