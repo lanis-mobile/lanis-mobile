@@ -78,7 +78,7 @@ dependencies:
   flutter_quill: ^10.0.0
   quill_html_converter: ^9.3.2
   flutter_tagging_plus: ^4.0.2
-  webview_inapp: ^1.0.3
+  flutter_inappwebview: ^6.1.0
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:

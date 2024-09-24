@@ -35,8 +35,8 @@
             android:value="2" />
 
         <provider
-                android:name="com.pichillilorenzo.webview_inapp_android.InAppWebViewFileProvider"
-                android:authorities="${applicationId}.webview_inapp_android.fileprovider"
+                android:name="com.pichillilorenzo.flutter_inappwebview_android.InAppWebViewFileProvider"
+                android:authorities="${applicationId}.flutter_inappwebview_android.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
