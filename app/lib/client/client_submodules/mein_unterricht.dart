@@ -6,6 +6,7 @@ import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../shared/types/lesson.dart';
 import '../../shared/types/upload.dart';
 
 class MeinUnterrichtParser {
@@ -16,17 +17,34 @@ class MeinUnterrichtParser {
     dio = dioClient;
   }
 
-  Future<dynamic> getOverview() async {
+  Future<Lessons> getOverview() async {
     if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       throw NotSupportedException();
     }
 
-    var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
+    var lessons = <Lesson>[];
+
+    int unixTime = DateTime.now().millisecondsSinceEpoch;
 
     final response =
-        await dio.get("https://start.schulportal.hessen.de/meinunterricht.php");
+        await dio.get("https://start.schulportal.hessen.de/meinunterricht.php?cacheBreaker=$unixTime");
     var encryptedHTML = client.cryptor.decryptEncodedTags(response.data);
     var document = parse(encryptedHTML);
+
+    var kursmappenDOM = document.getElementById("mappen");
+    final _row = kursmappenDOM?.getElementsByClassName("row");
+    var mappen = _row!.isEmpty ? null : _row[0].children;
+    if (mappen != null) {
+      for (var mappe in mappen) {
+        String url = mappe.querySelector("a.btn.btn-primary")!.attributes["href"]!;
+        lessons.add(Lesson(
+          name: mappe.getElementsByTagName("h2")[0].text.trim(),
+          teacher: mappe.querySelector("div.btn-group>button")?.attributes["title"],
+          courseURL: Uri.parse(url),
+          courseID: url.split("id=")[1],
+        ));
+      }
+    }
 
     //Aktuelle Einträge
     var schoolClasses = document.querySelectorAll("tr.printable");
@@ -34,42 +52,42 @@ class MeinUnterrichtParser {
       var teacher = schoolClass.querySelector(".teacher");
 
       if (schoolClass.querySelector(".datum") != null) {
-        result["aktuell"]?.add({
-          "name": schoolClass.querySelector(".name")?.text.trim(),
-          "teacher": {
-            "short": teacher
-                ?.getElementsByClassName(
-                    "btn btn-primary dropdown-toggle btn-xs")[0]
-                .text
-                .trim(),
-            "name":
-                teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
-          },
-          "thema": {
-            "title": schoolClass.querySelector(".thema")?.text.trim(),
-            "date": schoolClass.querySelector(".datum")?.text.trim()
-          },
-          "data": {
-            "entry": schoolClass.attributes["data-entry"],
-            "book": schoolClass.attributes["data-entry"]
-          },
-          "_courseURL":
-              schoolClass.querySelector("td>h3>a")?.attributes["href"]
-        });
+        String? topicTitle = schoolClass.querySelector(".thema")?.text.trim();
+        String? teacherKuerzel = teacher
+            ?.getElementsByClassName("btn btn-primary dropdown-toggle btn-xs")[0]
+            .text
+            .trim();
+        String? teacherName = teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim();
+        String? topicDateString = schoolClass.querySelector(".datum")?.text.trim();
+        DateTime? topicDate = DateTime.parse(topicDateString!.split(".").reversed.join("-"));
+        String? courseURL = schoolClass.querySelector("td>h3>a")?.attributes["href"];
+        int fileCount = schoolClass.getElementsByClassName('file').length;
+
+        Homework? homework;
+        if (schoolClass.querySelector('.homework') != null) {
+          homework = Homework(
+            description: schoolClass.querySelector('.realHomework')!.text.trim(),
+            homeWorkDone: schoolClass.querySelector('.undone') == null,
+          );
+        }
+        String entryID = schoolClass.attributes["data-entry"]!;
+
+        // find lesson by courseURL and add currentEntry
+        for (var lesson in lessons) {
+          if (lesson.courseURL.toString() == courseURL) {
+            lesson.currentEntry = CurrentEntry(
+              entryID: entryID,
+              topicTitle: topicTitle,
+              topicDate: topicDate,
+              homework: homework,
+              fileCount: fileCount,
+            );
+            lesson.teacher = teacherName;
+            lesson.teacherKuerzel = teacherKuerzel;
+            break;
+          }
+        }
       }
-
-      //sort by date
-      result["aktuell"]?.sort((a, b) {
-        var aDate = a["thema"]["date"];
-        var bDate = b["thema"]["date"];
-
-        var aDateTime = DateTime(int.parse(aDate.split(".")[2]),
-            int.parse(aDate.split(".")[1]), int.parse(aDate.split(".")[0]));
-        var bDateTime = DateTime(int.parse(bDate.split(".")[2]),
-            int.parse(bDate.split(".")[1]), int.parse(bDate.split(".")[0]));
-
-        return bDateTime.compareTo(aDateTime);
-      });
     }
 
     //Anwesenheiten
@@ -77,61 +95,39 @@ class MeinUnterrichtParser {
     var thead = anwesendDOM?.querySelector("thead>tr");
     var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
-    var keys = [];
+    List<String> keys = [];
     thead?.children.forEach((element) => keys.add(element.text.trim()));
 
-    tbody?.forEach((elem) {
+    tbody?.forEach((row) {
       var textElements = [];
-      for (var i = 0; i < elem.children.length; i++) {
-        var element = elem.children[i];
-        element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+      for (var i = 0; i < row.children.length; i++) {
+        var col = row.children[i];
+        col.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
 
-        if (keys[i] != "Kurs") {
-          textElements.add(element.text.trim());
-        } else {
-          textElements.add(element.text.trim());
-        }
+        textElements.add(col.text.trim());
       }
 
-      var rowEntry = {};
+      Map<String, String> attendances = {};
 
       for (int i = 0; i < keys.length; i++) {
-        var key = keys[i];
+        var key = keys[i].toLowerCase();
         var value = textElements[i];
-
-        rowEntry[key] = value;
+        if (['kurs', 'lehrkraft'].contains(key)) continue;
+        attendances[key] = value;
       }
+      var hyperlinkToCourse = row.getElementsByTagName("a")[0];
+      String courseURL = hyperlinkToCourse.attributes["href"]!;
 
-      //get url of course
-      var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
-      rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
-
-      result["anwesenheiten"]?.add(rowEntry);
+      // find lesson by courseURL and add attendances
+      for (var lesson in lessons) {
+        if (courseURL.contains(lesson.courseID)) {
+          lesson.attendances = attendances;
+          break;
+        }
+      }
     });
 
-    //Kursmappen
-    var kursmappenDOM = document.getElementById("mappen");
-    var parsedMappen = [];
-
-    final row = kursmappenDOM?.getElementsByClassName("row");
-    var mappen = row!.isEmpty ? null : row[0].children;
-    if (mappen != null) {
-      for (var mappe in mappen) {
-        parsedMappen.add({
-          "title": mappe.getElementsByTagName("h2")[0].text.trim(),
-          "teacher": mappe
-              .querySelector("div.btn-group>button")
-              ?.attributes["title"],
-          "_courseURL":
-              mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
-        });
-      }
-      result["kursmappen"] = parsedMappen;
-    } else {
-      result["kursmappen"] = [];
-    }
-
-    return result;
+    return lessons;
   }
 
   Future<dynamic> getCourseView(String url) async {
@@ -370,7 +366,7 @@ class MeinUnterrichtParser {
     }
   }
 
-  Future<dynamic> setHomework(
+  Future<String> setHomework(
       String courseID, String courseEntry, bool status) async {
     //returns the response of the http request. 1 means success.
 

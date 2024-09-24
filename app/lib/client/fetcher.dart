@@ -7,7 +7,7 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 
-import '../shared/types/fach.dart';
+import '../shared/types/lesson.dart';
 import '../shared/types/timetable.dart';
 import 'client.dart';
 import 'connection_checker.dart';
@@ -90,11 +90,11 @@ class SubstitutionsFetcher extends Fetcher<SubstitutionPlan> {
   }
 }
 
-class MeinUnterrichtFetcher extends Fetcher<dynamic> {
+class MeinUnterrichtFetcher extends Fetcher<Lessons> {
   MeinUnterrichtFetcher(super.validCacheDuration, {super.storageKey});
 
   @override
-  Future<dynamic> _get() {
+  Future<Lessons> _get() {
     return client.meinUnterricht.getOverview();
   }
 }
