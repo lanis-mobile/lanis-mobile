@@ -125,10 +125,10 @@
   "introHaveFunTitle": "What are you waiting for?",
 
   "introWelcome": "lanis-mobile helps with the daily tasks of the school portal. Whether substitution plan or calendar, news or course booklets. With lanis-mobile you can learn more efficiently and easily.",
-  "introForStudentsByStudents": "This application is developed by students who use the school portal Hessen.\n\nThanks to all developers and bug reporters!",
+  "introForStudentsByStudents": "This application is developed by students who use the school portal Hessen. Join us on our journey! We are always looking for new collaborators!\n\nThanks to all developers and bug reporters!",
   "introCustomize": "You can customize the app to your needs in the settings.",
   "introSchoolPortal": "The school portal has a modular structure. This means that your school may not support all the features of the app or the app may not support all the features of your school.",
-  "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report. If the app detects an error internally, this is also automatically sent anonymously to the developers in order to create an application that is as robust as possible.",
+  "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report via GitHub or E-Mail.",
   "introHaveFun": "Login now to use lanis-mobile. Use the login credentials that you normally use for the school portal website.",
 
   "startupError": "Critical error!",
