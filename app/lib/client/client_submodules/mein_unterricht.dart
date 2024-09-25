@@ -9,6 +9,7 @@ import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/lesson.dart';
 import '../../shared/types/upload.dart';
+import '../logger.dart';
 
 class MeinUnterrichtParser {
   late Dio dio;
@@ -81,6 +82,7 @@ class MeinUnterrichtParser {
               topicTitle: topicTitle,
               topicDate: topicDate,
               homework: homework,
+              uploads: const [],
               files: List.generate(fileCount, (_)=>LessonsFile()),
             );
             lesson.teacher = teacherName;
@@ -230,17 +232,18 @@ class MeinUnterrichtParser {
             ));
           }
         }
+
+        List<String> dateInformation = tableRow.children[0].text.split("\n").map((e) => e.trim()).where((element) => element!="").toList();
+
         history.add(CurrentEntry(
           entryID: tableRow.attributes["data-entry"]!,
           topicTitle: tableRow.children[1].querySelector("big>b")?.text.trim(),
           description: description,
-          topicDate: DateTime.now(), //todo parse date and fix schoolHours
-          schoolHours: tableRow.children[0].text
-              .trim()
-              .replaceAll("  ", "")
-              .replaceAll("\n", " ")
-              .replaceAll("  ", " "),
+          presence: tableRow.children[2].text.trim() == 'nicht erfasst' ? null : tableRow.children[2].text.trim(),
+          topicDate: DateTime.parse(dateInformation[0].split(".").reversed.join("-")),
+          schoolHours: dateInformation[1].replaceAll("Stunde", "").trimRight(),
           files: files,
+          uploads: uploads,
           homework: (homework != null) ? Homework(description: homework, homeWorkDone: homeworkDone) : null,
         ));
       });
@@ -276,7 +279,7 @@ class MeinUnterrichtParser {
           marks.add(LessonMark(
             name: row.children[0].text.trim(),
             date: row.children[1].text.trim(),
-            note: row.children[2].text.trim(),
+            mark: row.children[2].text.trim(),
             comment: (row.children.length == 2)
               ? row.children[1].text.trim().split(":").sublist(1).join(":")
               : null,

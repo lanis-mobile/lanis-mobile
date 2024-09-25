@@ -36,10 +36,10 @@ class LessonExam {
 class LessonMark {
   String name;
   String date;
-  String note;
+  String mark;
   String? comment;
 
-  LessonMark({required this.name, required this.date, required this.note, this.comment});
+  LessonMark({required this.name, required this.date, required this.mark, this.comment});
 }
 
 class CurrentEntry {
@@ -49,9 +49,11 @@ class CurrentEntry {
   DateTime? topicDate;
   String? schoolHours;
   Homework? homework;
+  String? presence;
   List<LessonsFile> files;
+  List<LessonUpload> uploads;
 
-  CurrentEntry({required this.entryID, required this.files, this.topicTitle, this.topicDate, this.homework, this.schoolHours, this.description});
+  CurrentEntry({required this.entryID, required this.files, required this.uploads, this.presence, this.topicTitle, this.topicDate, this.homework, this.schoolHours, this.description});
 }
 
 class Homework {
