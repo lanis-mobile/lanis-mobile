@@ -42,9 +42,9 @@ class _LessonListTileState extends State<LessonListTile> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const Spacer(),
-              if ((widget.lesson.currentEntry?.fileCount ?? 0) > 0) ...[
+              if ((widget.lesson.currentEntry?.files.length ?? 0) > 0) ...[
                 Text(
-                  widget.lesson.currentEntry!.fileCount.toString(),
+                  widget.lesson.currentEntry!.files.toString(),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const Icon(Icons.attach_file, size: 16),

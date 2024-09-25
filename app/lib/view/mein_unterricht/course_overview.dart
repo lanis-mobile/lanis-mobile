@@ -45,7 +45,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       }
 
       String url = widget.dataFetchURL;
-      data = await client.meinUnterricht.getCourseView(url);
+      data = await client.meinUnterricht.getDetailedCourseView(url);
 
       loading = false;
       setState(() {});
