@@ -115,6 +115,11 @@ class MeinUnterrichtParser {
         var key = keys[i].toLowerCase();
         var value = textElements[i];
         if (['kurs', 'lehrkraft'].contains(key)) continue;
+
+        if (value == "") {
+          value = "0";
+        }
+
         attendances[key] = value;
       }
       var hyperlinkToCourse = row.getElementsByTagName("a")[0];

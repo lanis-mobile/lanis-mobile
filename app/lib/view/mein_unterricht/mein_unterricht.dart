@@ -75,7 +75,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AttendancesScreen(lessons: lessons),
+                  builder: (context) => AttendancesScreen(lessons: lessons.where((element) => element.attendances != null).toList()),
                 ),
               );
             },
