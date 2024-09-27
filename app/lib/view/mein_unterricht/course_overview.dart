@@ -262,7 +262,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                               size: 15,
                                             ),
                                           ),
-                                          Text("${dateFormat.format(data!.history[index].topicDate!)}, ${data!.history[index].schoolHours} Stunde",
+                                          Text(AppLocalizations.of(context)!.dateWithHours(
+                                              dateFormat.format(data!.history[index].topicDate!),
+                                              data!.history[index].schoolHours ?? ""
+                                            ),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .labelSmall,

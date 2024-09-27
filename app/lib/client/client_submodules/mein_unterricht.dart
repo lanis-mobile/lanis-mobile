@@ -9,7 +9,6 @@ import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/lesson.dart';
 import '../../shared/types/upload.dart';
-import '../logger.dart';
 
 class MeinUnterrichtParser {
   late Dio dio;
@@ -128,6 +127,14 @@ class MeinUnterrichtParser {
           break;
         }
       }
+    });
+
+    //sort lessons by date
+    lessons.sort((a, b) {
+      if (a.currentEntry?.topicDate == null || b.currentEntry?.topicDate == null) {
+        return 0;
+      }
+      return b.currentEntry!.topicDate!.compareTo(a.currentEntry!.topicDate!);
     });
 
     return lessons;

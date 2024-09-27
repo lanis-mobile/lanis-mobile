@@ -192,5 +192,6 @@
   "schoolCountString": "{count, plural, =0{No schools} one{1 school} other{{count} schools}}",
 
   "timetableSwitchToPersonal": "Switch to Personal timetable",
-  "timetableSwitchToClass": "Switch to Class timetable"
+  "timetableSwitchToClass": "Switch to Class timetable",
+  "dateWithHours": "{date}, {hours} Hours"
 }

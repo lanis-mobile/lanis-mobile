@@ -30,9 +30,9 @@ class AttendancesScreen extends StatelessWidget {
               ),
               subtitle: Column(
                 children: lesson.attendances!.entries.indexed.map((val) {
-                  //(index, entry)
                   final index = val.$1;
                   final entry = val.$2;
+
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     color: index.isEven
