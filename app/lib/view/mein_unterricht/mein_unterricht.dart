@@ -4,6 +4,7 @@ import '../../client/client.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/types/lesson.dart';
 import '../../shared/widgets/error_view.dart';
+import 'attendances.dart';
 import 'lesson_list_tile.dart';
 
 class MeinUnterrichtAnsicht extends StatefulWidget {
@@ -38,41 +39,51 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<FetcherResponse<Lessons>>(
-        stream: fetcher.stream,
-        builder: (BuildContext context,
-            AsyncSnapshot<FetcherResponse<Lessons>> snapshot) {
-          if (snapshot.data?.status == FetcherStatus.fetching) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (snapshot.data?.status == FetcherStatus.error) {
-            return ErrorView(
-              error: snapshot.data!.error!,
-              name: 'Ups.',
-            );
-          }
-          if (snapshot.data?.content == null ||
-              snapshot.data!.content!.isEmpty) {
-            return noDataScreen(context);
-          }
-          Lessons lessons = snapshot.data!.content!;
-          return RefreshIndicator(
+    return StreamBuilder<FetcherResponse<Lessons>>(
+      stream: fetcher.stream,
+      builder: (BuildContext context,
+          AsyncSnapshot<FetcherResponse<Lessons>> snapshot) {
+        if (snapshot.data?.status == FetcherStatus.fetching) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.data?.status == FetcherStatus.error) {
+          return ErrorView(
+            error: snapshot.data!.error!,
+            name: 'Ups.',
+          );
+        }
+        if (snapshot.data?.content == null ||
+            snapshot.data!.content!.isEmpty) {
+          return noDataScreen(context);
+        }
+        Lessons lessons = snapshot.data!.content!;
+        return Scaffold(
+          body: RefreshIndicator(
             onRefresh: () => fetcher.fetchData(forceRefresh: true),
             child: ListView.builder(
               itemCount: lessons.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  child: LessonListTile(lesson: lessons[index]),
-                );
-              },
+              itemBuilder: (BuildContext context, int index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                child: LessonListTile(lesson: lessons[index]),
+              ),
             ),
-          );
-        },
-      ),
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AttendancesScreen(lessons: lessons),
+                ),
+              );
+            },
+            label: Text(AppLocalizations.of(context)!.attendances),
+            icon: const Icon(Icons.access_alarm),
+          ),
+        );
+      },
     );
   }
 }

@@ -5,7 +5,6 @@ import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
 import '../../shared/launch_file.dart';
 import '../../shared/types/lesson.dart';
-import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/format_text.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
