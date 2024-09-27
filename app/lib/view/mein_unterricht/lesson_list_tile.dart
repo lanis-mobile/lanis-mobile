@@ -19,7 +19,7 @@ class _LessonListTileState extends State<LessonListTile> {
 
   bool _showNotExcusedHours() {
     if (widget.lesson.attendances?.containsKey('fehlend') ?? false) {
-      if (int.parse(widget.lesson.attendances!['fehlend'] ?? "0") > 0) {
+      if (int.parse(widget.lesson.attendances?['fehlend'] ?? "0") > 0) {
         return true;
       }
     }
@@ -69,7 +69,7 @@ class _LessonListTileState extends State<LessonListTile> {
                     " ${widget.lesson.teacher} (${widget.lesson.teacherKuerzel})",
                   ),
                   const Spacer(),
-                  Text('${dateFormat.format(widget.lesson.currentEntry!.topicDate!)} '),
+                  Text('${dateFormat.format(widget.lesson.currentEntry?.topicDate ?? DateTime(0))} '),
                   const Icon(Icons.calendar_today, size: 16)
                 ],
               ),
