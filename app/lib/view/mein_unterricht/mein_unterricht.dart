@@ -59,7 +59,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
           return noDataScreen(context);
         }
         Lessons lessons = snapshot.data!.content!;
-        Lessons attandanceLessons = lessons.where((element) => element.attendances != null).toList();
+        Lessons attendanceLessons = lessons.where((element) => element.attendances != null).toList();
 
         return Scaffold(
           body: RefreshIndicator(
@@ -67,19 +67,21 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
             child: ListView.builder(
               itemCount: lessons.length,
               itemBuilder: (BuildContext context, int index) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                padding: index == lessons.length - 1
+                    ? const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 80)
+                    : const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                 child: LessonListTile(lesson: lessons[index]),
               ),
             ),
           ),
           floatingActionButton: Visibility(
-            visible: attandanceLessons.isNotEmpty,
+            visible: attendanceLessons.isNotEmpty,
             child: FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AttendancesScreen(lessons: attandanceLessons),
+                    builder: (context) => AttendancesScreen(lessons: attendanceLessons),
                   ),
                 );
               },
