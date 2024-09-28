@@ -1,11 +1,12 @@
-// ### ENVIRONMENT OPTIONS ###
+// ### OVERWRITE ENVIRONMENT OPTIONS ###
 //
 // How to use this:
-// 1: Copy it to SOMEWHERE SAFE
-// 2: Adjust it and remove comments, options with default values are optional.
+// 1: Copy it to SOMEWHERE SAFE.
+// 2: Adjust it and remove comments, not all options need to be specified.
 // 3: Add --dart-define-from-file=PATH_TO_YOUR_COPY to your run arguments.
 //
-// NOTE: THESE OPTIONS WILL BE PART OF YOUR BUILD!
+// NOTE: These options will be part of your build!
+//       Even with SKIP_CONFIG enabled!
 
 {
   "ID":                "SCHOOLID",
@@ -13,6 +14,6 @@
   "PASSWORD":          "PASSWORD",
   "THEME":             "light|dark|amoled|system",
   "COLOR":             "standard|school|dynamic|... for specific colours see themes.dart > <<Themes class>> > <<flutterColorThemes map>>",
-  "NOTIFICATIONS":     true, // default is true
-  "DISABLE_OVERWRITE": false // default is false
+  "NOTIFICATIONS":     true|false,
+  "SKIP_CONFIG":       true|false // skips overwriting the options, default is false.
 }

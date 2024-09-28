@@ -155,7 +155,7 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
 
 Future<void> applyEnvironmentVariables() async {
   if (kDebugMode) {
-    if (!(const bool.fromEnvironment("DISABLE_OVERWRITE"))) {
+    if (!(const bool.fromEnvironment("SKIP_CONFIG"))) {
       const schoolID = String.fromEnvironment("ID");
       const username = String.fromEnvironment("USERNAME");
       const password = String.fromEnvironment("PASSWORD");
@@ -184,8 +184,11 @@ Future<void> applyEnvironmentVariables() async {
         await globalStorage.write(key: StorageKey.settingsSelectedColor, value: color);
       }
 
-      const notifications = bool.fromEnvironment("NOTIFICATIONS", defaultValue: true);
-      await globalStorage.write(key: StorageKey.settingsPushService, value: notifications.toString());
+      const notificationsString = String.fromEnvironment("NOTIFICATIONS");
+      if (notificationsString != "") {
+        const notifications = bool.fromEnvironment("NOTIFICATIONS", defaultValue: true);
+        await globalStorage.write(key: StorageKey.settingsPushService, value: notifications.toString());
+      }
     }
   }
 }
