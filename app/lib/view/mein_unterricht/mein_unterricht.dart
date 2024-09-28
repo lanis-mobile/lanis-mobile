@@ -59,6 +59,8 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
           return noDataScreen(context);
         }
         Lessons lessons = snapshot.data!.content!;
+        Lessons attandanceLessons = lessons.where((element) => element.attendances != null).toList();
+
         return Scaffold(
           body: RefreshIndicator(
             onRefresh: () => fetcher.fetchData(forceRefresh: true),
@@ -70,17 +72,20 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
               ),
             ),
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AttendancesScreen(lessons: lessons.where((element) => element.attendances != null).toList()),
-                ),
-              );
-            },
-            label: Text(AppLocalizations.of(context)!.attendances),
-            icon: const Icon(Icons.access_alarm),
+          floatingActionButton: Visibility(
+            visible: attandanceLessons.isNotEmpty,
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AttendancesScreen(lessons: attandanceLessons),
+                  ),
+                );
+              },
+              label: Text(AppLocalizations.of(context)!.attendances),
+              icon: const Icon(Icons.access_alarm),
+            ),
           ),
         );
       },

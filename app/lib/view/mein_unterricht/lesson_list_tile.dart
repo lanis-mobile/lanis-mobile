@@ -44,7 +44,7 @@ class _LessonListTileState extends State<LessonListTile> {
               const Spacer(),
               if ((widget.lesson.currentEntry?.files.length ?? 0) > 0) ...[
                 Text(
-                  widget.lesson.currentEntry!.files.toString(),
+                  widget.lesson.currentEntry!.files.length.toString(),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const Icon(Icons.attach_file, size: 16),
@@ -58,10 +58,14 @@ class _LessonListTileState extends State<LessonListTile> {
                 widget.lesson.currentEntry!.topicTitle ?? '-',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
               ),
-              if (widget.lesson.currentEntry?.homework != null) HomeworkBox(
-                currentEntry: widget.lesson.currentEntry!,
-                courseID: widget.lesson.courseID,
-              ),
+              if (widget.lesson.currentEntry?.homework != null) ...[
+                const SizedBox(height: 4),
+                HomeworkBox(
+                  currentEntry: widget.lesson.currentEntry!,
+                  courseID: widget.lesson.courseID,
+                ),
+              ],
+              const SizedBox(height: 4),
               Row(
                 children: [
                   const Icon(Icons.person, size: 16),
