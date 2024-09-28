@@ -69,7 +69,7 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
               itemBuilder: (BuildContext context, int index) => Padding(
                 padding: index == lessons.length - 1
                     ? const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 80)
-                    : const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    : const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                 child: LessonListTile(lesson: lessons[index]),
               ),
             ),

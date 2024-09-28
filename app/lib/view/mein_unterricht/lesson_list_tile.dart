@@ -59,13 +59,14 @@ class _LessonListTileState extends State<LessonListTile> {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
               ),
               if (widget.lesson.currentEntry?.homework != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 12),
                 HomeworkBox(
                   currentEntry: widget.lesson.currentEntry!,
                   courseID: widget.lesson.courseID,
                 ),
+                const SizedBox(height: 4),
               ],
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   const Icon(Icons.person, size: 16),

@@ -19,25 +19,30 @@ class AttendancesScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final lesson = lessons[index];
           return Card(
-            margin: const EdgeInsets.all(8),
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        lesson.name,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Spacer(),
-                      Text(
-                          "${lesson.teacherKuerzel ?? lesson.teacher ?? '???'} "),
-                      const Icon(
-                        Icons.person,
-                        size: 16,
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          lesson.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        Text(
+                            "${lesson.teacherKuerzel ?? lesson.teacher ?? '???'} ",
+                        ),
+                        const Icon(
+                          Icons.person,
+                          size: 16,
+                        ),
+                      ],
+                    ),
                   ),
                   ...lesson.attendances!.entries.indexed.map(
                         (val) {
