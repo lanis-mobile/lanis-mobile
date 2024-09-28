@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../client/client.dart';
+import '../../../client/logger.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -37,7 +38,7 @@ class _AboutScreenState extends State<AboutScreen> {
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.about)),
       body: ListView(
         children: <Widget>[
-          Contributors(),
+          const Contributors(),
           ListTile(
             leading: const Icon(Icons.code),
             title: const Text('GitHub Repository'),
@@ -98,6 +99,8 @@ class _AboutScreenState extends State<AboutScreen> {
 
 /// List of contributors loaded from GitHub API, showing a loading indicator while fetching data
 class Contributors extends StatefulWidget {
+  const Contributors({super.key});
+
   @override
   State<StatefulWidget> createState() => _ContributorsState();
 }
@@ -115,12 +118,13 @@ class _ContributorsState extends State<Contributors> {
 
   void loadData() async {
     try {
-      final response = await client.dio.get('https://api.github.com/repos/alessioC42/lanis-mobile/contributors');
+      final response = await client.dio.get('https://api.github.com/repos/lanis-mobile/lanis-mobile/contributors');
       contributors = response.data;
       setState(() {
         loading = false;
       });
     } catch (e) {
+      logger.e(e);
       setState(() {
         error = true;
       });

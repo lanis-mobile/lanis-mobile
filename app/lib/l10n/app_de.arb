@@ -12,7 +12,7 @@
   "settings": "Einstellungen",
   "about": "Über Lanis-Mobile",
   "openLanisInBrowser": "Im Browser öffnen",
-  "openMoodleLogin": "Moodle Login öffnen",
+  "openMoodle": "Moodle öffnen",
   "userData": "Benutzerdaten",
   "personalSchoolSupport": "Unterstützung für deine Schule",
   "appearance": "Aussehen",
@@ -28,6 +28,7 @@
 
   "reportError": "Es gab wohl ein Problem, bitte melde den Fehler bei wiederholtem Auftreten.",
   "errorOccurred": "Ein Fehler ist aufgetreten.",
+  "errorOccurredWebsite": "Ein Fehler ist beim Öffnen der Seite aufgetreten!",
   "supported": "Unterstützt",
   "unsupported": "Nicht unterstützt",
   "theme": "Thema",
@@ -88,6 +89,7 @@
   "actionContinue": "Weiter",
   "back": "Zurück",
   "create": "Erstellen",
+  "refresh": "Aktualisieren",
   "logInTitle": "Anmeldung",
   "logIn": "Anmelden",
   "selectSchool": "Schule auswählen",
@@ -114,8 +116,7 @@
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoPersonalSchoolSupport": "Jede Schule hat andere Apps. Deine Schule verfügt über die hier aufgelisteten Apps. Nicht alle Apps werden von dieser App unterstützt. Wenn eine App nicht wie erwartet funktioniert, kontaktiere bitte den Entwickler der App. Wahrscheinlich gibt es ein Problem mit deiner Schule, das behoben werden kann.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung des Vertretungsplans hängen von verschiedenen Faktoren des Endgeräts ab. Im Akkusparmodus wird der Vertretungsplan beispielsweise oft nicht aktualisiert.",
-  "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben.",
-  "settingsInfoTelemetry": "Wir nutzen Countly um anonyme Bugreports automatisch an die Entwickler zu senden. Dabei werden keine Daten an dritte weitergegeben.",
+  "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben. Dateien werden automatisch nach 7 Tagen gelöscht.",
 
   "introWelcomeTitle": "Willkommen",
   "introForStudentsByStudentsTitle": "Von Schülern. Für Schüler.",
@@ -125,23 +126,23 @@
   "introHaveFunTitle": "Worauf wartest du?",
 
   "introWelcome": "lanis-mobile hilft bei den täglichen Aufgaben des Schulportals. Ob Vertretungsplan oder Kalender, Nachrichten oder Kurshefte. Mit lanis-mobile kannst du effizienter und einfacher lernen.",
-  "introForStudentsByStudents": "Diese Anwendung wird von Schülern entwickelt, die das Schulportal Hessen nutzen.\n\nDank an alle Entwickler und Bug Reporter!",
+  "introForStudentsByStudents": "Diese Anwendung wird von Schülern entwickelt, die das Schulportal Hessen nutzen. Wir sind immer auf der Suche nach neuen Entwicklern!\n\nDank an alle Entwickler und Bug Reporter!",
   "introCustomize": "In den Einstellungen kannst du die App auf deine Bedürfnisse anpassen.",
   "introSchoolPortal": "Das Schulportal ist Modular aufgebaut. Das bedeutet, dass deine Schule vielleicht nicht alle Features der App unterstützt oder die App nicht alle Features deiner Schule.",
-  "introAnalytics": "Wegen der modularen Natur des Schulportals kann es vereinzelt zu Problem für deine Schule kommen. Sende uns in diesem Fall bitte einen Fehlerbericht. Wenn die App intern einen Fehler erkennt wird dieser auch automatisch anonym an die Entwickler gesendet um eine möglichst robuste Anwendung zur schaffen.",
+  "introAnalytics": "Wegen der modularen Natur des Schulportals kann es vereinzelt zu Problem für deine Schule kommen. Sende uns in diesem Fall bitte einen Fehlerbericht.",
   "introHaveFun": "Melde dich jetzt an um lanis-mobile zu nutzen. Verwende dafür die Logindaten, die du Normalerweise für die Webseite des Schulportals verwendest.",
 
   "startupError": "Kritischer Fehler!",
-  "startupErrorMessage": "Ein kritischer Fehler ist während dem Login aufgetreten! Du kannst es erneut versuchen oder melde den fettgeschriebenen Fehler.",
+  "startupErrorMessage": "Ein kritischer Fehler ist während dem Login aufgetreten! Du kannst es erneut versuchen oder melde den fett geschriebenen Fehler.",
   "startupRetryButton": "Erneut versuchen",
   "startupReportButton": "Melden",
 
   "startUpMessage1": "Wenn dir das Projekt gefällt, dann schau doch mal auf GitHub vorbei!",
   "startUpMessage2": "Wusstest du schon, dass Lanis-Mobile von Leuten wie dir, Schülern, entwickelt wird?",
   "startUpMessage3": "Du kannst den Vertretungsplan ganz einfach unter dem Filter-Menü auf deine eigenen Kurse reduzieren.",
-  "startUpMessage4": "Wenn dir die App gefällt, dann bewerte uns doch auf Google Play.",
+  "startUpMessage4": "Wenn dir die App gefällt, dann bewerte uns doch auf Google Play oder im App Store.",
   "startUpMessage5": "Fehlt etwas an der App? Kann etwas besser gemacht werden? Schreibe uns einfach über GitHub Issues. Auch kleine Dinge sind wichtig.",
-  "startUpMessage6": "Lanis-Mobile wird inzwischen von Leuten an über 50 Schulen in ganz Hessen verwendet.",
+  "startUpMessage6": "Lanis-Mobile wird inzwischen von Leuten an über 200 Schulen in ganz Hessen verwendet.",
   "startUpMessage7": "Danke, dass du Lanis-Mobile verwendest.",
   "startUpMessage8": "Lanis-Mobile ist Open Source und wird von Schülern entwickelt. Wenn du helfen möchtest, dann schau doch mal auf GitHub vorbei.",
   "startUpMessage9": "Du kannst die App auf deine Bedürfnisse anpassen. Schau doch mal in den Einstellungen vorbei.",
@@ -189,5 +190,12 @@
   "addSpecificFilter": "\"{filter}\" hinzufügen",
   "tryAgain": "Erneut versuchen",
   "refreshComplete": "Aktualisierung abgeschlossen",
-  "offline": "Offline"
+  "offline": "Offline",
+  "noAppToOpen": "Lanis-Mobile konnte keine App finden, um die angegebene Datei zu öffnen.",
+  "searchSchools": "Suche nach Name, Ort oder Schulnummer",
+  "noSchoolsFound": "Keine Schulen gefunden.",
+  "schoolCountString": "{count, plural, =0{Keine Schulen} one{1 Schule} other{{count} Schulen}}",
+
+  "timetableSwitchToPersonal": "Wechsel zum Persönlichen Stundenplan",
+  "timetableSwitchToClass": "Wechsel zum Klassen Stundenplan"
 }

@@ -12,7 +12,7 @@
   "settings": "Settings",
   "about": "About Lanis-Mobile",
   "openLanisInBrowser": "Open in Browser",
-  "openMoodleLogin": "Open Moodle Login",
+  "openMoodle": "Open Moodle",
   "userData": "Userdata",
   "personalSchoolSupport": "Personal school support",
   "appearance": "Appearance",
@@ -28,6 +28,7 @@
 
   "reportError": "A problem occurred. Please report it in case of repeated occurrence.",
   "errorOccurred": "An error occurred",
+  "errorOccurredWebsite": "An error occurring while accessing the website!",
   "supported": "supported",
   "unsupported": "unsupported",
   "theme": "Theme",
@@ -88,6 +89,7 @@
   "actionContinue": "Continue",
   "back": "Back",
   "create": "Create",
+  "refresh": "Refresh",
   "logInTitle": "Logging in",
   "logIn": "Authenticate",
   "selectSchool": "Select school",
@@ -114,8 +116,7 @@
   "settingsInfoUserData": "All user data is stored on the Lanis servers.",
   "settingsInfoPersonalSchoolSupport": "Every school has different apps. Your school has the apps listed here. Not all apps are supported by this app. If an app does not work as expected, please contact the developer of the app. There is probably a problem with your school that can be fixed.",
   "settingsInfoNotifications": "The frequency and time at which the substitution plan is updated depends on various factors relating to the end device. In battery-saving mode, for example, the substitution plan is often not updated.",
-  "settingsInfoClearCache": "All files that you have ever downloaded form the cache. You can empty it here to free up storage space.",
-  "settingsInfoTelemetry": "We use Countly to automatically send anonymous bug reports to the developers. No data is passed on to third parties.",
+  "settingsInfoClearCache": "All files that you have ever downloaded form the cache. You can empty it here to free up storage space. Documents older than 7 days are automatically deleted.",
 
   "introWelcomeTitle": "Welcome",
   "introForStudentsByStudentsTitle": "By students for students",
@@ -125,10 +126,10 @@
   "introHaveFunTitle": "What are you waiting for?",
 
   "introWelcome": "lanis-mobile helps with the daily tasks of the school portal. Whether substitution plan or calendar, news or course booklets. With lanis-mobile you can learn more efficiently and easily.",
-  "introForStudentsByStudents": "This application is developed by students who use the school portal Hessen.\n\nThanks to all developers and bug reporters!",
+  "introForStudentsByStudents": "This application is developed by students who use the school portal Hessen. Join us on our journey! We are always looking for new collaborators!\n\nThanks to all developers and bug reporters!",
   "introCustomize": "You can customize the app to your needs in the settings.",
   "introSchoolPortal": "The school portal has a modular structure. This means that your school may not support all the features of the app or the app may not support all the features of your school.",
-  "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report. If the app detects an error internally, this is also automatically sent anonymously to the developers in order to create an application that is as robust as possible.",
+  "introAnalytics": "Due to the modular nature of the school portal, there may be occasional problems for your school. In this case, please send us a bug report via GitHub or E-Mail.",
   "introHaveFun": "Login now to use lanis-mobile. Use the login credentials that you normally use for the school portal website.",
 
   "startupError": "Critical error!",
@@ -139,9 +140,9 @@
   "startUpMessage1": "If you like the project, have a look at GitHub!",
   "startUpMessage2": "Did you know that Lanis-Mobile is being developed by people like you, students?",
   "startUpMessage3": "You can easily reduce the substitution plan to your own courses under the filter menu.",
-  "startUpMessage4": "If you like the app, please rate us on Google Play.",
+  "startUpMessage4": "If you like the app, please rate us on Google Play or the App Store.",
   "startUpMessage5": "Is there anything missing from the app? Can something be made better? Just write to us via GitHub Issues. Even small things are important.",
-  "startUpMessage6": "Lanis-Mobile is now used by people at over 50 schools throughout Hesse.",
+  "startUpMessage6": "Lanis-Mobile is now used by people at over 200 schools throughout Hesse.",
   "startUpMessage7": "Thank you for using Lanis-Mobile.",
   "startUpMessage8": "Lanis-Mobile is open source and developed by students. If you would like to help, please have a look at GitHub.",
   "startUpMessage9": "You can customize the app to your needs in the settings.",
@@ -189,5 +190,12 @@
   "addSpecificFilter": "Add \"{filter}\"",
   "tryAgain": "Try again",
   "refreshComplete": "Refresh complete",
-  "offline": "Offline"
+  "offline": "Offline",
+  "noAppToOpen": "Lanis-Mobile could not find any App to open the specified File in.",
+  "searchSchools": "Search by name, city or id",
+  "noSchoolsFound": "No schools found.",
+  "schoolCountString": "{count, plural, =0{No schools} one{1 school} other{{count} schools}}",
+
+  "timetableSwitchToPersonal": "Switch to Personal timetable",
+  "timetableSwitchToClass": "Switch to Class timetable"
 }

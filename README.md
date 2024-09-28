@@ -1,7 +1,7 @@
 # Lanis Mobile
-Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertretungsplan, "Mein Unterricht", Nachrichten und den Schulkalender mit mehr Geplant. 
+Inoffizielle App rund um das Schulportal Hessen.
 
-**Einsatz an über 130 Schulen in Hessen mit über Tausend Nutzern**
+**Einsatz an über 200 Schulen in Hessen mit Tausenden Nutzern**
 
 <p align="center">
     <img src="https://github.com/alessioC42/lanis-mobile/assets/84250128/19d30436-32f7-4cbe-b78e-f2fee3583c28" width="60%">
@@ -13,7 +13,7 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
 
 <a href='https://apps.apple.com/de/app/lanis-mobile/id6511247743?l=en-GB'>
-  <img alt='Jetzt im App Store' src='https://alessioc42.github.io/lanis-mobile/assets/ios-badge.svg' style='height: 61px'/>
+  <img alt='Jetzt im App Store' src='https://lanis-mobile.github.io/assets/ios-badge.svg' style='height: 61px'/>
 </a>
 
 <p></p>
@@ -32,7 +32,7 @@ Inoffizielle App rund um das Schulportal Hessen. Unterstützung für den Vertret
 </details>
 
 ## Hilf mit!
-Wir sind offen für neue Colaborator. Aber auch wenn du nicht coden kannst, bist du in der Lage einen beitrag zur App zu leisten. Du kannst den Vertretungsplan deiner Schule anpassen. Siehe [hier](https://github.com/alessioC42/lanis-mobile-autoconfig/issues/1) und [hier](https://github.com/alessioC42/lanis-mobile-autoconfig)
+Wir sind offen für neue Collaborator. Aber auch wenn du nicht coden kannst, bist du in der Lage einen Beitrag zur App zu leisten. Du kannst den Vertretungsplan deiner Schule anpassen. Siehe [hier](https://github.com/alessioC42/lanis-mobile-autoconfig/issues/1) und [hier](https://github.com/alessioC42/lanis-mobile-autoconfig)
 
 ## features
 - [x] Login
@@ -47,15 +47,12 @@ Wir sind offen für neue Colaborator. Aber auch wenn du nicht coden kannst, bist
 - [x] Stundenplan
 - [x] Offline views
 
-Es werden anonyme Daten zur Fehleranalyse erhoben. (Optional)
-
 ## Mitarbeit
 [Schulkonfiguration der Vertretungspläne](https://github.com/alessioC42/lanis-mobile-autoconfig)
 
 Dieses Projekt ist stark von Bug-Reports anderer Schulen oder von neuen Mitarbeitern abhängig. Der Grund dafür liegt in
 der modularen Natur des Schulportals, die es äußerst schwierig macht, eine universelle Lanis-App zu entwickeln.
 
+Scheue dich nicht, einen Bug-Report zu erstellen, wenn du einen Fehler findest. Wir sind immer offen für neue Mitarbeiter/Schüler, die mit uns arbeiten, um die App zu verbessern.
+
 Bug-Reports können auch an <a href="mailto:alessioc42.dev@gmail.com">diese</a> E-Mail-Adresse gesendet werden, falls kein Github-Konto vorhanden ist.
-
-<a href="https://countly.com/?utm_source=badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/dark.svg" alt="Countly - Product Analytics" /></a>
-
