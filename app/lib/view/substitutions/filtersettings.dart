@@ -95,7 +95,7 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                             ),
                             data: jsonEncode({
                               "schoolID": client.schoolID,
-                              "loginName": client.username,
+                              //"loginName": client.username,
                               "classString": client.userData["klasse"]??"",
                               "classLevel": client.userData["stufe"]??""
                             })
@@ -109,7 +109,6 @@ class _FilterSettingsScreenState extends State<FilterSettingsScreen> {
                             });
                             client.substitutions.saveFilterToStorage();
                           } else {
-                            //message with scaffoldmessenger to indicate that there is no data
                             client.substitutions.localFilter = {};
                             client.substitutions.saveFilterToStorage();
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.autoSetToEmpty)));
