@@ -1,7 +1,11 @@
-// Copy this file and adjust. PUT IT SOMEWHERE SAFE!
-// Attach --dart-define-from-file=PATH_TO_YOUR_COPY to your run arguments.
-// Don't forget to remove comments and note that these values will be constants in the code.
-// That means it will be always applied at the beggining and is part of your build.
+// ### ENVIRONMENT OPTIONS ###
+//
+// How to use this:
+// 1: Copy it to SOMEWHERE SAFE
+// 2: Adjust it and remove comments, options with default values are optional.
+// 3: Add --dart-define-from-file=PATH_TO_YOUR_COPY to your run arguments.
+//
+// NOTE: THESE OPTIONS WILL BE PART OF YOUR BUILD!
 
 {
   "ID":                "SCHOOLID",
