@@ -109,30 +109,40 @@ class ReleaseNotesScreen extends StatelessWidget {
               },
             ),
           ),
-          const Divider(),
-          Wrap(
-            children: getContributors(releaseInfo['body']??'').map((contributor) {
-              return Padding(
-                padding: const EdgeInsets.all(8),
-                child: GestureDetector(
-                  onTap: () {
-                    launchUrl(Uri.parse('https://github.com/$contributor'));
-                  },
-                  child: ClipOval(
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    child: Image.network(
-                      'https://github.com/$contributor.png?size=60',
-                      fit: BoxFit.cover,
-                      width: 60,
-                      height: 60,
-                    ),
+          Card(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(AppLocalizations.of(context)!.contributors, style: Theme.of(context).textTheme.labelLarge),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0, top: 4.0, left: 8.0, right: 8.0),
+                  child: Wrap(
+                    children: getContributors(releaseInfo['body']??'').map((contributor) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            launchUrl(Uri.parse('https://github.com/$contributor'));
+                          },
+                          child: ClipOval(
+                            clipBehavior: Clip.antiAliasWithSaveLayer,
+                            child: Image.network(
+                              'https://github.com/$contributor.png?size=60',
+                              fit: BoxFit.cover,
+                              width: 60,
+                              height: 60,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
-              );
-            }).toList(),
+              ],
+            ),
           ),
-          Text(AppLocalizations.of(context)!.contributors, style: Theme.of(context).textTheme.labelLarge),
-          const Divider(),
           Text(AppLocalizations.of(context)!.becomeContributor, style: Theme.of(context).textTheme.labelMedium),
           const SizedBox(height: 32),
         ],
@@ -173,7 +183,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
             builder: (context) => ReleaseNotesScreen(releaseInfo),
           ),
         ),
-        ElevatedButton(
+        FilledButton(
           onPressed: () {
             Navigator.of(context).pop();
             launchStore();
