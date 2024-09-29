@@ -54,12 +54,16 @@ Future<String> getDeviceReleaseTag() async {
 }
 
 Future<Map?> getReleaseInfo(String? releaseTag) async {
-  String url = 'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/latest';
-  if (releaseTag != null) {
-    url = 'https://api.github.com/repos/octocat/Hello-World/releases/$releaseTag';
+  try {
+    String url = 'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/latest';
+    if (releaseTag != null) {
+      url = 'https://api.github.com/repos/octocat/Hello-World/releases/$releaseTag';
+    }
+    final response = await client.dio.get(url);
+    return response.data;
+  } on Exception {
+    return null;
   }
-  final response = await client.dio.get(url);
-  return response.data;
 }
 
 class ReleaseNotesScreen extends StatelessWidget {
