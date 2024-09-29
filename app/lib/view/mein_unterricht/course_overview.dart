@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/view/mein_unterricht/homework_box.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
 import '../../shared/launch_file.dart';
-import '../../shared/widgets/error_view.dart';
+import '../../shared/types/lesson.dart';
 import '../../shared/widgets/format_text.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -19,18 +20,13 @@ class CourseOverviewAnsicht extends StatefulWidget {
 
 class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
   static const double padding = 10.0;
+  final dateFormat = DateFormat('dd.MM.yyyy');
 
   bool checked = false;
 
   int _currentIndex = 0;
   bool loading = true;
-  dynamic data = {
-    "historie": [],
-    "leistungen": [],
-    "leistungskontrollen": [],
-    "anwesenheiten": [],
-    "name": ["Lade..."]
-  };
+  DetailedLesson? data;
 
   @override
   void initState() {
@@ -45,7 +41,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       }
 
       String url = widget.dataFetchURL;
-      data = await client.meinUnterricht.getCourseView(url);
+      data = await client.meinUnterricht.getDetailedCourseView(url);
 
       loading = false;
       setState(() {});
@@ -71,20 +67,20 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       );
 
   Widget _buildBody() {
-    if (data is int && data < 0) {
-      return noDataScreen(context);
+    if (data == null) {
+      noDataScreen(context);
     }
 
     switch (_currentIndex) {
       case 0: // historie
-        return data["historie"].length != 0
+        return data!.history.isNotEmpty
             ? ListView.builder(
-                itemCount: data["halbjahr1"].length > 0
-                    ? data["historie"].length + 1
-                    : data["historie"].length,
+                itemCount: data!.semester1URL != null
+                    ? data!.history.length + 1
+                    : data!.history.length,
                 itemBuilder: (context, index) {
                   //last item in list
-                  if (index == data["historie"].length) {
+                  if (index == data!.history.length) {
                     return Padding(
                       padding: const EdgeInsets.only(
                         left: padding,
@@ -100,7 +96,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           CourseOverviewAnsicht(
-                                            dataFetchURL: data["halbjahr1"][0],
+                                            dataFetchURL: data!.semester1URL.toString(),
                                             title: widget.title,
                                           )),
                                 );
@@ -117,17 +113,17 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   }
 
                   List<ActionChip> files = [];
-                  data["historie"][index]["files"].forEach((file) {
+                  for (LessonsFile file in data!.history[index].files) {
                     files.add(ActionChip(
-                      label: Text(file["filename"]),
-                      onPressed: () => launchFile(context, file["url"],
-                          file["filename"], file["filesize"], () {}),
+                      label: Text(file.fileName ?? "..."),
+                      onPressed: () => launchFile(context, file.fileURL.toString(),
+                          file.fileName ?? '', file.fileSize, () {}),
                     ));
-                  });
+                  }
 
                   List<Widget> uploads = [];
-                  data["historie"][index]["uploads"].forEach((upload) {
-                    if (upload["status"] == "open") {
+                  for (var upload in data!.history[index].uploads) {
+                    if (upload.status == "open") {
                       uploads.add(Container(
                           decoration: BoxDecoration(
                               color:
@@ -143,8 +139,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => UploadScreen(
-                                            url: upload["link"],
-                                            name: upload["name"],
+                                            url: upload.url.toString(),
+                                            name: upload.name,
                                             status: "open"),
                                       ),
                                     );
@@ -161,14 +157,14 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                         Icons.upload,
                                         size: 20,
                                       ),
-                                      Text(upload["name"]),
-                                      if (upload["uploaded"] != null) ...[
+                                      Text(upload.name),
+                                      if (upload.uploaded != null) ...[
                                         Badge(
                                           backgroundColor: Theme.of(context)
                                               .colorScheme
                                               .onPrimary,
                                           label: Text(
-                                            upload["uploaded"],
+                                            upload.uploaded!,
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .labelLarge
@@ -186,7 +182,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                 padding: const EdgeInsets.only(
                                     left: 6.0, right: 12.0),
                                 child: Text(
-                                  upload["date"],
+                                  upload.date?? "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
                                 ),
@@ -199,8 +195,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => UploadScreen(
-                                      url: upload["link"],
-                                      name: upload["name"],
+                                      url: upload.url.toString(),
+                                      name: upload.name,
                                       status: "closed"),
                                 ),
                               ),
@@ -212,13 +208,13 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                 Icons.file_upload_off,
                                 size: 18,
                               ),
-                              Text(upload["name"]),
-                              if (upload["uploaded"] != null) ...[
+                              Text(upload.name),
+                              if (upload.uploaded != null) ...[
                                 Badge(
                                   backgroundColor:
                                       Theme.of(context).colorScheme.primary,
                                   label: Text(
-                                    upload["uploaded"],
+                                    upload.uploaded!,
                                     style: Theme.of(context)
                                         .textTheme
                                         .labelLarge
@@ -233,13 +229,13 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                             ],
                           )));
                     }
-                  });
+                  }
 
                   return Padding(
                     padding: EdgeInsets.only(
                       left: padding,
                       right: padding,
-                      bottom: index == data["historie"].length - 1 ? 14 : 8,
+                      bottom: index == data!.history.length - 1 ? 14 : 8,
                     ),
                     child: Card(
                       child: Column(
@@ -266,9 +262,10 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                               size: 15,
                                             ),
                                           ),
-                                          Text(
-                                            data["historie"][index]["time"] ??
-                                                "",
+                                          Text(AppLocalizations.of(context)!.dateWithHours(
+                                              dateFormat.format(data!.history[index].topicDate!),
+                                              data!.history[index].schoolHours ?? ""
+                                            ),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .labelSmall,
@@ -276,17 +273,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                         ],
                                       ),
                                       Visibility(
-                                        visible: data["historie"][index]
-                                                    ["presence"] !=
-                                                "nicht erfasst" &&
-                                            data["historie"][index]
-                                                    ["presence"] !=
-                                                null,
+                                        visible: data!.history[index].presence != null,
                                         child: Row(
                                           children: [
                                             Text(
-                                              data["historie"][index]
-                                                      ["presence"]
+                                              (data!.history[index].presence??'')
                                                   .replaceAll(
                                                       "andere schulische Veranstaltung",
                                                       "a.s.V."),
@@ -308,154 +299,27 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                     ],
                                   ),
                                 ),
-                                if (data["historie"][index]["title"] !=
+                                if (data!.history[index].topicTitle !=
                                     null) ...[
-                                  Text(data["historie"][index]["title"],
+                                  Text(data!.history[index].topicTitle!,
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleLarge),
                                 ],
-                                if (data["historie"][index]["markup"]
-                                    .containsKey("content")) ...[
+                                if (data!.history[index].description != null) ...[
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 4, bottom: 4),
                                     child: FormattedText(
-                                      text: data["historie"][index]["markup"]
-                                          ["content"],
+                                      text: data!.history[index].description!,
                                       formatStyle: DefaultFormatStyle(context: context),
                                     ),
                                   ),
                                 ],
-                                if (data["historie"][index]["markup"]
-                                    .containsKey("homework")) ...[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    margin: const EdgeInsets.only(
-                                        top: 8, bottom: 4),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 12, top: 4, bottom: 4),
-                                              child: Row(
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            right: 8),
-                                                    child: Icon(
-                                                      Icons.school,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .onPrimary,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    AppLocalizations.of(
-                                                            context)!
-                                                        .homework,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .labelLarge
-                                                        ?.copyWith(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .colorScheme
-                                                                .onPrimary),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Checkbox(
-                                              value: data["historie"][index][
-                                                  "homework-done"], // Set the initial value as needed
-                                              side: BorderSide(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onPrimary,
-                                                  width: 2),
-                                              onChanged: (bool? value) {
-                                                try {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              AppLocalizations.of(
-                                                                      context)!
-                                                                  .homeworkSaving),
-                                                          duration:
-                                                              const Duration(
-                                                                  milliseconds:
-                                                                      500)));
-                                                  client.meinUnterricht
-                                                      .setHomework(
-                                                          data["historie"]
-                                                                  [index]
-                                                              ["course-id"],
-                                                          data["historie"]
-                                                                  [index]
-                                                              ["entry-id"],
-                                                          value!)
-                                                      .then((val) {
-                                                    if (val != "1") {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                              SnackBar(
-                                                        content: Text(
-                                                            AppLocalizations.of(
-                                                                    context)!
-                                                                .homeworkSavingError),
-                                                      ));
-                                                    } else {
-                                                      setState(() {
-                                                        data["historie"][index][
-                                                                "homework-done"] =
-                                                            value;
-                                                      });
-                                                    }
-                                                  });
-                                                } catch (e) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                    content: Text(
-                                                        AppLocalizations.of(
-                                                                context)!
-                                                            .homeworkSavingError),
-                                                  ));
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .cardColor
-                                                  .withOpacity(0.85),
-                                              borderRadius:
-                                                  BorderRadius.circular(12)),
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: FormattedText(
-                                            text: data["historie"][index]
-                                                ["markup"]["homework"],
-                                            formatStyle: DefaultFormatStyle(context: context),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                if (data!.history[index].homework != null) HomeworkBox(
+                                    currentEntry: data!.history[index],
+                                    courseID: data!.courseID,
+                                ),
                                 Visibility(
                                   visible: files.isNotEmpty,
                                   child: Padding(
@@ -487,32 +351,32 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                 })
             : noDataScreen(context);
       case 1: // leistungen
-        return data["leistungen"].length != 0
+        return data!.marks.isNotEmpty
             ? ListView.builder(
-                itemCount: data["leistungen"].length,
+                itemCount: data!.marks.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: EdgeInsets.only(
                       left: padding,
                       right: padding,
-                      bottom: index == data["leistungen"].length - 1 ? 14 : 8,
+                      bottom: index == data!.marks.length - 1 ? 14 : 8,
                     ),
                     child: Card(
                       child: ListTile(
                         title: Text(
-                          data["leistungen"][index]["Name"] ?? "",
+                          data!.marks[index].name,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              data["leistungen"][index]["Datum"] ?? "",
+                              data!.marks[index].date,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            if (data["leistungen"][index]["Kommentar"] != null)
+                            if (data!.marks[index].comment != null)
                               Text(
-                                data["leistungen"][index]["Kommentar"] ?? "",
+                                data!.marks[index].comment ?? "",
                                 style: TextStyle(
                                   fontSize: Theme.of(context)
                                       .textTheme
@@ -524,7 +388,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           ],
                         ),
                         trailing: Text(
-                          data["leistungen"][index]["Note"] ?? "",
+                          data!.marks[index].mark,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20.0),
                         ),
@@ -535,68 +399,64 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
               )
             : noDataScreen(context);
       case 2: //Leistungskontrollen
-        return data["leistungskontrollen"].length != 0
+        return data!.exams.isNotEmpty
             ? ListView.builder(
-                itemCount: data["leistungskontrollen"].length,
+                itemCount: data!.exams.length,
                 itemBuilder: (context, index) {
                   return Padding(
                       padding: EdgeInsets.only(
                         left: padding,
                         right: padding,
-                        bottom: index == data["leistungskontrollen"].length - 1
+                        bottom: index == data!.exams.length - 1
                             ? 14
                             : 8,
                       ),
                       child: Card(
                           child: ListTile(
                         title: Text(
-                          data["leistungskontrollen"][index]["title"] ?? "",
+                          data!.exams[index].name,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         subtitle: Text(
-                          data["leistungskontrollen"][index]["value"] ?? "",
+                          data!.exams[index].value??'',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )));
                 },
               )
             : noDataScreen(context);
-      case 3: //anwesenheiten
-        return data["anwesenheiten"].length != 0
+      case 3:
+        return data!.attendances.isNotEmpty
             ? ListView.builder(
-                itemCount: data["anwesenheiten"].length,
+                itemCount: data!.attendances.length,
                 itemBuilder: (context, index) {
-                  final String? subtitleText = parseString(
-                      data["anwesenheiten"][index]["count"])["brackets"];
+                  final String key = data!.attendances.keys.elementAt(index);
+                  final String value = data!.attendances[key] ?? "";
                   return Padding(
-                      padding: EdgeInsets.only(
-                        left: padding,
-                        right: padding,
-                        bottom:
-                            index == data["anwesenheiten"].length - 1 ? 14 : 8,
-                      ),
-                      child: Card(
-                        child: ListTile(
-                          title: Text(
-                            toBeginningOfSentenceCase(
-                                    data["anwesenheiten"][index]["type"]) ??
-                                "",
-                          ),
-                          subtitle: subtitleText != null && subtitleText != ""
-                              ? Text(subtitleText)
-                              : null,
-                          trailing: Text(
-                              parseString(data["anwesenheiten"][index]
-                                  ["count"])["before"]!,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20.0)),
+                    padding: EdgeInsets.only(
+                      left: padding,
+                      right: padding,
+                      bottom: index == data!.attendances.length - 1 ? 14 : 8,
+                    ),
+                    child: Card(
+                      child: ListTile(
+                        title: Text(
+                          toBeginningOfSentenceCase(
+                              key),
                         ),
-                      ));
+                        trailing: Text(
+                          value,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20.0),
+                        ),
+                      ),
+                    ),
+                  );
                 },
               )
             : noDataScreen(context);
       default:
-        return const Text("How did you manage to get here?");
+        return const Placeholder();
     }
   }
 
@@ -613,23 +473,12 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       );
     }
 
-    if (data is int && data < 0) {
-      return Scaffold(
-          appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.error),
-          ),
-          body: ErrorView.fromCode(
-            data: data,
-            name: "einen Kurs",
-          ));
-    }
-
     return Scaffold(
       body: _buildBody(),
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
-          if (data["halbjahr1"].length > 0)
+          if (data!.semester1URL != null)
             IconButton(
                 icon: const Icon(Icons.looks_one_outlined),
                 onPressed: () {
@@ -637,7 +486,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => CourseOverviewAnsicht(
-                              dataFetchURL: data["halbjahr1"][0],
+                              dataFetchURL: data!.semester1URL.toString(),
                               title: widget.title,
                             )),
                   );
@@ -675,17 +524,4 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
       ),
     );
   }
-}
-
-Map<String, String> parseString(String input) {
-  RegExp regex = RegExp(r'(\d+)\s*(?:\(([^)]*)\))?');
-  RegExpMatch? match = regex.firstMatch(input);
-
-  if (match != null) {
-    String before = match.group(1) ?? "";
-    String brackets = match.group(2) ?? "";
-    return {"before": before, "brackets": brackets};
-  }
-
-  return {"before": "", "brackets": ""};
 }
