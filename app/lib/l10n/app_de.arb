@@ -193,6 +193,7 @@
 
   "timetableSwitchToPersonal": "Wechsel zum Persönlichen Stundenplan",
   "timetableSwitchToClass": "Wechsel zum Klassen Stundenplan",
+  "dateWithHours": "{date}, {hours} Stunde",
   "contributors": "Mitwirkende",
   "becomeContributor": "Werde Mitwirkender!",
   "done": "Fertig",
