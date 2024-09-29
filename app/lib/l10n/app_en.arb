@@ -192,6 +192,12 @@
   "schoolCountString": "{count, plural, =0{No schools} one{1 school} other{{count} schools}}",
 
   "timetableSwitchToPersonal": "Switch to Personal timetable",
+  "dateWithHours": "{date}, {hours} Hours",
   "timetableSwitchToClass": "Switch to Class timetable",
-  "dateWithHours": "{date}, {hours} Hours"
+  "contributors": "Contributors",
+  "becomeContributor": "Become a contributor",
+  "done": "Done",
+  "updateAvailable": "Update available",
+  "info": "Information",
+  "install": "Install"
 }
