@@ -98,12 +98,12 @@ extension on StorageKey {
 }
 
 class Storage {
-  late SharedPreferences prefs;
+  SharedPreferences? prefs;
   final secureStorage =
       const FlutterSecureStorage(aOptions: AndroidOptions.defaultOptions);
 
   Future<void> initialize() async {
-    prefs = await SharedPreferences.getInstance();
+    prefs ??= await SharedPreferences.getInstance();
   }
 
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
@@ -114,33 +114,37 @@ class Storage {
     required StorageKey key,
     required String value,
     bool secure = false,
-  }) {
+  }) async {
+    await initialize();
+
     if (secure) {
-      return secureStorage.write(
+      await secureStorage.write(
         key: key.key,
         value: value,
         aOptions: _getAndroidOptions(),
       );
     } else {
-      return prefs.setString(key.key, value);
+      await prefs!.setString(key.key, value);
     }
   }
 
   Future<String> read({required StorageKey key, secure = false}) async {
+    await initialize();
+
     if (secure) {
       return Future.value((await secureStorage.read(
               key: key.key, aOptions: _getAndroidOptions())) ??
           key.defaultValue);
     } else {
-      return Future.value(prefs.getString(key.key) ?? key.defaultValue);
+      return Future.value(prefs!.getString(key.key) ?? key.defaultValue);
     }
   }
 
-  Future<void> deleteAll() {
-    return Future.wait([
-      prefs.clear(),
-      secureStorage.deleteAll(aOptions: _getAndroidOptions())
-    ]);
+  Future<void> deleteAll() async {
+    await initialize();
+
+    await prefs!.clear();
+    await secureStorage.deleteAll(aOptions: _getAndroidOptions());
   }
 }
 

@@ -346,7 +346,7 @@ class SPHclient {
     jar.deleteAll();
     dio.interceptors.add(CookieManager(jar));
 
-    globalStorage.deleteAll();
+    await globalStorage.deleteAll();
     ColorModeNotifier.set("standard", Themes.standardTheme);
     ThemeModeNotifier.set("system");
     substitutions.localFilter = {};
