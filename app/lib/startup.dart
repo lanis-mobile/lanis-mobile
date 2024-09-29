@@ -11,7 +11,6 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/types/timetable.dart';
-import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -82,23 +81,10 @@ class _StartupScreenState extends State<StartupScreen> {
       await client.login();
 
       if (error == null) {
-        whatsNew().then((value) {
-          if (value != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ReleaseNotesScreen(value)),
-            ).then((_) => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                ));
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          }
-        });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       }
       return;
     } on WrongCredentialsException {

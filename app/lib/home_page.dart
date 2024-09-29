@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
+import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/conversations/overview.dart';
 import 'package:sph_plan/view/data_storage/data_storage.dart';
@@ -163,6 +164,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     setDefaultDestination();
+    showUpdateInfoIfRequired(context);
   }
 
   void openLanisInBrowser(BuildContext? context) {
