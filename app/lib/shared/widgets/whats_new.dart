@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
 import '../../client/storage.dart';
@@ -97,7 +98,7 @@ class ReleaseNotesScreen extends StatelessWidget {
         children: [
           Expanded(
             child: Markdown(
-              data: releaseInfo['body'] ?? 'failed to load release data',
+              data: releaseInfo['body'] ?? AppLocalizations.of(context)!.error,
               padding: const EdgeInsets.all(16),
               onTapLink: (text, href, title) {
                 launchUrl(Uri.parse(href!));
@@ -126,16 +127,16 @@ class ReleaseNotesScreen extends StatelessWidget {
               );
             }).toList(),
           ),
-          Text("Contributors", style: Theme.of(context).textTheme.labelLarge),
+          Text(AppLocalizations.of(context)!.contributors, style: Theme.of(context).textTheme.labelLarge),
           const Divider(),
-          Text("Become a contributor!", style: Theme.of(context).textTheme.labelMedium),
+          Text(AppLocalizations.of(context)!.becomeContributor, style: Theme.of(context).textTheme.labelMedium),
           const SizedBox(height: 32),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).pop(),
         icon: const Icon(Icons.done),
-        label: const Text("Fertig"),
+        label: Text(AppLocalizations.of(context)!.done),
       ),
     );
   }
@@ -151,7 +152,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       icon: const Icon(Icons.update, size: 56,),
-      title: const Text("Neues Update verfügbar"),
+      title: Text(AppLocalizations.of(context)!.updateAvailable),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -162,7 +163,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          child: const Text("Release Notes"),
+          child: Text(AppLocalizations.of(context)!.info),
           onPressed: () => showDialog(
             context: context,
             builder: (context) => ReleaseNotesScreen(releaseInfo),
@@ -173,8 +174,9 @@ class NewUpdateAvailableDialog extends StatelessWidget {
             Navigator.of(context).pop();
             launchStore();
           },
-          child: const Text("Installieren"),
-        ),]
+          child: Text(AppLocalizations.of(context)!.install),
+        ),
+      ],
     );
   }
 }
