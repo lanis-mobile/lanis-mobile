@@ -196,31 +196,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                     conversationsFetcher.fetchData(forceRefresh: true);
                   },
                   child: ListView.builder(
-                      itemCount: snapshot.data?.content.length + 1,
+                      itemCount: snapshot.data?.content.length + 2,
+                      itemExtent: 80,
                       itemBuilder: (context, index) {
-                        if (index == snapshot.data?.content.length) {
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                                left: 12.0,
-                                right: 12.0,
-                                top: 12.0,
-                                bottom: 16.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!
-                                      .noFurtherEntries,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!
-                                      .notificationsNote,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          );
+                        if (index > snapshot.data?.content.length - 1) {
+                          return const SizedBox.shrink();
                         }
 
                         return ConversationTile(
@@ -285,204 +265,111 @@ class ConversationTile extends StatefulWidget {
 }
 
 class _ConversationTileState extends State<ConversationTile> {
-  ValueNotifier<bool> dismissing = ValueNotifier(false);
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: SizedBox(
-        height: 72,
-        child: Dismissible(
-          key: UniqueKey(),
-          direction: DismissDirection.startToEnd,
-          onUpdate: (details) {
-            if (details.progress <= 0.002) {
-              dismissing.value = false;
-            }
+      child: Card(
+        margin: const EdgeInsets.all(0),
+        color: widget.entry.hidden
+            ? Theme.of(context)
+            .colorScheme
+            .surfaceContainerLow
+            .withOpacity(0.75)
+            : null,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  if (widget.entry.unread == true) {
+                    client.conversations.filter
+                        .toggleEntry(widget.entry.id, unread: true);
+                  }
 
-            if (details.progress > 0.002) {
-              dismissing.value = true;
-            }
-          },
-          confirmDismiss: (_) async {
-            try {
-              final result = widget.entry.hidden
-                  ? await client.conversations.showConversation(widget.entry.id)
-                  : await client.conversations.hideConversation(widget.entry.id);
-
-              if (!result) {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context)!.errorOccurred),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              }
-
-              return result;
-            } on NoConnectionException {
-              return false;
-            }
-          },
-          onDismissed: (_) {
-            dismissing.value = false;
-            client.conversations.filter
-                .toggleEntry(widget.entry.id, hidden: true);
-          },
-          background: DecoratedBox(
-            decoration: BoxDecoration(
-                color: widget.entry.hidden
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.error,
-                borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12.0),
-              child: Row(
-                children: [
-                  Icon(
-                    widget.entry.hidden ? Icons.visibility : Icons.visibility_off,
-                    color: widget.entry.hidden
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onError,
-                  ),
-                  const SizedBox(
-                    width: 4.0,
-                  ),
-                  Text(
-                    widget.entry.hidden
-                        ? AppLocalizations.of(context)!.conversationShow
-                        : AppLocalizations.of(context)!.conversationHide,
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: widget.entry.hidden
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onError),
-                  )
-                ],
-              ),
-            ),
-          ),
-          child: ValueListenableBuilder(
-            valueListenable: dismissing,
-            builder: (context, isDismissing, _) => Card(
-              margin: const EdgeInsets.all(0),
-              color: widget.entry.hidden
-                  ? Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerLow
-                  .withOpacity(0.75)
-                  : null,
-              shape: isDismissing
-                  ? const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(12.0),
-                    bottomRight: Radius.circular(12.0)),
-              )
-                  : null,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        if (widget.entry.unread == true) {
-                          client.conversations.filter
-                              .toggleEntry(widget.entry.id, unread: true);
-                        }
-
-                        return ConversationsChat.fromEntry(widget.entry);
-                      },
-                    ),
-                  );
+                  return ConversationsChat.fromEntry(widget.entry);
                 },
-                customBorder: isDismissing
-                    ? const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12.0),
-                      bottomRight: Radius.circular(12.0)),
-                )
-                    : RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Stack(
-                  alignment: Alignment.center,
+              ),
+            );
+          },
+          customBorder: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (widget.entry.hidden) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (widget.entry.hidden) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 64.0),
-                            child: Icon(
-                              Icons.visibility_off,
-                              color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHigh
-                                  .withOpacity(0.4)
-                                  : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerLow
-                                  .withOpacity(0.75),
-                              size: 65,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                    Badge(
-                      smallSize: widget.entry.unread ? 9 : 0,
-                      child: ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              flex: 3,
-                              child: Text(
-                                widget.entry.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            if (widget.entry.shortName != null) ...[
-                              Flexible(
-                                child: Text(
-                                  widget.entry.shortName!,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: widget.entry.shortName != null
-                                      ? Theme.of(context).textTheme.titleMedium
-                                      : Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .error),
-                                ),
-                              ),
-                            ]
-                          ],
-                        ),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              widget.entry.date,
-                            ),
-                            Text(
-                              widget.entry.fullName,
-                            ),
-                          ],
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 64.0),
+                      child: Icon(
+                        Icons.visibility_off,
+                        color:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHigh
+                            .withOpacity(0.4)
+                            : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerLow
+                            .withOpacity(0.75),
+                        size: 65,
                       ),
                     ),
                   ],
                 ),
+              ],
+              Badge(
+                smallSize: widget.entry.unread ? 9 : 0,
+                child: ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        flex: 3,
+                        child: Text(
+                          widget.entry.title,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      if (widget.entry.shortName != null) ...[
+                        Flexible(
+                          child: Text(
+                            widget.entry.shortName!,
+                            overflow: TextOverflow.ellipsis,
+                            style: widget.entry.shortName != null
+                                ? Theme.of(context).textTheme.titleMedium
+                                : Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .error),
+                          ),
+                        ),
+                      ]
+                    ],
+                  ),
+                  subtitle: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.entry.date,
+                      ),
+                      Text(
+                        widget.entry.fullName,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
