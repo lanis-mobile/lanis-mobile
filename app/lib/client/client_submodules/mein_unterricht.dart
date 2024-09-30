@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../shared/types/lesson.dart';
 import '../../shared/types/upload.dart';
 
 class MeinUnterrichtParser {
@@ -16,17 +18,34 @@ class MeinUnterrichtParser {
     dio = dioClient;
   }
 
-  Future<dynamic> getOverview() async {
+  Future<Lessons> getOverview() async {
     if (!client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       throw NotSupportedException();
     }
 
-    var result = {"aktuell": [], "anwesenheiten": [], "kursmappen": []};
+    var lessons = <Lesson>[];
+
+    int unixTime = DateTime.now().millisecondsSinceEpoch;
 
     final response =
-        await dio.get("https://start.schulportal.hessen.de/meinunterricht.php");
+        await dio.get("https://start.schulportal.hessen.de/meinunterricht.php?cacheBreaker=$unixTime");
     var encryptedHTML = client.cryptor.decryptEncodedTags(response.data);
     var document = parse(encryptedHTML);
+
+    var kursmappenDOM = document.getElementById("mappen");
+    final _row = kursmappenDOM?.getElementsByClassName("row");
+    var mappen = _row!.isEmpty ? null : _row[0].children;
+    if (mappen != null) {
+      for (var mappe in mappen) {
+        String url = mappe.querySelector("a.btn.btn-primary")!.attributes["href"]!;
+        lessons.add(Lesson(
+          name: mappe.getElementsByTagName("h2")[0].text.trim(),
+          teacher: mappe.querySelector("div.btn-group>button")?.attributes["title"],
+          courseURL: Uri.parse(url),
+          courseID: url.split("id=")[1],
+        ));
+      }
+    }
 
     //Aktuelle Einträge
     var schoolClasses = document.querySelectorAll("tr.printable");
@@ -34,42 +53,43 @@ class MeinUnterrichtParser {
       var teacher = schoolClass.querySelector(".teacher");
 
       if (schoolClass.querySelector(".datum") != null) {
-        result["aktuell"]?.add({
-          "name": schoolClass.querySelector(".name")?.text.trim(),
-          "teacher": {
-            "short": teacher
-                ?.getElementsByClassName(
-                    "btn btn-primary dropdown-toggle btn-xs")[0]
-                .text
-                .trim(),
-            "name":
-                teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim()
-          },
-          "thema": {
-            "title": schoolClass.querySelector(".thema")?.text.trim(),
-            "date": schoolClass.querySelector(".datum")?.text.trim()
-          },
-          "data": {
-            "entry": schoolClass.attributes["data-entry"],
-            "book": schoolClass.attributes["data-entry"]
-          },
-          "_courseURL":
-              schoolClass.querySelector("td>h3>a")?.attributes["href"]
-        });
+        String? topicTitle = schoolClass.querySelector(".thema")?.text.trim();
+        String? teacherKuerzel = teacher
+            ?.getElementsByClassName("btn btn-primary dropdown-toggle btn-xs")[0]
+            .text
+            .trim();
+        String? teacherName = teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim();
+        String? topicDateString = schoolClass.querySelector(".datum")?.text.trim();
+        DateTime? topicDate = DateTime.parse(topicDateString!.split(".").reversed.join("-"));
+        String? courseURL = schoolClass.querySelector("td>h3>a")?.attributes["href"];
+        int fileCount = schoolClass.getElementsByClassName('file').length;
+
+        Homework? homework;
+        if (schoolClass.querySelector('.homework') != null) {
+          homework = Homework(
+            description: schoolClass.querySelector('.realHomework')!.text.trim(),
+            homeWorkDone: schoolClass.querySelector('.undone') == null,
+          );
+        }
+        String entryID = schoolClass.attributes["data-entry"]!;
+
+        // find lesson by courseURL and add currentEntry
+        for (var lesson in lessons) {
+          if (lesson.courseURL.toString() == courseURL) {
+            lesson.currentEntry = CurrentEntry(
+              entryID: entryID,
+              topicTitle: topicTitle,
+              topicDate: topicDate,
+              homework: homework,
+              uploads: const [],
+              files: List.generate(fileCount, (_)=>LessonsFile()),
+            );
+            lesson.teacher = teacherName;
+            lesson.teacherKuerzel = teacherKuerzel;
+            break;
+          }
+        }
       }
-
-      //sort by date
-      result["aktuell"]?.sort((a, b) {
-        var aDate = a["thema"]["date"];
-        var bDate = b["thema"]["date"];
-
-        var aDateTime = DateTime(int.parse(aDate.split(".")[2]),
-            int.parse(aDate.split(".")[1]), int.parse(aDate.split(".")[0]));
-        var bDateTime = DateTime(int.parse(bDate.split(".")[2]),
-            int.parse(bDate.split(".")[1]), int.parse(bDate.split(".")[0]));
-
-        return bDateTime.compareTo(aDateTime);
-      });
     }
 
     //Anwesenheiten
@@ -77,300 +97,255 @@ class MeinUnterrichtParser {
     var thead = anwesendDOM?.querySelector("thead>tr");
     var tbody = anwesendDOM?.querySelectorAll("tbody>tr");
 
-    var keys = [];
+    List<String> keys = [];
     thead?.children.forEach((element) => keys.add(element.text.trim()));
 
-    tbody?.forEach((elem) {
+    tbody?.forEach((row) {
       var textElements = [];
-      for (var i = 0; i < elem.children.length; i++) {
-        var element = elem.children[i];
-        element.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
+      for (var i = 0; i < row.children.length; i++) {
+        var col = row.children[i];
+        col.querySelector("div.hidden.hidden_encoded")?.innerHtml = "";
 
-        if (keys[i] != "Kurs") {
-          textElements.add(element.text.trim());
-        } else {
-          textElements.add(element.text.trim());
-        }
+        textElements.add(col.text.trim());
       }
 
-      var rowEntry = {};
+      Map<String, String> attendances = {};
 
       for (int i = 0; i < keys.length; i++) {
-        var key = keys[i];
+        var key = keys[i].toLowerCase();
         var value = textElements[i];
+        if (['kurs', 'lehrkraft'].contains(key)) continue;
 
-        rowEntry[key] = value;
+        if (value == "") {
+          value = "0";
+        }
+
+        attendances[key] = value;
       }
+      var hyperlinkToCourse = row.getElementsByTagName("a")[0];
+      String courseURL = hyperlinkToCourse.attributes["href"]!;
 
-      //get url of course
-      var hyperlinkToCourse = elem.getElementsByTagName("a")[0];
-      rowEntry["_courseURL"] = hyperlinkToCourse.attributes["href"];
-
-      result["anwesenheiten"]?.add(rowEntry);
+      // find lesson by courseURL and add attendances
+      for (var lesson in lessons) {
+        if (courseURL.contains(lesson.courseID)) {
+          lesson.attendances = attendances;
+          break;
+        }
+      }
     });
 
-    //Kursmappen
-    var kursmappenDOM = document.getElementById("mappen");
-    var parsedMappen = [];
-
-    final row = kursmappenDOM?.getElementsByClassName("row");
-    var mappen = row!.isEmpty ? null : row[0].children;
-    if (mappen != null) {
-      for (var mappe in mappen) {
-        parsedMappen.add({
-          "title": mappe.getElementsByTagName("h2")[0].text.trim(),
-          "teacher": mappe
-              .querySelector("div.btn-group>button")
-              ?.attributes["title"],
-          "_courseURL":
-              mappe.querySelector("a.btn.btn-primary")?.attributes["href"]
-        });
+    //sort lessons by date
+    lessons.sort((a, b) {
+      if (a.currentEntry?.topicDate == null || b.currentEntry?.topicDate == null) {
+        return 0;
       }
-      result["kursmappen"] = parsedMappen;
-    } else {
-      result["kursmappen"] = [];
-    }
+      return b.currentEntry!.topicDate!.compareTo(a.currentEntry!.topicDate!);
+    });
 
-    return result;
+    return lessons;
   }
 
-  Future<dynamic> getCourseView(String url) async {
+  Future<DetailedLesson> getDetailedCourseView(String url) async {
     try {
-      var result = {
-        "historie": [],
-        "leistungen": [],
-        "leistungskontrollen": [],
-        "anwesenheiten": [],
-        "halbjahr1": [],
-        "name": ["name"],
-      };
-
       String courseID = url.split("id=")[1];
 
       final response =
           await dio.get("https://start.schulportal.hessen.de/$url");
-      var encryptedHTML = client.cryptor.decryptEncodedTags(response.data);
-      var document = parse(encryptedHTML);
+      final String decryptedHTML = client.cryptor.decryptEncodedTags(response.data);
+      Document document = parse(decryptedHTML);
 
       //course name
       var heading = document.getElementById("content")?.querySelector("h1");
       heading?.children[0].innerHtml = "";
-      result["name"] = [heading?.text.trim()];
+      String? courseTitle = heading?.text.trim();
 
+      Uri? semester1URL;
       //halbjahr2
       var halbJahrButtons =
           document.getElementsByClassName("btn btn-default hidden-print");
       if (halbJahrButtons.length > 1) {
         if (halbJahrButtons[0].attributes["href"]!.contains("&halb=1")) {
-          result["halbjahr1"] = [halbJahrButtons[0].attributes["href"]];
+          semester1URL = Uri.parse(halbJahrButtons[0].attributes["href"]!);
         }
       }
 
       //historie
-      () {
-        var historySection = document.getElementById("history");
-        var tableRows = historySection?.querySelectorAll("table>tbody>tr");
+      List<CurrentEntry> history = [];
 
-        tableRows?.forEach((tableRow) {
-          tableRow.children[2]
-              .querySelector("div.hidden.hidden_encoded")
-              ?.innerHtml = "";
+      Element? historySection = document.getElementById("history");
+      List<Element>? historyTableRows = historySection?.querySelectorAll("table>tbody>tr");
 
-          Map<String, String> markups = {};
+      historyTableRows?.forEach((tableRow) {
+        tableRow.children[2]
+            .querySelector("div.hidden.hidden_encoded")
+            ?.innerHtml = "";
 
-          // There is also a css selector :has() but it's not implemented yet.
-          final String? content = tableRow.children[1]
-              .querySelector("span.markup i.far.fa-comment-alt:first-child")
-              ?.parent
-              ?.text
-              .trim();
-          if (content != null && content.startsWith(" ")) {
-            markups["content"] = content.substring(1);
-          } else if (content != null) {
-            markups["content"] = content;
-          }
+        String? description = tableRow.children[1]
+            .querySelector("span.markup i.far.fa-comment-alt:first-child")
+            ?.parent
+            ?.text
+            .trim();
 
-          final String? homework = tableRow.children[1]
-              .querySelector("span.homework + br + span.markup")
-              ?.text
-              .trim();
-          bool homeworkDone = false;
+        String? homework = tableRow.children[1]
+            .querySelector("span.homework + br + span.markup")
+            ?.text
+            .trim();
+        bool homeworkDone = tableRow.querySelectorAll("span.done.hidden").isEmpty;
 
-          if (homework != null) {
-            homeworkDone =
-                tableRow.querySelectorAll("span.done.hidden").isEmpty;
-            if (homework.startsWith(" ")) {
-              markups["homework"] = homework.substring(1);
-            } else {
-              markups["homework"] = homework;
+
+        List<LessonsFile> files = [];
+        if (tableRow.children[1].querySelector("div.alert.alert-info") !=
+            null) {
+          String baseURL = "https://start.schulportal.hessen.de/";
+          baseURL += tableRow.children[1]
+              .querySelector("div.alert.alert-info>a")!
+              .attributes["href"]!;
+          baseURL = baseURL.replaceAll("&b=zip", "");
+
+          for (var fileDiv in tableRow.getElementsByClassName("files")[0].children) {
+            String? filename = fileDiv.attributes["data-file"];
+            files.add(LessonsFile(
+              fileName: filename,
+              fileSize: fileDiv
+                  .querySelector("a>small")
+                  ?.text,
+              fileURL: Uri.parse("$baseURL&f=$filename"),
+            ));
             }
           }
 
-          List files = [];
-          if (tableRow.children[1].querySelector("div.alert.alert-info") !=
-              null) {
-            String baseURL = "https://start.schulportal.hessen.de/";
-            baseURL += tableRow.children[1]
-                .querySelector("div.alert.alert-info>a")!
-                .attributes["href"]!;
-            baseURL = baseURL.replaceAll("&b=zip", "");
+        List<LessonUpload> uploads = [];
+        final uploadGroups =
+            tableRow.children[1].querySelectorAll("div.btn-group");
+        for (final uploadGroup in uploadGroups) {
+          final openUpload = uploadGroup.querySelector(".btn-warning");
+          final closedUpload = uploadGroup.querySelector(".btn-default");
 
-            for (var fileDiv
-                in tableRow.getElementsByClassName("files")[0].children) {
-              String? filename = fileDiv.attributes["data-file"];
-              files.add({
-                "filename": filename,
-                "filesize": fileDiv.querySelector("a>small")?.text,
-                "url": "$baseURL&f=$filename",
-              });
-            }
+          const String baseURL = "https://start.schulportal.hessen.de/";
+
+          if (openUpload != null) {
+            uploads.add(LessonUpload(
+              name: openUpload.nodes[2].text!.trim(),
+              status: "open",
+              url: Uri.parse(baseURL+uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!),
+              uploaded: openUpload.querySelector("span.badge")?.text,
+              date: openUpload.querySelector("small")?.text
+                  .replaceAll("\n", "")
+                  .replaceAll("                                                                ", "")
+                  .replaceAll("bis ", "")
+                  .replaceAll("um", ""),
+            ));
+          } else if (closedUpload != null) {
+            uploads.add(LessonUpload(
+              name: closedUpload.nodes[2].text!.trim(),
+              status: "closed",
+              url: Uri.parse(baseURL+uploadGroup.querySelector("ul.dropdown-menu li a")!.attributes["href"]!),
+              uploaded: closedUpload.querySelector("span.badge")?.text,
+            ));
           }
+        }
 
-          List uploads = [];
-          final uploadGroups =
-              tableRow.children[1].querySelectorAll("div.btn-group");
-          for (final uploadGroup in uploadGroups) {
-            final openUpload = uploadGroup.querySelector(".btn-warning");
-            final closedUpload = uploadGroup.querySelector(".btn-default");
+        List<String> dateInformation = tableRow.children[0].text.split("\n").map((e) => e.trim()).where((element) => element!="").toList();
 
-            const String baseURL = "https://start.schulportal.hessen.de/";
-
-            if (openUpload != null) {
-              uploads.add({
-                "name": openUpload.nodes[2].text?.trim(),
-                "status": "open",
-                "link": baseURL +
-                    uploadGroup
-                        .querySelector("ul.dropdown-menu li a")!
-                        .attributes["href"]!,
-                "uploaded": openUpload.querySelector("span.badge")?.text,
-                "date": openUpload
-                    .querySelector("small")
-                    ?.text
-                    .replaceAll("\n", "")
-                    .replaceAll(
-                        "                                                                ",
-                        "")
-                    .replaceAll("bis ", "")
-                    .replaceAll("um", ""),
-              });
-            } else if (closedUpload != null) {
-              uploads.add({
-                "name": closedUpload.nodes[2].text?.trim(),
-                "status": "closed",
-                "link": baseURL +
-                    uploadGroup
-                        .querySelector("ul.dropdown-menu li a")!
-                        .attributes["href"]!,
-                "uploaded": closedUpload.querySelector("span.badge")?.text,
-                "date": null,
-              });
-            }
-          }
-
-          result["historie"]?.add({
-            "time": tableRow.children[0].text
-                .trim()
-                .replaceAll("  ", "")
-                .replaceAll("\n", " ")
-                .replaceAll("  ", " "),
-            "title": tableRow.children[1].querySelector("big>b")?.text.trim(),
-            "markup": markups,
-            "entry-id": tableRow.attributes["data-entry"],
-            "course-id": courseID,
-            "homework-done": homeworkDone,
-            "presence": tableRow.children[2].text.trim(),
-            "files": files,
-            "uploads": uploads
-          });
-        });
-      }();
+        history.add(CurrentEntry(
+          entryID: tableRow.attributes["data-entry"]!,
+          topicTitle: tableRow.children[1].querySelector("big>b")?.text.trim(),
+          description: description,
+          presence: tableRow.children[2].text.trim() == 'nicht erfasst' ? null : tableRow.children[2].text.trim(),
+          topicDate: DateTime.parse(dateInformation[0].split(".").reversed.join("-")),
+          schoolHours: dateInformation[1].replaceAll("Stunde", "").trimRight(),
+          files: files,
+          uploads: uploads,
+          homework: (homework != null) ? Homework(description: homework, homeWorkDone: homeworkDone) : null,
+        ));
+      });
 
       //anwesenheiten
-      () {
-        var presenceSection = document.getElementById("attendanceTable");
-        var tableRows = presenceSection?.querySelectorAll("table>tbody>tr");
+      Element? presenceSection = document.getElementById("attendanceTable");
+      List<Element>? attendanceTableRows = presenceSection?.querySelectorAll("table>tbody>tr");
 
-        tableRows?.forEach((row) {
-          var encodedElements = row.getElementsByClassName("hidden_encoded");
-          for (var e in encodedElements) {
-            e.innerHtml = "";
-          }
-
-          result["anwesenheiten"]?.add({
-            "type": row.children[0].text.trim(),
-            "count": row.children[1].text.trim()
-          });
-        });
-      }();
+      Map<String, String> attendances = {};
+      
+      attendanceTableRows?.forEach((row) {
+        var encodedElements = row.getElementsByClassName("hidden_encoded");
+        for (var e in encodedElements) {
+          e.innerHtml = "";
+        }
+        attendances[row.children[0].text.trim()] = row.children[1].text.trim();
+      });
 
       //leistungen
-      () {
-        var marksSection = document.getElementById("marks");
-        List tableRows =
-            marksSection?.querySelectorAll("table>tbody>tr") as List;
+      var marksSection = document.getElementById("marks");
+      List markTableRows =
+          marksSection?.querySelectorAll("table>tbody>tr") as List;
 
-        for (var (index, row) in tableRows.indexed) {
-          var encodedElements = row.getElementsByClassName("hidden_encoded");
-          for (var e in encodedElements) {
-            e.innerHtml = "";
-          }
-
-          if (row.children.length == 3) {
-            result["leistungen"]?.add({
-              "Name": row.children[0].text.trim(),
-              "Datum": row.children[1].text.trim(),
-              "Note": row.children[2].text.trim()
-            });
-          }
-          if (row.children.length == 2) {
-            String comment = row.children[1].text.trim();
-            comment = comment.split(":").sublist(1).join(":");
-
-            result["leistungen"]![index - 1]["Kommentar"] = comment;
-          }
+      List<LessonMark> marks = [];
+      
+      for (var row in markTableRows) {
+        var encodedElements = row.getElementsByClassName("hidden_encoded");
+        for (var e in encodedElements) {
+          e.innerHtml = "";
         }
-      }();
+
+        if (row.children.length == 3) {
+          marks.add(LessonMark(
+            name: row.children[0].text.trim(),
+            date: row.children[1].text.trim(),
+            mark: row.children[2].text.trim(),
+            comment: (row.children.length == 2)
+              ? row.children[1].text.trim().split(":").sublist(1).join(":")
+              : null,
+          ));
+        }
+      }
 
       //leistungskontrollen
-      () {
-        var examSection = document.getElementById("klausuren");
-        var lists = examSection?.children;
+        Element? examSection = document.getElementById("klausuren");
 
-        if (lists![0].text.contains("Diese Kursmappe beinhaltet leider noch keine Leistungskontrollen!")) {
-          return;
-        }
+        List<LessonExam> lessonExams = [];
 
-        for (var element in lists) {
-          String exams = "";
+        if (!(examSection?.children)![0].text.contains("Diese Kursmappe beinhaltet leider noch keine Leistungskontrollen!")) {
 
-          final elements = element.querySelectorAll("ul li");
+          for (var element in examSection?.children ?? []) {
+            String exams = "";
 
-          for (var element in elements) {
-            //todo better solution that splitting the string with "  ...  "
-            var exam = element.text.trim().split(
-                "                                                                                                    ");
-            exams +=
-                "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}";
-            if (element != elements.last) {
-              exams += "\n";
+            final elements = element.querySelectorAll("ul li");
+
+            for (var element in elements) {
+              //todo better solution that splitting the string with "  ...  "
+              var exam = element.text.trim().split(
+                  "                                                                                                    ");
+              exams +=
+                  "${exam.first.trim()} ${exam.last != exam.first ? exam.last.trim() : ""}";
+              if (element != elements.last) {
+                exams += "\n";
+              }
             }
+
+            lessonExams.add(LessonExam(
+              name: element.querySelector("h1,h2,h3,h4,h5,h6")?.text.trim() ?? "",
+              value: exams == "" ? "Keine Daten!" : exams,
+            ));
           }
-
-          result["leistungskontrollen"]?.add({
-            "title": element.querySelector("h1,h2,h3,h4,h5,h6")?.text.trim(),
-            "value": exams == "" ? "Keine Daten!" : exams
-          });
         }
-      }();
-
-      return result;
+      Element teacherButton = document.getElementsByClassName("btn btn-primary dropdown-toggle btn-md")[0];
+      return DetailedLesson(
+        courseID: courseID,
+        name: courseTitle!,
+        teacher: teacherButton.parent!.querySelector(".dropdown-menu")!.text.trim(),
+        teacherKuerzel: teacherButton.text.trim(),
+        history: history,
+        marks: marks,
+        exams: lessonExams,
+        attendances: attendances,
+        semester1URL: semester1URL,
+      );
     } catch (e) {
       throw UnknownException();
     }
   }
 
-  Future<dynamic> setHomework(
+  Future<String> setHomework(
       String courseID, String courseEntry, bool status) async {
     //returns the response of the http request. 1 means success.
 
