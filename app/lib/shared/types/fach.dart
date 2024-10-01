@@ -1,11 +1,13 @@
+import 'package:flutter/material.dart';
+
 class StdPlanFach {
   String? name;
   String? raum;
   String? lehrer;
   String? badge;
   int duration;
-  (int, int) startTime;
-  (int, int) endTime;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
 
   StdPlanFach(
       {required this.name,
@@ -18,7 +20,7 @@ class StdPlanFach {
 
   @override
   String toString() {
-    return "(Fach: $name, Raum: $raum, Lehrer: $lehrer, Badge: $badge, Dauer: $duration (${startTime.$1}:${startTime.$2}-${endTime.$1}:${endTime.$2}))";
+    return "(Fach: $name, Raum: $raum, Lehrer: $lehrer, Badge: $badge, Dauer: $duration (${startTime.hour}:${startTime.minute}-${endTime.hour}:${endTime.minute}))";
   }
 
   Map<String, dynamic> toJson() {
@@ -28,8 +30,8 @@ class StdPlanFach {
       "lehrer": lehrer,
       "badge": badge,
       "duration": duration,
-      "startTime": [startTime.$1, startTime.$2],
-      "endTime": [endTime.$1, endTime.$2],
+      "startTime": [startTime.hour, startTime.minute],
+      "endTime": [endTime.hour, endTime.minute],
     };
   }
 
@@ -40,8 +42,8 @@ class StdPlanFach {
         lehrer: json["lehrer"],
         badge: json["badge"],
         duration: json["duration"],
-        startTime: (json["startTime"][0], json["startTime"][1]),
-        endTime: (json["endTime"][0], json["endTime"][1])
+        startTime: TimeOfDay(hour: json["startTime"][0],minute: json["startTime"][1]),
+        endTime: TimeOfDay(hour: json["endTime"][0],minute:  json["endTime"][1])
     );
   }
 
