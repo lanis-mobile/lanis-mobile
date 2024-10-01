@@ -509,10 +509,13 @@ class OverviewFiltering {
   /// Cached overview entries set by a [getOverview] call.
   List<OverviewEntry> entries = [];
 
-  bool showHidden = false;
-  String searchText = "";
+  /// Skip current options when in toggle mode.
+  bool toggleMode = false;
 
-  final individual = {
+  bool showHidden = false;
+  String simpleSearch = "";
+
+  final advancedSearch = {
     SearchFunction.subject: "",
     SearchFunction.name: "",
     SearchFunction.schedule: "",
@@ -540,25 +543,29 @@ class OverviewFiltering {
 
   /// Show all conversations or just non-hidden ones.
   List<OverviewEntry> filtered(List<OverviewEntry> entries) {
-    if (showHidden == true) {
+    if (showHidden || toggleMode) {
       return entries;
     }
 
     return entries.where((entry) => entry.hidden == false).toList();
   }
 
-  List<OverviewEntry> individualSearched(List<OverviewEntry> entries, SearchFunction function) {
-    return entries.where((entry) => function.call(entry, individual[function]!)).toList();
+  List<OverviewEntry> advancedSearched(List<OverviewEntry> entries, SearchFunction function) {
+    return entries.where((entry) => function.call(entry, advancedSearch[function]!)).toList();
   }
 
   List<OverviewEntry> searched(List<OverviewEntry> entries) {
+    if (toggleMode) {
+      return entries;
+    }
+
     List<OverviewEntry> newEntries = [];
 
     // Basic search which often is enough.
     for (int i = 0; i < entries.length; i++) {
       bool add = false;
       for (final function in SearchFunction.values) {
-        if (function.call(entries[i], searchText)) {
+        if (function.call(entries[i], simpleSearch)) {
           add = true;
           break;
         }
@@ -570,8 +577,8 @@ class OverviewFiltering {
     }
 
     // Search with the expanded precision search.
-    for (final function in individual.keys) {
-      newEntries = individualSearched(newEntries, function);
+    for (final function in advancedSearch.keys) {
+      newEntries = advancedSearched(newEntries, function);
     }
 
     return newEntries;
