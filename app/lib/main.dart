@@ -13,7 +13,6 @@ import 'package:sph_plan/client/storage.dart';
 import 'background_service.dart';
 import 'package:http_proxy/http_proxy.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -34,7 +33,7 @@ void main() async {
   AmoledNotifier.init();
 
   HttpProxy httpProxy = await HttpProxy.createHttpProxy();
-  HttpOverrides.global=httpProxy;
+  HttpOverrides.global = httpProxy;
 
   runApp(const App());
 }
@@ -59,29 +58,33 @@ class App extends StatelessWidget {
                 valueListenable: ThemeModeNotifier.notifier,
                 builder: (_, mode, __) {
                   return ValueListenableBuilder<bool>(
-                    valueListenable: AmoledNotifier.notifier,
-                    builder: (_, isAmoled, __) {
+                      valueListenable: AmoledNotifier.notifier,
+                      builder: (_, isAmoled, __) {
+                        ThemeData darkTheme = getAmoledTheme(theme, isAmoled);
 
-                      ThemeData darkTheme = getAmoledTheme(theme, isAmoled);
+                        if (mode == ThemeMode.light ||
+                            mode == ThemeMode.system &&
+                                MediaQuery.of(context).platformBrightness ==
+                                    Brightness.light) {
+                          BubbleStyles.init(theme.lightTheme!);
+                        } else if (mode == ThemeMode.dark ||
+                            mode == ThemeMode.system &&
+                                MediaQuery.of(context).platformBrightness ==
+                                    Brightness.dark) {
+                          BubbleStyles.init(darkTheme);
+                        }
 
-                      if (mode == ThemeMode.light || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.light) {
-                        BubbleStyles.init(theme.lightTheme!);
-                      } else if (mode == ThemeMode.dark || mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.dark) {
-                        BubbleStyles.init(darkTheme);
-                      }
-
-                      return MaterialApp(
-                        title: 'Lanis Mobile',
-                        theme: theme.lightTheme,
-                        darkTheme: darkTheme,
-                        themeMode: mode,
-                        localizationsDelegates:
-                        AppLocalizations.localizationsDelegates,
-                        supportedLocales: AppLocalizations.supportedLocales,
-                        home: const StartupScreen(),
-                      );
-                    }
-                  );
+                        return MaterialApp(
+                          title: 'Lanis Mobile',
+                          theme: theme.lightTheme,
+                          darkTheme: darkTheme,
+                          themeMode: mode,
+                          localizationsDelegates:
+                              AppLocalizations.localizationsDelegates,
+                          supportedLocales: AppLocalizations.supportedLocales,
+                          home: const StartupScreen(),
+                        );
+                      });
                 });
           });
     });
@@ -122,29 +125,28 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
             Padding(
               padding: const EdgeInsets.only(bottom: 35),
               child: FilledButton(
-                  onPressed: () async {
-                    await Clipboard.setData(ClipboardData(
-                        text: Trace.from(details.stack!).terse.toString()));
-                  },
-                  style: ButtonStyle(
-                    overlayColor: WidgetStateProperty.resolveWith((states) {
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(
+                      text: Trace.from(details.stack!).terse.toString()));
+                },
+                style: ButtonStyle(
+                  overlayColor: WidgetStateProperty.resolveWith((states) {
+                    return Colors.redAccent;
+                  }),
+                  foregroundColor: WidgetStateProperty.resolveWith((states) {
+                    return Colors.white;
+                  }),
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.pressed)) {
                       return Colors.redAccent;
-                    }),
-                    foregroundColor:
-                        WidgetStateProperty.resolveWith((states) {
-                      return Colors.white;
-                    }),
-                    backgroundColor:
-                        WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.pressed)) {
-                        return Colors.redAccent;
-                      }
-                      return Colors.red;
-                    }),
-                  ),
-                  child: const Text(
-                    "Copy error details to clipboard",
-                  )),
+                    }
+                    return Colors.red;
+                  }),
+                ),
+                child: const Text(
+                  "Copy error details to clipboard",
+                ),
+              ),
             ),
           ],
         ),

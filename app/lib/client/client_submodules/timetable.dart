@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/shared/types/fach.dart';
@@ -59,22 +63,23 @@ class TimetableParser {
   }
 
   List<Day> parseRoomPlan(Element tbody) {
-    List<Day> result = List.generate(5, (_) => []);
+    int dayCount = tbody.children[0].children.length - 1;
+    List<Day> result = List.generate(dayCount, (_) => []);
 
-    List<((int, int), (int, int))> timeSlots =
+    List<(TimeOfDay, TimeOfDay)> timeSlots =
         tbody.querySelectorAll(".VonBis").map((e) {
       var timeString = e.text.trim();
       var s = timeString.split(" - ");
       var splitA = s[0].split(":");
       var splitB = s[1].split(":");
       return (
-        (int.parse(splitA[0]), int.parse(splitA[1])),
-        (int.parse(splitB[0]), int.parse(splitB[1]))
+        TimeOfDay(hour: int.parse(splitA[0]), minute: int.parse(splitA[1])),
+        TimeOfDay(hour: int.parse(splitB[0]), minute: int.parse(splitB[1]))
       );
     }).toList();
 
     List<List<bool>> alreadyParsed = List.generate(
-        timeSlots.length + 1, (_) => List.generate(5, (_) => false));
+        timeSlots.length + 1, (_) => List.generate(dayCount, (_) => false));
 
     bool timeslotOffsetFirstRow = tbody.children[0].children[0].text.trim() != "";
 
@@ -102,7 +107,7 @@ class TimetableParser {
   }
 
   List<StdPlanFach> parseSingeEntry(
-      Element cell, int y, List<((int, int), (int, int))> timeSlots, bool timeslotOffsetFirstRow) {
+      Element cell, int y, List<(TimeOfDay, TimeOfDay)> timeSlots, bool timeslotOffsetFirstRow) {
     List<StdPlanFach> result = [];
     for (var row in cell.querySelectorAll(".stunde")) {
       var name = row.querySelector("b")?.text.trim();
