@@ -57,7 +57,7 @@ Future<Map?> getReleaseInfo(String? releaseTag) async {
   try {
     String url = 'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/latest';
     if (releaseTag != null) {
-      url = 'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/$releaseTag';
+      url = 'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/tags/$releaseTag';
     }
     final response = await client.dio.get(url);
     return response.data;
