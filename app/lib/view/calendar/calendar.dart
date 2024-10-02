@@ -10,6 +10,7 @@ import '../../client/client.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../client/logger.dart';
 import '../../shared/widgets/error_view.dart';
+import '../../shared/types/calendar_event.dart';
 
 class CalendarAnsicht extends StatefulWidget {
   const CalendarAnsicht({super.key});
@@ -21,12 +22,12 @@ class CalendarAnsicht extends StatefulWidget {
 class _CalendarAnsichtState extends State<CalendarAnsicht> {
   CalendarFetcher calendarFetcher = client.fetchers.calendarFetcher;
 
-  late final ValueNotifier<List<Event>> _selectedEvents;
+  late final ValueNotifier<List<CalendarEvent>> _selectedEvents;
 
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  List<Event> eventList = [];
+  List<CalendarEvent> eventList = [];
 
   @override
   void dispose() {
@@ -58,8 +59,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     }
   }
 
-  List<Event> _getEventsForDay(DateTime day) {
-    List<Event> validEvents = [];
+  List<CalendarEvent> _getEventsForDay(DateTime day) {
+    List<CalendarEvent> validEvents = [];
 
     for (var event in eventList) {
       // Compare only the date part of startTime and endTime
@@ -93,7 +94,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   bool doesEntryExist(dynamic entry) => entry != null && entry != "";
 
-  Widget getEvent(Event calendarData, Map<String, dynamic> singleEventData) {
+  Widget getEvent(
+      CalendarEvent calendarData, Map<String, dynamic> singleEventData) {
     const double iconSize = 24;
 
     // German-formatted readable date string
@@ -102,7 +104,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     String startTime = calendarData.startTime.format("E d MMM y", "de_DE");
     String endTime = calendarData.endTime.format("E d MMM y", "de_DE");
 
-    if (calendarData.data["allDay"] == true) {
+    if (calendarData.allDay) {
       if (startTime == endTime) {
         date += startTime;
       } else {
@@ -195,7 +197,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
               ),
             ),
             // Place
-            if (doesEntryExist(calendarData.data["Ort"])) ...[
+            if (doesEntryExist(calendarData.place)) ...[
               Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Row(
@@ -207,7 +209,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                         size: iconSize,
                       ),
                     ),
-                    Text(calendarData.data["Ort"],
+                    Text(calendarData.place!,
                         style: Theme.of(context).textTheme.labelLarge)
                   ],
                 ),
@@ -236,7 +238,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 ),
               ),
             ],
-            if (doesEntryExist(calendarData.data["Lerngruppe"])) ...[
+            if (doesEntryExist(calendarData.lerngruppe)) ...[
               Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Row(
@@ -249,14 +251,14 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                       ),
                     ),
                     Flexible(
-                      child: Text(calendarData.data["Lerngruppe"]["Name"],
+                      child: Text(calendarData.lerngruppe["Name"],
                           style: Theme.of(context).textTheme.labelLarge),
                     )
                   ],
                 ),
               ),
             ],
-            if (doesEntryExist(calendarData.data["description"])) ...[
+            if (doesEntryExist(calendarData.description)) ...[
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Linkify(
@@ -265,8 +267,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                       logger.w("${link.url} konnte nicht geöffnet werden.");
                     }
                   },
-                  text: calendarData.data["description"]
-                      .replaceAll("<br />", "\n"),
+                  text: calendarData.description.replaceAll("<br />", "\n"),
                   style: Theme.of(context).textTheme.bodyLarge,
                   linkStyle: Theme.of(context)
                       .textTheme
@@ -283,7 +284,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<FetcherResponse>(
+    return StreamBuilder<FetcherResponse<List<CalendarEvent>>>(
         stream: calendarFetcher.stream,
         builder: (context, snapshot) {
           if (snapshot.data?.status == FetcherStatus.error) {
@@ -295,22 +296,12 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
               snapshot.data == null) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            List<Event> updatedEventList = [];
-
-            snapshot.data?.content.forEach((event) {
-              updatedEventList.add(Event(
-                  event["title"],
-                  event,
-                  parseDateString(event["Anfang"]),
-                  parseDateString(event["Ende"])));
-            });
-
-            eventList = updatedEventList;
+            eventList = snapshot.data!.content ?? [];
             _selectedEvents.value = _getEventsForDay(_selectedDay!);
 
             return Column(
               children: [
-                TableCalendar<Event>(
+                TableCalendar<CalendarEvent>(
                   locale: AppLocalizations.of(context)!.locale,
                   firstDay: DateTime.utc(2020),
                   lastDay: DateTime.utc(2030),
@@ -367,7 +358,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                   },
                 ),
                 Expanded(
-                  child: ValueListenableBuilder<List<Event>>(
+                  child: ValueListenableBuilder<List<CalendarEvent>>(
                     valueListenable: _selectedEvents,
                     builder: (context, value, _) {
                       return Padding(
@@ -380,15 +371,15 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                   left: 8, right: 8, bottom: 4),
                               child: Card(
                                 child: ListTile(
-                                  title: Text('${value[index]}'),
+                                  title: Text(value[index].title),
                                   trailing: const Icon(Icons.arrow_right),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   onTap: () async {
                                     try {
-                                      var singleEvent = await fetchEvent(
-                                          value[index].data["Id"]);
+                                      var singleEvent =
+                                          await fetchEvent(value[index].id);
                                       showModalBottomSheet(
                                           context: context,
                                           showDragHandle: true,
@@ -403,14 +394,15 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                     } on LanisException catch (ex) {
                                       if (mounted) {
                                         showModalBottomSheet(
-                                            context: context,
-                                            showDragHandle: true,
-                                            builder: (context) {
-                                              return ErrorView(
-                                                error: ex,
-                                                name: "einem Kalenderereignis",
-                                              );
-                                            });
+                                          context: context,
+                                          showDragHandle: true,
+                                          builder: (context) {
+                                            return ErrorView(
+                                              error: ex,
+                                              name: "einem Kalenderereignis",
+                                            );
+                                          },
+                                        );
                                       }
                                     }
                                   },
@@ -428,18 +420,6 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
           }
         });
   }
-}
-
-class Event {
-  final String title;
-  final Map<String, dynamic> data;
-  final DateTime startTime;
-  final DateTime endTime;
-
-  const Event(this.title, this.data, this.startTime, this.endTime);
-
-  @override
-  String toString() => title;
 }
 
 List<DateTime> daysInRange(DateTime first, DateTime last) {
