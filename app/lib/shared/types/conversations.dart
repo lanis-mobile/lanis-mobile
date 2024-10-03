@@ -170,4 +170,19 @@ class OverviewEntry {
       unread: unread ?? this.unread,
       hidden: hidden ?? this.hidden,
   );
+
+  @override
+  bool operator ==(Object other) {
+    if (other is OverviewEntry) {
+      return hashCode == other.hashCode;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode;
+  }
+
 }

@@ -15,6 +15,8 @@ final scrollController = ScrollController();
 final ValueNotifier<bool> hideNotifications = ValueNotifier(false);
 final Map<String, bool> checkedTiles = {};
 
+const double tileSize = 80.0;
+
 void openToggleMode() {
   hideNotifications.value = true;
   client.conversations.filter.toggleMode = true;
@@ -57,15 +59,54 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
   bool showHidden = false;
   bool advancedSearch = false;
-  bool disableToggleButton = true;
+  bool disableToggleButton = false;
+
+  // Switching between two lists of overview entries messes up the scroll controller, so we just try to jump to the top visible tile and anchor to it.
+  // If top tile is not visible in the new list, we try to find the first visible tile above the top tile and jump to it.
+  void jumpToTopTile(final List<OverviewEntry> entries, final List<OverviewEntry> oldEntries) {
+    final offsetTopIndex = (scrollController.offset / 80).round();
+
+    double position = 0;
+    if (!(entries.contains(oldEntries[offsetTopIndex]))) {
+      for (int i = offsetTopIndex; i >= 0; i--) {
+        if (entries.contains(oldEntries[i])) {
+          final index = entries.indexOf(oldEntries[i]);
+          position = index * tileSize;
+          break;
+        }
+      }
+    } else {
+      final index = entries.indexOf(oldEntries[offsetTopIndex]);
+      position = index * tileSize;
+    }
+
+    final length = entries.length + 1;
+    final viewport = scrollController.position.viewportDimension;
+
+    if (length * tileSize < viewport) {
+      return;
+    }
+
+    if (position >= length * tileSize - viewport) {
+      scrollController.jumpTo(length * tileSize - viewport);
+    } else {
+      scrollController.jumpTo(position);
+    }
+  }
 
   void closeToggleMode() {
     hideNotifications.value = false;
+
+    final oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
+
     client.conversations.filter.toggleMode = false;
     client.conversations.filter.supply();
+
     setState(() {
       disableToggleButton = false;
     });
+
+    jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
   }
 
   @override
@@ -246,9 +287,18 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                       setState(() {
                                         showHidden = !showHidden;
                                       });
+
+                                      final oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
+
                                       client.conversations.filter.showHidden =
                                           showHidden;
                                       client.conversations.filter.supply();
+
+                                      if (!showHidden) {
+                                        jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
+                                      } else {
+                                        jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
+                                      }
                                     },
                                     child: Text(showHidden
                                         ? "Zeige nur Eingeblendete"
@@ -259,7 +309,13 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                     leadingIcon: SizedBox.fromSize(
                                       size: Size(24, 0),
                                     ),
-                                    onPressed: () => openToggleMode(),
+                                    onPressed: () {
+                                      final oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
+
+                                      openToggleMode();
+
+                                      jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
+                                    },
                                     child: Text("Aus-/einblenden"),
                                   ),
                                 ],
@@ -291,7 +347,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                   child: ListView.builder(
                       controller: scrollController,
                       itemCount: snapshot.data?.content.length + 1,
-                      itemExtent: 80,
+                      itemExtent: tileSize,
                       itemBuilder: (context, index) {
                         if (index > snapshot.data?.content.length - 1) {
                           return const SizedBox.shrink();
@@ -325,7 +381,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                           });
 
                           // So you don't see each button being toggled
-                          Map<String, bool> successful = {};
+                          Map<String, bool> toggled = {};
 
                           for (final tile in checkedTiles.entries) {
                             if (tile.value == true) {
@@ -394,16 +450,17 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                 return;
                               }
 
-                              successful.addEntries([tile]);
+                              toggled.addEntries([tile]);
+                              checkedTiles[tile.key] = false;
                             }
                           }
 
-                          for (final id in successful.keys) {
+                          for (final id in toggled.keys) {
                             client.conversations.filter
                                 .toggleEntry(id, hidden: true);
-                            checkedTiles[id] = false;
                           }
 
+                          client.conversations.filter.supply();
                           closeToggleMode();
                         }
                       : null);
@@ -501,6 +558,7 @@ class _ConversationTileState extends State<ConversationTile> {
                         if (widget.entry.unread == true) {
                           client.conversations.filter
                               .toggleEntry(widget.entry.id, unread: true);
+                          client.conversations.filter.supply();
                         }
 
                         return ConversationsChat.fromEntry(widget.entry);
@@ -508,14 +566,26 @@ class _ConversationTileState extends State<ConversationTile> {
                     ),
                   );
                 },
-                onLongPress: () {
+                onLongPress: () async {
+                  // Try to let the tile be in same place as in the old list.
                   if (!hideNotifications.value) {
+                    final List<OverviewEntry> oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
+                    final oldPosition = oldEntries.indexOf(widget.entry) * tileSize;
+
                     openToggleMode();
+
                     setState(() {
                       checkedTiles[widget.entry.id] = true;
                     });
-                    final index = client.conversations.filter.entries.indexOf(widget.entry);
-                    scrollController.animateTo(index * 80, duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+
+                    final List<OverviewEntry> entries = client.fetchers.conversationsFetcher.stream.value.content;
+
+                    final index = entries.indexOf(widget.entry);
+                    final position = index * tileSize;
+                    final offset = scrollController.offset;
+
+                    final newOffset = position + (offset - oldPosition);
+                    scrollController.jumpTo(newOffset);
                   }
                 },
                 customBorder: RoundedRectangleBorder(

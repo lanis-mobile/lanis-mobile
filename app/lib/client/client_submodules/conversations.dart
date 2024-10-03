@@ -533,8 +533,6 @@ class OverviewFiltering {
         hidden: hidden == null || hidden == false ? null : !entries[index].hidden,
         unread: unread == null || unread == false ? null : !entries[index].unread,
     )]);
-
-    supply();
   }
 
   List<OverviewEntry> filteredAndSearched(List<OverviewEntry> entries) {
@@ -555,10 +553,6 @@ class OverviewFiltering {
   }
 
   List<OverviewEntry> searched(List<OverviewEntry> entries) {
-    if (toggleMode) {
-      return entries;
-    }
-
     List<OverviewEntry> newEntries = [];
 
     // Basic search which often is enough.
