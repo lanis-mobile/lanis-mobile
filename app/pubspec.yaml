@@ -23,7 +23,7 @@ dependencies:
   http_proxy:
     git:
       url: https://github.com/lanis-mobile/http_proxy.git
-      ref: bd56acd6d59c4340e186bdade269a208e89ce08b
+      ref: f84ae53fe9663ff2d18fc0f203adf750a6816349
   flutter:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
