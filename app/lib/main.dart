@@ -37,7 +37,7 @@ void main() async {
 
   await setupProxy();
 
-  StreamSubscription<List<ConnectivityResult>> subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) async {
+  Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) async {
     if (result.isNotEmpty && result.first != ConnectivityResult.none) {
       await setupProxy();
     }
