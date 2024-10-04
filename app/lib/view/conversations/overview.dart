@@ -12,15 +12,16 @@ import 'chat.dart';
 
 // Global because we need them in ConversationTile and ConversationsOverview.
 final scrollController = ScrollController();
-final ValueNotifier<bool> hideNotifications = ValueNotifier(false);
+final ValueNotifier<bool> toggleMode = ValueNotifier(false);
 final Map<String, bool> checkedTiles = {};
 
 const double tileSize = 80.0;
 
 void openToggleMode() {
-  hideNotifications.value = true;
+  toggleMode.value = true;
   client.conversations.filter.toggleMode = true;
   client.conversations.filter.supply();
+  client.fetchers.conversationsFetcher.toggleSuspend();
 }
 
 class ConversationsOverview extends StatefulWidget {
@@ -57,13 +58,19 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     SearchFunction.schedule: false
   };
 
+  bool loadingCreateButton = false;
+
   bool showHidden = false;
   bool advancedSearch = false;
   bool disableToggleButton = false;
 
+  // Workaround to use setState instead of ValueListenableBuilder.
+  bool _toggleMode = false;
+
   // Switching between two lists of overview entries messes up the scroll controller, so we just try to jump to the top visible tile and anchor to it.
   // If top tile is not visible in the new list, we try to find the first visible tile above the top tile and jump to it.
-  void jumpToTopTile(final List<OverviewEntry> entries, final List<OverviewEntry> oldEntries) {
+  void jumpToTopTile(
+      final List<OverviewEntry> entries, final List<OverviewEntry> oldEntries) {
     final offsetTopIndex = (scrollController.offset / 80).round();
 
     double position = 0;
@@ -80,24 +87,26 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
       position = index * tileSize;
     }
 
-    final length = entries.length + 1;
     final viewport = scrollController.position.viewportDimension;
+    final size = (entries.length + 2.5) * tileSize;
 
-    if (length * tileSize < viewport) {
+    if (size < viewport) {
       return;
     }
 
-    if (position >= length * tileSize - viewport) {
-      scrollController.jumpTo(length * tileSize - viewport);
+    if (position >= size - viewport) {
+      scrollController.jumpTo(size - viewport);
     } else {
-      scrollController.jumpTo(position);
+      // TODO
+      scrollController.jumpTo(position - (offsetTopIndex * tileSize - scrollController.offset));
     }
   }
 
   void closeToggleMode() {
-    hideNotifications.value = false;
+    toggleMode.value = false;
 
-    final oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
+    final oldEntries =
+        client.fetchers.conversationsFetcher.stream.value.content;
 
     client.conversations.filter.toggleMode = false;
     client.conversations.filter.supply();
@@ -106,12 +115,20 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
       disableToggleButton = false;
     });
 
-    jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
+    client.fetchers.conversationsFetcher.toggleSuspend();
+
+    jumpToTopTile(
+        client.fetchers.conversationsFetcher.stream.value.content!, oldEntries!);
   }
 
   @override
   void initState() {
     conversationsFetcher.fetchData();
+    toggleMode.addListener(() {
+      setState(() {
+        _toggleMode = !_toggleMode;
+      });
+    });
 
     super.initState();
   }
@@ -121,210 +138,227 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     return Scaffold(
         appBar: AppBar(
           bottom: PreferredSize(
-            preferredSize: Size(double.maxFinite, advancedSearch ? 200 : 16),
-            child: ValueListenableBuilder(
-                valueListenable: hideNotifications,
-                builder: (context, value, _) {
-                  if (value == true) {
-                    return AppBar(
-                      title: Text("Nachrichten aus-/einblenden"),
-                      backgroundColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
-                      leading: IconButton(
-                          onPressed: () {
-                            closeToggleMode();
-                            for (final tile in checkedTiles.keys) {
-                              checkedTiles[tile] = false;
-                            }
-                          },
-                          icon: Icon(Icons.arrow_back)),
-                    );
-                  }
+            preferredSize: Size(
+                double.maxFinite, advancedSearch && !_toggleMode ? 200 : 16),
+            child: _toggleMode
+                ? AppBar(
+                    title: Text(
+                        AppLocalizations.of(context)!.hideShowConversations),
+                    backgroundColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    leading: IconButton(
+                        onPressed: () {
+                          closeToggleMode();
+                          for (final tile in checkedTiles.keys) {
+                            checkedTiles[tile] = false;
+                          }
+                        },
+                        icon: Icon(Icons.arrow_back)),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(
+                        left: 8.0, right: 8.0, top: 0, bottom: 8),
+                    child: Column(
+                      children: [
+                        // Advanced search
+                        if (advancedSearch) ...[
+                          ...List<Padding>.generate(
+                              client.conversations.filter.advancedSearch.length,
+                              (i) {
+                            SearchFunction function = client
+                                .conversations.filter.advancedSearch.keys
+                                .elementAt(i);
 
-                  return Padding(
-                      padding: const EdgeInsets.only(
-                          left: 8.0, right: 8.0, top: 0, bottom: 8),
-                      child: Column(
-                        children: [
-                          // Advanced search
-                          if (advancedSearch) ...[
-                            ...List<Padding>.generate(
-                                client.conversations.filter.advancedSearch
-                                    .length, (i) {
-                              SearchFunction function = client
-                                  .conversations.filter.advancedSearch.keys
-                                  .elementAt(i);
-
-                              filterFunction(String text) {
-                                client.conversations.filter
-                                    .advancedSearch[function] = text;
-                                client.conversations.filter.supply();
-
-                                if (text.isEmpty) {
-                                  setState(() {
-                                    advancedRemoveButtons[function] = false;
-                                  });
-                                }
-
-                                if (advancedRemoveButtons[function] == false &&
-                                    text.isNotEmpty) {
-                                  setState(() {
-                                    advancedRemoveButtons[function] = true;
-                                  });
-                                }
-                              }
-
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: SearchBar(
-                                  hintText: AppLocalizations.of(context)!
-                                      .individualSearchHint(function.name),
-                                  textInputAction: TextInputAction.search,
-                                  controller:
-                                      advancedSearchControllers[function],
-                                  onSubmitted: filterFunction,
-                                  onChanged: filterFunction,
-                                  leading: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: advancedSearchIcons[function],
-                                  ),
-                                  trailing: [
-                                    Visibility(
-                                      visible: advancedRemoveButtons[function]!,
-                                      child: IconButton(
-                                          onPressed: () {
-                                            client.conversations.filter
-                                                .advancedSearch[function] = "";
-                                            advancedSearchControllers[function]!
-                                                .clear();
-                                            client.conversations.filter
-                                                .supply();
-
-                                            setState(() {
-                                              advancedRemoveButtons[function] =
-                                                  false;
-                                            });
-                                          },
-                                          icon: const Icon(Icons.delete)),
-                                    )
-                                  ],
-                                ),
-                              );
-                            })
-                          ],
-
-                          // Simple search
-                          SearchBar(
-                            hintText: AppLocalizations.of(context)!.searchHint,
-                            textInputAction: TextInputAction.search,
-                            controller: simpleSearchController,
-                            onSubmitted: (String text) {
-                              client.conversations.filter.simpleSearch = text;
-                              client.conversations.filter.supply();
-                            },
-                            onChanged: (String text) {
-                              client.conversations.filter.simpleSearch = text;
+                            filterFunction(String text) {
+                              client.conversations.filter
+                                  .advancedSearch[function] = text;
                               client.conversations.filter.supply();
 
                               if (text.isEmpty) {
                                 setState(() {
-                                  simpleRemoveButton = false;
+                                  advancedRemoveButtons[function] = false;
                                 });
                               }
 
-                              if (simpleRemoveButton == false &&
+                              if (advancedRemoveButtons[function] == false &&
                                   text.isNotEmpty) {
                                 setState(() {
-                                  simpleRemoveButton = true;
+                                  advancedRemoveButtons[function] = true;
                                 });
                               }
-                            },
-                            trailing: [
-                              Visibility(
-                                visible: simpleRemoveButton,
-                                child: IconButton(
-                                    onPressed: () {
-                                      client.conversations.filter.simpleSearch =
-                                          "";
-                                      simpleSearchController.clear();
-                                      client.conversations.filter.supply();
+                            }
 
-                                      setState(() {
-                                        simpleRemoveButton = false;
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete)),
-                              ),
-                              MenuAnchor(
-                                builder: (context, controller, _) => IconButton(
-                                    onPressed: () {
-                                      if (controller.isOpen) {
-                                        controller.close();
-                                      } else {
-                                        controller.open();
-                                      }
-                                    },
-                                    icon: const Icon(Icons.more_vert)),
-                                menuChildren: [
-                                  MenuItemButton(
-                                    leadingIcon: advancedSearch
-                                        ? Icon(Icons.search_off)
-                                        : Icon(Icons.search),
-                                    onPressed: () {
-                                      setState(() {
-                                        advancedSearch = !advancedSearch;
-                                      });
-                                    },
-                                    child: Text(advancedSearch
-                                        ? "Einfache Suche"
-                                        : "Erweiterte Suche"),
-                                  ),
-                                  MenuItemButton(
-                                    leadingIcon: showHidden
-                                        ? const Icon(Icons.visibility_off)
-                                        : const Icon(Icons.visibility),
-                                    onPressed: () {
-                                      setState(() {
-                                        showHidden = !showHidden;
-                                      });
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: SearchBar(
+                                hintText: AppLocalizations.of(context)!
+                                    .individualSearchHint(function.name),
+                                textInputAction: TextInputAction.search,
+                                controller: advancedSearchControllers[function],
+                                onSubmitted: filterFunction,
+                                onChanged: filterFunction,
+                                leading: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: advancedSearchIcons[function],
+                                ),
+                                trailing: [
+                                  Visibility(
+                                    visible: advancedRemoveButtons[function]!,
+                                    child: IconButton(
+                                        onPressed: () {
+                                          client.conversations.filter
+                                              .advancedSearch[function] = "";
+                                          advancedSearchControllers[function]!
+                                              .clear();
+                                          client.conversations.filter.supply();
 
-                                      final oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
-
-                                      client.conversations.filter.showHidden =
-                                          showHidden;
-                                      client.conversations.filter.supply();
-
-                                      if (!showHidden) {
-                                        jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
-                                      } else {
-                                        jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
-                                      }
-                                    },
-                                    child: Text(showHidden
-                                        ? "Zeige nur Eingeblendete"
-                                        : "Zeige alle"),
-                                  ),
-                                  const Divider(),
-                                  MenuItemButton(
-                                    leadingIcon: SizedBox.fromSize(
-                                      size: Size(24, 0),
-                                    ),
-                                    onPressed: () {
-                                      final oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
-
-                                      openToggleMode();
-
-                                      jumpToTopTile(client.fetchers.conversationsFetcher.stream.value.content, oldEntries);
-                                    },
-                                    child: Text("Aus-/einblenden"),
-                                  ),
+                                          setState(() {
+                                            advancedRemoveButtons[function] =
+                                                false;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.delete)),
+                                  )
                                 ],
                               ),
-                            ],
-                          ),
+                            );
+                          })
                         ],
-                      ));
-                }),
+
+                        // Simple search
+                        SearchBar(
+                          hintText: AppLocalizations.of(context)!.searchHint,
+                          textInputAction: TextInputAction.search,
+                          controller: simpleSearchController,
+                          onSubmitted: (String text) {
+                            client.conversations.filter.simpleSearch = text;
+                            client.conversations.filter.supply();
+                          },
+                          onChanged: (String text) {
+                            client.conversations.filter.simpleSearch = text;
+                            client.conversations.filter.supply();
+
+                            if (text.isEmpty) {
+                              setState(() {
+                                simpleRemoveButton = false;
+                              });
+                            }
+
+                            if (simpleRemoveButton == false &&
+                                text.isNotEmpty) {
+                              setState(() {
+                                simpleRemoveButton = true;
+                              });
+                            }
+                          },
+                          trailing: [
+                            Visibility(
+                              visible: simpleRemoveButton,
+                              child: IconButton(
+                                  onPressed: () {
+                                    client.conversations.filter.simpleSearch =
+                                        "";
+                                    simpleSearchController.clear();
+                                    client.conversations.filter.supply();
+
+                                    setState(() {
+                                      simpleRemoveButton = false;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete)),
+                            ),
+                            MenuAnchor(
+                              builder: (context, controller, _) => IconButton(
+                                  onPressed: () {
+                                    if (controller.isOpen) {
+                                      controller.close();
+                                    } else {
+                                      controller.open();
+                                    }
+                                  },
+                                  icon: const Icon(Icons.more_vert)),
+                              menuChildren: [
+                                MenuItemButton(
+                                  leadingIcon: advancedSearch
+                                      ? Icon(Icons.search_off)
+                                      : Icon(Icons.search),
+                                  onPressed: () {
+                                    setState(() {
+                                      advancedSearch = !advancedSearch;
+                                    });
+                                  },
+                                  child: Text(advancedSearch
+                                      ? AppLocalizations.of(context)!
+                                          .simpleSearch
+                                      : AppLocalizations.of(context)!
+                                          .advancedSearch),
+                                ),
+                                MenuItemButton(
+                                  leadingIcon: showHidden
+                                      ? const Icon(Icons.visibility_off)
+                                      : const Icon(Icons.visibility),
+                                  onPressed: () {
+                                    setState(() {
+                                      showHidden = !showHidden;
+                                    });
+
+                                    final oldEntries = client
+                                        .fetchers
+                                        .conversationsFetcher
+                                        .stream
+                                        .value
+                                        .content;
+
+                                    client.conversations.filter.showHidden =
+                                        showHidden;
+                                    client.conversations.filter.supply();
+
+                                    if (!showHidden) {
+                                      jumpToTopTile(
+                                          client.fetchers.conversationsFetcher
+                                              .stream.value.content!,
+                                          oldEntries!);
+                                    } else {
+                                      jumpToTopTile(
+                                          client.fetchers.conversationsFetcher
+                                              .stream.value.content!,
+                                          oldEntries!);
+                                    }
+                                  },
+                                  child: Text(showHidden
+                                      ? AppLocalizations.of(context)!
+                                          .showOnlyVisible
+                                      : AppLocalizations.of(context)!.showAll),
+                                ),
+                                const Divider(),
+                                MenuItemButton(
+                                  leadingIcon: SizedBox.fromSize(
+                                    size: Size(24, 0),
+                                  ),
+                                  onPressed: () {
+                                    final oldEntries = client
+                                        .fetchers
+                                        .conversationsFetcher
+                                        .stream
+                                        .value
+                                        .content;
+
+                                    openToggleMode();
+
+                                    jumpToTopTile(
+                                        client.fetchers.conversationsFetcher
+                                            .stream.value.content!,
+                                        oldEntries!);
+                                  },
+                                  child: Text(
+                                      AppLocalizations.of(context)!.hideShow),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    )),
           ),
         ),
         body: StreamBuilder(
@@ -346,22 +380,42 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                   },
                   child: ListView.builder(
                       controller: scrollController,
-                      itemCount: snapshot.data?.content.length + 1,
-                      itemExtent: tileSize,
+                      itemCount: (snapshot.data?.content!.length)! + 1,
+                      itemExtentBuilder: (index, _) {
+                        if (index > (snapshot.data?.content!.length)! - 1) {
+                          return tileSize * 2.5;
+                        }
+
+                        return tileSize;
+                      },
                       itemBuilder: (context, index) {
-                        if (index > snapshot.data?.content.length - 1) {
-                          return const SizedBox.shrink();
+                        if (index > (snapshot.data?.content!.length)! - 1) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                                top: 12.0, left: 12.0, right: 12.0),
+                            child: ListTile(
+                              title: Text(
+                                AppLocalizations.of(context)!.noFurtherEntries,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              subtitle: Text(
+                                AppLocalizations.of(context)!.conversationNote,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
                         }
 
                         return ConversationTile(
-                          entry: snapshot.data?.content[index],
+                          entry: snapshot.data!.content![index],
                         );
                       }),
                 );
               }
             }),
         floatingActionButton: ValueListenableBuilder(
-          valueListenable: hideNotifications,
+          valueListenable: toggleMode,
           builder: (context, value, _) {
             if (value) {
               return FloatingActionButton.extended(
@@ -373,7 +427,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                           height: 24,
                           child: const CircularProgressIndicator(),
                         ),
-                  label: Text("Aus-/einblenden"),
+                  label: Text(AppLocalizations.of(context)!.hideShow),
                   onPressed: !disableToggleButton
                       ? () async {
                           setState(() {
@@ -468,12 +522,34 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
             return FloatingActionButton(
               onPressed: () async {
+                if (client.conversations.cachedCanChooseType != null) {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    if (client.conversations.cachedCanChooseType!) {
+                      return const TypeChooser();
+                    }
+                    return const CreateConversation(chatType: null);
+                  }));
+                  return;
+                }
+
+                setState(() {
+                  loadingCreateButton = true;
+                });
+
                 bool canChooseType;
                 try {
                   canChooseType = await client.conversations.canChooseType();
                 } on NoConnectionException {
+                  setState(() {
+                    loadingCreateButton = false;
+                  });
                   return;
                 }
+
+                setState(() {
+                  loadingCreateButton = false;
+                });
 
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) {
@@ -483,7 +559,13 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                   return const CreateConversation(chatType: null);
                 }));
               },
-              child: const Icon(Icons.edit),
+              child: loadingCreateButton
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: const CircularProgressIndicator(),
+                    )
+                  : const Icon(Icons.edit),
             );
           },
         ));
@@ -543,7 +625,7 @@ class _ConversationTileState extends State<ConversationTile> {
               smallSize: widget.entry.unread ? 9 : 0,
               child: InkWell(
                 onTap: () {
-                  if (hideNotifications.value) {
+                  if (toggleMode.value) {
                     setState(() {
                       checkedTiles[widget.entry.id] =
                           !(checkedTiles[widget.entry.id] ?? false);
@@ -568,9 +650,11 @@ class _ConversationTileState extends State<ConversationTile> {
                 },
                 onLongPress: () async {
                   // Try to let the tile be in same place as in the old list.
-                  if (!hideNotifications.value) {
-                    final List<OverviewEntry> oldEntries = client.fetchers.conversationsFetcher.stream.value.content;
-                    final oldPosition = oldEntries.indexOf(widget.entry) * tileSize;
+                  if (!toggleMode.value) {
+                    final List<OverviewEntry> oldEntries = client
+                        .fetchers.conversationsFetcher.stream.value.content!;
+                    final oldPosition =
+                        oldEntries.indexOf(widget.entry) * tileSize;
 
                     openToggleMode();
 
@@ -578,7 +662,8 @@ class _ConversationTileState extends State<ConversationTile> {
                       checkedTiles[widget.entry.id] = true;
                     });
 
-                    final List<OverviewEntry> entries = client.fetchers.conversationsFetcher.stream.value.content;
+                    final List<OverviewEntry> entries = client
+                        .fetchers.conversationsFetcher.stream.value.content!;
 
                     final index = entries.indexOf(widget.entry);
                     final position = index * tileSize;
@@ -593,7 +678,7 @@ class _ConversationTileState extends State<ConversationTile> {
                 child: Row(
                   children: [
                     ValueListenableBuilder(
-                        valueListenable: hideNotifications,
+                        valueListenable: toggleMode,
                         builder: (context, value, _) {
                           return Visibility(
                               visible: value,

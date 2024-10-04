@@ -29,7 +29,6 @@ class FetcherResponse<T> {
 
 abstract class Fetcher<T> {
   final BehaviorSubject<FetcherResponse<T>> _controller = BehaviorSubject();
-  late Timer timer;
   late Duration? validCacheDuration;
   bool isEmpty = true;
   StorageKey? storageKey;
@@ -38,11 +37,13 @@ abstract class Fetcher<T> {
 
   Fetcher(this.validCacheDuration, {this.storageKey}) {
     if (validCacheDuration != null) {
-      Timer.periodic(validCacheDuration!, (timer) async {
-        if (await connectionChecker.connected) {
-          await fetchData(forceRefresh: true);
-        }
-      });
+      Timer.periodic(validCacheDuration!, _timerCallback);
+    }
+  }
+
+  void _timerCallback(Timer timer) async {
+    if (await connectionChecker.connected) {
+      await fetchData(forceRefresh: true);
     }
   }
 
@@ -100,19 +101,28 @@ class MeinUnterrichtFetcher extends Fetcher<Lessons> {
   }
 }
 
-class ConversationsFetcher extends Fetcher<dynamic> {
+class ConversationsFetcher extends Fetcher<List<OverviewEntry>> {
   ConversationsFetcher(super.validCacheDuration, {super.storageKey});
+  bool _suspend = false;
+
+  @override
+  void _timerCallback(Timer timer) {
+    if (!_suspend) {
+      super._timerCallback(timer);
+    }
+  }
 
   @override
   Future<List<OverviewEntry>> _get() {
     return client.conversations.getOverview();
   }
 
+  void toggleSuspend() {
+    _suspend = !_suspend;
+  }
+
   /// Force pushes a new supply for the stream.
   void supply(final List<OverviewEntry> content) {
-    print("######################");
-    print("supply");
-
     _addResponse(FetcherResponse<List<OverviewEntry>>(
         status: FetcherStatus.done,
       content: content
@@ -162,7 +172,7 @@ class GlobalFetcher {
     }
     if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
       conversationsFetcher =
-          ConversationsFetcher(const Duration(minutes: 5));
+          ConversationsFetcher(const Duration(minutes: 15));
     }
     if (client.doesSupportFeature(SPHAppEnum.kalender)) {
       calendarFetcher = CalendarFetcher(null);
