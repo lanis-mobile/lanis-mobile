@@ -71,7 +71,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
   // If top tile is not visible in the new list, we try to find the first visible tile above the top tile and jump to it.
   void jumpToTopTile(
       final List<OverviewEntry> entries, final List<OverviewEntry> oldEntries) {
-    final offsetTopIndex = (scrollController.offset / 80).round();
+    final offsetTopIndex = (scrollController.offset / 80).toInt();
 
     double position = 0;
     if (!(entries.contains(oldEntries[offsetTopIndex]))) {
@@ -97,8 +97,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     if (position >= size - viewport) {
       scrollController.jumpTo(size - viewport);
     } else {
-      // TODO
-      scrollController.jumpTo(position - (offsetTopIndex * tileSize - scrollController.offset));
+      scrollController.jumpTo(position + (scrollController.offset - (offsetTopIndex * tileSize)));
     }
   }
 
