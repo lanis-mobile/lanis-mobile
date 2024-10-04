@@ -28,6 +28,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<CalendarEvent> eventList = [];
+  SearchController searchController = SearchController();
 
   @override
   void dispose() {
@@ -45,7 +46,17 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     calendarFetcher.fetchData();
   }
 
-  Future<dynamic> fetchEvent(String id, {secondTry = false}) async {
+  List<CalendarEvent> fuzzySearchEventList(String query) {
+    List<CalendarEvent> searchResults = [];
+    for (var event in eventList) {
+      if (event.title.toLowerCase().contains(query.toLowerCase())) {
+        searchResults.add(event);
+      }
+    }
+    return searchResults;
+  }
+
+  Future<Map<String, dynamic>?> fetchEvent(String id, {secondTry = false}) async {
     try {
       if (secondTry) {
         await client.login();
@@ -57,6 +68,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
         fetchEvent(id, secondTry: true);
       }
     }
+    return null;
   }
 
   List<CalendarEvent> _getEventsForDay(DateTime day) {
@@ -94,8 +106,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
 
   bool doesEntryExist(dynamic entry) => entry != null && entry != "";
 
-  Widget getEvent(
-      CalendarEvent calendarData, Map<String, dynamic> singleEventData) {
+  Widget eventBottomSheet(CalendarEvent calendarData, Map<String, dynamic> singleEventData) {
     const double iconSize = 24;
 
     // German-formatted readable date string
@@ -282,143 +293,199 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     );
   }
 
+  void openEventBottomSheet(CalendarEvent calendarData, {bool unFocusAfter = true})  async {
+    try {
+      var singleEvent = await fetchEvent(calendarData.id);
+      if (singleEvent == null) return;
+      await showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          builder: (context) {
+            return eventBottomSheet(calendarData, singleEvent);
+          });
+      if (unFocusAfter) {
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    } on NoConnectionException {
+      if (mounted) {
+        return;
+      }
+    } on LanisException catch (ex) {
+      if (mounted) {
+        await showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          builder: (context) {
+            return ErrorView(
+              error: ex,
+              name: "einem Kalenderereignis",
+            );
+          },
+        );
+        if (unFocusAfter) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<FetcherResponse<List<CalendarEvent>>>(
-        stream: calendarFetcher.stream,
-        builder: (context, snapshot) {
-          if (snapshot.data?.status == FetcherStatus.error) {
-            return ErrorView(
-                error: snapshot.data!.error!,
-                name: "Kalender",
-                retry: retryFetcher(calendarFetcher));
-          } else if (snapshot.data?.status == FetcherStatus.fetching ||
-              snapshot.data == null) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            eventList = snapshot.data!.content ?? [];
-            _selectedEvents.value = _getEventsForDay(_selectedDay!);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: SearchAnchor.bar(
+            searchController: searchController,
+            isFullScreen: false,
+            barTrailing: [
+              if (!_selectedDay!.isSameDay(DateTime.now())) IconButton(
+                icon: const Icon(Icons.restore),
+                onPressed: () {
+                  setState(() {
+                    searchController.text = "";
+                    _selectedDay = DateTime.now();
+                    _focusedDay = DateTime.now();
+                  });
+                },
+              ),
+            ],
+            suggestionsBuilder: (context, _searchController) {
+                final results = fuzzySearchEventList(_searchController.text);
 
-            return Column(
-              children: [
-                TableCalendar<CalendarEvent>(
-                  locale: AppLocalizations.of(context)!.locale,
-                  firstDay: DateTime.utc(2020),
-                  lastDay: DateTime.utc(2030),
-                  availableCalendarFormats: {
-                    CalendarFormat.month:
-                        AppLocalizations.of(context)!.calendarFormatMonth,
-                    CalendarFormat.twoWeeks:
-                        AppLocalizations.of(context)!.calendarFormatTwoWeeks,
-                    CalendarFormat.week:
-                        AppLocalizations.of(context)!.calendarFormatWeek,
-                  },
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  calendarFormat: _calendarFormat,
-                  eventLoader: _getEventsForDay,
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  calendarStyle: CalendarStyle(
-                      outsideDaysVisible: false,
-                      defaultDecoration:
-                          const BoxDecoration(shape: BoxShape.circle),
-                      selectedDecoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle),
-                      selectedTextStyle: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).colorScheme.onPrimary),
-                      todayDecoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary,
-                        shape: BoxShape.circle,
-                      ),
-                      todayTextStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.onSecondary,
-                        fontSize: 16,
-                      ),
-                      markerDecoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.inversePrimary)),
-                  onDaySelected: _onDaySelected,
-                  onFormatChanged: (format) {
-                    if (_calendarFormat != format) {
-                      setState(() {
-                        _calendarFormat = format;
-                      });
-                    }
-                  },
-                  headerStyle: HeaderStyle(
-                      formatButtonTextStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary),
-                      formatButtonDecoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(24))),
-                  onPageChanged: (focusedDay) {
-                    _focusedDay = focusedDay;
+                return results.map((event) => ListTile(
+                  title: Text(event.title),
+                  subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                  onTap: () {
+                    setState(() {
+                      _selectedDay = event.startTime;
+                      _focusedDay = event.startTime;
+                    });
+                    _searchController.closeView(null);
+                    FocusScope.of(context).unfocus();
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    openEventBottomSheet(event);
                   },
                 ),
-                Expanded(
-                  child: ValueListenableBuilder<List<CalendarEvent>>(
-                    valueListenable: _selectedEvents,
-                    builder: (context, value, _) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: ListView.builder(
-                          itemCount: value.length,
-                          itemBuilder: (context, index) {
+                ).toList();
+              },
+          ),
+        ),
+        Expanded(
+            child: StreamBuilder<FetcherResponse<List<CalendarEvent>>>(
+              stream: calendarFetcher.stream,
+              builder: (context, snapshot) {
+                if (snapshot.data?.status == FetcherStatus.error) {
+                  return ErrorView(
+                      error: snapshot.data!.error!,
+                      name: "Kalender",
+                      retry: retryFetcher(calendarFetcher));
+                } else if (snapshot.data?.status == FetcherStatus.fetching ||
+                    snapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  eventList = snapshot.data!.content ?? [];
+                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+
+                  return Column(
+                    children: [
+                      TableCalendar<CalendarEvent>(
+                        locale: AppLocalizations.of(context)!.locale,
+                        firstDay: DateTime.utc(2020),
+                        lastDay: DateTime.utc(2030),
+                        availableCalendarFormats: {
+                          CalendarFormat.month:
+                          AppLocalizations.of(context)!.calendarFormatMonth,
+                          CalendarFormat.twoWeeks:
+                          AppLocalizations.of(context)!.calendarFormatTwoWeeks,
+                          CalendarFormat.week:
+                          AppLocalizations.of(context)!.calendarFormatWeek,
+                        },
+                        focusedDay: _focusedDay,
+                        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                        calendarFormat: _calendarFormat,
+                        eventLoader: _getEventsForDay,
+                        startingDayOfWeek: StartingDayOfWeek.monday,
+                        calendarStyle: CalendarStyle(
+                            outsideDaysVisible: false,
+                            defaultDecoration:
+                            const BoxDecoration(shape: BoxShape.circle),
+                            selectedDecoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle),
+                            selectedTextStyle: TextStyle(
+                                fontSize: 16.0,
+                                color: Theme.of(context).colorScheme.onPrimary),
+                            todayDecoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                            todayTextStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                              fontSize: 16,
+                            ),
+                            markerDecoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Theme.of(context).colorScheme.inversePrimary)),
+                        onDaySelected: _onDaySelected,
+                        pageJumpingEnabled: true,
+                        onFormatChanged: (format) {
+                          if (_calendarFormat != format) {
+                            setState(() {
+                              _calendarFormat = format;
+                            });
+                          }
+                        },
+                        headerStyle: HeaderStyle(
+                            formatButtonTextStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary),
+                            formatButtonDecoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(24),
+                            ),
+                        ),
+                        onPageChanged: (focusedDay) {
+                          _focusedDay = focusedDay;
+                        },
+                      ),
+                      Expanded(
+                        child: ValueListenableBuilder<List<CalendarEvent>>(
+                          valueListenable: _selectedEvents,
+                          builder: (context, value, _) {
                             return Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 8, right: 8, bottom: 4),
-                              child: Card(
-                                child: ListTile(
-                                  title: Text(value[index].title),
-                                  trailing: const Icon(Icons.arrow_right),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  onTap: () async {
-                                    try {
-                                      var singleEvent =
-                                          await fetchEvent(value[index].id);
-                                      showModalBottomSheet(
-                                          context: context,
-                                          showDragHandle: true,
-                                          builder: (context) {
-                                            return getEvent(
-                                                value[index], singleEvent);
-                                          });
-                                    } on NoConnectionException {
-                                      if (mounted) {
-                                        return;
-                                      }
-                                    } on LanisException catch (ex) {
-                                      if (mounted) {
-                                        showModalBottomSheet(
-                                          context: context,
-                                          showDragHandle: true,
-                                          builder: (context) {
-                                            return ErrorView(
-                                              error: ex,
-                                              name: "einem Kalenderereignis",
-                                            );
-                                          },
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
+                              padding: const EdgeInsets.only(top: 12),
+                              child: ListView.builder(
+                                itemCount: value.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8, right: 8, bottom: 4),
+                                    child: Card(
+                                      child: ListTile(
+                                        title: Text(value[index].title),
+                                        trailing: const Icon(Icons.arrow_right),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        onTap: () => openEventBottomSheet(value[index]),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           },
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          }
-        });
+                      ),
+                    ],
+                  );
+                }
+              },
+            )
+        ),
+      ],
+    );
   }
 }
 

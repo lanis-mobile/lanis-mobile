@@ -7,15 +7,15 @@ class CalendarEvent {
   dynamic lerngruppe;
   bool secret;
   String id;
-  String schoolID;
-  DateTime lastModified;
+  String? schoolID;
+  DateTime? lastModified;
   bool isNew;
   bool public;
   String? place;
   bool private;
   String? responsibleID;
   bool allDay;
-  String category;
+  int? category;
   String description;
   String title;
 
@@ -26,15 +26,15 @@ class CalendarEvent {
     this.lerngruppe,
     required this.secret,
     required this.id,
-    required this.schoolID,
-    required this.lastModified,
+    this.schoolID,
+    this.lastModified,
     required this.isNew,
     required this.public,
     this.place,
     required this.private,
     this.responsibleID,
     required this.allDay,
-    required this.category,
+    this.category,
     required this.description,
     required this.title,
   });
@@ -43,24 +43,25 @@ class CalendarEvent {
   factory CalendarEvent.fromLanisJson(Map<String, dynamic> json) {
     final formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
 
-    return CalendarEvent(
+    final data = CalendarEvent(
       startTime: formatter.parse(json['Anfang']),
       endTime: formatter.parse(json['Ende']),
-      fremdUID: json['FremdUID']??null,
+      fremdUID: json['FremdUID'],
       lerngruppe: json['Lerngruppe']??null,
       secret: json['Geheim'] != 'nein',
       id: json['Id'],
       schoolID: json['Institution'],
-      lastModified: formatter.parse(json['LetzteAenderung']),
+      lastModified: json['LetzteAenderung'] != null ? formatter.parse(json['LetzteAenderung']) : null,
       isNew: json['Neu'] != 'nein',
       public: json['Oeffentlich'] != 'nein',
-      place: json['Ort'] ?? '',
+      place: json['Ort'],
       private: json['Privat'] != 'nein',
-      responsibleID: json['Verantwortlich']??null,
-      allDay: json['allDay'] ?? true,
-      category: json['category'] ?? '0',
+      responsibleID: json['Verantwortlich'],
+      allDay: json['allDay'] ?? false,
+      category: int.tryParse('${json['category']}'),
       description: json['description'] ?? '',
       title: json['title'] ?? '',
     );
+    return data;
   }
 }

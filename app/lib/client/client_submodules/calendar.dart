@@ -37,7 +37,7 @@ class CalendarParser {
                 "start": formatter.format(startDate),
                 "end": formatter.format(endDate),
               },
-              data: 'f=getEvents&start=$startDate&end=$endDate',
+              data: 'f=getEvents&start=$startDate&end=$endDate&s=$searchQuery',
               options: Options(
                 headers: {
                   "Accept": "*/*",
@@ -62,7 +62,7 @@ class CalendarParser {
     }
   }
 
-  Future<dynamic> getEvent(String id) async {
+  Future<Map<String, dynamic>?> getEvent(String id) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
@@ -84,7 +84,10 @@ class CalendarParser {
                   "Sec-Fetch-Site": "same-origin",
                 },
               ));
-      return jsonDecode(response.toString());
+      final data = jsonDecode(response.toString());
+      if (data['id'] == '' || data['id'] == null) return null;
+
+      return data;
     } on SocketException {
       throw NetworkException();
     } catch (e) {

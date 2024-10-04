@@ -120,6 +120,7 @@ class InvisibleConversationsFetcher extends Fetcher<dynamic> {
 
 class CalendarFetcher extends Fetcher<List<CalendarEvent>> {
   CalendarFetcher(super.validCacheDuration, {super.storageKey});
+  String searchQuery = "";
 
   @override
   Future<List<CalendarEvent>> _get() {
@@ -128,7 +129,7 @@ class CalendarFetcher extends Fetcher<List<CalendarEvent>> {
     DateTime oneYearLater = currentDate.add(const Duration(days: 365));
 
     return client.calendar
-        .getCalendar(startDate: sixMonthsAgo, endDate: oneYearLater);
+        .getCalendar(startDate: sixMonthsAgo, endDate: oneYearLater, searchQuery: searchQuery);
   }
 }
 
