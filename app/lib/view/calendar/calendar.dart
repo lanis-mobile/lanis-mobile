@@ -55,8 +55,23 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       }
     }
 
-    // Sort by distance to current date
-    searchResults.sort((a, b) => a.startTime.difference(DateTime.now()).abs().compareTo(b.startTime.difference(DateTime.now()).abs()));
+    // Sort by distance to today
+    searchResults.sort((a, b) {
+      int distanceA = a.startTime.differenceInDays(DateTime.now());
+      int distanceB = b.startTime.differenceInDays(DateTime.now());
+      return distanceA.compareTo(distanceB);
+    });
+
+    // move elements of the past to the end
+    searchResults.sort((a, b) {
+      if (a.startTime.isBefore(DateTime.now()) && b.startTime.isAfter(DateTime.now())) {
+        return 1;
+      } else if (a.startTime.isAfter(DateTime.now()) && b.startTime.isBefore(DateTime.now())) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
 
     return searchResults;
   }
@@ -362,6 +377,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 return results.map((event) => ListTile(
                   title: Text(event.title),
                   subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                  leading: event.endTime.isBefore(DateTime.now()) ? const Icon(Icons.done) : const Icon(Icons.event),
                   onTap: () {
                     setState(() {
                       _selectedDay = event.startTime;
