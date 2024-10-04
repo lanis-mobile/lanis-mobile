@@ -23,7 +23,7 @@ dependencies:
   http_proxy:
     git:
       url: https://github.com/lanis-mobile/http_proxy.git
-      ref: 5b0acc4b7f3ea4db85bec2a3360e6a690c31d53e
+      ref: 4e5e068ff3c44de076e1eba8a635fb73e7d72e25
   flutter:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
@@ -79,6 +79,7 @@ dependencies:
   quill_html_converter: ^9.3.2
   flutter_tagging_plus: ^4.0.2
   flutter_inappwebview: ^6.1.0
+  connectivity_plus: ^6.0.5
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:
