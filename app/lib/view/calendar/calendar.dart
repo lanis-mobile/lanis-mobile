@@ -49,10 +49,15 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   List<CalendarEvent> fuzzySearchEventList(String query) {
     List<CalendarEvent> searchResults = [];
     for (var event in eventList) {
-      if (event.title.toLowerCase().contains(query.toLowerCase())) {
+      String searchString = '${event.title} ${event.description} ${event.place??''} ${event.startTime.year}'.toLowerCase();
+      if (searchString.contains(query.toLowerCase())) {
         searchResults.add(event);
       }
     }
+
+    // Sort by distance to current date
+    searchResults.sort((a, b) => a.startTime.difference(DateTime.now()).abs().compareTo(b.startTime.difference(DateTime.now()).abs()));
+
     return searchResults;
   }
 
