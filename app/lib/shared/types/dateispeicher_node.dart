@@ -15,6 +15,8 @@ class FileNode {
       this.groesse = "",
       this.hinweis,
       this.folderID});
+
+  String get fileExtension => name.split('.').last;
 }
 
 class FolderNode {

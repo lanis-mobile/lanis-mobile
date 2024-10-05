@@ -63,8 +63,6 @@ dependencies:
   flutter_native_splash: ^2.4.1
   table_calendar: ^3.0.9
   intl: ^0.19.0
-  cached_network_image: ^3.3.1
-  file_icon: ^1.0.0
   syncfusion_flutter_calendar: ^27.1.48
   flutter_localizations:
     sdk: flutter
