@@ -371,6 +371,10 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                 },
               ),
             ],
+            onSubmitted: (_) {
+              FocusScope.of(context).requestFocus(FocusNode());
+              searchController.closeView(null);
+            },
             suggestionsBuilder: (context, _searchController) {
                 final results = fuzzySearchEventList(_searchController.text);
 
@@ -389,8 +393,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                     openEventBottomSheet(event);
                   },
                 ),
-                ).toList();
-              },
+              ).toList();
+            },
           ),
         ),
         Expanded(
