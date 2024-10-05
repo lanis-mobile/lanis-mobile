@@ -40,6 +40,12 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   void initState() {
     super.initState();
 
+    searchController.addListener(() {
+      if (!searchController.isOpen) {
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    });
+
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
 
@@ -373,7 +379,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
             ],
             onSubmitted: (_) {
               FocusScope.of(context).requestFocus(FocusNode());
-              searchController.closeView(null);
+              //searchController.closeView(null);
             },
             suggestionsBuilder: (context, _searchController) {
                 final results = fuzzySearchEventList(_searchController.text);
