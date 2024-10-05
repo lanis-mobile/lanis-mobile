@@ -137,6 +137,7 @@ class _StartupScreenState extends State<StartupScreen> {
     );
 
     return CachedNetworkImage(
+      imageType: ImageType.png,
        imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}"),
       placeholder: deviceInfo,
       builder: (context, imageProvider) => ColorFiltered(

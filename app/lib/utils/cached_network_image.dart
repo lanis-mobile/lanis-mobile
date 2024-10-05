@@ -3,16 +3,22 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../client/client.dart';
+import '../client/logger.dart';
 
-typedef imageBuilder = Widget Function(BuildContext context, ImageProvider imageProvider);
+typedef ImageBuilder = Widget Function(BuildContext context, ImageProvider imageProvider);
+
+enum ImageType {
+  png,
+  jpg
+}
 
 class CachedNetworkImage extends StatefulWidget{
   final Widget placeholder;
   final Uri imageUrl;
-  final imageBuilder builder;
+  final ImageBuilder builder;
+  final ImageType imageType;
 
-
-  const CachedNetworkImage({super.key, required this.placeholder, required this.imageUrl, required this.builder});
+  const CachedNetworkImage({super.key, required this.placeholder, required this.imageUrl, required this.builder, this.imageType = ImageType.jpg});
 
   @override
   State<CachedNetworkImage> createState() => _CachedNetworkImageState();
@@ -23,7 +29,7 @@ class _CachedNetworkImageState extends State<CachedNetworkImage> {
   late ImageProvider imageProvider;
 
   Future<void> loadData() async {
-    String imagePath = await client.downloadFile(widget.imageUrl.toString(), widget.imageUrl.pathSegments.last);
+    String imagePath = await client.downloadFile(widget.imageUrl.toString(), 'image.${widget.imageType.toString().split('.').last}', followRedirects: true);
     File imageFile = File(imagePath);
     imageProvider = FileImage(imageFile);
     setState(() {
