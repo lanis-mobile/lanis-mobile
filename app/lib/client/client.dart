@@ -19,13 +19,13 @@ import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
+import '../utils/logger.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 import 'connection_checker.dart';
 import 'fetcher.dart';
-import 'logger.dart';
 
 class SPHclient {
   String username = "";

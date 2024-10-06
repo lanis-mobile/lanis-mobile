@@ -9,10 +9,10 @@ import 'package:html/parser.dart';
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/conversations.dart';
+import '../../utils/logger.dart';
 import '../client.dart';
 import '../connection_checker.dart';
 import '../cryptor.dart';
-import '../logger.dart';
 
 class ConversationsParser {
   late Dio dio;

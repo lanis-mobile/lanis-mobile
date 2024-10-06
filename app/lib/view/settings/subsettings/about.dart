@@ -5,7 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../client/client.dart';
-import '../../../client/logger.dart';
+import '../../../utils/logger.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});

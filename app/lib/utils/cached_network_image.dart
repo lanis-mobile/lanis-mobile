@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../client/client.dart';
-import '../client/logger.dart';
 
 typedef ImageBuilder = Widget Function(BuildContext context, ImageProvider imageProvider);
 

@@ -46,7 +46,6 @@ dependencies:
   pointycastle: ^3.7.3
   flutter_linkify: ^6.0.0
   crypto: ^3.0.3
-  google_fonts: ^6.1.0
   open_file: ^3.3.2
   shared_preferences: ^2.2.2
   rxdart: ^0.28.0
@@ -66,7 +65,6 @@ dependencies:
   syncfusion_flutter_calendar: ^27.1.48
   flutter_localizations:
     sdk: flutter
-  logger: ^2.2.0
   simple_shadow: ^0.3.1
   app_settings: ^5.1.1
   device_info_plus: ^10.1.0

@@ -8,8 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../client/client.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../../client/logger.dart';
 import '../../shared/widgets/error_view.dart';
+import '../../utils/logger.dart';
 
 class CalendarAnsicht extends StatefulWidget {
   const CalendarAnsicht({super.key});
