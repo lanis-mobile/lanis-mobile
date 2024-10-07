@@ -527,23 +527,3 @@ List<DateTime> daysInRange(DateTime first, DateTime last) {
     (index) => DateTime.utc(first.year, first.month, first.day + index),
   );
 }
-
-DateTime parseDateString(String dateString) {
-  // Parse the date string
-  List<String> dateTimeParts = dateString.split(' ');
-  List<String> dateParts = dateTimeParts[0].split('-');
-  List<String> timeParts = dateTimeParts[1].split(':');
-
-  // Extract year, month, day, hour, minute, and second
-  int year = int.parse(dateParts[0]);
-  int month = int.parse(dateParts[1]);
-  int day = int.parse(dateParts[2]);
-  int hour = int.parse(timeParts[0]);
-  int minute = int.parse(timeParts[1]);
-  int second = int.parse(timeParts[2]);
-
-  // Create a DateTime object
-  DateTime dateTime = DateTime(year, month, day, hour, minute, second);
-
-  return dateTime;
-}
