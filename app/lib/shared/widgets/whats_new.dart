@@ -10,12 +10,24 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../client/client.dart';
 import '../../client/storage.dart';
 
+int compareVersions(String version1, String version2) {
+  List<int> v1 = version1.replaceFirst('v', '').split(RegExp(r'[.+]')).map(int.parse).toList();
+  List<int> v2 = version2.replaceFirst('v', '').split(RegExp(r'[.+]')).map(int.parse).toList();
+
+  for (int i = 0; i < v1.length; i++) {
+    if (v1[i] > v2[i]) return 1;
+    if (v1[i] < v2[i]) return -1;
+  }
+  return 0;
+}
+
 void showUpdateInfoIfRequired(BuildContext context) async {
   final latestReleaseInfo = await getReleaseInfo(null);
   if (latestReleaseInfo == null) return;
   final String latestReleaseTag = latestReleaseInfo['tag_name'];
   final String deviceReleaseTag = await getDeviceReleaseTag();
   final String storageReleaseTag = await globalStorage.read(key: StorageKey.lastAppVersion);
+
   if (storageReleaseTag != deviceReleaseTag) {
     if (latestReleaseTag == deviceReleaseTag) {
       await globalStorage.write(key: StorageKey.lastAppVersion, value: deviceReleaseTag);
@@ -32,7 +44,8 @@ void showUpdateInfoIfRequired(BuildContext context) async {
       );
     }
   }
-  if (latestReleaseTag != deviceReleaseTag) {
+
+  if (compareVersions(latestReleaseTag, deviceReleaseTag) > 0) {
     await showDialog(
       context: context,
       builder: (context) => NewUpdateAvailableDialog(
@@ -43,7 +56,6 @@ void showUpdateInfoIfRequired(BuildContext context) async {
     );
   }
 }
-
 Future<String> getDeviceReleaseTag() async {
   final packageInfo = await PackageInfo.fromPlatform();
   
