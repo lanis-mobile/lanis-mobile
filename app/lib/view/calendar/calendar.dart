@@ -53,31 +53,28 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   }
 
   List<CalendarEvent> fuzzySearchEventList(String query) {
-    List<CalendarEvent> searchResults = [];
+    List<CalendarEvent> searchResultsBeforeToday = [];
+    List<CalendarEvent> searchResultsAfterToday = [];
+
     for (var event in eventList) {
       String searchString = '${event.title} ${event.description} ${event.place??''} ${event.startTime.year}'.toLowerCase();
       if (searchString.contains(query.toLowerCase())) {
-        searchResults.add(event);
+        if (event.endTime.isBefore(DateTime.now())) {
+          searchResultsBeforeToday.add(event);
+        } else {
+          searchResultsAfterToday.add(event);
+        }
       }
     }
 
-    // Sort by distance to today
-    searchResults.sort((a, b) {
-      int distanceA = a.startTime.differenceInDays(DateTime.now());
-      int distanceB = b.startTime.differenceInDays(DateTime.now());
-      return distanceA.compareTo(distanceB);
-    });
+    // Sort the search results by date
+    searchResultsBeforeToday.sort((a, b) => b.startTime.compareTo(a.startTime));
+    searchResultsAfterToday.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    // move elements of the past to the end
-    searchResults.sort((a, b) {
-      if (a.startTime.isBefore(DateTime.now()) && b.startTime.isAfter(DateTime.now())) {
-        return 1;
-      } else if (a.startTime.isAfter(DateTime.now()) && b.startTime.isBefore(DateTime.now())) {
-        return -1;
-      } else {
-        return 0;
-      }
-    });
+    List<CalendarEvent> searchResults = [];
+    searchResults.addAll(searchResultsAfterToday);
+    searchResults.addAll(searchResultsBeforeToday);
+
 
     return searchResults;
   }
