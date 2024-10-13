@@ -14,7 +14,7 @@ publish_to: 'none'
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.21.0+48
+version: 2.21.1+49
 
 environment:
   sdk: '>=3.1.3 <4.0.0'
@@ -23,7 +23,7 @@ dependencies:
   http_proxy:
     git:
       url: https://github.com/lanis-mobile/http_proxy.git
-      ref: 740a8f2
+      ref: 4e5e068ff3c44de076e1eba8a635fb73e7d72e25
   flutter:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
@@ -79,6 +79,7 @@ dependencies:
   quill_html_converter: ^9.3.2
   flutter_tagging_plus: ^4.0.2
   flutter_inappwebview: ^6.1.0
+  connectivity_plus: ^6.0.5
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:

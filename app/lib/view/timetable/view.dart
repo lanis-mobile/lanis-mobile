@@ -108,7 +108,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
                         if (selected.raum != null)
                           modalSheetItem(selected.raum!, Icons.place),
                         modalSheetItem(
-                            "${selected.startTime.$1}:${selected.startTime.$2} - ${selected.endTime.$1}:${selected.endTime.$2} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
+                            "${selected.startTime.hour}:${selected.startTime.minute} - ${selected.endTime.hour}:${selected.endTime.minute} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
                             Icons.access_time),
                         if (selected.lehrer != null)
                           modalSheetItem(selected.lehrer!, Icons.person),
@@ -192,9 +192,9 @@ class TimeTableDataSource extends CalendarDataSource {
       for (var (lessonIndex, lesson) in day.indexed) {
         // Use the calculated date for the startTime and endTime
         final startTime = DateTime(date.year, date.month, date.day,
-            lesson.startTime.$1, lesson.startTime.$2);
+            lesson.startTime.hour, lesson.startTime.minute);
         final endTime = DateTime(date.year, date.month, date.day,
-            lesson.endTime.$1, lesson.endTime.$2);
+            lesson.endTime.hour, lesson.endTime.minute);
 
         final Color entryColor = generateColor(lesson.name!, Colors.blue);
 

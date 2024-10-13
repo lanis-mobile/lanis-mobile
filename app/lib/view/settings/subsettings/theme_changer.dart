@@ -35,9 +35,9 @@ class _AppearanceElementsState extends State<AppearanceElements> {
   void initState() {
     super.initState();
     // Idk if prefs is the right way but it's working.
-    _selectedTheme = globalStorage.prefs.getString("theme") ?? "system";
-    _selectedColor = globalStorage.prefs.getString("color") ?? "standard";
-    _isAmoled = bool.parse(globalStorage.prefs.getString("isAmoled") ?? "false");
+    _selectedTheme = globalStorage.prefs!.getString("theme") ?? "system";
+    _selectedColor = globalStorage.prefs!.getString("color") ?? "standard";
+    _isAmoled = bool.parse(globalStorage.prefs!.getString("isAmoled") ?? "false");
   }
 
   RadioListTile colorListTile(
