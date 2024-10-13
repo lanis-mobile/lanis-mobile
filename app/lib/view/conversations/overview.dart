@@ -289,15 +289,13 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: Row(
                             children: [
-                              SizedBox(
-                                width: 4,
-                              ),
                               IconButton(
                                 icon: Icon(
                                   Icons.arrow_back,
                                   color:
                                       Theme.of(context).colorScheme.onSurface,
                                 ),
+                                constraints: BoxConstraints.tightFor(width: kToolbarHeight, height: kToolbarHeight),
                                 onPressed: () {
                                   closeToggleMode();
                                   for (final tile in checkedTiles.keys) {
@@ -306,7 +304,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                 },
                               ),
                               SizedBox(
-                                width: 20,
+                                width: 16,
                               ),
                               Text(
                                 AppLocalizations.of(context)!
