@@ -8,6 +8,7 @@ import 'package:sph_plan/shared/types/conversations.dart';
 import '../../client/client.dart';
 import '../../client/fetcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../shared/keyboard_observer.dart';
 import '../../shared/widgets/error_view.dart';
 import 'overview_dialogs.dart';
 import 'chat.dart';
@@ -138,6 +139,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     SearchFunction.schedule: TextEditingController()
   };
   final ScrollController scrollController = ScrollController();
+  final KeyboardObserver keyboardObserver = KeyboardObserver();
 
   final Map<String, bool> checkedTiles = {};
 
@@ -212,7 +214,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
   @override
   void initState() {
+    super.initState();
+
     fetcher.fetchData();
+
+    keyboardObserver.addDefaultCallback();
 
     nullContentSubscription = fetcher.stream.listen((snapshot) {
       setState(() {
@@ -226,8 +232,6 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
       advancedSearchControllers[value]!.text =
           client.conversations.filter.advancedSearch[value] ?? "";
     }
-
-    super.initState();
   }
 
   @override
@@ -240,6 +244,8 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     for (final value in SearchFunction.values) {
       advancedSearchControllers[value]!.dispose();
     }
+
+    keyboardObserver.dispose();
 
     scrollController.dispose();
   }
@@ -363,6 +369,9 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                             advancedSearchControllers[function],
                                         onSubmitted: filterFunction,
                                         onChanged: filterFunction,
+                                        onTapOutside: (event) {
+                                          FocusManager.instance.primaryFocus?.unfocus();
+                                        },
                                         leading: Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8.0),
@@ -424,6 +433,9 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                                         simpleRemoveButton = true;
                                       });
                                     }
+                                  },
+                                  onTapOutside: (event) {
+                                    FocusManager.instance.primaryFocus?.unfocus();
                                   },
                                   trailing: [
                                     Visibility(
