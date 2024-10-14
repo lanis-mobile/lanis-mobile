@@ -227,7 +227,7 @@ class TimeTableDataSource extends CalendarDataSource {
         events.add(Appointment(
             startTime: startTime.add(const Duration(days: 7)),
             endTime: endTime.add(const Duration(days: 7)),
-            subject: lesson.name!,
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
             location: lesson.raum,
             notes: lesson.lehrer,
             color: entryColor,
