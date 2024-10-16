@@ -80,10 +80,18 @@ class SPHclient {
         return handler.next(options); //continue
       },
     ));
+    dio.interceptors.add(InterceptorsWrapper(
+      onResponse: (response, handler) {
+        if (response.statusCode == 503) {
+          throw LanisDownException();
+        }
+        return handler.next(response);
+      },
+    ));
     dio.options.followRedirects = false;
     dio.options.connectTimeout = Duration(seconds: 8);
     dio.options.validateStatus =
-        (status) => status != null && (status == 200 || status == 302);
+        (status) => status != null && (status == 200 || status == 302 || status == 503);
   }
 
   /// Similar to [overwriteCredits] but not permanently.
@@ -228,7 +236,7 @@ class SPHclient {
     dioHttp.interceptors.add(CookieManager(cookieJar));
     dioHttp.options.followRedirects = false;
     dioHttp.options.validateStatus =
-        (status) => status != null && (status == 200 || status == 302);
+        (status) => status != null && (status == 200 || status == 302 || status == 503);
 
     if (username != "" && password != "" && schoolID != "") {
       final response1 = await dioHttp.post(
