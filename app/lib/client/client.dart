@@ -81,6 +81,7 @@ class SPHclient {
       },
     ));
     dio.options.followRedirects = false;
+    dio.options.connectTimeout = Duration(seconds: 8);
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302);
   }
