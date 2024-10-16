@@ -67,8 +67,14 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       ));
     }
     return SfCalendar(
-      view: CalendarView.day,
-      headerHeight: 0,
+      view: DateTime.now().weekday == DateTime.saturday || DateTime.now().weekday == DateTime.sunday
+          ? CalendarView.week
+          : CalendarView.workWeek,
+      allowedViews: [
+        CalendarView.day,
+        CalendarView.week,
+        CalendarView.workWeek,
+      ],
       timeSlotViewSettings: const TimeSlotViewSettings(
         timeFormat: "HH:mm",
       ),
@@ -198,10 +204,20 @@ class TimeTableDataSource extends CalendarDataSource {
 
         final Color entryColor = generateColor(lesson.name!, Colors.blue);
 
+        //1 week before
+        events.add(Appointment(
+            startTime: startTime.subtract(const Duration(days: 7)),
+            endTime: endTime.subtract(const Duration(days: 7)),
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
+            location: lesson.raum,
+            notes: lesson.badge,
+            color: entryColor,
+            id: "${dayIndex - 1}-$lessonIndex-1"));
+
         events.add(Appointment(
             startTime: startTime,
             endTime: endTime,
-            subject: "${lesson.name!} ${lesson.lehrer}",
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
             location: lesson.raum,
             notes: lesson.badge,
             color: entryColor,
@@ -211,7 +227,7 @@ class TimeTableDataSource extends CalendarDataSource {
         events.add(Appointment(
             startTime: startTime.add(const Duration(days: 7)),
             endTime: endTime.add(const Duration(days: 7)),
-            subject: lesson.name!,
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
             location: lesson.raum,
             notes: lesson.lehrer,
             color: entryColor,
