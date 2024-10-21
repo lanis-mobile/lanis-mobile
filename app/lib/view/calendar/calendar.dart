@@ -170,46 +170,23 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       });
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                calendarData.title,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          // Title
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              calendarData.title,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            // Responsible (Teacher, Admin, ...)
-            if (doesEntryExist(singleEventData["properties"]) &&
-                doesEntryExist(
-                    singleEventData["properties"]["verantwortlich"])) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        Icons.person,
-                        size: iconSize,
-                      ),
-                    ),
-                    Text(
-                      singleEventData["properties"]["verantwortlich"],
-                      style: Theme.of(context).textTheme.labelLarge,
-                    )
-                  ],
-                ),
-              )
-            ],
-            // Time
+          ),
+          // Responsible (Teacher, Admin, ...)
+          if (doesEntryExist(singleEventData["properties"]) &&
+              doesEntryExist(
+                  singleEventData["properties"]["verantwortlich"])) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0),
               child: Row(
@@ -217,101 +194,121 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                   const Padding(
                     padding: EdgeInsets.only(right: 8.0),
                     child: Icon(
-                      Icons.access_time_filled,
+                      Icons.person,
+                      size: iconSize,
+                    ),
+                  ),
+                  Text(
+                    singleEventData["properties"]["verantwortlich"],
+                    style: Theme.of(context).textTheme.labelLarge,
+                  )
+                ],
+              ),
+            )
+          ],
+          // Time
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 8.0),
+                  child: Icon(
+                    Icons.access_time_filled,
+                    size: iconSize,
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    date,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                )
+              ],
+            ),
+          ),
+          // Place
+          if (doesEntryExist(calendarData.place)) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      Icons.place,
+                      size: iconSize,
+                    ),
+                  ),
+                  Text(calendarData.place!,
+                      style: Theme.of(context).textTheme.labelLarge)
+                ],
+              ),
+            ),
+          ],
+          // Target group
+          if (doesEntryExist(singleEventData["properties"]) &&
+              doesEntryExist(
+                  singleEventData["properties"]["zielgruppen"])) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      Icons.group,
                       size: iconSize,
                     ),
                   ),
                   Flexible(
-                    child: Text(
-                      date,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
+                    child: Text(targetGroup,
+                        style: Theme.of(context).textTheme.labelLarge),
                   )
                 ],
               ),
             ),
-            // Place
-            if (doesEntryExist(calendarData.place)) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        Icons.place,
-                        size: iconSize,
-                      ),
-                    ),
-                    Text(calendarData.place!,
-                        style: Theme.of(context).textTheme.labelLarge)
-                  ],
-                ),
-              ),
-            ],
-            // Target group
-            if (doesEntryExist(singleEventData["properties"]) &&
-                doesEntryExist(
-                    singleEventData["properties"]["zielgruppen"])) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        Icons.group,
-                        size: iconSize,
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(targetGroup,
-                          style: Theme.of(context).textTheme.labelLarge),
-                    )
-                  ],
-                ),
-              ),
-            ],
-            if (doesEntryExist(calendarData.lerngruppe)) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        Icons.school,
-                        size: iconSize,
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(calendarData.lerngruppe["Name"],
-                          style: Theme.of(context).textTheme.labelLarge),
-                    )
-                  ],
-                ),
-              ),
-            ],
-            if (doesEntryExist(calendarData.description)) ...[
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Linkify(
-                  onOpen: (link) async {
-                    if (!await launchUrl(Uri.parse(link.url))) {
-                      logger.w("${link.url} konnte nicht geöffnet werden.");
-                    }
-                  },
-                  text: calendarData.description.replaceAll("<br />", "\n"),
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  linkStyle: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: Theme.of(context).colorScheme.primary),
-                ),
-              ),
-            ],
           ],
-        ),
+          if (doesEntryExist(calendarData.lerngruppe)) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      Icons.school,
+                      size: iconSize,
+                    ),
+                  ),
+                  Flexible(
+                    child: Text(calendarData.lerngruppe["Name"],
+                        style: Theme.of(context).textTheme.labelLarge),
+                  )
+                ],
+              ),
+            ),
+          ],
+          if (doesEntryExist(calendarData.description)) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Linkify(
+                onOpen: (link) async {
+                  if (!await launchUrl(Uri.parse(link.url))) {
+                    logger.w("${link.url} konnte nicht geöffnet werden.");
+                  }
+                },
+                text: calendarData.description.replaceAll("<br />", "\n"),
+                style: Theme.of(context).textTheme.bodyLarge,
+                linkStyle: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
+          ],
+          SizedBox(height: 50.0,)
+        ],
       ),
     );
   }
@@ -322,6 +319,8 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       if (singleEvent == null) return;
       await showModalBottomSheet(
           context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
           showDragHandle: true,
           builder: (context) {
             return eventBottomSheet(calendarData, singleEvent);
@@ -357,6 +356,10 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
             onFocusChange: (hasFocus) {
               if (hasFocus == true && noTrigger == false) {
                 FocusManager.instance.primaryFocus?.consumeKeyboardToken();
+
+                if (keyboardObserver.value == KeyboardStatus.closed) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
               }
             },
             child: SearchAnchor.bar(
