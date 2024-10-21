@@ -21,6 +21,7 @@ class KeyboardObserver extends ValueNotifier<KeyboardStatus> with WidgetsBinding
     }
   }
 
+  /// Unfocus a text node (Removes the cursor).
   void addDefaultCallback() {
     addListener(() {
       if (value == KeyboardStatus.closed) {

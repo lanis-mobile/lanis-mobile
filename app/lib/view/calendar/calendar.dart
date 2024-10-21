@@ -356,7 +356,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
           child: Focus(
             onFocusChange: (hasFocus) {
               if (hasFocus == true && noTrigger == false) {
-                FocusManager.instance.primaryFocus?.unfocus();
+                FocusManager.instance.primaryFocus?.consumeKeyboardToken();
               }
             },
             child: SearchAnchor.bar(
@@ -509,7 +509,9 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12),
                                         ),
-                                        onTap: () => openEventBottomSheet(value[index]),
+                                        onTap: () async {
+                                          await openEventBottomSheet(value[index]);
+                                        },
                                       ),
                                     ),
                                   );
