@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/shared/keyboard_observer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -30,6 +31,9 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   List<CalendarEvent> eventList = [];
   SearchController searchController = SearchController();
 
+  KeyboardObserver keyboardObserver = KeyboardObserver();
+  bool noTrigger = false;
+
   @override
   void dispose() {
     _selectedEvents.dispose();
@@ -40,14 +44,10 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
   void initState() {
     super.initState();
 
-    searchController.addListener(() {
-      if (!searchController.isOpen) {
-        FocusManager.instance.primaryFocus?.unfocus();
-      }
-    });
-
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
+
+    keyboardObserver.addDefaultCallback();
 
     calendarFetcher.fetchData();
   }
@@ -316,7 +316,7 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
     );
   }
 
-  void openEventBottomSheet(CalendarEvent calendarData, {bool unFocusAfter = true})  async {
+  Future<void> openEventBottomSheet(CalendarEvent calendarData) async {
     try {
       var singleEvent = await fetchEvent(calendarData.id);
       if (singleEvent == null) return;
@@ -326,9 +326,6 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
           builder: (context) {
             return eventBottomSheet(calendarData, singleEvent);
           });
-      if (unFocusAfter) {
-        FocusManager.instance.primaryFocus?.unfocus();
-      }
     } on NoConnectionException {
       if (mounted) {
         return;
@@ -345,9 +342,6 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
             );
           },
         );
-        if (unFocusAfter) {
-          FocusManager.instance.primaryFocus?.unfocus();
-        }
       }
     }
   }
@@ -359,45 +353,64 @@ class _CalendarAnsichtState extends State<CalendarAnsicht> {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: SearchAnchor.bar(
-            searchController: searchController,
-            isFullScreen: false,
-            barTrailing: [
-              if (!_selectedDay!.isSameDay(DateTime.now())) IconButton(
-                icon: const Icon(Icons.restore),
-                onPressed: () {
-                  setState(() {
-                    searchController.text = "";
-                    _selectedDay = DateTime.now();
-                    _focusedDay = DateTime.now();
-                  });
-                },
-              ),
-            ],
-            onSubmitted: (_) {
-              FocusScope.of(context).requestFocus(FocusNode());
-              //searchController.closeView(null);
+          child: Focus(
+            onFocusChange: (hasFocus) {
+              if (hasFocus == true && noTrigger == false) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
             },
-            suggestionsBuilder: (context, _searchController) {
-                final results = fuzzySearchEventList(_searchController.text);
-
-                return results.map((event) => ListTile(
-                  title: Text(event.title),
-                  subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
-                  leading: event.endTime.isBefore(DateTime.now()) ? const Icon(Icons.done) : const Icon(Icons.event),
-                  onTap: () {
+            child: SearchAnchor.bar(
+              searchController: searchController,
+              isFullScreen: false,
+              viewLeading: IconButton(
+                  onPressed: () {
+                    searchController.closeView(null);
+                  },
+                  icon: Icon(Icons.arrow_back)
+              ),
+              barTrailing: [
+                if (!_selectedDay!.isSameDay(DateTime.now())) IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () {
                     setState(() {
-                      _selectedDay = event.startTime;
-                      _focusedDay = event.startTime;
+                      searchController.text = "";
+                      _selectedDay = DateTime.now();
+                      _focusedDay = DateTime.now();
                     });
-                    _searchController.closeView(null);
-                    FocusScope.of(context).unfocus();
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    openEventBottomSheet(event);
                   },
                 ),
-              ).toList();
-            },
+              ],
+              onSubmitted: (_) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              suggestionsBuilder: (context, _searchController) {
+                  final results = fuzzySearchEventList(_searchController.text);
+
+                  return results.map((event) => ListTile(
+                    title: Text(event.title),
+                    subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                    leading: event.endTime.isBefore(DateTime.now()) ? const Icon(Icons.done) : const Icon(Icons.event),
+                    onTap: () async {
+                      setState(() {
+                        _selectedDay = event.startTime;
+                        _focusedDay = event.startTime;
+                      });
+                      searchController.closeView(null);
+
+                      noTrigger = true;
+                      if (keyboardObserver.value == KeyboardStatus.closed) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      }
+
+                      await openEventBottomSheet(event).whenComplete(() {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        noTrigger = false;
+                      });
+                    },
+                  ),
+                ).toList();
+              },
+            ),
           ),
         ),
         Expanded(
