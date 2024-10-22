@@ -14,18 +14,37 @@ class HomeworkBox extends StatefulWidget {
   State<HomeworkBox> createState() => _HomeworkBoxState();
 }
 
-class _HomeworkBoxState extends State<HomeworkBox> {
+class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
   final GlobalKey _columnKey = GlobalKey();
   Size _columnSize = Size.zero;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _updateColumnSize();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    _updateColumnSize();
+  }
+
+  void _updateColumnSize() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox renderBox = _columnKey.currentContext!.findRenderObject() as RenderBox;
-      setState(() {
-        _columnSize = renderBox.size;
-      });
+      // Checks if the context is still available to prevent _TypeError
+      if (_columnKey.currentContext != null) {
+        final RenderBox renderBox = _columnKey.currentContext!.findRenderObject() as RenderBox;
+        setState(() {
+          _columnSize = renderBox.size;
+        });
+      }
     });
   }
 
