@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client_submodules/conversations.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -14,20 +12,6 @@ import 'overview_dialogs.dart';
 import 'chat.dart';
 
 const double tileSize = 80.0;
-
-class ToggleModeNotification extends Notification {}
-
-class CheckTileNotification extends Notification {
-  final String? id;
-
-  const CheckTileNotification({this.id});
-}
-
-class JumpToNotification extends Notification {
-  final double? position;
-
-  const JumpToNotification({this.position});
-}
 
 class ScrolledDownContainer extends StatefulWidget {
   final Widget child;
@@ -58,10 +42,13 @@ class _ScrolledDownContainerState extends State<ScrolledDownContainer> {
   }
 
   void calculateColor() {
-    surface = Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).colorScheme.surface;
+    surface = Theme.of(context).appBarTheme.backgroundColor ??
+        Theme.of(context).colorScheme.surface;
     tintedSurface = ElevationOverlay.applySurfaceTint(
-        Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer,
-        Theme.of(context).appBarTheme.surfaceTintColor ?? Theme.of(context).colorScheme.surfaceTint,
+        Theme.of(context).appBarTheme.backgroundColor ??
+            Theme.of(context).colorScheme.surfaceContainer,
+        Theme.of(context).appBarTheme.surfaceTintColor ??
+            Theme.of(context).colorScheme.surfaceTint,
         3);
   }
 
@@ -75,11 +62,6 @@ class _ScrolledDownContainerState extends State<ScrolledDownContainer> {
 
     // Not perfect but better than calculating every time.
     calculateColor();
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -103,6 +85,18 @@ class _ScrolledDownContainerState extends State<ScrolledDownContainer> {
   }
 }
 
+class CheckTileNotification extends Notification {
+  final String? id;
+
+  const CheckTileNotification({this.id});
+}
+
+class JumpToNotification extends Notification {
+  final double? position;
+
+  const JumpToNotification({this.position});
+}
+
 class ConversationsOverview extends StatefulWidget {
   const ConversationsOverview({super.key});
 
@@ -112,6 +106,7 @@ class ConversationsOverview extends StatefulWidget {
 
 class _ConversationsOverviewState extends State<ConversationsOverview> {
   final ConversationsFetcher fetcher = client.fetchers.conversationsFetcher;
+  final OverviewFiltering filter = client.conversations.filter;
   final GlobalKey<RefreshIndicatorState> _refreshKey =
       GlobalKey<RefreshIndicatorState>();
 
@@ -143,16 +138,227 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
   final Map<String, bool> checkedTiles = {};
 
-  bool nullContent = true;
-  late StreamSubscription nullContentSubscription;
-
   bool loadingCreateButton = false;
   bool disableToggleButton = false;
+
+  Widget toggleModeAppBar() {
+    return SizedBox(
+      height: 64,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              constraints: BoxConstraints.tightFor(
+                  width: kToolbarHeight, height: kToolbarHeight),
+              onPressed: () {
+                closeToggleMode();
+                for (final tile in checkedTiles.keys) {
+                  checkedTiles[tile] = false;
+                }
+              },
+            ),
+            SizedBox(
+              width: 16,
+            ),
+            Text(
+              AppLocalizations.of(context)!.hideShowConversations,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget searchWidget() {
+    return Padding(
+        padding:
+            const EdgeInsets.only(left: 8.0, right: 8.0, top: 0, bottom: 8),
+        child: Column(
+          children: [
+            // Advanced search
+            if (advancedSearch) ...[
+              ...List<Padding>.generate(filter.advancedSearch.length, (i) {
+                SearchFunction function =
+                    filter.advancedSearch.keys.elementAt(i);
+
+                filterFunction(String text) {
+                  filter.advancedSearch[function] = text;
+                  filter.supply();
+
+                  if (text.isEmpty) {
+                    setState(() {
+                      advancedRemoveButtons[function] = false;
+                    });
+                  }
+
+                  if (advancedRemoveButtons[function] == false &&
+                      text.isNotEmpty) {
+                    setState(() {
+                      advancedRemoveButtons[function] = true;
+                    });
+                  }
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: SearchBar(
+                    hintText: AppLocalizations.of(context)!
+                        .individualSearchHint(function.name),
+                    textInputAction: TextInputAction.search,
+                    controller: advancedSearchControllers[function],
+                    onSubmitted: filterFunction,
+                    onChanged: filterFunction,
+                    onTapOutside: (event) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
+                    leading: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: advancedSearchIcons[function],
+                    ),
+                    trailing: [
+                      Visibility(
+                        visible: advancedRemoveButtons[function]!,
+                        child: IconButton(
+                            onPressed: () {
+                              filter.advancedSearch[function] = "";
+                              advancedSearchControllers[function]!.clear();
+                              filter.supply();
+
+                              setState(() {
+                                advancedRemoveButtons[function] = false;
+                              });
+                            },
+                            icon: const Icon(Icons.delete)),
+                      )
+                    ],
+                  ),
+                );
+              })
+            ],
+
+            // Simple search
+            SearchBar(
+              hintText: AppLocalizations.of(context)!.searchHint,
+              textInputAction: TextInputAction.search,
+              controller: simpleSearchController,
+              onSubmitted: (String text) {
+                filter.simpleSearch = text;
+                filter.supply();
+              },
+              onChanged: (String text) {
+                filter.simpleSearch = text;
+                filter.supply();
+
+                if (text.isEmpty) {
+                  setState(() {
+                    simpleRemoveButton = false;
+                  });
+                }
+
+                if (simpleRemoveButton == false && text.isNotEmpty) {
+                  setState(() {
+                    simpleRemoveButton = true;
+                  });
+                }
+              },
+              onTapOutside: (event) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              trailing: [
+                Visibility(
+                  visible: simpleRemoveButton,
+                  child: IconButton(
+                      onPressed: () {
+                        filter.simpleSearch = "";
+                        simpleSearchController.clear();
+                        filter.supply();
+
+                        setState(() {
+                          simpleRemoveButton = false;
+                        });
+                      },
+                      icon: const Icon(Icons.delete)),
+                ),
+                MenuAnchor(
+                  builder: (context, controller, _) => IconButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      icon: const Icon(Icons.more_vert)),
+                  menuChildren: [
+                    MenuItemButton(
+                      leadingIcon: advancedSearch
+                          ? Icon(Icons.search_off)
+                          : Icon(Icons.search),
+                      onPressed: () {
+                        setState(() {
+                          advancedSearch = !advancedSearch;
+                        });
+                      },
+                      child: Text(advancedSearch
+                          ? AppLocalizations.of(context)!.simpleSearch
+                          : AppLocalizations.of(context)!.advancedSearch),
+                    ),
+                    MenuItemButton(
+                      leadingIcon: showHidden
+                          ? const Icon(Icons.visibility_off)
+                          : const Icon(Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          showHidden = !showHidden;
+                        });
+
+                        final oldEntries = fetcher.stream.value.content;
+
+                        filter.showHidden = showHidden;
+                        filter.supply();
+
+                        jumpToTopTile(
+                            fetcher.stream.value.content!, oldEntries!);
+                      },
+                      child: Text(showHidden
+                          ? AppLocalizations.of(context)!.showOnlyVisible
+                          : AppLocalizations.of(context)!.showAll),
+                    ),
+                    const Divider(),
+                    MenuItemButton(
+                      leadingIcon: SizedBox.fromSize(
+                        size: Size(24, 0),
+                      ),
+                      onPressed: () {
+                        final oldEntries = fetcher.stream.value.content;
+
+                        openToggleMode();
+
+                        jumpToTopTile(
+                            fetcher.stream.value.content!, oldEntries!);
+                      },
+                      child: Text(AppLocalizations.of(context)!.hideShow),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ));
+  }
 
   // Switching between two lists of overview entries messes up the scroll controller, so we just try to jump to the top visible tile and anchor to it.
   // If top tile is not visible in the new list, we try to find the first visible tile above the top tile and jump to it.
   void jumpToTopTile(
       final List<OverviewEntry> entries, final List<OverviewEntry> oldEntries) {
+    if (oldEntries.isEmpty) return;
+
     final offsetTopIndex = (scrollController.offset / 80).toInt();
 
     double position = 0;
@@ -177,7 +383,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     }
 
     if (position >= size - viewport) {
-      scrollController.jumpTo(size - viewport);
+      scrollController.jumpTo(size - viewport + 64);
     } else {
       scrollController.jumpTo(
           position + (scrollController.offset - (offsetTopIndex * tileSize)));
@@ -188,24 +394,21 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     setState(() {
       toggleMode = true;
     });
-    client.conversations.filter.toggleMode = true;
-    client.conversations.filter.supply();
+    filter.toggleMode = true;
+    filter.supply();
     fetcher.toggleSuspend();
   }
 
   void closeToggleMode() {
     setState(() {
       toggleMode = false;
+      disableToggleButton = false;
     });
 
     final oldEntries = fetcher.stream.value.content;
 
-    client.conversations.filter.toggleMode = false;
-    client.conversations.filter.supply();
-
-    setState(() {
-      disableToggleButton = false;
-    });
+    filter.toggleMode = false;
+    filter.supply();
 
     fetcher.toggleSuspend();
 
@@ -220,25 +423,17 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
     keyboardObserver.addDefaultCallback();
 
-    nullContentSubscription = fetcher.stream.listen((snapshot) {
-      setState(() {
-        nullContent = snapshot.content == null;
-      });
-    });
-
-    simpleSearchController.text = client.conversations.filter.simpleSearch;
+    simpleSearchController.text = filter.simpleSearch;
 
     for (final value in SearchFunction.values) {
       advancedSearchControllers[value]!.text =
-          client.conversations.filter.advancedSearch[value] ?? "";
+          filter.advancedSearch[value] ?? "";
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-
-    nullContentSubscription.cancel();
 
     simpleSearchController.dispose();
     for (final value in SearchFunction.values) {
@@ -254,14 +449,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
   Widget build(BuildContext context) {
     return NotificationListener(
       onNotification: (notification) {
-        if (notification is ToggleModeNotification) {
-          if (toggleMode) {
-            closeToggleMode();
-          } else {
+        if (notification is CheckTileNotification) {
+          if (!toggleMode) {
             openToggleMode();
           }
-          return true;
-        } else if (notification is CheckTileNotification) {
+
           setState(() {
             checkedTiles[notification.id!] =
                 !(checkedTiles[notification.id!] ?? false);
@@ -275,294 +467,6 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
         return false;
       },
       child: Scaffold(
-          appBar: PreferredSize(
-              preferredSize: Size.fromHeight(nullContent
-                  ? 0
-                  : advancedSearch && !toggleMode
-                      ? 256
-                      : 64),
-              child: ScrolledDownContainer(
-                child: toggleMode
-                    ? SizedBox(
-                        height: 64,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.arrow_back,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                                constraints: BoxConstraints.tightFor(width: kToolbarHeight, height: kToolbarHeight),
-                                onPressed: () {
-                                  closeToggleMode();
-                                  for (final tile in checkedTiles.keys) {
-                                    checkedTiles[tile] = false;
-                                  }
-                                },
-                              ),
-                              SizedBox(
-                                width: 16,
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!
-                                    .hideShowConversations,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : !nullContent
-                        ? Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8.0, right: 8.0, top: 0, bottom: 8),
-                            child: Column(
-                              children: [
-                                // Advanced search
-                                if (advancedSearch) ...[
-                                  ...List<Padding>.generate(
-                                      client.conversations.filter.advancedSearch
-                                          .length, (i) {
-                                    SearchFunction function = client
-                                        .conversations
-                                        .filter
-                                        .advancedSearch
-                                        .keys
-                                        .elementAt(i);
-
-                                    filterFunction(String text) {
-                                      client.conversations.filter
-                                          .advancedSearch[function] = text;
-                                      client.conversations.filter.supply();
-
-                                      if (text.isEmpty) {
-                                        setState(() {
-                                          advancedRemoveButtons[function] =
-                                              false;
-                                        });
-                                      }
-
-                                      if (advancedRemoveButtons[function] ==
-                                              false &&
-                                          text.isNotEmpty) {
-                                        setState(() {
-                                          advancedRemoveButtons[function] =
-                                              true;
-                                        });
-                                      }
-                                    }
-
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: SearchBar(
-                                        hintText: AppLocalizations.of(context)!
-                                            .individualSearchHint(
-                                                function.name),
-                                        textInputAction: TextInputAction.search,
-                                        controller:
-                                            advancedSearchControllers[function],
-                                        onSubmitted: filterFunction,
-                                        onChanged: filterFunction,
-                                        onTapOutside: (event) {
-                                          FocusManager.instance.primaryFocus?.unfocus();
-                                        },
-                                        leading: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: advancedSearchIcons[function],
-                                        ),
-                                        trailing: [
-                                          Visibility(
-                                            visible: advancedRemoveButtons[
-                                                function]!,
-                                            child: IconButton(
-                                                onPressed: () {
-                                                  client.conversations.filter
-                                                          .advancedSearch[
-                                                      function] = "";
-                                                  advancedSearchControllers[
-                                                          function]!
-                                                      .clear();
-                                                  client.conversations.filter
-                                                      .supply();
-
-                                                  setState(() {
-                                                    advancedRemoveButtons[
-                                                        function] = false;
-                                                  });
-                                                },
-                                                icon: const Icon(Icons.delete)),
-                                          )
-                                        ],
-                                      ),
-                                    );
-                                  })
-                                ],
-
-                                // Simple search
-                                SearchBar(
-                                  hintText:
-                                      AppLocalizations.of(context)!.searchHint,
-                                  textInputAction: TextInputAction.search,
-                                  controller: simpleSearchController,
-                                  onSubmitted: (String text) {
-                                    client.conversations.filter.simpleSearch =
-                                        text;
-                                    client.conversations.filter.supply();
-                                  },
-                                  onChanged: (String text) {
-                                    client.conversations.filter.simpleSearch =
-                                        text;
-                                    client.conversations.filter.supply();
-
-                                    if (text.isEmpty) {
-                                      setState(() {
-                                        simpleRemoveButton = false;
-                                      });
-                                    }
-
-                                    if (simpleRemoveButton == false &&
-                                        text.isNotEmpty) {
-                                      setState(() {
-                                        simpleRemoveButton = true;
-                                      });
-                                    }
-                                  },
-                                  onTapOutside: (event) {
-                                    FocusManager.instance.primaryFocus?.unfocus();
-                                  },
-                                  trailing: [
-                                    Visibility(
-                                      visible: simpleRemoveButton,
-                                      child: IconButton(
-                                          onPressed: () {
-                                            client.conversations.filter
-                                                .simpleSearch = "";
-                                            simpleSearchController.clear();
-                                            client.conversations.filter
-                                                .supply();
-
-                                            setState(() {
-                                              simpleRemoveButton = false;
-                                            });
-                                          },
-                                          icon: const Icon(Icons.delete)),
-                                    ),
-                                    MenuAnchor(
-                                      builder: (context, controller, _) =>
-                                          IconButton(
-                                              onPressed: () {
-                                                if (controller.isOpen) {
-                                                  controller.close();
-                                                } else {
-                                                  controller.open();
-                                                }
-                                              },
-                                              icon:
-                                                  const Icon(Icons.more_vert)),
-                                      menuChildren: [
-                                        MenuItemButton(
-                                          leadingIcon: advancedSearch
-                                              ? Icon(Icons.search_off)
-                                              : Icon(Icons.search),
-                                          onPressed: () {
-                                            setState(() {
-                                              advancedSearch = !advancedSearch;
-                                            });
-                                          },
-                                          child: Text(advancedSearch
-                                              ? AppLocalizations.of(context)!
-                                                  .simpleSearch
-                                              : AppLocalizations.of(context)!
-                                                  .advancedSearch),
-                                        ),
-                                        MenuItemButton(
-                                          leadingIcon: showHidden
-                                              ? const Icon(Icons.visibility_off)
-                                              : const Icon(Icons.visibility),
-                                          onPressed: () {
-                                            setState(() {
-                                              showHidden = !showHidden;
-                                            });
-
-                                            final oldEntries = client
-                                                .fetchers
-                                                .conversationsFetcher
-                                                .stream
-                                                .value
-                                                .content;
-
-                                            client.conversations.filter
-                                                .showHidden = showHidden;
-                                            client.conversations.filter
-                                                .supply();
-
-                                            if (!showHidden) {
-                                              jumpToTopTile(
-                                                  client
-                                                      .fetchers
-                                                      .conversationsFetcher
-                                                      .stream
-                                                      .value
-                                                      .content!,
-                                                  oldEntries!);
-                                            } else {
-                                              jumpToTopTile(
-                                                  client
-                                                      .fetchers
-                                                      .conversationsFetcher
-                                                      .stream
-                                                      .value
-                                                      .content!,
-                                                  oldEntries!);
-                                            }
-                                          },
-                                          child: Text(showHidden
-                                              ? AppLocalizations.of(context)!
-                                                  .showOnlyVisible
-                                              : AppLocalizations.of(context)!
-                                                  .showAll),
-                                        ),
-                                        const Divider(),
-                                        MenuItemButton(
-                                          leadingIcon: SizedBox.fromSize(
-                                            size: Size(24, 0),
-                                          ),
-                                          onPressed: () {
-                                            final oldEntries = client
-                                                .fetchers
-                                                .conversationsFetcher
-                                                .stream
-                                                .value
-                                                .content;
-
-                                            openToggleMode();
-
-                                            jumpToTopTile(
-                                                client
-                                                    .fetchers
-                                                    .conversationsFetcher
-                                                    .stream
-                                                    .value
-                                                    .content!,
-                                                oldEntries!);
-                                          },
-                                          child: Text(
-                                              AppLocalizations.of(context)!
-                                                  .hideShow),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ))
-                        : SizedBox.shrink(),
-              )),
           body: StreamBuilder(
               stream: fetcher.stream,
               builder: (context, snapshot) {
@@ -576,50 +480,72 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                   return const Center(child: CircularProgressIndicator());
                 } else {
                   return RefreshIndicator(
-                    key: _refreshKey,
-                    onRefresh: () async {
-                      fetcher.fetchData(forceRefresh: true);
-                    },
-                    child: ListView.builder(
+                      key: _refreshKey,
+                      edgeOffset: snapshot.data == null
+                          ? 0
+                          : advancedSearch && !toggleMode
+                              ? 256
+                              : 64,
+                      onRefresh: () async {
+                        fetcher.fetchData(forceRefresh: true);
+                      },
+                      child: CustomScrollView(
                         controller: scrollController,
-                        itemCount: (snapshot.data?.content!.length)! + 1,
-                        itemExtentBuilder: (index, _) {
-                          if (index > (snapshot.data?.content!.length)! - 1) {
-                            return tileSize * 2.5;
-                          }
+                        physics: AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          PinnedHeaderSliver(
+                            child: Visibility(
+                                visible: snapshot.data != null,
+                                child: ScrolledDownContainer(
+                                    child: toggleMode
+                                        ? toggleModeAppBar()
+                                        : searchWidget())),
+                          ),
+                          SliverVariedExtentList.builder(
+                            itemCount: (snapshot.data?.content!.length)! + 1,
+                            itemExtentBuilder: (index, _) {
+                              if (index >
+                                  (snapshot.data?.content!.length)! - 1) {
+                                return tileSize * 2.5;
+                              }
 
-                          return tileSize;
-                        },
-                        itemBuilder: (context, index) {
-                          if (index > (snapshot.data?.content!.length)! - 1) {
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 12.0, left: 12.0, right: 12.0),
-                              child: ListTile(
-                                title: Text(
-                                  AppLocalizations.of(context)!
-                                      .noFurtherEntries,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                subtitle: Text(
-                                  AppLocalizations.of(context)!
-                                      .conversationNote,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            );
-                          }
+                              return tileSize;
+                            },
+                            itemBuilder: (context, index) {
+                              if (index >
+                                  (snapshot.data?.content!.length)! - 1) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 12.0, left: 12.0, right: 12.0),
+                                  child: ListTile(
+                                    title: Text(
+                                      AppLocalizations.of(context)!
+                                          .noFurtherEntries,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                    subtitle: Text(
+                                      AppLocalizations.of(context)!
+                                          .conversationNote,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              }
 
-                          return ConversationTile(
-                            entry: snapshot.data!.content![index],
-                            toggleMode: toggleMode,
-                            checked: checkedTiles[
-                                    snapshot.data!.content![index].id] ??
-                                false,
-                          );
-                        }),
-                  );
+                              return ConversationTile(
+                                entry: snapshot.data!.content![index],
+                                toggleMode: toggleMode,
+                                checked: checkedTiles[
+                                        snapshot.data!.content![index].id] ??
+                                    false,
+                              );
+                            },
+                          )
+                        ],
+                      ));
                 }
               }),
           floatingActionButton: toggleMode
@@ -639,13 +565,12 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                             disableToggleButton = true;
                           });
 
-                          // So you don't see each button being toggled
+                          // So you don't see each tile being toggled
                           Map<String, bool> toggled = {};
 
                           for (final tile in checkedTiles.entries) {
                             if (tile.value == true) {
-                              final isHidden = client
-                                  .conversations.filter.entries
+                              final isHidden = filter.entries
                                   .where((element) => element.id == tile.key)
                                   .first
                                   .hidden;
@@ -715,11 +640,10 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                           }
 
                           for (final id in toggled.keys) {
-                            client.conversations.filter
-                                .toggleEntry(id, hidden: true);
+                            filter.toggleEntry(id, hidden: true);
                           }
 
-                          client.conversations.filter.supply();
+                          filter.supply();
                           closeToggleMode();
                         }
                       : null)
@@ -856,7 +780,6 @@ class ConversationTile extends StatelessWidget {
                         .fetchers.conversationsFetcher.stream.value.content!;
                     final oldPosition = oldEntries.indexOf(entry) * tileSize;
 
-                    ToggleModeNotification().dispatch(context);
                     CheckTileNotification(id: entry.id).dispatch(context);
 
                     final List<OverviewEntry> entries = client
