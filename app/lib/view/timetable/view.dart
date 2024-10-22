@@ -178,22 +178,11 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
 class TimeTableDataSource extends CalendarDataSource {
   TimeTableDataSource(List<Day>? data) {
     final now = DateTime.now();
-
+    final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
 
     for (var (dayIndex, day) in data!.indexed) {
-      dayIndex += 1;
-      // Calculate the difference between the current weekday and the dayIndex
-      var diff = dayIndex - now.weekday;
-      // If the dayIndex is less than the current weekday, add 7 to ensure the date is in the future
-      if (diff < 0) {
-        diff += 7;
-      } else if (diff == 0) {
-        diff = 0;
-      }
-
-      // Add the difference to the current date to get the correct date
-      final date = now.add(Duration(days: diff));
+      final date = lastMonday.add(Duration(days: dayIndex));
 
       for (var (lessonIndex, lesson) in day.indexed) {
         // Use the calculated date for the startTime and endTime
