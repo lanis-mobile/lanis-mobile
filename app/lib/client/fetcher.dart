@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/client/storage.dart';
@@ -10,6 +9,7 @@ import 'package:sph_plan/shared/types/conversations.dart';
 
 import '../shared/types/lesson.dart';
 import '../shared/types/timetable.dart';
+import '../shared/types/calendar_event.dart';
 import 'client.dart';
 import 'connection_checker.dart';
 
@@ -47,7 +47,8 @@ abstract class Fetcher<T> {
     }
   }
 
-  void _addResponse(final FetcherResponse<T> data) => _controller.sink.add(data);
+  void _addResponse(final FetcherResponse<T> data) =>
+      _controller.sink.add(data);
 
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
     if (!(await connectionChecker.connected)) {
@@ -129,19 +130,18 @@ class ConversationsFetcher extends Fetcher<List<OverviewEntry>> {
   }
 }
 
-class CalendarFetcher extends Fetcher<dynamic> {
+class CalendarFetcher extends Fetcher<List<CalendarEvent>> {
   CalendarFetcher(super.validCacheDuration, {super.storageKey});
+  String searchQuery = "";
 
   @override
-  Future<dynamic> _get() {
+  Future<List<CalendarEvent>> _get() {
     DateTime currentDate = DateTime.now();
     DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
     DateTime oneYearLater = currentDate.add(const Duration(days: 365));
 
-    final formatter = DateFormat('yyyy-MM-dd');
-
-    return client.calendar.getCalendar(
-        formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+    return client.calendar
+        .getCalendar(startDate: sixMonthsAgo, endDate: oneYearLater, searchQuery: searchQuery);
   }
 }
 
@@ -163,7 +163,8 @@ class GlobalFetcher {
 
   GlobalFetcher() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5), storageKey: StorageKey.lastSubstitutionData);
+      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5),
+          storageKey: StorageKey.lastSubstitutionData);
     }
     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       meinUnterrichtFetcher =
@@ -177,7 +178,8 @@ class GlobalFetcher {
       calendarFetcher = CalendarFetcher(null);
     }
     if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
-      timeTableFetcher = TimeTableFetcher(null, storageKey: StorageKey.lastTimetableData);
+      timeTableFetcher =
+          TimeTableFetcher(null, storageKey: StorageKey.lastTimetableData);
     }
   }
 }

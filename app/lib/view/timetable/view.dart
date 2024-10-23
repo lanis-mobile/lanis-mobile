@@ -67,8 +67,14 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       ));
     }
     return SfCalendar(
-      view: CalendarView.day,
-      headerHeight: 0,
+      view: DateTime.now().weekday == DateTime.saturday || DateTime.now().weekday == DateTime.sunday
+          ? CalendarView.week
+          : CalendarView.workWeek,
+      allowedViews: [
+        CalendarView.day,
+        CalendarView.week,
+        CalendarView.workWeek,
+      ],
       timeSlotViewSettings: const TimeSlotViewSettings(
         timeFormat: "HH:mm",
       ),
@@ -172,22 +178,11 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
 class TimeTableDataSource extends CalendarDataSource {
   TimeTableDataSource(List<Day>? data) {
     final now = DateTime.now();
-
+    final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
 
     for (var (dayIndex, day) in data!.indexed) {
-      dayIndex += 1;
-      // Calculate the difference between the current weekday and the dayIndex
-      var diff = dayIndex - now.weekday;
-      // If the dayIndex is less than the current weekday, add 7 to ensure the date is in the future
-      if (diff < 0) {
-        diff += 7;
-      } else if (diff == 0) {
-        diff = 0;
-      }
-
-      // Add the difference to the current date to get the correct date
-      final date = now.add(Duration(days: diff));
+      final date = lastMonday.add(Duration(days: dayIndex));
 
       for (var (lessonIndex, lesson) in day.indexed) {
         // Use the calculated date for the startTime and endTime
@@ -198,10 +193,20 @@ class TimeTableDataSource extends CalendarDataSource {
 
         final Color entryColor = generateColor(lesson.name!, Colors.blue);
 
+        //1 week before
+        events.add(Appointment(
+            startTime: startTime.subtract(const Duration(days: 7)),
+            endTime: endTime.subtract(const Duration(days: 7)),
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
+            location: lesson.raum,
+            notes: lesson.badge,
+            color: entryColor,
+            id: "${dayIndex - 1}-$lessonIndex-1"));
+
         events.add(Appointment(
             startTime: startTime,
             endTime: endTime,
-            subject: "${lesson.name!} ${lesson.lehrer}",
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
             location: lesson.raum,
             notes: lesson.badge,
             color: entryColor,
@@ -211,7 +216,7 @@ class TimeTableDataSource extends CalendarDataSource {
         events.add(Appointment(
             startTime: startTime.add(const Duration(days: 7)),
             endTime: endTime.add(const Duration(days: 7)),
-            subject: lesson.name!,
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
             location: lesson.raum,
             notes: lesson.lehrer,
             color: entryColor,
