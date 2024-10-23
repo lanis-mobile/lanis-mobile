@@ -80,14 +80,6 @@ class SPHclient {
         return handler.next(options); //continue
       },
     ));
-    dio.interceptors.add(InterceptorsWrapper(
-      onResponse: (response, handler) {
-        if (response.statusCode == 503) {
-          throw LanisDownException();
-        }
-        return handler.next(response);
-      },
-    ));
     dio.options.followRedirects = false;
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302 || status == 503);
@@ -139,7 +131,8 @@ class SPHclient {
 
     jar.deleteAll();
     dio.options.validateStatus =
-        (status) => status != null && (status == 200 || status == 302);
+        (status) => status != null && (status == 200 || status == 302 || status == 503);
+
     try {
       String loginURL = await getLoginURL();
       await dio.get(loginURL);
@@ -160,13 +153,15 @@ class SPHclient {
 
       await cryptor.start(dio);
 
+      logger.d("Survived cryptor");
+
       return;
+    } on LanisException {
+      rethrow;
     } on SocketException {
       throw NetworkException();
     } on DioException {
       throw NetworkException();
-    } on LanisException {
-      rethrow;
     } catch (e) {
       throw UnknownException();
     }
@@ -186,9 +181,12 @@ class SPHclient {
     }
     logger.i("Refreshing session");
     try {
-      await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
+      var response = await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
           queryParameters: {"name": sid},
           options: Options(contentType: "application/x-www-form-urlencoded"));
+      if (response.statusCode == 503) {
+        throw LanisDownException();
+      }
     } on DioException {
       return;
     }
@@ -246,6 +244,10 @@ class SPHclient {
             "password": password
           },
           options: Options(contentType: "application/x-www-form-urlencoded"));
+
+      if (response1.statusCode == 503) {
+        throw LanisDownException();
+      }
 
       final loginTimeout =
           parse(response1.data).getElementById("authErrorLocktime");

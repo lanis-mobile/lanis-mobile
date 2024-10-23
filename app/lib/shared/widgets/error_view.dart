@@ -61,11 +61,20 @@ class ErrorView extends StatelessWidget {
                     style:
                         const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-              if (error is! NoConnectionException) ...[
+              if (error is! NoConnectionException && error is! LanisDownException) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
                       "Problem: ${error.cause}",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+              if (error is! LanisDownException) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.lanisDownError,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -75,7 +84,7 @@ class ErrorView extends StatelessWidget {
                   onPressed: retry,
                   child: Text(AppLocalizations.of(context)!.tryAgain)
               ),
-              if (error is! NoConnectionException) ...[
+              if (error is! NoConnectionException && error is! LanisDownException) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -97,6 +106,14 @@ class ErrorView extends StatelessWidget {
                   ],
                 )
               ],
+              if (error is LanisDownException) ...[
+                OutlinedButton(
+                    onPressed: () {
+                      launchUrl(Uri.parse("https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
+                    },
+                    child: const Text("Status")
+                ),
+              ]
             ],
           ),
         )

@@ -8,7 +8,9 @@ enum ConnectionStatus { connected, disconnected }
 class CustomConnectionChecker {
   ConnectionStatus _status = ConnectionStatus.disconnected;
   final _statusController = StreamController<ConnectionStatus>.broadcast();
-  final dio = Dio();
+  final dio = Dio(
+    BaseOptions(validateStatus: (status) => status != null && (status == 200 || status == 302 || status == 503))
+  );
   DateTime lastRequest = DateTime.now().subtract(const Duration(seconds: 5));
 
   Stream<ConnectionStatus> get statusStream => _statusController.stream;
@@ -41,7 +43,7 @@ class CustomConnectionChecker {
 
   Future<bool> testConnection() async {
     try {
-      await dio.post("https://start.schulportal.hessen.de/ajax_login.php");
+      await dio.post("http://192.168.0.65:5000");
       status = ConnectionStatus.connected;
       return true;
     } catch (e) {
