@@ -153,8 +153,6 @@ class SPHclient {
 
       await cryptor.start(dio);
 
-      logger.d("Survived cryptor");
-
       return;
     } on LanisException {
       rethrow;
