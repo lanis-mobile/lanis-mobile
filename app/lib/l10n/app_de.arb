@@ -26,7 +26,7 @@
   "noInternetConnection1": "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
   "noInternetConnection2": "Keine Internetverbindung!",
   "lanisDownError": "Lanis ist nicht aufrufbar!",
-  "lanisDownErrorMessage": "Anscheinend ist Lanis nicht verfügbar da Lanis mit code 503 geantwortet hat.\nBitte überprüfe den Status von Lanis (PaedOrg) auf der Website",
+  "lanisDownErrorMessage": "Anscheinend ist Lanis nicht verfügbar da Lanis mit code 503 geantwortet hat.\nBitte überprüfe den Status von Lanis (PaedOrg) auf der Websited",
 
   "reportError": "Es gab wohl ein Problem, bitte melde den Fehler bei wiederholtem Auftreten.",
   "errorOccurred": "Ein Fehler ist aufgetreten.",
