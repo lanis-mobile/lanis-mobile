@@ -189,7 +189,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
 
                 filterFunction(String text) {
                   filter.advancedSearch[function] = text;
-                  filter.supply();
+                  filter.pushEntries();
 
                   if (text.isEmpty) {
                     setState(() {
@@ -228,7 +228,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                             onPressed: () {
                               filter.advancedSearch[function] = "";
                               advancedSearchControllers[function]!.clear();
-                              filter.supply();
+                              filter.pushEntries();
 
                               setState(() {
                                 advancedRemoveButtons[function] = false;
@@ -249,11 +249,11 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
               controller: simpleSearchController,
               onSubmitted: (String text) {
                 filter.simpleSearch = text;
-                filter.supply();
+                filter.pushEntries();
               },
               onChanged: (String text) {
                 filter.simpleSearch = text;
-                filter.supply();
+                filter.pushEntries();
 
                 if (text.isEmpty) {
                   setState(() {
@@ -277,7 +277,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                       onPressed: () {
                         filter.simpleSearch = "";
                         simpleSearchController.clear();
-                        filter.supply();
+                        filter.pushEntries();
 
                         setState(() {
                           simpleRemoveButton = false;
@@ -321,7 +321,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                         final oldEntries = fetcher.stream.value.content;
 
                         filter.showHidden = showHidden;
-                        filter.supply();
+                        filter.pushEntries();
 
                         jumpToTopTile(
                             fetcher.stream.value.content!, oldEntries!);
@@ -395,7 +395,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
       toggleMode = true;
     });
     filter.toggleMode = true;
-    filter.supply();
+    filter.pushEntries();
     fetcher.toggleSuspend();
   }
 
@@ -408,7 +408,7 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
     final oldEntries = fetcher.stream.value.content;
 
     filter.toggleMode = false;
-    filter.supply();
+    filter.pushEntries();
 
     fetcher.toggleSuspend();
 
@@ -549,104 +549,103 @@ class _ConversationsOverviewState extends State<ConversationsOverview> {
                 }
               }),
           floatingActionButton: toggleMode
-              ? FloatingActionButton.extended(
-                  isExtended: !disableToggleButton,
-                  icon: !disableToggleButton
-                      ? Icon(Icons.visibility)
-                      : SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: const CircularProgressIndicator(),
-                        ),
-                  label: Text(AppLocalizations.of(context)!.hideShow),
-                  onPressed: !disableToggleButton
-                      ? () async {
-                          setState(() {
-                            disableToggleButton = true;
-                          });
+              ? disableToggleButton
+                  ? FloatingActionButton(
+                      onPressed: null,
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: const CircularProgressIndicator(),
+                      ))
+                  : FloatingActionButton.extended(
+                      icon: Icon(Icons.visibility),
+                      label: Text(AppLocalizations.of(context)!.hideShow),
+                      onPressed: () async {
+                        setState(() {
+                          disableToggleButton = true;
+                        });
 
-                          // So you don't see each tile being toggled
-                          Map<String, bool> toggled = {};
+                        // So you don't see each tile being toggled
+                        Map<String, bool> toggled = {};
 
-                          for (final tile in checkedTiles.entries) {
-                            if (tile.value == true) {
-                              final isHidden = filter.entries
-                                  .where((element) => element.id == tile.key)
-                                  .first
-                                  .hidden;
+                        for (final tile in checkedTiles.entries) {
+                          if (tile.value == true) {
+                            final isHidden = filter.entries
+                                .where((element) => element.id == tile.key)
+                                .first
+                                .hidden;
 
-                              late bool result;
-                              try {
-                                if (isHidden) {
-                                  result = await client.conversations
-                                      .showConversation(tile.key);
-                                } else {
-                                  result = await client.conversations
-                                      .hideConversation(tile.key);
-                                }
-                              } on NoConnectionException {
-                                setState(() {
-                                  disableToggleButton = false;
-                                });
-
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                          icon: const Icon(Icons.wifi_off),
-                                          title: Text(
-                                              AppLocalizations.of(context)!
-                                                  .noInternetConnection2),
-                                          actions: [
-                                            FilledButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(AppLocalizations.of(
-                                                        context)!
-                                                    .back))
-                                          ],
-                                        ));
-                                return;
+                            late bool result;
+                            try {
+                              if (isHidden) {
+                                result = await client.conversations
+                                    .showConversation(tile.key);
+                              } else {
+                                result = await client.conversations
+                                    .hideConversation(tile.key);
                               }
+                            } on NoConnectionException {
+                              setState(() {
+                                disableToggleButton = false;
+                              });
 
-                              if (!result) {
-                                setState(() {
-                                  disableToggleButton = false;
-                                });
-
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                          icon: const Icon(Icons.error),
-                                          title: Text(
-                                              AppLocalizations.of(context)!
-                                                  .errorOccurred),
-                                          actions: [
-                                            FilledButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(AppLocalizations.of(
-                                                        context)!
-                                                    .back))
-                                          ],
-                                        ));
-                                return;
-                              }
-
-                              toggled.addEntries([tile]);
-                              checkedTiles[tile.key] = false;
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        icon: const Icon(Icons.wifi_off),
+                                        title: Text(
+                                            AppLocalizations.of(context)!
+                                                .noInternetConnection2),
+                                        actions: [
+                                          FilledButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(
+                                                  AppLocalizations.of(context)!
+                                                      .back))
+                                        ],
+                                      ));
+                              return;
                             }
-                          }
 
-                          for (final id in toggled.keys) {
-                            filter.toggleEntry(id, hidden: true);
-                          }
+                            if (!result) {
+                              setState(() {
+                                disableToggleButton = false;
+                              });
 
-                          filter.supply();
-                          closeToggleMode();
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        icon: const Icon(Icons.error),
+                                        title: Text(
+                                            AppLocalizations.of(context)!
+                                                .errorOccurred),
+                                        actions: [
+                                          FilledButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(
+                                                  AppLocalizations.of(context)!
+                                                      .back))
+                                        ],
+                                      ));
+                              return;
+                            }
+
+                            toggled.addEntries([tile]);
+                            checkedTiles[tile.key] = false;
+                          }
                         }
-                      : null)
+
+                        for (final id in toggled.keys) {
+                          filter.toggleEntry(id, hidden: true);
+                        }
+
+                        filter.pushEntries();
+                        closeToggleMode();
+                      })
               : FloatingActionButton(
                   onPressed: () async {
                     if (client.conversations.cachedCanChooseType != null) {
@@ -765,7 +764,7 @@ class ConversationTile extends StatelessWidget {
                         if (entry.unread == true) {
                           client.conversations.filter
                               .toggleEntry(entry.id, unread: true);
-                          client.conversations.filter.supply();
+                          client.conversations.filter.pushEntries();
                         }
 
                         return ConversationsChat.fromEntry(entry);

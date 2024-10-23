@@ -446,7 +446,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                                   hidden = false;
                                 });
                                 client.conversations.filter.toggleEntry(widget.id, hidden: true);
-                                client.conversations.filter.supply();
+                                client.conversations.filter.pushEntries();
                               }
 
                               return;

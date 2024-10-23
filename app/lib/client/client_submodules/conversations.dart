@@ -523,7 +523,8 @@ class OverviewFiltering {
 
   OverviewFiltering();
 
-  void supply() {
+  /// Pushes entries to the fetcher using the current settings.
+  void pushEntries() {
     client.fetchers.conversationsFetcher.addData(filteredAndSearched(entries));
   }
   
