@@ -43,7 +43,7 @@ class CustomConnectionChecker {
 
   Future<bool> testConnection() async {
     try {
-      await dio.post("http://192.168.0.65:5000");
+      await dio.post("https://start.schulportal.hessen.de/ajax_login.php");
       status = ConnectionStatus.connected;
       return true;
     } catch (e) {
