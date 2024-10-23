@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
-import 'package:html/parser.dart';
 
 class ReceiverEntry extends Taggable {
   final String id;
@@ -125,6 +124,8 @@ class KnownParticipant {
   }
 }
 
+final getUsernameInsideHTML = RegExp(r"</i> (.*)</span>");
+
 class OverviewEntry {
   final String id;
   final String title;
@@ -148,7 +149,7 @@ class OverviewEntry {
       : id = json["Uniquid"] as String
       , title = json["Betreff"] as String
       , shortName = json["kuerzel"] as String?
-      , fullName = parse(json["SenderName"] as String).querySelector("span")!.text.trim()
+      , fullName = getUsernameInsideHTML.firstMatch((json["SenderName"] as String))?.group(1) as String
       , date = json["Datum"] as String
       , unread = (json["unread"] as int?) != null && (json["unread"] as int?) == 1
       , hidden = json["Papierkorb"] as String == "ja";

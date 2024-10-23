@@ -161,7 +161,7 @@ class ConversationsParser {
       return username;
     }
 
-    return parse(username).querySelector("span")!.text.trim();
+    return getUsernameInsideHTML.firstMatch(username)!.group(1)!;
   }
 
   /// Gets a whole single conversation with statistics.
@@ -524,7 +524,7 @@ class OverviewFiltering {
   OverviewFiltering();
 
   void supply() {
-    client.fetchers.conversationsFetcher.supply(filteredAndSearched(entries));
+    client.fetchers.conversationsFetcher.addData(filteredAndSearched(entries));
   }
   
   void toggleEntry(String id, {bool? hidden, bool? unread}) {

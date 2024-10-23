@@ -103,6 +103,7 @@ class MeinUnterrichtFetcher extends Fetcher<Lessons> {
 
 class ConversationsFetcher extends Fetcher<List<OverviewEntry>> {
   ConversationsFetcher(super.validCacheDuration, {super.storageKey});
+
   bool _suspend = false;
 
   @override
@@ -121,12 +122,10 @@ class ConversationsFetcher extends Fetcher<List<OverviewEntry>> {
     _suspend = !_suspend;
   }
 
-  /// Force pushes a new supply for the stream.
-  void supply(final List<OverviewEntry> content) {
+  /// Force pushes new data for the stream.
+  void addData(final List<OverviewEntry> content) {
     _addResponse(FetcherResponse<List<OverviewEntry>>(
-        status: FetcherStatus.done,
-      content: content
-    ));
+        status: FetcherStatus.done, content: content));
   }
 }
 
