@@ -34,6 +34,11 @@ class Cryptor {
           },
         ),
       );
+
+      if (response.statusCode == 503) {
+        throw LanisDownException();
+      }
+
       return encrypt.RSAKeyParser()
           .parse(jsonDecode(response.toString())["publickey"]) as RSAPublicKey;
     } on (SocketException, DioException) {
@@ -176,7 +181,7 @@ class Cryptor {
   }
 
   String decryptEncodedTags(String htmlString) {
-    RegExp exp = RegExp(r'<encoded>(.*?)<\/encoded>');
+    RegExp exp = RegExp(r'<encoded>(.*?)</encoded>');
 
     String replacedHtml = htmlString.replaceAllMapped(exp, (match) {
       String? encodedContent = match.group(1);

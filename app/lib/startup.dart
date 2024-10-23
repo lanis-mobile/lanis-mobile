@@ -257,28 +257,38 @@ class _StartupScreenState extends State<StartupScreen> {
 
 
   Widget errorDialog() {
+    var text = AppLocalizations.of(context)!.startupError;
+    if (error is LanisDownException) {
+      text = AppLocalizations.of(context)!.lanisDownError;
+    } else if (error is NoConnectionException) {
+      text = AppLocalizations.of(context)!.noInternetConnection2;
+    }
     return AlertDialog(
       icon: error is NoConnectionException
           ? const Icon(Icons.wifi_off)
           : const Icon(Icons.error),
-      title: Text(error is NoConnectionException
-          ? AppLocalizations.of(context)!.noInternetConnection2
-          : AppLocalizations.of(context)!.startupError),
+      title: Text(text),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (error is! NoConnectionException) Text.rich(TextSpan(
+          if (error is! NoConnectionException && error is! LanisDownException) Text.rich(TextSpan(
               text: AppLocalizations.of(context)!.startupErrorMessage,
               children: [
                 TextSpan(
                     text: "\n\n${error.runtimeType}: ${error!.cause}",
                     style: Theme.of(context).textTheme.labelLarge)
               ])),
+          if (error is LanisDownException) Text.rich(TextSpan(
+              children: [
+                TextSpan(
+                    text: AppLocalizations.of(context)!.lanisDownErrorMessage,
+                    style: Theme.of(context).textTheme.labelLarge)
+              ])),
           const OfflineAppletSelector()
         ],
       ),
       actions: [
-        if (error is! NoConnectionException) ...[
+        if (error is! NoConnectionException && error is! LanisDownException) ...[
           TextButton(
               onPressed: () {
                 launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
@@ -290,6 +300,14 @@ class _StartupScreenState extends State<StartupScreen> {
                 launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
               },
               child: Text(AppLocalizations.of(context)!.startupReportButton)
+          ),
+        ],
+        if (error is LanisDownException) ...[
+          OutlinedButton(
+              onPressed: () {
+                launchUrl(Uri.parse("https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
+              },
+              child: const Text("Status")
           ),
         ],
         FilledButton(

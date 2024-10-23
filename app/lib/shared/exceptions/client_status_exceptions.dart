@@ -12,6 +12,12 @@ class WrongCredentialsException implements LanisException {
   WrongCredentialsException([this.cause = "Falsche Anmeldedaten!"]);
 }
 
+class LanisDownException implements LanisException {
+  @override
+  String cause;
+  LanisDownException([this.cause = "Lanis ist down!"]);
+}
+
 class LoginTimeoutException implements WrongCredentialsException {
   @override
   String cause;
