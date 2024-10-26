@@ -26,7 +26,7 @@
   "noInternetConnection1": "No internet connection. Some data is still available.",
   "noInternetConnection2": "No internet connection!",
   "lanisDownError": "Lanis is down!",
-  "lanisDownErrorMessage": "Looks like Lanis is down because Lanis responded with code 503.\nPlease check the status of Lanis (PaedOrg) on the Website.",
+  "lanisDownErrorMessage": "Looks like Lanis is down.\nPlease check the status of Lanis (PaedOrg) on the Website.",
 
   "reportError": "A problem occurred. Please report it in case of repeated occurrence.",
   "errorOccurred": "An error occurred",
