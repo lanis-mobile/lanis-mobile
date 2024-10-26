@@ -25,6 +25,8 @@
   "noSupportOpenInBrowser": "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
   "noInternetConnection1": "No internet connection. Some data is still available.",
   "noInternetConnection2": "No internet connection!",
+  "lanisDownError": "Lanis is down!",
+  "lanisDownErrorMessage": "Looks like Lanis is down.\nPlease check the status of Lanis (PaedOrg) on the Website.",
 
   "reportError": "A problem occurred. Please report it in case of repeated occurrence.",
   "errorOccurred": "An error occurred",

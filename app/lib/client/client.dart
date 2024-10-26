@@ -83,7 +83,7 @@ class SPHclient {
     dio.options.followRedirects = false;
     dio.options.connectTimeout = Duration(seconds: 8);
     dio.options.validateStatus =
-        (status) => status != null && (status == 200 || status == 302);
+        (status) => status != null && (status == 200 || status == 302 || status == 503);
   }
 
   /// Similar to [overwriteCredits] but not permanently.
@@ -132,7 +132,8 @@ class SPHclient {
 
     jar.deleteAll();
     dio.options.validateStatus =
-        (status) => status != null && (status == 200 || status == 302);
+        (status) => status != null && (status == 200 || status == 302 || status == 503);
+
     try {
       String loginURL = await getLoginURL();
       await dio.get(loginURL);
@@ -154,12 +155,12 @@ class SPHclient {
       await cryptor.start(dio);
 
       return;
+    } on LanisException {
+      rethrow;
     } on SocketException {
       throw NetworkException();
     } on DioException {
       throw NetworkException();
-    } on LanisException {
-      rethrow;
     } catch (e) {
       throw UnknownException();
     }
@@ -179,9 +180,12 @@ class SPHclient {
     }
     logger.i("Refreshing session");
     try {
-      await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
+      var response = await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
           queryParameters: {"name": sid},
           options: Options(contentType: "application/x-www-form-urlencoded"));
+      if (response.statusCode == 503) {
+        throw LanisDownException();
+      }
     } on DioException {
       return;
     }
@@ -228,7 +232,7 @@ class SPHclient {
     dioHttp.interceptors.add(CookieManager(cookieJar));
     dioHttp.options.followRedirects = false;
     dioHttp.options.validateStatus =
-        (status) => status != null && (status == 200 || status == 302);
+        (status) => status != null && (status == 200 || status == 302 || status == 503);
 
     if (username != "" && password != "" && schoolID != "") {
       final response1 = await dioHttp.post(
@@ -239,6 +243,10 @@ class SPHclient {
             "password": password
           },
           options: Options(contentType: "application/x-www-form-urlencoded"));
+
+      if (response1.statusCode == 503) {
+        throw LanisDownException();
+      }
 
       final loginTimeout =
           parse(response1.data).getElementById("authErrorLocktime");
