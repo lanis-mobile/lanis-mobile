@@ -9,7 +9,7 @@ class CustomConnectionChecker {
   ConnectionStatus _status = ConnectionStatus.disconnected;
   final _statusController = StreamController<ConnectionStatus>.broadcast();
   final dio = Dio(
-    BaseOptions(validateStatus: (status) => status != null && (status == 200 || status == 302 || status == 503))
+    BaseOptions(validateStatus: (status) => status != null)
   );
   DateTime lastRequest = DateTime.now().subtract(const Duration(seconds: 5));
 
