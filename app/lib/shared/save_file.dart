@@ -61,7 +61,7 @@ void saveFile(BuildContext context, String url, String filename,
           return "/storage/emulated/0/Download";
         } else {
           var directory = await getApplicationDocumentsDirectory();
-          return '${directory.path}${Platform.pathSeparator}Download';
+          return '${directory.path.replaceAll("Documents", "Downloads")}${Platform.pathSeparator}';
         }
       }
 

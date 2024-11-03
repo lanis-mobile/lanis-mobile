@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/save_file.dart';
@@ -117,7 +119,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   for (LessonsFile file in data!.history[index].files) {
                     files.add(GestureDetector(
                       onLongPress: () {
-                        saveFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {});
+                        if (!Platform.isIOS) {
+                          saveFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {});
+                        } else {
+                          launchFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {});
+                        }
                       },
                       child: ActionChip(
                         label: Text(file.fileName ?? "..."),
