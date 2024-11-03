@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/shared/save_file.dart';
 import 'package:sph_plan/view/mein_unterricht/homework_box.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
@@ -112,13 +113,18 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     );
                   }
 
-                  List<ActionChip> files = [];
+                  List<GestureDetector> files = [];
                   for (LessonsFile file in data!.history[index].files) {
-                    files.add(ActionChip(
-                      label: Text(file.fileName ?? "..."),
-                      onPressed: () => launchFile(context, file.fileURL.toString(),
-                          file.fileName ?? '', file.fileSize, () {}),
-                    ));
+                    files.add(GestureDetector(
+                      onLongPress: () {
+                        saveFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {});
+                      },
+                      child: ActionChip(
+                        label: Text(file.fileName ?? "..."),
+                        onPressed: () => launchFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {},
+                        ),
+                      ))
+                    );
                   }
 
                   List<Widget> uploads = [];

@@ -64,5 +64,7 @@
 			<string>UIInterfaceOrientationPortrait</string>
 			<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		</array>
+		<key>UISupportsDocumentBrowser</key>
+        <true/>
 	</dict>
 </plist>

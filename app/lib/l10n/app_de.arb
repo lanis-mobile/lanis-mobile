@@ -104,6 +104,8 @@
   "authResetPassword": "Passwort zurücksetzen",
   "authFailedLoadingSchools": "Fehler beim Laden der Schulen. Erneut versuchen in 10 Sekunden...",
 
+  "fileSavedToDownloads": "Datei in Downloads gespeichert",
+
   "setupNonStudentTitle": "Lehrkräfte oder Elternaccount",
   "setupNonStudent": "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren.",
   "setupFilterSubstitutionsTitle": "Vertretungen filtern",
