@@ -39,6 +39,12 @@ class Logger {
       print('$_magenta${_dateFormat.format(DateTime.now())} [FATAL] $_name: $message$_reset');
     }
   }
+
+  void d(dynamic message) {
+    if (kDebugMode) {
+      print('$_magenta${_dateFormat.format(DateTime.now())} [DEBUG] $_name: $message$_reset');
+    }
+  }
 }
 
 Logger logger = Logger('Lanis');
