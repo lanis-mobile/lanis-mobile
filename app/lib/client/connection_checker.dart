@@ -8,7 +8,9 @@ enum ConnectionStatus { connected, disconnected }
 class CustomConnectionChecker {
   ConnectionStatus _status = ConnectionStatus.disconnected;
   final _statusController = StreamController<ConnectionStatus>.broadcast();
-  final dio = Dio();
+  final dio = Dio(
+    BaseOptions(validateStatus: (status) => status != null)
+  );
   DateTime lastRequest = DateTime.now().subtract(const Duration(seconds: 5));
 
   Stream<ConnectionStatus> get statusStream => _statusController.stream;

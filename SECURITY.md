@@ -32,8 +32,6 @@ Die Anwendung muss um den Nutzer beim App-Start anzumelden bestimmte Daten Lokal
 
 Des Weiteren werden Nutzereinstellungen ebenfalls Lokal unverschlüsselt gespeichert.
 
-Dies ist für die weitere Entwicklung der App notwendig, da verschiedene Accounts sich in der App sehr unterschiedlich verhalten. Das Analysetool erleichtert die Anpassung 
-
 ## Verschlüsselung
 Jegliche Kommunikation mit den Lanis-Servern erfolgt ausschließlich mit HTTPS-Verschlüsselung.
 

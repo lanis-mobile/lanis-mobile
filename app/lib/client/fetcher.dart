@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/shared/apps.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/shared/types/conversations.dart';
 
 import '../shared/types/lesson.dart';
 import '../shared/types/timetable.dart';
+import '../shared/types/calendar_event.dart';
 import 'client.dart';
 import 'connection_checker.dart';
 
@@ -28,7 +29,6 @@ class FetcherResponse<T> {
 
 abstract class Fetcher<T> {
   final BehaviorSubject<FetcherResponse<T>> _controller = BehaviorSubject();
-  late Timer timer;
   late Duration? validCacheDuration;
   bool isEmpty = true;
   StorageKey? storageKey;
@@ -37,15 +37,18 @@ abstract class Fetcher<T> {
 
   Fetcher(this.validCacheDuration, {this.storageKey}) {
     if (validCacheDuration != null) {
-      Timer.periodic(validCacheDuration!, (timer) async {
-        if (await connectionChecker.connected) {
-          await fetchData(forceRefresh: true);
-        }
-      });
+      Timer.periodic(validCacheDuration!, _timerCallback);
     }
   }
 
-  void _addResponse(final FetcherResponse<T> data) => _controller.sink.add(data);
+  void _timerCallback(Timer timer) async {
+    if (await connectionChecker.connected) {
+      await fetchData(forceRefresh: true);
+    }
+  }
+
+  void _addResponse(final FetcherResponse<T> data) =>
+      _controller.sink.add(data);
 
   Future<void> fetchData({forceRefresh = false, secondTry = false}) async {
     if (!(await connectionChecker.connected)) {
@@ -99,37 +102,46 @@ class MeinUnterrichtFetcher extends Fetcher<Lessons> {
   }
 }
 
-class VisibleConversationsFetcher extends Fetcher<dynamic> {
-  VisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
+class ConversationsFetcher extends Fetcher<List<OverviewEntry>> {
+  ConversationsFetcher(super.validCacheDuration, {super.storageKey});
+
+  bool _suspend = false;
 
   @override
-  Future<dynamic> _get() {
-    return client.conversations.getOverview(false);
+  void _timerCallback(Timer timer) {
+    if (!_suspend) {
+      super._timerCallback(timer);
+    }
+  }
+
+  @override
+  Future<List<OverviewEntry>> _get() {
+    return client.conversations.getOverview();
+  }
+
+  void toggleSuspend() {
+    _suspend = !_suspend;
+  }
+
+  /// Force pushes new data for the stream.
+  void addData(final List<OverviewEntry> content) {
+    _addResponse(FetcherResponse<List<OverviewEntry>>(
+        status: FetcherStatus.done, content: content));
   }
 }
 
-class InvisibleConversationsFetcher extends Fetcher<dynamic> {
-  InvisibleConversationsFetcher(super.validCacheDuration, {super.storageKey});
-
-  @override
-  Future<dynamic> _get() {
-    return client.conversations.getOverview(true);
-  }
-}
-
-class CalendarFetcher extends Fetcher<dynamic> {
+class CalendarFetcher extends Fetcher<List<CalendarEvent>> {
   CalendarFetcher(super.validCacheDuration, {super.storageKey});
+  String searchQuery = "";
 
   @override
-  Future<dynamic> _get() {
+  Future<List<CalendarEvent>> _get() {
     DateTime currentDate = DateTime.now();
     DateTime sixMonthsAgo = currentDate.subtract(const Duration(days: 180));
     DateTime oneYearLater = currentDate.add(const Duration(days: 365));
 
-    final formatter = DateFormat('yyyy-MM-dd');
-
-    return client.calendar.getCalendar(
-        formatter.format(sixMonthsAgo), formatter.format(oneYearLater));
+    return client.calendar
+        .getCalendar(startDate: sixMonthsAgo, endDate: oneYearLater, searchQuery: searchQuery);
   }
 }
 
@@ -145,30 +157,29 @@ class TimeTableFetcher extends Fetcher<TimeTable?> {
 class GlobalFetcher {
   late final SubstitutionsFetcher substitutionsFetcher;
   late final MeinUnterrichtFetcher meinUnterrichtFetcher;
-  late final VisibleConversationsFetcher visibleConversationsFetcher;
-  late final InvisibleConversationsFetcher invisibleConversationsFetcher;
+  late final ConversationsFetcher conversationsFetcher;
   late final CalendarFetcher calendarFetcher;
   late final TimeTableFetcher timeTableFetcher;
 
   GlobalFetcher() {
     if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) {
-      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5), storageKey: StorageKey.lastSubstitutionData);
+      substitutionsFetcher = SubstitutionsFetcher(const Duration(minutes: 5),
+          storageKey: StorageKey.lastSubstitutionData);
     }
     if (client.doesSupportFeature(SPHAppEnum.meinUnterricht)) {
       meinUnterrichtFetcher =
           MeinUnterrichtFetcher(const Duration(minutes: 20));
     }
     if (client.doesSupportFeature(SPHAppEnum.nachrichten)) {
-      visibleConversationsFetcher =
-          VisibleConversationsFetcher(const Duration(minutes: 5));
-      invisibleConversationsFetcher =
-          InvisibleConversationsFetcher(const Duration(minutes: 5));
+      conversationsFetcher =
+          ConversationsFetcher(const Duration(minutes: 15));
     }
     if (client.doesSupportFeature(SPHAppEnum.kalender)) {
       calendarFetcher = CalendarFetcher(null);
     }
     if (client.doesSupportFeature(SPHAppEnum.stundenplan)) {
-      timeTableFetcher = TimeTableFetcher(null, storageKey: StorageKey.lastTimetableData);
+      timeTableFetcher =
+          TimeTableFetcher(null, storageKey: StorageKey.lastTimetableData);
     }
   }
 }

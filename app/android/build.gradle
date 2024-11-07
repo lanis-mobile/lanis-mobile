@@ -15,6 +15,19 @@ allprojects {
         }
     }
 
+    //// Add compiler parameters to debug deprecated APIs
+    //gradle.projectsEvaluated {
+    //    tasks.withType(JavaCompile) {
+    //        options.compilerArgs += ["-Xlint:deprecation"]
+    //    }
+    //
+    //    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    //        kotlinOptions {
+    //            freeCompilerArgs += ["-Xlint:deprecation"]
+    //        }
+    //    }
+    //}
+
 }
 
 rootProject.buildDir = '../build'

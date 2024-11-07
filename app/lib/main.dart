@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
+import 'package:sph_plan/client/logger.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/view/conversations/shared.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -32,10 +35,25 @@ void main() async {
   ColorModeNotifier.init();
   AmoledNotifier.init();
 
-  HttpProxy httpProxy = await HttpProxy.createHttpProxy();
-  HttpOverrides.global = httpProxy;
+  await setupProxy();
+
+  Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) async {
+    if (result.isNotEmpty && result.first != ConnectivityResult.none) {
+      await setupProxy();
+    }
+  });
 
   runApp(const App());
+}
+
+Future<void> setupProxy() async {
+  logger.d("Running setupProxy()...");
+  try {
+    HttpProxy httpProxy = await HttpProxy.createHttpProxy();
+    HttpOverrides.global = httpProxy;
+  } catch (e) {
+    debugPrint("Error setting up proxy: $e");
+  }
 }
 
 class App extends StatelessWidget {
