@@ -43,7 +43,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       ),
     );
   }
-  
+
   Widget getBody() {
     if (widget.loading) {
       return const Center(
@@ -201,7 +201,7 @@ class TimeTableDataSource extends CalendarDataSource {
             location: lesson.raum,
             notes: lesson.badge,
             color: entryColor,
-            id: "${dayIndex - 1}-$lessonIndex-1"));
+            id: "${dayIndex}-${lessonIndex}-1"));
 
         events.add(Appointment(
             startTime: startTime,
@@ -210,7 +210,7 @@ class TimeTableDataSource extends CalendarDataSource {
             location: lesson.raum,
             notes: lesson.badge,
             color: entryColor,
-            id: "${dayIndex - 1}-$lessonIndex-1"));
+            id: "${dayIndex}-${lessonIndex}-2"));
 
         //1 week later
         events.add(Appointment(
@@ -220,7 +220,7 @@ class TimeTableDataSource extends CalendarDataSource {
             location: lesson.raum,
             notes: lesson.lehrer,
             color: entryColor,
-            id: "${dayIndex - 1}-$lessonIndex-2"));
+            id: "${dayIndex}-${lessonIndex}-3"));
       }
     }
 
