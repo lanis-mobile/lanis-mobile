@@ -419,7 +419,7 @@ class SPHclient {
       Response response = await dio.get(
         url,
         options: Options(
-          responseType: followRedirects ? ResponseType.bytes : null,
+          responseType: ResponseType.bytes,
           followRedirects: false,
         ),
       );
