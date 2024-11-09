@@ -19,13 +19,13 @@ import 'package:sph_plan/themes.dart';
 
 import '../shared/account_types.dart';
 import '../shared/apps.dart';
+import '../utils/logger.dart';
 import 'client_submodules/calendar.dart';
 import 'client_submodules/conversations.dart';
 import 'client_submodules/substitutions.dart';
 import 'client_submodules/timetable.dart';
 import 'connection_checker.dart';
 import 'fetcher.dart';
-import 'logger.dart';
 
 class SPHclient {
   String username = "";
@@ -400,7 +400,7 @@ class SPHclient {
   ///
   ///The file is stored in the temporary directory of the device.
   ///So calling the same URL twice will result in the same file and one Download.
-  Future<String> downloadFile(String url, String filename) async {
+  Future<String> downloadFile(String url, String filename, {bool followRedirects = false}) async {
     try {
       var tempDir = await getFileCacheDirectory();
       String urlHash = generateUniqueHash(url);
@@ -423,6 +423,24 @@ class SPHclient {
           followRedirects: false,
         ),
       );
+      if (response.statusCode == 302 && followRedirects) {
+        logger.i("Following redirect to ${response.headers.value("location")}");
+        if (response.headers.value("location")!.startsWith("https")) {
+          url = response.headers.value("location")!;
+        } else {
+          Uri originalUrl = Uri.parse(url);
+          String originalHost = originalUrl.host;
+          url = "https://$originalHost/${response.headers.value("location")}";
+        }
+
+        response = await dio.get(
+          url,
+          options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+          ),
+        );
+      }
 
       File file = File(savePath);
       var raf = file.openSync(mode: FileMode.write);
@@ -430,7 +448,8 @@ class SPHclient {
       await raf.close();
 
       return savePath;
-    } catch (e) {
+    } catch (e, stack) {
+      logger.e(e, stackTrace: stack);
       return "";
     }
   }

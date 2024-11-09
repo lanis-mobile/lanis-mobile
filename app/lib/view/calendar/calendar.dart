@@ -6,12 +6,11 @@ import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/keyboard_observer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../client/client.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../../client/logger.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/types/calendar_event.dart';
+import '../../utils/logger.dart';
 
 class CalendarAnsicht extends StatefulWidget {
   const CalendarAnsicht({super.key});
