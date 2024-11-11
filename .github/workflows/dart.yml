@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: dart pub get
-        working-directory: lanis-mobile/app
+        working-directory: app
 
       # Uncomment this step to verify the use of 'dart format' on each commit.
       # - name: Verify formatting
@@ -35,11 +35,11 @@ jobs:
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       - name: Analyze project source
         run: dart analyze
-        working-directory: lanis-mobile/app
+        working-directory: app
 
       # Your project will need to have tests in test/ and a dependency on
       # package:test for this step to succeed. Note that Flutter projects will
       # want to change this to 'flutter test'.
       - name: Run tests
         run: dart test
-        working-directory: lanis-mobile/app
+        working-directory: app
