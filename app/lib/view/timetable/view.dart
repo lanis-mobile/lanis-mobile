@@ -26,6 +26,49 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
   TimeTableType selectedType = TimeTableType.OWN;
   // todo create settings to set the default view
 
+
+  List<String> extractUniqueBadges(TimeTable data) {
+    Set<String> badges = {};
+    for (var day in data.planForOwn!) {
+      for (var lesson in day) {
+        if (lesson.badge != null) {
+          badges.add(lesson.badge!);
+        }
+      }
+    }
+    return badges.toList();
+  }
+
+  void onFilterChange(String filter) {
+    setState(() {
+      selectedFilter = filter;
+    });
+  }
+
+  bool shouldShowDropdown() {
+    return filterOptions.length > 1;
+  }
+
+  String selectedFilter = 'All';
+  List<String> filterOptions = ['All'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.data != null) {
+      filterOptions.addAll(extractUniqueBadges(widget.data!));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant StaticTimetableView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.data != null && widget.data != oldWidget.data) {
+      filterOptions = ['All'];
+      filterOptions.addAll(extractUniqueBadges(widget.data!));
+    }
+  }
+
   Widget modalSheetItem(String content, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4.0),
@@ -78,7 +121,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       timeSlotViewSettings: const TimeSlotViewSettings(
         timeFormat: "HH:mm",
       ),
-      dataSource: TimeTableDataSource(getSelectedPlan()),
+      dataSource: TimeTableDataSource(getSelectedPlan(), selectedFilter),
       minDate: DateTime.now(),
       maxDate: DateTime.now().add(const Duration(days: 7)),
       onTap: (details) {
@@ -176,7 +219,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
 }
 
 class TimeTableDataSource extends CalendarDataSource {
-  TimeTableDataSource(List<Day>? data) {
+  TimeTableDataSource(List<Day>? data, String filter) {
     final now = DateTime.now();
     final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
@@ -185,6 +228,9 @@ class TimeTableDataSource extends CalendarDataSource {
       final date = lastMonday.add(Duration(days: dayIndex));
 
       for (var (lessonIndex, lesson) in day.indexed) {
+        if (filter != 'All' && lesson.badge == filter) {
+          continue;
+        }
         // Use the calculated date for the startTime and endTime
         final startTime = DateTime(date.year, date.month, date.day,
             lesson.startTime.hour, lesson.startTime.minute);
