@@ -3,7 +3,7 @@ import 'package:linkify/linkify.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../client/logger.dart';
+import '../../utils/logger.dart';
 
 class FormatPattern {
   late final RegExp regExp;

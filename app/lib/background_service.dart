@@ -6,10 +6,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'client/client.dart';
-import 'client/logger.dart';
 import 'client/storage.dart';
 
 Future<void> setupBackgroundService() async {

@@ -1,6 +1,4 @@
 import 'dart:ui';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sph_plan/background_service.dart';
 import 'package:sph_plan/shared/apps.dart';
@@ -10,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
+import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
 import 'package:sph_plan/view/conversations/overview.dart';
 import 'package:sph_plan/view/data_storage/data_storage.dart';
@@ -256,14 +255,17 @@ class _HomePageState extends State<HomePage> {
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
                         child: CachedNetworkImage(
-                          imageUrl:
-                              "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=xs",
-                          fadeInDuration: const Duration(milliseconds: 0),
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Image(
+                          imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=xs"),
+                          placeholder: const Image(
                             image: AssetImage("assets/icon.png"),
                             fit: BoxFit.cover,
                           ),
+                          builder: (BuildContext context, ImageProvider<Object> imageProvider) {
+                            return Image(
+                              fit: BoxFit.cover,
+                              image: imageProvider,
+                            );
+                          },
                         ),
                       ),
                     ),
