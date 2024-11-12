@@ -16,6 +16,7 @@ import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/conversations/shared.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
+
 import 'background_service.dart';
 
 void main() async {
@@ -103,7 +104,8 @@ class App extends StatelessWidget {
                           themeMode: mode,
                           localizationsDelegates: [
                             ...AppLocalizations.localizationsDelegates,
-                          SfGlobalLocalizations.delegate],
+                            SfGlobalLocalizations.delegate
+                          ],
                           supportedLocales: AppLocalizations.supportedLocales,
                           home: const StartupScreen(),
                         );
