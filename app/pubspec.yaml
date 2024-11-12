@@ -76,6 +76,7 @@ dependencies:
   flutter_tagging_plus: ^4.0.2
   flutter_inappwebview: ^6.1.0
   connectivity_plus: ^6.0.5
+  syncfusion_localizations: ^27.1.58
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:
