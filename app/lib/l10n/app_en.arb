@@ -104,7 +104,10 @@
   "authResetPassword": "Reset password",
   "authFailedLoadingSchools": "Failed to load schools. Retrying in 10 seconds...",
 
+  "saveFile": "Save file",
+  "openFile": "Open file",
   "fileSavedToDownloads": "File saved in downloads",
+  "unknownFile": "Unknown File",
 
   "setupNonStudentTitle": "Teachers or parent account",
   "setupNonStudent": "You obviously have a non-student account. You can still use the app, but some features may not work.",

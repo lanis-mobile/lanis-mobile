@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/client/logger.dart';
 import 'package:sph_plan/shared/save_file.dart';
 import 'package:sph_plan/view/mein_unterricht/homework_box.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
@@ -119,11 +120,70 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   for (LessonsFile file in data!.history[index].files) {
                     files.add(GestureDetector(
                       onLongPress: () {
-                        if (!Platform.isIOS) {
-                          saveFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {});
-                        } else {
-                          launchFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {});
-                        }
+                        showModalBottomSheet(
+                            context: context,
+                            showDragHandle: true,
+                            builder: (context) {
+                              return SizedBox(
+                                width: double.infinity,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Filename
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 20.0, left: 20.0),
+                                          child: Text(
+                                            file.fileName ?? AppLocalizations.of(context)!.unknownFile,
+                                            style: Theme.of(context).textTheme.titleLarge,
+                                          ),
+                                        )
+                                      ),
+                                      GestureDetector(
+                                        onTap: () => {
+                                          launchFile(context, file.fileURL as String, file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                                        },
+                                        child: PopupMenuItem(
+                                          value: "open_file",
+                                          child: Row(
+                                            children: [
+                                              Padding(padding: EdgeInsets.only(left: 10.0)),
+                                              Icon(Icons.open_in_new),
+                                              Padding(padding: EdgeInsets.only(right: 8.0)),
+                                              Text(AppLocalizations.of(context)!.openFile)
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      if (!Platform.isIOS) (
+                                        GestureDetector(
+                                          onTap: () => {
+                                            logger.i("Saving file..."),
+                                            saveFile(context, file.fileURL as String, file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                                          },
+                                          child: PopupMenuItem(
+                                            value: "save_file",
+                                            child: Row(
+                                              children: [
+                                                Padding(padding: EdgeInsets.only(left: 10.0)),
+                                                Icon(Icons.save_alt_rounded),
+                                                Padding(padding: EdgeInsets.only(right: 8.0)),
+                                                Text(AppLocalizations.of(context)!.saveFile)
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                        );
                       },
                       child: ActionChip(
                         label: Text(file.fileName ?? "..."),
