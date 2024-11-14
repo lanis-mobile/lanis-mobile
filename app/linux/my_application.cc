@@ -63,13 +63,9 @@ void create_file(const char* file_path, const char* file_name) {
 
   gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), file_name);
   gtk_widget_show_all(dialog);
-  gint response = gtk_dialog_run(GTK_DIALOG(dialog));
 
-  if (response == GTK_RESPONSE_ACCEPT) {
+  if (gint response = gtk_dialog_run(GTK_DIALOG(dialog)); response == GTK_RESPONSE_ACCEPT) {
     gchar *dest_file_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-
-    printf("Dest path: %s\n", dest_file_path);
-    printf("Source path: %s\n", file_path);
 
     try {
       std::filesystem::copy(file_path, dest_file_path);
@@ -105,16 +101,12 @@ static void my_application_activate(GApplication* application) {
       use_header_bar = FALSE;
     }
   } else {
-    FILE *fp;
-    char buffer[128];
-
     // Checks if Hyprland is used
-    fp = popen("printenv HYPRLAND_INSTANCE_SIGNATURE", "r");
-    if (fp == NULL) {
+    if (FILE *fp = popen("printenv HYPRLAND_INSTANCE_SIGNATURE", "r"); fp == nullptr) {
       perror("popen failed");
       use_header_bar = true;
     } else {
-      if (fgets(buffer, sizeof(buffer), fp) != NULL) {
+      if (char buffer[128]; fgets(buffer, sizeof(buffer), fp) != nullptr) {
         buffer[strcspn(buffer, "\n")] = 0;
         if (strlen(buffer) > 0) {
           use_header_bar = false;
