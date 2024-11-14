@@ -5,14 +5,83 @@
 #include <gdk/gdkx.h>
 #endif
 
+#include <string>
+#include <iostream>
+#include <filesystem>
+
 #include "flutter/generated_plugin_registrant.h"
 
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
+  FlMethodChannel* storage_channel;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
+
+// Argument keys
+auto kFilePathKey = "filePath";
+auto kFileNameKey = "fileName";
+auto kMimeTypeKey = "mimeType";
+
+void create_file(const char * file_path, const char * file_name);
+
+static void storage_method_call_handler (FlMethodChannel* channel, FlMethodCall* method_call, gpointer user_data) {
+  g_autoptr(FlMethodResponse) response = nullptr;
+  if (strcmp(fl_method_call_get_name(method_call), "saveFile") == 0) {
+    if (FlValue* args = fl_method_call_get_args(method_call); args != nullptr) {
+      const char* file_path = nullptr;
+      const char* file_name = nullptr;
+
+      if (FlValue* file_path_value = fl_value_lookup_string(args, kFilePathKey); file_path_value != nullptr) {
+        file_path = fl_value_get_string(file_path_value);
+      }
+
+      if (FlValue* file_name_value = fl_value_lookup_string(args, kFileNameKey); file_name_value != nullptr) {
+        file_name = fl_value_get_string(file_name_value);
+      }
+
+      if (file_path != nullptr && file_name != nullptr) {
+        create_file(file_path, file_name);
+      }
+    }
+
+    g_autoptr(FlValue) result = fl_value_new_int(0);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  } else {
+    response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
+  }
+
+  g_autoptr(GError) error = nullptr;
+  if (!fl_method_call_respond(method_call, response, &error)) {
+    g_warning("Failed to send response: %s", error->message);
+  }
+}
+
+void create_file(const char* file_path, const char* file_name) {
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Save File", nullptr, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL);
+
+  gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), file_name);
+  gtk_widget_show_all(dialog);
+  gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response == GTK_RESPONSE_ACCEPT) {
+    gchar *dest_file_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+
+    printf("Dest path: %s\n", dest_file_path);
+    printf("Source path: %s\n", file_path);
+
+    try {
+      std::filesystem::copy(file_path, dest_file_path);
+      std::remove(file_path);
+    } catch (std::filesystem::filesystem_error& e) {
+      std::cout << e.what() << '\n';
+    }
+
+    g_free(dest_file_path);
+  }
+  gtk_widget_destroy(dialog);
+}
 
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
@@ -35,7 +104,26 @@ static void my_application_activate(GApplication* application) {
     if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
       use_header_bar = FALSE;
     }
+  } else {
+    FILE *fp;
+    char buffer[128];
+
+    // Checks if Hyprland is used
+    fp = popen("printenv HYPRLAND_INSTANCE_SIGNATURE", "r");
+    if (fp == NULL) {
+      perror("popen failed");
+      use_header_bar = true;
+    } else {
+      if (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        buffer[strcspn(buffer, "\n")] = 0;
+        if (strlen(buffer) > 0) {
+          use_header_bar = false;
+        }
+      }
+      pclose(fp);
+    }
   }
+
 #endif
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
@@ -58,6 +146,14 @@ static void my_application_activate(GApplication* application) {
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+
+  // Set channel
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  self->storage_channel = fl_method_channel_new(
+      fl_engine_get_binary_messenger(fl_view_get_engine(view)),
+      "io.github.lanis-mobile/storage", FL_METHOD_CODEC(codec));
+  fl_method_channel_set_method_call_handler(
+      self->storage_channel, storage_method_call_handler, self, nullptr);
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
@@ -103,6 +199,7 @@ static void my_application_shutdown(GApplication* application) {
 static void my_application_dispose(GObject* object) {
   MyApplication* self = MY_APPLICATION(object);
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
+  g_clear_object(&self->storage_channel);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 
