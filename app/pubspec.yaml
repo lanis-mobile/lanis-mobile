@@ -48,6 +48,7 @@ dependencies:
   crypto: ^3.0.3
   google_fonts: ^6.1.0
   open_file: ^3.3.2
+  share_plus: ^10.1.2
   shared_preferences: ^2.2.2
   rxdart: ^0.28.0
   stack_trace: ^1.11.1

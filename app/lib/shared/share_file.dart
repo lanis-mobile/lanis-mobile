@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:mime/mime.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../client/client.dart';
 
 
-void saveFile(BuildContext context, String url, String filename, String? filesize, Function callback) {
-  const platform = MethodChannel('io.github.lanis-mobile/storage');
-
+void shareFile(BuildContext context, String url, String filename, String? filesize, Function callback) {
   showDialog(
       context: context,
       barrierDismissible: false,
@@ -56,11 +53,7 @@ void saveFile(BuildContext context, String url, String filename, String? filesiz
             ],
           ));
     } else {
-      await platform.invokeMethod('saveFile', {
-        'fileName': filename,
-        'mimeType': lookupMimeType(filepath) ?? "*/*",
-        'filePath': filepath,
-      });
+      await Share.shareXFiles([XFile(filepath)]);
       callback(); // Call the callback function after the file is opened
     }
   });

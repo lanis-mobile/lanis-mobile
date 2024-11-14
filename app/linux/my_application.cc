@@ -60,7 +60,11 @@ static void storage_method_call_handler (FlMethodChannel* channel, FlMethodCall*
 void create_file(const char* file_path, const char* file_name) {
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Save File", nullptr, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL);
 
+  const gchar *downloads_dir = g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD);
+
   gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), file_name);
+  gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), downloads_dir);
+
   gtk_widget_show_all(dialog);
 
   if (gint response = gtk_dialog_run(GTK_DIALOG(dialog)); response == GTK_RESPONSE_ACCEPT) {

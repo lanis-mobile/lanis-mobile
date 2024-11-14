@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/shared/save_file.dart';
+import 'package:sph_plan/shared/share_file.dart';
 import 'package:sph_plan/view/mein_unterricht/homework_box.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
@@ -170,6 +171,21 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                             ),
                                           )
                                       ),
+                                      if (!Platform.isLinux) (
+                                          MenuItemButton(
+                                            onPressed: () => {
+                                              shareFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Padding(padding: EdgeInsets.only(left: 10.0)),
+                                                Icon(Icons.share_rounded),
+                                                Padding(padding: EdgeInsets.only(right: 8.0)),
+                                                Text(AppLocalizations.of(context)!.shareFile)
+                                              ],
+                                            ),
+                                          )
+                                      )
                                     ],
                                   ),
                                 ),
