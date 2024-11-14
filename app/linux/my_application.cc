@@ -22,7 +22,6 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 // Argument keys
 auto kFilePathKey = "filePath";
 auto kFileNameKey = "fileName";
-auto kMimeTypeKey = "mimeType";
 
 void create_file(const char * file_path, const char * file_name);
 
