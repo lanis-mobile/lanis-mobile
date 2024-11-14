@@ -60,36 +60,11 @@ void saveFile(BuildContext context, String url, String filename,
             ],
           ));
     } else {
-      Future<String?> findLocalPath() async {
-        if (Platform.isAndroid) {
-          return "/storage/emulated/0/Download";
-        } else {
-          var directory = await getApplicationDocumentsDirectory();
-          return '${directory.path.replaceAll("Documents", "Downloads")}${Platform.pathSeparator}';
-        }
-      }
-
-      Future<File> moveFile(File sourceFile, String newPath) async {
-        try {
-          return await sourceFile.rename(newPath);
-        } on FileSystemException {
-          final newFile = await sourceFile.copy(newPath);
-          await sourceFile.delete();
-          return newFile;
-        }
-      }
-
       await platform.invokeMethod('saveFile', {
         'fileName': filename,
         'mimeType': lookupMimeType(filepath) ?? "*/*",
         'filePath': filepath,
       });
-
-      final file = File(filepath);
-      moveFile(file, "${(await findLocalPath())!}/$filename");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.fileSavedToDownloads)),
-      );
       callback(); // Call the callback function after the file is opened
     }
   });
