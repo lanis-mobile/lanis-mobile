@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sph_plan/client/logger.dart';
 import 'package:sph_plan/shared/save_file.dart';
 import 'package:sph_plan/view/mein_unterricht/homework_box.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
@@ -143,30 +142,24 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                           ),
                                         )
                                       ),
-                                      GestureDetector(
-                                        onTap: () => {
-                                          launchFile(context, file.fileURL as String, file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                                      MenuItemButton(
+                                        onPressed: () => {
+                                          launchFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
                                         },
-                                        child: PopupMenuItem(
-                                          value: "open_file",
-                                          child: Row(
-                                            children: [
-                                              Padding(padding: EdgeInsets.only(left: 10.0)),
-                                              Icon(Icons.open_in_new),
-                                              Padding(padding: EdgeInsets.only(right: 8.0)),
-                                              Text(AppLocalizations.of(context)!.openFile)
-                                            ],
-                                          ),
+                                        child: Row(
+                                          children: [
+                                            Padding(padding: EdgeInsets.only(left: 10.0)),
+                                            Icon(Icons.open_in_new),
+                                            Padding(padding: EdgeInsets.only(right: 8.0)),
+                                            Text(AppLocalizations.of(context)!.openFile)
+                                          ],
                                         ),
                                       ),
                                       if (!Platform.isIOS) (
-                                        GestureDetector(
-                                          onTap: () => {
-                                            logger.i("Saving file..."),
-                                            saveFile(context, file.fileURL as String, file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
-                                          },
-                                          child: PopupMenuItem(
-                                            value: "save_file",
+                                          MenuItemButton(
+                                            onPressed: () => {
+                                              saveFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                                            },
                                             child: Row(
                                               children: [
                                                 Padding(padding: EdgeInsets.only(left: 10.0)),
@@ -175,8 +168,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                 Text(AppLocalizations.of(context)!.saveFile)
                                               ],
                                             ),
-                                          ),
-                                        )
+                                          )
                                       ),
                                     ],
                                   ),
