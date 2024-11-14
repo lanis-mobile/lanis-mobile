@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
+import 'package:mime/mime.dart';
 import 'package:open_file/open_file.dart';
 import 'package:sph_plan/shared/widgets/error_view.dart';
 

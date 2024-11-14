@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,6 +12,8 @@ import '../client/client.dart';
 
 void saveFile(BuildContext context, String url, String filename,
     String? filesize, Function callback) {
+  const platform = MethodChannel('io.github.lanis-mobile/storage');
+
   showDialog(
       context: context,
       barrierDismissible: false,
@@ -74,6 +78,12 @@ void saveFile(BuildContext context, String url, String filename,
           return newFile;
         }
       }
+
+      await platform.invokeMethod('saveFile', {
+        'fileName': filename,
+        'mimeType': lookupMimeType(filepath) ?? "*/*",
+        'filePath': filepath,
+      });
 
       final file = File(filepath);
       moveFile(file, "${(await findLocalPath())!}/$filename");
