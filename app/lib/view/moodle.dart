@@ -6,7 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io' as io;
 
 import '../client/client.dart';
-import '../shared/launch_file.dart';
+import '../shared/file_operations.dart';
 
 class MoodleWebView extends StatefulWidget {
   const MoodleWebView({super.key});

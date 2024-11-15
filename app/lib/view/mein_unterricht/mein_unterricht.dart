@@ -18,18 +18,18 @@ class _MeinUnterrichtAnsichtState extends State<MeinUnterrichtAnsicht> with Tick
   final MeinUnterrichtFetcher fetcher = client.fetchers.meinUnterrichtFetcher;
 
   Widget noDataScreen(context) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.search,
-              size: 60,
-            ),
-            Text(AppLocalizations.of(context)!.noCoursesFound)
-          ],
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.search,
+          size: 60,
         ),
-      );
+        Text(AppLocalizations.of(context)!.noCoursesFound)
+      ],
+    ),
+  );
 
   @override
   void initState() {
