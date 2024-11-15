@@ -90,21 +90,13 @@ void showFileModal(BuildContext context, LessonsFile file) {
   );
 }
 
-void saveFile(BuildContext context, String url, String filename, String? filesize, Function callback) {
+void saveFile(BuildContext context, String url, String filename, String? fileSize, Function callback) {
   const platform = MethodChannel('io.github.lanis-mobile/storage');
 
   showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Download... ${filesize ?? ""}"),
-          content: const Center(
-            heightFactor: 1.1,
-            child: CircularProgressIndicator(),
-          ),
-        );
-      });
+      builder: (BuildContext context) => downloadDialog(context, fileSize));
 
   client.downloadFile(url, filename).then((filepath) async {
     Navigator.of(context).pop();
@@ -112,32 +104,7 @@ void saveFile(BuildContext context, String url, String filename, String? filesiz
     if (filepath == "") {
       showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text("${AppLocalizations.of(context)!.error}!"),
-            icon: const Icon(Icons.error),
-            content: Text(
-                AppLocalizations.of(context)!.reportError),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
-                  },
-                  child: const Text("GitHub")
-              ),
-              OutlinedButton(
-                  onPressed: () {
-                    launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
-                  },
-                  child: Text(AppLocalizations.of(context)!.startupReportButton)
-              ),
-              FilledButton(
-                child: const Text('Ok'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ));
+          builder: (context) => errorDialog(context));
     } else {
       await platform.invokeMethod('saveFile', {
         'fileName': filename,
@@ -149,19 +116,11 @@ void saveFile(BuildContext context, String url, String filename, String? filesiz
   });
 }
 
-void shareFile(BuildContext context, String url, String filename, String? filesize, Function callback) {
+void shareFile(BuildContext context, String url, String filename, String? fileSize, Function callback) {
   showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Download... ${filesize ?? ""}"),
-          content: const Center(
-            heightFactor: 1.1,
-            child: CircularProgressIndicator(),
-          ),
-        );
-      });
+      builder: (BuildContext context) => downloadDialog(context, fileSize));
 
   client.downloadFile(url, filename).then((filepath) async {
     Navigator.of(context).pop();
@@ -169,35 +128,45 @@ void shareFile(BuildContext context, String url, String filename, String? filesi
     if (filepath == "") {
       showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text("${AppLocalizations.of(context)!.error}!"),
-            icon: const Icon(Icons.error),
-            content: Text(
-                AppLocalizations.of(context)!.reportError),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
-                  },
-                  child: const Text("GitHub")
-              ),
-              OutlinedButton(
-                  onPressed: () {
-                    launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
-                  },
-                  child: Text(AppLocalizations.of(context)!.startupReportButton)
-              ),
-              FilledButton(
-                child: const Text('Ok'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ));
+          builder: (context) => errorDialog(context));
     } else {
       await Share.shareXFiles([XFile(filepath)]);
       callback(); // Call the callback function after the file is opened
     }
   });
 }
+
+AlertDialog errorDialog(BuildContext context) => AlertDialog(
+  title: Text("${AppLocalizations.of(context)!.error}!"),
+  icon: const Icon(Icons.error),
+  content: Text(
+      AppLocalizations.of(context)!.reportError),
+  actions: [
+    TextButton(
+        onPressed: () {
+          launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
+        },
+        child: const Text("GitHub")
+    ),
+    OutlinedButton(
+        onPressed: () {
+          launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
+        },
+        child: Text(AppLocalizations.of(context)!.startupReportButton)
+    ),
+    FilledButton(
+      child: const Text('Ok'),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    ),
+  ],
+);
+
+AlertDialog downloadDialog(BuildContext context, String? fileSize) => AlertDialog(
+  title: Text("Download... ${fileSize ?? ""}"),
+  content: const Center(
+    heightFactor: 1.1,
+    child: CircularProgressIndicator(),
+  ),
+);
