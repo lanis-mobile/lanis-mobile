@@ -73,7 +73,6 @@ Future<void> initializeNotifications() async {
     const InitializationSettings(
       android: AndroidInitializationSettings('@drawable/ic_launcher'),
       iOS: DarwinInitializationSettings(
-        onDidReceiveLocalNotification: onDidReceiveLocalNotification,
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true
@@ -84,10 +83,6 @@ Future<void> initializeNotifications() async {
   }
 }
 
-void onDidReceiveLocalNotification(
-    int id, String? title, String? body, String? payload) {
-  logger.i("Received local notification with id $id, title $title, body $body, payload $payload");
-}
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
