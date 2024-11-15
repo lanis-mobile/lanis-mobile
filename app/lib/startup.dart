@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -11,6 +10,7 @@ import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/shared/types/timetable.dart';
+import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -137,12 +137,10 @@ class _StartupScreenState extends State<StartupScreen> {
     );
 
     return CachedNetworkImage(
-      imageUrl:
-          "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}",
-      fadeInDuration: const Duration(milliseconds: 0),
-      placeholder: (context, url) => deviceInfo,
-      errorWidget: (context, url, error) => deviceInfo,
-      imageBuilder: (context, imageProvider) => ColorFiltered(
+      imageType: ImageType.png,
+       imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}"),
+      placeholder: deviceInfo,
+      builder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
             ? const ColorFilter.matrix([
                 -1, 0, 0, 0,

@@ -1,9 +1,10 @@
-import 'package:file_icon/file_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../client/client.dart';
 import '../../shared/launch_file.dart';
+import '../../shared/types/dateispeicher_node.dart';
 import '../../shared/widgets/marquee.dart';
+import '../../utils/file_icons.dart';
 
 enum FileExists { yes, no, loading }
 
@@ -16,7 +17,7 @@ extension FileExistsExtension on FileExists {
 }
 
 class FileListTile extends StatefulWidget {
-  final dynamic file;
+  final FileNode file;
   final BuildContext context;
 
   const FileListTile({super.key, required this.context, required this.file});
@@ -64,9 +65,7 @@ class _FileListTileState extends State<FileListTile> {
       ),
       leading: Badge(
           backgroundColor: exists.color,
-          child: FileIcon(
-            widget.file.name,
-          )),
+          child: Icon(getIconByFileExtension(widget.file.fileExtension))),
       onTap: () => launchFile(context, widget.file.downloadUrl,
           widget.file.name, widget.file.groesse, updateLocalFileStatus),
     );
@@ -111,7 +110,7 @@ class _SearchFileListTileState extends State<SearchFileListTile> {
       title: MarqueeWidget(child: Text(widget.name)),
       leading: Badge(
         backgroundColor: exists.color,
-        child: FileIcon(widget.name),
+        child: Icon(getIconByFileExtension(widget.name.split('.').last)),
       ),
       onTap: () => launchFile(
           context, widget.downloadUrl, widget.name, "", updateLocalFileStatus),

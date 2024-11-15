@@ -89,8 +89,8 @@ class SubstitutionsParser {
             lehrer: headers.contains("Lehrer")
                 ? fields[headers.indexOf("Lehrer")].text.trim()
                 : null,
-            vertreter: headers.contains("Vertretung")
-                ? fields[headers.indexOf("Vertretung")].text.trim()
+            vertreter: headers.contains("Vertreter")
+                ? fields[headers.indexOf("Vertreter")].text.trim()
                 : null,
             klasse: headers.contains("Klasse")
                 ? fields[headers.indexOf("Klasse")].text.trim()

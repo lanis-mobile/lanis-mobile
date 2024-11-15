@@ -46,7 +46,6 @@ dependencies:
   pointycastle: ^3.7.3
   flutter_linkify: ^6.0.0
   crypto: ^3.0.3
-  google_fonts: ^6.1.0
   open_file: ^3.3.2
   share_plus: ^10.1.2
   shared_preferences: ^2.2.2
@@ -64,12 +63,9 @@ dependencies:
   flutter_native_splash: ^2.4.1
   table_calendar: ^3.0.9
   intl: ^0.19.0
-  cached_network_image: ^3.3.1
-  file_icon: ^1.0.0
   syncfusion_flutter_calendar: ^27.1.48
   flutter_localizations:
     sdk: flutter
-  logger: ^2.2.0
   simple_shadow: ^0.3.1
   app_settings: ^5.1.1
   device_info_plus: ^10.1.0
@@ -81,6 +77,7 @@ dependencies:
   flutter_tagging_plus: ^4.0.2
   flutter_inappwebview: ^6.1.0
   connectivity_plus: ^6.0.5
+  syncfusion_localizations: ^27.1.58
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:

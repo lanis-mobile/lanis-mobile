@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client_submodules/timetable.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
@@ -16,7 +16,13 @@ class StaticTimetableView extends StatefulWidget {
   final TimeTableFetcher? fetcher;
   final Future<void> Function()? refresh;
   final bool loading;
-  const StaticTimetableView({super.key, this.data, this.lanisException, this.fetcher, required this.refresh, this.loading = false});
+  const StaticTimetableView(
+      {super.key,
+      this.data,
+      this.lanisException,
+      this.fetcher,
+      required this.refresh,
+      this.loading = false});
 
   @override
   State<StatefulWidget> createState() => _StaticTimetableViewState();
@@ -43,7 +49,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       ),
     );
   }
-  
+
   Widget getBody() {
     if (widget.loading) {
       return const Center(
@@ -58,7 +64,8 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       );
     }
     if (widget.data == null) {
-      return Center(child: Column(
+      return Center(
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(Icons.error, size: 48),
@@ -67,7 +74,8 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       ));
     }
     return SfCalendar(
-      view: DateTime.now().weekday == DateTime.saturday || DateTime.now().weekday == DateTime.sunday
+      view: DateTime.now().weekday == DateTime.saturday ||
+              DateTime.now().weekday == DateTime.sunday
           ? CalendarView.week
           : CalendarView.workWeek,
       allowedViews: [
@@ -78,6 +86,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
       timeSlotViewSettings: const TimeSlotViewSettings(
         timeFormat: "HH:mm",
       ),
+      firstDayOfWeek: DateTime.monday,
       dataSource: TimeTableDataSource(getSelectedPlan()),
       minDate: DateTime.now(),
       maxDate: DateTime.now().add(const Duration(days: 7)),
@@ -85,10 +94,9 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
         if (details.appointments != null) {
           final appointment = details.appointments!.first;
 
-          final helperIDs =
-          appointment.id.split("-").map(int.parse).toList();
+          final helperIDs = appointment.id.split("-").map(int.parse).toList();
           final StdPlanFach selected =
-          (getSelectedPlan()[helperIDs[0]][helperIDs[1]]);
+              (getSelectedPlan()[helperIDs[0]][helperIDs[1]]);
 
           showModalBottomSheet(
               context: context,
@@ -152,12 +160,13 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (widget.refresh != null) FloatingActionButton(
-              heroTag: "refresh",
-              tooltip: AppLocalizations.of(context)!.refresh,
-              onPressed: widget.refresh!,
-              child: const Icon(Icons.refresh),
-            ),
+            if (widget.refresh != null)
+              FloatingActionButton(
+                heroTag: "refresh",
+                tooltip: AppLocalizations.of(context)!.refresh,
+                onPressed: widget.refresh!,
+                child: const Icon(Icons.refresh),
+              ),
             const SizedBox(height: 8),
             FloatingActionButton(
               heroTag: "toggle",
@@ -170,8 +179,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
                   : Icons.people),
             ),
           ],
-        )
-    );
+        ));
   }
 }
 
@@ -197,30 +205,30 @@ class TimeTableDataSource extends CalendarDataSource {
         events.add(Appointment(
             startTime: startTime.subtract(const Duration(days: 7)),
             endTime: endTime.subtract(const Duration(days: 7)),
-            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
             location: lesson.raum,
             notes: lesson.badge,
             color: entryColor,
-            id: "${dayIndex - 1}-$lessonIndex-1"));
+            id: "${dayIndex}-${lessonIndex}-1"));
 
         events.add(Appointment(
             startTime: startTime,
             endTime: endTime,
-            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
             location: lesson.raum,
             notes: lesson.badge,
             color: entryColor,
-            id: "${dayIndex - 1}-$lessonIndex-1"));
+            id: "${dayIndex}-${lessonIndex}-2"));
 
         //1 week later
         events.add(Appointment(
             startTime: startTime.add(const Duration(days: 7)),
             endTime: endTime.add(const Duration(days: 7)),
-            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum??""}",
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
             location: lesson.raum,
             notes: lesson.lehrer,
             color: entryColor,
-            id: "${dayIndex - 1}-$lessonIndex-2"));
+            id: "${dayIndex}-${lessonIndex}-3"));
       }
     }
 

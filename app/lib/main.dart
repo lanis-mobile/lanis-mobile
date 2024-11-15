@@ -1,20 +1,23 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sph_plan/client/logger.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:http_proxy/http_proxy.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/conversations/shared.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:sph_plan/startup.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:flutter/material.dart';
-import 'package:sph_plan/client/storage.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
+
 import 'background_service.dart';
-import 'package:http_proxy/http_proxy.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +40,9 @@ void main() async {
 
   await setupProxy();
 
-  Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) async {
+  Connectivity()
+      .onConnectivityChanged
+      .listen((List<ConnectivityResult> result) async {
     if (result.isNotEmpty && result.first != ConnectivityResult.none) {
       await setupProxy();
     }
@@ -97,8 +102,10 @@ class App extends StatelessWidget {
                           theme: theme.lightTheme,
                           darkTheme: darkTheme,
                           themeMode: mode,
-                          localizationsDelegates:
-                              AppLocalizations.localizationsDelegates,
+                          localizationsDelegates: [
+                            ...AppLocalizations.localizationsDelegates,
+                            SfGlobalLocalizations.delegate
+                          ],
                           supportedLocales: AppLocalizations.supportedLocales,
                           home: const StartupScreen(),
                         );
@@ -181,33 +188,49 @@ Future<void> applyEnvironmentVariables() async {
       const password = String.fromEnvironment("PASSWORD");
       if (schoolID != "" && username != "" && password != "") {
         // We could get the school name or just leave this "easter egg".
-        await globalStorage.write(key: StorageKey.userSchoolName, value: "Ein Entwickler! $schoolID");
+        await globalStorage.write(
+            key: StorageKey.userSchoolName, value: "Ein Entwickler! $schoolID");
 
-        await globalStorage.write(key: StorageKey.userSchoolID, value: const String.fromEnvironment("ID"));
-        await globalStorage.write(key: StorageKey.userUsername, value: const String.fromEnvironment("USERNAME"));
-        await globalStorage.write(key: StorageKey.userPassword, value: const String.fromEnvironment("PASSWORD"), secure: true);
+        await globalStorage.write(
+            key: StorageKey.userSchoolID,
+            value: const String.fromEnvironment("ID"));
+        await globalStorage.write(
+            key: StorageKey.userUsername,
+            value: const String.fromEnvironment("USERNAME"));
+        await globalStorage.write(
+            key: StorageKey.userPassword,
+            value: const String.fromEnvironment("PASSWORD"),
+            secure: true);
       }
 
       const theme = String.fromEnvironment("THEME");
       if (theme != "") {
         if (theme == "amoled") {
-          await globalStorage.write(key: StorageKey.settingsSelectedTheme, value: "dark");
-          await globalStorage.write(key: StorageKey.settingsIsAmoled, value: "true");
+          await globalStorage.write(
+              key: StorageKey.settingsSelectedTheme, value: "dark");
+          await globalStorage.write(
+              key: StorageKey.settingsIsAmoled, value: "true");
         } else {
-          await globalStorage.write(key: StorageKey.settingsIsAmoled, value: "false");
-          await globalStorage.write(key: StorageKey.settingsSelectedTheme, value: theme);
+          await globalStorage.write(
+              key: StorageKey.settingsIsAmoled, value: "false");
+          await globalStorage.write(
+              key: StorageKey.settingsSelectedTheme, value: theme);
         }
       }
 
       const color = String.fromEnvironment("COLOR");
       if (color != "") {
-        await globalStorage.write(key: StorageKey.settingsSelectedColor, value: color);
+        await globalStorage.write(
+            key: StorageKey.settingsSelectedColor, value: color);
       }
 
       const notificationsString = String.fromEnvironment("NOTIFICATIONS");
       if (notificationsString != "") {
-        const notifications = bool.fromEnvironment("NOTIFICATIONS", defaultValue: true);
-        await globalStorage.write(key: StorageKey.settingsPushService, value: notifications.toString());
+        const notifications =
+            bool.fromEnvironment("NOTIFICATIONS", defaultValue: true);
+        await globalStorage.write(
+            key: StorageKey.settingsPushService,
+            value: notifications.toString());
       }
     }
   }
