@@ -68,6 +68,8 @@ class LessonsFile {
   String? fileSize;
   Uri? fileURL;
   
+  String get extension => fileName!.split('.').last;
+  
   LessonsFile({this.fileName, this.fileSize, this.fileURL});
 }
 

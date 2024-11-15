@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sph_plan/shared/save_file.dart';
-import 'package:sph_plan/shared/share_file.dart';
 import 'package:sph_plan/view/mein_unterricht/homework_box.dart';
 import 'package:sph_plan/view/mein_unterricht/upload_page.dart';
 import '../../client/client.dart';
+import '../../shared/file_operations.dart';
 import '../../shared/launch_file.dart';
 import '../../shared/types/lesson.dart';
 import '../../shared/widgets/format_text.dart';
@@ -120,78 +117,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   for (LessonsFile file in data!.history[index].files) {
                     files.add(GestureDetector(
                       onLongPress: () {
-                        showModalBottomSheet(
-                            context: context,
-                            showDragHandle: true,
-                            builder: (context) {
-                              return SizedBox(
-                                width: double.infinity,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 20.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Filename
-                                      Padding(
-                                        padding: const EdgeInsets.only(bottom: 8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 20.0, left: 20.0),
-                                          child: Text(
-                                            file.fileName ?? AppLocalizations.of(context)!.unknownFile,
-                                            style: Theme.of(context).textTheme.titleLarge,
-                                          ),
-                                        )
-                                      ),
-                                      MenuItemButton(
-                                        onPressed: () => {
-                                          launchFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Padding(padding: EdgeInsets.only(left: 10.0)),
-                                            Icon(Icons.open_in_new),
-                                            Padding(padding: EdgeInsets.only(right: 8.0)),
-                                            Text(AppLocalizations.of(context)!.openFile)
-                                          ],
-                                        ),
-                                      ),
-                                      if (!Platform.isIOS) (
-                                          MenuItemButton(
-                                            onPressed: () => {
-                                              saveFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
-                                            },
-                                            child: Row(
-                                              children: [
-                                                Padding(padding: EdgeInsets.only(left: 10.0)),
-                                                Icon(Icons.save_alt_rounded),
-                                                Padding(padding: EdgeInsets.only(right: 8.0)),
-                                                Text(AppLocalizations.of(context)!.saveFile)
-                                              ],
-                                            ),
-                                          )
-                                      ),
-                                      if (!Platform.isLinux) (
-                                          MenuItemButton(
-                                            onPressed: () => {
-                                              shareFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
-                                            },
-                                            child: Row(
-                                              children: [
-                                                Padding(padding: EdgeInsets.only(left: 10.0)),
-                                                Icon(Icons.share_rounded),
-                                                Padding(padding: EdgeInsets.only(right: 8.0)),
-                                                Text(AppLocalizations.of(context)!.shareFile)
-                                              ],
-                                            ),
-                                          )
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                        );
+                        showFileModal(context, file);
                       },
                       child: ActionChip(
                         label: Text(file.fileName ?? "..."),
