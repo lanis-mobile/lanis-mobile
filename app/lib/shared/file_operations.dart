@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:open_file/open_file.dart';
 import 'package:sph_plan/shared/types/lesson.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,9 +11,7 @@ import 'package:mime/mime.dart';
 
 import '../client/client.dart';
 
-
 import '../utils/file_icons.dart';
-import 'launch_file.dart';
 
 void showFileModal(BuildContext context, LessonsFile file) {
   showModalBottomSheet(
@@ -53,34 +52,34 @@ void showFileModal(BuildContext context, LessonsFile file) {
                   ),
                 ),
                 if (!Platform.isIOS) (
-                    MenuItemButton(
-                      onPressed: () => {
-                        saveFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
-                      },
-                      child: Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Icon(Icons.save_alt_rounded),
-                          Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context)!.saveFile)
-                        ],
-                      ),
-                    )
+                  MenuItemButton(
+                    onPressed: () => {
+                      saveFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                    },
+                    child: Row(
+                      children: [
+                        Padding(padding: EdgeInsets.only(left: 10.0)),
+                        Icon(Icons.save_alt_rounded),
+                        Padding(padding: EdgeInsets.only(right: 8.0)),
+                        Text(AppLocalizations.of(context)!.saveFile)
+                      ],
+                    ),
+                  )
                 ),
                 if (!Platform.isLinux) (
-                    MenuItemButton(
-                      onPressed: () => {
-                        shareFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
-                      },
-                      child: Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Icon(Icons.share_rounded),
-                          Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context)!.shareFile)
-                        ],
-                      ),
-                    )
+                  MenuItemButton(
+                    onPressed: () => {
+                      shareFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                    },
+                    child: Row(
+                      children: [
+                        Padding(padding: EdgeInsets.only(left: 10.0)),
+                        Icon(Icons.share_rounded),
+                        Padding(padding: EdgeInsets.only(right: 8.0)),
+                        Text(AppLocalizations.of(context)!.shareFile)
+                      ],
+                    ),
+                  )
                 )
               ],
             ),
@@ -89,6 +88,47 @@ void showFileModal(BuildContext context, LessonsFile file) {
       }
   );
 }
+
+void launchFile(BuildContext context, String url, String filename,
+    String? fileSize, Function callback) {
+  showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => downloadDialog(context, fileSize));
+
+  client.downloadFile(url, filename).then((filepath) async {
+    Navigator.of(context).pop();
+
+    if (filepath == "") {
+      showDialog(
+          context: context,
+          builder: (context) => errorDialog(context));
+    } else {
+      final result = await OpenFile.open(filepath);
+      //sketchy, but "open_file" left us no other choice
+      if (result.message.contains("No APP found to open this file")) {
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text("${AppLocalizations.of(context)!.error}!"),
+              icon: const Icon(Icons.error),
+              content: Text(
+                  AppLocalizations.of(context)!.noAppToOpen),
+              actions: [
+                FilledButton(
+                  child: const Text('Ok'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ));
+      }
+      callback(); // Call the callback function after the file is opened
+    }
+  });
+}
+
 
 void saveFile(BuildContext context, String url, String filename, String? fileSize, Function callback) {
   const platform = MethodChannel('io.github.lanis-mobile/storage');
