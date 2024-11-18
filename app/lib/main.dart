@@ -18,6 +18,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 import 'background_service.dart';
+import 'core/database/account_database/account_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +26,8 @@ void main() async {
     return errorWidget(details);
   };
 
-  await globalStorage.initialize();
+  accountDatabase = AccountDatabase();
 
-  await applyEnvironmentVariables();
 
   await initializeNotifications();
   await setupBackgroundService();

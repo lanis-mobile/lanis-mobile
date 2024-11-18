@@ -223,7 +223,7 @@ class SPHclient {
     }
   }
 
-  ///returns a URL that when called loggs the user in.
+  ///returns a URL that when called logs the user in.
   ///
   ///This can be used to open lanis in the browser of the user.
   Future<String> getLoginURL() async {
@@ -271,7 +271,7 @@ class SPHclient {
     }
   }
 
-  ///returns the user's school's information.
+  ///returns the user's school information.
   Future<dynamic> getSchoolInfo(String schoolID) async {
     final response = await dio.get(
         "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=$schoolID");

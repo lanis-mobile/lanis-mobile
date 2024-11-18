@@ -78,6 +78,9 @@ dependencies:
   flutter_inappwebview: ^6.1.0
   connectivity_plus: ^6.0.5
   syncfusion_localizations: ^27.1.58
+  drift: ^2.21.0
+  drift_flutter: ^0.2.1
+  flutter_keychain: ^2.5.0
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:
@@ -249,6 +252,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  drift_dev: ^2.21.2
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
