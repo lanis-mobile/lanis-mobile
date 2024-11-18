@@ -5,7 +5,7 @@ import 'package:encrypt/encrypt.dart';
 
 import '../../../utils/logger.dart';
 
-part 'account_database.g.dart';
+part 'account_db.g.dart';
 
 class ClearTextAccount {
   final int localId;

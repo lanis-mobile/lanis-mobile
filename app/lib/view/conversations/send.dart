@@ -5,7 +5,7 @@ import 'package:sph_plan/view/conversations/chat.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../client/client.dart';
-import '../../client/connection_checker.dart';
+import '../../core/connection_checker.dart';
 import '../../shared/types/conversations.dart';
 import 'shared.dart';
 

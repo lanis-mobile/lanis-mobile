@@ -4,7 +4,7 @@ import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 import 'package:sph_plan/view/conversations/send.dart';
 
 import '../../client/client.dart';
-import '../../client/connection_checker.dart';
+import '../../core/connection_checker.dart';
 import '../../shared/types/conversations.dart';
 
 class TypeChooser extends StatefulWidget {

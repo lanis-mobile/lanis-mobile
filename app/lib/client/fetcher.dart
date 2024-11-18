@@ -11,7 +11,7 @@ import '../shared/types/lesson.dart';
 import '../shared/types/timetable.dart';
 import '../shared/types/calendar_event.dart';
 import 'client.dart';
-import 'connection_checker.dart';
+import '../core/connection_checker.dart';
 
 enum FetcherStatus {
   fetching,

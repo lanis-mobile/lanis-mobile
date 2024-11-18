@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:http_proxy/http_proxy.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sph_plan/client/storage.dart';
@@ -18,7 +19,8 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 import 'background_service.dart';
-import 'core/database/account_database/account_database.dart';
+import 'core/database/account_database/account_db.dart';
+import 'core/sph/sph.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,11 +29,13 @@ void main() async {
   };
 
   accountDatabase = AccountDatabase();
-
+  final account = await accountDatabase.getLastLoggedInAccount();
+  if (account != null) {
+    sph = SPH(account: account);
+    await setupBackgroundService();
+  }
 
   await initializeNotifications();
-  await setupBackgroundService();
-
   await initializeDateFormatting();
 
   ThemeModeNotifier.init();
@@ -48,7 +52,11 @@ void main() async {
     }
   });
 
-  runApp(const App());
+  runApp(
+    Phoenix(
+      child: const App(),
+    ),
+  );
 }
 
 Future<void> setupProxy() async {
@@ -100,7 +108,7 @@ class App extends StatelessWidget {
                         return MaterialApp(
                           title: 'Lanis Mobile',
                           theme: theme.lightTheme,
-                          darkTheme: darkTheme,
+                          darkTheme: theme.darkTheme,
                           themeMode: mode,
                           localizationsDelegates: [
                             ...AppLocalizations.localizationsDelegates,

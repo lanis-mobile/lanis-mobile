@@ -11,8 +11,8 @@ import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../shared/types/conversations.dart';
 import '../../utils/logger.dart';
 import '../client.dart';
-import '../connection_checker.dart';
-import '../cryptor.dart';
+import '../../core/connection_checker.dart';
+import '../../core/sph/cryptor.dart';
 
 class ConversationsParser {
   late Dio dio;

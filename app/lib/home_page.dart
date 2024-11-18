@@ -18,7 +18,7 @@ import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/timetable/stream.dart';
 import 'package:sph_plan/view/substitutions/stream.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:sph_plan/client/connection_checker.dart';
+import 'package:sph_plan/core/connection_checker.dart';
 
 class Destination {
   final Icon icon;

@@ -8,7 +8,7 @@ import 'package:sph_plan/client/client.dart';
 
 import '../../shared/apps.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
-import '../connection_checker.dart';
+import '../../core/connection_checker.dart';
 
 class CalendarParser {
   late Dio dio;

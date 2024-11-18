@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/client/fetcher.dart';
 import 'package:sph_plan/view/substitutions/view.dart';
 
-import '../../client/client.dart';
-
 /// The [StaticSubstitutionsView] utilizing the [SubstitutionsFetcher] to display the substitutions.
 class SubstitutionsView extends StatefulWidget {
   const SubstitutionsView({super.key});
@@ -12,10 +10,8 @@ class SubstitutionsView extends StatefulWidget {
   State<StatefulWidget> createState() => _SubstitutionsViewState();
 }
 
-class _SubstitutionsViewState extends State<SubstitutionsView>
-    with TickerProviderStateMixin {
-  final SubstitutionsFetcher substitutionsFetcher =
-      client.fetchers.substitutionsFetcher;
+class _SubstitutionsViewState extends State<SubstitutionsView> {
+  final SubstitutionsFetcher substitutionsFetcher = SubstitutionsFetcher(Duration(minutes: 5));
 
   @override
   void initState() {

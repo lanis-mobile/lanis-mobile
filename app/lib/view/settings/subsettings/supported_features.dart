@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../core/sph/sph.dart';
 import '../../../shared/apps.dart';
 
 class SupportedFeaturesOverviewScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _SupportedFeaturesOverviewScreenState
     setState(() {
       featureListListTiles.clear();
 
-      for (var value in client.travelMenu) {
+      for (var value in sph!.session.travelMenu) {
         featureListListTiles.add(ListTile(
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),

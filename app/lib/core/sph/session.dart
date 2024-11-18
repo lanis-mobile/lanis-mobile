@@ -8,8 +8,8 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/parser.dart';
 
-import '../../client/connection_checker.dart';
-import '../../client/cryptor.dart';
+import '../connection_checker.dart';
+import 'cryptor.dart';
 import '../../shared/account_types.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';
 import '../../themes.dart';

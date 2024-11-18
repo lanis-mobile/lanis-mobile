@@ -3,6 +3,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
@@ -13,7 +14,6 @@ import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
 import '../../shared/apps.dart';
 import '../login/screen.dart';
-import '../../client/client.dart';
 
 
 class SettingsScreen extends StatefulWidget {
@@ -86,20 +86,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          if (client.doesSupportFeature(SPHAppEnum.vertretungsplan)) ...[
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: Text(AppLocalizations.of(context)!.notifications),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const NotificationsSettingsScreen()),
-                );
-              },
-            ),
-          ],
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: Text(AppLocalizations.of(context)!.notifications),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const NotificationsSettingsScreen()),
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.storage),
             title: Text(AppLocalizations.of(context)!.clearCache),
@@ -143,14 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      client.deleteAllSettings().then((_) {
-                        Navigator.pop(context, 'OK');
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const WelcomeLoginScreen()));
-                      });
+                      Phoenix.rebirth(context);
                     },
                     child: const Text('OK'),
                   ),

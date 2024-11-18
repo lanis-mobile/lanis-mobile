@@ -18,7 +18,7 @@ import 'package:sph_plan/view/substitutions/view.dart';
 import 'package:sph_plan/view/timetable/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'client/client.dart';
+import 'core/sph/sph.dart';
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});
@@ -33,13 +33,12 @@ class _StartupScreenState extends State<StartupScreen> {
   // We need to load storage first, so we have to wait before everything.
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
 
-
   void openWelcomeScreen() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     ).then((_) async {
-      await client.prepareDio();
+      await sph?.session.prepareDio();
 
       // Context should be mounted
       // ignore: use_build_context_synchronously
@@ -54,31 +53,32 @@ class _StartupScreenState extends State<StartupScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => Scaffold(
-                  body: LoginForm(
-                afterLogin: () async {
-                  await client.loadFromStorage();
-                  await client.prepareDio();
+        builder: (context) => Scaffold(
+          body: LoginForm(
+            afterLogin: () async {
+              sph?.session.prepareDio();
 
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                  );
-                },
-              ))),
+              // ignore: use_build_context_synchronously
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 
   Future<void> performLogin() async {
-    await client.prepareDio();
-    if (client.username == "") {
+    await sph?.session.prepareDio();
+    if (sph == null) {
       openWelcomeScreen();
       return;
     }
 
     try {
-      await client.login();
+      await sph?.session.authenticate();
 
       if (error == null) {
         Navigator.pushReplacement(
@@ -98,18 +98,15 @@ class _StartupScreenState extends State<StartupScreen> {
           barrierDismissible: false,
           builder: (context) {
             return errorDialog();
-          }
-      );
+          });
     }
   }
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      client.loadFromStorage().then((_) {
-        finishedLoadingStorage.value = true;
-        performLogin();
-      });
+      finishedLoadingStorage.value = true;
+      performLogin();
     });
 
     super.initState();
@@ -120,7 +117,7 @@ class _StartupScreenState extends State<StartupScreen> {
     finishedLoadingStorage.dispose();
     super.dispose();
   }
-  
+
   /// Either school image or app version.
   Widget schoolLogo() {
     var darkMode = Theme.of(context).brightness == Brightness.dark;
@@ -138,16 +135,32 @@ class _StartupScreenState extends State<StartupScreen> {
 
     return CachedNetworkImage(
       imageType: ImageType.png,
-       imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}"),
+      imageUrl: Uri.parse(
+          "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${sph?.account.schoolID}"),
       placeholder: deviceInfo,
       builder: (context, imageProvider) => ColorFiltered(
         colorFilter: darkMode
             ? const ColorFilter.matrix([
-                -1, 0, 0, 0,
-                255, 0, -1, 0,
-                0, 255, 0, 0,
-                -1, 0, 255, 0,
-                0, 0, 1, 0
+                -1,
+                0,
+                0,
+                0,
+                255,
+                0,
+                -1,
+                0,
+                0,
+                255,
+                0,
+                0,
+                -1,
+                0,
+                255,
+                0,
+                0,
+                0,
+                1,
+                0
               ])
             : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
         child: Image(
@@ -169,7 +182,8 @@ class _StartupScreenState extends State<StartupScreen> {
           offset: const Offset(4, 8),
           child: SvgPicture.asset(
             "assets/startup.svg",
-            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(
+                Theme.of(context).colorScheme.primary, BlendMode.srcIn),
             fit: BoxFit.contain,
             width: constraints.maxWidth.clamp(0, 300),
             height: constraints.maxHeight.clamp(0, 250),
@@ -180,55 +194,39 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   WidgetSpan toolTipIcon(IconData icon) {
-    return WidgetSpan(child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.onPrimary,));
+    return WidgetSpan(
+        child: Icon(
+      icon,
+      size: 18,
+      color: Theme.of(context).colorScheme.onPrimary,
+    ));
   }
 
   Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
     List<Widget> toolTips = <Widget>[
       Text.rich(TextSpan(
-        text: AppLocalizations.of(context)!.startUpMessage1,
-        children: [
-          toolTipIcon(Icons.code)
-        ]
-      )),
+          text: AppLocalizations.of(context)!.startUpMessage1,
+          children: [toolTipIcon(Icons.code)])),
       Text.rich(TextSpan(
-        text: AppLocalizations.of(context)!.startUpMessage2,
-        children: [
-          toolTipIcon(Icons.people)
-        ]
-      )),
+          text: AppLocalizations.of(context)!.startUpMessage2,
+          children: [toolTipIcon(Icons.people)])),
       Text.rich(TextSpan(
-        text: AppLocalizations.of(context)!.startUpMessage3,
-        children: [
-          toolTipIcon(Icons.filter_alt)
-        ]
-      )),
+          text: AppLocalizations.of(context)!.startUpMessage3,
+          children: [toolTipIcon(Icons.filter_alt)])),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage4,
-          children: [
-            toolTipIcon(Icons.star)
-          ]
-      )),
+          children: [toolTipIcon(Icons.star)])),
       Text(AppLocalizations.of(context)!.startUpMessage5),
       Text(AppLocalizations.of(context)!.startUpMessage6),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage7,
-          children: [
-            toolTipIcon(Icons.favorite)
-          ]
-      )),
+          children: [toolTipIcon(Icons.favorite)])),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage8,
-          children: [
-            toolTipIcon(Icons.code)
-          ]
-      )),
+          children: [toolTipIcon(Icons.code)])),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage9,
-          children: [
-            toolTipIcon(Icons.settings)
-          ]
-      )),
+          children: [toolTipIcon(Icons.settings)])),
     ];
 
     return Container(
@@ -246,13 +244,14 @@ class _StartupScreenState extends State<StartupScreen> {
         margin: margin,
         width: width,
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+          style: Theme.of(context)
+              .textTheme
+              .labelLarge!
+              .copyWith(color: Theme.of(context).colorScheme.onPrimary),
           textAlign: TextAlign.center,
           child: toolTips.elementAt(Random().nextInt(toolTips.length)),
-        )
-    );
+        ));
   }
-
 
   Widget errorDialog() {
     var text = AppLocalizations.of(context)!.startupError;
@@ -269,44 +268,45 @@ class _StartupScreenState extends State<StartupScreen> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (error is! NoConnectionException && error is! LanisDownException) Text.rich(TextSpan(
-              text: AppLocalizations.of(context)!.startupErrorMessage,
-              children: [
-                TextSpan(
-                    text: "\n\n${error.runtimeType}: ${error!.cause}",
-                    style: Theme.of(context).textTheme.labelLarge)
-              ])),
-          if (error is LanisDownException) Text.rich(TextSpan(
-              children: [
-                TextSpan(
-                    text: AppLocalizations.of(context)!.lanisDownErrorMessage,
-                    style: Theme.of(context).textTheme.labelLarge)
-              ])),
+          if (error is! NoConnectionException && error is! LanisDownException)
+            Text.rich(TextSpan(
+                text: AppLocalizations.of(context)!.startupErrorMessage,
+                children: [
+                  TextSpan(
+                      text: "\n\n${error.runtimeType}: ${error!.cause}",
+                      style: Theme.of(context).textTheme.labelLarge)
+                ])),
+          if (error is LanisDownException)
+            Text.rich(TextSpan(children: [
+              TextSpan(
+                  text: AppLocalizations.of(context)!.lanisDownErrorMessage,
+                  style: Theme.of(context).textTheme.labelLarge)
+            ])),
           const OfflineAppletSelector()
         ],
       ),
       actions: [
-        if (error is! NoConnectionException && error is! LanisDownException) ...[
+        if (error is! NoConnectionException &&
+            error is! LanisDownException) ...[
           TextButton(
               onPressed: () {
-                launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
+                launchUrl(Uri.parse(
+                    "https://github.com/alessioC42/lanis-mobile/issues"));
               },
-              child: const Text("GitHub")
-          ),
+              child: const Text("GitHub")),
           OutlinedButton(
               onPressed: () {
                 launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
               },
-              child: Text(AppLocalizations.of(context)!.startupReportButton)
-          ),
+              child: Text(AppLocalizations.of(context)!.startupReportButton)),
         ],
         if (error is LanisDownException) ...[
           OutlinedButton(
               onPressed: () {
-                launchUrl(Uri.parse("https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
+                launchUrl(Uri.parse(
+                    "https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
               },
-              child: const Text("Status")
-          ),
+              child: const Text("Status")),
         ],
         FilledButton(
             onPressed: () async {
@@ -335,7 +335,8 @@ class _StartupScreenState extends State<StartupScreen> {
                           tipText(
                               const EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 12.0),
-                              const EdgeInsets.symmetric(horizontal: 36.0), null)
+                              const EdgeInsets.symmetric(horizontal: 36.0),
+                              null)
                         ],
                       ),
                       const LinearProgressIndicator()
@@ -358,7 +359,8 @@ class _StartupScreenState extends State<StartupScreen> {
                               tipText(
                                   const EdgeInsets.symmetric(
                                       vertical: 16.0, horizontal: 12.0),
-                                  const EdgeInsets.only(), 250)
+                                  const EdgeInsets.only(),
+                                  250)
                             ],
                           ),
                         ],
@@ -400,46 +402,50 @@ class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
       ],
     );
   }
+
   Future<void> loadAppletData() async {
-    String substitutionJson = await globalStorage.read(key: StorageKey.lastSubstitutionData);
-    String timetableJson = await globalStorage.read(key: StorageKey.lastTimetableData);
+    String substitutionJson =
+        await globalStorage.read(key: StorageKey.lastSubstitutionData);
+    String timetableJson =
+        await globalStorage.read(key: StorageKey.lastTimetableData);
     if (substitutionJson != "") {
-      substitutionData = SubstitutionPlan.fromJson(jsonDecode(substitutionJson));
-      appletList.add(appletListTile(AppLocalizations.of(context)!.substitutions, Icons.calendar_today, () {
+      substitutionData =
+          SubstitutionPlan.fromJson(jsonDecode(substitutionJson));
+      appletList.add(appletListTile(
+          AppLocalizations.of(context)!.substitutions, Icons.calendar_today,
+          () {
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: Text("${AppLocalizations.of(context)!.substitutions} (${AppLocalizations.of(context)!.offline})"),
-            ),
-            body: StaticSubstitutionsView(
-                plan: substitutionData,
-                refresh: null,
-                )
-            )
-          )
-        );
+            context,
+            MaterialPageRoute(
+                builder: (context) => Scaffold(
+                    appBar: AppBar(
+                      title: Text(
+                          "${AppLocalizations.of(context)!.substitutions} (${AppLocalizations.of(context)!.offline})"),
+                    ),
+                    body: StaticSubstitutionsView(
+                      plan: substitutionData,
+                      refresh: null,
+                    ))));
       }));
     }
     if (timetableJson != "") {
       timetableData = TimeTable.fromJson(jsonDecode(timetableJson));
 
-      appletList.add(appletListTile(AppLocalizations.of(context)!.timeTable, Icons.calendar_today, () {
+      appletList.add(appletListTile(
+          AppLocalizations.of(context)!.timeTable, Icons.calendar_today, () {
         Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Scaffold(
-                appBar: AppBar(
-                  title: Text("${AppLocalizations.of(context)!.timeTable} (${AppLocalizations.of(context)!.offline})"),
-                ),
-                body: StaticTimetableView(
-                  data: timetableData,
-                  refresh: null,
-                )
-            )
-            )
-        );
-      })
-      );
+            MaterialPageRoute(
+                builder: (context) => Scaffold(
+                    appBar: AppBar(
+                      title: Text(
+                          "${AppLocalizations.of(context)!.timeTable} (${AppLocalizations.of(context)!.offline})"),
+                    ),
+                    body: StaticTimetableView(
+                      data: timetableData,
+                      refresh: null,
+                    ))));
+      }));
     }
     setState(() {
       loading = false;
