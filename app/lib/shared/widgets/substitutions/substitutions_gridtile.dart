@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/widgets/marquee.dart';
+import '../../../models/substitution.dart';
 import 'substitutions_listtile.dart';
 
 class SubstitutionGridTile extends StatelessWidget {

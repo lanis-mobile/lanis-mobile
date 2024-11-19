@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../core/database/account_preferences_database/stored_preference.dart';
 import '../../shared/account_types.dart';
 
 final timeTableDefinition = AppletDefinition(
@@ -14,7 +15,7 @@ final timeTableDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student],
   refreshInterval: Duration(hours: 1),
   settings: [
-    AppletSetting<bool>(
+    StoredPreference<bool>(
       key: 'show_full_plan',
       label: (context) => 'Gesamten Plan anzeigen',
       description: (context) => 'Zeigt den gesamten Vertretungsplan an, anstatt nur die persönlichen einträge.',

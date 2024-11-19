@@ -17,7 +17,7 @@ IconData getIconByFileExtension(String fileExtension) {
       return Icons.text_fields;
     case 'zip':
     case 'rar':
-      return Icons.archive;
+      return Icons.folder_zip;
     case 'jpg':
     case 'jpeg':
     case 'png':
@@ -26,7 +26,7 @@ IconData getIconByFileExtension(String fileExtension) {
     case 'mp3':
     case 'wav':
     case 'flac':
-      return Icons.audiotrack;
+      return Icons.audio_file;
     case 'mp4':
     case 'avi':
     case 'mkv':

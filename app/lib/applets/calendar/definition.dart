@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/account_types.dart';
 
 final calendarDefinition = AppletDefinition(
-  appletPhpUrl: 'calendar.php',
+  appletPhpUrl: 'kalender.php',
   addDivider: false,
   appletType: AppletType.withBottomNavigation,
   icon: const Icon(Icons.calendar_today),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sph_plan/client/storage.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -27,17 +27,19 @@ class AppearanceElements extends StatefulWidget {
 }
 
 class _AppearanceElementsState extends State<AppearanceElements> {
-  String _selectedTheme = "system"; // Default theme
-  String _selectedColor = "standard"; // Default color
-  bool _isAmoled = false;
+  late String _selectedTheme = "system"; // Default theme
+  late String _selectedColor = "standard"; // Default color
+  late bool _isAmoled = false;
 
   @override
   void initState() {
+    loadSettingsVars();
     super.initState();
-    // Idk if prefs is the right way but it's working.
-    _selectedTheme = globalStorage.prefs!.getString("theme") ?? "system";
-    _selectedColor = globalStorage.prefs!.getString("color") ?? "standard";
-    _isAmoled = bool.parse(globalStorage.prefs!.getString("isAmoled") ?? "false");
+  }
+  void loadSettingsVars() async {
+    _selectedTheme = (await accountDatabase.kv.get('theme'))!;
+    _selectedColor = (await accountDatabase.kv.get('color'))!;
+    _isAmoled = bool.parse((await accountDatabase.kv.get('isAmoled'))!);
   }
 
   RadioListTile colorListTile(
@@ -72,13 +74,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
       onChanged: (value) {
         setState(() {
           _selectedColor = value.toString();
-          if (value == "standard") {
-            ColorModeNotifier.set("standard", Themes.standardTheme);
-          } else if (value == "school") {
-            ColorModeNotifier.set("school", Themes.schoolTheme);
-          } else {
-            ColorModeNotifier.set(value, Themes.flutterColorThemes[value]!);
-          }
+          accountDatabase.kv.set('color', _selectedColor);
         });
       },
     );
@@ -113,7 +109,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               onChanged: (value) {
                 setState(() {
                   _selectedTheme = value.toString();
-                  ThemeModeNotifier.set(_selectedTheme);
+                  accountDatabase.kv.set('theme', _selectedTheme);
                 });
               },
             ),
@@ -124,7 +120,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               onChanged: (value) {
                 setState(() {
                   _selectedTheme = value.toString();
-                  ThemeModeNotifier.set(_selectedTheme);
+                  accountDatabase.kv.set('theme', _selectedTheme);
                 });
               },
             ),
@@ -135,7 +131,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
               onChanged: (value) {
                 setState(() {
                   _selectedTheme = value.toString();
-                  ThemeModeNotifier.set(_selectedTheme);
+                  accountDatabase.kv.set('theme', _selectedTheme);
                 });
               },
             ),
@@ -155,7 +151,7 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                         onChanged: (value) {
                           setState(() {
                             _isAmoled = value!;
-                            AmoledNotifier.set(_isAmoled);
+                            accountDatabase.kv.set('isAmoled', _isAmoled.toString());
                           });
                         }
                     ),
@@ -234,7 +230,8 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                   : (value) {
                       setState(() {
                         _selectedColor = value.toString();
-                        ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
+
+                        accountDatabase.kv.set('color', _selectedColor);
                       });
                     },
             ),

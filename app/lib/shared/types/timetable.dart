@@ -1,7 +1,6 @@
-import '../../client/client_submodules/timetable.dart';
 import 'fach.dart';
 
-// typedef Day = List<StdPlanFach>;
+typedef Day = List<StdPlanFach>;
 
 class TimeTable {
   List<Day>? planForAll;

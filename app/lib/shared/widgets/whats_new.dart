@@ -7,8 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../client/client.dart';
-import '../../client/storage.dart';
+import '../../core/sph/sph.dart';
 
 int compareVersions(String version1, String version2) {
   List<int> v1 = version1.replaceFirst('v', '').split(RegExp(r'[.+]')).map(int.parse).toList();
@@ -26,11 +25,11 @@ void showUpdateInfoIfRequired(BuildContext context) async {
   if (latestReleaseInfo == null) return;
   final String latestReleaseTag = latestReleaseInfo['tag_name'];
   final String deviceReleaseTag = await getDeviceReleaseTag();
-  final String storageReleaseTag = await globalStorage.read(key: StorageKey.lastAppVersion);
+  final String? storageReleaseTag = await sph!.prefs.kv.get('last-app-version');
 
   if (storageReleaseTag != deviceReleaseTag) {
     if (latestReleaseTag == deviceReleaseTag) {
-      await globalStorage.write(key: StorageKey.lastAppVersion, value: deviceReleaseTag);
+      await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(latestReleaseInfo),
@@ -71,7 +70,7 @@ Future<Map?> getReleaseInfo(String? releaseTag) async {
     if (releaseTag != null) {
       url = 'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/tags/$releaseTag';
     }
-    final response = await client.dio.get(url);
+    final response = await sph!.session.dio.get(url);
     return response.data;
   } on Exception {
     return null;

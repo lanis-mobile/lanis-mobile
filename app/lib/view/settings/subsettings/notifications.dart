@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../../core/sph/sph.dart';
 
 class NotificationsSettingsScreen extends StatelessWidget {
   const NotificationsSettingsScreen({super.key});
@@ -41,14 +42,9 @@ class _NotificationElementsState extends State<NotificationElements> {
   bool _androidNotificationPermissionGranted = true;
 
   Future<void> loadSettingsVars() async {
-    _enableNotifications =
-        (await globalStorage.read(key: StorageKey.settingsPushService)) ==
-            "true";
-    _androidNotificationInterval = int.parse(
-        await globalStorage.read(key: StorageKey.settingsPushServiceIntervall));
-    _androidNotificationsOngoing = (await globalStorage.read(
-            key: StorageKey.settingsPushServiceOngoing)) ==
-        "true";
+    _enableNotifications = await sph!.prefs.kv.get('settings-push-service-on') == "true";
+    _androidNotificationInterval = int.parse( (await sph!.prefs.kv.get('settings-push-service-interval'))!);
+    _androidNotificationsOngoing = await sph!.prefs.kv.get('settings-push-service-notifications-ongoing') == "true";
 
     _androidNotificationPermissionGranted = await Permission.notification.isGranted;
   }
@@ -92,9 +88,7 @@ class _NotificationElementsState extends State<NotificationElements> {
                   setState(() {
                     _enableNotifications = value!;
                   });
-                  await globalStorage.write(
-                      key: StorageKey.settingsPushService,
-                      value: _enableNotifications.toString());
+                  await sph!.prefs.kv.set('settings-push-service-on', _enableNotifications.toString());
                 }
               : null,
           subtitle:
@@ -108,9 +102,7 @@ class _NotificationElementsState extends State<NotificationElements> {
                   setState(() {
                     _androidNotificationsOngoing = value!;
                   });
-                  await globalStorage.write(
-                      key: StorageKey.settingsPushServiceOngoing,
-                      value: _androidNotificationsOngoing.toString());
+                  await sph!.prefs.kv.set('settings-push-service-notifications-ongoing', _androidNotificationsOngoing.toString());
                 }
               : null,
         ),
@@ -132,9 +124,7 @@ class _NotificationElementsState extends State<NotificationElements> {
                 }
               : null,
           onChangeEnd: (double value) async {
-            await globalStorage.write(
-                key: StorageKey.settingsPushServiceIntervall,
-                value: _androidNotificationInterval.toString());
+            await sph!.prefs.kv.set('settings-push-service-interval', _androidNotificationInterval.toString());
           },
         ),
         if (Platform.isIOS) const ListTile(

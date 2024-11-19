@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/applets/definitions.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 
 import '../connection_checker.dart';
 import 'cryptor.dart';
@@ -34,7 +35,7 @@ class SessionHandler {
   List<dynamic> travelMenu = [];
 
 
-  SessionHandler({required this.sph,});
+  SessionHandler({required this.sph, String? withLoginURL,});
 
   Future<void> prepareDio() async {
     jar = CookieJar();
@@ -72,7 +73,7 @@ class SessionHandler {
   }
 
   ///Logs the user in and fetches the necessary metadata.
-  Future<void> authenticate({backgroundFetch = false}) async {
+  Future<void> authenticate({backgroundFetch = false, String? withLoginUrl}) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
@@ -82,8 +83,17 @@ class SessionHandler {
         (status) => status != null && (status == 200 || status == 302 || status == 503);
 
     try {
-      String loginURL = await getLoginURL();
-      await dio.get(loginURL);
+
+      late String loginURL;
+
+      if (withLoginUrl != null) {
+        loginURL = withLoginUrl;
+      } else {
+        loginURL = await getLoginURL(sph.account);
+      }
+
+      final response = await dio.get(loginURL);
+
 
       preventLogoutTimer?.cancel();
       preventLogoutTimer = Timer.periodic(
@@ -112,7 +122,7 @@ class SessionHandler {
   ///returns a URL that when called loggs the user in.
   ///
   ///This can be used to open lanis in the browser of the user.
-  Future<String> getLoginURL() async {
+  static Future<String> getLoginURL(ClearTextAccount acc) async {
     final dioHttp = Dio();
     final cookieJar = CookieJar();
     dioHttp.interceptors.add(CookieManager(cookieJar));
@@ -121,11 +131,11 @@ class SessionHandler {
         (status) => status != null && (status == 200 || status == 302 || status == 503);
 
     final response1 = await dioHttp.post(
-        "https://login.schulportal.hessen.de/?i=${sph.account.schoolID}",
+        "https://login.schulportal.hessen.de/?i=${acc.schoolID}",
         queryParameters: {
-          "user": '${sph.account.schoolID}.${sph.account.password}',
-          "user2": sph.account.username,
-          "password": sph.account.password,
+          "user": '${acc.schoolID}.${acc.username}',
+          "user2": acc.username,
+          "password": acc.password,
         },
         options: Options(contentType: "application/x-www-form-urlencoded"));
 
@@ -133,11 +143,12 @@ class SessionHandler {
       throw LanisDownException();
     }
 
+    logger.i(response1.statusCode);
+
     final loginTimeout =
     parse(response1.data).getElementById("authErrorLocktime");
 
     if (response1.headers.value(HttpHeaders.locationHeader) != null) {
-      //credits are valid
       final response2 =
       await dioHttp.get("https://connect.schulportal.hessen.de");
 
@@ -216,13 +227,18 @@ class SessionHandler {
     var app = travelMenu
       .where((element) => element["link"].toString() == applet.appletPhpUrl)
       .singleOrNull;
-    if (app == null) return false;
+    if (app == null) {
+      logger.i("Applet ${applet.appletPhpUrl} not found in travel menu");
+      return false;
+    }
+    logger.i("Applet ${applet.appletPhpUrl} found in travel menu");
     return applet.supportedAccountTypes.contains(accountType);
   }
 
   ///Fetches the school's accent color and saves it to the storage.
   Future<void> getSchoolTheme() async {
-    if (await globalStorage.read(key: StorageKey.schoolAccentColor) == "") {
+    final data = await sph.prefs.kv.get("schoolAccentColor");
+    if (data != null) {
       try {
         final response = await dio.get(
             "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=${sph.account.schoolID}");
@@ -234,13 +250,7 @@ class SessionHandler {
 
         Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
 
-        if ((await globalStorage.read(key: StorageKey.settingsSelectedColor)) ==
-            "school") {
-          ColorModeNotifier.set("school", Themes.schoolTheme);
-        }
-
-        await globalStorage.write(
-            key: StorageKey.schoolAccentColor, value: schoolColor.toString());
+        await sph.prefs.kv.set("schoolAccentColor", schoolColor.toString());
       } on Exception catch (_) {}
     }
   }

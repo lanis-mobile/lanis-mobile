@@ -1,25 +1,23 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/shared/account_types.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../client/client.dart';
-import '../../shared/apps.dart';
+import '../../core/sph/sph.dart';
 
 List<PageViewModel> setupScreenPageViewModels(BuildContext context) => [
       //todo @codespoof
-      if (client.getAccountType() != AccountType.student)
+      if (sph!.session.accountType != AccountType.student)
         PageViewModel(
             image: SvgPicture.asset("assets/undraw/undraw_profile_re_4a55.svg",
                 height: 175.0),
             title: AppLocalizations.of(context)!.setupNonStudentTitle,
             body: AppLocalizations.of(context)!.setupNonStudent),
-      if (client.doesSupportFeature(SPHAppEnum.vertretungsplan) && Platform.isAndroid) ...[
+      if (AppDefinitions.isAppletSupported(sph!.session.accountType, 'vertretungsplan.php')) ...[
         PageViewModel(
             image: SvgPicture.asset(
                 "assets/undraw/undraw_new_notifications_re_xpcv.svg",

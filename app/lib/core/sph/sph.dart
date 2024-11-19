@@ -6,13 +6,12 @@ import '../database/account_preferences_database/account_preferences_db.dart';
 
 class SPH {
   final ClearTextAccount account;
-  late SessionHandler session = SessionHandler(sph: this);
+  late SessionHandler session = SessionHandler(sph: this, withLoginURL: withLoginURL);
   late StorageManager storage = StorageManager(sph: this);
-  late AccountPreferencesDatabase accountPrefs = AccountPreferencesDatabase(localId: account.localId);
+  late AccountPreferencesDatabase prefs = AccountPreferencesDatabase(localId: account.localId);
+  String? withLoginURL;
 
-  SPH({required this.account,});
-
-  get accountType => session.getAccountType();
+  SPH({required this.account, this.withLoginURL});
 }
 
 SPH? sph;

@@ -15,6 +15,10 @@ class StorageManager {
 
   Future<Directory> getDocumentCacheDirectory() async {
     var tempDir = await getTemporaryDirectory();
+    var userDir = Directory("${tempDir.path}/${sph.account.localId}");
+    if (!userDir.existsSync()) {
+      userDir.createSync();
+    }
     String path = "${tempDir.path}/${sph.account.localId}/document_cache";
     Directory dir = Directory(path);
     if (!dir.existsSync()) {

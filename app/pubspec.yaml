@@ -28,7 +28,6 @@ dependencies:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
   dart_date: ^1.2.2
-  flutter_secure_storage: ^9.0.0
   path_provider: ^2.1.1
   url_launcher: ^6.1.14
   cookie_jar: ^4.0.8
@@ -48,7 +47,6 @@ dependencies:
   crypto: ^3.0.3
   open_file: ^3.3.2
   share_plus: ^10.1.2
-  shared_preferences: ^2.2.2
   rxdart: ^0.28.0
   stack_trace: ^1.11.1
   styled_text: ^9.0.0-beta-4

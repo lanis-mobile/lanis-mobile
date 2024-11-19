@@ -1,3 +1,4 @@
+/*
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart' as crypto;
@@ -9,7 +10,6 @@ import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'client/client.dart';
 import 'client/storage.dart';
 
 Future<void> setupBackgroundService() async {
@@ -196,3 +196,4 @@ String weekDayGer(String dateString) {
   final germanFormat = DateFormat('E', 'de');
   return germanFormat.format(dateTime);
 }
+*/

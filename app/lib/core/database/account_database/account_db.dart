@@ -4,6 +4,7 @@ import 'package:flutter_keychain/flutter_keychain.dart';
 import 'package:encrypt/encrypt.dart';
 
 import '../../../utils/logger.dart';
+import '../account_preferences_database/kv_defaults.dart';
 
 part 'account_db.g.dart';
 
@@ -12,41 +13,55 @@ class ClearTextAccount {
   final int schoolID;
   final String username;
   final String password;
+  final String schoolName;
 
   ClearTextAccount({
     required this.localId,
     required this.schoolID,
     required this.username,
     required this.password,
+    required this.schoolName,
   });
+}
+
+class AppPreferencesTable extends Table {
+  TextColumn get key => text().withLength(min: 1, max: 50)();
+  TextColumn get value => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {key};
 }
 
 class AccountsTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get schoolId => integer()();
+  TextColumn get schoolName => text()();
   TextColumn get username => text().withLength(min: 1, max: 50)();
-  TextColumn get passwordHash => text().withLength(min: 1, max: 50)();
-  DateTimeColumn get lastLogin => dateTime()();
+  TextColumn get passwordHash => text()();
+  DateTimeColumn get lastLogin => dateTime().nullable()();
   DateTimeColumn get creationDate => dateTime()();
 }
 
 @DriftDatabase(tables: [
-  AccountsTable,
+  AccountsTable, AppPreferencesTable
 ])
 class AccountDatabase extends _$AccountDatabase {
+  late final KV kv = KV(this);
+
   AccountDatabase() : super(_openConnection());
 
   @override
   int get schemaVersion => 1;
 
   Future<String> cryptPassword(String password) async {
-    final String? key = await FlutterKeychain.get(key: 'encryption_key');
+    String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
       final cryptKey = Key.fromSecureRandom(32); // 256 bits
       await FlutterKeychain.put(key: 'encryption_key', value: cryptKey.base64);
+      key = cryptKey.base64;
       logger.i('Generated new encryption key');
     }
-    final cryptKey = Key.fromBase64(key!);
+    final cryptKey = Key.fromBase64(key);
     final iv = IV.fromSecureRandom(16); // 128 bits
     final encrypter = Encrypter(AES(cryptKey, mode: AESMode.gcm));
     final encrypted = encrypter.encrypt(password, iv: iv);
@@ -54,6 +69,7 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future<String> decryptPassword(String encryptedPassword) async {
+    logger.i(encryptedPassword);
     final String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
       throw Exception('Encryption key not found');
@@ -68,13 +84,14 @@ class AccountDatabase extends _$AccountDatabase {
     return encrypter.decrypt64(parts[1], iv: iv);
   }
 
-  Future <void> addAccountToDatabase({required int schoolID, required String username, required String password}) async {
+  Future <void> addAccountToDatabase({required int schoolID, required String username, required String password, required String schoolName}) async {
     String passwordHash = await cryptPassword(password);
     await into(accountsTable).insert(AccountsTableCompanion(
       schoolId: Value(schoolID),
+      schoolName: Value(schoolName),
       username: Value(username),
       passwordHash: Value(passwordHash),
-      lastLogin: Value(DateTime.now()),
+      lastLogin: Value(null),
       creationDate: Value(DateTime.now()),
     ));
   }
@@ -95,11 +112,41 @@ class AccountDatabase extends _$AccountDatabase {
       schoolID: account.schoolId,
       username: account.username,
       password: await decryptPassword(account.passwordHash),
+      schoolName: account.schoolName,
     );
   }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'accounts_database');
+  }
+}
+
+class KV {
+  final AccountDatabase db;
+
+  KV(this.db);
+
+  Future<void> set(String key, String value) async {
+    await db.into(db.appPreferencesTable).insert(AppPreferencesTableCompanion.insert(key: key, value: Value(value)), mode: InsertMode.insertOrReplace);
+  }
+
+  Future<String?> get(String key) async {
+    final val = (await (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).getSingleOrNull())?.value;
+    if (val == null && kvDefaults.keys.contains(key)) {
+      set(key, kvDefaults[key]!);
+      return kvDefaults[key];
+    }
+    return val;
+  }
+
+  Stream<String?> subscribe(String key) {
+    final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).watchSingleOrNull();
+    return stream.map((event) => event?.value);
+  }
+
+  Stream<Map<String, String?>> subscribeMultiple(List<String> keys) {
+    final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.isIn(keys))).watch();
+    return stream.map((event) => Map.fromEntries(event.map((e) => MapEntry(e.key, e.value))));
   }
 }
 

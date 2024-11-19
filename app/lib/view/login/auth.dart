@@ -1,11 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
+import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../client/client.dart';
+import '../../utils/logger.dart';
 
 class LoginForm extends StatefulWidget {
   final Function() afterLogin;
@@ -27,6 +30,7 @@ class LoginFormState extends State<LoginForm> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool dseAgree = false;
+  String selectedSchoolName = "";
 
 
   void login(String username, String password, String schoolID) async {
@@ -39,15 +43,30 @@ class LoginFormState extends State<LoginForm> {
                 heightFactor: 1.2,
                 child: CircularProgressIndicator(),
               ),
-            ));
-    await client.temporaryOverwriteCredits(username, password, schoolID);
+            ),
+    );
     try {
-      await client.login(userLogin: true);
-      await client.overwriteCredits(username, password, schoolID);
-      setState(() {
-        Navigator.pop(context); //pop dialog
-        widget.afterLogin();
-      });
+      logger.i("Logging in with $schoolID.$username and $password");
+      await SessionHandler.getLoginURL(
+        ClearTextAccount(
+          localId: -1,
+          schoolID: int.parse(schoolID),
+          username: username,
+          password: password,
+          schoolName: "",
+        ),
+      );
+      logger.i("Logged in successfully");
+      logger.i("Adding account to database");
+      await accountDatabase.addAccountToDatabase(
+        schoolID: int.parse(schoolID),
+        username: username,
+        password: password,
+        schoolName: selectedSchoolName,
+      );
+      logger.i("Account added to database");
+      logger.i("Calling rebirth");
+      Phoenix.rebirth(context);
     } on LanisException catch (ex) {
       setState(() {
         Navigator.pop(context); //pop dialog
@@ -113,7 +132,8 @@ class LoginFormState extends State<LoginForm> {
                 SchoolSelector(
                   controller: schoolIDController,
                   outContext: context,
-                  onSchoolSelected: () {
+                  onSchoolSelected: (name) {
+                    selectedSchoolName = name;
                     setState(() {});
                   },
                 ),

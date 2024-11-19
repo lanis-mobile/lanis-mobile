@@ -78,8 +78,8 @@ class FormattedText extends StatelessWidget {
   /// -- => <​i>,<br />
   /// ` or ``` => <​code>,<br />
   /// ​- => \u2022 (•),<br />
-  /// _ and _() => character substitution subscript,<br />
-  /// ^ and ^() => character substitution superscript,<br />
+  /// _ and _() => character substitution.dart subscript,<br />
+  /// ^ and ^() => character substitution.dart superscript,<br />
   /// 12.01.23, 12.01.2023 => <​date>,<br />
   /// 12:03 => <​time><br />
   String convertLanisSyntax(String lanisStyledText) {

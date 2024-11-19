@@ -9,8 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
 
-import '../client/client.dart';
-
+import '../core/sph/sph.dart';
 import '../utils/file_icons.dart';
 
 void showFileModal(BuildContext context, LessonsFile file) {
@@ -96,7 +95,7 @@ void launchFile(BuildContext context, String url, String filename,
       barrierDismissible: false,
       builder: (BuildContext context) => downloadDialog(context, fileSize));
 
-  client.downloadFile(url, filename).then((filepath) async {
+  sph!.storage.downloadFile(url, filename).then((filepath) async {
     Navigator.of(context).pop();
 
     if (filepath == "") {
@@ -138,7 +137,7 @@ void saveFile(BuildContext context, String url, String filename, String? fileSiz
       barrierDismissible: false,
       builder: (BuildContext context) => downloadDialog(context, fileSize));
 
-  client.downloadFile(url, filename).then((filepath) async {
+  sph!.storage.downloadFile(url, filename).then((filepath) async {
     Navigator.of(context).pop();
 
     if (filepath == "") {
@@ -162,7 +161,7 @@ void shareFile(BuildContext context, String url, String filename, String? fileSi
       barrierDismissible: false,
       builder: (BuildContext context) => downloadDialog(context, fileSize));
 
-  client.downloadFile(url, filename).then((filepath) async {
+  sph!.storage.downloadFile(url, filename).then((filepath) async {
     Navigator.of(context).pop();
 
     if (filepath == "") {

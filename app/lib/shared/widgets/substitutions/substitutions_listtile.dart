@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/client_submodules/substitutions.dart';
 
+import '../../../models/substitution.dart';
 import '../marquee.dart';
 
 class SubstitutionListTile extends StatelessWidget {

@@ -1,23 +1,19 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:simple_shadow/simple_shadow.dart';
-import 'package:sph_plan/client/client_submodules/substitutions.dart';
-import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/shared/types/timetable.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:sph_plan/view/substitutions/view.dart';
-import 'package:sph_plan/view/timetable/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'core/database/account_database/account_db.dart';
 import 'core/sph/sph.dart';
 
 class StartupScreen extends StatefulWidget {
@@ -58,7 +54,6 @@ class _StartupScreenState extends State<StartupScreen> {
             afterLogin: () async {
               sph?.session.prepareDio();
 
-              // ignore: use_build_context_synchronously
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const HomePage()),
@@ -71,12 +66,17 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   Future<void> performLogin() async {
-    await sph?.session.prepareDio();
+    sph = null;
+    final account = await accountDatabase.getLastLoggedInAccount();
+    if (account != null) {
+      logger.w("SET ACCOUNT: $account");
+      sph = SPH(account: account);
+    }
     if (sph == null) {
       openWelcomeScreen();
       return;
     }
-
+    await sph?.session.prepareDio();
     try {
       await sph?.session.authenticate();
 
@@ -282,7 +282,6 @@ class _StartupScreenState extends State<StartupScreen> {
                   text: AppLocalizations.of(context)!.lanisDownErrorMessage,
                   style: Theme.of(context).textTheme.labelLarge)
             ])),
-          const OfflineAppletSelector()
         ],
       ),
       actions: [
@@ -371,99 +370,5 @@ class _StartupScreenState extends State<StartupScreen> {
                       )
                     ],
                   )));
-  }
-}
-
-class OfflineAppletSelector extends StatefulWidget {
-  const OfflineAppletSelector({super.key});
-
-  @override
-  State<OfflineAppletSelector> createState() => _OfflineAppletSelectorState();
-}
-
-//handling just 2 applets (substitution and timetable) does not require a scalable solution. When adding offline support for more applets we should adapt to creating the config from a single location maybe even integrating the list from [home_page.dart]
-class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
-  SubstitutionPlan? substitutionData;
-  TimeTable? timetableData;
-  bool loading = true;
-
-  List<Widget> appletList = [];
-
-  Widget appletListTile(String title, IconData icon, Function action) {
-    return Column(
-      children: [
-        IconButton(
-          icon: Icon(icon),
-          onPressed: () {
-            action();
-          },
-        ),
-        Text(title)
-      ],
-    );
-  }
-
-  Future<void> loadAppletData() async {
-    String substitutionJson =
-        await globalStorage.read(key: StorageKey.lastSubstitutionData);
-    String timetableJson =
-        await globalStorage.read(key: StorageKey.lastTimetableData);
-    if (substitutionJson != "") {
-      substitutionData =
-          SubstitutionPlan.fromJson(jsonDecode(substitutionJson));
-      appletList.add(appletListTile(
-          AppLocalizations.of(context)!.substitutions, Icons.calendar_today,
-          () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Scaffold(
-                    appBar: AppBar(
-                      title: Text(
-                          "${AppLocalizations.of(context)!.substitutions} (${AppLocalizations.of(context)!.offline})"),
-                    ),
-                    body: StaticSubstitutionsView(
-                      plan: substitutionData,
-                      refresh: null,
-                    ))));
-      }));
-    }
-    if (timetableJson != "") {
-      timetableData = TimeTable.fromJson(jsonDecode(timetableJson));
-
-      appletList.add(appletListTile(
-          AppLocalizations.of(context)!.timeTable, Icons.calendar_today, () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Scaffold(
-                    appBar: AppBar(
-                      title: Text(
-                          "${AppLocalizations.of(context)!.timeTable} (${AppLocalizations.of(context)!.offline})"),
-                    ),
-                    body: StaticTimetableView(
-                      data: timetableData,
-                      refresh: null,
-                    ))));
-      }));
-    }
-    setState(() {
-      loading = false;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadAppletData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: appletList,
-    );
   }
 }
