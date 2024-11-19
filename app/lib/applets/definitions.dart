@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/calendar/definition.dart';
+import 'package:sph_plan/applets/conversations/definition.dart';
+import 'package:sph_plan/applets/data_storage/definition.dart';
+import 'package:sph_plan/applets/lessons/definition.dart';
+import 'package:sph_plan/applets/substitutions/definition.dart';
+import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/shared/account_types.dart';
 
 typedef StringBuildContextCallback = String Function(BuildContext context);
@@ -53,4 +59,15 @@ class AppletSetting<T> {
     required this.description,
     required this.defaultValue,
   });
+}
+
+class AppDefinitions {
+  static List<AppletDefinition> applets = [
+    substitutionDefinition,
+    calendarDefinition,
+    timeTableDefinition,
+    conversationsDefinition,
+    lessonsDefinition,
+    dataStorageDefinition,
+  ];
 }

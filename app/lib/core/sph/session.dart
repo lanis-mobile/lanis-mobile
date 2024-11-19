@@ -7,6 +7,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/parser.dart';
+import 'package:sph_plan/applets/definitions.dart';
 
 import '../connection_checker.dart';
 import 'cryptor.dart';
@@ -211,12 +212,20 @@ class SessionHandler {
     }
   }
 
+  bool doesSupportFeature(AppletDefinition applet) {
+    var app = travelMenu
+      .where((element) => element["link"].toString() == applet.appletPhpUrl)
+      .singleOrNull;
+    if (app == null) return false;
+    return applet.supportedAccountTypes.contains(accountType);
+  }
+
   ///Fetches the school's accent color and saves it to the storage.
   Future<void> getSchoolTheme() async {
     if (await globalStorage.read(key: StorageKey.schoolAccentColor) == "") {
       try {
         final response = await dio.get(
-            "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=$schoolID");
+            "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=${sph.account.schoolID}");
         final schoolInfo = jsonDecode(response.data.toString());
 
         int schoolColor = int.parse(
@@ -236,8 +245,8 @@ class SessionHandler {
     }
   }
 
-
-  AccountType getAccountType() {
+  AccountType get accountType => _getAccountType();
+  AccountType _getAccountType() {
     if (userData.containsKey("klasse")) {
       return AccountType.student;
     } else {

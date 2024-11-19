@@ -4,19 +4,18 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../shared/account_types.dart';
 
-final lessonsDefinition = AppletDefinition(
-  appletPhpUrl: 'meinunterricht.php',
+final calendarDefinition = AppletDefinition(
+  appletPhpUrl: 'calendar.php',
   addDivider: false,
   appletType: AppletType.withBottomNavigation,
-  icon: const Icon(Icons.school),
-  selectedIcon: const Icon(Icons.school_outlined),
-  label: (context) => AppLocalizations.of(context)!.lessons,
+  icon: const Icon(Icons.calendar_today),
+  selectedIcon: const Icon(Icons.calendar_today_outlined),
+  label: (context) => AppLocalizations.of(context)!.calendar,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
-  allowOffline: false,
+  allowOffline: true,
   settings: [],
-  refreshInterval: const Duration(minutes: 15),
+  refreshInterval: const Duration(minutes: 30),
   bodyBuilder: (context, accountType) {
     return Container();
   },
-  
 );

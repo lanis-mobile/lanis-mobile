@@ -4,15 +4,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../shared/account_types.dart';
 
-final substitutionDefinition = AppletDefinition(
-  appletPhpUrl: 'vertretungsplan.php',
-  icon: Icon(Icons.swap_horiz),
-  selectedIcon: Icon(Icons.swap_horiz),
+final timeTableDefinition = AppletDefinition(
+  appletPhpUrl: 'stundenplan.php',
+  icon: Icon(Icons.timelapse),
+  selectedIcon: Icon(Icons.timelapse_outlined),
   appletType: AppletType.withBottomNavigation,
-  addDivider: true,
+  addDivider: false,
   label: (context) => AppLocalizations.of(context)!.substitutions,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher],
-  refreshInterval: Duration(minutes: 10),
+  supportedAccountTypes: [AccountType.student],
+  refreshInterval: Duration(hours: 1),
   settings: [
     AppletSetting<bool>(
       key: 'show_full_plan',

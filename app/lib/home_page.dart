@@ -6,7 +6,6 @@ import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/calendar/calendar.dart';
@@ -19,6 +18,8 @@ import 'package:sph_plan/view/timetable/stream.dart';
 import 'package:sph_plan/view/substitutions/stream.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/core/connection_checker.dart';
+
+import 'core/sph/sph.dart';
 
 class Destination {
   final Icon icon;
@@ -54,62 +55,14 @@ class _HomePageState extends State<HomePage> {
   late int selectedDestinationDrawer;
   late bool doesSupportAnyApplet = false;
 
-  ///The UI is build dynamically based on this list.
-  ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
+  @override
+  void initState() {
+    super.initState();
+    setDefaultDestination();
+    showUpdateInfoIfRequired(context);
+  }
+
   List<Destination> destinations = [
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.substitutions,
-        icon: const Icon(Icons.group),
-        selectedIcon: const Icon(Icons.group_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const SubstitutionsView()),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.calendar,
-        icon: const Icon(Icons.calendar_today),
-        selectedIcon: const Icon(Icons.calendar_today_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.kalender),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const CalendarAnsicht()),
-    Destination(
-      label: (context) => AppLocalizations.of(context)!.timeTable,
-      icon: const Icon(Icons.timelapse),
-      selectedIcon: const Icon(Icons.timelapse),
-      isSupported: client.doesSupportFeature(SPHAppEnum.stundenplan),
-      enableBottomNavigation: true,
-      enableDrawer: true,
-      body: const TimetableView(),
-    ),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.messages,
-        icon: const Icon(Icons.forum),
-        selectedIcon: const Icon(Icons.forum_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.nachrichten),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const ConversationsOverview()),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.lessons,
-        icon: const Icon(Icons.school),
-        selectedIcon: const Icon(Icons.school_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const MeinUnterrichtAnsicht()),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.storage,
-        icon: const Icon(Icons.folder_copy),
-        selectedIcon: const Icon(Icons.folder_copy_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.dateispeicher),
-        enableBottomNavigation: false,
-        enableDrawer: true,
-        action: (context) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const DataStorageAnsicht()),
-            )),
     Destination(
         label: (context) => AppLocalizations.of(context)!.openMoodle,
         icon: const Icon(Icons.open_in_new),
@@ -130,7 +83,7 @@ class _HomePageState extends State<HomePage> {
         enableBottomNavigation: false,
         enableDrawer: true,
         action: (context) {
-          client.getLoginURL().then((response) {
+          sph!.session.getLoginURL().then((response) {
             launchUrl(Uri.parse(response));
           });
         }),
@@ -148,6 +101,8 @@ class _HomePageState extends State<HomePage> {
             )),
   ];
 
+
+
   void setDefaultDestination() {
     for (var destination in destinations) {
       if (destination.isSupported && destination.enableBottomNavigation) {
@@ -159,15 +114,9 @@ class _HomePageState extends State<HomePage> {
     selectedDestinationDrawer = -1;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    setDefaultDestination();
-    showUpdateInfoIfRequired(context);
-  }
 
   void openLanisInBrowser(BuildContext? context) {
-    client.getLoginURL().then((response) {
+    sph!.session.getLoginURL().then((response) {
       launchUrl(Uri.parse(response));
     }).catchError((ex) {
       if (context == null) return;
