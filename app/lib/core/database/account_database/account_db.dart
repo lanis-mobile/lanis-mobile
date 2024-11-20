@@ -14,6 +14,7 @@ class ClearTextAccount {
   final String username;
   final String password;
   final String schoolName;
+  final bool firstLogin;
 
   ClearTextAccount({
     required this.localId,
@@ -21,6 +22,7 @@ class ClearTextAccount {
     required this.username,
     required this.password,
     required this.schoolName,
+    this.firstLogin = false,
   });
 }
 
@@ -102,7 +104,7 @@ class AccountDatabase extends _$AccountDatabase {
             (u) => OrderingTerm(
                 expression: u.lastLogin,
                 mode: OrderingMode.desc,
-                nulls: NullsOrder.last),
+                nulls: NullsOrder.first),
           ]))
         .getSingleOrNull();
     if (account == null) return null;
@@ -113,6 +115,7 @@ class AccountDatabase extends _$AccountDatabase {
       username: account.username,
       password: await decryptPassword(account.passwordHash),
       schoolName: account.schoolName,
+      firstLogin: account.lastLogin == null,
     );
   }
 

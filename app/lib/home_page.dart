@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/shared/account_types.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
+import 'package:sph_plan/view/account_switcher/account_switcher.dart';
+import 'package:sph_plan/view/login/setup_screen_page_view_models.dart';
 import 'package:sph_plan/view/moodle.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,19 +42,23 @@ class Destination {
       required this.label});
 
   factory Destination.fromAppletDefinition(AppletDefinition appletDefinition) {
-    debugPrint("Creating destination from applet definition: ${appletDefinition.appletPhpUrl}");
+    debugPrint(
+        "Creating destination from applet definition: ${appletDefinition.appletPhpUrl}");
     return Destination(
       body: appletDefinition.appletType == AppletType.withBottomNavigation
           ? appletDefinition.bodyBuilder
           : null,
-      action: appletDefinition.appletType != AppletType.withBottomNavigation ? (context) => Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) {
-          return appletDefinition.bodyBuilder!(context, sph!.session.accountType);
-        })
-      ) : null,
+      action: appletDefinition.appletType != AppletType.withBottomNavigation
+          ? (context) =>
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return appletDefinition.bodyBuilder!(
+                    context, sph!.session.accountType);
+              }))
+          : null,
       addDivider: appletDefinition.addDivider,
       isSupported: sph!.session.doesSupportFeature(appletDefinition),
-      enableBottomNavigation: appletDefinition.appletType == AppletType.withBottomNavigation,
+      enableBottomNavigation:
+          appletDefinition.appletType == AppletType.withBottomNavigation,
       enableDrawer: true,
       icon: appletDefinition.icon,
       selectedIcon: appletDefinition.selectedIcon,
@@ -61,7 +68,8 @@ class Destination {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final bool showIntro;
+  const HomePage({super.key, required this.showIntro});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -83,6 +91,11 @@ class _HomePageState extends State<HomePage> {
     showUpdateInfoIfRequired(context);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
   final List<Destination> endDestinations = [
     Destination(
         label: (context) => AppLocalizations.of(context)!.openMoodle,
@@ -91,11 +104,8 @@ class _HomePageState extends State<HomePage> {
         isSupported: true,
         enableBottomNavigation: false,
         enableDrawer: true,
-        action: (context) => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const MoodleWebView())
-        )),
+        action: (context) => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MoodleWebView()))),
     Destination(
         label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
         icon: const Icon(Icons.open_in_new),
@@ -117,12 +127,10 @@ class _HomePageState extends State<HomePage> {
         enableDrawer: true,
         addDivider: true,
         action: (context) => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SettingsScreen()),
-        )),
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            )),
   ];
-
-
 
   void setDefaultDestination() {
     for (var destination in destinations) {
@@ -134,7 +142,6 @@ class _HomePageState extends State<HomePage> {
     }
     selectedDestinationDrawer = -1;
   }
-
 
   void openLanisInBrowser(BuildContext? context) {
     SessionHandler.getLoginURL(sph!.account).then((response) {
@@ -214,57 +221,78 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                ClipRRect(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                    child: ColorFiltered(
-                      colorFilter:
-                          ColorFilter.mode(imageColor, BlendMode.srcOver),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: CachedNetworkImage(
-                          imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${sph!.account.schoolID}&s=xs"),
-                          placeholder: const Image(
-                            image: AssetImage("assets/icon.png"),
-                            fit: BoxFit.cover,
+                children: [
+                  Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      ClipRRect(
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.mode(imageColor, BlendMode.srcOver),
+                            child: AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: CachedNetworkImage(
+                                imageUrl: Uri.parse(
+                                    "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${sph!.account.schoolID}&s=xs"),
+                                placeholder: const Image(
+                                  image: AssetImage("assets/icon.png"),
+                                  fit: BoxFit.cover,
+                                ),
+                                builder: (BuildContext context,
+                                    ImageProvider<Object> imageProvider) {
+                                  return Image(
+                                    fit: BoxFit.cover,
+                                    image: imageProvider,
+                                  );
+                                },
+                              ),
+                            ),
                           ),
-                          builder: (BuildContext context, ImageProvider<Object> imageProvider) {
-                            return Image(
-                              fit: BoxFit.cover,
-                              image: imageProvider,
-                            );
-                          },
                         ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              sph!.account.schoolName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(color: textColor),
+                            ),
+                            Text(
+                              "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                  fontWeight: FontWeight.bold, color: textColor),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 2, right: 2),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => AccountSwitcher())
+                          );
+                        },
+                        icon: Icon(Icons.switch_account),
+                        iconSize: 32,
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        sph!.account.schoolName,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: textColor),
-                      ),
-                      Text(
-                        "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                                fontWeight: FontWeight.bold, color: textColor),
-                      )
-                    ],
-                  ),
-                )
-              ],
+                ],
             ),
           ),
           ...drawerDestinations,
@@ -340,22 +368,24 @@ class _HomePageState extends State<HomePage> {
                 actions: [
                   if (kDebugMode) ...[
                     IconButton(
-                      onPressed: (){
-                      throw ErrorDescription("Test Error in debug mode");
-                      }, icon: const Icon(Icons.nearby_error),
+                      onPressed: () {
+                        throw ErrorDescription("Test Error in debug mode");
+                      },
+                      icon: const Icon(Icons.nearby_error),
                       tooltip: "Throw test Error",
                     ),
                     IconButton(
-                      onPressed: (){
-                        //updateNotifications();
-                      }, icon: const Icon(Icons.notifications),
-                      tooltip: "Simulate notification update"
-                    )
+                        onPressed: () {
+                          //updateNotifications();
+                        },
+                        icon: const Icon(Icons.notifications),
+                        tooltip: "Simulate notification update")
                   ]
                 ],
               ),
               body: doesSupportAnyApplet
-                  ? destinations[selectedDestinationDrawer].body!(context, sph!.session.accountType)
+                  ? destinations[selectedDestinationDrawer].body!(
+                      context, sph!.session.accountType)
                   : noAppsSupported(),
               bottomNavigationBar:
                   doesSupportAnyApplet ? navBar(context) : null,

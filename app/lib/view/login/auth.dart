@@ -11,9 +11,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../utils/logger.dart';
 
 class LoginForm extends StatefulWidget {
-  final Function() afterLogin;
-
-  const LoginForm({super.key, required this.afterLogin});
+  const LoginForm({super.key});
 
   @override
   LoginFormState createState() {

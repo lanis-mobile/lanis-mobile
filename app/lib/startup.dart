@@ -33,16 +33,7 @@ class _StartupScreenState extends State<StartupScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
-    ).then((_) async {
-      await sph?.session.prepareDio();
-
-      // Context should be mounted
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    });
+    );
   }
 
   void openLoginScreen() {
@@ -50,16 +41,7 @@ class _StartupScreenState extends State<StartupScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          body: LoginForm(
-            afterLogin: () async {
-              sph?.session.prepareDio();
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
-              );
-            },
-          ),
+          body: LoginForm(),
         ),
       ),
     );
@@ -83,7 +65,7 @@ class _StartupScreenState extends State<StartupScreen> {
       if (error == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => HomePage(showIntro: account!.firstLogin,)),
         );
       }
       return;
