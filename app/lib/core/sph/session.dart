@@ -92,7 +92,7 @@ class SessionHandler {
         loginURL = await getLoginURL(sph.account);
       }
 
-      final response = await dio.get(loginURL);
+      await dio.get(loginURL);
 
 
       preventLogoutTimer?.cancel();
@@ -100,6 +100,7 @@ class SessionHandler {
           const Duration(seconds: 10), (timer) => preventLogout());
 
       if (!backgroundFetch) {
+        accountDatabase.updateLastLogin(sph.account.localId);
         travelMenu = await getFastTravelMenu();
         userData = await fetchUserData();
       }

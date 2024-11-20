@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
+import 'package:sph_plan/view/login/auth.dart';
 
 import 'account_list_tile.dart';
 
@@ -35,7 +37,13 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
                       padding: EdgeInsets.all(16),
                       child: ElevatedButton(
                         onPressed: () {
-                          //accountDatabase.insert(Account(schoolName: 'New School', username: 'New User'));
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => Scaffold(
+                                body: LoginForm(),
+                              ),
+                            )
+                          );
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -58,8 +66,8 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
                 userName: account.username,
                 lastLogin: account.lastLogin ?? DateTime.now(),
                 onTap: () {
-                  //accountDatabase.updateLastLogin(account.id);
-                  Navigator.pop(context);
+                  accountDatabase.setNextLogin(account.id);
+                  Phoenix.rebirth(context);
                 },
               );
             },

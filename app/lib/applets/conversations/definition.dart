@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../shared/account_types.dart';
 
 final conversationsDefinition = AppletDefinition(
-  appletPhpUrl: 'conversations.php',
+  appletPhpUrl: 'nachrichten.php',
   addDivider: false,
   appletType: AppletType.withBottomNavigation,
   icon: const Icon(Icons.forum),

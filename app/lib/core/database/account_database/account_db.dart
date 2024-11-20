@@ -99,14 +99,14 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future<ClearTextAccount?> getLastLoggedInAccount() async {
-    final account = await (select(accountsTable)
+    final _account = await (select(accountsTable)
           ..orderBy([
             (u) => OrderingTerm(
                 expression: u.lastLogin,
                 mode: OrderingMode.desc,
                 nulls: NullsOrder.first),
-          ]))
-        .getSingleOrNull();
+          ])).get();
+    final account = _account.isNotEmpty ? _account.first : null;
     if (account == null) return null;
 
     return ClearTextAccount(
@@ -121,6 +121,24 @@ class AccountDatabase extends _$AccountDatabase {
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'accounts_database');
+  }
+
+  void updateLastLogin(int id) async {
+    (await (update(accountsTable)..where((tbl) => tbl.id.equals(id))).write(AccountsTableCompanion(
+      lastLogin: Value(DateTime.now()),
+    )));
+  }
+
+  void setNextLogin(int id) async {
+    // check weather a account with null is already in the db and return if so
+    final account = await (select(accountsTable)..where((tbl) => tbl.lastLogin.isNull())).get();
+    if (account.isNotEmpty) {
+      return;
+    }
+
+    (await (update(accountsTable)..where((tbl) => tbl.id.equals(id))).write(AccountsTableCompanion(
+      lastLogin: Value(null),
+    )));
   }
 }
 
