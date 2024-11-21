@@ -65,22 +65,16 @@ class App extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<Map<String, String?>> snapshot) {
         late ThemeMode mode;
         late Themes theme;
+        logger.f("Snapshot: ${snapshot.data}");
         if (snapshot.hasData) {
           mode = snapshot.data!['theme'] == 'system' ? ThemeMode.system : snapshot.data!['theme'] == 'dark' ? ThemeMode.dark : ThemeMode.light;
 
           if (snapshot.data!['color'] == 'standard') {
             theme = Themes.standardTheme;
           } else if (snapshot.data!['isAmoled'] == 'true') {
-            theme = Themes.standardTheme;
             theme = Themes.getAmoledThemes();
-          }
-          else if (snapshot.data!['color'] == 'school') {
-            Color? schoolColor = snapshot.data!['schoolColor'] == '' ? null : Color(int.parse(snapshot.data!['schoolColor']!));
-            if (schoolColor == null) {
-              theme = Themes.standardTheme;
-            } else {
-              theme = Themes.getNewTheme(schoolColor);
-            }
+          } else if (snapshot.data!['color'] != 'standard' && snapshot.data!['color'] != 'dynamic') {
+            theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
           } else {
             theme = Themes.standardTheme;
           }

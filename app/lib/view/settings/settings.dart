@@ -124,31 +124,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(AppLocalizations.of(context)!.language),
             onTap: () => AppSettings.openAppSettings(type: AppSettingsType.appLocale),
           ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: Text(AppLocalizations.of(context)!.logout),
-            onTap: () => showDialog<String>(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: Text(AppLocalizations.of(context)!.reallyReset),
-                content:
-                    Text(AppLocalizations.of(context)!.allSettingsWillBeLost),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(
-                        context, AppLocalizations.of(context)!.cancel),
-                    child: Text(AppLocalizations.of(context)!.cancel),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Phoenix.rebirth(context);
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -8,8 +8,6 @@ import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../utils/logger.dart';
-
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -44,7 +42,6 @@ class LoginFormState extends State<LoginForm> {
             ),
     );
     try {
-      logger.i("Logging in with $schoolID.$username and $password");
       await SessionHandler.getLoginURL(
         ClearTextAccount(
           localId: -1,
@@ -54,16 +51,12 @@ class LoginFormState extends State<LoginForm> {
           schoolName: "",
         ),
       );
-      logger.i("Logged in successfully");
-      logger.i("Adding account to database");
       await accountDatabase.addAccountToDatabase(
         schoolID: int.parse(schoolID),
         username: username,
         password: password,
         schoolName: selectedSchoolName,
       );
-      logger.i("Account added to database");
-      logger.i("Calling rebirth");
       Phoenix.rebirth(context);
     } on LanisException catch (ex) {
       setState(() {

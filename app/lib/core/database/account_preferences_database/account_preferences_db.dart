@@ -77,4 +77,7 @@ class KV {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.isIn(keys))).watch();
     return stream.map((event) => Map.fromEntries(event.map((e) => MapEntry(e.key, e.value))));
   }
+
+  void deleteDatabaseFile() {
+  }
 }

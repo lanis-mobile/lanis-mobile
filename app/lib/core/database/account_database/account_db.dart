@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_keychain/flutter_keychain.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../utils/logger.dart';
+import '../../sph/sph.dart';
 import '../account_preferences_database/kv_defaults.dart';
 
 part 'account_db.g.dart';
@@ -55,7 +59,7 @@ class AccountDatabase extends _$AccountDatabase {
   @override
   int get schemaVersion => 1;
 
-  Future<String> cryptPassword(String password) async {
+  Future<String> _cryptPassword(String password) async {
     String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
       final cryptKey = Key.fromSecureRandom(32); // 256 bits
@@ -70,7 +74,7 @@ class AccountDatabase extends _$AccountDatabase {
     return '${iv.base64}:${encrypted.base64}';
   }
 
-  Future<String> decryptPassword(String encryptedPassword) async {
+  Future<String> _decryptPassword(String encryptedPassword) async {
     logger.i(encryptedPassword);
     final String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
@@ -87,7 +91,7 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future <void> addAccountToDatabase({required int schoolID, required String username, required String password, required String schoolName}) async {
-    String passwordHash = await cryptPassword(password);
+    String passwordHash = await _cryptPassword(password);
     await into(accountsTable).insert(AccountsTableCompanion(
       schoolId: Value(schoolID),
       schoolName: Value(schoolName),
@@ -113,14 +117,30 @@ class AccountDatabase extends _$AccountDatabase {
       localId: account.id,
       schoolID: account.schoolId,
       username: account.username,
-      password: await decryptPassword(account.passwordHash),
+      password: await _decryptPassword(account.passwordHash),
       schoolName: account.schoolName,
       firstLogin: account.lastLogin == null,
     );
   }
 
-  static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'accounts_database');
+  Future<void> deleteAccount(int id) async {
+    if (id == sph?.account.localId) {
+      sph?.prefs.close();
+      final Directory databasesDirectory = await getApplicationDocumentsDirectory();
+      final dbFile = File('${databasesDirectory.path}/session_${id}_db.sqlite');
+      if (dbFile.existsSync()) {
+        dbFile.deleteSync();
+      }
+    }
+    final int rows = await (delete(accountsTable)..where((tbl) => tbl.id.equals(id))).go();
+    if (rows == 0) {
+      logger.w('Account with id $id not found');
+    }
+    final tempDir = await getTemporaryDirectory();
+    final userDir = Directory("${tempDir.path}/$id");
+    if (!userDir.existsSync()) {
+      userDir.deleteSync(recursive: true);
+    }
   }
 
   void updateLastLogin(int id) async {
@@ -139,6 +159,10 @@ class AccountDatabase extends _$AccountDatabase {
     (await (update(accountsTable)..where((tbl) => tbl.id.equals(id))).write(AccountsTableCompanion(
       lastLogin: Value(null),
     )));
+  }
+
+  static QueryExecutor _openConnection() {
+    return driftDatabase(name: 'accounts_database');
   }
 }
 

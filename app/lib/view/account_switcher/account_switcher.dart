@@ -68,7 +68,7 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
                 onTap: () {
                   accountDatabase.setNextLogin(account.id);
                   Phoenix.rebirth(context);
-                },
+                }, dbID: account.id,
               );
             },
           );

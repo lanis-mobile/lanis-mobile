@@ -62,9 +62,9 @@ class _AppearanceElementsState extends State<AppearanceElements> {
             borderRadius: BorderRadius.circular(10),
             color: primaryColor ??
                 (Theme.of(context).brightness == Brightness.dark
-                    ? Themes.flutterColorThemes[value]!.darkTheme!.colorScheme
+                    ? Themes.flutterColorThemes[value]?.darkTheme?.colorScheme
                         .primary
-                    : Themes.flutterColorThemes[value]!.lightTheme!.colorScheme
+                    : Themes.flutterColorThemes[value]?.lightTheme?.colorScheme
                         .primary),
           ),
         ),
@@ -234,15 +234,6 @@ class _AppearanceElementsState extends State<AppearanceElements> {
                         accountDatabase.kv.set('color', _selectedColor);
                       });
                     },
-            ),
-            colorListTile(
-              title: AppLocalizations.of(context)!.schoolColor,
-              subtitle:
-                  AppLocalizations.of(context)!.schoolColorOriginExplanation,
-              value: "school",
-              primaryColor: Theme.of(context).brightness == Brightness.dark
-                  ? Themes.schoolTheme.darkTheme!.colorScheme.primary
-                  : Themes.schoolTheme.lightTheme!.colorScheme.primary,
             ),
           ],
           const Padding(

@@ -193,7 +193,7 @@ class Cryptor {
   }
 
   /// Initialize RSA encryption and authentication.
-  Future<void> start(Dio dioClient) async {
+  Future<void> initialize(Dio dioClient) async {
     dio = dioClient;
 
     key = generateKey();

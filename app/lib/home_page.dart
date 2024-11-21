@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import 'package:introduction_screen/introduction_screen.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/shared/account_types.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
@@ -10,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/shared/widgets/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/account_switcher/account_switcher.dart';
-import 'package:sph_plan/view/login/setup_screen_page_view_models.dart';
 import 'package:sph_plan/view/moodle.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,14 +19,16 @@ import 'package:sph_plan/core/connection_checker.dart';
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
 
+typedef ActionFunction = void Function(BuildContext);
+
 class Destination {
   final Icon icon;
   final Icon selectedIcon;
   final bool enableBottomNavigation;
   final bool enableDrawer;
   final bool addDivider;
-  final Function label;
-  final Function? action;
+  final String Function(BuildContext) label;
+  final ActionFunction? action;
   final Widget Function(BuildContext, AccountType)? body;
   late final bool isSupported;
 
@@ -42,8 +44,6 @@ class Destination {
       required this.label});
 
   factory Destination.fromAppletDefinition(AppletDefinition appletDefinition) {
-    debugPrint(
-        "Creating destination from applet definition: ${appletDefinition.appletPhpUrl}");
     return Destination(
       body: appletDefinition.appletType == AppletType.withBottomNavigation
           ? appletDefinition.bodyBuilder
@@ -103,6 +103,7 @@ class _HomePageState extends State<HomePage> {
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
         enableBottomNavigation: false,
+        addDivider: true,
         enableDrawer: true,
         action: (context) => Navigator.push(context,
             MaterialPageRoute(builder: (context) => const MoodleWebView()))),
@@ -119,17 +120,31 @@ class _HomePageState extends State<HomePage> {
           });
         }),
     Destination(
-        label: (context) => AppLocalizations.of(context)!.settings,
-        icon: const Icon(Icons.settings),
-        selectedIcon: const Icon(Icons.settings),
-        isSupported: true,
-        enableBottomNavigation: false,
-        enableDrawer: true,
-        addDivider: true,
-        action: (context) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            )),
+      label: (context) => AppLocalizations.of(context)!.settings,
+      icon: const Icon(Icons.settings),
+      selectedIcon: const Icon(Icons.settings),
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      addDivider: true,
+      action: (context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      ),
+    ),
+    Destination(
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      icon: Icon(Icons.logout),
+      selectedIcon: Icon(Icons.logout_outlined),
+      label: (context) => AppLocalizations.of(context)!.logout,
+      action: (context) {
+        sph!.session.deAuthenticate();
+        accountDatabase.deleteAccount(sph!.account.localId);
+        Phoenix.rebirth(context);
+      }
+    ),
   ];
 
   void setDefaultDestination() {
@@ -221,42 +236,51 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Stack(
-                children: [
-                  Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      ClipRRect(
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                          child: ColorFiltered(
-                            colorFilter:
-                            ColorFilter.mode(imageColor, BlendMode.srcOver),
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: CachedNetworkImage(
-                                imageUrl: Uri.parse(
-                                    "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${sph!.account.schoolID}&s=xs"),
-                                placeholder: const Image(
-                                  image: AssetImage("assets/icon.png"),
-                                  fit: BoxFit.cover,
-                                ),
-                                builder: (BuildContext context,
-                                    ImageProvider<Object> imageProvider) {
-                                  return Image(
-                                    fit: BoxFit.cover,
-                                    image: imageProvider,
-                                  );
-                                },
+              children: [
+                Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    ClipRRect(
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                        child: ColorFiltered(
+                          colorFilter:
+                              ColorFilter.mode(imageColor, BlendMode.srcOver),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 8,
+                            child: CachedNetworkImage(
+                              imageUrl: Uri.parse(
+                                  "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${sph!.account.schoolID}&s=xs"),
+                              placeholder: const Image(
+                                image: AssetImage("assets/icon.png"),
+                                fit: BoxFit.cover,
                               ),
+                              builder: (BuildContext context,
+                                  ImageProvider<Object> imageProvider) {
+                                return Image(
+                                  fit: BoxFit.cover,
+                                  image: imageProvider,
+                                );
+                              },
                             ),
                           ),
                         ),
                       ),
-                      Padding(
+                    ),
+                    Padding(
                         padding: const EdgeInsets.only(left: 24.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor),
+                            ),
                             Text(
                               sph!.account.schoolName,
                               style: Theme.of(context)
@@ -264,35 +288,26 @@ class _HomePageState extends State<HomePage> {
                                   .titleMedium
                                   ?.copyWith(color: textColor),
                             ),
-                            Text(
-                              "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                  fontWeight: FontWeight.bold, color: textColor),
-                            )
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 2, right: 2),
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => AccountSwitcher())
-                          );
-                        },
-                        icon: Icon(Icons.switch_account),
-                        iconSize: 32,
-                      ),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 2, right: 2),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => AccountSwitcher()));
+                      },
+                      icon: Icon(Icons.switch_account),
+                      iconSize: 32,
                     ),
                   ),
-                ],
+                ),
+              ],
             ),
           ),
           ...drawerDestinations,

@@ -104,9 +104,8 @@ class SessionHandler {
         travelMenu = await getFastTravelMenu();
         userData = await fetchUserData();
       }
-      await getSchoolTheme();
 
-      await cryptor.start(dio);
+      await cryptor.initialize(dio);
 
       return;
     } on LanisException {
@@ -118,6 +117,12 @@ class SessionHandler {
     } catch (e) {
       throw UnknownException();
     }
+  }
+
+  Future<void> deAuthenticate() async {
+    preventLogoutTimer?.cancel();
+    await dio.get('https://start.schulportal.hessen.de/index.php?logout=all');
+    jar.deleteAll();
   }
 
   ///returns a URL that when called loggs the user in.
@@ -143,8 +148,6 @@ class SessionHandler {
     if (response1.statusCode == 503) {
       throw LanisDownException();
     }
-
-    logger.i(response1.statusCode);
 
     final loginTimeout =
     parse(response1.data).getElementById("authErrorLocktime");
@@ -229,32 +232,11 @@ class SessionHandler {
       .where((element) => element["link"].toString() == applet.appletPhpUrl)
       .singleOrNull;
     if (app == null) {
-      logger.i("Applet ${applet.appletPhpUrl} not found in travel menu");
       return false;
     }
-    logger.i("Applet ${applet.appletPhpUrl} found in travel menu");
     return applet.supportedAccountTypes.contains(accountType);
   }
-
-  ///Fetches the school's accent color and saves it to the storage.
-  Future<void> getSchoolTheme() async {
-    final data = await sph.prefs.kv.get("schoolAccentColor");
-    if (data != null) {
-      try {
-        final response = await dio.get(
-            "https://startcache.schulportal.hessen.de/exporteur.php?a=school&i=${sph.account.schoolID}");
-        final schoolInfo = jsonDecode(response.data.toString());
-
-        int schoolColor = int.parse(
-            "FF${schoolInfo["Farben"]["bg"].substring(1)}",
-            radix: 16);
-
-        Themes.schoolTheme = Themes.getNewTheme(Color(schoolColor));
-
-        await sph.prefs.kv.set("schoolAccentColor", schoolColor.toString());
-      } on Exception catch (_) {}
-    }
-  }
+  
 
   AccountType get accountType => _getAccountType();
   AccountType _getAccountType() {
