@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const AppearanceSettingsScreen()),
+                    builder: (context) => const AppearanceSettings()),
               );
             },
           ),

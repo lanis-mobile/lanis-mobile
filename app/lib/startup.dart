@@ -51,7 +51,7 @@ class _StartupScreenState extends State<StartupScreen> {
     sph = null;
     final account = await accountDatabase.getLastLoggedInAccount();
     if (account != null) {
-      logger.w("SET ACCOUNT: $account");
+      logger.w("SET ACCOUNT: ${account.schoolID}.${account.username}");
       sph = SPH(account: account);
     }
     if (sph == null) {
