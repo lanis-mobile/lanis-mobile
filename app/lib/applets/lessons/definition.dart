@@ -13,7 +13,7 @@ final lessonsDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.lessons,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   allowOffline: false,
-  settings: [],
+  settings: {},
   refreshInterval: const Duration(minutes: 15),
   bodyBuilder: (context, accountType) {
     return Container();

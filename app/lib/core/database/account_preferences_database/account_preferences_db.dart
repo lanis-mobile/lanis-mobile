@@ -70,14 +70,41 @@ class KV {
 
   Stream<String?> subscribe(String key) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).watchSingleOrNull();
-    return stream.map((event) => event?.value);
+    return stream.map((event) {
+      if (event?.value == null && kvDefaults.containsKey(key)) {
+        return kvDefaults[key];
+      }
+      return event?.value;
+    });
   }
 
   Stream<Map<String, String?>> subscribeMultiple(List<String> keys) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.isIn(keys))).watch();
-    return stream.map((event) => Map.fromEntries(event.map((e) => MapEntry(e.key, e.value))));
+    return stream.map((event) {
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
+      for (var key in keys) {
+        if (!result.containsKey(key) && kvDefaults.containsKey(key)) {
+          result[key] = kvDefaults[key];
+        }
+      }
+      return result;
+    });
   }
 
-  void deleteDatabaseFile() {
+  Stream<Map<String, String?>> subscribeAllApplet(String appletId, Map<String, String?> defaults) {
+    final stream = (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).watch();
+    return stream.map((event) {
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
+      for (var key in defaults.keys) {
+        if (!result.containsKey(key) && defaults.containsKey(key)) {
+          result[key] = defaults[key];
+        }
+      }
+      return result;
+    });
+  }
+
+  Future<void> setAppletValue(String appletId, String key, String value) async {
+    await db.into(db.appletPreferencesTable).insert(AppletPreferencesTableCompanion.insert(appletId: appletId, key: key, value: Value(value)), mode: InsertMode.insertOrReplace);
   }
 }

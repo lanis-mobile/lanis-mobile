@@ -13,7 +13,7 @@ final dataStorageDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.storage,
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
-  settings: [],
+  settings: {},
   refreshInterval: const Duration(minutes: 2),
   bodyBuilder: (context, accountType) {
     return Container();

@@ -75,7 +75,6 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future<String> _decryptPassword(String encryptedPassword) async {
-    logger.i(encryptedPassword);
     final String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
       throw Exception('Encryption key not found');
@@ -186,7 +185,12 @@ class KV {
 
   Stream<String?> subscribe(String key) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).watchSingleOrNull();
-    return stream.map((event) => event?.value);
+    return stream.map((event) {
+      if (event?.value == null && kvDefaults.containsKey(key)) {
+        return kvDefaults[key];
+      }
+      return event?.value;
+    });
   }
 
   Stream<Map<String, String?>> subscribeMultiple(List<String> keys) {

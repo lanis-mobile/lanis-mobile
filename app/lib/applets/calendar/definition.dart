@@ -13,7 +13,7 @@ final calendarDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.calendar,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   allowOffline: true,
-  settings: [],
+  settings: {},
   refreshInterval: const Duration(minutes: 30),
   bodyBuilder: (context, accountType) {
     return Container();

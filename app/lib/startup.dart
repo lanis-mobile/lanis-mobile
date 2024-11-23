@@ -275,11 +275,6 @@ class _StartupScreenState extends State<StartupScreen> {
                     "https://github.com/alessioC42/lanis-mobile/issues"));
               },
               child: const Text("GitHub")),
-          OutlinedButton(
-              onPressed: () {
-                launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
-              },
-              child: Text(AppLocalizations.of(context)!.startupReportButton)),
         ],
         if (error is LanisDownException) ...[
           OutlinedButton(

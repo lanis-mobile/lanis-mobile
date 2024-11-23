@@ -96,12 +96,6 @@ class ErrorView extends StatelessWidget {
                           child: const Text("GitHub")
                       ),
                     ),
-                    OutlinedButton(
-                        onPressed: () {
-                          launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
-                        },
-                        child: Text(AppLocalizations.of(context)!.startupReportButton)
-                    ),
                   ],
                 )
               ],
