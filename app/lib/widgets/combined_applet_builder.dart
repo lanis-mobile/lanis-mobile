@@ -19,10 +19,10 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
   const CombinedAppletBuilder({super.key, required this.parser, required this.phpUrl, required this.settingsDefaults, required this.accountType, required this.builder, this.offline = false});
 
   @override
-  State<CombinedAppletBuilder> createState() => _CombinedAppletBuilderState<T>();
+  State<CombinedAppletBuilder<T>> createState() => _CombinedAppletBuilderState<T>();
 }
 
-class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder> {
+class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
   Widget _errorWidget() {
     return Center(
       child: Column(
