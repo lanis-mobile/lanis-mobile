@@ -6,17 +6,17 @@ import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
 import '../utils/logger.dart';
 
+typedef RefreshFunction = Future<void> Function();
 typedef UpdateSetting = Future<void> Function(String key, String value);
-typedef BuilderFunction<T> = Widget Function(BuildContext, T, AccountType, Map<String, String?>, UpdateSetting);
+typedef BuilderFunction<T> = Widget Function(BuildContext, T, AccountType, Map<String, String?>, UpdateSetting, RefreshFunction? refresh);
 
 class CombinedAppletBuilder<T> extends StatefulWidget {
   final AppletParser<T> parser;
   final String phpUrl;
   final Map<String, String?> settingsDefaults;
   final AccountType accountType;
-  final bool offline;
   final BuilderFunction<T> builder;
-  const CombinedAppletBuilder({super.key, required this.parser, required this.phpUrl, required this.settingsDefaults, required this.accountType, required this.builder, this.offline = false});
+  const CombinedAppletBuilder({super.key, required this.parser, required this.phpUrl, required this.settingsDefaults, required this.accountType, required this.builder,});
 
   @override
   State<CombinedAppletBuilder<T>> createState() => _CombinedAppletBuilderState<T>();
@@ -66,13 +66,16 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
               } else if (!snapshot.hasData) {
                 return _loadingState();
               }
-              return (widget.builder  as BuilderFunction<T>)(
+              return widget.builder(
                 context,
                 snapshot.data!.content as T,
                 widget.accountType,
                 dbSnapshot.data ?? {},
                     (String key, String value) async {
                   await sph!.prefs.kv.set(key, value);
+                },
+                () async {
+                  await widget.parser.fetchData(forceRefresh: true);
                 },
               );
             },
