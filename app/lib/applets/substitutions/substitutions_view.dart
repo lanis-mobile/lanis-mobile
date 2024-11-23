@@ -6,7 +6,6 @@ import 'package:sph_plan/models/substitution.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../core/parsers.dart';
 import '../../core/sph/sph.dart';
 import '../../shared/widgets/substitutions/substitutions_gridtile.dart';
 import '../../shared/widgets/substitutions/substitutions_listtile.dart';
@@ -130,10 +129,16 @@ class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProvid
   }
 
   @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder<SubstitutionPlan>(
       accountType: sph!.session.accountType,
-      parser: Parsers.substitutionsParser,
+      parser: sph!.parser.substitutionsParser,
       phpUrl: substitutionDefinition.appletPhpUrl,
       settingsDefaults: substitutionDefinition.settings,
       builder: (context, data, accountType, settings, updateSetting, refresh) {

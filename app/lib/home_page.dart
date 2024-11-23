@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:sph_plan/core/connection_checker.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/shared/account_types.dart';
@@ -14,7 +15,6 @@ import 'package:sph_plan/view/account_switcher/account_switcher.dart';
 import 'package:sph_plan/view/moodle.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:sph_plan/core/connection_checker.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
@@ -350,61 +350,67 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<ConnectionStatus>(
-        stream: connectionChecker.statusStream,
-        builder: (context, network) {
-          return Scaffold(
-              appBar: AppBar(
-                title: Text(doesSupportAnyApplet
-                    ? destinations[selectedDestinationDrawer].label(context)
-                    : AppLocalizations.of(context)!.openLanisInBrowser),
-                bottom: network.data == ConnectionStatus.disconnected
-                    ? PreferredSize(
-                        preferredSize: const Size.fromHeight(40),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Icon(Icons.signal_wifi_off),
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!
-                                    .noInternetConnection1,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : null,
-                actions: [
-                  if (kDebugMode) ...[
-                    IconButton(
-                      onPressed: () {
-                        throw ErrorDescription("Test Error in debug mode");
-                      },
-                      icon: const Icon(Icons.nearby_error),
-                      tooltip: "Throw test Error",
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(doesSupportAnyApplet
+            ? destinations[selectedDestinationDrawer].label(context)
+            : AppLocalizations.of(context)!.openLanisInBrowser),
+        actions: [
+          if (kDebugMode) ...[
+            IconButton(
+              onPressed: () {
+                throw ErrorDescription("Test Error in debug mode");
+              },
+              icon: const Icon(Icons.nearby_error),
+              tooltip: "Throw test Error",
+            ),
+            IconButton(
+                onPressed: () {
+                  //updateNotifications();
+                },
+                icon: const Icon(Icons.notifications),
+                tooltip: "Simulate notification update")
+          ]
+        ],
+      ),
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          StreamBuilder(
+            stream: connectionChecker.statusStream,
+            builder: (context, snapshot) {
+              if (snapshot.data == ConnectionStatus.connected) {
+                return const SizedBox();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(Icons.signal_wifi_off),
                     ),
-                    IconButton(
-                        onPressed: () {
-                          //updateNotifications();
-                        },
-                        icon: const Icon(Icons.notifications),
-                        tooltip: "Simulate notification update")
-                  ]
-                ],
-              ),
-              body: doesSupportAnyApplet
-                  ? destinations[selectedDestinationDrawer].body!(
-                      context, sph!.session.accountType)
-                  : noAppsSupported(),
-              bottomNavigationBar:
-                  doesSupportAnyApplet ? navBar(context) : null,
-              drawer: navDrawer(context));
-        });
+                    Text(
+                      AppLocalizations.of(context)!.noInternetConnection1,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          Expanded(
+            child: doesSupportAnyApplet
+                ? destinations[selectedDestinationDrawer].body!(
+                context, sph!.session.accountType)
+                : noAppsSupported(),
+          )
+        ],
+      ),
+      bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
+      drawer: navDrawer(context),
+    );
   }
 }

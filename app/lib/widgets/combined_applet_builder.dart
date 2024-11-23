@@ -23,6 +23,9 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
 }
 
 class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
+  late Map<String, String?> appletSettings;
+  bool _loading = true;
+
   Widget _errorWidget() {
     return Center(
       child: Column(
@@ -40,44 +43,43 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
     );
   }
 
+  void initSettings () async {
+    appletSettings = await sph!.prefs.kv.getAllApplet(widget.phpUrl, widget.settingsDefaults);
+    setState(() {
+      _loading = false;
+    });
+  }
+
   @override
   void initState() {
     widget.parser.fetchData();
     super.initState();
+    initSettings();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return _loadingState();
+    }
     return StreamBuilder(
       stream: widget.parser.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
           return _errorWidget();
         } else if (!snapshot.hasData || snapshot.data?.status == FetcherStatus.fetching) {
-          logger.i('At first loading state');
           return _loadingState();
         } else {
-          logger.i('At builder');
-          return StreamBuilder<Map<String, String?>>(
-            stream: sph!.prefs.kv.subscribeAllApplet(widget.phpUrl, widget.settingsDefaults),
-            builder: (context, dbSnapshot) {
-              if (dbSnapshot.hasError) {
-                return _errorWidget();
-              } else if (!snapshot.hasData) {
-                return _loadingState();
-              }
-              return widget.builder(
-                context,
-                snapshot.data!.content as T,
-                widget.accountType,
-                dbSnapshot.data ?? {},
-                    (String key, String value) async {
-                  await sph!.prefs.kv.set(key, value);
-                },
-                () async {
-                  await widget.parser.fetchData(forceRefresh: true);
-                },
-              );
+          return widget.builder(
+            context,
+            snapshot.data!.content as T,
+            widget.accountType,
+            appletSettings,
+            (String key, String value) async {
+              await sph!.prefs.kv.set(key, value);
+            },
+            () async {
+              await widget.parser.fetchData(forceRefresh: true);
             },
           );
         }

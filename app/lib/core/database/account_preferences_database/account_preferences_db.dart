@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../../utils/logger.dart';
 import 'kv_defaults.dart';
 
 part 'account_preferences_db.g.dart';
@@ -102,6 +105,15 @@ class KV {
       }
       return result;
     });
+  }
+  Future<Map<String, String?>> getAllApplet(String appletId, Map<String, String?> defaults) async {
+    final result = Map<String, String?>.fromEntries((await (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).get()).map((e) => MapEntry(e.key, e.value)));
+    for (var key in defaults.keys) {
+      if (!result.containsKey(key) && defaults.containsKey(key)) {
+        result[key] = defaults[key];
+      }
+    }
+    return result;
   }
 
   Future<void> setAppletValue(String appletId, String key, String value) async {

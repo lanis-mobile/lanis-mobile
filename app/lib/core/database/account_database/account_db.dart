@@ -89,7 +89,7 @@ class AccountDatabase extends _$AccountDatabase {
     return encrypter.decrypt64(parts[1], iv: iv);
   }
 
-  Future <void> addAccountToDatabase({required int schoolID, required String username, required String password, required String schoolName}) async {
+  Future <int> addAccountToDatabase({required int schoolID, required String username, required String password, required String schoolName}) async {
     String passwordHash = await _cryptPassword(password);
     await into(accountsTable).insert(AccountsTableCompanion(
       schoolId: Value(schoolID),
@@ -99,6 +99,9 @@ class AccountDatabase extends _$AccountDatabase {
       lastLogin: Value(null),
       creationDate: Value(DateTime.now()),
     ));
+    final insertedAccount = await (select(accountsTable)
+        ..where((tbl) => tbl.schoolId.equals(schoolID) & tbl.username.equals(username))).getSingle();
+    return insertedAccount.id;
   }
 
   Future<ClearTextAccount?> getLastLoggedInAccount() async {
@@ -148,7 +151,8 @@ class AccountDatabase extends _$AccountDatabase {
     )));
   }
 
-  void setNextLogin(int id) async {
+  Future<void> setNextLogin(int id) async {
+    sph!.prefs.close();
     // check weather a account with null is already in the db and return if so
     final account = await (select(accountsTable)..where((tbl) => tbl.lastLogin.isNull())).get();
     if (account.isNotEmpty) {

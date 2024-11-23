@@ -8,6 +8,8 @@ import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../core/sph/sph.dart';
+
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -51,12 +53,15 @@ class LoginFormState extends State<LoginForm> {
           schoolName: "",
         ),
       );
-      await accountDatabase.addAccountToDatabase(
+
+      int newID = await accountDatabase.addAccountToDatabase(
         schoolID: int.parse(schoolID),
         username: username,
         password: password,
         schoolName: selectedSchoolName,
       );
+      await sph?.session.deAuthenticate();
+      await accountDatabase.setNextLogin(newID);
       Phoenix.rebirth(context);
     } on LanisException catch (ex) {
       setState(() {

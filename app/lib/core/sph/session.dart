@@ -120,6 +120,7 @@ class SessionHandler {
   }
 
   Future<void> deAuthenticate() async {
+    logger.w('Deauthenticating user [${sph.account.localId}] ${sph.account.schoolID}.${sph.account.username}');
     preventLogoutTimer?.cancel();
     await dio.get('https://start.schulportal.hessen.de/index.php?logout=all');
     jar.deleteAll();
