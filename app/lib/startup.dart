@@ -6,7 +6,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
@@ -100,57 +99,17 @@ class _StartupScreenState extends State<StartupScreen> {
     super.dispose();
   }
 
-  /// Either school image or app version.
-  Widget schoolLogo() {
-    var darkMode = Theme.of(context).brightness == Brightness.dark;
-
-    Widget deviceInfo = FutureBuilder(
+  Widget appVersion() {
+    return FutureBuilder(
       future: PackageInfo.fromPlatform(),
       builder: (context, packageInfo) {
         return Text(
           "lanis-mobile ${packageInfo.data?.version}",
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.25)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
         );
       },
-    );
-
-    return CachedNetworkImage(
-      imageType: ImageType.png,
-      imageUrl: Uri.parse(
-          "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${sph?.account.schoolID}"),
-      placeholder: deviceInfo,
-      builder: (context, imageProvider) => ColorFiltered(
-        colorFilter: darkMode
-            ? const ColorFilter.matrix([
-                -1,
-                0,
-                0,
-                0,
-                255,
-                0,
-                -1,
-                0,
-                0,
-                255,
-                0,
-                0,
-                -1,
-                0,
-                255,
-                0,
-                0,
-                0,
-                1,
-                0
-              ])
-            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-        child: Image(
-          image: imageProvider,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
+    ); 
   }
 
   Widget appLogo(double horizontal, double vertical) {
@@ -304,7 +263,7 @@ class _StartupScreenState extends State<StartupScreen> {
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      schoolLogo(),
+                      appVersion(),
                       Column(
                         children: [
                           appLogo(80.0, 20.0),
@@ -321,7 +280,7 @@ class _StartupScreenState extends State<StartupScreen> {
                 : Stack(
                     alignment: Alignment.topCenter,
                     children: [
-                      schoolLogo(),
+                      appVersion(),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

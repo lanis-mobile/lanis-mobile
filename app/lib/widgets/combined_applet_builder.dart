@@ -59,15 +59,12 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return _loadingState();
-    }
     return StreamBuilder(
       stream: widget.parser.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
           return _errorWidget();
-        } else if (!snapshot.hasData || snapshot.data?.status == FetcherStatus.fetching) {
+        } else if (!snapshot.hasData || snapshot.data?.status == FetcherStatus.fetching || _loading) {
           return _loadingState();
         } else {
           return widget.builder(
