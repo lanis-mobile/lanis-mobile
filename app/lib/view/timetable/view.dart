@@ -122,7 +122,7 @@ class _StaticTimetableViewState extends State<StaticTimetableView> {
                         if (selected.raum != null)
                           modalSheetItem(selected.raum!, Icons.place),
                         modalSheetItem(
-                            "${selected.startTime.hour}:${selected.startTime.minute} - ${selected.endTime.hour}:${selected.endTime.minute} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
+                            "${selected.startTime.hour}:${selected.startTime.minute.toString().padLeft(2, '0')} - ${selected.endTime.hour}:${selected.endTime.minute.toString().padLeft(2, '0')} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
                             Icons.access_time),
                         if (selected.lehrer != null)
                           modalSheetItem(selected.lehrer!, Icons.person),
