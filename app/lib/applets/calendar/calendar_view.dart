@@ -9,7 +9,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 
-import '../../core/applet_parser.dart';
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
 import '../../shared/exceptions/client_status_exceptions.dart';

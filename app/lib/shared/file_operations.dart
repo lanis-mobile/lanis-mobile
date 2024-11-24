@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:open_file/open_file.dart';
-import 'package:sph_plan/shared/types/lesson.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
 
 import '../core/sph/sph.dart';
+import '../models/lessons.dart';
 import '../utils/file_icons.dart';
 
 void showFileModal(BuildContext context, LessonsFile file) {
