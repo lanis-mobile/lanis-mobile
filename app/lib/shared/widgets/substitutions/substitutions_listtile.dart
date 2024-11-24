@@ -34,7 +34,8 @@ class SubstitutionListTile extends StatelessWidget {
               )
             ],
           ),
-              SubstitutionsFormattedText(value!, Theme.of(context).textTheme.bodyMedium!)
+          SubstitutionsFormattedText(
+              value!, Theme.of(context).textTheme.bodyMedium!)
         ]));
   }
 
@@ -114,32 +115,34 @@ class SubstitutionListTile extends StatelessWidget {
               ),
             )
           ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (!doesNoticeExist(substitutionData.klasse)) ...[
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.30,
-                  child: MarqueeWidget(
-                      child: Text(
-                    substitutionData.klasse!,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  )),
-                ),
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              spacing: 16,
+              alignment: WrapAlignment.spaceBetween,
+              children: [
+                if (!doesNoticeExist(substitutionData.klasse)) ...[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.30,
+                    child: MarqueeWidget(
+                        child: Text(
+                      substitutionData.klasse!,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    )),
+                  ),
+                ],
+                if (!doesNoticeExist(substitutionData.fach)) ...[
+                  Text(
+                    substitutionData.fach!,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+                if (!doesNoticeExist(substitutionData.stunde)) ...[
+                  Text(substitutionData.stunde,
+                      style: Theme.of(context).textTheme.titleLarge),
+                ]
               ],
-              if (!doesNoticeExist(substitutionData.fach)) ...[
-                Text(
-                  substitutionData.fach!,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-              if (!doesNoticeExist(substitutionData.stunde)) ...[
-                Text(
-                  substitutionData.stunde,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ]
-            ],
+            ),
           ),
         ],
       ),

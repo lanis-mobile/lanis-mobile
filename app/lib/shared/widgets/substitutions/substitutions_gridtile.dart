@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/client/client_submodules/substitutions.dart';
 import 'package:sph_plan/shared/widgets/marquee.dart';
+
 import 'substitutions_listtile.dart';
 
 class SubstitutionGridTile extends StatelessWidget {
@@ -18,9 +19,9 @@ class SubstitutionGridTile extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
-      child:
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
             children: [
               Padding(
@@ -33,8 +34,9 @@ class SubstitutionGridTile extends StatelessWidget {
               )
             ],
           ),
-          SubstitutionsFormattedText(value!, Theme.of(context).textTheme.bodyMedium!)
-      ]));
+          SubstitutionsFormattedText(
+              value!, Theme.of(context).textTheme.bodyMedium!)
+        ]));
   }
 
   @override
@@ -112,33 +114,34 @@ class SubstitutionGridTile extends StatelessWidget {
               ),
             )
           ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              if (!doesNoticeExist(substitutionData.klasse)) ...[
-                SizedBox(
-                  width: 230,
-                  child: MarqueeWidget(
-                    child: Text(
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              spacing: 16,
+              alignment: WrapAlignment.spaceBetween,
+              children: [
+                if (!doesNoticeExist(substitutionData.klasse)) ...[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.30,
+                    child: MarqueeWidget(
+                        child: Text(
                       substitutionData.klasse!,
                       style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                    )),
                   ),
-                )
+                ],
+                if (!doesNoticeExist(substitutionData.fach)) ...[
+                  Text(
+                    substitutionData.fach!,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+                if (!doesNoticeExist(substitutionData.stunde)) ...[
+                  Text(substitutionData.stunde,
+                      style: Theme.of(context).textTheme.titleLarge),
+                ]
               ],
-              if (!doesNoticeExist(substitutionData.fach)) ...[
-                Text(
-                  substitutionData.fach!,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-              if (!doesNoticeExist(substitutionData.stunde)) ...[
-                Text(
-                  substitutionData.stunde,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ]
-            ],
+            ),
           ),
         ],
       ),
