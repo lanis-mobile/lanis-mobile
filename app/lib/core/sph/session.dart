@@ -73,7 +73,7 @@ class SessionHandler {
   }
 
   ///Logs the user in and fetches the necessary metadata.
-  Future<void> authenticate({backgroundFetch = false, String? withLoginUrl}) async {
+  Future<void> authenticate({bool withoutData = false, String? withLoginUrl}) async {
     if (!(await connectionChecker.connected)) {
       throw NoConnectionException();
     }
@@ -99,7 +99,7 @@ class SessionHandler {
       preventLogoutTimer = Timer.periodic(
           const Duration(seconds: 10), (timer) => preventLogout());
 
-      if (!backgroundFetch) {
+      if (!withoutData) {
         accountDatabase.updateLastLogin(sph.account.localId);
         travelMenu = await getFastTravelMenu();
         userData = await fetchUserData();

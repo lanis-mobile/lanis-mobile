@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/calendar/calendar_view.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -11,11 +12,11 @@ final calendarDefinition = AppletDefinition(
   icon: const Icon(Icons.calendar_today),
   selectedIcon: const Icon(Icons.calendar_today_outlined),
   label: (context) => AppLocalizations.of(context)!.calendar,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher],
-  allowOffline: true,
+  supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
+  allowOffline: false,
   settings: {},
-  refreshInterval: const Duration(minutes: 30),
+  refreshInterval: const Duration(hours: 1),
   bodyBuilder: (context, accountType) {
-    return Container();
+    return CalendarView();
   },
 );
