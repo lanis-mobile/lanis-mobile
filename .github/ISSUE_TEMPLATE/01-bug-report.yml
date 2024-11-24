@@ -33,10 +33,9 @@ body:
     attributes:
       label: Device Info
       description: Please provide some info about the Device your using
-      placeholder: """
-      OS: Android 20
-      Device: Samsung Galaxy S44 Ultra Pro Max Toaster Edition
-      """
+      placeholder: |
+        OS: Android 20
+        Device: Samsung Galaxy S44 Ultra Pro Max Toaster Edition
     validations:
       required: true
   - type: markdown
