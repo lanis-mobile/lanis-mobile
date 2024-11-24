@@ -1,0 +1,21 @@
+name: Feature request
+description: Request a feature.
+title: "[Feature]: "
+labels: ["enhancement", "low priority"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    id: what-do-you-want
+    attributes:
+      label: What feature do you want in the App?
+      description: Also tell us, how should it work?
+      placeholder: It would be nice...
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Please make sure you looked for this issues in already existing issues before creating a new one.
