@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/data_storage/folder_listtile.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
 import '../../models/client_status_exceptions.dart';
+import '../../utils/logger.dart';
 import 'file_listtile.dart';
 
 class DataStorageNodeView extends StatefulWidget {
@@ -30,8 +32,7 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
 
   void loadItems() async {
     try {
-      var items = await sph!.parser.dataStorageParser.getNode(widget.nodeID);
-      var (fileList, folderList) = items;
+      final (fileList, folderList) = await sph!.parser.dataStorageParser.getNode(widget.nodeID);
       files = fileList;
       folders = folderList;
 
@@ -50,23 +51,12 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
     var listTiles = <Widget>[];
 
     for (var folder in folders) {
-      listTiles.add(ListTile(
-          title: Text(folder.name),
-          subtitle: Text(
-            folder.desc,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          leading: const Icon(Icons.folder_outlined),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    DataStorageNodeView(nodeID: folder.id, title: folder.name),
-              ),
-            );
-          }));
+      listTiles.add(
+        FolderListTile(
+          context: context,
+          folder: folder,
+        ),
+      );
     }
 
     for (var file in files) {

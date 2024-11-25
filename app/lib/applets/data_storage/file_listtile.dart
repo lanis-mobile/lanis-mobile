@@ -24,7 +24,7 @@ class FileListTile extends StatefulWidget {
   const FileListTile({super.key, required this.context, required this.file});
 
   @override
-  _FileListTileState createState() => _FileListTileState();
+  State<FileListTile> createState() => _FileListTileState();
 }
 
 class _FileListTileState extends State<FileListTile> {
@@ -37,7 +37,7 @@ class _FileListTileState extends State<FileListTile> {
   }
 
   void updateLocalFileStatus() {
-    sph!.parser.dataStorageParser
+    sph!.storage
         .doesFileExist(widget.file.downloadUrl, widget.file.name)
         .then((value) {
       setState(() {

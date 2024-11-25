@@ -14,11 +14,11 @@ class FolderListTile extends ListTile {
   Widget build(BuildContext context) {
     return ListTile(
         title: Text(folder.name),
-        subtitle: Text(
+        subtitle: folder.desc.trim() != '' ? Text(
           folder.desc,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-        ),
+        ) : null,
         leading: const Icon(Icons.folder_outlined),
         onTap: () {
           Navigator.push(
