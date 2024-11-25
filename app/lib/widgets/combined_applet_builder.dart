@@ -4,7 +4,6 @@ import 'package:sph_plan/shared/account_types.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
-import '../utils/logger.dart';
 
 typedef RefreshFunction = Future<void> Function();
 typedef UpdateSetting = Future<void> Function(String key, String value);
@@ -80,7 +79,10 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
             widget.accountType,
             appletSettings,
             (String key, String value) async {
-              await sph!.prefs.kv.set(key, value);
+              await sph!.prefs.kv.setAppletValue(widget.phpUrl, key, value);
+              setState(() {
+                appletSettings[key] = value;
+              });
             },
             () async {
               await widget.parser.fetchData(forceRefresh: true);

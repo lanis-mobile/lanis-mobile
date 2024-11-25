@@ -27,7 +27,7 @@ class AccountListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ColorPair userColor = RandomColor.randomColor("$userName$schoolName$dbID");
+    ColorPair userColor = RandomColor.bySeed("$userName$schoolName$dbID");
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

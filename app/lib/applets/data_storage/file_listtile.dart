@@ -92,7 +92,7 @@ class SearchFileListTile extends StatefulWidget {
       required this.downloadUrl});
 
   @override
-  _SearchFileListTileState createState() => _SearchFileListTileState();
+  State<SearchFileListTile> createState() => _SearchFileListTileState();
 }
 
 class _SearchFileListTileState extends State<SearchFileListTile> {
