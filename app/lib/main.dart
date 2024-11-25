@@ -70,12 +70,13 @@ class App extends StatelessWidget {
 
           if (snapshot.data!['color'] == 'standard') {
             theme = Themes.standardTheme;
-          } else if (snapshot.data!['isAmoled'] == 'true') {
-            theme = Themes.getAmoledThemes();
           } else if (snapshot.data!['color'] != 'standard' && snapshot.data!['color'] != 'dynamic') {
             theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
           } else {
             theme = Themes.standardTheme;
+          }
+          if (snapshot.data!['isAmoled'] == 'true') {
+            theme = Themes.getAmoledThemes();
           }
         } else {
           mode = ThemeMode.system;

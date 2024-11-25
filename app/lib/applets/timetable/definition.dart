@@ -9,7 +9,7 @@ final timeTableDefinition = AppletDefinition(
   appletPhpUrl: 'stundenplan.php',
   icon: Icon(Icons.timelapse),
   selectedIcon: Icon(Icons.timelapse_outlined),
-  appletType: AppletType.withBottomNavigation,
+  appletType: AppletType.nested,
   addDivider: false,
   label: (context) => AppLocalizations.of(context)!.timeTable,
   supportedAccountTypes: [AccountType.student],

@@ -8,7 +8,7 @@ import '../../shared/account_types.dart';
 final calendarDefinition = AppletDefinition(
   appletPhpUrl: 'kalender.php',
   addDivider: false,
-  appletType: AppletType.withBottomNavigation,
+  appletType: AppletType.nested,
   icon: const Icon(Icons.calendar_today),
   selectedIcon: const Icon(Icons.calendar_today_outlined),
   label: (context) => AppLocalizations.of(context)!.calendar,

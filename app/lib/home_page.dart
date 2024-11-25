@@ -45,10 +45,10 @@ class Destination {
 
   factory Destination.fromAppletDefinition(AppletDefinition appletDefinition) {
     return Destination(
-      body: appletDefinition.appletType == AppletType.withBottomNavigation
+      body: appletDefinition.appletType == AppletType.nested
           ? appletDefinition.bodyBuilder
           : null,
-      action: appletDefinition.appletType != AppletType.withBottomNavigation
+      action: appletDefinition.appletType != AppletType.nested
           ? (context) =>
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                 return appletDefinition.bodyBuilder!(
@@ -58,7 +58,7 @@ class Destination {
       addDivider: appletDefinition.addDivider,
       isSupported: sph!.session.doesSupportFeature(appletDefinition),
       enableBottomNavigation:
-          appletDefinition.appletType == AppletType.withBottomNavigation,
+          appletDefinition.appletType == AppletType.nested,
       enableDrawer: true,
       icon: appletDefinition.icon,
       selectedIcon: appletDefinition.selectedIcon,

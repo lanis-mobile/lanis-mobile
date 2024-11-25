@@ -68,7 +68,6 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
             );
           }
 
-          logger.i(snapshot.data!);
 
           return ListView(
             children: [

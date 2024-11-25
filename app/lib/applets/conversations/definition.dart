@@ -7,7 +7,7 @@ import '../../shared/account_types.dart';
 final conversationsDefinition = AppletDefinition(
   appletPhpUrl: 'nachrichten.php',
   addDivider: false,
-  appletType: AppletType.withBottomNavigation,
+  appletType: AppletType.nested,
   icon: const Icon(Icons.forum),
   selectedIcon: const Icon(Icons.forum_outlined),
   label: (context) => AppLocalizations.of(context)!.messages,

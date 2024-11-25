@@ -9,7 +9,7 @@ import '../../shared/account_types.dart';
 final lessonsDefinition = AppletDefinition(
   appletPhpUrl: 'meinunterricht.php',
   addDivider: false,
-  appletType: AppletType.withBottomNavigation,
+  appletType: AppletType.nested,
   icon: const Icon(Icons.school),
   selectedIcon: const Icon(Icons.school_outlined),
   label: (context) => AppLocalizations.of(context)!.lessons,

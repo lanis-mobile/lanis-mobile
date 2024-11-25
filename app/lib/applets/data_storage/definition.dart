@@ -8,7 +8,7 @@ import '../../shared/account_types.dart';
 final dataStorageDefinition = AppletDefinition(
   appletPhpUrl: 'dateispeicher.php',
   addDivider: true,
-  appletType: AppletType.onlyDrawer,
+  appletType: AppletType.navigation,
   icon: const Icon(Icons.folder_copy),
   selectedIcon: const Icon(Icons.folder_copy_outlined),
   label: (context) => AppLocalizations.of(context)!.storage,

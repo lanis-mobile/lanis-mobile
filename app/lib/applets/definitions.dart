@@ -12,8 +12,8 @@ typedef WidgetBuildBody = Widget Function(BuildContext context, AccountType acco
 typedef BackgroundTaskFunction = Future<void> Function(AccountType accountType);
 
 enum AppletType {
-  withBottomNavigation,
-  onlyDrawer,
+  nested,
+  navigation,
 }
 
 class AppletDefinition {
@@ -29,7 +29,7 @@ class AppletDefinition {
   final Map<String, String?> settings;
   WidgetBuildBody? bodyBuilder;
 
-  bool get enableBottomNavigation => appletType == AppletType.withBottomNavigation;
+  bool get enableBottomNavigation => appletType == AppletType.nested;
 
   AppletDefinition({
     required this.appletPhpUrl,

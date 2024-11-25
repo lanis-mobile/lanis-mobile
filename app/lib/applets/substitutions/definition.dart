@@ -11,7 +11,7 @@ final substitutionDefinition = AppletDefinition(
   appletPhpUrl: 'vertretungsplan.php',
   icon: Icon(Icons.people),
   selectedIcon: Icon(Icons.people_outline),
-  appletType: AppletType.withBottomNavigation,
+  appletType: AppletType.nested,
   addDivider: true,
   label: (context) => AppLocalizations.of(context)!.substitutions,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
