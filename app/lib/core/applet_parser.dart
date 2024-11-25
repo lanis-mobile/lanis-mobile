@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 
+import '../utils/logger.dart';
 import 'connection_checker.dart';
 
 enum FetcherStatus {
@@ -59,6 +60,7 @@ class AppletParser<T> {
             FetcherResponse<T>(status: FetcherStatus.done, content: data));
         isEmpty = false;
       }).catchError((ex) async {
+        logger.e(ex);
         if (!secondTry) {
           await sph!.session.authenticate();
           await fetchData(forceRefresh: true, secondTry: true);

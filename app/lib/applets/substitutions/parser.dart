@@ -145,8 +145,6 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
               .toList());
     } on SocketException {
       throw NetworkException();
-    } catch (e) {
-      throw UnknownException();
     }
   }
 

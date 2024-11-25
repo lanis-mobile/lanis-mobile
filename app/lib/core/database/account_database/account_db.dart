@@ -152,7 +152,8 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future<void> setNextLogin(int id) async {
-    sph!.prefs.close();
+    if (sph == null) return;
+    sph?.prefs.close();
     // check weather a account with null is already in the db and return if so
     final account = await (select(accountsTable)..where((tbl) => tbl.lastLogin.isNull())).get();
     if (account.isNotEmpty) {

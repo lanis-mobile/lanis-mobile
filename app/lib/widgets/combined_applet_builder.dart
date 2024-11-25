@@ -26,12 +26,19 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
   late Map<String, String?> appletSettings;
   bool _loading = true;
 
-  Widget _errorWidget() {
+  Widget _errorWidget(Function refresh) {
     return Center(
       child: Column(
         children: [
           Icon(Icons.error),
           Text(AppLocalizations.of(context)!.errorOccurred),
+          SizedBox(height: 30,),
+          ElevatedButton(
+            onPressed: () {
+              refresh();
+            },
+            child: Text(AppLocalizations.of(context)!.tryAgain),
+          ),
         ],
       ),
     );
@@ -63,7 +70,7 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
       stream: widget.parser.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
-          return _errorWidget();
+          return _errorWidget(() => widget.parser.fetchData(forceRefresh: true));
         } else if (!snapshot.hasData || snapshot.data?.status == FetcherStatus.fetching || _loading) {
           return _loadingState();
         } else {
