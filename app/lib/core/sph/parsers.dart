@@ -1,4 +1,5 @@
 import 'package:sph_plan/applets/calendar/parser.dart';
+import 'package:sph_plan/applets/conversations/parser.dart';
 import 'package:sph_plan/applets/lessons/teacher/parser.dart';
 import 'package:sph_plan/applets/timetable/student/parser.dart';
 
@@ -13,6 +14,7 @@ class Parsers {
   LessonsTeacherParser? _lessonsTeacherParser;
   DataStorageParser? _dataStorageParser;
   TimetableStudentParser? _timetableStudentParser;
+  ConversationsParser? _conversationsParser;
 
   get substitutionsParser {
     _substitutionsParser ??= SubstitutionsParser();
@@ -42,5 +44,10 @@ class Parsers {
   get timetableStudentParser {
     _timetableStudentParser ??= TimetableStudentParser();
     return _timetableStudentParser;
+  }
+
+  get conversationsParser {
+    _conversationsParser ??= ConversationsParser();
+    return _conversationsParser;
   }
 }

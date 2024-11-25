@@ -10,7 +10,7 @@ import 'package:mime/mime.dart';
 
 import '../core/sph/sph.dart';
 import '../models/lessons.dart';
-import '../utils/file_icons.dart';
+import 'file_icons.dart';
 
 void showFileModal(BuildContext context, LessonsFile file) {
   showModalBottomSheet(

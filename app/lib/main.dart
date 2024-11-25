@@ -15,6 +15,7 @@ import 'package:sph_plan/utils/logger.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
+import 'applets/conversations/view/shared.dart';
 import 'core/database/account_database/account_db.dart';
 
 void main() async {
@@ -88,6 +89,18 @@ class App extends StatelessWidget {
           }
           if (snapshot.data?['color'] == 'dynamic') {
             theme = Themes.dynamicTheme;
+          }
+
+          if (mode == ThemeMode.light ||
+              mode == ThemeMode.system &&
+                  MediaQuery.of(context).platformBrightness ==
+                      Brightness.light) {
+            BubbleStyles.init(theme.lightTheme!);
+          } else if (mode == ThemeMode.dark ||
+              mode == ThemeMode.system &&
+                  MediaQuery.of(context).platformBrightness ==
+                      Brightness.dark) {
+            BubbleStyles.init(theme.darkTheme ?? Themes.standardTheme.darkTheme!);
           }
 
           return MaterialApp(

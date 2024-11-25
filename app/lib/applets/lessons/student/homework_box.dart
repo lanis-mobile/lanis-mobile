@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
-import '../../../shared/widgets/format_text.dart';
+import '../../../widgets/format_text.dart';
 
 class HomeworkBox extends StatefulWidget {
   final CurrentEntry currentEntry;

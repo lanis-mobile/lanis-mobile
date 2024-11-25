@@ -35,7 +35,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView> with TickerProv
     return CombinedAppletBuilder<Lessons>(
         parser: sph!.parser.lessonsStudentParser,
         phpUrl: lessonsDefinition.appletPhpUrl,
-        settingsDefaults: lessonsDefinition.settings,
+        settingsDefaults: lessonsDefinition.settingsDefaults,
         accountType: sph!.session.accountType,
         builder: (context, lessons, accountType, settings, updateSetting, refresh) {
           if (lessons.isEmpty) return noDataScreen(context);

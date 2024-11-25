@@ -10,7 +10,7 @@ import 'package:encrypt/encrypt.dart' as encrypt; // Main lib
 import 'package:crypto/crypto.dart'; // Hashing functions
 
 import 'package:dio/dio.dart';
-import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 
 // We use this class to authenticate with Lanis' Encryption and decrypt things.
 class Cryptor {

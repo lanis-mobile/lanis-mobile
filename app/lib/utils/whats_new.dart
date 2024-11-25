@@ -7,7 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../core/sph/sph.dart';
+import '../core/sph/sph.dart';
 
 int compareVersions(String version1, String version2) {
   List<int> v1 = version1.replaceFirst('v', '').split(RegExp(r'[.+]')).map(int.parse).toList();

@@ -3,7 +3,7 @@ import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/timetable/student/student_timetable_view.dart';
 
-import '../../shared/account_types.dart';
+import '../../models/account_types.dart';
 
 final timeTableDefinition = AppletDefinition(
   appletPhpUrl: 'stundenplan.php',
@@ -14,7 +14,7 @@ final timeTableDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.timeTable,
   supportedAccountTypes: [AccountType.student],
   refreshInterval: Duration(hours: 1),
-  settings: {
+  settingsDefaults: {
     'student-selected-type': 'TimeTableType.own',
   },
   bodyBuilder: (context, accountType) {

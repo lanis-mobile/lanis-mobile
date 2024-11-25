@@ -2,7 +2,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
-import 'package:sph_plan/shared/keyboard_observer.dart';
+import 'package:sph_plan/utils/keyboard_observer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,8 +11,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
-import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../shared/widgets/error_view.dart';
+import '../../models/client_status_exceptions.dart';
+import '../../widgets/error_view.dart';
 import '../../utils/logger.dart';
 
 class CalendarView extends StatefulWidget {
@@ -418,7 +418,7 @@ class _CalendarViewState extends State<CalendarView> {
             child: CombinedAppletBuilder<List<CalendarEvent>>(
                 parser: sph!.parser.calendarParser,
                 phpUrl: calendarDefinition.appletPhpUrl,
-                settingsDefaults: calendarDefinition.settings,
+                settingsDefaults: calendarDefinition.settingsDefaults,
                 accountType: sph!.session.accountType,
                 builder: (context, data, accountType, settings, updateSetting, refresh) {
                   eventList = data;

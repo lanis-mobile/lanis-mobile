@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
@@ -12,9 +11,8 @@ import 'package:sph_plan/core/database/account_database/account_db.dart';
 
 import '../connection_checker.dart';
 import 'cryptor.dart';
-import '../../shared/account_types.dart';
-import '../../shared/exceptions/client_status_exceptions.dart';
-import '../../themes.dart';
+import '../../models/account_types.dart';
+import '../../models/client_status_exceptions.dart';
 import '../../utils/logger.dart';
 import 'sph.dart';
 

@@ -2,13 +2,13 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
+import 'package:sph_plan/applets/substitutions/substitutions_listtile.dart';
 import 'package:sph_plan/models/substitution.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/sph/sph.dart';
-import '../../shared/widgets/substitutions/substitutions_gridtile.dart';
-import '../../shared/widgets/substitutions/substitutions_listtile.dart';
+import 'substitutions_gridtile.dart';
 import '../../widgets/combined_applet_builder.dart';
 
 
@@ -140,7 +140,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProvid
       accountType: sph!.session.accountType,
       parser: sph!.parser.substitutionsParser,
       phpUrl: substitutionDefinition.appletPhpUrl,
-      settingsDefaults: substitutionDefinition.settings,
+      settingsDefaults: substitutionDefinition.settingsDefaults,
       builder: (context, data, accountType, settings, updateSetting, refresh) {
 
         if (data.days.isEmpty) {

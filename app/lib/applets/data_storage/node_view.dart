@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
-import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../models/client_status_exceptions.dart';
 import 'file_listtile.dart';
 
 class DataStorageNodeView extends StatefulWidget {

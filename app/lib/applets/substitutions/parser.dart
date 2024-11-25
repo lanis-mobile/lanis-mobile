@@ -10,7 +10,7 @@ import 'package:sph_plan/applets/substitutions/definition.dart';
 import '../../core/applet_parser.dart';
 import '../../core/sph/sph.dart';
 import '../../models/substitution.dart';
-import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../models/client_status_exceptions.dart';
 
 class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
   @override

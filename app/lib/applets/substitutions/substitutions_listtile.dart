@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/substitution.dart';
-import '../marquee.dart';
+import '../../models/substitution.dart';
+import '../../widgets/marquee.dart';
 
 class SubstitutionListTile extends StatelessWidget {
   final Substitution substitutionData;

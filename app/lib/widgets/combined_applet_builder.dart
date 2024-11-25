@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/shared/account_types.dart';
+import 'package:sph_plan/models/account_types.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../core/applet_parser.dart';

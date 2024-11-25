@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/lessons/student/lessons_student_view.dart';
 import 'package:sph_plan/applets/lessons/teacher/lessons_teacher_view.dart';
 
-import '../../shared/account_types.dart';
+import '../../models/account_types.dart';
 
 final lessonsDefinition = AppletDefinition(
   appletPhpUrl: 'meinunterricht.php',
@@ -15,7 +15,7 @@ final lessonsDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.lessons,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   allowOffline: false,
-  settings: {},
+  settingsDefaults: {},
   refreshInterval: const Duration(minutes: 15),
   bodyBuilder: (context, accountType) {
     if (accountType == AccountType.student) {

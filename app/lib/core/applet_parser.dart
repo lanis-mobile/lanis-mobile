@@ -28,11 +28,11 @@ class AppletParser<T> {
 
   AppletParser() {
     if (validCacheDuration != null) {
-      Timer.periodic(validCacheDuration!, _timerCallback);
+      Timer.periodic(validCacheDuration!, timerCallback);
     }
   }
 
-  void _timerCallback(Timer timer) async {
+  void timerCallback(Timer timer) async {
     if (await connectionChecker.connected) {
       await fetchData(forceRefresh: true);
     }

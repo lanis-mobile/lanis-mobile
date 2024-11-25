@@ -7,7 +7,7 @@ import 'package:sph_plan/models/datastorage.dart';
 
 import '../../core/applet_parser.dart';
 import '../../core/sph/sph.dart';
-import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../models/client_status_exceptions.dart';
 
 class DataStorageParser extends AppletParser<(List<FileNode>, List<FolderNode>)> {
   @override

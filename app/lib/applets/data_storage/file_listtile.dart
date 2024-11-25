@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
 import '../../models/lessons.dart';
-import '../../shared/file_operations.dart';
-import '../../shared/widgets/marquee.dart';
+import '../../utils/file_operations.dart';
 import '../../utils/file_icons.dart';
+import '../../widgets/marquee.dart';
 
 enum FileExists { yes, no, loading }
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/conversations/view/conversations_view.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../shared/account_types.dart';
+import '../../models/account_types.dart';
 
 final conversationsDefinition = AppletDefinition(
   appletPhpUrl: 'nachrichten.php',
@@ -13,10 +14,10 @@ final conversationsDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.messages,
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
-  settings: {},
+  settingsDefaults: {},
   refreshInterval: const Duration(minutes: 2),
   bodyBuilder: (context, accountType) {
-    return Container();
+    return ConversationsView();
   },
 
 );

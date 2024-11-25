@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sph_plan/applets/definitions.dart';
-import 'package:sph_plan/shared/account_types.dart';
+import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

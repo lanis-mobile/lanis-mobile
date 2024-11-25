@@ -4,12 +4,12 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/connection_checker.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
-import 'package:sph_plan/shared/account_types.dart';
-import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/models/account_types.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
-import 'package:sph_plan/shared/widgets/whats_new.dart';
+import 'package:sph_plan/utils/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/account_switcher/account_switcher.dart';
 import 'package:sph_plan/view/moodle.dart';

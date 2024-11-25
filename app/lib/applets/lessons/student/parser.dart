@@ -8,7 +8,7 @@ import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/lessons.dart';
 
 import '../../../core/sph/sph.dart';
-import '../../../shared/exceptions/client_status_exceptions.dart';
+import '../../../models/client_status_exceptions.dart';
 
 class LessonsStudentParser extends AppletParser<Lessons> {
 

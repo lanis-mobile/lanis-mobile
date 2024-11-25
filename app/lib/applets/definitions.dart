@@ -5,7 +5,7 @@ import 'package:sph_plan/applets/data_storage/definition.dart';
 import 'package:sph_plan/applets/lessons/definition.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
-import 'package:sph_plan/shared/account_types.dart';
+import 'package:sph_plan/models/account_types.dart';
 
 typedef StringBuildContextCallback = String Function(BuildContext context);
 typedef WidgetBuildBody = Widget Function(BuildContext context, AccountType accountType);
@@ -26,7 +26,7 @@ class AppletDefinition {
   final List<AccountType> supportedAccountTypes;
   final bool allowOffline;
   final Duration refreshInterval;
-  final Map<String, String?> settings;
+  final Map<String, String?> settingsDefaults;
   WidgetBuildBody? bodyBuilder;
 
   bool get enableBottomNavigation => appletType == AppletType.nested;
@@ -40,7 +40,7 @@ class AppletDefinition {
     required this.label,
     required this.supportedAccountTypes,
     required this.refreshInterval,
-    required this.settings,
+    required this.settingsDefaults,
     this.bodyBuilder,
     this.allowOffline = false,
   });

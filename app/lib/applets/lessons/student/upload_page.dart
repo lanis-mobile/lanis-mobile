@@ -7,11 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
 import 'package:mime/mime.dart';
 import 'package:open_file/open_file.dart';
-import 'package:sph_plan/shared/widgets/error_view.dart';
+import 'package:sph_plan/widgets/error_view.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
-import '../../../shared/exceptions/client_status_exceptions.dart';
+import '../../../models/client_status_exceptions.dart';
 
 
 class UploadScreen extends StatefulWidget {

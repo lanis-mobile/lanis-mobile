@@ -9,7 +9,7 @@ import 'package:sph_plan/models/calendar_event.dart';
 import '../../core/applet_parser.dart';
 import '../../core/connection_checker.dart';
 import '../../core/sph/sph.dart';
-import '../../shared/exceptions/client_status_exceptions.dart';
+import '../../models/client_status_exceptions.dart';
 
 class CalendarParser extends AppletParser<List<CalendarEvent>> {
   @override

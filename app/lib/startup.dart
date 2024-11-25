@@ -5,7 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:sph_plan/home_page.dart';
-import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';

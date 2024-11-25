@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
-import 'package:sph_plan/shared/account_types.dart';
+import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/random_color.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -50,7 +50,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     return CombinedAppletBuilder<TimeTable>(
       parser: sph!.parser.timetableStudentParser,
       phpUrl: timeTableDefinition.appletPhpUrl,
-      settingsDefaults: timeTableDefinition.settings,
+      settingsDefaults: timeTableDefinition.settingsDefaults,
       accountType: AccountType.student,
       builder: (context, timetable, _, settings, updateSettings, refresh) {
         TimeTableType selectedType = settings['student-selected-type'] == 'TimeTableType.own'

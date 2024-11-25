@@ -4,7 +4,6 @@ import 'package:sph_plan/view/settings/info_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
-import '../../../shared/apps.dart';
 
 class SupportedFeaturesOverviewScreen extends StatefulWidget {
   const SupportedFeaturesOverviewScreen({super.key});
@@ -35,7 +34,7 @@ class _SupportedFeaturesOverviewScreenState
           leading: const Icon(Icons.settings_applications),
           iconColor: HexColor.fromHex(value["Farbe"]),
           title: Text(value["Name"]),
-          subtitle: Text(getAppSupportStatus(value["link"].toString())),
+          subtitle: Text('#TODO'),
         ));
       }
     });
