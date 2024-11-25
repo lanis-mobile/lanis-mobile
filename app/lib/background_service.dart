@@ -1,22 +1,18 @@
-/*
-import 'dart:convert';
 import 'dart:io';
-import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sph_plan/client/client_submodules/substitutions.dart';
+import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'client/storage.dart';
+import 'core/database/account_database/account_db.dart';
+import 'core/sph/sph.dart';
+
+const identifier = "io.github.alessioc42.pushservice";
 
 Future<void> setupBackgroundService() async {
   if (!Platform.isAndroid && !Platform.isIOS) return;
-  bool enableNotifications =
-      await globalStorage.read(key: StorageKey.settingsPushService) ==
-          "true";
 
 
   if (Platform.isAndroid){
@@ -29,15 +25,12 @@ Future<void> setupBackgroundService() async {
     });
     if (!(notificationsPermissionStatus ?? PermissionStatus.granted).isGranted) return;
   }
-  if (!enableNotifications) return;
 
   await Workmanager().cancelAll();
 
   await Workmanager().initialize(callbackDispatcher,
       isInDebugMode: kDebugMode);
-  const uniqueName = "notificationservice";
-  const uniqueNameIOS = "io.github.alessioc42.notificationservice";
-  final constraints = Constraints(
+  final workManagerConstraints = Constraints(
       networkType: NetworkType.connected,
       requiresBatteryNotLow: true,
       requiresCharging: false,
@@ -46,20 +39,16 @@ Future<void> setupBackgroundService() async {
   );
 
   if (Platform.isAndroid) {
-    int notificationInterval = int.parse(await globalStorage.read(
-        key: StorageKey.settingsPushServiceIntervall));
-
-    await Workmanager().registerPeriodicTask(uniqueName, uniqueName,
-        frequency: Duration(minutes: notificationInterval),
-        constraints: constraints,
+    await Workmanager().registerPeriodicTask(identifier, identifier,
+        frequency: Duration(minutes: 15),
+        constraints: workManagerConstraints,
         initialDelay: const Duration(minutes: 3)
     );
   }
   if (Platform.isIOS) {
     try {
-      await Workmanager().registerPeriodicTask(uniqueNameIOS, uniqueNameIOS,
-          frequency: const Duration(days: 1),
-          constraints: constraints,
+      await Workmanager().registerPeriodicTask(identifier, identifier,
+          constraints: workManagerConstraints,
       );
     } catch (e, s) {
       logger.e(e, stackTrace: s);
@@ -76,7 +65,7 @@ Future<void> initializeNotifications() async {
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true
-      )
+      ),
     ),
   );} catch (e, s) {
     logger.e(e, stackTrace: s);
@@ -89,111 +78,58 @@ void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
       logger.i("Background fetch triggered");
-      await updateNotifications();
+      initializeNotifications();
+
+      AccountDatabase accountDatabase = AccountDatabase();
+      final accounts = await (accountDatabase.select(accountDatabase.accountsTable)..where((tbl) => tbl.allowBackgroundFetch.equals(true))).get();
+      for (final account in accounts) {
+        final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
+        final sph = SPH(account: clearTextAccount);
+        sph.session.authenticate(withoutData: true);
+        for (final applet in AppDefinitions.applets.where((a) => a.backgroundTask != null)) {
+          if (applet.supportedAccountTypes.contains(sph.session.accountType)) {
+            await applet.backgroundTask!(sph, sph.session.accountType, BackgroundTaskToolkit(clearTextAccount));
+          }
+        }
+      }
       return Future.value(true);
-    } catch (e) {
-      logger.f(e.toString());
+    } catch (e, s) {
+      logger.f('Error in background fetch');
+      logger.e(e, stackTrace: s);
     }
     return Future.value(true);
   });
 }
 
-Future<void> updateNotifications() async {
-  initializeNotifications();
-  var client = SPHclient();
-  await client.prepareDio();
-  await client.loadFromStorage();
-  if (client.username == "" || client.password == "") {
-    logger.w("No credentials found, aborting background fetch");
-    return;
-  }
-  await client.login(backgroundFetch: true);
-  final vPlan =
-  await client.substitutions.getAllSubstitutions(skipLoginCheck: true, filtered: true);
-  await globalStorage.write(
-      key: StorageKey.lastSubstitutionData, value: jsonEncode(vPlan));
-  List<Substitution> allSubstitutions = vPlan.allSubstitutions;
-  String messageBody = "";
+class BackgroundTaskToolkit {
+  final ClearTextAccount account;
 
-  for (final entry in allSubstitutions) {
-    final time =
-        "${weekDayGer(entry.tag)} ${entry.stunde.replaceAll(" - ", "/")}";
-    final type = entry.art ?? "";
-    final subject = entry.fach ?? "";
-    final teacher = entry.lehrer ?? "";
-    final classInfo = entry.klasse ?? "";
+  BackgroundTaskToolkit(this.account);
 
-    // Concatenate non-null values with separator "-"
-    final entryText = [time, type, subject, teacher, classInfo]
-        .where((e) => e.isNotEmpty)
-        .join(" - ");
-
-    messageBody += "$entryText\n";
+  int _seedId(int id) {
+    return id + account.localId * 10000;
   }
 
-  if (messageBody != "") {
-    final messageUUID = generateUUID(messageBody);
-
-    messageBody +=
-    "Zuletzt editiert: ${DateFormat.Hm().format(vPlan.lastUpdated)}";
-
-    if (!(await isMessageAlreadySent(messageUUID))) {
-      await sendMessage(
-          "${allSubstitutions.length} Einträge im Vertretungsplan",
-          messageBody);
-      await markMessageAsSent(messageUUID);
+  Future<void> sendMessage(String title, String message, {id = 0}) async {
+    id = _seedId(id);
+    try {
+      final androidDetails = AndroidNotificationDetails(
+        'io.github.alessioc42.sphplan', 'lanis-mobile',
+        channelDescription: "SPH Benachrichtigungen",
+        importance: Importance.high,
+        priority: Priority.high,
+        styleInformation: BigTextStyleInformation(message),
+        ongoing: false,
+      );
+      const iOSDetails = DarwinNotificationDetails(
+        presentAlert: false, presentBadge: true,
+      );
+      var platformDetails = NotificationDetails(android: androidDetails, iOS: iOSDetails);
+      await FlutterLocalNotificationsPlugin()
+          .show(id, title, message, platformDetails);
+    } catch (e,s) {
+      logger.e(e, stackTrace: s);
     }
   }
 }
 
-Future<void> sendMessage(String title, String message, {int id = 0}) async {
-  try {
-    bool ongoingMessage =
-      (await globalStorage.read(key: StorageKey.settingsPushServiceOngoing)) ==
-          "true";
-
-  final androidDetails = AndroidNotificationDetails(
-      'io.github.alessioc42.sphplan', 'lanis-mobile',
-      channelDescription: "Benachrichtigungen über den Vertretungsplan",
-      importance: Importance.high,
-      priority: Priority.high,
-      styleInformation: BigTextStyleInformation(message),
-      ongoing: ongoingMessage,
-      );
-  const iOSDetails = DarwinNotificationDetails(
-      presentAlert: false, presentBadge: true,
-      
-  );
-  var platformDetails = NotificationDetails(android: androidDetails, iOS: iOSDetails);
-  await FlutterLocalNotificationsPlugin()
-      .show(id, title, message, platformDetails);
-  } catch (e,s) {
-    logger.e(e, stackTrace: s);
-  }
-}
-
-String generateUUID(String input) {
-  // Use a hash function (MD5) to generate a unique identifier for the message
-  final uuid = crypto.md5.convert(utf8.encode(input)).toString();
-  return uuid;
-}
-
-Future<void> markMessageAsSent(String uuid) async {
-  await globalStorage.write(key: StorageKey.lastPushMessageHash, value: uuid);
-}
-
-Future<bool> isMessageAlreadySent(String uuid) async {
-  // Read the existing JSON from secure storage
-  String storageValue =
-  await globalStorage.read(key: StorageKey.lastPushMessageHash);
-  return storageValue == uuid;
-}
-
-String weekDayGer(String dateString) {
-  final inputFormat = DateFormat('dd.MM.yyyy');
-  final dateTime = inputFormat.parse(dateString);
-
-  final germanFormat = DateFormat('E', 'de');
-  return germanFormat.format(dateTime);
-}
-*/

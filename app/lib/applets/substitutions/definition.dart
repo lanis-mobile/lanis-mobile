@@ -5,6 +5,7 @@ import 'package:sph_plan/applets/substitutions/parser.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_view.dart';
 
 import '../../models/account_types.dart';
+import 'background.dart';
 
 final parser = SubstitutionsParser();
 final substitutionDefinition = AppletDefinition(
@@ -17,6 +18,7 @@ final substitutionDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   refreshInterval: Duration(minutes: 10),
   settingsDefaults: {},
+  backgroundTask: substitutionsBackgroundTask,
   bodyBuilder: (context, accountType) {
     return SubstitutionsView();
   },

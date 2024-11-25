@@ -57,6 +57,16 @@ class $AccountsTableTable extends AccountsTable
   late final GeneratedColumn<DateTime> creationDate = GeneratedColumn<DateTime>(
       'creation_date', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _allowBackgroundFetchMeta =
+      const VerificationMeta('allowBackgroundFetch');
+  @override
+  late final GeneratedColumn<bool> allowBackgroundFetch = GeneratedColumn<bool>(
+      'allow_background_fetch', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("allow_background_fetch" IN (0, 1))'),
+      defaultValue: const Constant(true));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -65,7 +75,8 @@ class $AccountsTableTable extends AccountsTable
         username,
         passwordHash,
         lastLogin,
-        creationDate
+        creationDate,
+        allowBackgroundFetch
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -120,6 +131,12 @@ class $AccountsTableTable extends AccountsTable
     } else if (isInserting) {
       context.missing(_creationDateMeta);
     }
+    if (data.containsKey('allow_background_fetch')) {
+      context.handle(
+          _allowBackgroundFetchMeta,
+          allowBackgroundFetch.isAcceptableOrUnknown(
+              data['allow_background_fetch']!, _allowBackgroundFetchMeta));
+    }
     return context;
   }
 
@@ -143,6 +160,8 @@ class $AccountsTableTable extends AccountsTable
           .read(DriftSqlType.dateTime, data['${effectivePrefix}last_login']),
       creationDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}creation_date'])!,
+      allowBackgroundFetch: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool, data['${effectivePrefix}allow_background_fetch'])!,
     );
   }
 
@@ -161,6 +180,7 @@ class AccountsTableData extends DataClass
   final String passwordHash;
   final DateTime? lastLogin;
   final DateTime creationDate;
+  final bool allowBackgroundFetch;
   const AccountsTableData(
       {required this.id,
       required this.schoolId,
@@ -168,7 +188,8 @@ class AccountsTableData extends DataClass
       required this.username,
       required this.passwordHash,
       this.lastLogin,
-      required this.creationDate});
+      required this.creationDate,
+      required this.allowBackgroundFetch});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -181,6 +202,7 @@ class AccountsTableData extends DataClass
       map['last_login'] = Variable<DateTime>(lastLogin);
     }
     map['creation_date'] = Variable<DateTime>(creationDate);
+    map['allow_background_fetch'] = Variable<bool>(allowBackgroundFetch);
     return map;
   }
 
@@ -195,6 +217,7 @@ class AccountsTableData extends DataClass
           ? const Value.absent()
           : Value(lastLogin),
       creationDate: Value(creationDate),
+      allowBackgroundFetch: Value(allowBackgroundFetch),
     );
   }
 
@@ -209,6 +232,8 @@ class AccountsTableData extends DataClass
       passwordHash: serializer.fromJson<String>(json['passwordHash']),
       lastLogin: serializer.fromJson<DateTime?>(json['lastLogin']),
       creationDate: serializer.fromJson<DateTime>(json['creationDate']),
+      allowBackgroundFetch:
+          serializer.fromJson<bool>(json['allowBackgroundFetch']),
     );
   }
   @override
@@ -222,6 +247,7 @@ class AccountsTableData extends DataClass
       'passwordHash': serializer.toJson<String>(passwordHash),
       'lastLogin': serializer.toJson<DateTime?>(lastLogin),
       'creationDate': serializer.toJson<DateTime>(creationDate),
+      'allowBackgroundFetch': serializer.toJson<bool>(allowBackgroundFetch),
     };
   }
 
@@ -232,7 +258,8 @@ class AccountsTableData extends DataClass
           String? username,
           String? passwordHash,
           Value<DateTime?> lastLogin = const Value.absent(),
-          DateTime? creationDate}) =>
+          DateTime? creationDate,
+          bool? allowBackgroundFetch}) =>
       AccountsTableData(
         id: id ?? this.id,
         schoolId: schoolId ?? this.schoolId,
@@ -241,6 +268,7 @@ class AccountsTableData extends DataClass
         passwordHash: passwordHash ?? this.passwordHash,
         lastLogin: lastLogin.present ? lastLogin.value : this.lastLogin,
         creationDate: creationDate ?? this.creationDate,
+        allowBackgroundFetch: allowBackgroundFetch ?? this.allowBackgroundFetch,
       );
   AccountsTableData copyWithCompanion(AccountsTableCompanion data) {
     return AccountsTableData(
@@ -256,6 +284,9 @@ class AccountsTableData extends DataClass
       creationDate: data.creationDate.present
           ? data.creationDate.value
           : this.creationDate,
+      allowBackgroundFetch: data.allowBackgroundFetch.present
+          ? data.allowBackgroundFetch.value
+          : this.allowBackgroundFetch,
     );
   }
 
@@ -268,14 +299,15 @@ class AccountsTableData extends DataClass
           ..write('username: $username, ')
           ..write('passwordHash: $passwordHash, ')
           ..write('lastLogin: $lastLogin, ')
-          ..write('creationDate: $creationDate')
+          ..write('creationDate: $creationDate, ')
+          ..write('allowBackgroundFetch: $allowBackgroundFetch')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, schoolId, schoolName, username,
-      passwordHash, lastLogin, creationDate);
+      passwordHash, lastLogin, creationDate, allowBackgroundFetch);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -286,7 +318,8 @@ class AccountsTableData extends DataClass
           other.username == this.username &&
           other.passwordHash == this.passwordHash &&
           other.lastLogin == this.lastLogin &&
-          other.creationDate == this.creationDate);
+          other.creationDate == this.creationDate &&
+          other.allowBackgroundFetch == this.allowBackgroundFetch);
 }
 
 class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
@@ -297,6 +330,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
   final Value<String> passwordHash;
   final Value<DateTime?> lastLogin;
   final Value<DateTime> creationDate;
+  final Value<bool> allowBackgroundFetch;
   const AccountsTableCompanion({
     this.id = const Value.absent(),
     this.schoolId = const Value.absent(),
@@ -305,6 +339,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     this.passwordHash = const Value.absent(),
     this.lastLogin = const Value.absent(),
     this.creationDate = const Value.absent(),
+    this.allowBackgroundFetch = const Value.absent(),
   });
   AccountsTableCompanion.insert({
     this.id = const Value.absent(),
@@ -314,6 +349,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     required String passwordHash,
     this.lastLogin = const Value.absent(),
     required DateTime creationDate,
+    this.allowBackgroundFetch = const Value.absent(),
   })  : schoolId = Value(schoolId),
         schoolName = Value(schoolName),
         username = Value(username),
@@ -327,6 +363,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     Expression<String>? passwordHash,
     Expression<DateTime>? lastLogin,
     Expression<DateTime>? creationDate,
+    Expression<bool>? allowBackgroundFetch,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -336,6 +373,8 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
       if (passwordHash != null) 'password_hash': passwordHash,
       if (lastLogin != null) 'last_login': lastLogin,
       if (creationDate != null) 'creation_date': creationDate,
+      if (allowBackgroundFetch != null)
+        'allow_background_fetch': allowBackgroundFetch,
     });
   }
 
@@ -346,7 +385,8 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
       Value<String>? username,
       Value<String>? passwordHash,
       Value<DateTime?>? lastLogin,
-      Value<DateTime>? creationDate}) {
+      Value<DateTime>? creationDate,
+      Value<bool>? allowBackgroundFetch}) {
     return AccountsTableCompanion(
       id: id ?? this.id,
       schoolId: schoolId ?? this.schoolId,
@@ -355,6 +395,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
       passwordHash: passwordHash ?? this.passwordHash,
       lastLogin: lastLogin ?? this.lastLogin,
       creationDate: creationDate ?? this.creationDate,
+      allowBackgroundFetch: allowBackgroundFetch ?? this.allowBackgroundFetch,
     );
   }
 
@@ -382,6 +423,10 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     if (creationDate.present) {
       map['creation_date'] = Variable<DateTime>(creationDate.value);
     }
+    if (allowBackgroundFetch.present) {
+      map['allow_background_fetch'] =
+          Variable<bool>(allowBackgroundFetch.value);
+    }
     return map;
   }
 
@@ -394,7 +439,8 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
           ..write('username: $username, ')
           ..write('passwordHash: $passwordHash, ')
           ..write('lastLogin: $lastLogin, ')
-          ..write('creationDate: $creationDate')
+          ..write('creationDate: $creationDate, ')
+          ..write('allowBackgroundFetch: $allowBackgroundFetch')
           ..write(')'))
         .toString();
   }
@@ -622,6 +668,7 @@ typedef $$AccountsTableTableCreateCompanionBuilder = AccountsTableCompanion
   required String passwordHash,
   Value<DateTime?> lastLogin,
   required DateTime creationDate,
+  Value<bool> allowBackgroundFetch,
 });
 typedef $$AccountsTableTableUpdateCompanionBuilder = AccountsTableCompanion
     Function({
@@ -632,6 +679,7 @@ typedef $$AccountsTableTableUpdateCompanionBuilder = AccountsTableCompanion
   Value<String> passwordHash,
   Value<DateTime?> lastLogin,
   Value<DateTime> creationDate,
+  Value<bool> allowBackgroundFetch,
 });
 
 class $$AccountsTableTableFilterComposer
@@ -663,6 +711,10 @@ class $$AccountsTableTableFilterComposer
 
   ColumnFilters<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get allowBackgroundFetch => $composableBuilder(
+      column: $table.allowBackgroundFetch,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$AccountsTableTableOrderingComposer
@@ -696,6 +748,10 @@ class $$AccountsTableTableOrderingComposer
   ColumnOrderings<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get allowBackgroundFetch => $composableBuilder(
+      column: $table.allowBackgroundFetch,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$AccountsTableTableAnnotationComposer
@@ -727,6 +783,9 @@ class $$AccountsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get creationDate => $composableBuilder(
       column: $table.creationDate, builder: (column) => column);
+
+  GeneratedColumn<bool> get allowBackgroundFetch => $composableBuilder(
+      column: $table.allowBackgroundFetch, builder: (column) => column);
 }
 
 class $$AccountsTableTableTableManager extends RootTableManager<
@@ -763,6 +822,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             Value<String> passwordHash = const Value.absent(),
             Value<DateTime?> lastLogin = const Value.absent(),
             Value<DateTime> creationDate = const Value.absent(),
+            Value<bool> allowBackgroundFetch = const Value.absent(),
           }) =>
               AccountsTableCompanion(
             id: id,
@@ -772,6 +832,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             passwordHash: passwordHash,
             lastLogin: lastLogin,
             creationDate: creationDate,
+            allowBackgroundFetch: allowBackgroundFetch,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -781,6 +842,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             required String passwordHash,
             Value<DateTime?> lastLogin = const Value.absent(),
             required DateTime creationDate,
+            Value<bool> allowBackgroundFetch = const Value.absent(),
           }) =>
               AccountsTableCompanion.insert(
             id: id,
@@ -790,6 +852,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             passwordHash: passwordHash,
             lastLogin: lastLogin,
             creationDate: creationDate,
+            allowBackgroundFetch: allowBackgroundFetch,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

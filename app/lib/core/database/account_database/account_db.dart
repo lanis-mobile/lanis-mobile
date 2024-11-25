@@ -46,6 +46,7 @@ class AccountsTable extends Table {
   TextColumn get passwordHash => text()();
   DateTimeColumn get lastLogin => dateTime().nullable()();
   DateTimeColumn get creationDate => dateTime()();
+  BoolColumn get allowBackgroundFetch => boolean().withDefault(const Constant(true))();
 }
 
 @DriftDatabase(tables: [
@@ -59,7 +60,7 @@ class AccountDatabase extends _$AccountDatabase {
   @override
   int get schemaVersion => 1;
 
-  Future<String> _cryptPassword(String password) async {
+  static Future<String> cryptPassword(String password) async {
     String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
       final cryptKey = Key.fromSecureRandom(32); // 256 bits
@@ -74,7 +75,7 @@ class AccountDatabase extends _$AccountDatabase {
     return '${iv.base64}:${encrypted.base64}';
   }
 
-  Future<String> _decryptPassword(String encryptedPassword) async {
+  static Future<String> decryptPassword(String encryptedPassword) async {
     final String? key = await FlutterKeychain.get(key: 'encryption_key');
     if (key == null) {
       throw Exception('Encryption key not found');
@@ -90,7 +91,7 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future <int> addAccountToDatabase({required int schoolID, required String username, required String password, required String schoolName}) async {
-    String passwordHash = await _cryptPassword(password);
+    String passwordHash = await cryptPassword(password);
     await into(accountsTable).insert(AccountsTableCompanion(
       schoolId: Value(schoolID),
       schoolName: Value(schoolName),
@@ -119,12 +120,24 @@ class AccountDatabase extends _$AccountDatabase {
       localId: account.id,
       schoolID: account.schoolId,
       username: account.username,
-      password: await _decryptPassword(account.passwordHash),
+      password: await decryptPassword(account.passwordHash),
       schoolName: account.schoolName,
       firstLogin: account.lastLogin == null,
     );
   }
-
+  
+  static Future<ClearTextAccount> getAccountFromTableData(AccountsTableData account) async {
+    final String clearTextPassword = await decryptPassword(account.passwordHash);
+    return ClearTextAccount(
+      localId: account.id,
+      schoolID: account.schoolId,
+      username: account.username,
+      password: clearTextPassword,
+      schoolName: account.schoolName,
+      firstLogin: account.lastLogin == null,
+    );
+  }
+  
   Future<void> deleteAccount(int id) async {
     if (id == sph?.account.localId) {
       sph?.prefs.close();

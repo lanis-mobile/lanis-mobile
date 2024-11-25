@@ -7,9 +7,12 @@ import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
 
+import '../background_service.dart';
+import '../core/sph/sph.dart';
+
 typedef StringBuildContextCallback = String Function(BuildContext context);
 typedef WidgetBuildBody = Widget Function(BuildContext context, AccountType accountType);
-typedef BackgroundTaskFunction = Future<void> Function(AccountType accountType);
+typedef BackgroundTaskFunction = Future<void> Function(SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit);
 
 enum AppletType {
   nested,
@@ -28,6 +31,7 @@ class AppletDefinition {
   final Duration refreshInterval;
   final Map<String, String?> settingsDefaults;
   WidgetBuildBody? bodyBuilder;
+  BackgroundTaskFunction? backgroundTask;
 
   bool get enableBottomNavigation => appletType == AppletType.nested;
 
@@ -41,6 +45,7 @@ class AppletDefinition {
     required this.supportedAccountTypes,
     required this.refreshInterval,
     required this.settingsDefaults,
+    this.backgroundTask,
     this.bodyBuilder,
     this.allowOffline = false,
   });

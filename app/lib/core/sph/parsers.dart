@@ -16,38 +16,38 @@ class Parsers {
   TimetableStudentParser? _timetableStudentParser;
   ConversationsParser? _conversationsParser;
 
-  get substitutionsParser {
+  SubstitutionsParser get substitutionsParser {
     _substitutionsParser ??= SubstitutionsParser();
-    return _substitutionsParser;
+    return _substitutionsParser!;
   }
 
-  get calendarParser {
+  CalendarParser get calendarParser {
     _calendarParser ??= CalendarParser();
-    return _calendarParser;
+    return _calendarParser!;
   }
 
-  get lessonsStudentParser {
+  LessonsStudentParser get lessonsStudentParser {
     _lessonsStudentParser ??= LessonsStudentParser();
-    return _lessonsStudentParser;
+    return _lessonsStudentParser!;
   }
 
-  get lessonsTeacherParser {
+  LessonsTeacherParser get lessonsTeacherParser {
     _lessonsTeacherParser ??= LessonsTeacherParser();
-    return _lessonsTeacherParser;
+    return _lessonsTeacherParser!;
   }
 
-  get dataStorageParser {
+  DataStorageParser get dataStorageParser {
     _dataStorageParser ??= DataStorageParser();
-    return _dataStorageParser;
+    return _dataStorageParser!;
   }
 
-  get timetableStudentParser {
+  TimetableStudentParser get timetableStudentParser {
     _timetableStudentParser ??= TimetableStudentParser();
-    return _timetableStudentParser;
+    return _timetableStudentParser!;
   }
 
-  get conversationsParser {
+  ConversationsParser get conversationsParser {
     _conversationsParser ??= ConversationsParser();
-    return _conversationsParser;
+    return _conversationsParser!;
   }
 }

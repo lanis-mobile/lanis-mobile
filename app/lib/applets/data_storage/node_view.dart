@@ -4,7 +4,6 @@ import 'package:sph_plan/applets/data_storage/folder_listtile.dart';
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
 import '../../models/client_status_exceptions.dart';
-import '../../utils/logger.dart';
 import 'file_listtile.dart';
 
 class DataStorageNodeView extends StatefulWidget {
