@@ -86,6 +86,9 @@ class App extends StatelessWidget {
           if (lightDynamic != null && darkDynamic != null) {
             Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
           }
+          if (snapshot.data?['color'] == 'dynamic') {
+            theme = Themes.dynamicTheme;
+          }
 
           return MaterialApp(
             title: 'Lanis Mobile',

@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/shared/account_types.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
-import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/sph/sph.dart';
@@ -42,7 +41,7 @@ List<PageViewModel> setupScreenPageViewModels(BuildContext context) => [
           bodyWidget: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [AppearanceElements()],
+            children: [],
           )),
       PageViewModel(
           image: SvgPicture.asset("assets/undraw/undraw_welcome_re_h3d9.svg",
