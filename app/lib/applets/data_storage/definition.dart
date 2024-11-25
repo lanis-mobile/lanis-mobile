@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/data_storage/data_storage_root_view.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -14,8 +15,8 @@ final dataStorageDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
   settings: {},
-  refreshInterval: const Duration(minutes: 2),
+  refreshInterval: const Duration(minutes: 5),
   bodyBuilder: (context, accountType) {
-    return Container();
+    return DataStorageRootView();
   },
 );

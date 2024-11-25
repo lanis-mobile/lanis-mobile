@@ -352,6 +352,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 1,
         title: Text(doesSupportAnyApplet
             ? destinations[selectedDestinationDrawer].label(context)
             : AppLocalizations.of(context)!.openLanisInBrowser),

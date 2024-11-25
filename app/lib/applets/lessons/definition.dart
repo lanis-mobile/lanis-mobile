@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/lessons/student/lessons_student_view.dart';
+import 'package:sph_plan/applets/lessons/teacher/lessons_teacher_view.dart';
 
 import '../../shared/account_types.dart';
 
@@ -19,8 +20,9 @@ final lessonsDefinition = AppletDefinition(
   bodyBuilder: (context, accountType) {
     if (accountType == AccountType.student) {
       return LessonsStudentView();
-    } else {
-      throw UnimplementedError('This account type is not supported jet');
+    } else if (accountType == AccountType.teacher) {
+      return LessonsTeacherView();
     }
+    throw UnimplementedError('This account type is not supported jet');
   },
 );
