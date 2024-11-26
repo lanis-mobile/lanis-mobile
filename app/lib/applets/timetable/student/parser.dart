@@ -5,10 +5,11 @@ import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
 
-import '../../../core/sph/sph.dart';
 import '../../../models/timetable.dart';
 
 class TimetableStudentParser extends AppletParser<TimeTable> {
+  TimetableStudentParser(super.sph);
+
   @override
   Duration? get validCacheDuration => timeTableDefinition.refreshInterval;
 
@@ -30,13 +31,13 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
 
   Future<Document?> getTimetableDocument() async {
     final redirectedRequest =
-    await sph!.session.dio.get("https://start.schulportal.hessen.de/stundenplan.php");
+    await sph.session.dio.get("https://start.schulportal.hessen.de/stundenplan.php");
 
     if (redirectedRequest.headers["location"] == null) {
       return null;
     }
 
-    final response = await sph!.session.dio.get(
+    final response = await sph.session.dio.get(
         "https://start.schulportal.hessen.de/${redirectedRequest.headers["location"]?[0]}");
     return parse(response.data);
   }

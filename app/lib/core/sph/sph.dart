@@ -7,7 +7,7 @@ import '../database/account_preferences_database/account_preferences_db.dart';
 
 class SPH {
   final ClearTextAccount account;
-  final Parsers parser = Parsers();
+  late Parsers parser = Parsers(sph: this);
   late SessionHandler session = SessionHandler(sph: this, withLoginURL: withLoginURL);
   late StorageManager storage = StorageManager(sph: this);
   late AccountPreferencesDatabase prefs = AccountPreferencesDatabase(localId: account.localId);

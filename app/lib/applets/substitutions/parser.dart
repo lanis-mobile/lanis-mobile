@@ -8,11 +8,12 @@ import 'package:dart_date/dart_date.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 
 import '../../core/applet_parser.dart';
-import '../../core/sph/sph.dart';
 import '../../models/substitution.dart';
 import '../../models/client_status_exceptions.dart';
 
 class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
+  SubstitutionsParser(super.sph);
+
   @override
   Duration? get validCacheDuration => substitutionDefinition.refreshInterval;
 
@@ -40,7 +41,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
 
   Future<String> getSubstitutionPlanDocument() async {
     try {
-      final response = await sph!.session.dio
+      final response = await sph.session.dio
           .get("https://start.schulportal.hessen.de/vertretungsplan.php");
       return response.data;
     } on SocketException {
@@ -106,7 +107,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
 
   Future<SubstitutionDay> getSubstitutionsAJAX(String date) async {
     try {
-      final response = await sph!.session.dio.post(
+      final response = await sph.session.dio.post(
           "https://start.schulportal.hessen.de/vertretungsplan.php",
           queryParameters: {"a": "my"},
           data: {"tag": date, "ganzerPlan": "true"},

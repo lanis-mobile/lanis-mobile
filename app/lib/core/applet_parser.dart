@@ -19,6 +19,7 @@ class FetcherResponse<T> {
 }
 
 class AppletParser<T> {
+  final SPH sph;
   final BehaviorSubject<FetcherResponse<T>> _controller = BehaviorSubject();
   late Duration? validCacheDuration;
   bool isEmpty = true;
@@ -26,7 +27,7 @@ class AppletParser<T> {
   ValueStream<FetcherResponse<T>> get stream => _controller.stream;
 
 
-  AppletParser() {
+  AppletParser(this.sph) {
     if (validCacheDuration != null) {
       Timer.periodic(validCacheDuration!, timerCallback);
     }
@@ -62,7 +63,7 @@ class AppletParser<T> {
       }).catchError((ex) async {
         logger.e(ex);
         if (!secondTry) {
-          await sph!.session.authenticate();
+          await sph.session.authenticate();
           await fetchData(forceRefresh: true, secondTry: true);
           return;
         }

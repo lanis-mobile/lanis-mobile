@@ -7,13 +7,13 @@ import 'package:sph_plan/applets/lessons/definition.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/lessons.dart';
 
-import '../../../core/sph/sph.dart';
 import '../../../models/client_status_exceptions.dart';
 
 class LessonsStudentParser extends AppletParser<Lessons> {
+  LessonsStudentParser(super.sph);
+
 
   @override
-  // TODO: implement validCacheDuration
   Duration? get validCacheDuration => lessonsDefinition.refreshInterval;
 
   @override
@@ -23,8 +23,8 @@ class LessonsStudentParser extends AppletParser<Lessons> {
     int unixTime = DateTime.now().millisecondsSinceEpoch;
 
     final response =
-    await sph!.session.dio.get("https://start.schulportal.hessen.de/meinunterricht.php?cacheBreaker=$unixTime");
-    var encryptedHTML = sph!.session.cryptor.decryptEncodedTags(response.data);
+    await sph.session.dio.get("https://start.schulportal.hessen.de/meinunterricht.php?cacheBreaker=$unixTime");
+    var encryptedHTML = sph.session.cryptor.decryptEncodedTags(response.data);
     var document = parse(encryptedHTML);
 
     var kursmappenDOM = document.getElementById("mappen");
@@ -145,8 +145,8 @@ class LessonsStudentParser extends AppletParser<Lessons> {
       String courseID = url.split("id=")[1];
 
       final response =
-      await sph!.session.dio.get("https://start.schulportal.hessen.de/$url");
-      final String decryptedHTML = sph!.session.cryptor.decryptEncodedTags(response.data);
+      await sph.session.dio.get("https://start.schulportal.hessen.de/$url");
+      final String decryptedHTML = sph.session.cryptor.decryptEncodedTags(response.data);
       Document document = parse(decryptedHTML);
 
       //course name
@@ -344,7 +344,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
       String courseID, String courseEntry, bool status) async {
     //returns the response of the http request. 1 means success.
 
-    final response = await sph!.session.dio.post(
+    final response = await sph.session.dio.post(
       "https://start.schulportal.hessen.de/meinunterricht.php",
       data: {
         "a": "sus_homeworkDone",
@@ -370,7 +370,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
         required String file,
         required String userPasswordEncrypted}) async {
     try {
-      final response = await sph!.session.dio.post(
+      final response = await sph.session.dio.post(
           "https://start.schulportal.hessen.de/meinunterricht.php",
           data: {
             "a": "sus_abgabe",
@@ -407,7 +407,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
   Future<dynamic> getUploadInfo(String url) async {
     try {
-      final response = await sph!.session.dio.get(url);
+      final response = await sph.session.dio.get(url);
       final parsed = parse(response.data);
 
       final requirementsGroup =
@@ -565,7 +565,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
         "file5": file5
       });
 
-      final response = await sph!.session.dio.post(
+      final response = await sph.session.dio.post(
           "https://start.schulportal.hessen.de/meinunterricht.php",
           data: uploadData,
           options: Options(headers: {

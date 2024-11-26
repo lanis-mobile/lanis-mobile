@@ -8,10 +8,11 @@ import 'package:sph_plan/models/calendar_event.dart';
 
 import '../../core/applet_parser.dart';
 import '../../core/connection_checker.dart';
-import '../../core/sph/sph.dart';
 import '../../models/client_status_exceptions.dart';
 
 class CalendarParser extends AppletParser<List<CalendarEvent>> {
+  CalendarParser(super.sph);
+
   @override
   Duration? get validCacheDuration => calendarDefinition.refreshInterval;
 
@@ -25,7 +26,7 @@ class CalendarParser extends AppletParser<List<CalendarEvent>> {
 
     try {
       final response =
-      await sph!.session.dio.post("https://start.schulportal.hessen.de/kalender.php",
+      await sph.session.dio.post("https://start.schulportal.hessen.de/kalender.php",
           queryParameters: {
             "f": "getEvents",
             "s": searchQuery,
@@ -64,7 +65,7 @@ class CalendarParser extends AppletParser<List<CalendarEvent>> {
 
     try {
       final response =
-      await sph!.session.dio.post("https://start.schulportal.hessen.de/kalender.php",
+      await sph.session.dio.post("https://start.schulportal.hessen.de/kalender.php",
           data: {
             "f": "getEvent",
             "id": id,

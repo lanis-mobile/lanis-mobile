@@ -6,10 +6,11 @@ import 'package:sph_plan/applets/data_storage/definition.dart';
 import 'package:sph_plan/models/datastorage.dart';
 
 import '../../core/applet_parser.dart';
-import '../../core/sph/sph.dart';
 import '../../models/client_status_exceptions.dart';
 
 class DataStorageParser extends AppletParser<(List<FileNode>, List<FolderNode>)> {
+  DataStorageParser(super.sph);
+
   @override
   Duration? get validCacheDuration => dataStorageDefinition.refreshInterval;
 
@@ -19,7 +20,7 @@ class DataStorageParser extends AppletParser<(List<FileNode>, List<FolderNode>)>
   }
 
   Future<dynamic> searchFiles(String query) async {
-    final response = await sph!.session.dio.get(
+    final response = await sph.session.dio.get(
       "https://start.schulportal.hessen.de/dateispeicher.php",
       queryParameters: {"q": query, "a": "searchFiles"},
       data: {"q": query, "a": "searchFiles"},
@@ -32,7 +33,7 @@ class DataStorageParser extends AppletParser<(List<FileNode>, List<FolderNode>)>
   Future<(List<FileNode>, List<FolderNode>)> getNode(int nodeID) async {
     late final Response response;
     try {
-      response = await sph!.session.dio.get(
+      response = await sph.session.dio.get(
           "https://start.schulportal.hessen.de/dateispeicher.php?a=view&folder=$nodeID");
     } catch (e) {
       throw NoConnectionException();

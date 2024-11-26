@@ -16,6 +16,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 import 'applets/conversations/view/shared.dart';
+import 'background_service.dart';
 import 'core/database/account_database/account_db.dart';
 
 void main() async {
@@ -25,9 +26,9 @@ void main() async {
   };
   accountDatabase = AccountDatabase();
 
-  //await initializeNotifications();
+  await setupBackgroundService();
+  await initializeNotifications();
   await initializeDateFormatting();
-
 
   await setupProxy();
 

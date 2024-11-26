@@ -18,13 +18,13 @@ Future<void> substitutionsBackgroundTask(SPH sph, AccountType accountType, Backg
     final teacher = entry.lehrer ?? "";
     final classInfo = entry.klasse ?? "";
 
-    // Concatenate non-null values with separator "-"
     final entryText = [time, type, subject, teacher, classInfo]
         .where((e) => e.isNotEmpty)
         .join(" - ");
 
     messageBody += "$entryText\n";
   }
+  tools.sendMessage('${allSubstitutions.length}', messageBody);
 }
 
 String weekDayGer(String dateString) {

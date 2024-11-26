@@ -11,7 +11,6 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 
 import '../../core/connection_checker.dart';
 import '../../core/sph/cryptor.dart';
-import '../../core/sph/sph.dart';
 import '../../models/client_status_exceptions.dart';
 import '../../models/conversations.dart';
 
@@ -23,7 +22,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
 
   bool? cachedCanChooseType;
 
-  ConversationsParser() {
+  ConversationsParser(super.sph) {
     filter = OverviewFiltering();
   }
 
@@ -44,7 +43,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
   @override
   Future<List<OverviewEntry>> getHome() async {
       final response =
-      await sph!.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+      await sph.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
           data: {
             "a": "headers",
             "getType": "All", // "unvisibleOnly", "visibleOnly" also possible
@@ -63,7 +62,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
           ));
 
       final dynamic json = await compute(
-          computeJson, [response.toString(), sph!.session.cryptor.key.bytes]);
+          computeJson, [response.toString(), sph.session.cryptor.key.bytes]);
 
       List<OverviewEntry> entries = [];
       for (final entry in json) {
@@ -98,7 +97,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
     }
 
     try {
-      final response = await sph!.session.dio.post(
+      final response = await sph.session.dio.post(
           "https://start.schulportal.hessen.de/nachrichten.php",
           data: {"a": "deleteAll", "uniqid": id},
           options: Options(
@@ -130,7 +129,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
     }
 
     try {
-      final response = await sph!.session.dio.post(
+      final response = await sph.session.dio.post(
           "https://start.schulportal.hessen.de/nachrichten.php",
           data: {"a": "recycleMsg", "uniqid": id},
           options: Options(
@@ -170,10 +169,10 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
     }
 
     try {
-      final encryptedUniqueID = sph!.session.cryptor.encryptString(uniqueID);
+      final encryptedUniqueID = sph.session.cryptor.encryptString(uniqueID);
 
       final response =
-      await sph!.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+      await sph.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
           queryParameters: {"a": "read", "msg": uniqueID},
           data: {"a": "read", "uniqid": encryptedUniqueID},
           options: Options(
@@ -192,7 +191,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       jsonDecode(response.toString());
 
       final String? decryptedConversations =
-      sph!.session.cryptor.decryptString(encryptedJSON["message"]);
+      sph.session.cryptor.decryptString(encryptedJSON["message"]);
 
       if (decryptedConversations == null) {
         throw UnsaltedOrUnknownException();
@@ -298,10 +297,10 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
         "replyToMsg": headId,
       };
 
-      String encrypted = sph!.session.cryptor.encryptString(json.encode(replyData));
+      String encrypted = sph.session.cryptor.encryptString(json.encode(replyData));
 
       final response =
-      await sph!.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+      await sph.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
           data: {
             "a": "reply",
             "c": encrypted,
@@ -365,10 +364,10 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
         createData.add({"name": "to[]", "value": receiver});
       }
 
-      String encrypted = sph!.session.cryptor.encryptString(json.encode(createData));
+      String encrypted = sph.session.cryptor.encryptString(json.encode(createData));
 
       final response =
-      await sph!.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
+      await sph.session.dio.post("https://start.schulportal.hessen.de/nachrichten.php",
           data: {
             "a": "newmessage",
             "c": encrypted,
@@ -410,7 +409,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
 
     try {
       final html =
-      await sph!.session.dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+      await sph.session.dio.get("https://start.schulportal.hessen.de/nachrichten.php",
           options: Options(
             headers: {
               "Accept": "*/*",
@@ -442,7 +441,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
 
     try {
       final response =
-      await sph!.session.dio.get("https://start.schulportal.hessen.de/nachrichten.php",
+      await sph.session.dio.get("https://start.schulportal.hessen.de/nachrichten.php",
           queryParameters: {"a": "searchRecipt", "q": name},
           options: Options(
             headers: {

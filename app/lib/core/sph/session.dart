@@ -80,41 +80,28 @@ class SessionHandler {
     dio.options.validateStatus =
         (status) => status != null && (status == 200 || status == 302 || status == 503);
 
-    try {
+    late String loginURL;
 
-      late String loginURL;
-
-      if (withLoginUrl != null) {
-        loginURL = withLoginUrl;
-      } else {
-        loginURL = await getLoginURL(sph.account);
-      }
-
-      await dio.get(loginURL);
-
-
-      preventLogoutTimer?.cancel();
-      preventLogoutTimer = Timer.periodic(
-          const Duration(seconds: 10), (timer) => preventLogout());
-
-      if (!withoutData) {
-        accountDatabase.updateLastLogin(sph.account.localId);
-        travelMenu = await getFastTravelMenu();
-        userData = await fetchUserData();
-      }
-
-      await cryptor.initialize(dio);
-
-      return;
-    } on LanisException {
-      rethrow;
-    } on SocketException {
-      throw NetworkException();
-    } on DioException {
-      throw NetworkException();
-    } catch (e) {
-      throw UnknownException();
+    if (withLoginUrl != null) {
+      loginURL = withLoginUrl;
+    } else {
+      loginURL = await getLoginURL(sph.account);
     }
+
+    await dio.get(loginURL);
+
+
+    preventLogoutTimer?.cancel();
+    preventLogoutTimer = Timer.periodic(
+        const Duration(seconds: 10), (timer) => preventLogout());
+
+    if (!withoutData) {
+      accountDatabase.updateLastLogin(sph.account.localId);
+      travelMenu = await getFastTravelMenu();
+      userData = await fetchUserData();
+    }
+
+    await cryptor.initialize(dio);
   }
 
   Future<void> deAuthenticate() async {

@@ -7,7 +7,7 @@ import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'core/database/account_database/account_db.dart';
-import 'core/sph/sph.dart';
+import 'core/sph/sph.dart' show SPH;
 
 const identifier = "io.github.alessioc42.pushservice";
 
@@ -72,7 +72,6 @@ Future<void> initializeNotifications() async {
   }
 }
 
-
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -80,16 +79,25 @@ void callbackDispatcher() {
       logger.i("Background fetch triggered");
       initializeNotifications();
 
-      AccountDatabase accountDatabase = AccountDatabase();
+      accountDatabase = AccountDatabase();
       final accounts = await (accountDatabase.select(accountDatabase.accountsTable)..where((tbl) => tbl.allowBackgroundFetch.equals(true))).get();
       for (final account in accounts) {
+
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
         final sph = SPH(account: clearTextAccount);
-        sph.session.authenticate(withoutData: true);
+        bool authenticated = false;
         for (final applet in AppDefinitions.applets.where((a) => a.backgroundTask != null)) {
           if (applet.supportedAccountTypes.contains(sph.session.accountType)) {
-            await applet.backgroundTask!(sph, sph.session.accountType, BackgroundTaskToolkit(clearTextAccount));
+            if (!authenticated) {
+              await sph.session.prepareDio();
+              await sph.session.authenticate();
+              authenticated = true;
+            }
+            await applet.backgroundTask!(sph, sph.session.accountType, BackgroundTaskToolkit(sph));
           }
+        }
+        if (authenticated) {
+          await sph.session.deAuthenticate();
         }
       }
       return Future.value(true);
@@ -97,17 +105,17 @@ void callbackDispatcher() {
       logger.f('Error in background fetch');
       logger.e(e, stackTrace: s);
     }
-    return Future.value(true);
+    return Future.value(false);
   });
 }
 
 class BackgroundTaskToolkit {
-  final ClearTextAccount account;
+  final SPH _sph;
 
-  BackgroundTaskToolkit(this.account);
+  BackgroundTaskToolkit(this._sph);
 
   int _seedId(int id) {
-    return id + account.localId * 10000;
+    return id + _sph.account.localId * 10000;
   }
 
   Future<void> sendMessage(String title, String message, {id = 0}) async {
