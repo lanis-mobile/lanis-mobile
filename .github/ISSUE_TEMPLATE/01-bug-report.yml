@@ -1,0 +1,44 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable please provide some Screenshots about the Problem
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of Lanis are you running?
+      value: "e.g. v2.22.0+50"
+    validations:
+      required: true
+  - type: textarea
+    id: device-info
+    attributes:
+      label: Device Info
+      description: Please provide some info about the Device your using
+      placeholder: |
+        OS: Android 20
+        Device: Samsung Galaxy S44 Ultra Pro Max Toaster Edition
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Please make sure you looked for this issues in already existing issues before creating a new one.
