@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
 import '../../utils/random_color.dart';
 
@@ -76,7 +78,35 @@ class AccountListTile extends StatelessWidget {
           ),
           trailing: IconButton(
             icon: Icon(Icons.logout),
-            onPressed: (){},
+            onPressed: () async {
+              bool? result = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(AppLocalizations.of(context)!.logout),
+                  content: Text(AppLocalizations.of(context)!.logoutConfirmation),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Logout'),
+                    ),
+                  ],
+                ),
+              );
+              if (result == true) {
+                bool restart = isLoggedInAccount;
+                if (restart) {
+                  await sph!.session.deAuthenticate();
+                }
+                accountDatabase.deleteAccount(dbID);
+                if (restart) {
+                  Phoenix.rebirth(context);
+                }
+              }
+            },
           ),
           onTap: () => onTap?.call(),
         ),

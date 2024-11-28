@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
-import 'package:sph_plan/view/login/setup_screen_page_view_models.dart';
 import 'auth.dart';
 import 'intro_screen_page_view_models.dart';
 

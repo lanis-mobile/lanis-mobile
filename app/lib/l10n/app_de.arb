@@ -79,7 +79,7 @@
   "message": "Nachricht",
   "substitutionsEndCardMessage": "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden.\nLetzte Aktualisierung: {time}",
   "logout": "Logout",
-  "reallyReset": "Wirklich zurücksetzen?",
+  "logoutConfirmation": "Bist du sicher, dass du dich abmelden möchtest?",
   "allSettingsWillBeLost": "Alle Einstellungen werden Gelöscht.",
   "loading": "Lade...",
   "teacher": "Lehrer",

@@ -239,10 +239,3 @@ class LoginFormState extends State<LoginForm> {
     );
   }
 }
-
-String extractNumber(str) {
-  RegExp numberPattern = RegExp(r'(?<=\()\d+(?=\))');
-
-  Match match = numberPattern.firstMatch(str) as Match;
-  return match.group(0)!;
-}

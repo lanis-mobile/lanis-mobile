@@ -98,7 +98,7 @@ void callbackDispatcher() {
           ) {
             if (!authenticated) {
               await sph.session.prepareDio();
-              await sph.session.authenticate();
+              await sph.session.authenticate(withoutData: true);
               authenticated = true;
             }
             if (!sph.session.doesSupportFeature(applet)) {

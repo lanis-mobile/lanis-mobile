@@ -95,9 +95,9 @@ class SessionHandler {
     preventLogoutTimer = Timer.periodic(
         const Duration(seconds: 10), (timer) => preventLogout());
 
+    travelMenu = await getFastTravelMenu();
     if (!withoutData) {
       accountDatabase.updateLastLogin(sph.account.localId);
-      travelMenu = await getFastTravelMenu();
       userData = await fetchUserData();
     }
 

@@ -79,7 +79,7 @@
   "message": "Message",
   "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.\nLast edited: {time}",
   "logout": "Logout",
-  "reallyReset": "Really reset?",
+  "logoutConfirmation": "Do you really want to log out?",
   "allSettingsWillBeLost": "All settings will be lost!",
   "loading": "Loading...",
   "teacher": "Teacher",
