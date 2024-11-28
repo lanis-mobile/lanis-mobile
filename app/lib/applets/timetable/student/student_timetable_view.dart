@@ -108,8 +108,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                 if (selected.raum != null)
                                   modalSheetItem(selected.raum!, Icons.place),
                                 modalSheetItem(
-                                    "${selected.startTime.hour}:${selected.startTime.minute} - ${selected.endTime.hour}:${selected.endTime.minute} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
-                                    Icons.access_time),
+                                    "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
+                                    Icons.access_time,
+                                ),
                                 if (selected.lehrer != null)
                                   modalSheetItem(selected.lehrer!, Icons.person),
                                 if (selected.badge != null)
