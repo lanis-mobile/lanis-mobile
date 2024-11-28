@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sph_plan/applets/definitions.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -17,12 +19,13 @@ class NotificationsSettingsScreen extends StatelessWidget {
         title: Text(AppLocalizations.of(context)!.notifications),
         actions: [
           InfoButton(
-              infoText: AppLocalizations.of(context)!.settingsInfoNotifications,
-              context: context)
+            infoText: AppLocalizations.of(context)!.settingsInfoNotifications,
+            context: context,
+          )
         ],
       ),
       body: ListView(
-        children: const [NotificationElements()],
+        children: [NotificationElements()],
       ),
     );
   }
@@ -36,103 +39,152 @@ class NotificationElements extends StatefulWidget {
 }
 
 class _NotificationElementsState extends State<NotificationElements> {
-  bool _enableNotifications = true;
-  int _androidNotificationInterval = 15;
-  bool _androidNotificationsOngoing = false;
-  bool _androidNotificationPermissionGranted = true;
+  final Map<String, String> _keyTitles = {};
 
-  Future<void> loadSettingsVars() async {
-    _enableNotifications = await sph!.prefs.kv.get('settings-push-service-on') == "true";
-    _androidNotificationInterval = int.parse( (await sph!.prefs.kv.get('settings-push-service-interval'))!);
-    _androidNotificationsOngoing = await sph!.prefs.kv.get('settings-push-service-notifications-ongoing') == "true";
+  double _notificationInterval = 15.0;
+  PermissionStatus _notificationPermissionStatus = PermissionStatus.provisional;
+  Future<int> accountsCount = accountDatabase.select(accountDatabase.accountsTable).get().then((value) => value.length);
 
-    _androidNotificationPermissionGranted = await Permission.notification.isGranted;
+  List<String> _getNotificationKeys() {
+    List<String> result = [];
+    for (final applet
+        in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+      if (sph!.session.doesSupportFeature(applet)) {
+        result.add('notification-${applet.appletPhpUrl}');
+        _keyTitles['notification-${applet.appletPhpUrl}'] =
+            applet.label(context);
+      }
+    }
+    result.addAll([
+      'notifications-allow',
+      'notifications-android-target-interval-minutes'
+    ]);
+    return result;
+  }
+
+  void initVars() async {
+    _notificationPermissionStatus = await Permission.notification.status;
+    final String interval = (await accountDatabase.kv
+            .get('notifications-android-target-interval-minutes')) ??
+        '15';
+    setState(() {
+      _notificationPermissionStatus = _notificationPermissionStatus;
+      _notificationInterval = double.parse(interval);
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    // Use await to ensure that loadSettingsVariables completes before continuing
-    loadSettingsVars().then((_) {
-      setState(() {
-        // Set the state after loading the variables
-        _enableNotifications = _enableNotifications;
-        _androidNotificationInterval = _androidNotificationInterval;
-        _androidNotificationsOngoing = _androidNotificationsOngoing;
-
-        _androidNotificationPermissionGranted = _androidNotificationPermissionGranted;
-      });
-    });
+    initVars();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (Platform.isAndroid) ListTile(
-          title: Text(
-              AppLocalizations.of(context)!.systemPermissionForNotifications),
-          trailing: Text(_androidNotificationPermissionGranted
-              ? AppLocalizations.of(context)!.granted
-              : AppLocalizations.of(context)!.denied),
-          subtitle: !_androidNotificationPermissionGranted
-              ? Text(AppLocalizations.of(context)!
-                  .systemPermissionForNotificationsExplained)
-              : null,
-        ),
-        SwitchListTile(
-          title: Text(AppLocalizations.of(context)!.pushNotifications),
-          value: _enableNotifications,
-          onChanged: (_androidNotificationPermissionGranted || Platform.isIOS)
-              ? (bool? value) async {
-                  setState(() {
-                    _enableNotifications = value!;
-                  });
-                  await sph!.prefs.kv.set('settings-push-service-on', _enableNotifications.toString());
+    return StreamBuilder(
+      stream: sph!.prefs.kv.subscribeMultiple(_getNotificationKeys()),
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.data == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        List<String> sortedKeys = snapshot.data!.keys.toList()..sort();
+        sortedKeys.removeWhere((element) => !element.endsWith('.php'));
+
+        final bool allowNotifications =
+            (snapshot.data!['notifications-allow'] ?? 'true') == 'true' &&
+                _notificationPermissionStatus == PermissionStatus.granted;
+
+        return Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.perm_device_info),
+              title: Text(AppLocalizations.of(context)!
+                  .systemPermissionForNotifications),
+              subtitle: Text(AppLocalizations.of(context)!
+                  .systemPermissionForNotificationsExplained),
+              onTap: () async {
+                _notificationPermissionStatus =
+                    await Permission.notification.request();
+                setState(() {
+                  _notificationPermissionStatus = _notificationPermissionStatus;
+                });
+              },
+              trailing:
+                  (_notificationPermissionStatus == PermissionStatus.granted)
+                      ? Icon(Icons.check, color: Colors.green)
+                      : Icon(Icons.error, color: Colors.red),
+            ),
+            const Divider(),
+            FutureBuilder<int>(
+              future: accountsCount,
+              builder: (context, snapshot){
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-              : null,
-          subtitle:
-              Text(AppLocalizations.of(context)!.activateToGetNotification),
-        ),
-        if (Platform.isAndroid) SwitchListTile(
-          title: Text(AppLocalizations.of(context)!.persistentNotification),
-          value: _androidNotificationsOngoing,
-          onChanged: _enableNotifications && _androidNotificationPermissionGranted
-              ? (bool? value) async {
-                  setState(() {
-                    _androidNotificationsOngoing = value!;
-                  });
-                  await sph!.prefs.kv.set('settings-push-service-notifications-ongoing', _androidNotificationsOngoing.toString());
-                }
-              : null,
-        ),
-        if (Platform.isAndroid) ListTile(
-          title: Text(AppLocalizations.of(context)!.updateInterval),
-          trailing: Text('$_androidNotificationInterval min',
-              style: const TextStyle(fontSize: 14)),
-          enabled: _enableNotifications && _androidNotificationPermissionGranted,
-        ),
-        if (Platform.isAndroid) Slider(
-          value: _androidNotificationInterval.toDouble(),
-          min: 15,
-          max: 180,
-          onChanged: _enableNotifications && _androidNotificationPermissionGranted
-              ? (double value) {
-                  setState(() {
-                    _androidNotificationInterval = value.toInt(); // Umwandlung zu int
-                  });
-                }
-              : null,
-          onChangeEnd: (double value) async {
-            await sph!.prefs.kv.set('settings-push-service-interval', _androidNotificationInterval.toString());
-          },
-        ),
-        if (Platform.isIOS) const ListTile(
-          title: Text("iOS Device"),
-          subtitle: Text("This feature is currently in public testing. Please be aware, that this feature may not work as expected. The update interval is a minimum of 30 minutes. An update every 30 minutes is not guaranteed."),
-          leading: Icon(Icons.info),
-        )
-      ],
+                return ListTile(
+                  subtitle: Text(AppLocalizations.of(context)!.notificationAccountBoundExplanation),
+                  leading: Icon(Icons.info),
+                );
+              },
+            ),
+            SwitchListTile(
+              title: Text(AppLocalizations.of(context)!.useNotifications),
+              value:
+                  (snapshot.data!['notifications-allow'] ?? 'true') == 'true',
+              onChanged: (value) {
+                sph!.prefs.kv.set('notifications-allow', value.toString());
+              },
+            ),
+            if (Platform.isAndroid)
+              Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 24),
+                    child: Row(
+                      children: [
+                        Text('Update interval', style: TextStyle(fontSize: 16),),
+                        const Spacer(),
+                        Text('${_notificationInterval.round()} min', style: Theme.of(context).textTheme.titleMedium,),
+                      ],
+                    ),
+                  ),
+                  Slider(
+                    value: _notificationInterval,
+                    onChanged: allowNotifications
+                        ? (val) {
+                            setState(() {
+                              _notificationInterval = val;
+                            });
+                          }
+                        : null,
+                    onChangeEnd: allowNotifications
+                        ? (val) {
+                            int value = val.round();
+                            accountDatabase.kv.set(
+                                'notifications-android-target-interval-minutes',
+                                value.toString());
+                          }
+                        : null,
+                    min: 15.0,
+                    max: 180.0,
+                  ),
+                ],
+              ),
+            const Divider(),
+            ...sortedKeys.map(
+              (key) => SwitchListTile(
+                title: Text(_keyTitles[key] ?? key),
+                value: (snapshot.data![key] ?? 'true') == 'true',
+                onChanged: allowNotifications
+                    ? (value) {
+                        sph!.prefs.kv.set(key, value.toString());
+                      }
+                    : null,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

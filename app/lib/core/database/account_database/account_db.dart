@@ -46,7 +46,6 @@ class AccountsTable extends Table {
   TextColumn get passwordHash => text()();
   DateTimeColumn get lastLogin => dateTime().nullable()();
   DateTimeColumn get creationDate => dateTime()();
-  BoolColumn get allowBackgroundFetch => boolean().withDefault(const Constant(true))();
 }
 
 @DriftDatabase(tables: [

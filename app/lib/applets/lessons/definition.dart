@@ -16,6 +16,7 @@ final lessonsDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   allowOffline: false,
   settingsDefaults: {},
+  notificationTask: (sph, accountType, toolkit) async {},
   refreshInterval: const Duration(minutes: 15),
   bodyBuilder: (context, accountType) {
     if (accountType == AccountType.student) {

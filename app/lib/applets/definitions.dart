@@ -31,7 +31,7 @@ class AppletDefinition {
   final Duration refreshInterval;
   final Map<String, String?> settingsDefaults;
   WidgetBuildBody? bodyBuilder;
-  BackgroundTaskFunction? backgroundTask;
+  BackgroundTaskFunction? notificationTask;
 
   bool get enableBottomNavigation => appletType == AppletType.nested;
 
@@ -45,7 +45,7 @@ class AppletDefinition {
     required this.supportedAccountTypes,
     required this.refreshInterval,
     required this.settingsDefaults,
-    this.backgroundTask,
+    this.notificationTask,
     this.bodyBuilder,
     this.allowOffline = false,
   });
@@ -62,7 +62,7 @@ class AppDefinitions {
     dataStorageDefinition,
   ];
 
-  static isAppletSupported(AccountType accountType, String phpIdentifier) {
+  static bool isAppletSupported(AccountType accountType, String phpIdentifier) {
     return applets.any((element) => element.supportedAccountTypes.contains(accountType) && element.appletPhpUrl == phpIdentifier);
   }
 }

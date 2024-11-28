@@ -15,6 +15,7 @@ final conversationsDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
   settingsDefaults: {},
+  notificationTask: (sph, accountType, toolkit) async {return;},
   refreshInterval: const Duration(minutes: 2),
   bodyBuilder: (context, accountType) {
     return ConversationsView();

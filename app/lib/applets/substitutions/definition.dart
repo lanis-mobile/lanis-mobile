@@ -16,7 +16,7 @@ final substitutionDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   refreshInterval: Duration(minutes: 10),
   settingsDefaults: {},
-  backgroundTask: substitutionsBackgroundTask,
+  notificationTask: substitutionsBackgroundTask,
   bodyBuilder: (context, accountType) {
     return SubstitutionsView();
   },

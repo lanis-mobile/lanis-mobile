@@ -26,7 +26,7 @@ void main() async {
   };
   accountDatabase = AccountDatabase();
 
-  await setupBackgroundService();
+  await setupBackgroundService(accountDatabase);
   await initializeNotifications();
   await initializeDateFormatting();
 

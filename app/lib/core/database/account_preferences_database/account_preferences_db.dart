@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
-import '../../../utils/logger.dart';
 import 'kv_defaults.dart';
 
 part 'account_preferences_db.g.dart';
@@ -86,8 +83,8 @@ class KV {
     return stream.map((event) {
       final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
       for (var key in keys) {
-        if (!result.containsKey(key) && kvDefaults.containsKey(key)) {
-          result[key] = kvDefaults[key];
+        if (!result.containsKey(key)) {
+          result[key] = kvDefaults.containsKey(key) ? kvDefaults[key] : null;
         }
       }
       return result;

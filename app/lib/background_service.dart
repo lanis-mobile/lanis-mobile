@@ -6,12 +6,12 @@ import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'core/database/account_database/account_db.dart';
+import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount;
 import 'core/sph/sph.dart' show SPH;
 
 const identifier = "io.github.alessioc42.pushservice";
 
-Future<void> setupBackgroundService() async {
+Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   if (!Platform.isAndroid && !Platform.isIOS) return;
 
 
@@ -35,14 +35,16 @@ Future<void> setupBackgroundService() async {
       requiresBatteryNotLow: true,
       requiresCharging: false,
       requiresDeviceIdle: false,
-      requiresStorageNotLow: false
+      requiresStorageNotLow: false,
   );
 
   if (Platform.isAndroid) {
+    final int min = int.parse(await accountDatabase.kv.get('notifications-android-target-interval-minutes') ?? '15');
     await Workmanager().registerPeriodicTask(identifier, identifier,
-        frequency: Duration(minutes: 15),
-        constraints: workManagerConstraints,
-        initialDelay: const Duration(minutes: 3)
+      frequency: Duration(minutes: min),
+      constraints: workManagerConstraints,
+      initialDelay: const Duration(minutes: 10),
+      existingWorkPolicy: ExistingWorkPolicy.replace,
     );
   }
   if (Platform.isIOS) {
@@ -79,26 +81,36 @@ void callbackDispatcher() {
       logger.i("Background fetch triggered");
       initializeNotifications();
 
-      accountDatabase = AccountDatabase();
-      final accounts = await (accountDatabase.select(accountDatabase.accountsTable)..where((tbl) => tbl.allowBackgroundFetch.equals(true))).get();
+      AccountDatabase _accountDatabase = AccountDatabase();
+      final accounts = await (_accountDatabase.select(_accountDatabase.accountsTable)).get();
       for (final account in accounts) {
 
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
         final sph = SPH(account: clearTextAccount);
+        if ((await sph.prefs.kv.get('notifications-allow')??'true') != 'true') {
+          sph.prefs.close();
+          continue;
+        }
         bool authenticated = false;
-        for (final applet in AppDefinitions.applets.where((a) => a.backgroundTask != null)) {
-          if (applet.supportedAccountTypes.contains(sph.session.accountType)) {
+        for (final applet in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+          if (applet.supportedAccountTypes.contains(sph.session.accountType)
+           && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}')??'true') == 'true'
+          ) {
             if (!authenticated) {
               await sph.session.prepareDio();
               await sph.session.authenticate();
               authenticated = true;
             }
-            await applet.backgroundTask!(sph, sph.session.accountType, BackgroundTaskToolkit(sph));
+            if (!sph.session.doesSupportFeature(applet)) {
+              continue;
+            }
+            await applet.notificationTask!(sph, sph.session.accountType, BackgroundTaskToolkit(sph));
           }
         }
         if (authenticated) {
           await sph.session.deAuthenticate();
         }
+        sph.prefs.close();
       }
       return Future.value(true);
     } catch (e, s) {
