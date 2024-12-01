@@ -640,6 +640,293 @@ class AppletDataCompanion extends UpdateCompanion<AppletDataData> {
   }
 }
 
+class $NotificationsDuplicatesTableTable extends NotificationsDuplicatesTable
+    with
+        TableInfo<$NotificationsDuplicatesTableTable,
+            NotificationsDuplicatesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NotificationsDuplicatesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _notificationIdMeta =
+      const VerificationMeta('notificationId');
+  @override
+  late final GeneratedColumn<int> notificationId = GeneratedColumn<int>(
+      'notification_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _appletIdMeta =
+      const VerificationMeta('appletId');
+  @override
+  late final GeneratedColumn<String> appletId = GeneratedColumn<String>(
+      'applet_id', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 30),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _hashMeta = const VerificationMeta('hash');
+  @override
+  late final GeneratedColumn<String> hash = GeneratedColumn<String>(
+      'hash', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [notificationId, appletId, hash, timestamp];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'notifications_duplicates_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<NotificationsDuplicatesTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('notification_id')) {
+      context.handle(
+          _notificationIdMeta,
+          notificationId.isAcceptableOrUnknown(
+              data['notification_id']!, _notificationIdMeta));
+    } else if (isInserting) {
+      context.missing(_notificationIdMeta);
+    }
+    if (data.containsKey('applet_id')) {
+      context.handle(_appletIdMeta,
+          appletId.isAcceptableOrUnknown(data['applet_id']!, _appletIdMeta));
+    } else if (isInserting) {
+      context.missing(_appletIdMeta);
+    }
+    if (data.containsKey('hash')) {
+      context.handle(
+          _hashMeta, hash.isAcceptableOrUnknown(data['hash']!, _hashMeta));
+    } else if (isInserting) {
+      context.missing(_hashMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {notificationId, appletId};
+  @override
+  NotificationsDuplicatesTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NotificationsDuplicatesTableData(
+      notificationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}notification_id'])!,
+      appletId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}applet_id'])!,
+      hash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}hash'])!,
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
+    );
+  }
+
+  @override
+  $NotificationsDuplicatesTableTable createAlias(String alias) {
+    return $NotificationsDuplicatesTableTable(attachedDatabase, alias);
+  }
+}
+
+class NotificationsDuplicatesTableData extends DataClass
+    implements Insertable<NotificationsDuplicatesTableData> {
+  final int notificationId;
+  final String appletId;
+  final String hash;
+  final DateTime timestamp;
+  const NotificationsDuplicatesTableData(
+      {required this.notificationId,
+      required this.appletId,
+      required this.hash,
+      required this.timestamp});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['notification_id'] = Variable<int>(notificationId);
+    map['applet_id'] = Variable<String>(appletId);
+    map['hash'] = Variable<String>(hash);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  NotificationsDuplicatesTableCompanion toCompanion(bool nullToAbsent) {
+    return NotificationsDuplicatesTableCompanion(
+      notificationId: Value(notificationId),
+      appletId: Value(appletId),
+      hash: Value(hash),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory NotificationsDuplicatesTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NotificationsDuplicatesTableData(
+      notificationId: serializer.fromJson<int>(json['notificationId']),
+      appletId: serializer.fromJson<String>(json['appletId']),
+      hash: serializer.fromJson<String>(json['hash']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'notificationId': serializer.toJson<int>(notificationId),
+      'appletId': serializer.toJson<String>(appletId),
+      'hash': serializer.toJson<String>(hash),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  NotificationsDuplicatesTableData copyWith(
+          {int? notificationId,
+          String? appletId,
+          String? hash,
+          DateTime? timestamp}) =>
+      NotificationsDuplicatesTableData(
+        notificationId: notificationId ?? this.notificationId,
+        appletId: appletId ?? this.appletId,
+        hash: hash ?? this.hash,
+        timestamp: timestamp ?? this.timestamp,
+      );
+  NotificationsDuplicatesTableData copyWithCompanion(
+      NotificationsDuplicatesTableCompanion data) {
+    return NotificationsDuplicatesTableData(
+      notificationId: data.notificationId.present
+          ? data.notificationId.value
+          : this.notificationId,
+      appletId: data.appletId.present ? data.appletId.value : this.appletId,
+      hash: data.hash.present ? data.hash.value : this.hash,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotificationsDuplicatesTableData(')
+          ..write('notificationId: $notificationId, ')
+          ..write('appletId: $appletId, ')
+          ..write('hash: $hash, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(notificationId, appletId, hash, timestamp);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NotificationsDuplicatesTableData &&
+          other.notificationId == this.notificationId &&
+          other.appletId == this.appletId &&
+          other.hash == this.hash &&
+          other.timestamp == this.timestamp);
+}
+
+class NotificationsDuplicatesTableCompanion
+    extends UpdateCompanion<NotificationsDuplicatesTableData> {
+  final Value<int> notificationId;
+  final Value<String> appletId;
+  final Value<String> hash;
+  final Value<DateTime> timestamp;
+  final Value<int> rowid;
+  const NotificationsDuplicatesTableCompanion({
+    this.notificationId = const Value.absent(),
+    this.appletId = const Value.absent(),
+    this.hash = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NotificationsDuplicatesTableCompanion.insert({
+    required int notificationId,
+    required String appletId,
+    required String hash,
+    required DateTime timestamp,
+    this.rowid = const Value.absent(),
+  })  : notificationId = Value(notificationId),
+        appletId = Value(appletId),
+        hash = Value(hash),
+        timestamp = Value(timestamp);
+  static Insertable<NotificationsDuplicatesTableData> custom({
+    Expression<int>? notificationId,
+    Expression<String>? appletId,
+    Expression<String>? hash,
+    Expression<DateTime>? timestamp,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (notificationId != null) 'notification_id': notificationId,
+      if (appletId != null) 'applet_id': appletId,
+      if (hash != null) 'hash': hash,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NotificationsDuplicatesTableCompanion copyWith(
+      {Value<int>? notificationId,
+      Value<String>? appletId,
+      Value<String>? hash,
+      Value<DateTime>? timestamp,
+      Value<int>? rowid}) {
+    return NotificationsDuplicatesTableCompanion(
+      notificationId: notificationId ?? this.notificationId,
+      appletId: appletId ?? this.appletId,
+      hash: hash ?? this.hash,
+      timestamp: timestamp ?? this.timestamp,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (notificationId.present) {
+      map['notification_id'] = Variable<int>(notificationId.value);
+    }
+    if (appletId.present) {
+      map['applet_id'] = Variable<String>(appletId.value);
+    }
+    if (hash.present) {
+      map['hash'] = Variable<String>(hash.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotificationsDuplicatesTableCompanion(')
+          ..write('notificationId: $notificationId, ')
+          ..write('appletId: $appletId, ')
+          ..write('hash: $hash, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AccountPreferencesDatabase extends GeneratedDatabase {
   _$AccountPreferencesDatabase(QueryExecutor e) : super(e);
   $AccountPreferencesDatabaseManager get managers =>
@@ -649,12 +936,18 @@ abstract class _$AccountPreferencesDatabase extends GeneratedDatabase {
   late final $AppletPreferencesTableTable appletPreferencesTable =
       $AppletPreferencesTableTable(this);
   late final $AppletDataTable appletData = $AppletDataTable(this);
+  late final $NotificationsDuplicatesTableTable notificationsDuplicatesTable =
+      $NotificationsDuplicatesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [appPreferencesTable, appletPreferencesTable, appletData];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        appPreferencesTable,
+        appletPreferencesTable,
+        appletData,
+        notificationsDuplicatesTable
+      ];
 }
 
 typedef $$AppPreferencesTableTableCreateCompanionBuilder
@@ -1069,6 +1362,175 @@ typedef $$AppletDataTableProcessedTableManager = ProcessedTableManager<
     ),
     AppletDataData,
     PrefetchHooks Function()>;
+typedef $$NotificationsDuplicatesTableTableCreateCompanionBuilder
+    = NotificationsDuplicatesTableCompanion Function({
+  required int notificationId,
+  required String appletId,
+  required String hash,
+  required DateTime timestamp,
+  Value<int> rowid,
+});
+typedef $$NotificationsDuplicatesTableTableUpdateCompanionBuilder
+    = NotificationsDuplicatesTableCompanion Function({
+  Value<int> notificationId,
+  Value<String> appletId,
+  Value<String> hash,
+  Value<DateTime> timestamp,
+  Value<int> rowid,
+});
+
+class $$NotificationsDuplicatesTableTableFilterComposer extends Composer<
+    _$AccountPreferencesDatabase, $NotificationsDuplicatesTableTable> {
+  $$NotificationsDuplicatesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get notificationId => $composableBuilder(
+      column: $table.notificationId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get appletId => $composableBuilder(
+      column: $table.appletId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get hash => $composableBuilder(
+      column: $table.hash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+}
+
+class $$NotificationsDuplicatesTableTableOrderingComposer extends Composer<
+    _$AccountPreferencesDatabase, $NotificationsDuplicatesTableTable> {
+  $$NotificationsDuplicatesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get notificationId => $composableBuilder(
+      column: $table.notificationId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get appletId => $composableBuilder(
+      column: $table.appletId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get hash => $composableBuilder(
+      column: $table.hash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+}
+
+class $$NotificationsDuplicatesTableTableAnnotationComposer extends Composer<
+    _$AccountPreferencesDatabase, $NotificationsDuplicatesTableTable> {
+  $$NotificationsDuplicatesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get notificationId => $composableBuilder(
+      column: $table.notificationId, builder: (column) => column);
+
+  GeneratedColumn<String> get appletId =>
+      $composableBuilder(column: $table.appletId, builder: (column) => column);
+
+  GeneratedColumn<String> get hash =>
+      $composableBuilder(column: $table.hash, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
+class $$NotificationsDuplicatesTableTableTableManager extends RootTableManager<
+    _$AccountPreferencesDatabase,
+    $NotificationsDuplicatesTableTable,
+    NotificationsDuplicatesTableData,
+    $$NotificationsDuplicatesTableTableFilterComposer,
+    $$NotificationsDuplicatesTableTableOrderingComposer,
+    $$NotificationsDuplicatesTableTableAnnotationComposer,
+    $$NotificationsDuplicatesTableTableCreateCompanionBuilder,
+    $$NotificationsDuplicatesTableTableUpdateCompanionBuilder,
+    (
+      NotificationsDuplicatesTableData,
+      BaseReferences<_$AccountPreferencesDatabase,
+          $NotificationsDuplicatesTableTable, NotificationsDuplicatesTableData>
+    ),
+    NotificationsDuplicatesTableData,
+    PrefetchHooks Function()> {
+  $$NotificationsDuplicatesTableTableTableManager(
+      _$AccountPreferencesDatabase db, $NotificationsDuplicatesTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NotificationsDuplicatesTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NotificationsDuplicatesTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NotificationsDuplicatesTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> notificationId = const Value.absent(),
+            Value<String> appletId = const Value.absent(),
+            Value<String> hash = const Value.absent(),
+            Value<DateTime> timestamp = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              NotificationsDuplicatesTableCompanion(
+            notificationId: notificationId,
+            appletId: appletId,
+            hash: hash,
+            timestamp: timestamp,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int notificationId,
+            required String appletId,
+            required String hash,
+            required DateTime timestamp,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              NotificationsDuplicatesTableCompanion.insert(
+            notificationId: notificationId,
+            appletId: appletId,
+            hash: hash,
+            timestamp: timestamp,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$NotificationsDuplicatesTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AccountPreferencesDatabase,
+        $NotificationsDuplicatesTableTable,
+        NotificationsDuplicatesTableData,
+        $$NotificationsDuplicatesTableTableFilterComposer,
+        $$NotificationsDuplicatesTableTableOrderingComposer,
+        $$NotificationsDuplicatesTableTableAnnotationComposer,
+        $$NotificationsDuplicatesTableTableCreateCompanionBuilder,
+        $$NotificationsDuplicatesTableTableUpdateCompanionBuilder,
+        (
+          NotificationsDuplicatesTableData,
+          BaseReferences<
+              _$AccountPreferencesDatabase,
+              $NotificationsDuplicatesTableTable,
+              NotificationsDuplicatesTableData>
+        ),
+        NotificationsDuplicatesTableData,
+        PrefetchHooks Function()>;
 
 class $AccountPreferencesDatabaseManager {
   final _$AccountPreferencesDatabase _db;
@@ -1080,4 +1542,8 @@ class $AccountPreferencesDatabaseManager {
           _db, _db.appletPreferencesTable);
   $$AppletDataTableTableManager get appletData =>
       $$AppletDataTableTableManager(_db, _db.appletData);
+  $$NotificationsDuplicatesTableTableTableManager
+      get notificationsDuplicatesTable =>
+          $$NotificationsDuplicatesTableTableTableManager(
+              _db, _db.notificationsDuplicatesTable);
 }

@@ -24,7 +24,7 @@ Future<void> substitutionsBackgroundTask(SPH sph, AccountType accountType, Backg
 
     messageBody += "$entryText\n";
   }
-  tools.sendMessage('${allSubstitutions.length}', messageBody);
+  tools.sendMessage('${allSubstitutions.length}', messageBody, id: 0, avoidDuplicateSending: true);
 }
 
 String weekDayGer(String dateString) {

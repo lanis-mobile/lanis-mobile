@@ -22,6 +22,16 @@ class AppletPreferencesTable extends Table {
   Set<Column> get primaryKey => {appletId, key};
 }
 
+class NotificationsDuplicatesTable extends Table {
+  IntColumn get notificationId => integer()();
+  TextColumn get appletId => text().withLength(min: 1, max: 30)();
+  TextColumn get hash => text()();
+  DateTimeColumn get timestamp => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {notificationId, appletId};
+}
+
 class AppletData extends Table {
   TextColumn get appletId => text().withLength(min: 1, max: 30)();
   TextColumn get json => text().nullable()();
@@ -32,7 +42,7 @@ class AppletData extends Table {
 }
 
 @DriftDatabase(tables: [
-  AppPreferencesTable, AppletPreferencesTable, AppletData
+  AppPreferencesTable, AppletPreferencesTable, AppletData, NotificationsDuplicatesTable
 ])
 class AccountPreferencesDatabase extends _$AccountPreferencesDatabase {
   late final KV kv = KV(this);
@@ -47,6 +57,14 @@ class AccountPreferencesDatabase extends _$AccountPreferencesDatabase {
 
   static QueryExecutor _openConnection(int id) {
     return driftDatabase(name: 'session_${id}_db');
+  }
+
+  Future<NotificationsDuplicatesTableData?> getNotificationDuplicates(int id, String appletId) async {
+    return (await (select(notificationsDuplicatesTable)..where((tbl) => tbl.notificationId.equals(id) & tbl.appletId.equals(appletId))).getSingleOrNull());
+  }
+
+  Future<void> updateNotificationDuplicate(int id, String appletId, String hash) async {
+    await into(notificationsDuplicatesTable).insert(NotificationsDuplicatesTableCompanion.insert(notificationId: id, appletId: appletId, hash: hash, timestamp: DateTime.now()), mode: InsertMode.insertOrReplace);
   }
 }
 

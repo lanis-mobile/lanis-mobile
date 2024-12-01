@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -15,16 +17,16 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   if (!Platform.isAndroid && !Platform.isIOS) return;
 
 
-  if (Platform.isAndroid){
-    PermissionStatus? notificationsPermissionStatus;
-    await Permission.notification.isDenied.then((value) async {
-      if (value) {
-        notificationsPermissionStatus =
-        await Permission.notification.request();
-      }
-    });
-    if (!(notificationsPermissionStatus ?? PermissionStatus.granted).isGranted) return;
-  }
+  //if (Platform.isAndroid){
+  PermissionStatus? notificationsPermissionStatus;
+  await Permission.notification.isDenied.then((value) async {
+    if (value) {
+      notificationsPermissionStatus =
+      await Permission.notification.request();
+    }
+  });
+  if (!(notificationsPermissionStatus ?? PermissionStatus.granted).isGranted) return;
+
 
   await Workmanager().cancelAll();
 
@@ -43,7 +45,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
     await Workmanager().registerPeriodicTask(identifier, identifier,
       frequency: Duration(minutes: min),
       constraints: workManagerConstraints,
-      initialDelay: const Duration(minutes: 10),
+      initialDelay: const Duration(minutes: 0),
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
   }
@@ -53,7 +55,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
           constraints: workManagerConstraints,
       );
     } catch (e, s) {
-      logger.e(e, stackTrace: s);
+      backgroundLogger.e(e, stackTrace: s);
     }
   }
 }
@@ -70,7 +72,7 @@ Future<void> initializeNotifications() async {
       ),
     ),
   );} catch (e, s) {
-    logger.e(e, stackTrace: s);
+    backgroundLogger.e(e, stackTrace: s);
   }
 }
 
@@ -78,11 +80,11 @@ Future<void> initializeNotifications() async {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      logger.i("Background fetch triggered");
+      backgroundLogger.i("Background fetch triggered");
       initializeNotifications();
 
-      AccountDatabase _accountDatabase = AccountDatabase();
-      final accounts = await (_accountDatabase.select(_accountDatabase.accountsTable)).get();
+      AccountDatabase accountDatabase = AccountDatabase();
+      final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
       for (final account in accounts) {
 
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
@@ -104,7 +106,7 @@ void callbackDispatcher() {
             if (!sph.session.doesSupportFeature(applet)) {
               continue;
             }
-            await applet.notificationTask!(sph, sph.session.accountType, BackgroundTaskToolkit(sph));
+            await applet.notificationTask!(sph, sph.session.accountType, BackgroundTaskToolkit(sph, applet.appletPhpUrl, multiAccount: accounts.length > 1));
           }
         }
         if (authenticated) {
@@ -114,24 +116,36 @@ void callbackDispatcher() {
       }
       return Future.value(true);
     } catch (e, s) {
-      logger.f('Error in background fetch');
-      logger.e(e, stackTrace: s);
+      backgroundLogger.f('Error in background fetch');
+      backgroundLogger.e(e, stackTrace: s);
     }
     return Future.value(false);
   });
 }
 
 class BackgroundTaskToolkit {
+  bool multiAccount = false;
+  String appletId;
   final SPH _sph;
 
-  BackgroundTaskToolkit(this._sph);
+  BackgroundTaskToolkit(this._sph, this.appletId, {this.multiAccount = false});
 
   int _seedId(int id) {
     return id + _sph.account.localId * 10000;
   }
 
-  Future<void> sendMessage(String title, String message, {id = 0}) async {
+  Future<void> sendMessage(String title, String message, {int id = 0, bool avoidDuplicateSending = false}) async {
     id = _seedId(id);
+    message = multiAccount ? '${_sph.account.username.toLowerCase()}@${_sph.account.schoolName}\n$message' : message;
+    if (avoidDuplicateSending) {
+      final hash = hashString(message);
+      final lastMessage = await _sph.prefs.getNotificationDuplicates(id, appletId);
+      if (lastMessage?.hash == hash) {
+        return;
+      }
+
+      await _sph.prefs.updateNotificationDuplicate(id, appletId, hash);
+    }
     try {
       final androidDetails = AndroidNotificationDetails(
         'io.github.alessioc42.sphplan', 'lanis-mobile',
@@ -148,8 +162,14 @@ class BackgroundTaskToolkit {
       await FlutterLocalNotificationsPlugin()
           .show(id, title, message, platformDetails);
     } catch (e,s) {
-      logger.e(e, stackTrace: s);
+      backgroundLogger.e(e, stackTrace: s);
     }
+  }
+
+  String hashString(String input) {
+    var bytes = utf8.encode(input);
+    var hashed = sha256.convert(bytes);
+    return hashed.toString();
   }
 }
 

@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/connection_checker.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
@@ -355,23 +354,6 @@ class _HomePageState extends State<HomePage> {
         title: Text(doesSupportAnyApplet
             ? destinations[selectedDestinationDrawer].label(context)
             : AppLocalizations.of(context)!.openLanisInBrowser),
-        actions: [
-          if (kDebugMode) ...[
-            IconButton(
-              onPressed: () {
-                throw ErrorDescription("Test Error in debug mode");
-              },
-              icon: const Icon(Icons.nearby_error),
-              tooltip: "Throw test Error",
-            ),
-            IconButton(
-                onPressed: () {
-                  //updateNotifications();
-                },
-                icon: const Icon(Icons.notifications),
-                tooltip: "Simulate notification update")
-          ]
-        ],
       ),
       body: Column(
         mainAxisSize: MainAxisSize.max,

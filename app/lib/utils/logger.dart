@@ -48,3 +48,4 @@ class Logger {
 }
 
 Logger logger = Logger('Lanis');
+Logger backgroundLogger = Logger('Lanis Background');
