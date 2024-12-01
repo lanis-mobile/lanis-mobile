@@ -5,17 +5,18 @@ import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:dart_date/dart_date.dart';
-import 'package:sph_plan/applets/substitutions/definition.dart';
 
 import '../../core/applet_parser.dart';
 import '../../models/substitution.dart';
 import '../../models/client_status_exceptions.dart';
 
 class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
-  SubstitutionsParser(super.sph);
+  SubstitutionsParser(super.sph, super.appletDefinition);
 
   @override
-  Duration? get validCacheDuration => substitutionDefinition.refreshInterval;
+  SubstitutionPlan typeFromJson(String json) {
+    return SubstitutionPlan.fromJson(jsonDecode(json));
+  }
 
   @override
   Future<SubstitutionPlan> getHome() async {

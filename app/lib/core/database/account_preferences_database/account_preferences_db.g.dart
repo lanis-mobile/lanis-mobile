@@ -465,8 +465,14 @@ class $AppletDataTable extends AppletData
   late final GeneratedColumn<String> json = GeneratedColumn<String>(
       'json', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
   @override
-  List<GeneratedColumn> get $columns => [appletId, json];
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [appletId, json, timestamp];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -487,6 +493,12 @@ class $AppletDataTable extends AppletData
       context.handle(
           _jsonMeta, json.isAcceptableOrUnknown(data['json']!, _jsonMeta));
     }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
     return context;
   }
 
@@ -500,6 +512,8 @@ class $AppletDataTable extends AppletData
           .read(DriftSqlType.string, data['${effectivePrefix}applet_id'])!,
       json: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}json']),
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
     );
   }
 
@@ -512,7 +526,9 @@ class $AppletDataTable extends AppletData
 class AppletDataData extends DataClass implements Insertable<AppletDataData> {
   final String appletId;
   final String? json;
-  const AppletDataData({required this.appletId, this.json});
+  final DateTime timestamp;
+  const AppletDataData(
+      {required this.appletId, this.json, required this.timestamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -520,6 +536,7 @@ class AppletDataData extends DataClass implements Insertable<AppletDataData> {
     if (!nullToAbsent || json != null) {
       map['json'] = Variable<String>(json);
     }
+    map['timestamp'] = Variable<DateTime>(timestamp);
     return map;
   }
 
@@ -527,6 +544,7 @@ class AppletDataData extends DataClass implements Insertable<AppletDataData> {
     return AppletDataCompanion(
       appletId: Value(appletId),
       json: json == null && nullToAbsent ? const Value.absent() : Value(json),
+      timestamp: Value(timestamp),
     );
   }
 
@@ -536,6 +554,7 @@ class AppletDataData extends DataClass implements Insertable<AppletDataData> {
     return AppletDataData(
       appletId: serializer.fromJson<String>(json['appletId']),
       json: serializer.fromJson<String?>(json['json']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
     );
   }
   @override
@@ -544,19 +563,24 @@ class AppletDataData extends DataClass implements Insertable<AppletDataData> {
     return <String, dynamic>{
       'appletId': serializer.toJson<String>(appletId),
       'json': serializer.toJson<String?>(json),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
     };
   }
 
   AppletDataData copyWith(
-          {String? appletId, Value<String?> json = const Value.absent()}) =>
+          {String? appletId,
+          Value<String?> json = const Value.absent(),
+          DateTime? timestamp}) =>
       AppletDataData(
         appletId: appletId ?? this.appletId,
         json: json.present ? json.value : this.json,
+        timestamp: timestamp ?? this.timestamp,
       );
   AppletDataData copyWithCompanion(AppletDataCompanion data) {
     return AppletDataData(
       appletId: data.appletId.present ? data.appletId.value : this.appletId,
       json: data.json.present ? data.json.value : this.json,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
     );
   }
 
@@ -564,52 +588,64 @@ class AppletDataData extends DataClass implements Insertable<AppletDataData> {
   String toString() {
     return (StringBuffer('AppletDataData(')
           ..write('appletId: $appletId, ')
-          ..write('json: $json')
+          ..write('json: $json, ')
+          ..write('timestamp: $timestamp')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(appletId, json);
+  int get hashCode => Object.hash(appletId, json, timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AppletDataData &&
           other.appletId == this.appletId &&
-          other.json == this.json);
+          other.json == this.json &&
+          other.timestamp == this.timestamp);
 }
 
 class AppletDataCompanion extends UpdateCompanion<AppletDataData> {
   final Value<String> appletId;
   final Value<String?> json;
+  final Value<DateTime> timestamp;
   final Value<int> rowid;
   const AppletDataCompanion({
     this.appletId = const Value.absent(),
     this.json = const Value.absent(),
+    this.timestamp = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AppletDataCompanion.insert({
     required String appletId,
     this.json = const Value.absent(),
+    required DateTime timestamp,
     this.rowid = const Value.absent(),
-  }) : appletId = Value(appletId);
+  })  : appletId = Value(appletId),
+        timestamp = Value(timestamp);
   static Insertable<AppletDataData> custom({
     Expression<String>? appletId,
     Expression<String>? json,
+    Expression<DateTime>? timestamp,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (appletId != null) 'applet_id': appletId,
       if (json != null) 'json': json,
+      if (timestamp != null) 'timestamp': timestamp,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   AppletDataCompanion copyWith(
-      {Value<String>? appletId, Value<String?>? json, Value<int>? rowid}) {
+      {Value<String>? appletId,
+      Value<String?>? json,
+      Value<DateTime>? timestamp,
+      Value<int>? rowid}) {
     return AppletDataCompanion(
       appletId: appletId ?? this.appletId,
       json: json ?? this.json,
+      timestamp: timestamp ?? this.timestamp,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -623,6 +659,9 @@ class AppletDataCompanion extends UpdateCompanion<AppletDataData> {
     if (json.present) {
       map['json'] = Variable<String>(json.value);
     }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -634,6 +673,7 @@ class AppletDataCompanion extends UpdateCompanion<AppletDataData> {
     return (StringBuffer('AppletDataCompanion(')
           ..write('appletId: $appletId, ')
           ..write('json: $json, ')
+          ..write('timestamp: $timestamp, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1236,11 +1276,13 @@ typedef $$AppletPreferencesTableTableProcessedTableManager
 typedef $$AppletDataTableCreateCompanionBuilder = AppletDataCompanion Function({
   required String appletId,
   Value<String?> json,
+  required DateTime timestamp,
   Value<int> rowid,
 });
 typedef $$AppletDataTableUpdateCompanionBuilder = AppletDataCompanion Function({
   Value<String> appletId,
   Value<String?> json,
+  Value<DateTime> timestamp,
   Value<int> rowid,
 });
 
@@ -1258,6 +1300,9 @@ class $$AppletDataTableFilterComposer
 
   ColumnFilters<String> get json => $composableBuilder(
       column: $table.json, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
 }
 
 class $$AppletDataTableOrderingComposer
@@ -1274,6 +1319,9 @@ class $$AppletDataTableOrderingComposer
 
   ColumnOrderings<String> get json => $composableBuilder(
       column: $table.json, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
 }
 
 class $$AppletDataTableAnnotationComposer
@@ -1290,6 +1338,9 @@ class $$AppletDataTableAnnotationComposer
 
   GeneratedColumn<String> get json =>
       $composableBuilder(column: $table.json, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
 }
 
 class $$AppletDataTableTableManager extends RootTableManager<
@@ -1322,21 +1373,25 @@ class $$AppletDataTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> appletId = const Value.absent(),
             Value<String?> json = const Value.absent(),
+            Value<DateTime> timestamp = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AppletDataCompanion(
             appletId: appletId,
             json: json,
+            timestamp: timestamp,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String appletId,
             Value<String?> json = const Value.absent(),
+            required DateTime timestamp,
             Value<int> rowid = const Value.absent(),
           }) =>
               AppletDataCompanion.insert(
             appletId: appletId,
             json: json,
+            timestamp: timestamp,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

@@ -1,17 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
 
 import '../../../models/timetable.dart';
 
 class TimetableStudentParser extends AppletParser<TimeTable> {
-  TimetableStudentParser(super.sph);
-
-  @override
-  Duration? get validCacheDuration => timeTableDefinition.refreshInterval;
+  TimetableStudentParser(super.sph, super.appletDefinition);
 
   @override
   Future<TimeTable> getHome() async {
@@ -27,6 +25,11 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
       planForAll: parsedAll,
       planForOwn: parsedOwn,
     );
+  }
+
+  @override
+  TimeTable typeFromJson(String json) {
+    return TimeTable.fromJson(jsonDecode(json));
   }
 
   Future<Document?> getTimetableDocument() async {

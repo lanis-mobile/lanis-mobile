@@ -35,6 +35,7 @@ class NotificationsDuplicatesTable extends Table {
 class AppletData extends Table {
   TextColumn get appletId => text().withLength(min: 1, max: 30)();
   TextColumn get json => text().nullable()();
+  DateTimeColumn get timestamp => dateTime()();
 
   @override
   Set<Column> get primaryKey => {appletId};
@@ -65,6 +66,18 @@ class AccountPreferencesDatabase extends _$AccountPreferencesDatabase {
 
   Future<void> updateNotificationDuplicate(int id, String appletId, String hash) async {
     await into(notificationsDuplicatesTable).insert(NotificationsDuplicatesTableCompanion.insert(notificationId: id, appletId: appletId, hash: hash, timestamp: DateTime.now()), mode: InsertMode.insertOrReplace);
+  }
+
+  Future<void> setAppletData(String appletId, String json) async {
+    await into(appletData).insert(AppletDataCompanion.insert(appletId: appletId, json: Value(json),timestamp: DateTime.now() ), mode: InsertMode.insertOrReplace);
+  }
+
+  Future<AppletDataData?> getAppletData(String appletId) async {
+    return (await (select(appletData)..where((tbl) => tbl.appletId.equals(appletId))).getSingleOrNull());
+  }
+
+  Future<List<AppletDataData>> getAllAppletData(String appletId) async {
+    return select(appletData).get();
   }
 }
 

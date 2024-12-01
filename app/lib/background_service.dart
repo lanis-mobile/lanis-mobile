@@ -172,4 +172,3 @@ class BackgroundTaskToolkit {
     return hashed.toString();
   }
 }
-

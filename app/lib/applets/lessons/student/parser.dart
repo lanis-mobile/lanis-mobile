@@ -3,18 +3,14 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:sph_plan/applets/lessons/definition.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/lessons.dart';
 
 import '../../../models/client_status_exceptions.dart';
 
 class LessonsStudentParser extends AppletParser<Lessons> {
-  LessonsStudentParser(super.sph);
+  LessonsStudentParser(super.sph, super.appletDefinition);
 
-
-  @override
-  Duration? get validCacheDuration => lessonsDefinition.refreshInterval;
 
   @override
   Future<Lessons> getHome() async {

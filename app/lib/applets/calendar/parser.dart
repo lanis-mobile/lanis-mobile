@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
-import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/models/calendar_event.dart';
 
 import '../../core/applet_parser.dart';
@@ -11,10 +10,7 @@ import '../../core/connection_checker.dart';
 import '../../models/client_status_exceptions.dart';
 
 class CalendarParser extends AppletParser<List<CalendarEvent>> {
-  CalendarParser(super.sph);
-
-  @override
-  Duration? get validCacheDuration => calendarDefinition.refreshInterval;
+  CalendarParser(super.sph, super.appletDefinition);
 
   @override
   Future<List<CalendarEvent>> getHome() async {

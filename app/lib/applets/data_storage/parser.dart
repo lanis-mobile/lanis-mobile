@@ -2,17 +2,13 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
-import 'package:sph_plan/applets/data_storage/definition.dart';
 import 'package:sph_plan/models/datastorage.dart';
 
 import '../../core/applet_parser.dart';
 import '../../models/client_status_exceptions.dart';
 
 class DataStorageParser extends AppletParser<(List<FileNode>, List<FolderNode>)> {
-  DataStorageParser(super.sph);
-
-  @override
-  Duration? get validCacheDuration => dataStorageDefinition.refreshInterval;
+  DataStorageParser(super.sph, super.appletDefinition);
 
   @override
   Future<(List<FileNode>, List<FolderNode>)> getHome() {

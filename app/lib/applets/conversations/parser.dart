@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html/parser.dart';
-import 'package:sph_plan/applets/conversations/definition.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
@@ -17,12 +16,9 @@ import '../../models/conversations.dart';
 class ConversationsParser extends AppletParser<List<OverviewEntry>> {
   late final OverviewFiltering filter;
 
-  @override
-  Duration? get validCacheDuration => conversationsDefinition.refreshInterval;
-
   bool? cachedCanChooseType;
 
-  ConversationsParser(super.sph) {
+  ConversationsParser(super.sph, super.appletDefinition) {
     filter = OverviewFiltering();
   }
 

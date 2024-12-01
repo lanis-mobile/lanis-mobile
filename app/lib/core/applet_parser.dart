@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:rxdart/rxdart.dart';
+import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 
 import '../utils/logger.dart';
@@ -11,26 +13,32 @@ enum FetcherStatus {
   error;
 }
 
-class FetcherResponse<T> {
-  late final FetcherStatus status;
-  late final T? content;
+enum ContentStatus {
+  online,
+  offline,
+}
 
-  FetcherResponse({required this.status, this.content});
+class FetcherResponse<T> {
+  final FetcherStatus status;
+  final T? content;
+  final ContentStatus contentStatus;
+
+  FetcherResponse(
+      {required this.status,
+      this.contentStatus = ContentStatus.online,
+      this.content});
 }
 
 class AppletParser<T> {
   final SPH sph;
   final BehaviorSubject<FetcherResponse<T>> _controller = BehaviorSubject();
-  late Duration? validCacheDuration;
+  final AppletDefinition appletDefinition;
   bool isEmpty = true;
 
   ValueStream<FetcherResponse<T>> get stream => _controller.stream;
 
-
-  AppletParser(this.sph) {
-    if (validCacheDuration != null) {
-      Timer.periodic(validCacheDuration!, timerCallback);
-    }
+  AppletParser(this.sph, this.appletDefinition) {
+    Timer.periodic(appletDefinition.refreshInterval, timerCallback);
   }
 
   void timerCallback(Timer timer) async {
@@ -42,12 +50,26 @@ class AppletParser<T> {
   void _addResponse(final FetcherResponse<T> data) =>
       _controller.sink.add(data);
 
-  Future<void> fetchData({bool forceRefresh = false, bool secondTry = false}) async {
+  Future<void> fetchData(
+      {bool forceRefresh = false, bool secondTry = false}) async {
     if (!(await connectionChecker.connected)) {
       if (isEmpty) {
-        _addResponse(FetcherResponse(
-            status: FetcherStatus.error
-        ));
+        final offlineData =
+            await sph.prefs.getAppletData(appletDefinition.appletPhpUrl);
+        if (offlineData != null) {
+          _addResponse(
+            FetcherResponse(
+              status: FetcherStatus.done,
+              content: typeFromJson(jsonDecode(offlineData.json!)),
+            ),
+          );
+        } else {
+          _addResponse(
+            FetcherResponse(
+              status: FetcherStatus.error,
+            ),
+          );
+        }
       }
 
       return;
@@ -56,7 +78,7 @@ class AppletParser<T> {
     if (isEmpty || forceRefresh) {
       _addResponse(FetcherResponse(status: FetcherStatus.fetching));
 
-      getHome().then((data) async {
+      _getHome().then((data) async {
         _addResponse(
             FetcherResponse<T>(status: FetcherStatus.done, content: data));
         isEmpty = false;
@@ -68,12 +90,30 @@ class AppletParser<T> {
           return;
         }
         _addResponse(
-            FetcherResponse<T>(status: FetcherStatus.error));
+          FetcherResponse<T>(status: FetcherStatus.error),
+        );
       });
     }
   }
 
-  Future<T> getHome(){
+  Future<T> _getHome() async {
+    try {
+      final T value = await getHome();
+      if (appletDefinition.allowOffline) {
+        sph.prefs
+            .setAppletData(appletDefinition.appletPhpUrl, jsonEncode(value));
+      }
+      return value;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  T typeFromJson(String json) {
+    throw UnimplementedError('Please add the required overrides in the parser');
+  }
+
+  Future<T> getHome() {
     throw UnimplementedError();
   }
 }
