@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -79,6 +80,7 @@ Future<void> initializeNotifications() async {
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     try {
       backgroundLogger.i("Background fetch triggered");
       initializeNotifications();

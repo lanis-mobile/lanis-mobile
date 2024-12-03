@@ -50,33 +50,34 @@ class _OfflineAvailableAppletsSectionState extends State<OfflineAvailableApplets
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return const Padding(
+        padding: EdgeInsets.only(top: 32),
+        child: LinearProgressIndicator(),
       );
     }
     return Column(
       children: possibleOfflineApplets.map(
-        (offlineApplet) => ListTile(
-          title: Text(offlineApplet.definition.label(context)),
-          subtitle: Text(offlineApplet.userDisplayName),
-          leading: offlineApplet.definition.icon,
-          onTap: () async {
-            ClearTextAccount acc = await accountDatabase.getClearTextAccountFromId(offlineApplet.localUserId);
-            sph = SPH(account: acc);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Scaffold(
-                  appBar: AppBar(
-                    title: Text(offlineApplet.definition.label(context)),
+            (offlineApplet) => ListTile(
+            title: Text(offlineApplet.definition.label(context)),
+            subtitle: Text(offlineApplet.userDisplayName),
+            leading: offlineApplet.definition.icon,
+            onTap: () async {
+              ClearTextAccount acc = await accountDatabase.getClearTextAccountFromId(offlineApplet.localUserId);
+              sph = SPH(account: acc);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(
+                      title: Text(offlineApplet.definition.label(context)),
+                    ),
+                    body: offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student),
                   ),
-                  body: offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student),
                 ),
-              ),
-            );
-          }
+              );
+            }
         ),
-      ).toList(),
+      ).toList(growable: false),
     );
   }
 }

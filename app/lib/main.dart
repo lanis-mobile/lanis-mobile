@@ -116,7 +116,9 @@ class App extends StatelessWidget {
               SfGlobalLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const StartupScreen(),
+            home: const Scaffold(
+              body: StartupScreen(),
+            ),
           );
         });
       },

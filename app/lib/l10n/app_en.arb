@@ -80,6 +80,7 @@
   "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.\nLast edited: {time}",
   "logout": "Logout",
   "logoutConfirmation": "Do you really want to log out?",
+  "checkStatus": "Check server status",
   "allSettingsWillBeLost": "All settings will be lost!",
   "loading": "Loading...",
   "teacher": "Teacher",
