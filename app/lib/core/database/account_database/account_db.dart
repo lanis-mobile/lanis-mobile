@@ -6,6 +6,7 @@ import 'package:flutter_keychain/flutter_keychain.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../models/account_types.dart';
 import '../../../utils/logger.dart';
 import '../../sph/sph.dart';
 import '../account_preferences_database/kv_defaults.dart';
@@ -18,6 +19,7 @@ class ClearTextAccount {
   final String username;
   final String password;
   final String schoolName;
+  final AccountType? accountType;
   final bool firstLogin;
 
   ClearTextAccount({
@@ -26,6 +28,7 @@ class ClearTextAccount {
     required this.username,
     required this.password,
     required this.schoolName,
+    this.accountType,
     this.firstLogin = false,
   });
 }
@@ -43,6 +46,7 @@ class AccountsTable extends Table {
   IntColumn get schoolId => integer()();
   TextColumn get schoolName => text()();
   TextColumn get username => text().withLength(min: 1, max: 50)();
+  TextColumn get accountType => text().nullable()();
   TextColumn get passwordHash => text()();
   DateTimeColumn get lastLogin => dateTime().nullable()();
   DateTimeColumn get creationDate => dateTime()();
@@ -89,6 +93,12 @@ class AccountDatabase extends _$AccountDatabase {
     return encrypter.decrypt64(parts[1], iv: iv);
   }
 
+  Future<void> setAccountType(int id, AccountType accountType) async {
+    await (update(accountsTable)..where((tbl) => tbl.id.equals(id))).write(AccountsTableCompanion(
+      accountType: Value(accountType.toString()),
+    ));
+  }
+
   Future <int> addAccountToDatabase({required int schoolID, required String username, required String password, required String schoolName}) async {
     String passwordHash = await cryptPassword(password);
     await into(accountsTable).insert(AccountsTableCompanion(
@@ -120,6 +130,7 @@ class AccountDatabase extends _$AccountDatabase {
       schoolID: account.schoolId,
       username: account.username,
       password: await decryptPassword(account.passwordHash),
+      accountType: account.accountType != null ? accountTypeFromString(account.accountType!) : null,
       schoolName: account.schoolName,
       firstLogin: account.lastLogin == null,
     );
@@ -133,8 +144,14 @@ class AccountDatabase extends _$AccountDatabase {
       username: account.username,
       password: clearTextPassword,
       schoolName: account.schoolName,
+      accountType: account.accountType != null ? accountTypeFromString(account.accountType!) : null,
       firstLogin: account.lastLogin == null,
     );
+  }
+
+  Future<ClearTextAccount> getClearTextAccountFromId(int id) async {
+    final account = await (select(accountsTable)..where((tbl) => tbl.id.equals(id))).getSingle();
+    return getAccountFromTableData(account);
   }
   
   Future<void> deleteAccount(int id) async {
@@ -221,6 +238,19 @@ class KV {
       }
       return result;
     });
+  }
+}
+
+AccountType? accountTypeFromString(String src) {
+  switch (src) {
+    case 'AccountType.student':
+      return AccountType.student;
+    case 'AccountType.teacher':
+      return AccountType.teacher;
+    case 'AccountType.parent':
+      return AccountType.parent;
+    default:
+      return null;
   }
 }
 

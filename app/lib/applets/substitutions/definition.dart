@@ -12,6 +12,7 @@ final substitutionDefinition = AppletDefinition(
   selectedIcon: Icon(Icons.people_outline),
   appletType: AppletType.nested,
   addDivider: true,
+  allowOffline: true,
   label: (context) => AppLocalizations.of(context)!.substitutions,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   refreshInterval: Duration(minutes: 10),

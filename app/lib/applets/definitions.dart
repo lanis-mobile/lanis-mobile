@@ -65,4 +65,12 @@ class AppDefinitions {
   static bool isAppletSupported(AccountType accountType, String phpIdentifier) {
     return applets.any((element) => element.supportedAccountTypes.contains(accountType) && element.appletPhpUrl == phpIdentifier);
   }
+
+  static getByPhpIdentifier(String phpIdentifier) {
+    return applets.firstWhere((element) => element.appletPhpUrl == phpIdentifier);
+  }
+
+  static getIndexByPhpIdentifier(String phpIdentifier) {
+    return applets.indexWhere((element) => element.appletPhpUrl == phpIdentifier);
+  }
 }

@@ -99,6 +99,7 @@ class SessionHandler {
     if (!withoutData) {
       accountDatabase.updateLastLogin(sph.account.localId);
       userData = await fetchUserData();
+      await accountDatabase.setAccountType(sph.account.localId, accountType);
     }
 
     await cryptor.initialize(dio);

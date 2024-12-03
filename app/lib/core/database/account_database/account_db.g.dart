@@ -39,6 +39,12 @@ class $AccountsTableTable extends AccountsTable
           GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 50),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
+  static const VerificationMeta _accountTypeMeta =
+      const VerificationMeta('accountType');
+  @override
+  late final GeneratedColumn<String> accountType = GeneratedColumn<String>(
+      'account_type', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _passwordHashMeta =
       const VerificationMeta('passwordHash');
   @override
@@ -63,6 +69,7 @@ class $AccountsTableTable extends AccountsTable
         schoolId,
         schoolName,
         username,
+        accountType,
         passwordHash,
         lastLogin,
         creationDate
@@ -99,6 +106,12 @@ class $AccountsTableTable extends AccountsTable
           username.isAcceptableOrUnknown(data['username']!, _usernameMeta));
     } else if (isInserting) {
       context.missing(_usernameMeta);
+    }
+    if (data.containsKey('account_type')) {
+      context.handle(
+          _accountTypeMeta,
+          accountType.isAcceptableOrUnknown(
+              data['account_type']!, _accountTypeMeta));
     }
     if (data.containsKey('password_hash')) {
       context.handle(
@@ -137,6 +150,8 @@ class $AccountsTableTable extends AccountsTable
           .read(DriftSqlType.string, data['${effectivePrefix}school_name'])!,
       username: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}username'])!,
+      accountType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_type']),
       passwordHash: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}password_hash'])!,
       lastLogin: attachedDatabase.typeMapping
@@ -158,6 +173,7 @@ class AccountsTableData extends DataClass
   final int schoolId;
   final String schoolName;
   final String username;
+  final String? accountType;
   final String passwordHash;
   final DateTime? lastLogin;
   final DateTime creationDate;
@@ -166,6 +182,7 @@ class AccountsTableData extends DataClass
       required this.schoolId,
       required this.schoolName,
       required this.username,
+      this.accountType,
       required this.passwordHash,
       this.lastLogin,
       required this.creationDate});
@@ -176,6 +193,9 @@ class AccountsTableData extends DataClass
     map['school_id'] = Variable<int>(schoolId);
     map['school_name'] = Variable<String>(schoolName);
     map['username'] = Variable<String>(username);
+    if (!nullToAbsent || accountType != null) {
+      map['account_type'] = Variable<String>(accountType);
+    }
     map['password_hash'] = Variable<String>(passwordHash);
     if (!nullToAbsent || lastLogin != null) {
       map['last_login'] = Variable<DateTime>(lastLogin);
@@ -190,6 +210,9 @@ class AccountsTableData extends DataClass
       schoolId: Value(schoolId),
       schoolName: Value(schoolName),
       username: Value(username),
+      accountType: accountType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountType),
       passwordHash: Value(passwordHash),
       lastLogin: lastLogin == null && nullToAbsent
           ? const Value.absent()
@@ -206,6 +229,7 @@ class AccountsTableData extends DataClass
       schoolId: serializer.fromJson<int>(json['schoolId']),
       schoolName: serializer.fromJson<String>(json['schoolName']),
       username: serializer.fromJson<String>(json['username']),
+      accountType: serializer.fromJson<String?>(json['accountType']),
       passwordHash: serializer.fromJson<String>(json['passwordHash']),
       lastLogin: serializer.fromJson<DateTime?>(json['lastLogin']),
       creationDate: serializer.fromJson<DateTime>(json['creationDate']),
@@ -219,6 +243,7 @@ class AccountsTableData extends DataClass
       'schoolId': serializer.toJson<int>(schoolId),
       'schoolName': serializer.toJson<String>(schoolName),
       'username': serializer.toJson<String>(username),
+      'accountType': serializer.toJson<String?>(accountType),
       'passwordHash': serializer.toJson<String>(passwordHash),
       'lastLogin': serializer.toJson<DateTime?>(lastLogin),
       'creationDate': serializer.toJson<DateTime>(creationDate),
@@ -230,6 +255,7 @@ class AccountsTableData extends DataClass
           int? schoolId,
           String? schoolName,
           String? username,
+          Value<String?> accountType = const Value.absent(),
           String? passwordHash,
           Value<DateTime?> lastLogin = const Value.absent(),
           DateTime? creationDate}) =>
@@ -238,6 +264,7 @@ class AccountsTableData extends DataClass
         schoolId: schoolId ?? this.schoolId,
         schoolName: schoolName ?? this.schoolName,
         username: username ?? this.username,
+        accountType: accountType.present ? accountType.value : this.accountType,
         passwordHash: passwordHash ?? this.passwordHash,
         lastLogin: lastLogin.present ? lastLogin.value : this.lastLogin,
         creationDate: creationDate ?? this.creationDate,
@@ -249,6 +276,8 @@ class AccountsTableData extends DataClass
       schoolName:
           data.schoolName.present ? data.schoolName.value : this.schoolName,
       username: data.username.present ? data.username.value : this.username,
+      accountType:
+          data.accountType.present ? data.accountType.value : this.accountType,
       passwordHash: data.passwordHash.present
           ? data.passwordHash.value
           : this.passwordHash,
@@ -266,6 +295,7 @@ class AccountsTableData extends DataClass
           ..write('schoolId: $schoolId, ')
           ..write('schoolName: $schoolName, ')
           ..write('username: $username, ')
+          ..write('accountType: $accountType, ')
           ..write('passwordHash: $passwordHash, ')
           ..write('lastLogin: $lastLogin, ')
           ..write('creationDate: $creationDate')
@@ -275,7 +305,7 @@ class AccountsTableData extends DataClass
 
   @override
   int get hashCode => Object.hash(id, schoolId, schoolName, username,
-      passwordHash, lastLogin, creationDate);
+      accountType, passwordHash, lastLogin, creationDate);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -284,6 +314,7 @@ class AccountsTableData extends DataClass
           other.schoolId == this.schoolId &&
           other.schoolName == this.schoolName &&
           other.username == this.username &&
+          other.accountType == this.accountType &&
           other.passwordHash == this.passwordHash &&
           other.lastLogin == this.lastLogin &&
           other.creationDate == this.creationDate);
@@ -294,6 +325,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
   final Value<int> schoolId;
   final Value<String> schoolName;
   final Value<String> username;
+  final Value<String?> accountType;
   final Value<String> passwordHash;
   final Value<DateTime?> lastLogin;
   final Value<DateTime> creationDate;
@@ -302,6 +334,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     this.schoolId = const Value.absent(),
     this.schoolName = const Value.absent(),
     this.username = const Value.absent(),
+    this.accountType = const Value.absent(),
     this.passwordHash = const Value.absent(),
     this.lastLogin = const Value.absent(),
     this.creationDate = const Value.absent(),
@@ -311,6 +344,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     required int schoolId,
     required String schoolName,
     required String username,
+    this.accountType = const Value.absent(),
     required String passwordHash,
     this.lastLogin = const Value.absent(),
     required DateTime creationDate,
@@ -324,6 +358,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     Expression<int>? schoolId,
     Expression<String>? schoolName,
     Expression<String>? username,
+    Expression<String>? accountType,
     Expression<String>? passwordHash,
     Expression<DateTime>? lastLogin,
     Expression<DateTime>? creationDate,
@@ -333,6 +368,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
       if (schoolId != null) 'school_id': schoolId,
       if (schoolName != null) 'school_name': schoolName,
       if (username != null) 'username': username,
+      if (accountType != null) 'account_type': accountType,
       if (passwordHash != null) 'password_hash': passwordHash,
       if (lastLogin != null) 'last_login': lastLogin,
       if (creationDate != null) 'creation_date': creationDate,
@@ -344,6 +380,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
       Value<int>? schoolId,
       Value<String>? schoolName,
       Value<String>? username,
+      Value<String?>? accountType,
       Value<String>? passwordHash,
       Value<DateTime?>? lastLogin,
       Value<DateTime>? creationDate}) {
@@ -352,6 +389,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
       schoolId: schoolId ?? this.schoolId,
       schoolName: schoolName ?? this.schoolName,
       username: username ?? this.username,
+      accountType: accountType ?? this.accountType,
       passwordHash: passwordHash ?? this.passwordHash,
       lastLogin: lastLogin ?? this.lastLogin,
       creationDate: creationDate ?? this.creationDate,
@@ -373,6 +411,9 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
     if (username.present) {
       map['username'] = Variable<String>(username.value);
     }
+    if (accountType.present) {
+      map['account_type'] = Variable<String>(accountType.value);
+    }
     if (passwordHash.present) {
       map['password_hash'] = Variable<String>(passwordHash.value);
     }
@@ -392,6 +433,7 @@ class AccountsTableCompanion extends UpdateCompanion<AccountsTableData> {
           ..write('schoolId: $schoolId, ')
           ..write('schoolName: $schoolName, ')
           ..write('username: $username, ')
+          ..write('accountType: $accountType, ')
           ..write('passwordHash: $passwordHash, ')
           ..write('lastLogin: $lastLogin, ')
           ..write('creationDate: $creationDate')
@@ -619,6 +661,7 @@ typedef $$AccountsTableTableCreateCompanionBuilder = AccountsTableCompanion
   required int schoolId,
   required String schoolName,
   required String username,
+  Value<String?> accountType,
   required String passwordHash,
   Value<DateTime?> lastLogin,
   required DateTime creationDate,
@@ -629,6 +672,7 @@ typedef $$AccountsTableTableUpdateCompanionBuilder = AccountsTableCompanion
   Value<int> schoolId,
   Value<String> schoolName,
   Value<String> username,
+  Value<String?> accountType,
   Value<String> passwordHash,
   Value<DateTime?> lastLogin,
   Value<DateTime> creationDate,
@@ -654,6 +698,9 @@ class $$AccountsTableTableFilterComposer
 
   ColumnFilters<String> get username => $composableBuilder(
       column: $table.username, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get accountType => $composableBuilder(
+      column: $table.accountType, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get passwordHash => $composableBuilder(
       column: $table.passwordHash, builder: (column) => ColumnFilters(column));
@@ -685,6 +732,9 @@ class $$AccountsTableTableOrderingComposer
 
   ColumnOrderings<String> get username => $composableBuilder(
       column: $table.username, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get accountType => $composableBuilder(
+      column: $table.accountType, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get passwordHash => $composableBuilder(
       column: $table.passwordHash,
@@ -718,6 +768,9 @@ class $$AccountsTableTableAnnotationComposer
 
   GeneratedColumn<String> get username =>
       $composableBuilder(column: $table.username, builder: (column) => column);
+
+  GeneratedColumn<String> get accountType => $composableBuilder(
+      column: $table.accountType, builder: (column) => column);
 
   GeneratedColumn<String> get passwordHash => $composableBuilder(
       column: $table.passwordHash, builder: (column) => column);
@@ -760,6 +813,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             Value<int> schoolId = const Value.absent(),
             Value<String> schoolName = const Value.absent(),
             Value<String> username = const Value.absent(),
+            Value<String?> accountType = const Value.absent(),
             Value<String> passwordHash = const Value.absent(),
             Value<DateTime?> lastLogin = const Value.absent(),
             Value<DateTime> creationDate = const Value.absent(),
@@ -769,6 +823,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             schoolId: schoolId,
             schoolName: schoolName,
             username: username,
+            accountType: accountType,
             passwordHash: passwordHash,
             lastLogin: lastLogin,
             creationDate: creationDate,
@@ -778,6 +833,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             required int schoolId,
             required String schoolName,
             required String username,
+            Value<String?> accountType = const Value.absent(),
             required String passwordHash,
             Value<DateTime?> lastLogin = const Value.absent(),
             required DateTime creationDate,
@@ -787,6 +843,7 @@ class $$AccountsTableTableTableManager extends RootTableManager<
             schoolId: schoolId,
             schoolName: schoolName,
             username: username,
+            accountType: accountType,
             passwordHash: passwordHash,
             lastLogin: lastLogin,
             creationDate: creationDate,

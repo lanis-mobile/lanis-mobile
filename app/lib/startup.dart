@@ -10,6 +10,7 @@ import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/widgets/offline_available_applets_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'core/database/account_database/account_db.dart';
@@ -223,6 +224,7 @@ class _StartupScreenState extends State<StartupScreen> {
                   text: AppLocalizations.of(context)!.lanisDownErrorMessage,
                   style: Theme.of(context).textTheme.labelLarge)
             ])),
+          OfflineAvailableAppletsSection(),
         ],
       ),
       actions: [

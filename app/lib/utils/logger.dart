@@ -12,6 +12,8 @@ class Logger {
   static const String _yellow = '\x1B[33m';
   static const String _blue = '\x1B[34m';
   static const String _magenta = '\x1B[35m';
+  static const String _cyan = '\x1B[36m';
+
 
   void i(dynamic message) {
     if (kDebugMode) {
@@ -43,6 +45,12 @@ class Logger {
   void d(dynamic message) {
     if (kDebugMode) {
       print('$_magenta${_dateFormat.format(DateTime.now())} [DEBUG] $_name: $message$_reset');
+    }
+  }
+
+  void database(String message) {
+    if (kDebugMode) {
+      print('$_cyan${_dateFormat.format(DateTime.now())} [DATABASE] $_name: $message$_reset');
     }
   }
 }
