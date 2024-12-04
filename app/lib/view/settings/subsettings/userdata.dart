@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'package:sph_plan/client/client.dart';
 import 'package:sph_plan/view/settings/info_button.dart';
+
+import '../../../core/sph/sph.dart';
 
 class UserdataAnsicht extends StatefulWidget {
   const UserdataAnsicht({super.key});
@@ -26,7 +27,7 @@ class _UserdataAnsichtState extends State<UserdataAnsicht> {
   void loadUserData() {
     setState(() {
       userDataListTiles.clear();
-      (client.userData).forEach((key, value) {
+      (sph!.session.userData).forEach((key, value) {
         userDataListTiles.add(ListTile(
           title: Text(value),
           subtitle: Text(toBeginningOfSentenceCase(key)!),

@@ -5,8 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io' as io;
 
-import '../client/client.dart';
-import '../shared/file_operations.dart';
+import '../core/sph/sph.dart';
+import '../utils/file_operations.dart';
 
 class MoodleWebView extends StatefulWidget {
   const MoodleWebView({super.key});
@@ -206,7 +206,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                       child: InAppWebView(
                         pullToRefreshController: pullToRefreshController,
                         initialUrlRequest: URLRequest(
-                            url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de")),
+                            url: WebUri("https://mo${sph!.account.schoolID}.schulportal.hessen.de")),
                         initialSettings: InAppWebViewSettings(
                             transparentBackground: true,
                           disableDefaultErrorPage: true
@@ -263,10 +263,10 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         },
                         onPageCommitVisible: (controller, uri) async {
                           if (!loggedIn.value) {
-                            if (!reachedLogin && uri!.rawValue.contains("singleSignOn") && !uri.rawValue.contains(client.schoolID)) {
+                            if (!reachedLogin && uri!.rawValue.contains("singleSignOn") && !uri.rawValue.contains(sph!.account.schoolID.toString())) {
                               controller.loadUrl(
                                   urlRequest: URLRequest(
-                                      url: WebUri("${uri.rawValue}&i=${client.schoolID}")
+                                      url: WebUri("${uri.rawValue}&i=${sph!.account.schoolID}")
                                   )
                               );
                               reachedLogin = true;
@@ -277,11 +277,11 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                   source:
                                   """
                                   setTimeout(function() {
-                                    document.querySelector('#username2').value = '${_sanitizeCredentialsForJavaScript(client.username)}';
+                                    document.querySelector('#username2').value = '${_sanitizeCredentialsForJavaScript(sph!.account.username)}';
                                   }, 250);
                                   
                                   setTimeout(function() {
-                                    document.querySelector('#inputPassword').value = '${_sanitizeCredentialsForJavaScript(client.password)}';
+                                    document.querySelector('#inputPassword').value = '${_sanitizeCredentialsForJavaScript(sph!.account.password)}';
                                   }, 250);
                                   
                                   setTimeout(function() {
@@ -291,17 +291,17 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                               );
                             }
 
-                            if (reachedLogin && uri!.rawValue.contains("mo${client.schoolID}")) {
+                            if (reachedLogin && uri!.rawValue.contains("mo${sph!.account.schoolID}")) {
                               loggedIn.value = true;
 
                               List<io.Cookie> cookies = [
-                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MoodleSession"))!),
-                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "MOODLEID1_"))!),
-                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${client.schoolID}.schulportal.hessen.de"), name: "mo-prod01"))!)
+                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${sph!.account.schoolID}.schulportal.hessen.de"), name: "MoodleSession"))!),
+                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${sph!.account.schoolID}.schulportal.hessen.de"), name: "MOODLEID1_"))!),
+                                translateCookie((await cookieManager.getCookie(url: WebUri("https://mo${sph!.account.schoolID}.schulportal.hessen.de"), name: "mo-prod01"))!)
                               ];
 
-                              await client.jar.saveFromResponse(
-                                  Uri.parse("https://mo${client.schoolID}.schulportal.hessen.de"),
+                              await sph!.session.jar.saveFromResponse(
+                                  Uri.parse("https://mo${sph!.account.schoolID}.schulportal.hessen.de"),
                                   cookies
                               );
                             }
@@ -345,7 +345,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         },
                         onDownloadStartRequest: (controller, request) async {
                           String url = request.url.rawValue;
-                          String filename = request.suggestedFilename ?? client.generateUniqueHash(request.url.rawValue);
+                          String filename = request.suggestedFilename ?? sph!.storage.generateUniqueHash(request.url.rawValue);
 
                           double fileSize = request.contentLength / 1000000;
                           launchFile(context, url,

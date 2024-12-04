@@ -28,7 +28,6 @@ dependencies:
     sdk: flutter
   dio_cookie_manager: ^3.1.0+1
   dart_date: ^1.2.2
-  flutter_secure_storage: ^9.0.0
   path_provider: ^2.1.1
   url_launcher: ^6.1.14
   cookie_jar: ^4.0.8
@@ -48,7 +47,6 @@ dependencies:
   crypto: ^3.0.3
   open_file: ^3.3.2
   share_plus: ^10.1.2
-  shared_preferences: ^2.2.2
   rxdart: ^0.28.0
   stack_trace: ^1.11.1
   styled_text: ^9.0.0-beta-4
@@ -78,6 +76,10 @@ dependencies:
   flutter_inappwebview: ^6.1.0
   connectivity_plus: ^6.0.5
   syncfusion_localizations: ^27.1.58
+  drift: ^2.21.0
+  drift_flutter: ^0.2.1
+  flutter_keychain: ^2.5.0
+  flutter_phoenix: ^1.1.1
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:
@@ -249,6 +251,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  drift_dev: ^2.21.2
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

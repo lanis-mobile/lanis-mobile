@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../client/client.dart';
+import '../core/sph/sph.dart';
 
 typedef ImageBuilder = Widget Function(BuildContext context, ImageProvider imageProvider);
 
@@ -28,7 +28,13 @@ class _CachedNetworkImageState extends State<CachedNetworkImage> {
   late ImageProvider imageProvider;
 
   Future<void> loadData() async {
-    String imagePath = await client.downloadFile(widget.imageUrl.toString(), 'image.${widget.imageType.toString().split('.').last}', followRedirects: true);
+    String? imagePath = await sph?.storage.downloadFile(widget.imageUrl.toString(), 'image.${widget.imageType.toString().split('.').last}', followRedirects: true);
+    if (imagePath == null){
+      setState(() {
+        loading = true;
+      });
+      return;
+    }
     File imageFile = File(imagePath);
     imageProvider = FileImage(imageFile);
     setState(() {
