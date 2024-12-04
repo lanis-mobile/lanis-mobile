@@ -19,7 +19,7 @@ class AttendancesScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return AttendanceCard(
-              title: AppLocalizations.of(context)!.attendances, //todo: better title
+              title: AppLocalizations.of(context)!.allAttendances,
               teacher: null,
               attendances: getCombinedAttendances(lessons),
             );

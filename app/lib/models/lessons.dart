@@ -75,10 +75,10 @@ class LessonsFile {
 
 class LessonUpload {
   String name;
-  String status; //todo replace with enum
+  String status; //todo @kurwjan replace with enum
   Uri url;
   String? uploaded;
-  String? date; //todo replace with DateTime
+  String? date; //todo @kurwjan replace with DateTime
 
   LessonUpload({required this.name, required this.status, required this.url, this.uploaded, this.date});
 }
