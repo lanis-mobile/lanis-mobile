@@ -60,14 +60,13 @@ Bug-Reports können auch an <a href="mailto:alessioc42.dev@gmail.com">diese</a> 
 ## How to build (Linux)
 1. Setup Flutter in Android Studio
 2. Install JDK 17 with your package manager
-3. 
-    ```shell
-    # Configure flutter to use JDK 17 and not the Android Studio JDK, otherwise the Project won't compile
-    flutter config --jdk-dir=/usr/lib/jvm/java-17-openjdk # The path may differ based on your distro
+```shell
+# 3. Configure flutter to use JDK 17 and not the Android Studio JDK, otherwise the Project won't compile
+flutter config --jdk-dir=/usr/lib/jvm/java-17-openjdk # The path may differ based on your distro
 
-    # Generate the code
-    dart run build_runner build
+# 4. Generate the code
+dart run build_runner build
 
-    # Build
-    flutter build YOUR_PLATFORM # Release doesn't work for adb or apk because of some signing stuff
-    ```
+# 5. Build
+flutter build YOUR_PLATFORM # Release doesn't work for adb or apk because of some signing stuff
+```
