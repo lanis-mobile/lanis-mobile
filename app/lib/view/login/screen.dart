@@ -37,7 +37,7 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
           pages: intoScreenPageViewModels(context));
     } else if (currentPage == PageType.login) {
       return Scaffold(
-        body: LoginForm(),
+        body: LoginForm(showBackButton: false,),
       );
     }
 

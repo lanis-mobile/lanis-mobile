@@ -111,8 +111,8 @@ class _NotificationElementsState extends State<NotificationElements> {
               },
               trailing:
                   (_notificationPermissionStatus == PermissionStatus.granted)
-                      ? Icon(Icons.check, color: Colors.green)
-                      : Icon(Icons.error, color: Colors.red),
+                      ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                      : Icon(Icons.error, color: Theme.of(context).colorScheme.error),
             ),
             const Divider(),
             FutureBuilder<int>(
@@ -121,18 +121,13 @@ class _NotificationElementsState extends State<NotificationElements> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+                if (snapshot.data == 1) {
+                  return SizedBox.shrink();
+                }
                 return ListTile(
                   subtitle: Text(AppLocalizations.of(context)!.notificationAccountBoundExplanation),
                   leading: Icon(Icons.info),
                 );
-              },
-            ),
-            SwitchListTile(
-              title: Text(AppLocalizations.of(context)!.useNotifications),
-              value:
-                  (snapshot.data!['notifications-allow'] ?? 'true') == 'true',
-              onChanged: (value) {
-                sph!.prefs.kv.set('notifications-allow', value.toString());
               },
             ),
             if (Platform.isAndroid)
@@ -171,6 +166,15 @@ class _NotificationElementsState extends State<NotificationElements> {
                 ],
               ),
             const Divider(),
+            SwitchListTile(
+              title: Text(AppLocalizations.of(context)!.useNotifications),
+              subtitle: Text(AppLocalizations.of(context)!.forThisAccount),
+              value:
+              (snapshot.data!['notifications-allow'] ?? 'true') == 'true',
+              onChanged: allowNotifications ? (value) {
+                sph!.prefs.kv.set('notifications-allow', value.toString());
+              } : null,
+            ),
             ...sortedKeys.map(
               (key) => SwitchListTile(
                 title: Text(_keyTitles[key] ?? key),

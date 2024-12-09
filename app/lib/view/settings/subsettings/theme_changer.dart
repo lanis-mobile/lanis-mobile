@@ -195,9 +195,14 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
                   });
                 },
               ),
+              const Divider(
+                indent: 25,
+                endIndent: 25,
+                height: 15,
+              ),
               ...Themes.flutterColorThemes.keys.map(
                 (key) => colorListTile(
-                  title: key,
+                  title: firstLetterUpperCase(key),
                   value: key,
                   selected: snapshot.data!['color'] == key,
                   onSelect: (_) => accountDatabase.kv.set('color', key),
@@ -208,4 +213,8 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
       ),
     );
   }
+}
+
+String firstLetterUpperCase(String text) {
+  return text[0].toUpperCase() + text.substring(1);
 }

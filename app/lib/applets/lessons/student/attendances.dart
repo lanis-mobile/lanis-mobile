@@ -18,10 +18,15 @@ class AttendancesScreen extends StatelessWidget {
         itemCount: lessons.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
-            return AttendanceCard(
-              title: AppLocalizations.of(context)!.allAttendances,
-              teacher: null,
-              attendances: getCombinedAttendances(lessons),
+            return Column(
+              children: [
+                AttendanceCard(
+                  title: AppLocalizations.of(context)!.allAttendances,
+                  teacher: null,
+                  attendances: getCombinedAttendances(lessons),
+                ),
+                Divider(),
+              ],
             );
           }
           final lesson = lessons[index - 1];
@@ -40,7 +45,11 @@ class AttendanceCard extends StatelessWidget {
   final String title;
   final String? teacher;
   final Map<String, String> attendances;
-  const AttendanceCard({super.key, required this.attendances, required this.title, required this.teacher});
+  const AttendanceCard(
+      {super.key,
+      required this.attendances,
+      required this.title,
+      required this.teacher});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +72,7 @@ class AttendanceCard extends StatelessWidget {
                   const Spacer(),
                   if (teacher != null) ...[
                     Text(
-                        teacher!,
+                      teacher!,
                     ),
                     const Icon(
                       Icons.person,

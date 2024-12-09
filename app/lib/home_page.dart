@@ -302,6 +302,7 @@ class _HomePageState extends State<HomePage> {
                             builder: (context) => AccountSwitcher()));
                       },
                       icon: Icon(Icons.switch_account),
+                      color: textColor,
                       iconSize: 32,
                     ),
                   ),

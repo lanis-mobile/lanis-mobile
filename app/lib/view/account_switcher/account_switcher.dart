@@ -27,46 +27,18 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
             return const Center(child: CircularProgressIndicator());
           }
           return ListView.builder(
-            itemCount: snapshot.data!.length + 1,
+            itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => Scaffold(
-                                body: LoginForm(),
-                              ),
-                            )
-                          );
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.person_add),
-                            const SizedBox(width: 8),
-                            const Text('Add Account'),
-                          ],
-                        ),
-                      ),
-                    )),
-                    Divider(),
-                  ],
-                );
-              }
-
-              final account = snapshot.data![index - 1];
+              final account = snapshot.data![index];
               return AccountListTile(
                 schoolName: account.schoolName,
                 userName: account.username,
                 lastLogin: account.lastLogin ?? DateTime.now(),
                 onTap: () async {
+                  if (sph!.account.localId == account.id) {
+                    Navigator.of(context).pop();
+                    return;
+                  }
                   await sph!.session.deAuthenticate();
                   await accountDatabase.setNextLogin(account.id);
                   Phoenix.rebirth(context);
@@ -75,6 +47,17 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              body: LoginForm(showBackButton: true,),
+            ),
+          )
+        ),
+        label: Text('Add Account'),
+        icon: Icon(Icons.person_add),
       ),
     );
   }

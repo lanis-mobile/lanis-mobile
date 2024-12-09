@@ -77,3 +77,9 @@ class NoConnectionException implements LanisException {
   String cause;
   NoConnectionException([this.cause = "Keine Verbindung zum SPH"]);
 }
+
+class AccountAlreadyExistsException implements LanisException {
+  @override
+  String cause;
+  AccountAlreadyExistsException([this.cause = "Account existiert bereits"]);
+}

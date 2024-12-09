@@ -194,6 +194,12 @@ class AccountDatabase extends _$AccountDatabase {
     )));
   }
 
+  Future<bool> doesAccountExist(int schoolID, String username) async {
+    final account = await (select(accountsTable)
+          ..where((tbl) => tbl.schoolId.equals(schoolID) & tbl.username.equals(username))).get();
+    return account.isNotEmpty;
+  }
+
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'accounts_database');
   }

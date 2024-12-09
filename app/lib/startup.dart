@@ -42,7 +42,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          body: LoginForm(),
+          body: LoginForm(showBackButton: false,),
         ),
       ),
     );
