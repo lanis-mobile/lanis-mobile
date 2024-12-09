@@ -107,7 +107,7 @@ class LoginFormState extends State<LoginForm> {
     return Stack(
       children: [
         if (widget.showBackButton) Padding(
-          padding: EdgeInsets.only(right: 8, top: 8),
+          padding: EdgeInsets.only(right: 32, top: 32),
           child: IconButton(
               onPressed: () => Navigator.pop(context),
               icon: Icon(Icons.arrow_back),
