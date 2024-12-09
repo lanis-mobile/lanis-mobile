@@ -56,3 +56,17 @@ der modularen Natur des Schulportals, die es äußerst schwierig macht, eine uni
 Scheue dich nicht, einen Bug-Report zu erstellen, wenn du einen Fehler findest. Wir sind immer offen für neue Mitarbeiter/Schüler, die mit uns arbeiten, um die App zu verbessern.
 
 Bug-Reports können auch an <a href="mailto:alessioc42.dev@gmail.com">diese</a> E-Mail-Adresse gesendet werden, falls kein Github-Konto vorhanden ist.
+
+## How to build (Linux)
+1. Setup Flutter in Android Studio
+2. Install JDK 17 with your package manager
+```shell
+# 3. Configure flutter to use JDK 17 and not the Android Studio JDK, otherwise the Project won't compile
+flutter config --jdk-dir=/usr/lib/jvm/java-17-openjdk # The path may differ based on your distro
+
+# 4. Generate the code
+dart run build_runner build
+
+# 5. Build
+flutter build YOUR_PLATFORM # Release doesn't work for adb or apk because of some signing stuff
+```

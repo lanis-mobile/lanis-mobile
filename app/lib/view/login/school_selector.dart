@@ -142,7 +142,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
                                           widget.controller.text = school.id;
                                           searchController.clear();
                                         });
-                                        widget.onSchoolSelected();
+                                        widget.onSchoolSelected(school.name);
                                         Navigator.pop(context);
                                       },
                                     );

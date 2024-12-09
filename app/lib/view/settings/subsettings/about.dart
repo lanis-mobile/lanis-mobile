@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../client/client.dart';
+import '../../../core/sph/sph.dart';
 import '../../../utils/logger.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -118,7 +118,7 @@ class _ContributorsState extends State<Contributors> {
 
   void loadData() async {
     try {
-      final response = await client.dio.get('https://api.github.com/repos/lanis-mobile/lanis-mobile/contributors');
+      final response = await sph!.session.dio.get('https://api.github.com/repos/lanis-mobile/lanis-mobile/contributors');
       contributors = response.data;
       setState(() {
         loading = false;

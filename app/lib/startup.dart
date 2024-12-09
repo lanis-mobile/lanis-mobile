@@ -1,24 +1,21 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:simple_shadow/simple_shadow.dart';
-import 'package:sph_plan/client/client_submodules/substitutions.dart';
-import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/home_page.dart';
-import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
-import 'package:sph_plan/shared/types/timetable.dart';
-import 'package:sph_plan/utils/cached_network_image.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:sph_plan/view/substitutions/view.dart';
-import 'package:sph_plan/view/timetable/view.dart';
+import 'package:sph_plan/widgets/offline_available_applets_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'client/client.dart';
+import 'core/database/account_database/account_db.dart';
+import 'core/sph/sph.dart';
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});
@@ -27,63 +24,60 @@ class StartupScreen extends StatefulWidget {
   State<StartupScreen> createState() => _StartupScreenState();
 }
 
-class _StartupScreenState extends State<StartupScreen> {
+class _StartupScreenState extends State<StartupScreen> with TickerProviderStateMixin{
   LanisException? error;
 
   // We need to load storage first, so we have to wait before everything.
   ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
 
-
   void openWelcomeScreen() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
-    ).then((_) async {
-      await client.prepareDio();
-
-      // Context should be mounted
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    });
+    );
   }
 
   void openLoginScreen() {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => Scaffold(
-                  body: LoginForm(
-                afterLogin: () async {
-                  await client.loadFromStorage();
-                  await client.prepareDio();
-
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                  );
-                },
-              ))),
+        builder: (context) => Scaffold(
+          body: LoginForm(showBackButton: false,),
+        ),
+      ),
     );
   }
 
   Future<void> performLogin() async {
-    await client.prepareDio();
-    if (client.username == "") {
+    logger.i("Performing login...");
+    sph?.prefs.close();
+    setState(() {
+      error = null;
+    });
+    sph = null;
+    final account = await accountDatabase.getLastLoggedInAccount();
+    logger.i("Last logged in account: $account");
+    if (account != null) {
+      sph = SPH(account: account);
+    }
+    if (sph == null) {
       openWelcomeScreen();
       return;
     }
-
+    await sph?.session.prepareDio();
+    logger.i("Prepared Dio for session");
     try {
-      await client.login();
+      logger.i('Authenticating...');
+      await sph?.session.authenticate();
+      logger.i('Authenticated');
 
       if (error == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                    showIntro: account!.firstLogin,
+                  )),
         );
       }
       return;
@@ -93,26 +87,22 @@ class _StartupScreenState extends State<StartupScreen> {
       openWelcomeScreen();
     } on LanisException catch (e) {
       error = e;
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return errorDialog();
-          }
+      await showModalBottomSheet(
+        context: context,
+        builder: (context) => errorDialog(context),
       );
+      await performLogin();
     }
   }
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      client.loadFromStorage().then((_) {
-        finishedLoadingStorage.value = true;
-        performLogin();
-      });
+      finishedLoadingStorage.value = true;
     });
 
     super.initState();
+    performLogin();
   }
 
   @override
@@ -120,41 +110,17 @@ class _StartupScreenState extends State<StartupScreen> {
     finishedLoadingStorage.dispose();
     super.dispose();
   }
-  
-  /// Either school image or app version.
-  Widget schoolLogo() {
-    var darkMode = Theme.of(context).brightness == Brightness.dark;
 
-    Widget deviceInfo = FutureBuilder(
+  Widget appVersion() {
+    return FutureBuilder(
       future: PackageInfo.fromPlatform(),
       builder: (context, packageInfo) {
         return Text(
           "lanis-mobile ${packageInfo.data?.version}",
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.25)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
         );
       },
-    );
-
-    return CachedNetworkImage(
-      imageType: ImageType.png,
-       imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoollogo&i=${client.schoolID}"),
-      placeholder: deviceInfo,
-      builder: (context, imageProvider) => ColorFiltered(
-        colorFilter: darkMode
-            ? const ColorFilter.matrix([
-                -1, 0, 0, 0,
-                255, 0, -1, 0,
-                0, 255, 0, 0,
-                -1, 0, 255, 0,
-                0, 0, 1, 0
-              ])
-            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-        child: Image(
-          image: imageProvider,
-          fit: BoxFit.cover,
-        ),
-      ),
     );
   }
 
@@ -169,7 +135,8 @@ class _StartupScreenState extends State<StartupScreen> {
           offset: const Offset(4, 8),
           child: SvgPicture.asset(
             "assets/startup.svg",
-            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(
+                Theme.of(context).colorScheme.primary, BlendMode.srcIn),
             fit: BoxFit.contain,
             width: constraints.maxWidth.clamp(0, 300),
             height: constraints.maxHeight.clamp(0, 250),
@@ -180,55 +147,39 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   WidgetSpan toolTipIcon(IconData icon) {
-    return WidgetSpan(child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.onPrimary,));
+    return WidgetSpan(
+        child: Icon(
+      icon,
+      size: 18,
+      color: Theme.of(context).colorScheme.onPrimary,
+    ));
   }
 
   Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
     List<Widget> toolTips = <Widget>[
       Text.rich(TextSpan(
-        text: AppLocalizations.of(context)!.startUpMessage1,
-        children: [
-          toolTipIcon(Icons.code)
-        ]
-      )),
+          text: AppLocalizations.of(context)!.startUpMessage1,
+          children: [toolTipIcon(Icons.code)])),
       Text.rich(TextSpan(
-        text: AppLocalizations.of(context)!.startUpMessage2,
-        children: [
-          toolTipIcon(Icons.people)
-        ]
-      )),
+          text: AppLocalizations.of(context)!.startUpMessage2,
+          children: [toolTipIcon(Icons.people)])),
       Text.rich(TextSpan(
-        text: AppLocalizations.of(context)!.startUpMessage3,
-        children: [
-          toolTipIcon(Icons.filter_alt)
-        ]
-      )),
+          text: AppLocalizations.of(context)!.startUpMessage3,
+          children: [toolTipIcon(Icons.filter_alt)])),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage4,
-          children: [
-            toolTipIcon(Icons.star)
-          ]
-      )),
+          children: [toolTipIcon(Icons.star)])),
       Text(AppLocalizations.of(context)!.startUpMessage5),
       Text(AppLocalizations.of(context)!.startUpMessage6),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage7,
-          children: [
-            toolTipIcon(Icons.favorite)
-          ]
-      )),
+          children: [toolTipIcon(Icons.favorite)])),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage8,
-          children: [
-            toolTipIcon(Icons.code)
-          ]
-      )),
+          children: [toolTipIcon(Icons.code)])),
       Text.rich(TextSpan(
           text: AppLocalizations.of(context)!.startUpMessage9,
-          children: [
-            toolTipIcon(Icons.settings)
-          ]
-      )),
+          children: [toolTipIcon(Icons.settings)])),
     ];
 
     return Container(
@@ -246,218 +197,137 @@ class _StartupScreenState extends State<StartupScreen> {
         margin: margin,
         width: width,
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+          style: Theme.of(context)
+              .textTheme
+              .labelLarge!
+              .copyWith(color: Theme.of(context).colorScheme.onPrimary),
           textAlign: TextAlign.center,
           child: toolTips.elementAt(Random().nextInt(toolTips.length)),
-        )
-    );
+        ));
   }
 
-
-  Widget errorDialog() {
+  BottomSheet errorDialog(BuildContext context) {
     var text = AppLocalizations.of(context)!.startupError;
     if (error is LanisDownException) {
       text = AppLocalizations.of(context)!.lanisDownError;
     } else if (error is NoConnectionException) {
       text = AppLocalizations.of(context)!.noInternetConnection2;
     }
-    return AlertDialog(
-      icon: error is NoConnectionException
-          ? const Icon(Icons.wifi_off)
-          : const Icon(Icons.error),
-      title: Text(text),
-      content: Column(
+    return BottomSheet(
+      enableDrag: false,
+      showDragHandle: false,
+      onClosing: () {
+        Navigator.of(context).pop();
+      },
+      builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (error is! NoConnectionException && error is! LanisDownException) Text.rich(TextSpan(
-              text: AppLocalizations.of(context)!.startupErrorMessage,
-              children: [
-                TextSpan(
-                    text: "\n\n${error.runtimeType}: ${error!.cause}",
-                    style: Theme.of(context).textTheme.labelLarge)
-              ])),
-          if (error is LanisDownException) Text.rich(TextSpan(
-              children: [
-                TextSpan(
-                    text: AppLocalizations.of(context)!.lanisDownErrorMessage,
-                    style: Theme.of(context).textTheme.labelLarge)
-              ])),
-          const OfflineAppletSelector()
+          SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.wifi_find_outlined),
+                onPressed: (){
+                  launchUrl(Uri.parse(
+                      "https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
+                },
+                tooltip: AppLocalizations.of(context)!.checkStatus,
+              ),
+              error is NoConnectionException
+                  ? const Icon(
+                Icons.wifi_off,
+                size: 48,
+              )
+                  : const Icon(
+                Icons.error,
+                size: 48,
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: (){
+                  Navigator.of(context).pop();
+                },
+                tooltip: AppLocalizations.of(context)!.tryAgain,
+              )
+            ],
+          ),
+          SizedBox(height: 12),
+          Center(
+            child: Text(text),
+          ),
+          if (error is! NoConnectionException && error is! LanisDownException)
+            Text.rich(TextSpan(
+                text: AppLocalizations.of(context)!.startupErrorMessage,
+                children: [
+                  TextSpan(
+                      text: "\n\n${error.runtimeType}: ${error?.cause}",
+                      style: Theme.of(context).textTheme.labelLarge)
+                ])),
+          if (error is LanisDownException)
+            Text.rich(TextSpan(children: [
+              TextSpan(
+                  text: AppLocalizations.of(context)!.lanisDownErrorMessage,
+                  style: Theme.of(context).textTheme.labelLarge)
+            ])),
+            Flexible(child: SingleChildScrollView(
+              child: OfflineAvailableAppletsSection(),
+            ),
+          ),
         ],
       ),
-      actions: [
-        if (error is! NoConnectionException && error is! LanisDownException) ...[
-          TextButton(
-              onPressed: () {
-                launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile/issues"));
-              },
-              child: const Text("GitHub")
-          ),
-          OutlinedButton(
-              onPressed: () {
-                launchUrl(Uri.parse("mailto:alessioc42.dev@gmail.com"));
-              },
-              child: Text(AppLocalizations.of(context)!.startupReportButton)
-          ),
-        ],
-        if (error is LanisDownException) ...[
-          OutlinedButton(
-              onPressed: () {
-                launchUrl(Uri.parse("https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
-              },
-              child: const Text("Status")
-          ),
-        ],
-        FilledButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-
-              error = null;
-              await performLogin();
-            },
-            child: Text(AppLocalizations.of(context)!.startupRetryButton)),
-      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-            child: MediaQuery.of(context).orientation == Orientation.portrait
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      schoolLogo(),
-                      Column(
-                        children: [
-                          appLogo(80.0, 20.0),
-                          tipText(
-                              const EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 12.0),
-                              const EdgeInsets.symmetric(horizontal: 36.0), null)
-                        ],
-                      ),
-                      const LinearProgressIndicator()
-                    ],
-                  )
-                : Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      schoolLogo(),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              appLogo(0.0, 0.0),
-                              SizedBox.fromSize(
-                                size: const Size(48.0, 0.0),
-                              ),
-                              tipText(
-                                  const EdgeInsets.symmetric(
-                                      vertical: 16.0, horizontal: 12.0),
-                                  const EdgeInsets.only(), 250)
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [LinearProgressIndicator()],
-                      )
-                    ],
-                  )));
-  }
-}
-
-class OfflineAppletSelector extends StatefulWidget {
-  const OfflineAppletSelector({super.key});
-
-  @override
-  State<OfflineAppletSelector> createState() => _OfflineAppletSelectorState();
-}
-
-//handling just 2 applets (substitution and timetable) does not require a scalable solution. When adding offline support for more applets we should adapt to creating the config from a single location maybe even integrating the list from [home_page.dart]
-class _OfflineAppletSelectorState extends State<OfflineAppletSelector> {
-  SubstitutionPlan? substitutionData;
-  TimeTable? timetableData;
-  bool loading = true;
-
-  List<Widget> appletList = [];
-
-  Widget appletListTile(String title, IconData icon, Function action) {
-    return Column(
+    return MediaQuery.of(context).orientation == Orientation.portrait
+        ? Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(
-          icon: Icon(icon),
-          onPressed: () {
-            action();
-          },
+        appVersion(),
+        Column(
+          children: [
+            appLogo(80.0, 20.0),
+            tipText(
+                const EdgeInsets.symmetric(
+                    vertical: 10.0, horizontal: 12.0),
+                const EdgeInsets.symmetric(horizontal: 36.0),
+                null)
+          ],
         ),
-        Text(title)
+        const LinearProgressIndicator()
       ],
-    );
-  }
-  Future<void> loadAppletData() async {
-    String substitutionJson = await globalStorage.read(key: StorageKey.lastSubstitutionData);
-    String timetableJson = await globalStorage.read(key: StorageKey.lastTimetableData);
-    if (substitutionJson != "") {
-      substitutionData = SubstitutionPlan.fromJson(jsonDecode(substitutionJson));
-      appletList.add(appletListTile(AppLocalizations.of(context)!.substitutions, Icons.calendar_today, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: Text("${AppLocalizations.of(context)!.substitutions} (${AppLocalizations.of(context)!.offline})"),
-            ),
-            body: StaticSubstitutionsView(
-                plan: substitutionData,
-                refresh: null,
-                )
-            )
-          )
-        );
-      }));
-    }
-    if (timetableJson != "") {
-      timetableData = TimeTable.fromJson(jsonDecode(timetableJson));
-
-      appletList.add(appletListTile(AppLocalizations.of(context)!.timeTable, Icons.calendar_today, () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Scaffold(
-                appBar: AppBar(
-                  title: Text("${AppLocalizations.of(context)!.timeTable} (${AppLocalizations.of(context)!.offline})"),
+    )
+        : Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        appVersion(),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                appLogo(0.0, 0.0),
+                SizedBox.fromSize(
+                  size: const Size(48.0, 0.0),
                 ),
-                body: StaticTimetableView(
-                  data: timetableData,
-                  refresh: null,
-                )
-            )
-            )
-        );
-      })
-      );
-    }
-    setState(() {
-      loading = false;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadAppletData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: appletList,
+                tipText(
+                    const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 12.0),
+                    const EdgeInsets.only(),
+                    250)
+              ],
+            ),
+          ],
+        ),
+        const Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [LinearProgressIndicator()],
+        )
+      ],
     );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../client/client.dart';
+import '../../../core/sph/sph.dart';
 
 class CacheScreen extends StatelessWidget {
   const CacheScreen({super.key});
@@ -47,7 +47,7 @@ class _BodyState extends State<Body> {
   }
 
   void clearCache() async {
-    final dir = await client.getFileCacheDirectory();
+    final dir = await sph!.storage.getDocumentCacheDirectory();
     dir.deleteSync(recursive: true);
     setState(() {
       cacheStats = dirStatSync(dir.path);
@@ -57,7 +57,7 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-    client.getFileCacheDirectory().then((dir) {
+    sph!.storage.getDocumentCacheDirectory().then((dir) {
       setState(() {
         cacheStats = dirStatSync(dir.path);
       });

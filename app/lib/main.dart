@@ -2,41 +2,35 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:http_proxy/http_proxy.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:sph_plan/client/storage.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/utils/logger.dart';
-import 'package:sph_plan/view/conversations/shared.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
+import 'applets/conversations/view/shared.dart';
 import 'background_service.dart';
+import 'core/database/account_database/account_db.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return errorWidget(details);
   };
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  accountDatabase = AccountDatabase();
 
-  await globalStorage.initialize();
-
-  await applyEnvironmentVariables();
-
+  await setupBackgroundService(accountDatabase);
   await initializeNotifications();
-  await setupBackgroundService();
-
   await initializeDateFormatting();
-
-  ThemeModeNotifier.init();
-  ColorModeNotifier.init();
-  AmoledNotifier.init();
 
   await setupProxy();
 
@@ -48,7 +42,11 @@ void main() async {
     }
   });
 
-  runApp(const App());
+  runApp(
+    Phoenix(
+      child: const App(),
+    ),
+  );
 }
 
 Future<void> setupProxy() async {
@@ -66,53 +64,65 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
-      if (lightDynamic != null && darkDynamic != null) {
-        Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
-        if (globalStorage.prefs!.getString("color") == "dynamic") {
-          ColorModeNotifier.set("dynamic", Themes.dynamicTheme);
+    return StreamBuilder(
+      stream: accountDatabase.kv.subscribeMultiple(['color', 'theme', 'isAmoled']),
+      builder: (BuildContext context, AsyncSnapshot<Map<String, String?>> snapshot) {
+        late ThemeMode mode;
+        late Themes theme;
+        if (snapshot.hasData) {
+          mode = snapshot.data!['theme'] == 'system' ? ThemeMode.system : snapshot.data!['theme'] == 'dark' ? ThemeMode.dark : ThemeMode.light;
+
+          if (snapshot.data!['color'] == 'standard') {
+            theme = Themes.standardTheme;
+          } else if (snapshot.data!['color'] != 'standard' && snapshot.data!['color'] != 'dynamic') {
+            theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
+          } else {
+            theme = Themes.standardTheme;
+          }
+          if (snapshot.data!['isAmoled'] == 'true') {
+            theme = Themes.getAmoledThemes();
+          }
+        } else {
+          mode = ThemeMode.system;
+          theme = Themes.standardTheme;
         }
-      }
+        return DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
+          if (lightDynamic != null && darkDynamic != null) {
+            Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
+          }
+          if (snapshot.data?['color'] == 'dynamic') {
+            theme = Themes.dynamicTheme;
+          }
 
-      return ValueListenableBuilder<Themes>(
-          valueListenable: ColorModeNotifier.notifier,
-          builder: (_, theme, __) {
-            return ValueListenableBuilder<ThemeMode>(
-                valueListenable: ThemeModeNotifier.notifier,
-                builder: (_, mode, __) {
-                  return ValueListenableBuilder<bool>(
-                      valueListenable: AmoledNotifier.notifier,
-                      builder: (_, isAmoled, __) {
-                        ThemeData darkTheme = getAmoledTheme(theme, isAmoled);
+          if (mode == ThemeMode.light ||
+              mode == ThemeMode.system &&
+                  MediaQuery.of(context).platformBrightness ==
+                      Brightness.light) {
+            BubbleStyles.init(theme.lightTheme!);
+          } else if (mode == ThemeMode.dark ||
+              mode == ThemeMode.system &&
+                  MediaQuery.of(context).platformBrightness ==
+                      Brightness.dark) {
+            BubbleStyles.init(theme.darkTheme ?? Themes.standardTheme.darkTheme!);
+          }
 
-                        if (mode == ThemeMode.light ||
-                            mode == ThemeMode.system &&
-                                MediaQuery.of(context).platformBrightness ==
-                                    Brightness.light) {
-                          BubbleStyles.init(theme.lightTheme!);
-                        } else if (mode == ThemeMode.dark ||
-                            mode == ThemeMode.system &&
-                                MediaQuery.of(context).platformBrightness ==
-                                    Brightness.dark) {
-                          BubbleStyles.init(darkTheme);
-                        }
-
-                        return MaterialApp(
-                          title: 'Lanis Mobile',
-                          theme: theme.lightTheme,
-                          darkTheme: darkTheme,
-                          themeMode: mode,
-                          localizationsDelegates: [
-                            ...AppLocalizations.localizationsDelegates,
-                            SfGlobalLocalizations.delegate
-                          ],
-                          supportedLocales: AppLocalizations.supportedLocales,
-                          home: const StartupScreen(),
-                        );
-                      });
-                });
-          });
-    });
+          return MaterialApp(
+            title: 'Lanis Mobile',
+            theme: theme.lightTheme,
+            darkTheme: theme.darkTheme,
+            themeMode: mode,
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              SfGlobalLocalizations.delegate
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(
+              body: StartupScreen(),
+            ),
+          );
+        });
+      },
+    );
   }
 }
 
@@ -178,60 +188,4 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
       ),
     )
   ]);
-}
-
-Future<void> applyEnvironmentVariables() async {
-  if (kDebugMode) {
-    if (!(const bool.fromEnvironment("SKIP_CONFIG"))) {
-      const schoolID = String.fromEnvironment("ID");
-      const username = String.fromEnvironment("USERNAME");
-      const password = String.fromEnvironment("PASSWORD");
-      if (schoolID != "" && username != "" && password != "") {
-        // We could get the school name or just leave this "easter egg".
-        await globalStorage.write(
-            key: StorageKey.userSchoolName, value: "Ein Entwickler! $schoolID");
-
-        await globalStorage.write(
-            key: StorageKey.userSchoolID,
-            value: const String.fromEnvironment("ID"));
-        await globalStorage.write(
-            key: StorageKey.userUsername,
-            value: const String.fromEnvironment("USERNAME"));
-        await globalStorage.write(
-            key: StorageKey.userPassword,
-            value: const String.fromEnvironment("PASSWORD"),
-            secure: true);
-      }
-
-      const theme = String.fromEnvironment("THEME");
-      if (theme != "") {
-        if (theme == "amoled") {
-          await globalStorage.write(
-              key: StorageKey.settingsSelectedTheme, value: "dark");
-          await globalStorage.write(
-              key: StorageKey.settingsIsAmoled, value: "true");
-        } else {
-          await globalStorage.write(
-              key: StorageKey.settingsIsAmoled, value: "false");
-          await globalStorage.write(
-              key: StorageKey.settingsSelectedTheme, value: theme);
-        }
-      }
-
-      const color = String.fromEnvironment("COLOR");
-      if (color != "") {
-        await globalStorage.write(
-            key: StorageKey.settingsSelectedColor, value: color);
-      }
-
-      const notificationsString = String.fromEnvironment("NOTIFICATIONS");
-      if (notificationsString != "") {
-        const notifications =
-            bool.fromEnvironment("NOTIFICATIONS", defaultValue: true);
-        await globalStorage.write(
-            key: StorageKey.settingsPushService,
-            value: notifications.toString());
-      }
-    }
-  }
 }

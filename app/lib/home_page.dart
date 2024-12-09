@@ -1,24 +1,24 @@
 import 'dart:ui';
-import 'package:flutter/foundation.dart';
-import 'package:sph_plan/background_service.dart';
-import 'package:sph_plan/shared/apps.dart';
-import 'package:sph_plan/shared/exceptions/client_status_exceptions.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:sph_plan/core/connection_checker.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
+import 'package:sph_plan/core/sph/session.dart';
+import 'package:sph_plan/models/account_types.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
-import 'package:sph_plan/client/client.dart';
-import 'package:sph_plan/shared/widgets/whats_new.dart';
+import 'package:sph_plan/utils/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
-import 'package:sph_plan/view/calendar/calendar.dart';
-import 'package:sph_plan/view/conversations/overview.dart';
-import 'package:sph_plan/view/data_storage/data_storage.dart';
-import 'package:sph_plan/view/mein_unterricht/mein_unterricht.dart';
+import 'package:sph_plan/view/account_switcher/account_switcher.dart';
 import 'package:sph_plan/view/moodle.dart';
 import 'package:sph_plan/view/settings/settings.dart';
-import 'package:sph_plan/view/timetable/stream.dart';
-import 'package:sph_plan/view/substitutions/stream.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:sph_plan/client/connection_checker.dart';
+
+import 'applets/definitions.dart';
+import 'core/sph/sph.dart';
+
+typedef ActionFunction = void Function(BuildContext);
 
 class Destination {
   final Icon icon;
@@ -26,9 +26,9 @@ class Destination {
   final bool enableBottomNavigation;
   final bool enableDrawer;
   final bool addDivider;
-  final Function label;
-  final Function? action;
-  final Widget? body;
+  final String Function(BuildContext) label;
+  final ActionFunction? action;
+  final Widget Function(BuildContext, AccountType)? body;
   late final bool isSupported;
 
   Destination(
@@ -41,10 +41,34 @@ class Destination {
       required this.icon,
       required this.selectedIcon,
       required this.label});
+
+  factory Destination.fromAppletDefinition(AppletDefinition appletDefinition) {
+    return Destination(
+      body: appletDefinition.appletType == AppletType.nested
+          ? appletDefinition.bodyBuilder
+          : null,
+      action: appletDefinition.appletType != AppletType.nested
+          ? (context) =>
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return appletDefinition.bodyBuilder!(
+                    context, sph!.session.accountType);
+              }))
+          : null,
+      addDivider: appletDefinition.addDivider,
+      isSupported: sph!.session.doesSupportFeature(appletDefinition),
+      enableBottomNavigation:
+          appletDefinition.appletType == AppletType.nested,
+      enableDrawer: true,
+      icon: appletDefinition.icon,
+      selectedIcon: appletDefinition.selectedIcon,
+      label: appletDefinition.label,
+    );
+  }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final bool showIntro;
+  const HomePage({super.key, required this.showIntro});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -53,75 +77,35 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late int selectedDestinationDrawer;
   late bool doesSupportAnyApplet = false;
+  List<Destination> destinations = [];
 
-  ///The UI is build dynamically based on this list.
-  ///Applets with destination.enableBottomNavigation enabled have to be placed at the beginning of the list or the bottom navigation bar will break.
-  List<Destination> destinations = [
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.substitutions,
-        icon: const Icon(Icons.group),
-        selectedIcon: const Icon(Icons.group_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.vertretungsplan),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const SubstitutionsView()),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.calendar,
-        icon: const Icon(Icons.calendar_today),
-        selectedIcon: const Icon(Icons.calendar_today_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.kalender),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const CalendarAnsicht()),
-    Destination(
-      label: (context) => AppLocalizations.of(context)!.timeTable,
-      icon: const Icon(Icons.timelapse),
-      selectedIcon: const Icon(Icons.timelapse),
-      isSupported: client.doesSupportFeature(SPHAppEnum.stundenplan),
-      enableBottomNavigation: true,
-      enableDrawer: true,
-      body: const TimetableView(),
-    ),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.messages,
-        icon: const Icon(Icons.forum),
-        selectedIcon: const Icon(Icons.forum_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.nachrichten),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const ConversationsOverview()),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.lessons,
-        icon: const Icon(Icons.school),
-        selectedIcon: const Icon(Icons.school_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.meinUnterricht),
-        enableBottomNavigation: true,
-        enableDrawer: true,
-        body: const MeinUnterrichtAnsicht()),
-    Destination(
-        label: (context) => AppLocalizations.of(context)!.storage,
-        icon: const Icon(Icons.folder_copy),
-        selectedIcon: const Icon(Icons.folder_copy_outlined),
-        isSupported: client.doesSupportFeature(SPHAppEnum.dateispeicher),
-        enableBottomNavigation: false,
-        enableDrawer: true,
-        action: (context) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const DataStorageAnsicht()),
-            )),
+  @override
+  void initState() {
+    for (var destination in AppDefinitions.applets) {
+      destinations.add(Destination.fromAppletDefinition(destination));
+    }
+    destinations.addAll(endDestinations);
+    super.initState();
+    setDefaultDestination();
+    showUpdateInfoIfRequired(context);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  final List<Destination> endDestinations = [
     Destination(
         label: (context) => AppLocalizations.of(context)!.openMoodle,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
         enableBottomNavigation: false,
+        addDivider: true,
         enableDrawer: true,
-        action: (context) => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const MoodleWebView())
-        )),
+        action: (context) => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MoodleWebView()))),
     Destination(
         label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
         icon: const Icon(Icons.open_in_new),
@@ -130,22 +114,36 @@ class _HomePageState extends State<HomePage> {
         enableBottomNavigation: false,
         enableDrawer: true,
         action: (context) {
-          client.getLoginURL().then((response) {
+          SessionHandler.getLoginURL(sph!.account).then((response) {
             launchUrl(Uri.parse(response));
           });
         }),
     Destination(
-        label: (context) => AppLocalizations.of(context)!.settings,
-        icon: const Icon(Icons.settings),
-        selectedIcon: const Icon(Icons.settings),
-        isSupported: true,
-        enableBottomNavigation: false,
-        enableDrawer: true,
-        addDivider: true,
-        action: (context) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            )),
+      label: (context) => AppLocalizations.of(context)!.settings,
+      icon: const Icon(Icons.settings),
+      selectedIcon: const Icon(Icons.settings),
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      addDivider: true,
+      action: (context) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      ),
+    ),
+    Destination(
+      isSupported: true,
+      enableBottomNavigation: false,
+      enableDrawer: true,
+      icon: Icon(Icons.logout),
+      selectedIcon: Icon(Icons.logout_outlined),
+      label: (context) => AppLocalizations.of(context)!.logout,
+      action: (context) {
+        sph!.session.deAuthenticate();
+        accountDatabase.deleteAccount(sph!.account.localId);
+        Phoenix.rebirth(context);
+      }
+    ),
   ];
 
   void setDefaultDestination() {
@@ -159,15 +157,8 @@ class _HomePageState extends State<HomePage> {
     selectedDestinationDrawer = -1;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    setDefaultDestination();
-    showUpdateInfoIfRequired(context);
-  }
-
   void openLanisInBrowser(BuildContext? context) {
-    client.getLoginURL().then((response) {
+    SessionHandler.getLoginURL(sph!.account).then((response) {
       launchUrl(Uri.parse(response));
     }).catchError((ex) {
       if (context == null) return;
@@ -244,56 +235,78 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Stack(
-              alignment: Alignment.centerLeft,
               children: [
-                ClipRRect(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                    child: ColorFiltered(
-                      colorFilter:
-                          ColorFilter.mode(imageColor, BlendMode.srcOver),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: CachedNetworkImage(
-                          imageUrl: Uri.parse("https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${client.schoolID}&s=xs"),
-                          placeholder: const Image(
-                            image: AssetImage("assets/icon.png"),
-                            fit: BoxFit.cover,
+                Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    ClipRRect(
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                        child: ColorFiltered(
+                          colorFilter:
+                              ColorFilter.mode(imageColor, BlendMode.srcOver),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 8,
+                            child: CachedNetworkImage(
+                              imageUrl: Uri.parse(
+                                  "https://startcache.schulportal.hessen.de/exporteur.php?a=schoolbg&i=${sph!.account.schoolID}&s=xs"),
+                              placeholder: const Image(
+                                image: AssetImage("assets/icon.png"),
+                                fit: BoxFit.cover,
+                              ),
+                              builder: (BuildContext context,
+                                  ImageProvider<Object> imageProvider) {
+                                return Image(
+                                  fit: BoxFit.cover,
+                                  image: imageProvider,
+                                );
+                              },
+                            ),
                           ),
-                          builder: (BuildContext context, ImageProvider<Object> imageProvider) {
-                            return Image(
-                              fit: BoxFit.cover,
-                              image: imageProvider,
-                            );
-                          },
                         ),
                       ),
                     ),
+                    Padding(
+                        padding: const EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor),
+                            ),
+                            Text(
+                              sph!.account.schoolName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(color: textColor),
+                            ),
+                          ],
+                        ),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 2, right: 2),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => AccountSwitcher()));
+                      },
+                      icon: Icon(Icons.switch_account),
+                      color: textColor,
+                      iconSize: 32,
+                    ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        client.schoolName,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: textColor),
-                      ),
-                      Text(
-                        "${client.userData["nachname"]}, ${client.userData["vorname"]}",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                                fontWeight: FontWeight.bold, color: textColor),
-                      )
-                    ],
-                  ),
-                )
               ],
             ),
           ),
@@ -337,59 +350,50 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<ConnectionStatus>(
-        stream: connectionChecker.statusStream,
-        builder: (context, network) {
-          return Scaffold(
-              appBar: AppBar(
-                title: Text(doesSupportAnyApplet
-                    ? destinations[selectedDestinationDrawer].label(context)
-                    : AppLocalizations.of(context)!.openLanisInBrowser),
-                bottom: network.data == ConnectionStatus.disconnected
-                    ? PreferredSize(
-                        preferredSize: const Size.fromHeight(40),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Icon(Icons.signal_wifi_off),
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!
-                                    .noInternetConnection1,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : null,
-                actions: [
-                  if (kDebugMode) ...[
-                    IconButton(
-                      onPressed: (){
-                      throw ErrorDescription("Test Error in debug mode");
-                      }, icon: const Icon(Icons.nearby_error),
-                      tooltip: "Throw test Error",
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(doesSupportAnyApplet
+            ? destinations[selectedDestinationDrawer].label(context)
+            : AppLocalizations.of(context)!.openLanisInBrowser),
+      ),
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          StreamBuilder(
+            stream: connectionChecker.statusStream,
+            builder: (context, snapshot) {
+              if (snapshot.data == ConnectionStatus.connected) {
+                return const SizedBox();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(Icons.signal_wifi_off),
                     ),
-                    IconButton(
-                      onPressed: (){
-                        updateNotifications();
-                      }, icon: const Icon(Icons.notifications),
-                      tooltip: "Simulate notification update"
-                    )
-                  ]
-                ],
-              ),
-              body: doesSupportAnyApplet
-                  ? destinations[selectedDestinationDrawer].body
-                  : noAppsSupported(),
-              bottomNavigationBar:
-                  doesSupportAnyApplet ? navBar(context) : null,
-              drawer: navDrawer(context));
-        });
+                    Text(
+                      AppLocalizations.of(context)!.noInternetConnection1,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          Expanded(
+            child: doesSupportAnyApplet
+                ? destinations[selectedDestinationDrawer].body!(
+                context, sph!.session.accountType)
+                : noAppsSupported(),
+          )
+        ],
+      ),
+      bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
+      drawer: navDrawer(context),
+    );
   }
 }
