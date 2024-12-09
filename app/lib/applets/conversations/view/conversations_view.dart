@@ -721,11 +721,11 @@ class ConversationTile extends StatelessWidget {
                           ? Theme.of(context)
                               .colorScheme
                               .surfaceContainerHigh
-                              .withOpacity(0.4)
+                              .withOpacity(0.5)
                           : Theme.of(context)
                               .colorScheme
                               .surfaceContainerLow
-                              .withOpacity(0.75),
+                              .withOpacity(0.8),
                       size: 65,
                     ),
                   ),

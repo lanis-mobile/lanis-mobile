@@ -19,7 +19,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
   bool? cachedCanChooseType;
 
   ConversationsParser(super.sph, super.appletDefinition) {
-    filter = OverviewFiltering();
+    filter = OverviewFiltering(this);
   }
 
   bool _suspend = false;
@@ -473,6 +473,12 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       throw UnknownException();
     }
   }
+
+  /// Force pushes new data for the stream.
+  void addData(final List<OverviewEntry> content) {
+    addResponse(FetcherResponse<List<OverviewEntry>>(
+        status: FetcherStatus.done, content: content));
+  }
 }
 
 /// Collection of filter functions for the search.
@@ -500,6 +506,10 @@ enum SearchFunction {
 /// A useful class to directly modify the most recent downloaded overview stream,
 /// so it's fast.
 class OverviewFiltering {
+  late ConversationsParser parser;
+  
+  OverviewFiltering(this.parser);
+  
   /// Cached overview entries set by a [getOverview] call.
   List<OverviewEntry> entries = [];
 
@@ -515,11 +525,10 @@ class OverviewFiltering {
     SearchFunction.schedule: "",
   };
 
-  OverviewFiltering();
 
   /// Pushes entries to the fetcher using the current settings.
   void pushEntries() {
-    //client.fetchers.conversationsFetcher.addData(filteredAndSearched(entries));
+    parser.addData(filteredAndSearched(entries));
   }
 
   void toggleEntry(String id, {bool? hidden, bool? unread}) {

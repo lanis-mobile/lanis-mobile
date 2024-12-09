@@ -48,7 +48,7 @@ class AppletParser<T> {
     }
   }
 
-  void _addResponse(final FetcherResponse<T> data) =>
+  void addResponse(final FetcherResponse<T> data) =>
       _controller.sink.add(data);
 
   Future<void> fetchData(
@@ -58,7 +58,7 @@ class AppletParser<T> {
         final offlineData =
             await sph.prefs.getAppletData(appletDefinition.appletPhpUrl);
         if (offlineData != null) {
-          _addResponse(
+          addResponse(
             FetcherResponse(
               status: FetcherStatus.done,
               contentStatus: ContentStatus.offline,
@@ -67,7 +67,7 @@ class AppletParser<T> {
             ),
           );
         } else {
-          _addResponse(
+          addResponse(
             FetcherResponse(
               status: FetcherStatus.error,
             ),
@@ -79,10 +79,10 @@ class AppletParser<T> {
     }
 
     if (isEmpty || forceRefresh) {
-      _addResponse(FetcherResponse(status: FetcherStatus.fetching));
+      addResponse(FetcherResponse(status: FetcherStatus.fetching));
 
       _getHome().then((data) async {
-        _addResponse(
+        addResponse(
             FetcherResponse<T>(status: FetcherStatus.done, content: data));
         isEmpty = false;
       }).catchError((ex) async {
@@ -92,7 +92,7 @@ class AppletParser<T> {
           await fetchData(forceRefresh: true, secondTry: true);
           return;
         }
-        _addResponse(
+        addResponse(
           FetcherResponse<T>(status: FetcherStatus.error),
         );
       });

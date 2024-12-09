@@ -70,9 +70,12 @@ class AccountListTile extends StatelessWidget {
           ),
           title: Text(userName.toLowerCase()),
           subtitle: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              Text(schoolName),
+              Expanded(
+                child: Text(schoolName, overflow: TextOverflow.ellipsis,),
+              ),
               Text(lastLoginInDays),
             ],
           ),
