@@ -482,12 +482,10 @@ class _ConversationsViewState extends State<ConversationsView> {
                         physics: AlwaysScrollableScrollPhysics(),
                         slivers: [
                           PinnedHeaderSliver(
-                            child: Visibility(
-                                visible: data.isNotEmpty,
-                                child: ScrolledDownContainer(
-                                    child: toggleMode
-                                        ? toggleModeAppBar()
-                                        : searchWidget())),
+                            child: ScrolledDownContainer(
+                                child: toggleMode
+                                    ? toggleModeAppBar()
+                                    : searchWidget()),
                           ),
                           SliverVariedExtentList.builder(
                             itemCount: data.length + 1,
