@@ -1,6 +1,7 @@
 # Lanis Mobile
-Inoffizielle App rund um das Schulportal Hessen.
 
+
+Deine App für das hessische Schulportal! In Zusammenarbeit mit dem staatlichen Schulamt für den Landkreis Groß-Gerau und den Main-Taunus-Kreis
 **Einsatz an über 200 Schulen in Hessen mit Tausenden Nutzern**
 
 <p align="center">
