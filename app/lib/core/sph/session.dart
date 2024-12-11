@@ -6,6 +6,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/parser.dart';
+import 'package:native_dio_adapter/native_dio_adapter.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 
@@ -15,6 +16,13 @@ import '../../models/account_types.dart';
 import '../../models/client_status_exceptions.dart';
 import '../../utils/logger.dart';
 import 'sph.dart';
+
+CronetEngine getCronetEngineInstance() {
+  return CronetEngine.build(
+    enableHttp2: true,
+    enableBrotli: true,
+  );
+}
 
 class SessionHandler {
   SPH sph;
@@ -37,6 +45,9 @@ class SessionHandler {
 
   Future<void> prepareDio() async {
     jar = CookieJar();
+    dio.httpClientAdapter = NativeAdapter(
+      createCronetEngine: getCronetEngineInstance,
+    );
     dio.interceptors.add(CookieManager(jar));
     dio.interceptors.add(InterceptorsWrapper(
       onResponse: (Response response, ResponseInterceptorHandler handler) {
@@ -118,6 +129,9 @@ class SessionHandler {
   static Future<String> getLoginURL(ClearTextAccount acc) async {
     final dioHttp = Dio();
     final cookieJar = CookieJar();
+    dioHttp.httpClientAdapter = NativeAdapter(
+      createCronetEngine: getCronetEngineInstance,
+    );
     dioHttp.interceptors.add(CookieManager(cookieJar));
     dioHttp.options.followRedirects = false;
     dioHttp.options.validateStatus =
