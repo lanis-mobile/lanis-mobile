@@ -8,7 +8,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
-import 'package:sph_plan/utils/native_adapter_instance.dart';
+import 'package:sph_plan/core/native_adapter_instance.dart';
 
 import '../connection_checker.dart';
 import 'cryptor.dart';

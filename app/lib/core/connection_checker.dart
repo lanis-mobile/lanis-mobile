@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:sph_plan/utils/native_adapter_instance.dart';
+import 'package:sph_plan/core/native_adapter_instance.dart';
 
 CustomConnectionChecker connectionChecker = CustomConnectionChecker();
 
