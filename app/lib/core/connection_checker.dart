@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:sph_plan/utils/native_adapter_instance.dart';
 
 CustomConnectionChecker connectionChecker = CustomConnectionChecker();
 
@@ -8,14 +9,17 @@ enum ConnectionStatus { connected, disconnected }
 class CustomConnectionChecker {
   ConnectionStatus _status = ConnectionStatus.disconnected;
   final _statusController = StreamController<ConnectionStatus>.broadcast();
-  final dio = Dio(
-    BaseOptions(validateStatus: (status) => status != null)
-  );
+  late final Dio dio;
   DateTime lastRequest = DateTime.now().subtract(const Duration(seconds: 5));
 
   Stream<ConnectionStatus> get statusStream => _statusController.stream;
 
   CustomConnectionChecker() {
+    dio = Dio(
+        BaseOptions(validateStatus: (status) => status != null)
+    );
+    dio.httpClientAdapter = getNativeAdapterInstance();
+
     testConnection();
   }
 
