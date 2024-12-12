@@ -131,6 +131,25 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     return tabs;
   }
 
+  void showSubstitutionInformation(
+      BuildContext context, List<SubstitutionInfo> infos) {
+    showModalBottomSheet(
+        context: context,
+        useSafeArea: true,
+        showDragHandle: true,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(shrinkWrap: true, children: [
+              HtmlWidget(
+                renderMode: RenderMode.column,
+                infos.map((e) => e.values.join('<br>')).join(),
+              ),
+            ]),
+          );
+        });
+  }
+
   @override
   void dispose() {
     _tabController?.dispose();
@@ -191,14 +210,14 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
               // JUST A DRAFT
               if (_tabController != null &&
                   data.days[_tabController!.index].infos != null)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: HtmlWidget(
-                    data.days[_tabController!.index].infos!
-                        .map((e) => e.values.join('<br>'))
-                        .join(),
-                  ),
-                ),
+                for (int i = 0; i < data.days.length; i++)
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton(
+                          onPressed: () => showSubstitutionInformation(
+                              context, data.days[i].infos!),
+                          child: Text(data.days[i].date))),
+
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
