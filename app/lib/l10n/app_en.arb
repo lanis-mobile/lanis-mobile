@@ -80,6 +80,7 @@
   "unknown": "Unknown",
   "message": "Message",
   "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.\nLast edited: {time}",
+  "substitutionsInformationMessage": "There is information available for this day",
   "logout": "Logout",
   "logoutConfirmation": "Do you really want to log out?",
   "checkStatus": "Check server status",

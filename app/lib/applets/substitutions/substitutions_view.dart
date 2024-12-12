@@ -212,17 +212,17 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                   isScrollable: true,
                   controller: _tabController,
                   tabs: getTabs(data)),
-              // JUST A DRAFT
               if (_tabController != null &&
                   data.days[_tabController!.index].infos != null)
-                for (int i = 0; i < data.days.length; i++)
-                  Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                          onPressed: () => showSubstitutionInformation(
-                              context, data.days[i].infos!),
-                          child: Text(data.days[i].date))),
-
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: 8.0, right: 8.0, left: 8.0),
+                  child: ElevatedButton(
+                      onPressed: () => showSubstitutionInformation(
+                          context, data.days[_tabController!.index].infos!),
+                      child: Text(AppLocalizations.of(context)!
+                          .substitutionsInformationMessage)),
+                ),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
