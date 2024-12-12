@@ -1,3 +1,5 @@
+import 'package:sph_plan/core/database/account_database/account_db.dart';
+
 /// {"strict": Bool, "filter": List<[String]>}
 typedef EntryFilter = Map<String, dynamic>;
 typedef SubstitutionFilter = Map<String, EntryFilter>;
@@ -204,9 +206,12 @@ class SubstitutionPlan {
     return allSubs;
   }
 
-  void removeEmptyDays() {
+  Future<void> removeEmptyDays() async {
+    bool infoEnabled =
+        await accountDatabase.kv.get('enableSubstitutionsInfo') == 'false';
     days.removeWhere((day) =>
-        day.substitutions.isEmpty && day.infos == null && day.infos!.isEmpty);
+        day.substitutions.isEmpty &&
+        ((day.infos == null && day.infos!.isEmpty) || infoEnabled));
   }
 
   void filterAll(SubstitutionFilter filter) {

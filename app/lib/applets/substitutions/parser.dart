@@ -38,7 +38,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     for (SubstitutionDay plan in plans) {
       fullPlan.add(plan);
     }
-    fullPlan.removeEmptyDays();
+    await fullPlan.removeEmptyDays();
     return fullPlan;
   }
 

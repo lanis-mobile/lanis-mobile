@@ -9,4 +9,5 @@ const Map<String, String> kvDefaults = {
   "isAmoled": "false",
   "substitutionsFilter": "",
   "lastPushMessageHash": "",
+  "enableSubstitutionsInfo": "true",
 };

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/themes.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 
 class AppearanceSettings extends StatefulWidget {
   const AppearanceSettings({super.key});
@@ -12,15 +11,13 @@ class AppearanceSettings extends StatefulWidget {
 }
 
 class _AppearanceSettingsState extends State<AppearanceSettings> {
-
   RadioListTile colorListTile(
       {required String title,
-        required String value,
-        Color? primaryColor,
-        String? subtitle,
-        required void Function(String data) onSelect,
-        bool selected = false
-      }) {
+      required String value,
+      Color? primaryColor,
+      String? subtitle,
+      required void Function(String data) onSelect,
+      bool selected = false}) {
     return RadioListTile(
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle) : null,
@@ -37,9 +34,9 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
             color: primaryColor ??
                 (Theme.of(context).brightness == Brightness.dark
                     ? Themes.flutterColorThemes[value]?.darkTheme?.colorScheme
-                    .primary
+                        .primary
                     : Themes.flutterColorThemes[value]?.lightTheme?.colorScheme
-                    .primary),
+                        .primary),
           ),
         ),
       ),
@@ -58,7 +55,8 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
         title: Text(AppLocalizations.of(context)!.appearance),
       ),
       body: StreamBuilder(
-        stream: accountDatabase.kv.subscribeMultiple(['color', 'theme', 'isAmoled']),
+        stream: accountDatabase.kv.subscribeMultiple(
+            ['color', 'theme', 'isAmoled', 'enableSubstitutionsInfo']),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -113,12 +111,11 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
                           value: snapshot.data!['isAmoled'] == 'true',
                           controlAffinity: ListTileControlAffinity.leading,
                           onChanged: (value) {
-                            accountDatabase.kv.set('isAmoled', value.toString());
-                          }
-                      ),
+                            accountDatabase.kv
+                                .set('isAmoled', value.toString());
+                          }),
                     ],
-                  )
-              ),
+                  )),
               Padding(
                 padding: EdgeInsets.only(left: 8.0),
                 child: Text(
@@ -141,72 +138,87 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
                 secondary: Themes.dynamicTheme.lightTheme == null
                     ? null
                     : Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          width: 2),
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Column(
-                    children: [
-                      Flexible(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                width: 2),
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Column(
+                          children: [
+                            Flexible(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                  ),
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Themes.dynamicTheme.darkTheme!
+                                          .colorScheme.primary
+                                      : Themes.dynamicTheme.lightTheme!
+                                          .colorScheme.primary,
+                                ),
+                              ),
                             ),
-                            color: Theme.of(context).brightness ==
-                                Brightness.dark
-                                ? Themes.dynamicTheme.darkTheme!.colorScheme
-                                .primary
-                                : Themes.dynamicTheme.lightTheme!
-                                .colorScheme.primary,
-                          ),
+                            Flexible(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.only(
+                                    bottomLeft: Radius.circular(10),
+                                    bottomRight: Radius.circular(10),
+                                  ),
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Themes.dynamicTheme.darkTheme!
+                                          .colorScheme.secondary
+                                      : Themes.dynamicTheme.lightTheme!
+                                          .colorScheme.secondary,
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ),
-                      Flexible(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(10),
-                              bottomRight: Radius.circular(10),
-                            ),
-                            color: Theme.of(context).brightness ==
-                                Brightness.dark
-                                ? Themes.dynamicTheme.darkTheme!.colorScheme
-                                .secondary
-                                : Themes.dynamicTheme.lightTheme!
-                                .colorScheme.secondary,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
                 value: "dynamic",
                 groupValue: snapshot.data!['color'],
                 onChanged: Themes.dynamicTheme.lightTheme == null
                     ? null
                     : (value) {
-                  setState(() {
-                    accountDatabase.kv.set('color', 'dynamic');
-                  });
-                },
+                        setState(() {
+                          accountDatabase.kv.set('color', 'dynamic');
+                        });
+                      },
               ),
               const Divider(
                 indent: 25,
                 endIndent: 25,
                 height: 15,
               ),
-              ...Themes.flutterColorThemes.keys.map(
-                (key) => colorListTile(
-                  title: firstLetterUpperCase(key),
-                  value: key,
-                  selected: snapshot.data!['color'] == key,
-                  onSelect: (_) => accountDatabase.kv.set('color', key),
-              ))
+              ...Themes.flutterColorThemes.keys.map((key) => colorListTile(
+                    title: firstLetterUpperCase(key),
+                    value: key,
+                    selected: snapshot.data!['color'] == key,
+                    onSelect: (_) => accountDatabase.kv.set('color', key),
+                  )),
+              Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Text(
+                  AppLocalizations.of(context)!.substitutions,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              CheckboxListTile(
+                  title: Text(
+                      AppLocalizations.of(context)!.enableSubstitutionsInfo),
+                  value: snapshot.data!['enableSubstitutionsInfo'] == 'true',
+                  controlAffinity: ListTileControlAffinity.leading,
+                  onChanged: (value) {
+                    accountDatabase.kv
+                        .set('enableSubstitutionsInfo', value.toString());
+                  }),
             ],
           );
         },

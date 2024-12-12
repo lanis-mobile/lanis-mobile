@@ -41,6 +41,7 @@
   "accentColor": "Accent color",
   "standard": "Standard",
   "dynamicColor": "Dynamic",
+  "enableSubstitutionsInfo": "Show information for substitutions",
   "noAppleMessageSupport": "Notifications are currently not supported on your device (IOS / IpadOS).",
   "sadlyNoSupport": "Unfortunately no support",
   "systemPermissionForNotifications": "Authorization for notifications",
