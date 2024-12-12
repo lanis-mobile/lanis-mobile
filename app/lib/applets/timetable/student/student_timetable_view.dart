@@ -56,8 +56,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
         TimeTableType selectedType = settings['student-selected-type'] == 'TimeTableType.own'
             ? TimeTableType.own
             : TimeTableType.all;
+        bool showByWeek = settings['student-selected-week'] == 'true';
         List<TimetableDay> selectedPlan = getSelectedPlan(timetable, selectedType);
-
 
         return Scaffold(
             body: SfCalendar(
@@ -74,7 +74,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 timeFormat: "HH:mm",
               ),
               firstDayOfWeek: DateTime.monday,
-              dataSource: TimeTableDataSource(context, selectedPlan, timetable.weekBadge),
+              dataSource: TimeTableDataSource(context, selectedPlan, showByWeek ? timetable.weekBadge : null),
               minDate: DateTime.now(),
               maxDate: DateTime.now().add(const Duration(days: 7)),
               onTap: (details) {
@@ -148,6 +148,23 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                   child: Icon(selectedType == TimeTableType.all
                       ? Icons.person
                       : Icons.people),
+                ),
+                const SizedBox(height: 8),
+                if(timetable.weekBadge != null && timetable.weekBadge != "")
+                  FloatingActionButton(
+                    heroTag: "toggleWeek",
+                    tooltip: showByWeek
+                        ? AppLocalizations.of(context)!.timetableSwitchToPersonal
+                        : AppLocalizations.of(context)!.timetableSwitchToClass,
+                    onPressed: () {
+                      updateSettings('student-selected-week', showByWeek == true
+                          ? 'false'
+                          :  'true'
+                      );
+                    },
+                    child: Icon(showByWeek == true
+                        ? Icons.all_inclusive
+                        : Icons.looks_one_outlined),
                 ),
               ],
             ));
