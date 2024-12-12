@@ -205,7 +205,8 @@ class SubstitutionPlan {
   }
 
   void removeEmptyDays() {
-    days.removeWhere((day) => day.substitutions.isEmpty);
+    days.removeWhere((day) =>
+        day.substitutions.isEmpty && day.infos == null && day.infos!.isEmpty);
   }
 
   void filterAll(SubstitutionFilter filter) {
