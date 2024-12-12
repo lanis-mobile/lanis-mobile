@@ -203,7 +203,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     final numbers =
         RegExp(r'\d+').allMatches(stunde).map((m) => m.group(0)!).toList();
     if (numbers.isEmpty || numbers.length > 2) return stunde;
-    return numbers.length == 2 ? '${numbers[0]}. - ${numbers[1]}.' : numbers[0];
+    return numbers.length == 2 ? '${numbers[0]} - ${numbers[1]}' : numbers[0];
   }
 
   List<SubstitutionInfo> parseInformationTables(
