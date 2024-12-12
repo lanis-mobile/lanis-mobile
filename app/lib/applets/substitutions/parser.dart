@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 
@@ -62,8 +63,10 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
         .map((element) => element.attributes["data-tag"]!);
     for (var date in dates) {
       DateTime parsedDate = entryFormat.parse(date);
+      String parsedDateStr = parsedDate.format('dd.MM.yyyy');
+      final infos = parseInformationTables(parsedDateStr, document);
       SubstitutionDay substitutionDay =
-          SubstitutionDay(date: parsedDate.format('dd.MM.yyyy'));
+          SubstitutionDay(date: parsedDateStr, infos: infos);
       final vtable = document.querySelector("#vtable$date");
       if (vtable == null) {
         return fullPlan;
@@ -194,5 +197,53 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     int minute = int.parse(match.group(5) ?? "00");
     int second = int.parse(match.group(6) ?? "00");
     return DateTime(year, month, day, hour, minute, second);
+  }
+
+  List<SubstitutionInfo> parseInformationTables(
+      String date, Document document) {
+    // Select table by multiple classes
+    // Is this a good way? No. Does it work? Yes. Hopefully.
+    var infoHeaders = document.querySelectorAll('h3.hidden-xs');
+
+    List<SubstitutionInfo> info = [];
+    for (Element header in infoHeaders) {
+      String headerText = header.text.trim();
+
+      RegExp dateRegex = RegExp(r'\b\d{2}\.\d{2}\.\d{4}\b');
+      var dateMatch = dateRegex.firstMatch(headerText);
+      if (dateMatch != null) {
+        if (date == dateMatch.group(0)!) {
+          Element? nextTable = header.nextElementSibling;
+          while (nextTable != null && !nextTable.classes.contains('infos')) {
+            nextTable = nextTable.nextElementSibling;
+          }
+
+          if (nextTable != null) {
+            var rows = nextTable.querySelectorAll('tr');
+            bool isHeader = false;
+            SubstitutionInfo? tmpInfo;
+            for (var row in rows) {
+              var cells = row.querySelectorAll('td');
+              // This makes sure that different header class names are supported (e.g. subheader, sub-header)
+              if (row.classes.join(',').contains('header')) isHeader = true;
+              for (var cell in cells) {
+                if (isHeader) {
+                  if (tmpInfo != null) {
+                    info.add(tmpInfo);
+                  }
+                  tmpInfo =
+                      SubstitutionInfo(header: cell.text.trim(), values: []);
+                } else {
+                  tmpInfo?.values.add(cell.innerHtml.trim());
+                }
+              }
+              isHeader = false;
+            }
+          }
+        }
+      }
+    }
+
+    return info;
   }
 }
