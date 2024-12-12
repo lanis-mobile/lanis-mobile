@@ -74,7 +74,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 timeFormat: "HH:mm",
               ),
               firstDayOfWeek: DateTime.monday,
-              dataSource: TimeTableDataSource(context, selectedPlan),
+              dataSource: TimeTableDataSource(context, selectedPlan, timetable.weekBadge),
               minDate: DateTime.now(),
               maxDate: DateTime.now().add(const Duration(days: 7)),
               onTap: (details) {
@@ -158,10 +158,16 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
 class TimeTableDataSource extends CalendarDataSource {
   BuildContext context;
-  TimeTableDataSource(this.context, List<TimetableDay>? data) {
+  TimeTableDataSource(this.context, List<TimetableDay>? data, String? weekBadge) {
     final now = DateTime.now();
     final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
+
+    // Same week should be true when it's the current week.
+    bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
+      return (weekBadge == null || weekBadge == "" || lesson.badge == null || lesson.badge == "")
+          ? true : sameWeek ? (weekBadge == lesson.badge) : (weekBadge != lesson.badge);
+    }
 
     for (var (dayIndex, day) in data!.indexed) {
       final date = lastMonday.add(Duration(days: dayIndex));
@@ -176,7 +182,8 @@ class TimeTableDataSource extends CalendarDataSource {
         final Color entryColor = RandomColor.bySeed(lesson.name!).primary;
 
         //1 week before
-        events.add(Appointment(
+        if(isCurrentWeek(lesson, false)) {
+          events.add(Appointment(
             startTime: startTime.subtract(const Duration(days: 7)),
             endTime: endTime.subtract(const Duration(days: 7)),
             subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
@@ -184,8 +191,10 @@ class TimeTableDataSource extends CalendarDataSource {
             notes: lesson.badge,
             color: entryColor,
             id: "$dayIndex-$lessonIndex-1"));
+        }
 
-        events.add(Appointment(
+        if(isCurrentWeek(lesson, true)) {
+          events.add(Appointment(
             startTime: startTime,
             endTime: endTime,
             subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
@@ -193,9 +202,11 @@ class TimeTableDataSource extends CalendarDataSource {
             notes: lesson.badge,
             color: entryColor,
             id: "$dayIndex-$lessonIndex-2"));
+        }
 
         //1 week later
-        events.add(Appointment(
+        if(isCurrentWeek(lesson, false)) {
+          events.add(Appointment(
             startTime: startTime.add(const Duration(days: 7)),
             endTime: endTime.add(const Duration(days: 7)),
             subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
@@ -203,6 +214,7 @@ class TimeTableDataSource extends CalendarDataSource {
             notes: lesson.lehrer,
             color: entryColor,
             id: "$dayIndex-$lessonIndex-3"));
+        }
       }
     }
 
