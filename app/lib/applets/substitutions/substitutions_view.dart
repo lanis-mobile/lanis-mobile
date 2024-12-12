@@ -141,9 +141,14 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListView(shrinkWrap: true, children: [
-              HtmlWidget(
-                renderMode: RenderMode.column,
-                infos.map((e) => e.values.join('<br>')).join(),
+              SelectionArea(
+                child: HtmlWidget(
+                  renderMode: RenderMode.column,
+                  infos
+                      .map(
+                          (e) => "<h4>${e.header}</h4>${e.values.join('<br>')}")
+                      .join(),
+                ),
               ),
             ]),
           );
