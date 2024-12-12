@@ -81,7 +81,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
         substitutionDay.add(Substitution(
             tag: parsedDate.format('dd.MM.yyyy'),
             tag_en: date,
-            stunde: fields[headers.indexOf("Stunde")].text.trim(),
+            stunde: parseStunde(fields[headers.indexOf("Stunde")].text.trim()),
             fach: headers.contains("Fach")
                 ? fields[headers.indexOf("Fach")].text.trim()
                 : null,
@@ -132,7 +132,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
               .map((e) => Substitution(
                   tag: e["Tag"],
                   tag_en: e["Tag_en"],
-                  stunde: e["Stunde"],
+                  stunde: parseStunde(e["Stunde"]),
                   vertreter: e["Vertreter"],
                   lehrer: e["Lehrer"],
                   klasse: e["Klasse"],
@@ -197,6 +197,13 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     int minute = int.parse(match.group(5) ?? "00");
     int second = int.parse(match.group(6) ?? "00");
     return DateTime(year, month, day, hour, minute, second);
+  }
+
+  String parseStunde(String stunde) {
+    final numbers =
+        RegExp(r'\d+').allMatches(stunde).map((m) => m.group(0)!).toList();
+    if (numbers.isEmpty || numbers.length > 2) return stunde;
+    return numbers.length == 2 ? '${numbers[0]}. - ${numbers[1]}.' : numbers[0];
   }
 
   List<SubstitutionInfo> parseInformationTables(
