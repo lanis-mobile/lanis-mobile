@@ -63,50 +63,67 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         onRefresh: refresh ?? () async {},
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: (deviceWidth > 505)
-              ? GridView.builder(
-                  itemCount: entriesLength + 1,
-                  itemBuilder: (context, entryIndex) {
-                    if (entryIndex == entriesLength) {
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: padding),
-                        child: lastWidget(
-                            entriesLength: entriesLength,
-                            lastEdit: substitutionPlan.lastUpdated),
-                      );
-                    }
+          child: Column(children: [
+            if (_tabController != null &&
+                substitutionPlan.days[dayIndex].infos != null)
+              Padding(
+                padding:
+                    const EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+                child: ElevatedButton(
+                    onPressed: () => showSubstitutionInformation(
+                        context, substitutionPlan.days[dayIndex].infos!),
+                    child: Text(AppLocalizations.of(context)!
+                        .substitutionsInformationMessage)),
+              ),
+            Expanded(
+                child: (deviceWidth > 505)
+                    ? GridView.builder(
+                        itemCount: entriesLength + 1,
+                        itemBuilder: (context, entryIndex) {
+                          if (entryIndex == entriesLength) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: padding),
+                              child: lastWidget(
+                                  entriesLength: entriesLength,
+                                  lastEdit: substitutionPlan.lastUpdated),
+                            );
+                          }
 
-                    return Card(
-                      child: SubstitutionGridTile(
-                          substitutionData: substitutionPlan
-                              .days[dayIndex].substitutions[entryIndex]),
-                    );
-                  },
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 500, childAspectRatio: 20 / 11),
-                )
-              : ListView.builder(
-                  itemCount: entriesLength + 1,
-                  itemBuilder: (context, entryIndex) {
-                    if (entryIndex == entriesLength) {
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: padding),
-                        child: lastWidget(
-                            entriesLength: entriesLength,
-                            lastEdit: substitutionPlan.lastUpdated),
-                      );
-                    }
+                          return Card(
+                            child: SubstitutionGridTile(
+                                substitutionData: substitutionPlan
+                                    .days[dayIndex].substitutions[entryIndex]),
+                          );
+                        },
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 500,
+                                childAspectRatio: 20 / 11),
+                      )
+                    : ListView.builder(
+                        itemCount: entriesLength + 1,
+                        itemBuilder: (context, entryIndex) {
+                          if (entryIndex == entriesLength) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: padding),
+                              child: lastWidget(
+                                  entriesLength: entriesLength,
+                                  lastEdit: substitutionPlan.lastUpdated),
+                            );
+                          }
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Card(
-                        child: SubstitutionListTile(
-                            substitutionData: substitutionPlan
-                                .days[dayIndex].substitutions[entryIndex]),
-                      ),
-                    );
-                  },
-                ),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Card(
+                              child: SubstitutionListTile(
+                                  substitutionData: substitutionPlan
+                                      .days[dayIndex]
+                                      .substitutions[entryIndex]),
+                            ),
+                          );
+                        },
+                      ))
+          ]),
         ),
       ));
     }
@@ -212,17 +229,6 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                   isScrollable: true,
                   controller: _tabController,
                   tabs: getTabs(data)),
-              if (_tabController != null &&
-                  data.days[_tabController!.index].infos != null)
-                Padding(
-                  padding:
-                      const EdgeInsets.only(top: 8.0, right: 8.0, left: 8.0),
-                  child: ElevatedButton(
-                      onPressed: () => showSubstitutionInformation(
-                          context, data.days[_tabController!.index].infos!),
-                      child: Text(AppLocalizations.of(context)!
-                          .substitutionsInformationMessage)),
-                ),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
