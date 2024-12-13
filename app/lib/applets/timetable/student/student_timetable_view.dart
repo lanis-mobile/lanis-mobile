@@ -126,7 +126,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     }
                   },
                 ),
-                if (uniqueBadges.isNotEmpty)
+                if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -144,8 +144,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                             child: Text(
                                 showByWeek != true
-                                    ? 'Gesamtplan'
-                                    : '${timetable.weekBadge}-Woche',
+                                    ? AppLocalizations.of(context)!.timetableAllWeeks
+                                    : AppLocalizations.of(context)!.timetableWeek(timetable.weekBadge!),
                               style: TextStyle(
                                 color: Theme.of(context).buttonTheme.colorScheme?.onPrimary,
                               ),
