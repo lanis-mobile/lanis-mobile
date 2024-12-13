@@ -58,70 +58,104 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
             : TimeTableType.all;
         bool showByWeek = settings['student-selected-week'] == 'true';
         List<TimetableDay> selectedPlan = getSelectedPlan(timetable, selectedType);
+        final List<String?> uniqueBadges = selectedPlan.map((e) => e.map((e) => e.badge).toList()).toList().expand((element) => element).toSet().toList();
 
         return Scaffold(
-            body: SfCalendar(
-              view: DateTime.now().weekday == DateTime.saturday ||
-                  DateTime.now().weekday == DateTime.sunday
-                  ? CalendarView.week
-                  : CalendarView.workWeek,
-              allowedViews: [
-                CalendarView.day,
-                CalendarView.week,
-                CalendarView.workWeek,
-              ],
-              timeSlotViewSettings: const TimeSlotViewSettings(
-                timeFormat: "HH:mm",
-              ),
-              firstDayOfWeek: DateTime.monday,
-              dataSource: TimeTableDataSource(context, selectedPlan, showByWeek ? timetable.weekBadge : null),
-              minDate: DateTime.now(),
-              maxDate: DateTime.now().add(const Duration(days: 7)),
-              onTap: (details) {
-                if (details.appointments != null) {
-                  final appointment = details.appointments!.first;
+            body: Stack(
+              children: [
+                SfCalendar(
+                  view: DateTime.now().weekday == DateTime.saturday ||
+                      DateTime.now().weekday == DateTime.sunday
+                      ? CalendarView.week
+                      : CalendarView.workWeek,
+                  allowedViews: [
+                    CalendarView.day,
+                    CalendarView.week,
+                    CalendarView.workWeek,
+                  ],
+                  timeSlotViewSettings: const TimeSlotViewSettings(
+                    timeFormat: "HH:mm",
+                  ),
+                  firstDayOfWeek: DateTime.monday,
+                  dataSource: TimeTableDataSource(context, selectedPlan, showByWeek ? timetable.weekBadge : null),
+                  minDate: DateTime.now(),
+                  maxDate: DateTime.now().add(const Duration(days: 7)),
+                  onTap: (details) {
+                    if (details.appointments != null) {
+                      final appointment = details.appointments!.first;
 
-                  final helperIDs = appointment.id.split("-").map(int.parse).toList();
-                  final TimetableSubject selected = selectedPlan[helperIDs[0]][helperIDs[1]];
+                      final helperIDs = appointment.id.split("-").map(int.parse).toList();
+                      final TimetableSubject selected = selectedPlan[helperIDs[0]][helperIDs[1]];
 
-                  showModalBottomSheet(
-                      context: context,
-                      showDragHandle: true,
-                      builder: (context) {
-                        return SizedBox(
-                          width: double.infinity,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 20.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    selected.name ?? "Unbekanntes Fach",
-                                    style: Theme.of(context).textTheme.titleLarge,
-                                  ),
+                      showModalBottomSheet(
+                          context: context,
+                          showDragHandle: true,
+                          builder: (context) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 20.0, right: 20.0, bottom: 20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Title
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        selected.name ?? "Unbekanntes Fach",
+                                        style: Theme.of(context).textTheme.titleLarge,
+                                      ),
+                                    ),
+                                    if (selected.raum != null)
+                                      modalSheetItem(selected.raum!, Icons.place),
+                                    modalSheetItem(
+                                        "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
+                                        Icons.access_time,
+                                    ),
+                                    if (selected.lehrer != null)
+                                      modalSheetItem(selected.lehrer!, Icons.person),
+                                    if (selected.badge != null)
+                                      modalSheetItem(selected.badge!, Icons.info),
+                                  ],
                                 ),
-                                if (selected.raum != null)
-                                  modalSheetItem(selected.raum!, Icons.place),
-                                modalSheetItem(
-                                    "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
-                                    Icons.access_time,
-                                ),
-                                if (selected.lehrer != null)
-                                  modalSheetItem(selected.lehrer!, Icons.person),
-                                if (selected.badge != null)
-                                  modalSheetItem(selected.badge!, Icons.info),
-                              ],
+                              ),
+                            );
+                          });
+                    }
+                  },
+                ),
+                if (uniqueBadges.isNotEmpty)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () => updateSettings('student-selected-week',
+                            showByWeek == true ? 'false' :  'true'
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 40, top: 6),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).buttonTheme.colorScheme?.primary,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            child: Text(
+                                showByWeek != true
+                                    ? 'Gesamtplan'
+                                    : '${timetable.weekBadge}-Woche',
+                              style: TextStyle(
+                                color: Theme.of(context).buttonTheme.colorScheme?.onPrimary,
+                              ),
                             ),
                           ),
-                        );
-                      });
-                }
-              },
+                        ),
+                      ),
+                    ],
+                  )
+              ],
             ),
             floatingActionButton: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -148,24 +182,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                   child: Icon(selectedType == TimeTableType.all
                       ? Icons.person
                       : Icons.people),
-                ),
-                const SizedBox(height: 8),
-                if(timetable.weekBadge != null && timetable.weekBadge != "")
-                  FloatingActionButton(
-                    heroTag: "toggleWeek",
-                    tooltip: showByWeek
-                        ? AppLocalizations.of(context)!.timetableSwitchToPersonal
-                        : AppLocalizations.of(context)!.timetableSwitchToClass,
-                    onPressed: () {
-                      updateSettings('student-selected-week', showByWeek == true
-                          ? 'false'
-                          :  'true'
-                      );
-                    },
-                    child: Icon(showByWeek == true
-                        ? Icons.all_inclusive
-                        : Icons.looks_one_outlined),
-                ),
+                )
               ],
             ));
       },
