@@ -199,8 +199,7 @@ class TimeTableDataSource extends CalendarDataSource {
         final Color entryColor = RandomColor.bySeed(lesson.name!).primary;
 
         //1 week before
-        if(isCurrentWeek(lesson, false)) {
-          events.add(Appointment(
+        events.add(Appointment(
             startTime: startTime.subtract(const Duration(days: 7)),
             endTime: endTime.subtract(const Duration(days: 7)),
             subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
@@ -208,7 +207,6 @@ class TimeTableDataSource extends CalendarDataSource {
             notes: lesson.badge,
             color: entryColor,
             id: "$dayIndex-$lessonIndex-1"));
-        }
 
         if(isCurrentWeek(lesson, true)) {
           events.add(Appointment(
@@ -222,8 +220,7 @@ class TimeTableDataSource extends CalendarDataSource {
         }
 
         //1 week later
-        if(isCurrentWeek(lesson, false)) {
-          events.add(Appointment(
+        events.add(Appointment(
             startTime: startTime.add(const Duration(days: 7)),
             endTime: endTime.add(const Duration(days: 7)),
             subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
@@ -231,7 +228,6 @@ class TimeTableDataSource extends CalendarDataSource {
             notes: lesson.lehrer,
             color: entryColor,
             id: "$dayIndex-$lessonIndex-3"));
-        }
       }
     }
 
