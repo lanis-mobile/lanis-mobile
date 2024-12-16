@@ -214,6 +214,8 @@
 
   "timetableSwitchToPersonal": "Wechsel zum Persönlichen Stundenplan",
   "timetableSwitchToClass": "Wechsel zum Klassen Stundenplan",
+  "timetableAllWeeks": "Gesamtplan",
+  "timetableWeek": "{week}-Woche",
   "dateWithHours": "{date}, {hours} Stunde",
   "contributors": "Mitwirkende",
   "becomeContributor": "Werde Mitwirkender!",

@@ -69,8 +69,9 @@ enum TimeTableType { all, own }
 class TimeTable {
   List<TimetableDay>? planForAll;
   List<TimetableDay>? planForOwn;
+  String? weekBadge;
 
-  TimeTable({this.planForAll, this.planForOwn});
+  TimeTable({this.planForAll, this.planForOwn, this.weekBadge});
 
   // JSON operations
   TimeTable.fromJson(Map<String, dynamic> json) {
@@ -84,6 +85,7 @@ class TimeTable {
         .map((fach) => TimetableSubject.fromJson(fach as Map<String, dynamic>))
         .toList())
         .toList();
+    weekBadge = json['weekBadge'];
   }
 
   Map<String, dynamic> toJson() {
@@ -94,6 +96,7 @@ class TimeTable {
     data['planForOwn'] = planForOwn
         ?.map((day) => day.map((fach) => fach.toJson()).toList())
         .toList();
+    data['weekBadge'] = weekBadge;
     return data;
   }
 }

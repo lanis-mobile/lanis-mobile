@@ -18,12 +18,14 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
 
     final tbodyAll = await getTableBody(document, timeTableType: TimeTableType.all);
     final tbodyOwn = await getTableBody(document, timeTableType: TimeTableType.own);
+    final String? weekBadge = document.querySelector("#aktuelleWoche")?.text.trim();
     final parsedAll = parseRoomPlan(tbodyAll!);
     final parsedOwn = parseRoomPlan(tbodyOwn!);
 
     return TimeTable(
       planForAll: parsedAll,
       planForOwn: parsedOwn,
+      weekBadge: weekBadge,
     );
   }
 
