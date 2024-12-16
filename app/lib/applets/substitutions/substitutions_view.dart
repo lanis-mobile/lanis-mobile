@@ -1,16 +1,16 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_listtile.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/models/substitution.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import '../../core/sph/sph.dart';
-import 'substitutions_gridtile.dart';
 import '../../widgets/combined_applet_builder.dart';
-
+import 'substitutions_gridtile.dart';
 
 class SubstitutionsView extends StatefulWidget {
   const SubstitutionsView({super.key});
@@ -19,7 +19,8 @@ class SubstitutionsView extends StatefulWidget {
   State<SubstitutionsView> createState() => _SubstitutionsViewState();
 }
 
-class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProviderStateMixin {
+class _SubstitutionsViewState extends State<SubstitutionsView>
+    with TickerProviderStateMixin {
   static const double padding = 12.0;
 
   List<GlobalKey<RefreshIndicatorState>> globalKeys = [
@@ -43,67 +44,95 @@ class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProvid
     );
   }
 
-  List<Widget> getSubstitutionViews(SubstitutionPlan substitutionPlan, RefreshFunction? refresh) {
+  List<Widget> getSubstitutionViews(
+      SubstitutionPlan substitutionPlan, RefreshFunction? refresh) {
     double deviceWidth = MediaQuery.of(context).size.width;
 
     List<Widget> substitutionViews = [];
 
     for (int dayIndex = 0;
-    dayIndex < substitutionPlan.days.length;
-    dayIndex++) {
+        dayIndex < substitutionPlan.days.length;
+        dayIndex++) {
       final int entriesLength =
           substitutionPlan.days[dayIndex].substitutions.length;
 
       substitutionViews.add(RefreshIndicator(
         key: globalKeys[dayIndex + 1],
-        notificationPredicate: refresh != null ? (_) => true : (_) => false, // Hide refresh indicator without bloating the code
+        notificationPredicate: refresh != null
+            ? (_) => true
+            : (_) => false, // Hide refresh indicator without bloating the code
         onRefresh: refresh ?? () async {},
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: (deviceWidth > 505)
-              ? GridView.builder(
-            itemCount: entriesLength + 1,
-            itemBuilder: (context, entryIndex) {
-              if (entryIndex == entriesLength) {
-                return Padding(
-                  padding: EdgeInsets.only(bottom: padding),
-                  child: lastWidget(
-                      entriesLength: entriesLength,
-                      lastEdit: substitutionPlan.lastUpdated),
-                );
-              }
+          child: Column(children: [
+            if (_tabController != null &&
+                substitutionPlan.days[dayIndex].infos != null)
+              StreamBuilder(
+                  stream:
+                      accountDatabase.kv.subscribe('enableSubstitutionsInfo'),
+                  builder: (context, snapshot) {
+                    return snapshot.hasData && snapshot.data == 'true'
+                        ? Padding(
+                            padding: const EdgeInsets.only(
+                                bottom: 8.0, right: 8.0, left: 8.0),
+                            child: ElevatedButton(
+                                onPressed: () => showSubstitutionInformation(
+                                    context,
+                                    substitutionPlan.days[dayIndex].infos!),
+                                child: Text(AppLocalizations.of(context)!
+                                    .substitutionsInformationMessage)),
+                          )
+                        : const SizedBox();
+                  }),
+            Expanded(
+                child: (deviceWidth > 505)
+                    ? GridView.builder(
+                        itemCount: entriesLength + 1,
+                        itemBuilder: (context, entryIndex) {
+                          if (entryIndex == entriesLength) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: padding),
+                              child: lastWidget(
+                                  entriesLength: entriesLength,
+                                  lastEdit: substitutionPlan.lastUpdated),
+                            );
+                          }
 
-              return Card(
-                child: SubstitutionGridTile(
-                    substitutionData: substitutionPlan
-                        .days[dayIndex].substitutions[entryIndex]),
-              );
-            },
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 500, childAspectRatio: 20 / 11),
-          )
-              : ListView.builder(
-            itemCount: entriesLength + 1,
-            itemBuilder: (context, entryIndex) {
-              if (entryIndex == entriesLength) {
-                return Padding(
-                  padding: EdgeInsets.only(bottom: padding),
-                  child: lastWidget(
-                      entriesLength: entriesLength,
-                      lastEdit: substitutionPlan.lastUpdated),
-                );
-              }
+                          return Card(
+                            child: SubstitutionGridTile(
+                                substitutionData: substitutionPlan
+                                    .days[dayIndex].substitutions[entryIndex]),
+                          );
+                        },
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 500,
+                                childAspectRatio: 20 / 11),
+                      )
+                    : ListView.builder(
+                        itemCount: entriesLength + 1,
+                        itemBuilder: (context, entryIndex) {
+                          if (entryIndex == entriesLength) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: padding),
+                              child: lastWidget(
+                                  entriesLength: entriesLength,
+                                  lastEdit: substitutionPlan.lastUpdated),
+                            );
+                          }
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Card(
-                  child: SubstitutionListTile(
-                      substitutionData: substitutionPlan
-                          .days[dayIndex].substitutions[entryIndex]),
-                ),
-              );
-            },
-          ),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Card(
+                              child: SubstitutionListTile(
+                                  substitutionData: substitutionPlan
+                                      .days[dayIndex]
+                                      .substitutions[entryIndex]),
+                            ),
+                          );
+                        },
+                      ))
+          ]),
         ),
       ));
     }
@@ -128,6 +157,30 @@ class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProvid
     return tabs;
   }
 
+  void showSubstitutionInformation(
+      BuildContext context, List<SubstitutionInfo> infos) {
+    showModalBottomSheet(
+        context: context,
+        useSafeArea: true,
+        showDragHandle: true,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(shrinkWrap: true, children: [
+              SelectionArea(
+                child: HtmlWidget(
+                  renderMode: RenderMode.column,
+                  infos
+                      .map(
+                          (e) => "<h4>${e.header}</h4>${e.values.join('<br>')}")
+                      .join(),
+                ),
+              ),
+            ]),
+          );
+        });
+  }
+
   @override
   void dispose() {
     _tabController?.dispose();
@@ -142,11 +195,10 @@ class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProvid
       phpUrl: substitutionDefinition.appletPhpUrl,
       settingsDefaults: substitutionDefinition.settingsDefaults,
       builder: (context, data, accountType, settings, updateSetting, refresh) {
-
         if (data.days.isEmpty) {
           // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys += List.generate(data.days.length,
-                  (index) => GlobalKey<RefreshIndicatorState>());
+          globalKeys += List.generate(
+              data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
           return RefreshIndicator(
             key: globalKeys[0],
             notificationPredicate: refresh != null ? (_) => true : (_) => false,
@@ -176,11 +228,10 @@ class _SubstitutionsViewState extends State<SubstitutionsView> with TickerProvid
             ),
           );
         } else {
-          globalKeys += List.generate(data.days.length,
-                  (index) => GlobalKey<RefreshIndicatorState>());
+          globalKeys += List.generate(
+              data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
+          _tabController = TabController(length: data.days.length, vsync: this);
 
-          _tabController = TabController(
-              length: data.days.length, vsync: this);
           return Column(
             children: [
               TabBar(
