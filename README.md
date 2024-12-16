@@ -7,15 +7,28 @@ Deine App für das hessische Schulportal! In Zusammenarbeit mit dem staatlichen 
 <p align="center">
     <img src="https://github.com/alessioC42/lanis-mobile/assets/84250128/19d30436-32f7-4cbe-b78e-f2fee3583c28" width="60%">
 </p>
-<a href='https://play.google.com/store/apps/details?id=io.github.alessioc42.sph&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
-  <img alt='Jetzt bei Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png' style='height: 71px'/>
-</a>
 
-<a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
-
-<a href='https://apps.apple.com/de/app/lanis-mobile/id6511247743?l=en-GB'>
-  <img alt='Jetzt im App Store' src='https://lanis-mobile.github.io/assets/ios-badge.svg' style='height: 61px'/>
-</a>
+<table>
+    <tr>
+        <td colspan='2'>
+            <a href='https://play.google.com/store/apps/details?id=io.github.alessioc42.sph&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Jetzt bei Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png' style='height: 71px'/></a>
+        </td>
+        <td colspan='2'>
+            <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.alessioc42.sph"><img src="https://www.martinstoeckli.ch/images/izzy-on-droid-badge-en.png" alt="Get it on IzzyOnDroid" style="height: 56px;"></a>
+        </td>
+        <td colspan='2'>
+            <a href='https://apps.apple.com/de/app/lanis-mobile/id6511247743?l=en-GB'><img alt='Jetzt im App Store' src='https://lanis-mobile.github.io/assets/ios-badge.svg' style='height: 61px'/></a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan='3'>
+            <a href='https://lanis-mobile.github.io/'>website</a>
+        </td>
+        <td colspan='3'>
+            <a href='https://discord.gg/MGYaSetUsY'>discord</a>
+        </td>
+    </tr>
+</table>
 
 <p></p>
 <details>
@@ -34,19 +47,6 @@ Deine App für das hessische Schulportal! In Zusammenarbeit mit dem staatlichen 
 
 ## Hilf mit!
 Wir sind offen für neue Collaborator. Aber auch wenn du nicht coden kannst, bist du in der Lage einen Beitrag zur App zu leisten. Du kannst den Vertretungsplan deiner Schule anpassen. Siehe [hier](https://github.com/alessioC42/lanis-mobile-autoconfig/issues/1) und [hier](https://github.com/alessioC42/lanis-mobile-autoconfig)
-
-## features
-- [x] Login
-- [x] Vertretungsplan
-- [x] Vertretungsplan Push benachrichtigungen (Android)
-- [x] Schulkalender
-- [x] Lanis eingeloggt im browser öffnen
-- [x] Benutzerdaten
-- [x] Mein Unterricht
-- [x] Nachrichten
-- [x] Datenspeicher
-- [x] Stundenplan
-- [x] Offline views
 
 ## Mitarbeit
 [Schulkonfiguration der Vertretungspläne](https://github.com/alessioC42/lanis-mobile-autoconfig)
