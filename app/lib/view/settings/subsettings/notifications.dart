@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/applets/definitions.dart';
@@ -44,11 +46,12 @@ class _NotificationElementsState extends State<NotificationElements> {
   double _notificationInterval = 15.0;
   PermissionStatus _notificationPermissionStatus = PermissionStatus.provisional;
   Future<int> accountsCount = accountDatabase.select(accountDatabase.accountsTable).get().then((value) => value.length);
+  Timer? _timer;
 
   List<String> _getNotificationKeys() {
     List<String> result = [];
     for (final applet
-        in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+    in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
       if (sph!.session.doesSupportFeature(applet)) {
         result.add('notification-${applet.appletPhpUrl}');
         _keyTitles['notification-${applet.appletPhpUrl}'] =
@@ -65,7 +68,7 @@ class _NotificationElementsState extends State<NotificationElements> {
   void initVars() async {
     _notificationPermissionStatus = await Permission.notification.status;
     final String interval = (await accountDatabase.kv
-            .get('notifications-android-target-interval-minutes')) ??
+        .get('notifications-android-target-interval-minutes')) ??
         '15';
     setState(() {
       _notificationPermissionStatus = _notificationPermissionStatus;
@@ -73,10 +76,28 @@ class _NotificationElementsState extends State<NotificationElements> {
     });
   }
 
+  void _startPermissionCheck() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      final newStatus = await Permission.notification.status;
+      if (newStatus != _notificationPermissionStatus && mounted) {
+        setState(() {
+          _notificationPermissionStatus = newStatus;
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     initVars();
+    _startPermissionCheck();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -102,17 +123,11 @@ class _NotificationElementsState extends State<NotificationElements> {
                   .systemPermissionForNotifications),
               subtitle: Text(AppLocalizations.of(context)!
                   .systemPermissionForNotificationsExplained),
-              onTap: () async {
-                _notificationPermissionStatus =
-                    await Permission.notification.request();
-                setState(() {
-                  _notificationPermissionStatus = _notificationPermissionStatus;
-                });
-              },
+              onTap: () => AppSettings.openAppSettings(type: AppSettingsType.notification, asAnotherTask: false),
               trailing:
-                  (_notificationPermissionStatus == PermissionStatus.granted)
-                      ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
-                      : Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+              (_notificationPermissionStatus == PermissionStatus.granted)
+                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                  : Icon(Icons.error, color: Theme.of(context).colorScheme.error),
             ),
             const Divider(),
             FutureBuilder<int>(
@@ -147,18 +162,18 @@ class _NotificationElementsState extends State<NotificationElements> {
                     value: _notificationInterval,
                     onChanged: allowNotifications
                         ? (val) {
-                            setState(() {
-                              _notificationInterval = val;
-                            });
-                          }
+                      setState(() {
+                        _notificationInterval = val;
+                      });
+                    }
                         : null,
                     onChangeEnd: allowNotifications
                         ? (val) {
-                            int value = val.round();
-                            accountDatabase.kv.set(
-                                'notifications-android-target-interval-minutes',
-                                value.toString());
-                          }
+                      int value = val.round();
+                      accountDatabase.kv.set(
+                          'notifications-android-target-interval-minutes',
+                          value.toString());
+                    }
                         : null,
                     min: 15.0,
                     max: 180.0,
@@ -176,13 +191,13 @@ class _NotificationElementsState extends State<NotificationElements> {
               } : null,
             ),
             ...sortedKeys.map(
-              (key) => SwitchListTile(
+                  (key) => SwitchListTile(
                 title: Text(_keyTitles[key] ?? key),
                 value: (snapshot.data![key] ?? 'true') == 'true',
                 onChanged: allowNotifications
                     ? (value) {
-                        sph!.prefs.kv.set(key, value.toString());
-                      }
+                  sph!.prefs.kv.set(key, value.toString());
+                }
                     : null,
               ),
             ),

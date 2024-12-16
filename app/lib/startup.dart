@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
@@ -87,10 +89,12 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       openWelcomeScreen();
     } on LanisException catch (e) {
       error = e;
-      await showModalBottomSheet(
-        context: context,
-        builder: (context) => errorDialog(context),
-      );
+      if (mounted) {
+        await showModalBottomSheet(
+          context: context,
+          builder: (context) => errorDialog(context),
+        );
+      }
       await performLogin();
     }
   }
@@ -103,6 +107,47 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
 
     super.initState();
     performLogin();
+    requestPermissions();
+  }
+
+  void requestPermissions() async {
+    var status = await Permission.notification.request();
+    if (status.isGranted) return;
+    status = await Permission.notification.request();
+    if (status.isGranted) return;
+    if (status == PermissionStatus.granted) return;
+    if (status.isDenied || status.isPermanentlyDenied) {
+      if (mounted) {
+        await showDialog(context: context, builder: (context) => AlertDialog(
+          icon: Icon(Icons.notifications_off),
+          title: Text(AppLocalizations.of(context)!.notifications),
+          content: Text(AppLocalizations.of(context)!.notificationPermanentlyDenied),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(AppLocalizations.of(context)!.close),
+            ),
+            TextButton(
+              onPressed: () {
+                AppSettings.openAppSettings(asAnotherTask: false, type: AppSettingsType.notification);
+              },
+              child: Text(AppLocalizations.of(context)!.open),
+            ),
+          ],
+        ));
+
+        /*ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(AppLocalizations.of(context)!.notificationPermanentlyDenied),
+          action: SnackBarAction(label: AppLocalizations.of(context)!.open, onPressed: () {
+            AppSettings.openAppSettings(asAnotherTask: false, type: AppSettingsType.notification);
+          }),)
+      );*/
+      }
+    }
   }
 
   @override
