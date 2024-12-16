@@ -15,21 +15,22 @@ import 'core/sph/sph.dart' show SPH;
 const identifier = "io.github.alessioc42.pushservice";
 
 Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
-  if (!Platform.isAndroid && !Platform.isIOS) return;
+  if (!Platform.isAndroid) return; //iOS currently experimental/not supported
 
+  if ((await Permission.notification.isDenied)) {
+    await Workmanager().cancelAll();
+    return;
+  }
 
-  //if (Platform.isAndroid){
-  PermissionStatus? notificationsPermissionStatus;
-  await Permission.notification.isDenied.then((value) async {
-    if (value) {
-      notificationsPermissionStatus =
-      await Permission.notification.request();
+  final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
+  for (final account in accounts) {
+    final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
+    final sph = SPH(account: clearTextAccount);
+    if ((await sph.prefs.kv.get('notifications-allow')??'true') == 'true') {
+      await Workmanager().cancelAll();
+      return;
     }
-  });
-  if (!(notificationsPermissionStatus ?? PermissionStatus.granted).isGranted) return;
-
-
-  await Workmanager().cancelAll();
+  }
 
   await Workmanager().initialize(callbackDispatcher,
       isInDebugMode: kDebugMode);
@@ -50,6 +51,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
   }
+
   if (Platform.isIOS) {
     try {
       await Workmanager().registerPeriodicTask(identifier, identifier,
@@ -88,7 +90,6 @@ void callbackDispatcher() {
       AccountDatabase accountDatabase = AccountDatabase();
       final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
       for (final account in accounts) {
-
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
         final sph = SPH(account: clearTextAccount);
         if ((await sph.prefs.kv.get('notifications-allow')??'true') != 'true') {
