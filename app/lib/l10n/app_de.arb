@@ -222,5 +222,8 @@
   "done": "Fertig",
   "updateAvailable": "Update verfügbar",
   "info": "Information",
-  "install": "Installieren"
+  "install": "Installieren",
+  "notificationPermanentlyDenied": "Bitte erlaube Benachrichtigungen für diese App.",
+  "open": "Öffnen",
+  "close": "Schließen"
 }
