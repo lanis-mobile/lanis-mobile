@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../core/native_adapter_instance.dart';
+
 
 class SchoolSelector extends StatefulWidget {
   const SchoolSelector({super.key, required this.controller, required this.outContext, required this.onSchoolSelected});
@@ -27,6 +29,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
   Future<void> loadSchoolList() async {
     try {
       final dio = Dio();
+      dio.httpClientAdapter = getNativeAdapterInstance();
       final response = await dio.get(
           "https://startcache.schulportal.hessen.de/exporteur.php?a=schoollist");
       List<dynamic> data = jsonDecode(response.data);
