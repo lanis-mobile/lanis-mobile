@@ -92,7 +92,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
   Widget build(BuildContext context) {
     return ActionChip(
       avatar: const Icon(Icons.account_balance),
-        label: Text(selectedSchool != null ? selectedSchool!.name : AppLocalizations.of(context)!.selectSchool),
+        label: Text(selectedSchool != null ? "${selectedSchool!.name} - ${selectedSchool!.city}" : AppLocalizations.of(context)!.selectSchool),
       onPressed: schoolBezirke != null ? () async {
         showDialog(
           context: context,
