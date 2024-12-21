@@ -52,9 +52,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     _loadCalenderView();
   }
 
-  CalendarView view = CalendarView.workWeek;
+  CalendarView view = CalendarView.week;
   Future<void> _loadCalenderView() async {
-    final dataString = await accountDatabase.kv.get("currentTimeTableView") ?? "CalenderView.workWeek";
+    final dataString = await accountDatabase.kv.get("currentTimeTableView") ?? "CalenderView.week";
 
     final CalendarView data = switch (dataString) {
       "CalendarView.day" => CalendarView.day,
