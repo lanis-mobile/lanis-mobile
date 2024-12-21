@@ -62,27 +62,27 @@ class Themes {
     return Themes(
       Themes.standardTheme.lightTheme,
       Themes.standardTheme.darkTheme?.copyWith(
-          // Amoled Background & Themes for required Components
-            scaffoldBackgroundColor: amoledColors["background"],
-            navigationBarTheme: NavigationBarThemeData(
-              backgroundColor: amoledColors["background"],
-            ),
-            navigationDrawerTheme: NavigationDrawerThemeData(
-              backgroundColor: amoledColors["background"],
-            ),
-            appBarTheme: AppBarTheme(
-              backgroundColor: amoledColors["background"],
-              surfaceTintColor: amoledColors["background"],
-            ),
-            dialogTheme: DialogTheme(
-              backgroundColor: amoledColors["secondary"],
-              surfaceTintColor: amoledColors["secondary"],
-            ),
-            bottomSheetTheme: BottomSheetThemeData(
-              backgroundColor: amoledColors["third"],
-              surfaceTintColor: amoledColors["third"],
-            )
+        // Amoled Background & Themes for required Components
+        scaffoldBackgroundColor: amoledColors["background"],
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: amoledColors["background"],
         ),
+        navigationDrawerTheme: NavigationDrawerThemeData(
+          backgroundColor: amoledColors["background"],
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: amoledColors["background"],
+          surfaceTintColor: amoledColors["background"],
+        ),
+        dialogTheme: DialogTheme(
+          backgroundColor: amoledColors["secondary"],
+          surfaceTintColor: amoledColors["secondary"],
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: amoledColors["third"],
+          surfaceTintColor: amoledColors["third"],
+        ),
+      ),
     );
   }
 }

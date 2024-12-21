@@ -61,6 +61,10 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
         return Scaffold(
             body: SfCalendar(
+              headerStyle: CalendarHeaderStyle(
+                textAlign: TextAlign.left,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor
+              ),
               view: DateTime.now().weekday == DateTime.saturday ||
                   DateTime.now().weekday == DateTime.sunday
                   ? CalendarView.week
