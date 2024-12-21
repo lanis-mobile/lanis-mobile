@@ -4,6 +4,7 @@
   "welcomeBack": "Wilkommen zurück",
   "substitutions": "Vertretungen",
   "calendar": "Kalender",
+  "calenderWeekShort": "KW",
   "messages": "Nachrichten",
   "singleMessages": "Einzelne Nachricht",
   "timeTable": "Stundenplan",

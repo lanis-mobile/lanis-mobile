@@ -17,6 +17,13 @@ class StudentTimetableView extends StatefulWidget {
   State<StudentTimetableView> createState() => _StudentTimetableViewState();
 }
 
+int getCurrentWeekNumber() {
+  final now = DateTime.now();
+  final firstDayOfYear = DateTime(now.year, 1, 1);
+  final days = now.difference(firstDayOfYear).inDays;
+  return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
+}
+
 class _StudentTimetableViewState extends State<StudentTimetableView> {
   Widget modalSheetItem(String content, IconData icon) {
     return Padding(
@@ -65,6 +72,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 textAlign: TextAlign.left,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor
               ),
+              headerDateFormat: "${AppLocalizations.of(context)?.calenderWeekShort} ${getCurrentWeekNumber()}",
               view: DateTime.now().weekday == DateTime.saturday ||
                   DateTime.now().weekday == DateTime.sunday
                   ? CalendarView.week
