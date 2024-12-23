@@ -279,6 +279,9 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                     return NavigationActionPolicy.ALLOW;
                   },
                   onLoadStart: (controller, uri) async {
+                    error = null;
+                    errorUrl = null;
+
                     if (await controller.canGoBack()) {
                       canGoBack.value = true;
                     } else {
@@ -331,13 +334,14 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                     progressIndicator.value = 0;
                   },
                   onDownloadStartRequest: (controller, request) {
-                    String url = request.url.rawValue;
-                    String filename = request.suggestedFilename ??
-                        sph!.storage.generateUniqueHash(request.url.rawValue);
-
                     double fileSize = request.contentLength / 1000000;
-                    launchFile(context, url, filename,
-                        "${fileSize.toStringAsFixed(2)} MB", () {});
+
+                    showFileModal(context, FileInfo(
+                      name: request.suggestedFilename ??
+                          sph!.storage.generateUniqueHash(request.url.rawValue),
+                      url: request.url,
+                      size: "(${fileSize.toStringAsFixed(2)} MB)",
+                    ));
                   },
                 ),
               ),
@@ -506,7 +510,6 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                   vertical: 4.0, horizontal: 8.0),
                               child: Text(
                                 "URL",
-                                maxLines: 3,
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelLarge!
@@ -514,7 +517,6 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onPrimaryContainer),
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
@@ -525,6 +527,8 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                             child: Text(
                               errorUrl?.rawValue ?? "Unknown error",
                               style: Theme.of(context).textTheme.bodyMedium,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           )
                         ],
@@ -559,6 +563,13 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                           onPressed: refresh, icon: const Icon(Icons.refresh)),
                       IconButton(
                           onPressed: () async {
+                            if (error != null) {
+                              await Clipboard.setData(ClipboardData(
+                                  text: errorUrl?.rawValue ?? "Unknown error"));
+
+                              return;
+                            }
+
                             if (webViewController != null) {
                               await Clipboard.setData(ClipboardData(
                                   text: (await webViewController!.getUrl())!
