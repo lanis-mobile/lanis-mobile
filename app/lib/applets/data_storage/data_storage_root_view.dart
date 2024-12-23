@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
 import '../../models/client_status_exceptions.dart';
@@ -65,22 +67,22 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Datenspeicher"),
+        title: Text(AppLocalizations.of(context)!.storage),
         actions: const [
           AsyncSearchAnchor(),
         ],
       ),
       body: loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(),
             )
           : error
-              ? const Center(
+              ? Center(
                   child: Column(
                   children: [
                     Icon(Icons.error_outline, size: 100),
                     SizedBox(height: 10),
-                    Text("Fehler beim Laden der Dateien"),
+                    Text(AppLocalizations.of(context)!.couldNotLoadDataStorage),
                   ],
                 ))
               : ListView(

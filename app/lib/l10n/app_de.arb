@@ -26,6 +26,8 @@
   "noSupportOpenInBrowser": "Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen.",
   "noInternetConnection1": "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
   "noInternetConnection2": "Keine Internetverbindung!",
+  "couldNotLoadDataStorage": "Fehler beim laden vom Dateispeicher!",
+  "couldNotLoadFiles": "Fehler beim laden der Dateien!",
   "lanisDownError": "Lanis ist nicht aufrufbar!",
   "lanisDownErrorMessage": "Anscheinend ist Lanis nicht verfügbar.\nBitte überprüfe den Status von Lanis (PaedOrg) auf der Website.",
 
