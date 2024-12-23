@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/connection_checker.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
@@ -17,6 +16,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
+import 'models/startup.dart';
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -67,8 +67,7 @@ class Destination {
 }
 
 class HomePage extends StatefulWidget {
-  final bool showIntro;
-  const HomePage({super.key, required this.showIntro});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -141,7 +140,7 @@ class _HomePageState extends State<HomePage> {
       action: (context) {
         sph!.session.deAuthenticate();
         accountDatabase.deleteAccount(sph!.account.localId);
-        Phoenix.rebirth(context);
+        reset(context);
       }
     ),
   ];

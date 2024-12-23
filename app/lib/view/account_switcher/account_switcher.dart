@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/view/login/auth.dart';
 
 import '../../core/sph/sph.dart';
+import '../../models/startup.dart';
 import 'account_list_tile.dart';
 
 class AccountSwitcher extends StatefulWidget {
@@ -41,7 +41,7 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
                   }
                   await sph!.session.deAuthenticate();
                   await accountDatabase.setNextLogin(account.id);
-                  Phoenix.rebirth(context);
+                  reset(context);
                 }, dbID: account.id,
               );
             },

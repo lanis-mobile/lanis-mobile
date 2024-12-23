@@ -1,37 +1,32 @@
 import 'dart:math';
 
 import 'package:app_settings/app_settings.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/widgets/offline_available_applets_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'core/database/account_database/account_db.dart';
-import 'core/sph/sph.dart';
+import 'models/startup.dart';
 
 class StartupScreen extends StatefulWidget {
-  const StartupScreen({super.key});
+  final ValueListenable<LoginStatus> status;
+  final ValueListenable<LanisException?> exception;
+  const StartupScreen({super.key, required this.status, required this.exception});
 
   @override
   State<StartupScreen> createState() => _StartupScreenState();
 }
 
 class _StartupScreenState extends State<StartupScreen> with TickerProviderStateMixin{
-  LanisException? error;
-
-  // We need to load storage first, so we have to wait before everything.
-  ValueNotifier<bool> finishedLoadingStorage = ValueNotifier<bool>(false);
-
   void openWelcomeScreen() {
     Navigator.push(
       context,
@@ -50,64 +45,49 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     );
   }
 
-  Future<void> performLogin() async {
-    logger.i("Performing login...");
-    sph?.prefs.close();
-    setState(() {
-      error = null;
-    });
-    sph = null;
-    final account = await accountDatabase.getLastLoggedInAccount();
-    logger.i("Last logged in account: $account");
-    if (account != null) {
-      sph = SPH(account: account);
-    }
-    if (sph == null) {
-      openWelcomeScreen();
-      return;
-    }
-    await sph?.session.prepareDio();
-    logger.i("Prepared Dio for session");
-    try {
-      logger.i('Authenticating...');
-      await sph?.session.authenticate();
-      logger.i('Authenticated');
+  Future<void> statusListener() async {
+    switch (widget.status.value) {
+      case LoginStatus.error:
+        if (mounted) {
+          await showModalBottomSheet(
+            context: context,
+            builder: (context) => errorDialog(context),
+          );
+        }
+        LoginNotification().dispatch(context);
+        break;
 
-      if (error == null) {
-        Navigator.pushReplacement(
+      case LoginStatus.done:
+        await Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => HomePage(
-                    showIntro: account!.firstLogin,
-                  )),
+              builder: (context) => HomePage()),
         );
-      }
-      return;
-    } on WrongCredentialsException {
-      openWelcomeScreen();
-    } on CredentialsIncompleteException {
-      openWelcomeScreen();
-    } on LanisException catch (e) {
-      error = e;
-      if (mounted) {
-        await showModalBottomSheet(
-          context: context,
-          builder: (context) => errorDialog(context),
-        );
-      }
-      await performLogin();
+        break;
+
+      case LoginStatus.setup:
+        openWelcomeScreen();
+        break;
+
+      default:
+        break;
     }
   }
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      finishedLoadingStorage.value = true;
-    });
+    widget.status.addListener(statusListener);
+
+    requestPermissions();
 
     super.initState();
-    performLogin();
-    requestPermissions();
+  }
+
+  @override
+  void dispose() {
+    widget.status.removeListener(statusListener);
+
+    super.dispose();
   }
 
   void requestPermissions() async {
@@ -148,12 +128,6 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       );*/
       }
     }
-  }
-
-  @override
-  void dispose() {
-    finishedLoadingStorage.dispose();
-    super.dispose();
   }
 
   Widget appVersion() {
@@ -253,9 +227,9 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
 
   BottomSheet errorDialog(BuildContext context) {
     var text = AppLocalizations.of(context)!.startupError;
-    if (error is LanisDownException) {
+    if (widget.exception.value is LanisDownException) {
       text = AppLocalizations.of(context)!.lanisDownError;
-    } else if (error is NoConnectionException) {
+    } else if (widget.exception.value is NoConnectionException) {
       text = AppLocalizations.of(context)!.noInternetConnection2;
     }
     return BottomSheet(
@@ -280,7 +254,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
                 },
                 tooltip: AppLocalizations.of(context)!.checkStatus,
               ),
-              error is NoConnectionException
+              widget.exception.value is NoConnectionException
                   ? const Icon(
                 Icons.wifi_off,
                 size: 48,
@@ -291,7 +265,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
               ),
               IconButton(
                 icon: Icon(Icons.refresh),
-                onPressed: (){
+                onPressed: () {
                   Navigator.of(context).pop();
                 },
                 tooltip: AppLocalizations.of(context)!.tryAgain,
@@ -302,15 +276,15 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
           Center(
             child: Text(text),
           ),
-          if (error is! NoConnectionException && error is! LanisDownException)
+          if (widget.exception.value is! NoConnectionException && widget.exception.value is! LanisDownException)
             Text.rich(TextSpan(
                 text: AppLocalizations.of(context)!.startupErrorMessage,
                 children: [
                   TextSpan(
-                      text: "\n\n${error.runtimeType}: ${error?.cause}",
+                      text: "\n\n${widget.exception.value.runtimeType}: ${widget.exception.value?.cause}",
                       style: Theme.of(context).textTheme.labelLarge)
                 ])),
-          if (error is LanisDownException)
+          if (widget.exception.value is LanisDownException)
             Text.rich(TextSpan(children: [
               TextSpan(
                   text: AppLocalizations.of(context)!.lanisDownErrorMessage,
