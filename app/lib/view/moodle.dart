@@ -22,7 +22,9 @@ class MoodleWebView extends StatefulWidget {
 }
 
 class _MoodleWebViewState extends State<MoodleWebView> {
-  static CookieManager cookieManager = CookieManager.instance();
+  static const noInternetError = "net::ERR_INTERNET_DISCONNECTED";
+
+  final CookieManager cookieManager = CookieManager.instance();
 
   ValueNotifier<bool> canGoBack = ValueNotifier(false);
   ValueNotifier<bool> canGoForward = ValueNotifier(false);
@@ -34,7 +36,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
   bool isLoginError = false;
   String loginError = "";
-  bool noInternet = false;
+  bool noInternetLogin = false;
 
   bool showWebView = true;
   bool isLoggedIn = false;
@@ -61,7 +63,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     if (!(await connectionChecker.connected)) {
       setState(() {
         isLoginError = true;
-        noInternet = true;
+        noInternetLogin = true;
       });
 
       return;
@@ -69,7 +71,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
     setState(() {
       isLoginError = false;
-      noInternet = false;
+      noInternetLogin = false;
     });
 
     try {
@@ -145,6 +147,10 @@ class _MoodleWebViewState extends State<MoodleWebView> {
       sph!.session.jar.saveFromResponse(Uri.parse(location3), [moProd01Cookie]);
       sph!.session.jar.saveFromResponse(
           Uri.parse(location4), [moodleId1Cookie, moodleSessionCookie]);
+
+      setState(() {
+        isLoggedIn = true;
+      });
     } catch (e) {
       setState(() {
         isLoginError = true;
@@ -155,13 +161,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
           loginError = e.toString();
         }
       });
-
-      return;
     }
-
-    setState(() {
-      isLoggedIn = true;
-    });
   }
 
   void refresh() {
@@ -182,7 +182,6 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   @override
   void initState() {
     super.initState();
-    cookieManager.deleteAllCookies();
 
     getCookies();
   }
@@ -387,7 +386,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (noInternet) ...[
+                    if (noInternetLogin) ...[
                       const Icon(
                         Icons.wifi_off,
                         size: 60,
@@ -442,58 +441,62 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.warning,
+                    Icon(
+                      error == noInternetError ? Icons.wifi_off : Icons.warning,
                       size: 60,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: Text(
-                        AppLocalizations.of(context)!.errorOccurredWebsite,
+                        error == noInternetError
+                            ? AppLocalizations.of(context)!.noInternetConnection2
+                            : AppLocalizations.of(context)!.errorOccurredWebsite,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                borderRadius: BorderRadius.circular(12)),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0, horizontal: 8.0),
-                              child: Text(
-                                AppLocalizations.of(context)!.error,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer),
+                    if (error != noInternetError) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0, horizontal: 8.0),
+                                child: Text(
+                                  AppLocalizations.of(context)!.error,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge!
+                                      .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          Flexible(
-                            child: Text(
-                              error ?? "",
-                              style: Theme.of(context).textTheme.bodyMedium,
+                            const SizedBox(
+                              width: 8,
                             ),
-                          )
-                        ],
+                            Flexible(
+                              child: Text(
+                                error ?? "",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                    ],
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(
