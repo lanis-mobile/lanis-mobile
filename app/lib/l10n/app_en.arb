@@ -44,7 +44,7 @@
   "accentColor": "Accent color",
   "standard": "Standard",
   "dynamicColor": "Dynamic",
-  "noAppleMessageSupport": "Notifications are currently not supported on your device (IOS / IpadOS).",
+  "noAppleMessageSupport": "Notifications are currently not supported on your device (iOS / iPadOS).",
   "sadlyNoSupport": "Unfortunately no support",
   "systemPermissionForNotifications": "Authorization for notifications",
   "systemPermissionForNotificationsExplained": "You must change your permissions for notifications in the app's system settings!",
