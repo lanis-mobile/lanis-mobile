@@ -220,5 +220,8 @@
   "done": "Done",
   "updateAvailable": "Update available",
   "info": "Information",
-  "install": "Install"
+  "install": "Install",
+  "notificationPermanentlyDenied": "Please activate notifications in the app settings.",
+  "open": "Open",
+  "close": "Close"
 }
