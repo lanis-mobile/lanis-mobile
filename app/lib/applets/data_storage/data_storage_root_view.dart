@@ -133,8 +133,8 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
 
       if (_lastOptions.isEmpty) {
         _lastOptions = <Widget>[
-          const ListTile(
-            title: Text("Keine Ergebnisse"),
+          ListTile(
+            title: Text(AppLocalizations.of(context)!.noResults),
           )
         ];
       }

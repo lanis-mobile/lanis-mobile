@@ -189,7 +189,7 @@ class _HomePageState extends State<HomePage> {
           ),
           ElevatedButton(
               onPressed: () => openLanisInBrowser(context),
-              child: const Text("Im Browser öffnen"))
+              child: Text(AppLocalizations.of(context)!.openLanisInBrowser))
         ],
       ),
     );

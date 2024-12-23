@@ -36,6 +36,7 @@
   "errorOccurredWebsite": "An error occurring while accessing the website!",
   "supported": "supported",
   "unsupported": "unsupported",
+  "noResults": "No results",
   "theme": "Theme",
   "lightMode": "Light mode",
   "darkMode": "Dark mode",
