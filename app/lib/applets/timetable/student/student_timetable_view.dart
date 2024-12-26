@@ -93,17 +93,16 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
         bool showByWeek = settings['student-selected-week'] == 'true';
         List<TimetableDay> selectedPlan =
             getSelectedPlan(timetable, selectedType);
-        final List<String?> uniqueBadges = selectedPlan
-            .map((e) => e.map((e) => e.badge).toList())
-            .toList()
-            .expand((element) => element)
+        final List<String> uniqueBadges = selectedPlan
+            .expand((innerList) => innerList.map((e) => e.badge))
+            .whereType<String>()
             .toSet()
-            .where((element) => element != null)
             .toList();
 
         if (currentWeekIndex == -1) {
-          currentWeekIndex =
-              showByWeek ? 0 : uniqueBadges.indexOf(timetable.weekBadge) + 1;
+          currentWeekIndex = (showByWeek || timetable.weekBadge == null)
+              ? 0
+              : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
         }
 
         return Scaffold(
