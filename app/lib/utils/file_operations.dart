@@ -9,10 +9,22 @@ import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
 
 import '../core/sph/sph.dart';
-import '../models/lessons.dart';
 import 'file_icons.dart';
 
-void showFileModal(BuildContext context, LessonsFile file) {
+class FileInfo {
+  String? name;
+
+  /// The size + the unit. Often enclosed with parentheses.
+  String? size;
+
+  Uri? url;
+
+  String get extension => name!.split('.').last;
+
+  FileInfo({this.name, this.size, this.url});
+}
+
+void showFileModal(BuildContext context, FileInfo file) {
   showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -31,15 +43,16 @@ void showFileModal(BuildContext context, LessonsFile file) {
                     Icon(getIconByFileExtension(file.extension)),
                     const SizedBox(width: 10.0),
                     Expanded(
-                      child: Text(file.fileName ?? AppLocalizations.of(context)!.unknownFile, overflow: TextOverflow.ellipsis,),),
-                    Text(file.fileSize ?? "", style: Theme.of(context).textTheme.labelMedium),
+                      child: Text(file.name ?? AppLocalizations.of(context)!.unknownFile, overflow: TextOverflow.ellipsis,),),
+                    Text(file.size ?? "", style: Theme.of(context).textTheme.labelMedium),
                     const SizedBox(width: 22.0),
                   ],
                 ),
+                SizedBox(height: 8,),
                 Divider(),
                 MenuItemButton(
                   onPressed: () => {
-                    launchFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                    launchFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
                   },
                   child: Row(
                     children: [
@@ -53,7 +66,7 @@ void showFileModal(BuildContext context, LessonsFile file) {
                 if (!Platform.isIOS) (
                   MenuItemButton(
                     onPressed: () => {
-                      saveFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                      saveFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
                     },
                     child: Row(
                       children: [
@@ -68,7 +81,7 @@ void showFileModal(BuildContext context, LessonsFile file) {
                 if (!Platform.isLinux) (
                   MenuItemButton(
                     onPressed: () => {
-                      shareFile(context, file.fileURL.toString(), file.fileName ?? AppLocalizations.of(context)!.unknownFile, file.fileSize, () {})
+                      shareFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
                     },
                     child: Row(
                       children: [

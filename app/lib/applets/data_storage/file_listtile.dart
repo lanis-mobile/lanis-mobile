@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
-import '../../models/lessons.dart';
 import '../../utils/file_operations.dart';
 import '../../utils/file_icons.dart';
 import '../../widgets/marquee.dart';
@@ -70,10 +69,10 @@ class _FileListTileState extends State<FileListTile> {
       onTap: () => launchFile(context, widget.file.downloadUrl,
           widget.file.name, widget.file.groesse, updateLocalFileStatus),
       onLongPress: () {
-        showFileModal(context, LessonsFile(
-          fileName: widget.file.name,
-          fileURL: Uri.parse(widget.file.downloadUrl),
-          fileSize: widget.file.groesse,
+        showFileModal(context, FileInfo(
+          name: widget.file.name,
+          url: Uri.parse(widget.file.downloadUrl),
+          size: widget.file.groesse,
         ));
       },
     );
@@ -122,10 +121,10 @@ class _SearchFileListTileState extends State<SearchFileListTile> {
       ),
       onTap: () => launchFile(
           context, widget.downloadUrl, widget.name, "", updateLocalFileStatus),
-      onLongPress: () => showFileModal(context, LessonsFile(
-        fileName: widget.name,
-        fileURL: Uri.parse(widget.downloadUrl),
-        fileSize: "",
+      onLongPress: () => showFileModal(context, FileInfo(
+        name: widget.name,
+        url: Uri.parse(widget.downloadUrl),
+        size: "",
       )),
     );
   }

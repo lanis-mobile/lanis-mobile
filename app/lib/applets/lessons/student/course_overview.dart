@@ -114,14 +114,14 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   }
 
                   List<GestureDetector> files = [];
-                  for (LessonsFile file in data!.history[index].files) {
+                  for (FileInfo file in data!.history[index].files) {
                     files.add(GestureDetector(
                       onLongPress: () {
                         showFileModal(context, file);
                       },
                       child: ActionChip(
-                        label: Text(file.fileName ?? "..."),
-                        onPressed: () => launchFile(context, file.fileURL.toString(), file.fileName ?? '', file.fileSize, () {},
+                        label: Text(file.name ?? "..."),
+                        onPressed: () => launchFile(context, file.url.toString(), file.name ?? '', file.size, () {},
                         ),
                       ))
                     );
