@@ -5,6 +5,7 @@
   "substitutions": "Vertretungen",
   "calendar": "Kalender",
   "calendarWeekShort": "ΚW",
+  "calendarWeek": "Kalenderwoche",
   "messages": "Nachrichten",
   "singleMessages": "Einzelne Nachricht",
   "timeTable": "Stundenplan",

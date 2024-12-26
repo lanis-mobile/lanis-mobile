@@ -95,8 +95,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                       textAlign: TextAlign.left,
                       backgroundColor:
                           Theme.of(context).scaffoldBackgroundColor),
-                  headerDateFormat:
-                      "${AppLocalizations.of(context)?.calendarWeekShort} ${getCurrentWeekNumber()}",
+                  headerDateFormat: " ", // This needs to be a space
                   view: view,
                   allowedViews: [
                     CalendarView.day,
@@ -116,7 +115,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
-                  onViewChanged: (_) => updateSettings('current-timetable-view', controller.view.toString()),
+                  onViewChanged: (_) => updateSettings(
+                      'current-timetable-view', controller.view.toString()),
                   onTap: (details) {
                     if (details.appointments != null) {
                       final appointment = details.appointments!.first;
@@ -171,10 +171,25 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     }
                   },
                 ),
-                if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 7, top: 6),
+                      child: Text(
+                        '${AppLocalizations.of(context)?.calendarWeek} ${getCurrentWeekNumber()}',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.normal,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.color
+                                      ?.withValues(alpha: 0.85),
+                                ),
+                      ),
+                    ),
+                    if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
                       GestureDetector(
                         onTap: () {
                           updateSettings('student-selected-week',
@@ -210,8 +225,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                           ),
                         ),
                       ),
-                    ],
-                  )
+                  ],
+                )
               ],
             ),
             floatingActionButton: Column(

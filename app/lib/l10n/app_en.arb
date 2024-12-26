@@ -5,6 +5,7 @@
   "substitutions": "Substitutions",
   "calendar": "Calendar",
   "calendarWeekShort": "CW",
+  "calendarWeek": "Calendar Week",
   "messages": "Messages",
   "singleMessages": "Single Message",
   "timeTable": "Timetable",
