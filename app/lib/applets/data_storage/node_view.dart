@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/data_storage/folder_listtile.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
@@ -72,16 +73,16 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
         title: Text(widget.title),
       ),
       body: loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(),
             )
           : error
-              ? const Center(
+              ? Center(
                   child: Column(
                   children: [
                     Icon(Icons.error_outline, size: 100),
                     SizedBox(height: 10),
-                    Text("Fehler beim Laden der Dateien"),
+                    Text(AppLocalizations.of(context)!.couldNotLoadFiles),
                   ],
                 ))
               : ListView(
