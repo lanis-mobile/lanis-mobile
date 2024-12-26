@@ -10,8 +10,10 @@ import 'package:intl/intl.dart';
 import '../../core/applet_parser.dart';
 import '../../models/client_status_exceptions.dart';
 import '../../models/substitution.dart';
+import '../../utils/logger.dart';
 
 class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
+  final DateFormat entryFormat = DateFormat('dd_MM_yyyy');
   SubstitutionsParser(super.sph, super.appletDefinition);
 
   @override
@@ -22,21 +24,25 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
   @override
   Future<SubstitutionPlan> getHome() async {
     String document = await getSubstitutionPlanDocument();
+    Document parsedDocument = parse(document);
     DateTime? lastEdit = parseLastEditDate(document);
     var dates = getSubstitutionDates(document);
 
     if (dates.isEmpty) {
-      SubstitutionPlan plan = parseSubstitutionsNonAJAX(document);
+      SubstitutionPlan plan = parseSubstitutionsNonAJAX(parsedDocument);
       return plan;
     }
 
     final fullPlan = SubstitutionPlan();
     fullPlan.lastUpdated = lastEdit ?? DateTime.now();
-    List<Future<SubstitutionDay>> futures =
-        dates.map((date) => getSubstitutionsAJAX(date)).toList();
+    List<Future<SubstitutionDay>> futures = dates.map((date) => getSubstitutionsAJAX(date)).toList();
     List<SubstitutionDay> plans = await Future.wait(futures);
-    for (SubstitutionDay plan in plans) {
-      fullPlan.add(plan);
+    for (SubstitutionDay day in plans) {
+      fullPlan.add(
+          day.withDayInfo(
+            parseInformationTables(parsedDocument.getElementById('tag${entryFormat.format(day.dateTime)}')!)
+          )
+      );
     }
     await fullPlan.removeEmptyDays();
     return fullPlan;
@@ -54,19 +60,17 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     }
   }
 
-  SubstitutionPlan parseSubstitutionsNonAJAX(String documentString) {
+  SubstitutionPlan parseSubstitutionsNonAJAX(Document document) {
     DateFormat entryFormat = DateFormat('dd_MM_yyyy');
     final SubstitutionPlan fullPlan = SubstitutionPlan();
-    final document = parse(documentString);
     final dates = document
         .querySelectorAll("[data-tag]")
         .map((element) => element.attributes["data-tag"]!);
     for (var date in dates) {
       DateTime parsedDate = entryFormat.parse(date);
       String parsedDateStr = parsedDate.format('dd.MM.yyyy');
-      final infos = parseInformationTables(parsedDateStr, document);
       SubstitutionDay substitutionDay =
-          SubstitutionDay(date: parsedDateStr, infos: infos);
+          SubstitutionDay(parsedDate: parsedDateStr);
       final vtable = document.querySelector("#vtable$date");
       if (vtable == null) {
         return fullPlan;
@@ -127,7 +131,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
                 },
               ));
       return SubstitutionDay(
-          date: date,
+          parsedDate: date,
           substitutions: (jsonDecode(response.toString()) as List)
               .map((e) => Substitution(
                   tag: e["Tag"],
@@ -206,51 +210,39 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     return numbers.length == 2 ? '${numbers[0]} - ${numbers[1]}' : numbers[0];
   }
 
-  List<SubstitutionInfo> parseInformationTables(
-      String date, Document document) {
+  List<SubstitutionInfo> parseInformationTables(Element element) {
     // Select table by multiple classes
     // Is this a good way? No. Does it work? Yes. Hopefully.
-    var infoHeaders = document.querySelectorAll('h3.hidden-xs');
+    var infoHeaders = element.querySelectorAll('h3.hidden-xs');
+    logger.d('Found ${infoHeaders.length} info headers');
+    List<SubstitutionInfo> infos = [];
 
-    List<SubstitutionInfo> info = [];
-    for (Element header in infoHeaders) {
-      String headerText = header.text.trim();
+    List<Element> tables = element.getElementsByClassName('infos');
+    if (tables.isEmpty) return [];
+    Element? table = tables[0];
 
-      RegExp dateRegex = RegExp(r'\b\d{2}\.\d{2}\.\d{4}\b');
-      var dateMatch = dateRegex.firstMatch(headerText);
-      if (dateMatch != null) {
-        if (date == dateMatch.group(0)!) {
-          Element? nextTable = header.nextElementSibling;
-          while (nextTable != null && !nextTable.classes.contains('infos')) {
-            nextTable = nextTable.nextElementSibling;
-          }
-
-          if (nextTable != null) {
-            var rows = nextTable.querySelectorAll('tr');
-            bool isHeader = false;
-            SubstitutionInfo? tmpInfo;
-            for (var row in rows) {
-              var cells = row.querySelectorAll('td');
-              // This makes sure that different header class names are supported (e.g. subheader, sub-header)
-              if (row.classes.join(',').contains('header')) isHeader = true;
-              for (var cell in cells) {
-                if (isHeader) {
-                  if (tmpInfo != null) {
-                    info.add(tmpInfo);
-                  }
-                  tmpInfo =
-                      SubstitutionInfo(header: cell.text.trim(), values: []);
-                } else {
-                  tmpInfo?.values.add(cell.innerHtml.trim());
-                }
-              }
-              isHeader = false;
-            }
-          }
+    var rows = table.querySelectorAll('tr');
+    bool isHeader = false;
+    SubstitutionInfo? tmpInfo;
+    for (var row in rows) {
+      var cells = row.querySelectorAll('td');
+      // This makes sure that different header class names are supported (e.g. subheader, sub-header)
+      if (row.classes.join(',').contains('header')) isHeader = true;
+      if (isHeader) {
+        if (tmpInfo != null) {
+          infos.add(tmpInfo);
         }
+        tmpInfo =
+            SubstitutionInfo(header: cells[0].text.trim(), values: []);
+      } else {
+        tmpInfo?.values.add(cells[0].innerHtml.trim());
       }
+      isHeader = false;
+    }
+    if (tmpInfo != null) {
+      infos.add(tmpInfo);
     }
 
-    return info;
+    return infos;
   }
 }

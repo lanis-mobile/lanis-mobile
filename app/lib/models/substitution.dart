@@ -1,4 +1,4 @@
-import 'package:sph_plan/core/sph/sph.dart';
+import 'package:intl/intl.dart';
 
 /// {"strict": Bool, "filter": List<[String]>}
 typedef EntryFilter = Map<String, dynamic>;
@@ -155,12 +155,22 @@ class Substitution {
 
 /// A data class to store all substitution information for a single day
 class SubstitutionDay {
-  final String date;
+  // dd.MM.yyyy
+  final String parsedDate;
   final List<Substitution> substitutions;
   final List<SubstitutionInfo>? infos;
 
+  DateTime? _dateTime;
+
+  DateTime get dateTime => getDateTime();
+
+  DateTime getDateTime() {
+    _dateTime ??= DateFormat('dd.MM.yyyy').parse(parsedDate);
+    return _dateTime!;
+  }
+
   SubstitutionDay(
-      {required this.date, List<Substitution>? substitutions, this.infos})
+      {required this.parsedDate, List<Substitution>? substitutions, this.infos})
       : substitutions = substitutions ?? [];
 
   void add(Substitution substitution) {
@@ -172,19 +182,27 @@ class SubstitutionDay {
   }
 
   Map<String, dynamic> toJson() => {
-        'date': date,
+        'date': parsedDate,
         'substitutions': substitutions.map((s) => s.toJson()).toList(),
         'infos': infos?.map((i) => i.toJson()).toList(),
       };
 
   SubstitutionDay.fromJson(Map<String, dynamic> json)
-      : date = json['date'],
+      : parsedDate = json['date'],
         substitutions = (json['substitutions'] as List)
             .map((i) => Substitution.fromJson(i))
             .toList(),
         infos = (json['infos'] as List)
             .map((i) => SubstitutionInfo.fromJson(i))
             .toList();
+
+  SubstitutionDay withDayInfo(List<SubstitutionInfo> info) {
+    return SubstitutionDay(
+      parsedDate: parsedDate,
+      substitutions: substitutions,
+      infos: info.isNotEmpty ? info : null,
+    );
+  }
 }
 
 /// A data class to store all substitution information available
@@ -207,11 +225,9 @@ class SubstitutionPlan {
   }
 
   Future<void> removeEmptyDays() async {
-    bool infoEnabled =
-        await sph?.prefs.kv.get('enableSubstitutionsInfo') == 'false';
     days.removeWhere((day) =>
         day.substitutions.isEmpty &&
-        ((day.infos == null && day.infos!.isEmpty) || infoEnabled));
+        ((day.infos == null && day.infos!.isEmpty)));
   }
 
   void filterAll(SubstitutionFilter filter) {

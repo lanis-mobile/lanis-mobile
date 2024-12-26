@@ -16,7 +16,7 @@ final substitutionDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.substitutions,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   refreshInterval: Duration(minutes: 10),
-  settingsDefaults: {'enableSubstitutionsInfo': 'true'},
+  settingsDefaults: {},
   notificationTask: substitutionsBackgroundTask,
   bodyBuilder: (context, accountType) {
     return SubstitutionsView();

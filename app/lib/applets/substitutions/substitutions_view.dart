@@ -65,18 +65,15 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
           child: Column(children: [
             if (_tabController != null &&
-                substitutionPlan.days[dayIndex].infos != null)
-              (settings['enableSubstitutionsInfo'] ?? 'false') == 'true'
-                  ? Padding(
-                      padding: const EdgeInsets.only(
-                          bottom: 8.0, right: 8.0, left: 8.0),
-                      child: ElevatedButton(
-                          onPressed: () => showSubstitutionInformation(
-                              context, substitutionPlan.days[dayIndex].infos!),
-                          child: Text(AppLocalizations.of(context)!
-                              .substitutionsInformationMessage)),
-                    )
-                  : const SizedBox(),
+                substitutionPlan.days[dayIndex].infos != null) Padding(
+              padding: const EdgeInsets.only(
+                  bottom: 8.0, right: 8.0, left: 8.0),
+              child: ElevatedButton(
+                  onPressed: () => showSubstitutionInformation(
+                      context, substitutionPlan.days[dayIndex].infos!),
+                  child: Text(AppLocalizations.of(context)!
+                      .substitutionsInformationMessage)),
+            ),
             Expanded(
                 child: (deviceWidth > 505)
                     ? GridView.builder(
@@ -143,7 +140,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           label: Text(entryCount),
           child: const Icon(Icons.calendar_today),
         ),
-        text: formatDate(day.date),
+        text: formatDate(day.parsedDate),
       ));
     }
 
@@ -158,17 +155,24 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         showDragHandle: true,
         builder: (BuildContext context) {
           return Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(right: 16, left: 16, bottom: 16),
             child: ListView(shrinkWrap: true, children: [
-              SelectionArea(
-                child: HtmlWidget(
-                  renderMode: RenderMode.column,
-                  infos
-                      .map(
-                          (e) => "<h4>${e.header}</h4>${e.values.join('<br>')}")
-                      .join(),
-                ),
-              ),
+              ...infos.map((info) => Column(
+                spacing: 4.0,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(info.header,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  SelectionArea(
+                    child: HtmlWidget(
+                      info.values.join('<br>'),
+                      renderMode: RenderMode.column,
+                    ),
+                  ),
+                  SizedBox(height: 8.0,),
+                ],
+              )),
             ]),
           );
         });
