@@ -52,9 +52,14 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
   }
 
   CalendarView view = CalendarView.week;
-  Future<void> _loadCalendarView() async {
-    final dataString = await accountDatabase.kv.get("currentTimeTableView") ??
+
+  Future<String> _getCalendarView() async {
+    return await accountDatabase.kv.get("currentTimeTableView") ??
         "CalendarView.week";
+  }
+
+  Future<void> _loadCalendarView({String? tableView}) async {
+    final dataString = tableView ?? await _getCalendarView();
 
     final CalendarView data = switch (dataString) {
       "CalendarView.day" => CalendarView.day,
@@ -134,12 +139,14 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
-                  onViewChanged: (_) {
-                    logger.i(
-                        "Setting \"currentTimeTableView\" to \"${controller.view}\"");
-                    accountDatabase.kv
-                        .set("currentTimeTableView", "${controller.view}");
-                    _loadCalendarView();
+                  onViewChanged: (_) async {
+                    if (await _getCalendarView() != "${controller.view}") {
+                      logger.i(
+                          "Setting \"currentTimeTableView\" to \"${controller.view}\"");
+                      accountDatabase.kv
+                          .set("currentTimeTableView", "${controller.view}");
+                      _loadCalendarView();
+                    }
                   },
                   onTap: (details) {
                     if (details.appointments != null) {
