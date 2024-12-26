@@ -6,16 +6,18 @@ import 'package:html/parser.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/study_groups.dart';
 
-class StudyGroupsStudentParser extends AppletParser<StudentStudyGroups> {
+class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
   StudyGroupsStudentParser(super.sph, super.appletDefinition);
 
   @override
-  StudentStudyGroups typeFromJson(String json) {
-    return StudentStudyGroups.fromJson(jsonDecode(json));
+  List<StudentStudyGroups> typeFromJson(String json) {
+    return (jsonDecode(json) as List)
+        .map((item) => StudentStudyGroups.fromJson(item))
+        .toList();
   }
 
   @override
-  Future<StudentStudyGroups> getHome() async {
+  Future<List<StudentStudyGroups>> getHome() async {
     Response response = await sph.session.dio
         .get('https://start.schulportal.hessen.de/lerngruppen.php');
 
@@ -24,33 +26,41 @@ class StudyGroupsStudentParser extends AppletParser<StudentStudyGroups> {
     Element? courses = document.getElementById('LGs');
     Element? exams = document.getElementById('klausuren');
 
-    // Courses parse thead
-    List<String> courseHeaders = [];
-    courses!.querySelectorAll('thead tr th').forEach((element) {
-      courseHeaders.add(element.text.trim());
-    });
+    ExamData examData = parseExams(exams!);
+    CourseData courseData = parseCourses(courses!);
 
-    courses.querySelectorAll('tbody tr').forEach((element) {
-      List<String> courseData = [];
-      element.querySelectorAll('td').forEach((element) {
-        // If <br> tag is present see each text as its own element
-        String html = element.innerHtml;
-        if (html.contains('<br>')) {
-          List<String> split = html.split('<br>');
-          for (var element in split) {
-            if (element.trim().isNotEmpty) {
-              courseData.add(element.trim());
-            }
-          }
-        } else {
-          courseData.add(element.text.trim());
-        }
-      });
-    });
+    List<StudentStudyGroups> studyGroups = [];
+    for (int i = 0; i < courseData.data.length; i++) {
+      List<String> data = courseData.data[i];
+      // Format DD, DD.MM.YYYY
+      String date = data[0];
+      DateTime day = DateTime.parse(date.split(', ')[1].trim());
+      print(day);
 
-    // Exams parse thead
+      studyGroups.add(StudentStudyGroups(
+        date: day,
+        halfYear: data[1],
+        courseName: data[2],
+        teacher: data[3],
+        teacherKuerzel: data[4],
+        type: data[5],
+        duration: data[6],
+        exams: examData.data
+            .where((element) => element[0] == date)
+            .map((e) => StudentExam(
+                  day: DateTime.parse(e[0]),
+                  time: e[1],
+                ))
+            .toList(),
+      ));
+    }
+
+    return studyGroups;
+  }
+
+  ExamData parseExams(Element exams) {
     List<String> examHeaders = [];
-    Element? examTable = exams!.querySelector('table');
+    Element? examTable = exams.querySelector('table');
     examTable!.querySelectorAll('thead tr th').forEach((element) {
       examHeaders.add(element.text.trim());
     });
@@ -72,9 +82,39 @@ class StudyGroupsStudentParser extends AppletParser<StudentStudyGroups> {
       }
     });
 
-    print(courseHeaders);
-    print(examData);
-
-    return StudentStudyGroups.fromJson(jsonDecode(response.data));
+    return ExamData(examHeaders, examData);
   }
+
+  CourseData parseCourses(Element courses) {
+    List<String> courseHeaders = [];
+    courses.querySelectorAll('thead tr th').forEach((element) {
+      courseHeaders.add(element.text.trim());
+    });
+
+    // Courses parse tbody
+    List<List<String>> courseData = [];
+    courses.querySelectorAll('tbody tr').forEach((element) {
+      List<String> courseRow = [];
+      element.querySelectorAll('td').forEach((element) {
+        courseRow.add(element.text.trim());
+      });
+      courseData.add(courseRow);
+    });
+
+    return CourseData(courseHeaders, courseData);
+  }
+}
+
+class ExamData {
+  final List<String> headers;
+  final List<List<String>> data;
+
+  ExamData(this.headers, this.data);
+}
+
+class CourseData {
+  final List<String> headers;
+  final List<List<String>> data;
+
+  CourseData(this.headers, this.data);
 }

@@ -5,6 +5,7 @@ class StudentStudyGroups {
   final String teacherKuerzel;
   final String type;
   final String duration;
+  final DateTime date;
   final List<StudentExam> exams;
 
   StudentStudyGroups(
@@ -14,6 +15,7 @@ class StudentStudyGroups {
       required this.teacherKuerzel,
       required this.type,
       required this.duration,
+      required this.date,
       required this.exams});
 
   factory StudentStudyGroups.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class StudentStudyGroups {
       teacherKuerzel: json['teacherKuerzel'],
       type: json['type'],
       duration: json['duration'],
+      date: DateTime.parse(json['date']),
       exams:
           (json['exams'] as List).map((e) => StudentExam.fromJson(e)).toList(),
     );
@@ -37,6 +40,7 @@ class StudentStudyGroups {
       'teacherKuerzel': teacherKuerzel,
       'type': type,
       'duration': duration,
+      'date': date.toIso8601String(),
       'exams': exams.map((e) => e.toJson()).toList(),
     };
   }
