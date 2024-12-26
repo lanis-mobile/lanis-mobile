@@ -55,8 +55,8 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
         title: Text(AppLocalizations.of(context)!.appearance),
       ),
       body: StreamBuilder(
-        stream: accountDatabase.kv.subscribeMultiple(
-            ['color', 'theme', 'isAmoled', 'enableSubstitutionsInfo']),
+        stream: accountDatabase.kv
+            .subscribeMultiple(['color', 'theme', 'isAmoled']),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -202,23 +202,7 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
                     value: key,
                     selected: snapshot.data!['color'] == key,
                     onSelect: (_) => accountDatabase.kv.set('color', key),
-                  )),
-              Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Text(
-                  AppLocalizations.of(context)!.substitutions,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              CheckboxListTile(
-                  title: Text(
-                      AppLocalizations.of(context)!.enableSubstitutionsInfo),
-                  value: snapshot.data!['enableSubstitutionsInfo'] == 'true',
-                  controlAffinity: ListTileControlAffinity.leading,
-                  onChanged: (value) {
-                    accountDatabase.kv
-                        .set('enableSubstitutionsInfo', value.toString());
-                  }),
+                  ))
             ],
           );
         },

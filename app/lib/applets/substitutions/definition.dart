@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_view.dart';
 
 import '../../models/account_types.dart';
@@ -16,7 +16,7 @@ final substitutionDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.substitutions,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   refreshInterval: Duration(minutes: 10),
-  settingsDefaults: {},
+  settingsDefaults: {'enableSubstitutionsInfo': 'true'},
   notificationTask: substitutionsBackgroundTask,
   bodyBuilder: (context, accountType) {
     return SubstitutionsView();

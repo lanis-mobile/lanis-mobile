@@ -1,4 +1,4 @@
-import 'package:sph_plan/core/database/account_database/account_db.dart';
+import 'package:sph_plan/core/sph/sph.dart';
 
 /// {"strict": Bool, "filter": List<[String]>}
 typedef EntryFilter = Map<String, dynamic>;
@@ -208,7 +208,7 @@ class SubstitutionPlan {
 
   Future<void> removeEmptyDays() async {
     bool infoEnabled =
-        await accountDatabase.kv.get('enableSubstitutionsInfo') == 'false';
+        await sph?.prefs.kv.get('enableSubstitutionsInfo') == 'false';
     days.removeWhere((day) =>
         day.substitutions.isEmpty &&
         ((day.infos == null && day.infos!.isEmpty) || infoEnabled));
@@ -233,9 +233,11 @@ class SubstitutionPlan {
         lastUpdated = DateTime.parse(json['lastUpdated']);
 }
 
-/// A data class to store all information for a single substitution day
+/// A data class to store all information that is available to every user for a single substitution day
+/// This value is plain html
 class SubstitutionInfo {
   final String header;
+  // List of html rows
   final List<String> values;
 
   SubstitutionInfo({required this.header, required this.values});

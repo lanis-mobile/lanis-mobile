@@ -5,7 +5,6 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_listtile.dart';
-import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/models/substitution.dart';
 
 import '../../core/sph/sph.dart';
@@ -44,8 +43,8 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     );
   }
 
-  List<Widget> getSubstitutionViews(
-      SubstitutionPlan substitutionPlan, RefreshFunction? refresh) {
+  List<Widget> getSubstitutionViews(SubstitutionPlan substitutionPlan,
+      RefreshFunction? refresh, Map<String, String?> settings) {
     double deviceWidth = MediaQuery.of(context).size.width;
 
     List<Widget> substitutionViews = [];
@@ -67,23 +66,17 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           child: Column(children: [
             if (_tabController != null &&
                 substitutionPlan.days[dayIndex].infos != null)
-              StreamBuilder(
-                  stream:
-                      accountDatabase.kv.subscribe('enableSubstitutionsInfo'),
-                  builder: (context, snapshot) {
-                    return snapshot.hasData && snapshot.data == 'true'
-                        ? Padding(
-                            padding: const EdgeInsets.only(
-                                bottom: 8.0, right: 8.0, left: 8.0),
-                            child: ElevatedButton(
-                                onPressed: () => showSubstitutionInformation(
-                                    context,
-                                    substitutionPlan.days[dayIndex].infos!),
-                                child: Text(AppLocalizations.of(context)!
-                                    .substitutionsInformationMessage)),
-                          )
-                        : const SizedBox();
-                  }),
+              (settings['enableSubstitutionsInfo'] ?? 'false') == 'true'
+                  ? Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: 8.0, right: 8.0, left: 8.0),
+                      child: ElevatedButton(
+                          onPressed: () => showSubstitutionInformation(
+                              context, substitutionPlan.days[dayIndex].infos!),
+                          child: Text(AppLocalizations.of(context)!
+                              .substitutionsInformationMessage)),
+                    )
+                  : const SizedBox(),
             Expanded(
                 child: (deviceWidth > 505)
                     ? GridView.builder(
@@ -241,7 +234,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: getSubstitutionViews(data, refresh),
+                  children: getSubstitutionViews(data, refresh, settings),
                 ),
               )
             ],

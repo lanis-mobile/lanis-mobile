@@ -41,7 +41,7 @@
   "accentColor": "Akzent Farbe",
   "standard": "Standart",
   "dynamicColor": "Dynamisch",
-  "enableSubstitutionsInfo": "Zeige Anmerkungen zu Vertretungen",
+  "enableSubstitutionsInfo": "Anmerkungen anzeigen",
   "noAppleMessageSupport": "Auf deinem Endgerät (IOS / IpadOS) werden derzeit keine Benachrichtigungen unterstützt.",
   "sadlyNoSupport": "Leider keine Unterstützung",
   "systemPermissionForNotifications": "Systemberechtigung für Benachrichtigungen",
