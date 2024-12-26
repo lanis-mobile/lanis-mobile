@@ -8,6 +8,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
+import 'package:sph_plan/core/native_adapter_instance.dart';
 
 import '../connection_checker.dart';
 import 'cryptor.dart';
@@ -37,6 +38,7 @@ class SessionHandler {
 
   Future<void> prepareDio() async {
     jar = CookieJar();
+    dio.httpClientAdapter = getNativeAdapterInstance();
     dio.interceptors.add(CookieManager(jar));
     dio.interceptors.add(InterceptorsWrapper(
       onResponse: (Response response, ResponseInterceptorHandler handler) {
@@ -118,6 +120,7 @@ class SessionHandler {
   static Future<String> getLoginURL(ClearTextAccount acc) async {
     final dioHttp = Dio();
     final cookieJar = CookieJar();
+    dioHttp.httpClientAdapter = getNativeAdapterInstance();
     dioHttp.interceptors.add(CookieManager(cookieJar));
     dioHttp.options.followRedirects = false;
     dioHttp.options.validateStatus =
