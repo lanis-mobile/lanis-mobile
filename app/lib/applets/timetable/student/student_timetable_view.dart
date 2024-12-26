@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
-import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/models/account_types.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random_color.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -45,34 +43,6 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     return data.planForAll!;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadCalendarView();
-  }
-
-  CalendarView view = CalendarView.week;
-
-  Future<String> _getCalendarView() async {
-    return await accountDatabase.kv.get("currentTimeTableView") ??
-        "CalendarView.week";
-  }
-
-  Future<void> _loadCalendarView({String? tableView}) async {
-    final dataString = tableView ?? await _getCalendarView();
-
-    final CalendarView data = switch (dataString) {
-      "CalendarView.day" => CalendarView.day,
-      "CalendarView.week" => CalendarView.week,
-      "CalendarView.workWeek" => CalendarView.workWeek,
-      String() => throw UnimplementedError(),
-    };
-
-    setState(() {
-      view = data;
-    });
-  }
-
   int getCurrentWeekNumber() {
     final now = DateTime.now();
     final firstDayOfYear = DateTime(now.year, 1, 1);
@@ -110,6 +80,13 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
         }
 
+        final CalendarView view = switch (settings['current-timetable-view']!) {
+          "CalendarView.day" => CalendarView.day,
+          "CalendarView.week" => CalendarView.week,
+          "CalendarView.workWeek" => CalendarView.workWeek,
+          String() => throw UnimplementedError(),
+        };
+
         return Scaffold(
             body: Stack(
               children: [
@@ -139,15 +116,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
-                  onViewChanged: (_) async {
-                    if (await _getCalendarView() != "${controller.view}") {
-                      logger.i(
-                          "Setting \"currentTimeTableView\" to \"${controller.view}\"");
-                      accountDatabase.kv
-                          .set("currentTimeTableView", "${controller.view}");
-                      _loadCalendarView();
-                    }
-                  },
+                  onViewChanged: (_) => updateSettings('current-timetable-view', controller.view.toString()),
                   onTap: (details) {
                     if (details.appointments != null) {
                       final appointment = details.appointments!.first;
@@ -230,7 +199,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                   ? AppLocalizations.of(context)!
                                       .timetableAllWeeks
                                   : AppLocalizations.of(context)!.timetableWeek(
-                                      uniqueBadges[currentWeekIndex - 1]!),
+                                      uniqueBadges[currentWeekIndex - 1]),
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .buttonTheme
