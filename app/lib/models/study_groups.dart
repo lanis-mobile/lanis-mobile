@@ -3,9 +3,6 @@ class StudentStudyGroups {
   final String courseName;
   final String teacher;
   final String teacherKuerzel;
-  final String type;
-  final String duration;
-  final DateTime date;
   final List<StudentExam> exams;
 
   StudentStudyGroups(
@@ -13,9 +10,6 @@ class StudentStudyGroups {
       required this.courseName,
       required this.teacher,
       required this.teacherKuerzel,
-      required this.type,
-      required this.duration,
-      required this.date,
       required this.exams});
 
   factory StudentStudyGroups.fromJson(Map<String, dynamic> json) {
@@ -24,9 +18,6 @@ class StudentStudyGroups {
       courseName: json['courseName'],
       teacher: json['teacher'],
       teacherKuerzel: json['teacherKuerzel'],
-      type: json['type'],
-      duration: json['duration'],
-      date: DateTime.parse(json['date']),
       exams:
           (json['exams'] as List).map((e) => StudentExam.fromJson(e)).toList(),
     );
@@ -38,31 +29,38 @@ class StudentStudyGroups {
       'courseName': courseName,
       'teacher': teacher,
       'teacherKuerzel': teacherKuerzel,
-      'type': type,
-      'duration': duration,
-      'date': date.toIso8601String(),
       'exams': exams.map((e) => e.toJson()).toList(),
     };
   }
 }
 
 class StudentExam {
-  final DateTime day;
+  final DateTime date;
   final String time;
+  final String type;
+  final String duration;
 
-  StudentExam({required this.day, required this.time});
+  StudentExam(
+      {required this.date,
+      required this.time,
+      required this.type,
+      required this.duration});
 
   factory StudentExam.fromJson(Map<String, dynamic> json) {
     return StudentExam(
-      day: DateTime.parse(json['day']),
+      date: DateTime.parse(json['date']),
+      duration: json['duration'],
       time: json['time'],
+      type: json['type'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'day': day.toIso8601String(),
+      'day': date.toIso8601String(),
+      'duration': duration,
       'time': time,
+      'type': type,
     };
   }
 }

@@ -29,27 +29,33 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
     ExamData examData = parseExams(exams!);
     CourseData courseData = parseCourses(courses!);
 
+    print(examData.data);
+
     List<StudentStudyGroups> studyGroups = [];
-    for (int i = 0; i < examData.data.length; i++) {
-      print(examData.data.length);
-      List<String> data = examData.data[i];
-      String date = data[0].split(', ')[1].trim();
-      // date is format DD.MM.YYYY
-      DateTime day = DateTime.parse(date.split('.').reversed.join('-'));
+    for (int i = 0; i < courseData.data.length; i++) {
+      List<String> data = courseData.data[i];
+
+      String courseName = data[1].split('(')[0].trim();
+      String teacher = data[2].split('(')[0].trim();
+      String teacherKuerzel = data[2].split('(')[1].split(')')[0].trim();
+
+      // Filters mapped by courseName
+      List<List<String>> examsInCourse = examData.data
+          .where((element) => element[1].contains(courseName))
+          .toList();
 
       studyGroups.add(StudentStudyGroups(
-        date: day,
-        halfYear: data[1],
-        courseName: data[2],
-        teacher: data[3],
-        teacherKuerzel: data[4],
-        type: data[5],
-        duration: data[6],
-        exams: examData.data
-            .where((element) => element[0] == date)
+        halfYear: data[0],
+        courseName: courseName,
+        teacher: teacher,
+        teacherKuerzel: teacherKuerzel,
+        exams: examsInCourse
             .map((e) => StudentExam(
-                  day: DateTime.parse(e[0]),
-                  time: e[1],
+                  date: DateTime.parse(
+                      e[0].split(', ')[1].split('.').reversed.join('-')),
+                  time: e[3],
+                  type: e[2],
+                  duration: e[4],
                 ))
             .toList(),
       ));
