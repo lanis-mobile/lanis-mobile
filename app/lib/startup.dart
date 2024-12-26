@@ -116,7 +116,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     status = await Permission.notification.request();
     if (status.isGranted) return;
     if (status == PermissionStatus.granted) return;
-    if (status.isDenied || status.isPermanentlyDenied) {
+    if (status.isDenied && !status.isPermanentlyDenied) {
       if (mounted) {
         await showDialog(context: context, builder: (context) => AlertDialog(
           icon: Icon(Icons.notifications_off),
