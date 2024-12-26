@@ -48,13 +48,13 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
   @override
   void initState() {
     super.initState();
-    _loadCalenderView();
+    _loadCalendarView();
   }
 
   CalendarView view = CalendarView.week;
-  Future<void> _loadCalenderView() async {
+  Future<void> _loadCalendarView() async {
     final dataString = await accountDatabase.kv.get("currentTimeTableView") ??
-        "CalenderView.week";
+        "CalendarView.week";
 
     final CalendarView data = switch (dataString) {
       "CalendarView.day" => CalendarView.day,
@@ -114,7 +114,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                       backgroundColor:
                           Theme.of(context).scaffoldBackgroundColor),
                   headerDateFormat:
-                      "${AppLocalizations.of(context)?.calenderWeekShort} ${getCurrentWeekNumber()}",
+                      "${AppLocalizations.of(context)?.calendarWeekShort} ${getCurrentWeekNumber()}",
                   view: view,
                   allowedViews: [
                     CalendarView.day,
@@ -139,7 +139,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                         "Setting \"currentTimeTableView\" to \"${controller.view}\"");
                     accountDatabase.kv
                         .set("currentTimeTableView", "${controller.view}");
-                    _loadCalenderView();
+                    _loadCalendarView();
                   },
                   onTap: (details) {
                     if (details.appointments != null) {
