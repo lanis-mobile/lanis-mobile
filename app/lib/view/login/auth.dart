@@ -45,9 +45,9 @@ class LoginFormState extends State<LoginForm> {
             ),
     );
     try {
-      /*if (await accountDatabase.doesAccountExist(int.parse(schoolID), username)) {
+      if (await accountDatabase.doesAccountExist(int.parse(schoolID), username)) {
         throw AccountAlreadyExistsException();
-      }*/
+      }
 
       await SessionHandler.getLoginURL(
         ClearTextAccount(
@@ -229,7 +229,7 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: dseAgree
                           ? () {
                         if (_formKey.currentState!.validate()) {
-                          login(usernameController.text,
+                          login(usernameController.text.toLowerCase(),
                               passwordController.text, schoolIDController.text);
                         }
                       }
