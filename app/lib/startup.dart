@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:app_settings/app_settings.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -17,9 +16,7 @@ import 'package:sph_plan/widgets/offline_available_applets_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StartupScreen extends StatefulWidget {
-  final ValueListenable<LoginStatus> status;
-  final ValueListenable<LanisException?> exception;
-  const StartupScreen({super.key, required this.status, required this.exception});
+  const StartupScreen({super.key});
 
   @override
   State<StartupScreen> createState() => _StartupScreenState();
@@ -45,7 +42,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   }
 
   Future<void> statusListener() async {
-    switch (widget.status.value) {
+    switch (authenticationState.status.value) {
       case LoginStatus.error:
         if (mounted) {
           await showModalBottomSheet(
@@ -75,16 +72,20 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
 
   @override
   void initState() {
-    widget.status.addListener(statusListener);
+    super.initState();
+
+    authenticationState.status.addListener(statusListener);
 
     requestPermissions();
 
-    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      statusListener();
+    });
   }
 
   @override
   void dispose() {
-    widget.status.removeListener(statusListener);
+    authenticationState.status.removeListener(statusListener);
 
     super.dispose();
   }
@@ -116,15 +117,6 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
             ),
           ],
         ));
-
-        /*ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text(AppLocalizations.of(context)!.notificationPermanentlyDenied),
-          action: SnackBarAction(label: AppLocalizations.of(context)!.open, onPressed: () {
-            AppSettings.openAppSettings(asAnotherTask: false, type: AppSettingsType.notification);
-          }),)
-      );*/
       }
     }
   }
@@ -226,9 +218,9 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
 
   BottomSheet errorDialog(BuildContext context) {
     var text = AppLocalizations.of(context)!.startupError;
-    if (widget.exception.value is LanisDownException) {
+    if (authenticationState.exception.value is LanisDownException) {
       text = AppLocalizations.of(context)!.lanisDownError;
-    } else if (widget.exception.value is NoConnectionException) {
+    } else if (authenticationState.exception.value is NoConnectionException) {
       text = AppLocalizations.of(context)!.noInternetConnection2;
     }
     return BottomSheet(
@@ -253,7 +245,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
                 },
                 tooltip: AppLocalizations.of(context)!.checkStatus,
               ),
-              widget.exception.value is NoConnectionException
+              authenticationState.exception.value is NoConnectionException
                   ? const Icon(
                 Icons.wifi_off,
                 size: 48,
@@ -275,15 +267,15 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
           Center(
             child: Text(text),
           ),
-          if (widget.exception.value is! NoConnectionException && widget.exception.value is! LanisDownException)
+          if (authenticationState.exception.value is! NoConnectionException && authenticationState.exception.value is! LanisDownException)
             Text.rich(TextSpan(
                 text: AppLocalizations.of(context)!.startupErrorMessage,
                 children: [
                   TextSpan(
-                      text: "\n\n${widget.exception.value.runtimeType}: ${widget.exception.value?.cause}",
+                      text: "\n\n${authenticationState.exception.value.runtimeType}: ${authenticationState.exception.value?.cause}",
                       style: Theme.of(context).textTheme.labelLarge)
                 ])),
-          if (widget.exception.value is LanisDownException)
+          if (authenticationState.exception.value is LanisDownException)
             Text.rich(TextSpan(children: [
               TextSpan(
                   text: AppLocalizations.of(context)!.lanisDownErrorMessage,

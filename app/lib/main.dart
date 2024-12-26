@@ -7,7 +7,6 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
@@ -95,7 +94,7 @@ class App extends StatelessWidget {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
-              body: StartupScreen(status: authenticationState.status, exception: authenticationState.exception,),
+              body: StartupScreen(),
             ),
           );
         });
