@@ -1,3 +1,5 @@
+import '../utils/file_operations.dart';
+
 typedef Lessons = List<Lesson>;
 
 class Lesson {
@@ -50,7 +52,7 @@ class CurrentEntry {
   String? schoolHours;
   Homework? homework;
   String? presence;
-  List<LessonsFile> files;
+  List<FileInfo> files;
   List<LessonUpload> uploads;
 
   CurrentEntry({required this.entryID, required this.files, required this.uploads, this.presence, this.topicTitle, this.topicDate, this.homework, this.schoolHours, this.description});
@@ -61,16 +63,6 @@ class Homework {
   bool homeWorkDone;
 
   Homework({required this.description, required this.homeWorkDone});
-}
-
-class LessonsFile {
-  String? fileName;
-  String? fileSize;
-  Uri? fileURL;
-
-  String get extension => fileName!.split('.').last;
-
-  LessonsFile({this.fileName, this.fileSize, this.fileURL});
 }
 
 class LessonUpload {

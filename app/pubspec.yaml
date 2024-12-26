@@ -69,7 +69,7 @@ dependencies:
   flutter_quill: ^10.0.0
   quill_html_converter: ^9.3.2
   flutter_tagging_plus: ^4.0.2
-  flutter_inappwebview: ^6.1.0
+  flutter_inappwebview: ^6.1.5
   syncfusion_localizations: ^27.1.58
   drift: ^2.21.0
   drift_flutter: ^0.2.1
