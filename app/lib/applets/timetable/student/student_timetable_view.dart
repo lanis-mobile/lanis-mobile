@@ -78,6 +78,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
   @override
   Widget build(BuildContext context) {
     var controller = CalendarController();
+    int currentWeekIndex = -1;
 
     return CombinedAppletBuilder<TimeTable>(
       parser: sph!.parser.timetableStudentParser,
@@ -97,7 +98,13 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
             .toList()
             .expand((element) => element)
             .toSet()
+            .where((element) => element != null)
             .toList();
+
+        if (currentWeekIndex == -1) {
+          currentWeekIndex =
+              showByWeek ? 0 : uniqueBadges.indexOf(timetable.weekBadge) + 1;
+        }
 
         return Scaffold(
             body: Stack(
@@ -119,8 +126,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     timeFormat: "HH:mm",
                   ),
                   firstDayOfWeek: DateTime.monday,
-                  dataSource: TimeTableDataSource(context, selectedPlan,
-                      showByWeek ? timetable.weekBadge : null),
+                  dataSource: TimeTableDataSource(
+                      context,
+                      selectedPlan,
+                      currentWeekIndex == 0
+                          ? null
+                          : uniqueBadges[currentWeekIndex - 1]),
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
@@ -190,8 +201,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
-                        onTap: () => updateSettings('student-selected-week',
-                            showByWeek == true ? 'false' : 'true'),
+                        onTap: () {
+                          updateSettings('student-selected-week',
+                              (currentWeekIndex == 0) ? 'false' : 'true');
+                          currentWeekIndex = (currentWeekIndex + 1) %
+                              (uniqueBadges.length + 1);
+                        },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 40, top: 6),
                           child: Container(
@@ -205,11 +220,11 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                             padding: const EdgeInsets.symmetric(
                                 vertical: 4, horizontal: 8),
                             child: Text(
-                              showByWeek != true
+                              (currentWeekIndex < 1)
                                   ? AppLocalizations.of(context)!
                                       .timetableAllWeeks
-                                  : AppLocalizations.of(context)!
-                                      .timetableWeek(timetable.weekBadge!),
+                                  : AppLocalizations.of(context)!.timetableWeek(
+                                      uniqueBadges[currentWeekIndex - 1]!),
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .buttonTheme
