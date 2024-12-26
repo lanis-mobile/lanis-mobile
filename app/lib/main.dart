@@ -7,6 +7,7 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
@@ -21,6 +22,8 @@ void main() async {
   };
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
+
+  authenticationState.login();
 
   await setupBackgroundService(accountDatabase);
   await initializeNotifications();
@@ -90,7 +93,7 @@ class App extends StatelessWidget {
               SfGlobalLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(
+            home: Scaffold(
               body: StartupScreen(),
             ),
           );

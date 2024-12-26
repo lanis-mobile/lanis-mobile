@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -67,7 +67,7 @@ class LoginFormState extends State<LoginForm> {
       );
       await sph?.session.deAuthenticate();
       await accountDatabase.setNextLogin(newID);
-      Phoenix.rebirth(context);
+      authenticationState.reset(context);
     } on LanisException catch (ex) {
       setState(() {
         Navigator.pop(context); //pop dialog
@@ -229,7 +229,7 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: dseAgree
                           ? () {
                         if (_formKey.currentState!.validate()) {
-                          login(usernameController.text,
+                          login(usernameController.text.toLowerCase(),
                               passwordController.text, schoolIDController.text);
                         }
                       }

@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:sph_plan/core/connection_checker.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
@@ -8,6 +7,7 @@ import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/utils/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/account_switcher/account_switcher.dart';
@@ -67,8 +67,7 @@ class Destination {
 }
 
 class HomePage extends StatefulWidget {
-  final bool showIntro;
-  const HomePage({super.key, required this.showIntro});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -141,7 +140,7 @@ class _HomePageState extends State<HomePage> {
       action: (context) {
         sph!.session.deAuthenticate();
         accountDatabase.deleteAccount(sph!.account.localId);
-        Phoenix.rebirth(context);
+        authenticationState.reset(context);
       }
     ),
   ];
