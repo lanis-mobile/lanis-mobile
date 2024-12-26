@@ -9,13 +9,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/widgets/offline_available_applets_section.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'models/startup.dart';
 
 class StartupScreen extends StatefulWidget {
   final ValueListenable<LoginStatus> status;
@@ -54,7 +53,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
             builder: (context) => errorDialog(context),
           );
         }
-        LoginNotification().dispatch(context);
+        authenticationState.login();
         break;
 
       case LoginStatus.done:

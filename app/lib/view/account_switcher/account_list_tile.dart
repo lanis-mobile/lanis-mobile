@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
-import '../../models/startup.dart';
+import '../../utils/authentication_state.dart';
 import '../../utils/random_color.dart';
 
 class AccountListTile extends StatelessWidget {
@@ -102,11 +102,11 @@ class AccountListTile extends StatelessWidget {
               if (result == true) {
                 bool restart = isLoggedInAccount;
                 if (restart) {
-                  await sph!.session.deAuthenticate();
+                  sph!.session.deAuthenticate();
                 }
-                accountDatabase.deleteAccount(dbID);
+                await accountDatabase.deleteAccount(dbID);
                 if (restart) {
-                  reset(context);
+                  authenticationState.reset(context);
                 }
               }
             },

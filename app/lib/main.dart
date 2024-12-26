@@ -10,21 +10,16 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:http_proxy/http_proxy.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:sph_plan/core/sph/sph.dart';
-import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/utils/logger.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 import 'applets/conversations/view/shared.dart';
 import 'background_service.dart';
 import 'core/database/account_database/account_db.dart';
-import 'models/startup.dart';
-
-final ValueNotifier<LoginStatus> status = ValueNotifier(LoginStatus.waiting);
-final ValueNotifier<LanisException?> exception = ValueNotifier(null);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,13 +29,13 @@ void main() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
+  authenticationState.login();
+
   await setupBackgroundService(accountDatabase);
   await initializeNotifications();
   await initializeDateFormatting();
 
   await setupProxy();
-
-  performLogin();
 
   Connectivity()
       .onConnectivityChanged
@@ -51,58 +46,10 @@ void main() async {
   });
 
   runApp(
-    NotificationListener(
-      onNotification: (final notification) {
-        if (notification is LoginNotification) {
-          performLogin();
-          return true;
-        }
-
-        return false;
-      },
-      child: Phoenix(
-        child: const App(),
-      ),
+    Phoenix(
+      child: const App(),
     ),
   );
-}
-
-Future<void> performLogin() async {
-  logger.i("Performing login...");
-  sph?.prefs.close();
-  status.value = LoginStatus.waiting;
-  exception.value = null;
-  sph = null;
-
-  final account = await accountDatabase.getLastLoggedInAccount();
-  logger.i("Last logged in account: $account");
-  if (account != null) {
-    sph = SPH(account: account);
-  }
-  if (sph == null) {
-    status.value = LoginStatus.setup;
-    return;
-  }
-
-  print(account?.localId);
-
-  await sph?.session.prepareDio();
-  logger.i("Prepared Dio for session");
-
-  try {
-    logger.i('Authenticating...');
-    await sph?.session.authenticate();
-    logger.i('Authenticated');
-
-    if (exception.value == null) {
-      status.value = LoginStatus.done;
-    }
-  } on (WrongCredentialsException, CredentialsIncompleteException) {
-    status.value = LoginStatus.setup;
-  } on LanisException catch (e) {
-    exception.value = e;
-    status.value = LoginStatus.error;
-  }
 }
 
 Future<void> setupProxy() async {
@@ -173,7 +120,7 @@ class App extends StatelessWidget {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold( 
-              body: StartupScreen(status: status, exception: exception,),
+              body: StartupScreen(status: authenticationState.status, exception: authenticationState.exception,),
             ),
           );
         });

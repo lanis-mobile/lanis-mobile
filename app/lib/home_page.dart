@@ -7,6 +7,7 @@ import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/utils/whats_new.dart';
 import 'package:sph_plan/utils/cached_network_image.dart';
 import 'package:sph_plan/view/account_switcher/account_switcher.dart';
@@ -16,7 +17,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
-import 'models/startup.dart';
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
       action: (context) {
         sph!.session.deAuthenticate();
         accountDatabase.deleteAccount(sph!.account.localId);
-        reset(context);
+        authenticationState.reset(context);
       }
     ),
   ];

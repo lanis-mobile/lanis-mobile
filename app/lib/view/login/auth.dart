@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
+import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/sph/sph.dart';
-import '../../models/startup.dart';
 
 class LoginForm extends StatefulWidget {
   final bool showBackButton;
@@ -67,7 +67,7 @@ class LoginFormState extends State<LoginForm> {
       );
       await sph?.session.deAuthenticate();
       await accountDatabase.setNextLogin(newID);
-      reset(context);
+      authenticationState.reset(context);
     } on LanisException catch (ex) {
       setState(() {
         Navigator.pop(context); //pop dialog
