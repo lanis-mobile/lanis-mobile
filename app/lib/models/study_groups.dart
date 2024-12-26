@@ -64,3 +64,18 @@ class StudentExam {
     };
   }
 }
+
+class StudentStudyGroupsContainer {
+  final String halfYear;
+  final String courseName;
+  final String teacher;
+  final String teacherKuerzel;
+  final StudentExam exam;
+
+  StudentStudyGroupsContainer(
+      {required this.halfYear,
+      required this.courseName,
+      required this.teacher,
+      required this.teacherKuerzel,
+      required this.exam});
+}

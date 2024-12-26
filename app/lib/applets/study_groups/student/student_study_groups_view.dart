@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/study_groups/definitions.dart';
 import 'package:sph_plan/core/sph/sph.dart';
+import 'package:sph_plan/models/study_groups.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
 class StudentStudyGroupsView extends StatefulWidget {
@@ -22,11 +23,23 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
           accountType: sph!.session.accountType,
           builder:
               (context, data, accountType, settings, updateSetting, refresh) {
-            //
+            List<StudentStudyGroupsContainer> studyData = data
+                .expand((studyGroup) => studyGroup.exams.map(
+                      (exam) => StudentStudyGroupsContainer(
+                        halfYear: studyGroup.halfYear,
+                        courseName: studyGroup.courseName,
+                        teacher: studyGroup.teacher,
+                        teacherKuerzel: studyGroup.teacherKuerzel,
+                        exam: exam,
+                      ),
+                    ))
+                .toList();
+
+            studyData.sort((a, b) => a.exam.date.compareTo(b.exam.date));
+
             return ListView.builder(
-              itemCount: data.length,
+              itemCount: studyData.length,
               itemBuilder: (context, index) {
-                if (data[index].exams.isEmpty) return Container();
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
@@ -34,20 +47,20 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(data[index].courseName),
-                          Text(data[index].teacher),
+                          Text(studyData[index].courseName),
+                          Text(studyData[index].teacher),
                           Text(DateFormat('dd.MM.yy')
-                              .format(data[index].exams[0].date)),
+                              .format(studyData[index].exam.date)),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(data[index].exams[0].type),
-                          data[index].exams[0].duration.isEmpty
-                              ? Text(data[index].exams[0].time)
+                          Text(studyData[index].exam.type),
+                          studyData[index].exam.duration.isEmpty
+                              ? Text(studyData[index].exam.time)
                               : Text(
-                                  '${data[index].exams[0].time} (${data[index].exams[0].duration})'),
+                                  '${studyData[index].exam.time} (${studyData[index].exam.duration})'),
                         ],
                       ),
                     ],
