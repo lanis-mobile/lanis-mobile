@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/models/account_types.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random_color.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -44,9 +46,40 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     return data.planForAll!;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadCalenderView();
+  }
+
+  CalendarView view = CalendarView.week;
+  Future<void> _loadCalenderView() async {
+    final dataString = await accountDatabase.kv.get("currentTimeTableView") ?? "CalenderView.week";
+
+    final CalendarView data = switch (dataString) {
+      "CalendarView.day" => CalendarView.day,
+      "CalendarView.week" => CalendarView.week,
+      "CalendarView.workWeek" => CalendarView.workWeek,
+      String() => throw UnimplementedError(),
+    };
+
+    setState(() {
+      view = data;
+    });
+  }
+
+  int getCurrentWeekNumber() {
+    final now = DateTime.now();
+    final firstDayOfYear = DateTime(now.year, 1, 1);
+    final days = now.difference(firstDayOfYear).inDays;
+    return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    var controller = CalendarController();
+
     return CombinedAppletBuilder<TimeTable>(
       parser: sph!.parser.timetableStudentParser,
       phpUrl: timeTableDefinition.appletPhpUrl,
@@ -61,10 +94,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
         return Scaffold(
             body: SfCalendar(
-              view: DateTime.now().weekday == DateTime.saturday ||
-                  DateTime.now().weekday == DateTime.sunday
-                  ? CalendarView.week
-                  : CalendarView.workWeek,
+              headerStyle: CalendarHeaderStyle(
+                textAlign: TextAlign.left,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor
+              ),
+              headerDateFormat: "${AppLocalizations.of(context)?.calenderWeekShort} ${getCurrentWeekNumber()}",
+              view: view,
               allowedViews: [
                 CalendarView.day,
                 CalendarView.week,
@@ -77,6 +112,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               dataSource: TimeTableDataSource(context, selectedPlan),
               minDate: DateTime.now(),
               maxDate: DateTime.now().add(const Duration(days: 7)),
+              controller: controller,
+              onViewChanged: (_) {
+                logger.i("Setting \"currentTimeTableView\" to \"${controller.view}\"");
+                accountDatabase.kv.set("currentTimeTableView", "${controller.view}");
+                _loadCalenderView();
+              },
               onTap: (details) {
                 if (details.appointments != null) {
                   final appointment = details.appointments!.first;
