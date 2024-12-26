@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/models/account_types.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random_color.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
 
 import '../../../core/sph/sph.dart';
 import '../../../models/timetable.dart';
@@ -36,8 +37,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     );
   }
 
-
-  List<TimetableDay> getSelectedPlan(TimeTable data, TimeTableType selectedType) {
+  List<TimetableDay> getSelectedPlan(
+      TimeTable data, TimeTableType selectedType) {
     if (selectedType == TimeTableType.own) {
       return data.planForOwn!;
     }
@@ -52,7 +53,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
   CalendarView view = CalendarView.week;
   Future<void> _loadCalenderView() async {
-    final dataString = await accountDatabase.kv.get("currentTimeTableView") ?? "CalenderView.week";
+    final dataString = await accountDatabase.kv.get("currentTimeTableView") ??
+        "CalenderView.week";
 
     final CalendarView data = switch (dataString) {
       "CalendarView.day" => CalendarView.day,
@@ -73,7 +75,6 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
   }
 
-
   @override
   Widget build(BuildContext context) {
     var controller = CalendarController();
@@ -84,22 +85,30 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
       settingsDefaults: timeTableDefinition.settingsDefaults,
       accountType: AccountType.student,
       builder: (context, timetable, _, settings, updateSettings, refresh) {
-        TimeTableType selectedType = settings['student-selected-type'] == 'TimeTableType.own'
-            ? TimeTableType.own
-            : TimeTableType.all;
+        TimeTableType selectedType =
+            settings['student-selected-type'] == 'TimeTableType.own'
+                ? TimeTableType.own
+                : TimeTableType.all;
         bool showByWeek = settings['student-selected-week'] == 'true';
-        List<TimetableDay> selectedPlan = getSelectedPlan(timetable, selectedType);
-        final List<String?> uniqueBadges = selectedPlan.map((e) => e.map((e) => e.badge).toList()).toList().expand((element) => element).toSet().toList();
+        List<TimetableDay> selectedPlan =
+            getSelectedPlan(timetable, selectedType);
+        final List<String?> uniqueBadges = selectedPlan
+            .map((e) => e.map((e) => e.badge).toList())
+            .toList()
+            .expand((element) => element)
+            .toSet()
+            .toList();
 
         return Scaffold(
             body: Stack(
               children: [
                 SfCalendar(
-                    headerStyle: CalendarHeaderStyle(
-                    textAlign: TextAlign.left,
-                        backgroundColor: Theme.of(context).scaffoldBackgroundColor
-                    ),
-                  headerDateFormat: "${AppLocalizations.of(context)?.calenderWeekShort} ${getCurrentWeekNumber()}",
+                  headerStyle: CalendarHeaderStyle(
+                      textAlign: TextAlign.left,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor),
+                  headerDateFormat:
+                      "${AppLocalizations.of(context)?.calenderWeekShort} ${getCurrentWeekNumber()}",
                   view: view,
                   allowedViews: [
                     CalendarView.day,
@@ -110,21 +119,26 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     timeFormat: "HH:mm",
                   ),
                   firstDayOfWeek: DateTime.monday,
-                  dataSource: TimeTableDataSource(context, selectedPlan, showByWeek ? timetable.weekBadge : null),
+                  dataSource: TimeTableDataSource(context, selectedPlan,
+                      showByWeek ? timetable.weekBadge : null),
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
                   onViewChanged: (_) {
-                    logger.i("Setting \"currentTimeTableView\" to \"${controller.view}\"");
-                    accountDatabase.kv.set("currentTimeTableView", "${controller.view}");
+                    logger.i(
+                        "Setting \"currentTimeTableView\" to \"${controller.view}\"");
+                    accountDatabase.kv
+                        .set("currentTimeTableView", "${controller.view}");
                     _loadCalenderView();
                   },
                   onTap: (details) {
                     if (details.appointments != null) {
                       final appointment = details.appointments!.first;
 
-                      final helperIDs = appointment.id.split("-").map(int.parse).toList();
-                      final TimetableSubject selected = selectedPlan[helperIDs[0]][helperIDs[1]];
+                      final helperIDs =
+                          appointment.id.split("-").map(int.parse).toList();
+                      final TimetableSubject selected =
+                          selectedPlan[helperIDs[0]][helperIDs[1]];
 
                       showModalBottomSheet(
                           context: context,
@@ -141,22 +155,28 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                   children: [
                                     // Title
                                     Padding(
-                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
                                       child: Text(
                                         selected.name ?? "Unbekanntes Fach",
-                                        style: Theme.of(context).textTheme.titleLarge,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
                                       ),
                                     ),
                                     if (selected.raum != null)
-                                      modalSheetItem(selected.raum!, Icons.place),
+                                      modalSheetItem(
+                                          selected.raum!, Icons.place),
                                     modalSheetItem(
-                                        "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
-                                        Icons.access_time,
+                                      "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
+                                      Icons.access_time,
                                     ),
                                     if (selected.lehrer != null)
-                                      modalSheetItem(selected.lehrer!, Icons.person),
+                                      modalSheetItem(
+                                          selected.lehrer!, Icons.person),
                                     if (selected.badge != null)
-                                      modalSheetItem(selected.badge!, Icons.info),
+                                      modalSheetItem(
+                                          selected.badge!, Icons.info),
                                   ],
                                 ),
                               ),
@@ -171,22 +191,30 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     children: [
                       GestureDetector(
                         onTap: () => updateSettings('student-selected-week',
-                            showByWeek == true ? 'false' :  'true'
-                        ),
+                            showByWeek == true ? 'false' : 'true'),
                         child: Padding(
                           padding: const EdgeInsets.only(right: 40, top: 6),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Theme.of(context).buttonTheme.colorScheme?.primary,
+                              color: Theme.of(context)
+                                  .buttonTheme
+                                  .colorScheme
+                                  ?.primary,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
                             child: Text(
-                                showByWeek != true
-                                    ? AppLocalizations.of(context)!.timetableAllWeeks
-                                    : AppLocalizations.of(context)!.timetableWeek(timetable.weekBadge!),
+                              showByWeek != true
+                                  ? AppLocalizations.of(context)!
+                                      .timetableAllWeeks
+                                  : AppLocalizations.of(context)!
+                                      .timetableWeek(timetable.weekBadge!),
                               style: TextStyle(
-                                color: Theme.of(context).buttonTheme.colorScheme?.onPrimary,
+                                color: Theme.of(context)
+                                    .buttonTheme
+                                    .colorScheme
+                                    ?.onPrimary,
                               ),
                             ),
                           ),
@@ -213,10 +241,11 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                       ? AppLocalizations.of(context)!.timetableSwitchToPersonal
                       : AppLocalizations.of(context)!.timetableSwitchToClass,
                   onPressed: () {
-                    updateSettings('student-selected-type', selectedType == TimeTableType.all
-                          ? 'TimeTableType.own'
-                          : 'TimeTableType.all'
-                    );
+                    updateSettings(
+                        'student-selected-type',
+                        selectedType == TimeTableType.all
+                            ? 'TimeTableType.own'
+                            : 'TimeTableType.all');
                   },
                   child: Icon(selectedType == TimeTableType.all
                       ? Icons.person
@@ -231,15 +260,22 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
 class TimeTableDataSource extends CalendarDataSource {
   BuildContext context;
-  TimeTableDataSource(this.context, List<TimetableDay>? data, String? weekBadge) {
+  TimeTableDataSource(
+      this.context, List<TimetableDay>? data, String? weekBadge) {
     final now = DateTime.now();
     final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
 
     // Same week should be true when it's the current week.
     bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
-      return (weekBadge == null || weekBadge == "" || lesson.badge == null || lesson.badge == "")
-          ? true : sameWeek ? (weekBadge == lesson.badge) : (weekBadge != lesson.badge);
+      return (weekBadge == null ||
+              weekBadge == "" ||
+              lesson.badge == null ||
+              lesson.badge == "")
+          ? true
+          : sameWeek
+              ? (weekBadge == lesson.badge)
+              : (weekBadge != lesson.badge);
     }
 
     for (var (dayIndex, day) in data!.indexed) {
@@ -264,15 +300,15 @@ class TimeTableDataSource extends CalendarDataSource {
             color: entryColor,
             id: "$dayIndex-$lessonIndex-1"));
 
-        if(isCurrentWeek(lesson, true)) {
+        if (isCurrentWeek(lesson, true)) {
           events.add(Appointment(
-            startTime: startTime,
-            endTime: endTime,
-            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
-            location: lesson.raum,
-            notes: lesson.badge,
-            color: entryColor,
-            id: "$dayIndex-$lessonIndex-2"));
+              startTime: startTime,
+              endTime: endTime,
+              subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
+              location: lesson.raum,
+              notes: lesson.badge,
+              color: entryColor,
+              id: "$dayIndex-$lessonIndex-2"));
         }
 
         //1 week later
