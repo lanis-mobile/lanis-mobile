@@ -4,7 +4,8 @@
   "welcomeBack": "Wilkommen zurück",
   "substitutions": "Vertretungen",
   "calendar": "Kalender",
-  "calenderWeekShort": "KW",
+  "calendarWeekShort": "ΚW",
+  "calendarWeek": "Kalenderwoche",
   "messages": "Nachrichten",
   "singleMessages": "Einzelne Nachricht",
   "timeTable": "Stundenplan",
@@ -218,6 +219,8 @@
 
   "timetableSwitchToPersonal": "Wechsel zum Persönlichen Stundenplan",
   "timetableSwitchToClass": "Wechsel zum Klassen Stundenplan",
+  "timetableAllWeeks": "Gesamtplan",
+  "timetableWeek": "{week}-Woche",
   "dateWithHours": "{date}, {hours} Stunde",
   "contributors": "Mitwirkende",
   "becomeContributor": "Werde Mitwirkender!",

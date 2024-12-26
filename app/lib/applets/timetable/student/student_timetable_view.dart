@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
-import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/models/account_types.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random_color.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
 
 import '../../../core/sph/sph.dart';
 import '../../../models/timetable.dart';
@@ -38,34 +35,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     );
   }
 
-
-  List<TimetableDay> getSelectedPlan(TimeTable data, TimeTableType selectedType) {
+  List<TimetableDay> getSelectedPlan(
+      TimeTable data, TimeTableType selectedType) {
     if (selectedType == TimeTableType.own) {
       return data.planForOwn!;
     }
     return data.planForAll!;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCalenderView();
-  }
-
-  CalendarView view = CalendarView.week;
-  Future<void> _loadCalenderView() async {
-    final dataString = await accountDatabase.kv.get("currentTimeTableView") ?? "CalenderView.week";
-
-    final CalendarView data = switch (dataString) {
-      "CalendarView.day" => CalendarView.day,
-      "CalendarView.week" => CalendarView.week,
-      "CalendarView.workWeek" => CalendarView.workWeek,
-      String() => throw UnimplementedError(),
-    };
-
-    setState(() {
-      view = data;
-    });
   }
 
   int getCurrentWeekNumber() {
@@ -75,10 +50,10 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
   }
 
-
   @override
   Widget build(BuildContext context) {
     var controller = CalendarController();
+    int currentWeekIndex = -1;
 
     return CombinedAppletBuilder<TimeTable>(
       parser: sph!.parser.timetableStudentParser,
@@ -86,83 +61,173 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
       settingsDefaults: timeTableDefinition.settingsDefaults,
       accountType: AccountType.student,
       builder: (context, timetable, _, settings, updateSettings, refresh) {
-        TimeTableType selectedType = settings['student-selected-type'] == 'TimeTableType.own'
-            ? TimeTableType.own
-            : TimeTableType.all;
-        List<TimetableDay> selectedPlan = getSelectedPlan(timetable, selectedType);
+        TimeTableType selectedType =
+            settings['student-selected-type'] == 'TimeTableType.own'
+                ? TimeTableType.own
+                : TimeTableType.all;
+        bool showByWeek = settings['student-selected-week'] == 'true';
+        List<TimetableDay> selectedPlan =
+            getSelectedPlan(timetable, selectedType);
+        final List<String> uniqueBadges = selectedPlan
+            .expand((innerList) => innerList.map((e) => e.badge))
+            .whereType<String>()
+            .toSet()
+            .toList();
 
+        if (currentWeekIndex == -1) {
+          currentWeekIndex = (showByWeek || timetable.weekBadge == null)
+              ? 0
+              : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
+        }
+
+        final CalendarView view = switch (settings['current-timetable-view']!) {
+          "CalendarView.day" => CalendarView.day,
+          "CalendarView.week" => CalendarView.week,
+          "CalendarView.workWeek" => CalendarView.workWeek,
+          String() => throw UnimplementedError(),
+        };
 
         return Scaffold(
-            body: SfCalendar(
-              headerStyle: CalendarHeaderStyle(
-                textAlign: TextAlign.left,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor
-              ),
-              headerDateFormat: "${AppLocalizations.of(context)?.calenderWeekShort} ${getCurrentWeekNumber()}",
-              view: view,
-              allowedViews: [
-                CalendarView.day,
-                CalendarView.week,
-                CalendarView.workWeek,
-              ],
-              timeSlotViewSettings: const TimeSlotViewSettings(
-                timeFormat: "HH:mm",
-              ),
-              firstDayOfWeek: DateTime.monday,
-              dataSource: TimeTableDataSource(context, selectedPlan),
-              minDate: DateTime.now(),
-              maxDate: DateTime.now().add(const Duration(days: 7)),
-              controller: controller,
-              onViewChanged: (_) {
-                logger.i("Setting \"currentTimeTableView\" to \"${controller.view}\"");
-                accountDatabase.kv.set("currentTimeTableView", "${controller.view}");
-                _loadCalenderView();
-              },
-              onTap: (details) {
-                if (details.appointments != null) {
-                  final appointment = details.appointments!.first;
+            body: Stack(
+              children: [
+                SfCalendar(
+                  headerStyle: CalendarHeaderStyle(
+                      textAlign: TextAlign.left,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor),
+                  headerDateFormat: " ", // This needs to be a space
+                  view: view,
+                  allowedViews: [
+                    CalendarView.day,
+                    CalendarView.week,
+                    CalendarView.workWeek,
+                  ],
+                  timeSlotViewSettings: const TimeSlotViewSettings(
+                    timeFormat: "HH:mm",
+                  ),
+                  firstDayOfWeek: DateTime.monday,
+                  dataSource: TimeTableDataSource(
+                      context,
+                      selectedPlan,
+                      currentWeekIndex == 0
+                          ? null
+                          : uniqueBadges[currentWeekIndex - 1]),
+                  minDate: DateTime.now(),
+                  maxDate: DateTime.now().add(const Duration(days: 7)),
+                  controller: controller,
+                  onViewChanged: (_) => updateSettings(
+                      'current-timetable-view', controller.view.toString()),
+                  onTap: (details) {
+                    if (details.appointments != null) {
+                      final appointment = details.appointments!.first;
 
-                  final helperIDs = appointment.id.split("-").map(int.parse).toList();
-                  final TimetableSubject selected = selectedPlan[helperIDs[0]][helperIDs[1]];
+                      final helperIDs =
+                          appointment.id.split("-").map(int.parse).toList();
+                      final TimetableSubject selected =
+                          selectedPlan[helperIDs[0]][helperIDs[1]];
 
-                  showModalBottomSheet(
-                      context: context,
-                      showDragHandle: true,
-                      builder: (context) {
-                        return SizedBox(
-                          width: double.infinity,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 20.0, right: 20.0, bottom: 20.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    selected.name ?? "Unbekanntes Fach",
-                                    style: Theme.of(context).textTheme.titleLarge,
-                                  ),
+                      showModalBottomSheet(
+                          context: context,
+                          showDragHandle: true,
+                          builder: (context) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 20.0, right: 20.0, bottom: 20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Title
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        selected.name ?? "Unbekanntes Fach",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
+                                      ),
+                                    ),
+                                    if (selected.raum != null)
+                                      modalSheetItem(
+                                          selected.raum!, Icons.place),
+                                    modalSheetItem(
+                                      "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
+                                      Icons.access_time,
+                                    ),
+                                    if (selected.lehrer != null)
+                                      modalSheetItem(
+                                          selected.lehrer!, Icons.person),
+                                    if (selected.badge != null)
+                                      modalSheetItem(
+                                          selected.badge!, Icons.info),
+                                  ],
                                 ),
-                                if (selected.raum != null)
-                                  modalSheetItem(selected.raum!, Icons.place),
-                                modalSheetItem(
-                                    "${selected.startTime.format(context)} - ${selected.endTime.format(context)} (${selected.duration} ${selected.duration == 1 ? "Stunde" : "Stunden"})",
-                                    Icons.access_time,
+                              ),
+                            );
+                          });
+                    }
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 7, top: 6),
+                      child: Text(
+                        '${AppLocalizations.of(context)?.calendarWeek} ${getCurrentWeekNumber()}',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.normal,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.color
+                                      ?.withValues(alpha: 0.85),
                                 ),
-                                if (selected.lehrer != null)
-                                  modalSheetItem(selected.lehrer!, Icons.person),
-                                if (selected.badge != null)
-                                  modalSheetItem(selected.badge!, Icons.info),
-                              ],
+                      ),
+                    ),
+                    if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
+                      GestureDetector(
+                        onTap: () {
+                          updateSettings('student-selected-week',
+                              (currentWeekIndex == 0) ? 'false' : 'true');
+                          currentWeekIndex = (currentWeekIndex + 1) %
+                              (uniqueBadges.length + 1);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 40, top: 6),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .buttonTheme
+                                  .colorScheme
+                                  ?.primary,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
+                            child: Text(
+                              (currentWeekIndex < 1)
+                                  ? AppLocalizations.of(context)!
+                                      .timetableAllWeeks
+                                  : AppLocalizations.of(context)!.timetableWeek(
+                                      uniqueBadges[currentWeekIndex - 1]),
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .buttonTheme
+                                    .colorScheme
+                                    ?.onPrimary,
+                              ),
                             ),
                           ),
-                        );
-                      });
-                }
-              },
+                        ),
+                      ),
+                  ],
+                )
+              ],
             ),
             floatingActionButton: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -181,10 +246,11 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                       ? AppLocalizations.of(context)!.timetableSwitchToPersonal
                       : AppLocalizations.of(context)!.timetableSwitchToClass,
                   onPressed: () {
-                    updateSettings('student-selected-type', selectedType == TimeTableType.all
-                          ? 'TimeTableType.own'
-                          : 'TimeTableType.all'
-                    );
+                    updateSettings(
+                        'student-selected-type',
+                        selectedType == TimeTableType.all
+                            ? 'TimeTableType.own'
+                            : 'TimeTableType.all');
                   },
                   child: Icon(selectedType == TimeTableType.all
                       ? Icons.person
@@ -199,10 +265,23 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
 class TimeTableDataSource extends CalendarDataSource {
   BuildContext context;
-  TimeTableDataSource(this.context, List<TimetableDay>? data) {
+  TimeTableDataSource(
+      this.context, List<TimetableDay>? data, String? weekBadge) {
     final now = DateTime.now();
     final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
+
+    // Same week should be true when it's the current week.
+    bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
+      return (weekBadge == null ||
+              weekBadge == "" ||
+              lesson.badge == null ||
+              lesson.badge == "")
+          ? true
+          : sameWeek
+              ? (weekBadge == lesson.badge)
+              : (weekBadge != lesson.badge);
+    }
 
     for (var (dayIndex, day) in data!.indexed) {
       final date = lastMonday.add(Duration(days: dayIndex));
@@ -226,14 +305,16 @@ class TimeTableDataSource extends CalendarDataSource {
             color: entryColor,
             id: "$dayIndex-$lessonIndex-1"));
 
-        events.add(Appointment(
-            startTime: startTime,
-            endTime: endTime,
-            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
-            location: lesson.raum,
-            notes: lesson.badge,
-            color: entryColor,
-            id: "$dayIndex-$lessonIndex-2"));
+        if (isCurrentWeek(lesson, true)) {
+          events.add(Appointment(
+              startTime: startTime,
+              endTime: endTime,
+              subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
+              location: lesson.raum,
+              notes: lesson.badge,
+              color: entryColor,
+              id: "$dayIndex-$lessonIndex-2"));
+        }
 
         //1 week later
         events.add(Appointment(

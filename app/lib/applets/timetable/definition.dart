@@ -5,6 +5,7 @@ import 'package:sph_plan/applets/timetable/student/student_timetable_view.dart';
 
 import '../../models/account_types.dart';
 import '../../models/timetable.dart';
+import '../calendar/calendar_view.dart';
 
 final timeTableDefinition = AppletDefinition(
   appletPhpUrl: 'stundenplan.php',
@@ -17,7 +18,8 @@ final timeTableDefinition = AppletDefinition(
   refreshInterval: Duration(hours: 1),
   allowOffline: true,
   settingsDefaults: {
-    'student-selected-type': TimeTableType.own.toString(),
+    'student-selected-type': 'TimeTableType.own',
+    'current-timetable-view': 'CalendarView.workWeek',
   },
   bodyBuilder: (context, accountType) {
     if (accountType == AccountType.student) {
