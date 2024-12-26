@@ -11,8 +11,10 @@ import '../background_service.dart';
 import '../core/sph/sph.dart';
 
 typedef StringBuildContextCallback = String Function(BuildContext context);
-typedef WidgetBuildBody = Widget Function(BuildContext context, AccountType accountType);
-typedef BackgroundTaskFunction = Future<void> Function(SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit);
+typedef WidgetBuildBody = Widget Function(
+    BuildContext context, AccountType accountType);
+typedef BackgroundTaskFunction = Future<void> Function(
+    SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit);
 
 enum AppletType {
   nested,
@@ -51,7 +53,6 @@ class AppletDefinition {
   });
 }
 
-
 class AppDefinitions {
   static List<AppletDefinition> applets = [
     substitutionDefinition,
@@ -60,17 +61,22 @@ class AppDefinitions {
     conversationsDefinition,
     lessonsDefinition,
     dataStorageDefinition,
+    substitutionDefinition,
   ];
 
   static bool isAppletSupported(AccountType accountType, String phpIdentifier) {
-    return applets.any((element) => element.supportedAccountTypes.contains(accountType) && element.appletPhpUrl == phpIdentifier);
+    return applets.any((element) =>
+        element.supportedAccountTypes.contains(accountType) &&
+        element.appletPhpUrl == phpIdentifier);
   }
 
   static getByPhpIdentifier(String phpIdentifier) {
-    return applets.firstWhere((element) => element.appletPhpUrl == phpIdentifier);
+    return applets
+        .firstWhere((element) => element.appletPhpUrl == phpIdentifier);
   }
 
   static getIndexByPhpIdentifier(String phpIdentifier) {
-    return applets.indexWhere((element) => element.appletPhpUrl == phpIdentifier);
+    return applets
+        .indexWhere((element) => element.appletPhpUrl == phpIdentifier);
   }
 }

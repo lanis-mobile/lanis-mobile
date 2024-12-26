@@ -232,5 +232,7 @@
   "install": "Install",
   "notificationPermanentlyDenied": "Please activate notifications in the app settings.",
   "open": "Open",
-  "close": "Close"
+  "close": "Close",
+
+  "studyGroups": "Study groups"
 }
