@@ -7,6 +7,7 @@ import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/lessons.dart';
 
 import '../../../models/client_status_exceptions.dart';
+import '../../../utils/file_operations.dart';
 
 class LessonsStudentParser extends AppletParser<Lessons> {
   LessonsStudentParser(super.sph, super.appletDefinition);
@@ -73,7 +74,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
               topicDate: topicDate,
               homework: homework,
               uploads: const [],
-              files: List.generate(fileCount, (_)=>LessonsFile()),
+              files: List.generate(fileCount, (_)=> FileInfo()),
             );
             lesson.teacher = teacherName;
             lesson.teacherKuerzel = teacherKuerzel;
@@ -184,7 +185,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
         bool homeworkDone = tableRow.querySelectorAll("span.done.hidden").isEmpty;
 
 
-        List<LessonsFile> files = [];
+        List<FileInfo> files = [];
         if (tableRow.children[1].querySelector("div.alert.alert-info") !=
             null) {
           String baseURL = "https://start.schulportal.hessen.de/";
@@ -195,12 +196,12 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
           for (var fileDiv in tableRow.getElementsByClassName("files")[0].children) {
             String? filename = fileDiv.attributes["data-file"];
-            files.add(LessonsFile(
-              fileName: filename,
-              fileSize: fileDiv
+            files.add(FileInfo(
+              name: filename,
+              size: fileDiv
                   .querySelector("a>small")
                   ?.text,
-              fileURL: Uri.parse("$baseURL&f=$filename"),
+              url: Uri.parse("$baseURL&f=$filename"),
             ));
           }
         }

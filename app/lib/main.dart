@@ -1,14 +1,9 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:http_proxy/http_proxy.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
@@ -35,31 +30,11 @@ void main() async {
   await initializeNotifications();
   await initializeDateFormatting();
 
-  await setupProxy();
-
-  Connectivity()
-      .onConnectivityChanged
-      .listen((List<ConnectivityResult> result) async {
-    if (result.isNotEmpty && result.first != ConnectivityResult.none) {
-      await setupProxy();
-    }
-  });
-
   runApp(
     Phoenix(
       child: const App(),
     ),
   );
-}
-
-Future<void> setupProxy() async {
-  logger.d("Running setupProxy()...");
-  try {
-    HttpProxy httpProxy = await HttpProxy.createHttpProxy();
-    HttpOverrides.global = httpProxy;
-  } catch (e) {
-    debugPrint("Error setting up proxy: $e");
-  }
 }
 
 class App extends StatelessWidget {
@@ -119,7 +94,7 @@ class App extends StatelessWidget {
               SfGlobalLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold( 
+            home: Scaffold(
               body: StartupScreen(status: authenticationState.status, exception: authenticationState.exception,),
             ),
           );
