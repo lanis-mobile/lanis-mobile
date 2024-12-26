@@ -63,7 +63,8 @@ class SessionHandler {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
         });
-        return handler.next(options); //continue
+        options.queryParameters['_cachebreaker'] = DateTime.now().millisecondsSinceEpoch.toString();
+        return handler.next(options);
       },
     ));
     dio.options.followRedirects = false;
