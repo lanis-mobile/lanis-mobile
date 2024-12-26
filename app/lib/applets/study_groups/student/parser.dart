@@ -49,6 +49,31 @@ class StudyGroupsStudentParser extends AppletParser<StudentStudyGroups> {
     });
 
     // Exams parse thead
+    List<String> examHeaders = [];
+    Element? examTable = exams!.querySelector('table');
+    examTable!.querySelectorAll('thead tr th').forEach((element) {
+      examHeaders.add(element.text.trim());
+    });
+
+    // Exams parse tbody
+    List<List<String>> examData = [];
+    examTable.querySelectorAll('tbody tr').forEach((element) {
+      List<String> examRow = [];
+      // Check if first element contains a date
+      if (element
+          .querySelector('td')!
+          .text
+          .trim()
+          .contains(RegExp(r'\d{2}\.\d{2}\.\d{4}'))) {
+        element.querySelectorAll('td').forEach((element) {
+          examRow.add(element.text.trim());
+        });
+        examData.add(examRow);
+      }
+    });
+
+    print(courseHeaders);
+    print(examData);
 
     return StudentStudyGroups.fromJson(jsonDecode(response.data));
   }
