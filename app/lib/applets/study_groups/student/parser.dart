@@ -30,12 +30,12 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
     CourseData courseData = parseCourses(courses!);
 
     List<StudentStudyGroups> studyGroups = [];
-    for (int i = 0; i < courseData.data.length; i++) {
-      List<String> data = courseData.data[i];
-      // Format DD, DD.MM.YYYY
-      String date = data[0];
-      DateTime day = DateTime.parse(date.split(', ')[1].trim());
-      print(day);
+    for (int i = 0; i < examData.data.length; i++) {
+      print(examData.data.length);
+      List<String> data = examData.data[i];
+      String date = data[0].split(', ')[1].trim();
+      // date is format DD.MM.YYYY
+      DateTime day = DateTime.parse(date.split('.').reversed.join('-'));
 
       studyGroups.add(StudentStudyGroups(
         date: day,
@@ -96,7 +96,16 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
     courses.querySelectorAll('tbody tr').forEach((element) {
       List<String> courseRow = [];
       element.querySelectorAll('td').forEach((element) {
-        courseRow.add(element.text.trim());
+        String html = element.innerHtml;
+        if (html.contains('<br>')) {
+          courseRow.add(html
+              .split('<br>')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .join('|'));
+        } else {
+          courseRow.add(element.text.trim());
+        }
       });
       courseData.add(courseRow);
     });
