@@ -41,14 +41,15 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
             appBar: AppBar(
               title: Text(studyGroupsDefinition.label(context)),
               actions: [
-                IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () => updateSetting('showExams', 'true'),
-                ),
-                IconButton(
-                  icon: Icon(Icons.menu_book),
-                  onPressed: () => updateSetting('showExams', 'false'),
-                ),
+                settings['showExams'] != 'true'
+                    ? IconButton(
+                        icon: Icon(Icons.article_outlined),
+                        onPressed: () => updateSetting('showExams', 'true'),
+                      )
+                    : IconButton(
+                        icon: Icon(Icons.groups),
+                        onPressed: () => updateSetting('showExams', 'false'),
+                      ),
               ],
             ),
             body: settings['showExams'] == 'true'

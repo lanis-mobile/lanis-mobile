@@ -9,7 +9,6 @@ class StudentCourseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 42),
       itemCount: studyData.length,
       itemBuilder: (context, index) {
         return Padding(

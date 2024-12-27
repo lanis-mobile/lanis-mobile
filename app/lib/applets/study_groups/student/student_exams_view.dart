@@ -13,7 +13,6 @@ class StudentExamsView extends StatelessWidget {
     DateTime today = DateTime.now();
     bool todayMarkerShown = false;
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 42),
       itemCount: studyData.length,
       itemBuilder: (context, index) {
         bool showMarker = !todayMarkerShown &&
