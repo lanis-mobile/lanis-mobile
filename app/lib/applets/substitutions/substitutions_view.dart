@@ -12,7 +12,8 @@ import '../../widgets/combined_applet_builder.dart';
 import 'substitutions_gridtile.dart';
 
 class SubstitutionsView extends StatefulWidget {
-  const SubstitutionsView({super.key});
+  final Function? openDrawerCb;
+  const SubstitutionsView({super.key, this.openDrawerCb});
 
   @override
   State<SubstitutionsView> createState() => _SubstitutionsViewState();
@@ -186,65 +187,74 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
 
   @override
   Widget build(BuildContext context) {
-    return CombinedAppletBuilder<SubstitutionPlan>(
-      accountType: sph!.session.accountType,
-      parser: sph!.parser.substitutionsParser,
-      phpUrl: substitutionDefinition.appletPhpUrl,
-      settingsDefaults: substitutionDefinition.settingsDefaults,
-      builder: (context, data, accountType, settings, updateSetting, refresh) {
-        if (data.days.isEmpty) {
-          // GlobalKeys for RefreshIndicator and Refresh-FAB
-          globalKeys += List.generate(
-              data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-          return RefreshIndicator(
-            key: globalKeys[0],
-            notificationPredicate: refresh != null ? (_) => true : (_) => false,
-            onRefresh: refresh ?? () async {},
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverFillRemaining(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.sentiment_dissatisfied, size: 60),
-                      Padding(
-                        padding: const EdgeInsets.all(35),
-                        child: Text(AppLocalizations.of(context)!.noEntries,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            )),
-                      ),
-                    ],
+    return Scaffold(
+      appBar: widget.openDrawerCb != null ? AppBar(
+        title: Text(substitutionDefinition.label(context)),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => widget.openDrawerCb!(),
+        ),
+      ) : null,
+      body: CombinedAppletBuilder<SubstitutionPlan>(
+        accountType: sph!.session.accountType,
+        parser: sph!.parser.substitutionsParser,
+        phpUrl: substitutionDefinition.appletPhpUrl,
+        settingsDefaults: substitutionDefinition.settingsDefaults,
+        builder: (context, data, accountType, settings, updateSetting, refresh) {
+          if (data.days.isEmpty) {
+            // GlobalKeys for RefreshIndicator and Refresh-FAB
+            globalKeys += List.generate(
+                data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
+            return RefreshIndicator(
+              key: globalKeys[0],
+              notificationPredicate: refresh != null ? (_) => true : (_) => false,
+              onRefresh: refresh ?? () async {},
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.sentiment_dissatisfied, size: 60),
+                        Padding(
+                          padding: const EdgeInsets.all(35),
+                          child: Text(AppLocalizations.of(context)!.noEntries,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            );
+          } else {
+            globalKeys += List.generate(
+                data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
+            _tabController = TabController(length: data.days.length, vsync: this);
+
+            return Column(
+              children: [
+                TabBar(
+                    isScrollable: true,
+                    controller: _tabController,
+                    tabs: getTabs(data)),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: getSubstitutionViews(data, refresh, settings),
                   ),
                 )
               ],
-            ),
-          );
-        } else {
-          globalKeys += List.generate(
-              data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-          _tabController = TabController(length: data.days.length, vsync: this);
-
-          return Column(
-            children: [
-              TabBar(
-                  isScrollable: true,
-                  controller: _tabController,
-                  tabs: getTabs(data)),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: getSubstitutionViews(data, refresh, settings),
-                ),
-              )
-            ],
-          );
-        }
-      },
+            );
+          }
+        },
+      ),
     );
   }
 }

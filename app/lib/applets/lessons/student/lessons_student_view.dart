@@ -8,7 +8,8 @@ import 'attendances.dart';
 import 'lesson_list_tile.dart';
 
 class LessonsStudentView extends StatefulWidget {
-  const LessonsStudentView({super.key});
+  final Function? openDrawerCb;
+  const LessonsStudentView({super.key, this.openDrawerCb});
 
   @override
   State<StatefulWidget> createState() => _LessonsStudentViewState();
@@ -32,8 +33,16 @@ class _LessonsStudentViewState extends State<LessonsStudentView> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    return CombinedAppletBuilder<Lessons>(
-        parser: sph!.parser.lessonsStudentParser,
+    return Scaffold(
+      appBar: widget.openDrawerCb != null ? AppBar(
+        title: Text(lessonsDefinition.label(context)),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => widget.openDrawerCb!(),
+        ),
+      ) : null,
+      body: CombinedAppletBuilder<Lessons>(
+      parser: sph!.parser.lessonsStudentParser,
         phpUrl: lessonsDefinition.appletPhpUrl,
         settingsDefaults: lessonsDefinition.settingsDefaults,
         accountType: sph!.session.accountType,
@@ -74,6 +83,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView> with TickerProv
             ),
           );
         },
+      ),
     );
   }
 }
