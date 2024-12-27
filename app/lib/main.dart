@@ -57,7 +57,7 @@ class App extends StatelessWidget {
             theme = Themes.standardTheme;
           }
           if (snapshot.data!['isAmoled'] == 'true') {
-            theme = Themes.getAmoledThemes();
+            theme = Themes.getAmoledThemes(theme);
           }
         } else {
           mode = ThemeMode.system;
@@ -68,7 +68,16 @@ class App extends StatelessWidget {
             Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
           }
           if (snapshot.data?['color'] == 'dynamic') {
-            theme = Themes.dynamicTheme;
+            var dynamicTheme = Themes.dynamicTheme;
+            var darkTheme = dynamicTheme.darkTheme;
+            if (snapshot.data!['isAmoled'] == 'true') {
+              darkTheme = Themes.getAmoledThemes(dynamicTheme).darkTheme;
+            }
+
+            theme = Themes(
+              dynamicTheme.lightTheme,
+              darkTheme
+            );
           }
 
           if (mode == ThemeMode.light ||
