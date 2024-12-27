@@ -1,54 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import 'package:sph_plan/view/settings/info_button.dart';
+import 'package:sph_plan/utils/large_appbar.dart';
 
 import '../../../core/sph/sph.dart';
 
-class UserdataAnsicht extends StatefulWidget {
-  const UserdataAnsicht({super.key});
+class UserDataSettings extends StatefulWidget {
+  const UserDataSettings({super.key});
 
   @override
-  State<StatefulWidget> createState() => _UserdataAnsichtState();
+  State<UserDataSettings> createState() => _UserDataSettingsState();
 }
 
-class _UserdataAnsichtState extends State<UserdataAnsicht> {
-  double padding = 10.0;
-
-  List<ListTile> userDataListTiles = [];
-
-  @override
-  void initState() {
-    super.initState();
-    loadUserData();
-  }
-
-  void loadUserData() {
-    setState(() {
-      userDataListTiles.clear();
-      (sph!.session.userData).forEach((key, value) {
-        userDataListTiles.add(ListTile(
-          title: Text(value),
-          subtitle: Text(toBeginningOfSentenceCase(key)!),
-        ));
-      });
-    });
-  }
-
+class _UserDataSettingsState extends State<UserDataSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.userData),
-        actions: [
-          InfoButton(
-              infoText: AppLocalizations.of(context)!.settingsInfoUserData,
-              context: context)
-        ],
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+      appBar: LargeAppBar(
+          title: Text("User data")
       ),
-      body: ListView(
-        children: userDataListTiles,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: ListView(
+          children: [
+            for (var key in sph!.session.userData.keys)
+              ListTile(
+                title: Text(sph!.session.userData[key]!),
+                subtitle: Text(toBeginningOfSentenceCase(key)!),
+                contentPadding: EdgeInsets.zero,
+              ),
+            SizedBox(
+              height: 24.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 20.0,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )
+              ],
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Text(
+              "All user data is stored on the Lanis servers.",
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

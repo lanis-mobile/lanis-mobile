@@ -126,7 +126,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: Icons.account_circle_rounded,
           screen: (context) => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => UserdataAnsicht()),
+            MaterialPageRoute(builder: (context) => UserDataSettings()),
           ),
       ),
     ]),
