@@ -1,10 +1,16 @@
 import 'dart:io';
 
+import 'package:app_settings/app_settings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/utils/large_appbar.dart';
+import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/cache.dart';
+import 'package:sph_plan/view/settings/subsettings/notifications.dart';
+import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
+import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
+import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
 
 class SettingsGroup {
@@ -17,6 +23,7 @@ class SettingsTile {
   final String title;
   final Future<String> Function(BuildContext context) subtitle;
   final IconData icon;
+  final Future<void> Function(BuildContext context) screen;
   final Future<bool> Function() show;
 
   static Future<bool> alwaysShow() async {
@@ -27,6 +34,7 @@ class SettingsTile {
       {required this.title,
       required this.subtitle,
       required this.icon,
+      required this.screen,
       this.show = alwaysShow});
 }
 
@@ -45,7 +53,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           subtitle: (context) async {
             return "Dark theme, colours";
           },
-          icon: Icons.palette_rounded),
+          icon: Icons.palette_rounded,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AppearanceSettings()),
+          )),
       SettingsTile(
         title: "Language",
         subtitle: (context) async {
@@ -60,7 +72,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
         },
         icon: Icons.language_rounded,
+        screen: (context) =>
+            AppSettings.openAppSettings(type: AppSettingsType.appLocale),
         show: () async {
+          if (!Platform.isAndroid) {
+            return false;
+          }
+
           DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
           final androidInfo = await deviceInfo.androidInfo;
           return androidInfo.version.sdkInt >= 33;
@@ -71,7 +89,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           subtitle: (context) async {
             return "Interval, applets";
           },
-          icon: Icons.notifications_rounded),
+          icon: Icons.notifications_rounded,
+          screen: (context) async {
+            int accountCount = await accountDatabase.select(accountDatabase.accountsTable).get().then((value) => value.length);
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationSettings(accountCount: accountCount)),
+            );
+          }
+      ),
       SettingsTile(
           title: "Clear cache",
           subtitle: (context) async {
@@ -83,7 +110,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? "file" : "files"} (${cacheStats['size']! ~/ 1024} KB)";
           },
-          icon: Icons.storage_rounded),
+          icon: Icons.storage_rounded,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CacheScreen()),
+          )
+      ),
     ]),
     SettingsGroup(tiles: [
       SettingsTile(
@@ -91,7 +123,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           subtitle: (context) async {
             return "Age, name, class";
           },
-          icon: Icons.account_circle_rounded)
+          icon: Icons.account_circle_rounded,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserdataAnsicht()),
+          ),
+      ),
     ]),
     SettingsGroup(tiles: [
       SettingsTile(
@@ -99,7 +136,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           subtitle: (context) async {
             return "Contributors, links, licenses";
           },
-          icon: Icons.school_rounded)
+          icon: Icons.school_rounded,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AboutScreen()),
+          ),
+      )
     ]),
   ];
 
@@ -142,6 +184,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: LargeAppBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+        title: Text(
+          "Settings",
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
       ),
       body: CustomScrollView(
         slivers: [
@@ -174,7 +220,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             borderRadius: getRadius(tileIndex,
                                 settingsTiles[groupIndex].tiles.length),
                             child: InkWell(
-                              onTap: () {},
+                              onTap: () async {
+                                await settingsTiles[groupIndex]
+                                    .tiles[tileIndex]
+                                    .screen(context);
+                              },
                               borderRadius: getRadius(tileIndex,
                                   settingsTiles[groupIndex].tiles.length),
                               child: Padding(
@@ -184,7 +234,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   children: [
                                     Icon(settingsTiles[groupIndex]
                                         .tiles[tileIndex]
-                                        .icon),
+                                        .icon,
+                                        color: Theme.of(context).colorScheme.onSurface
+                                    ),
                                     SizedBox(
                                       width: 16,
                                     ),
