@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/study_groups/definitions.dart';
 import 'package:sph_plan/applets/study_groups/student/student_course_view.dart';
 import 'package:sph_plan/applets/study_groups/student/student_exams_view.dart';
@@ -42,13 +43,19 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
               title: Text(studyGroupsDefinition.label(context)),
               actions: [
                 settings['showExams'] != 'true'
-                    ? IconButton(
-                        icon: Icon(Icons.article_outlined),
-                        onPressed: () => updateSetting('showExams', 'true'),
+                    ? Tooltip(
+                        message: AppLocalizations.of(context)!.exams,
+                        child: IconButton(
+                          icon: Icon(Icons.article_outlined),
+                          onPressed: () => updateSetting('showExams', 'true'),
+                        ),
                       )
-                    : IconButton(
-                        icon: Icon(Icons.groups),
-                        onPressed: () => updateSetting('showExams', 'false'),
+                    : Tooltip(
+                        message: AppLocalizations.of(context)!.studyGroups,
+                        child: IconButton(
+                          icon: Icon(Icons.groups),
+                          onPressed: () => updateSetting('showExams', 'false'),
+                        ),
                       ),
               ],
             ),
