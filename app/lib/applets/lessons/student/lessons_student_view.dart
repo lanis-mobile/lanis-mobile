@@ -43,8 +43,31 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         builder:
             (context, lessons, accountType, settings, updateSetting, refresh) {
           if (lessons.isEmpty) return noDataScreen(context);
-          Lessons attendanceLessons =
-              lessons.where((element) => element.attendances != null).toList();
+          Lessons? attendanceLessons;
+
+          if (settings['showHomework'] == 'true') {
+            lessons = lessons
+                .where((element) => element.currentEntry?.homework != null)
+                .toList();
+
+            lessons.sort((a, b) {
+              if (a.currentEntry!.homework!.homeWorkDone ==
+                  b.currentEntry?.homework?.homeWorkDone) {
+                if (a.currentEntry?.topicDate != null &&
+                    b.currentEntry?.topicDate != null) {
+                  return a.currentEntry!.topicDate!
+                      .compareTo(b.currentEntry!.topicDate!);
+                } else {
+                  return a.currentEntry?.topicDate == null ? 1 : -1;
+                }
+              }
+              return (a.currentEntry?.homework?.homeWorkDone ?? false) ? 1 : -1;
+            });
+          } else {
+            attendanceLessons = lessons
+                .where((element) => element.attendances != null)
+                .toList();
+          }
 
           return Scaffold(
             appBar: widget.openDrawerCb != null
@@ -56,18 +79,24 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                     ),
                     actions: [
                       settings['showHomework'] == 'true'
-                          ? IconButton(
-                              icon: const Icon(Icons.school_outlined),
-                              onPressed: () => updateSetting(
-                                'showHomework',
-                                'false',
+                          ? Tooltip(
+                              message: AppLocalizations.of(context)!.lessons,
+                              child: IconButton(
+                                icon: const Icon(Icons.school_outlined),
+                                onPressed: () => updateSetting(
+                                  'showHomework',
+                                  'false',
+                                ),
                               ),
                             )
-                          : IconButton(
-                              icon: const Icon(Icons.task_outlined),
-                              onPressed: () => updateSetting(
-                                'showHomework',
-                                'true',
+                          : Tooltip(
+                              message: AppLocalizations.of(context)!.homework,
+                              child: IconButton(
+                                icon: const Icon(Icons.task_outlined),
+                                onPressed: () => updateSetting(
+                                  'showHomework',
+                                  'true',
+                                ),
                               ),
                             ),
                     ],
@@ -89,14 +118,15 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
               ),
             ),
             floatingActionButton: Visibility(
-              visible: attendanceLessons.isNotEmpty,
+              visible:
+                  attendanceLessons != null && attendanceLessons.isNotEmpty,
               child: FloatingActionButton.extended(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          AttendancesScreen(lessons: attendanceLessons),
+                          AttendancesScreen(lessons: attendanceLessons!),
                     ),
                   );
                 },

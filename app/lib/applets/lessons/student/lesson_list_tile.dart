@@ -42,12 +42,14 @@ class _LessonListTileState extends State<LessonListTile> {
             children: [
               Expanded(
                 child: Text(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   widget.lesson.name,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              const SizedBox(width: 8),
               if ((widget.lesson.currentEntry?.files.length ?? 0) > 0) ...[
+                const SizedBox(width: 8),
                 Text(
                   widget.lesson.currentEntry!.files.length.toString(),
                   style: Theme.of(context).textTheme.bodyMedium,
