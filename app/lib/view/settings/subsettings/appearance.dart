@@ -31,11 +31,7 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
         appBar: LargeAppBar(
-          title: Text(
-            "Appearance",
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+          title: Text("Appearance",),
         ),
         body: StreamBuilder(
             stream: accountDatabase.kv

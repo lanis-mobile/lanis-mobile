@@ -106,14 +106,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             final dir = await sph!.storage.getDocumentCacheDirectory();
 
-            cacheStats = dirStatSync(dir.path);
+            cacheStats = CacheSettings.dirStatSync(dir.path);
 
             return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? "file" : "files"} (${cacheStats['size']! ~/ 1024} KB)";
           },
           icon: Icons.storage_rounded,
           screen: (context) => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CacheScreen()),
+            MaterialPageRoute(builder: (context) => CacheSettings()),
           )
       ),
     ]),
@@ -144,24 +144,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       )
     ]),
   ];
-
-  static Map<String, int> dirStatSync(String dirPath) {
-    int fileNum = 0;
-    int totalSize = 0;
-    var dir = Directory(dirPath);
-
-    if (dir.existsSync()) {
-      dir
-          .listSync(recursive: true, followLinks: false)
-          .forEach((FileSystemEntity entity) {
-        if (entity is File) {
-          fileNum++;
-          totalSize += entity.lengthSync();
-        }
-      });
-    }
-    return {'fileNum': fileNum, 'size': totalSize};
-  }
 
   BorderRadius getRadius(int index, int length) {
     if (index == 0 && length > 1) {

@@ -11,6 +11,7 @@ import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/utils/switch_tile.dart';
 
 import '../../../core/sph/sph.dart';
+import '../../../utils/callout.dart';
 import '../../../utils/slider_tile.dart';
 
 class NotificationSettings extends StatefulWidget {
@@ -86,11 +87,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
         appBar: LargeAppBar(
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-          title: Text(
-            "Notifications",
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          title: Text("Notifications",),
         ),
         body: StreamBuilder(
             stream: sph!.prefs.kv.subscribeMultiple(getDatabaseKeys()),
@@ -113,78 +110,20 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               return ListView(
                 children: [
                   if (!notificationsAllowed) ...[
-                    Card.filled(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      margin: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            spacing: 12.0,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.error_rounded,
-                                    color: Theme.of(context).colorScheme.error,
-                                    size: 40.0,
-                                  ),
-                                  SizedBox(
-                                    width: 8.0,
-                                  ),
-                                  Text(
-                                    "You didn’t authorise notifications!",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .error,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: FilledButton(
-                                      onPressed: () {
-                                        AppSettings.openAppSettings(
-                                            type: AppSettingsType.notification);
-                                      },
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            WidgetStateColor.resolveWith(
-                                                (states) {
-                                          if (states
-                                              .contains(WidgetState.pressed)) {
-                                            return Theme.of(context)
-                                                .colorScheme
-                                                .error
-                                                .withValues(alpha: 0.95);
-                                          }
-                                          return Theme.of(context)
-                                              .colorScheme
-                                              .error;
-                                        }),
-                                      ),
-                                      child: Text(
-                                        "Open system settings",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge!
-                                            .copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onError,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
-                          )),
+                    Callout(
+                      leading: Icon(Icons.error_rounded),
+                      title: Text(
+                        "You didn’t authorise notifications!",
+                      ),
+                      buttonText: Text("Open system settings"),
+                      onPressed: () {
+                        AppSettings.openAppSettings(
+                            type: AppSettingsType.notification);
+                      },
+                      backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                      buttonTextColor: Theme.of(context).colorScheme.onError,
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
                     ),
                     SizedBox(
                       height: 24.0,
