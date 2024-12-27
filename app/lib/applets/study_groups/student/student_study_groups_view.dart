@@ -16,61 +16,45 @@ class StudentStudyGroupsView extends StatefulWidget {
 class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(studyGroupsDefinition.label(context)),
-      ),
-      body: CombinedAppletBuilder(
-          parser: sph!.parser.studyGroupsStudentParser,
-          phpUrl: studyGroupsDefinition.appletPhpUrl,
-          settingsDefaults: studyGroupsDefinition.settingsDefaults,
-          accountType: sph!.session.accountType,
-          builder:
-              (context, data, accountType, settings, updateSetting, refresh) {
-            List<StudentStudyGroupsContainer> studyData = data
-                .expand((studyGroup) => studyGroup.exams.map(
-                      (exam) => StudentStudyGroupsContainer(
-                        halfYear: studyGroup.halfYear,
-                        courseName: studyGroup.courseName,
-                        teacher: studyGroup.teacher,
-                        teacherKuerzel: studyGroup.teacherKuerzel,
-                        exam: exam,
-                      ),
-                    ))
-                .toList();
+    return CombinedAppletBuilder(
+        parser: sph!.parser.studyGroupsStudentParser,
+        phpUrl: studyGroupsDefinition.appletPhpUrl,
+        settingsDefaults: studyGroupsDefinition.settingsDefaults,
+        accountType: sph!.session.accountType,
+        builder:
+            (context, data, accountType, settings, updateSetting, refresh) {
+          List<StudentStudyGroupsContainer> studyData = data
+              .expand((studyGroup) => studyGroup.exams.map(
+                    (exam) => StudentStudyGroupsContainer(
+                      halfYear: studyGroup.halfYear,
+                      courseName: studyGroup.courseName,
+                      teacher: studyGroup.teacher,
+                      teacherKuerzel: studyGroup.teacherKuerzel,
+                      exam: exam,
+                    ),
+                  ))
+              .toList();
 
-            studyData.sort((a, b) => a.exam.date.compareTo(b.exam.date));
+          studyData.sort((a, b) => a.exam.date.compareTo(b.exam.date));
 
-            return Stack(children: [
-              settings['showExams'] == 'true'
-                  ? StudentExamsView(studyData: studyData)
-                  : StudentCourseView(studyData: data),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    runAlignment: WrapAlignment.center,
-                    spacing: 8.0,
-                    children: [
-                      GestureDetector(
-                        onTap: () => updateSetting('showExams', 'true'),
-                        child: Chip(
-                          label: Text('Klausuren'),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => updateSetting('showExams', 'false'),
-                        child: Chip(
-                          label: Text('Kurse'),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ]);
-          }),
-    );
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(studyGroupsDefinition.label(context)),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () => updateSetting('showExams', 'true'),
+                ),
+                IconButton(
+                  icon: Icon(Icons.menu_book),
+                  onPressed: () => updateSetting('showExams', 'false'),
+                ),
+              ],
+            ),
+            body: settings['showExams'] == 'true'
+                ? StudentExamsView(studyData: studyData)
+                : StudentCourseView(studyData: data),
+          );
+        });
   }
 }
