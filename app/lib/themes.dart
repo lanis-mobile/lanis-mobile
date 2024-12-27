@@ -16,12 +16,6 @@ class Themes {
           ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
         inputDecorationTheme:
           const InputDecorationTheme(border: OutlineInputBorder()),
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: <TargetPlatform, PageTransitionsBuilder>{
-            TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-          },
-        ),
       );
     }
 
