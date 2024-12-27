@@ -35,14 +35,41 @@ class MinimalSwitchTile extends StatelessWidget {
             Row(
               children: [
                 if (leading != null) ...[
-                  leading!,
+                  Theme(
+                      data: Theme.of(context).copyWith(
+                        iconTheme: Theme.of(context).iconTheme.copyWith(
+                              color: onChanged == null
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                  : Theme.of(context).colorScheme.onSurface,
+                              size: 20.0,
+                            ),
+                      ),
+                      child: leading!),
                   SizedBox(width: 16.0),
                 ],
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    title,
-                    if (subtitle != null) subtitle!,
+                    DefaultTextStyle(
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: onChanged != null
+                                ? Theme.of(context).colorScheme.onSurface
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant),
+                        child: title),
+                    if (subtitle != null)
+                      DefaultTextStyle(
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant),
+                          child: subtitle!),
                   ],
                 ),
               ],

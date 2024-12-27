@@ -49,7 +49,11 @@ class App extends StatelessWidget {
           if (snapshot.data!['color'] == 'standard') {
             theme = Themes.standardTheme;
           } else if (snapshot.data!['color'] != 'standard' && snapshot.data!['color'] != 'dynamic') {
-            theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
+            if (Themes.flutterColorThemes.containsKey(snapshot.data!['color'])) {
+              theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
+            } else {
+              theme = Themes.standardTheme;
+            }
           } else {
             theme = Themes.standardTheme;
           }
@@ -103,7 +107,7 @@ class App extends StatelessWidget {
 Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
   return ListView(children: [
     Container(
-      color: Colors.red.withOpacity(0.1),
+      color: Colors.red.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.only(
             left: 20.0, right: 20.0, top: 32.0, bottom: 32.0),

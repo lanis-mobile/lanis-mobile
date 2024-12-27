@@ -61,7 +61,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
     final String interval = (await accountDatabase.kv
             .get('notifications-android-target-interval-minutes')) ??
         '15';
-    
+
     setState(() {
       notificationPermissionStatus = notificationPermissionStatus;
       notificationInterval = double.parse(interval);
@@ -102,9 +102,10 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               List<String> applets = snapshot.data!.keys.toList()..sort();
               applets.removeWhere((element) => !element.endsWith('.php'));
 
-              final bool notificationsAllowed = notificationPermissionStatus ==
-                  PermissionStatus.granted;
-              final bool notificationsEnabled = (snapshot.data!['notifications-allow'] ?? 'true') == 'true';
+              final bool notificationsAllowed =
+                  notificationPermissionStatus == PermissionStatus.granted;
+              final bool notificationsEnabled =
+                  (snapshot.data!['notifications-allow'] ?? 'true') == 'true';
               final bool notificationsActive =
                   (snapshot.data!['notifications-allow'] ?? 'true') == 'true' &&
                       notificationPermissionStatus == PermissionStatus.granted;
@@ -227,14 +228,6 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                             subtitle: widget.accountCount > 1
                                 ? Text(
                                     "For this account",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
                                   )
                                 : null,
                             value: notificationsEnabled,
@@ -296,7 +289,8 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                           min: 15.0,
                           max: 180.0,
                           divisions: 11,
-                          inactiveColor: Theme.of(context).colorScheme.surfaceDim,
+                          inactiveColor:
+                              Theme.of(context).colorScheme.surfaceDim,
                         )),
                     SizedBox(
                       height: 8.0,
@@ -323,24 +317,9 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                         child: MinimalSwitchTile(
                           title: Text(
                             supportedApplets[key]?.label(context) ?? key,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(
-                                  color: notificationsActive
-                                      ? Theme.of(context).colorScheme.onSurface
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                ),
                           ),
                           leading: Icon(
                             supportedApplets[key]?.selectedIcon.icon,
-                            color: notificationsActive
-                                ? Theme.of(context).colorScheme.onSurface
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
                           ),
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 16.0),
@@ -386,11 +365,12 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                                           .onSurfaceVariant,
                                     ),
                           ),
-                          leading: Icon(
-                            Icons.schedule_rounded,
-                            color: notificationsAllowed ? Theme.of(context).colorScheme.onSurface
-                                : Theme.of(context).colorScheme.onSurfaceVariant
-                          ),
+                          leading: Icon(Icons.schedule_rounded,
+                              color: notificationsAllowed
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant),
                           value: notificationInterval,
                           onChanged: notificationsAllowed
                               ? (val) {

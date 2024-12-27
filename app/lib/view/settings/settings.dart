@@ -7,7 +7,7 @@ import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
-import 'package:sph_plan/view/settings/subsettings/theme_changer.dart';
+import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
 import '../../core/database/account_database/account_db.dart';
