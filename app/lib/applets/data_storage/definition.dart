@@ -11,7 +11,7 @@ final dataStorageDefinition = AppletDefinition(
   appletType: AppletType.navigation,
   icon: const Icon(Icons.folder_copy),
   selectedIcon: const Icon(Icons.folder_copy_outlined),
-  label: (context) => AppLocalizations.of(context)!.studyGroups,
+  label: (context) => AppLocalizations.of(context)!.storage,
   supportedAccountTypes: [
     AccountType.student,
     AccountType.teacher,

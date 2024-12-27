@@ -26,8 +26,8 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
     Element? courses = document.getElementById('LGs');
     Element? exams = document.getElementById('klausuren');
 
-    ExamData examData = parseExams(exams!);
-    CourseData courseData = parseCourses(courses!);
+    StudentStudyGroupsData examData = parseExams(exams!);
+    StudentStudyGroupsData courseData = parseCourses(courses!);
 
     List<StudentStudyGroups> studyGroups = [];
     for (int i = 0; i < courseData.data.length; i++) {
@@ -62,7 +62,7 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
     return studyGroups;
   }
 
-  ExamData parseExams(Element exams) {
+  StudentStudyGroupsData parseExams(Element exams) {
     List<String> examHeaders = [];
     Element? examTable = exams.querySelector('table');
     examTable!.querySelectorAll('thead tr th').forEach((element) {
@@ -86,10 +86,10 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
       }
     });
 
-    return ExamData(examHeaders, examData);
+    return StudentStudyGroupsData(examHeaders, examData);
   }
 
-  CourseData parseCourses(Element courses) {
+  StudentStudyGroupsData parseCourses(Element courses) {
     List<String> courseHeaders = [];
     courses.querySelectorAll('thead tr th').forEach((element) {
       courseHeaders.add(element.text.trim());
@@ -114,20 +114,6 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
       courseData.add(courseRow);
     });
 
-    return CourseData(courseHeaders, courseData);
+    return StudentStudyGroupsData(courseHeaders, courseData);
   }
-}
-
-class ExamData {
-  final List<String> headers;
-  final List<List<String>> data;
-
-  ExamData(this.headers, this.data);
-}
-
-class CourseData {
-  final List<String> headers;
-  final List<List<String>> data;
-
-  CourseData(this.headers, this.data);
 }

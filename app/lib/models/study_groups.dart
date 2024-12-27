@@ -79,3 +79,10 @@ class StudentStudyGroupsContainer {
       required this.teacherKuerzel,
       required this.exam});
 }
+
+class StudentStudyGroupsData {
+  final List<String> headers;
+  final List<List<String>> data;
+
+  StudentStudyGroupsData(this.headers, this.data);
+}
