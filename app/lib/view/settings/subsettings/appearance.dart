@@ -13,14 +13,14 @@ class AppearanceSettings extends StatefulWidget {
 }
 
 class _AppearanceSettingsState extends State<AppearanceSettings> {
-  ThemeData dynamicTheme = Themes.dynamicTheme.lightTheme!;
+  ThemeData? dynamicTheme = Themes.dynamicTheme.lightTheme;
 
   @override
   void didChangeDependencies() {
     setState(() {
       dynamicTheme = Theme.of(context).brightness == Brightness.dark
-          ? Themes.dynamicTheme.darkTheme!
-          : Themes.dynamicTheme.lightTheme!;
+          ? Themes.dynamicTheme.darkTheme
+          : Themes.dynamicTheme.lightTheme;
     });
 
     super.didChangeDependencies();
@@ -138,59 +138,61 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
                                     Theme.of(context).colorScheme.primary,
                                 selected: snapshot.data!['color'] == "standard",
                               )),
-                          RadioPillGroupItem.horizontal(
-                              title: Text("Material You"),
-                              value: "dynamic",
-                              trailing: TrailingCircle.custom(
-                                selectedBackgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                selectedColor:
-                                    Theme.of(context).colorScheme.primary,
-                                selected: snapshot.data!['color'] == "dynamic",
-                                customCircle: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(100)),
-                                          color:
-                                              dynamicTheme.colorScheme.primary,
+                          if (dynamicTheme != null)
+                            RadioPillGroupItem.horizontal(
+                                title: Text("Material You"),
+                                value: "dynamic",
+                                trailing: TrailingCircle.custom(
+                                  selectedBackgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  selectedColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  selected:
+                                      snapshot.data!['color'] == "dynamic",
+                                  customCircle: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.vertical(
+                                                top: Radius.circular(100)),
+                                            color: dynamicTheme!
+                                                .colorScheme.primary,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                        child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(
-                                                  bottomLeft:
-                                                      Radius.circular(100)),
-                                              color: dynamicTheme
-                                                  .colorScheme.inversePrimary,
+                                      Expanded(
+                                          child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.only(
+                                                    bottomLeft:
+                                                        Radius.circular(100)),
+                                                color: dynamicTheme!
+                                                    .colorScheme.inversePrimary,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Expanded(
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(
-                                                  bottomRight:
-                                                      Radius.circular(100)),
-                                              color: dynamicTheme
-                                                  .colorScheme.secondary,
+                                          Expanded(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.only(
+                                                    bottomRight:
+                                                        Radius.circular(100)),
+                                                color: dynamicTheme!
+                                                    .colorScheme.secondary,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ))
-                                  ],
-                                ),
-                              )),
+                                        ],
+                                      ))
+                                    ],
+                                  ),
+                                )),
                         ],
                         customPillBuilder: (String? groupValue,
                             void Function(String)? onChanged) {

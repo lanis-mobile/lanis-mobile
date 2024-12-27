@@ -276,22 +276,26 @@ class RadioPillGroup<T> extends StatelessWidget {
     if (_variant == _RadioPillGroupVariant.large) {
       border = RadioBorder.top;
 
-      if (index == 0) {
-        border = RadioBorder.topLeft;
-      } else if (index == pills.length - 1) {
-        border = RadioBorder.topRight;
-      } else {
-        border = RadioBorder.none;
+      if (pills.length > 1) {
+        if (index == 0) {
+          border = RadioBorder.topLeft;
+        } else if (index == pills.length - 1) {
+          border = RadioBorder.topRight;
+        } else {
+          border = RadioBorder.none;
+        }
       }
     } else {
       border = RadioBorder.both;
 
-      if (index == 0) {
-        border = RadioBorder.left;
-      } else if (index == pills.length - 1) {
-        border = RadioBorder.right;
-      } else {
-        border = RadioBorder.none;
+      if (pills.length > 1) {
+        if (index == 0) {
+          border = RadioBorder.left;
+        } else if (index == pills.length - 1) {
+          border = RadioBorder.right;
+        } else {
+          border = RadioBorder.none;
+        }
       }
     }
 
