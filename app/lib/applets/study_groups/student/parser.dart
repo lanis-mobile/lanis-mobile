@@ -29,8 +29,6 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
     ExamData examData = parseExams(exams!);
     CourseData courseData = parseCourses(courses!);
 
-    print(examData.data);
-
     List<StudentStudyGroups> studyGroups = [];
     for (int i = 0; i < courseData.data.length; i++) {
       List<String> data = courseData.data[i];
