@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/study_groups/definitions.dart';
+import 'package:sph_plan/applets/study_groups/student/student_exams_view.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/models/study_groups.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
@@ -16,6 +16,9 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(studyGroupsDefinition.label(context)),
+      ),
       body: CombinedAppletBuilder(
           parser: sph!.parser.studyGroupsStudentParser,
           phpUrl: studyGroupsDefinition.appletPhpUrl,
@@ -37,37 +40,27 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
 
             studyData.sort((a, b) => a.exam.date.compareTo(b.exam.date));
 
-            return ListView.builder(
-              itemCount: studyData.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
+            return Stack(children: [
+              StudentExamsView(studyData: studyData),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    runAlignment: WrapAlignment.center,
+                    spacing: 8.0,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(studyData[index].courseName),
-                          Text(studyData[index].teacher),
-                          Text(DateFormat('dd.MM.yy')
-                              .format(studyData[index].exam.date)),
-                        ],
+                      Chip(
+                        label: Text('Klausuren'),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(studyData[index].exam.type),
-                          studyData[index].exam.duration.isEmpty
-                              ? Text(studyData[index].exam.time)
-                              : Text(
-                                  '${studyData[index].exam.time} (${studyData[index].exam.duration})'),
-                        ],
-                      ),
+                      Chip(
+                        label: Text('Kurse'),
+                      )
                     ],
                   ),
-                );
-              },
-            );
+                ],
+              ),
+            ]);
           }),
     );
   }
