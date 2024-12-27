@@ -25,11 +25,14 @@ class _LessonListTileState extends State<LessonListTile> {
     }
     return false;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Badge(
-      label: Text('${widget.lesson.attendances?['fehlend'].toString() ?? ''} unentschuldigte Fehlstunden!', textAlign: TextAlign.left,),
+      label: Text(
+        '${widget.lesson.attendances?['fehlend'].toString() ?? ''} unentschuldigte Fehlstunden!',
+        textAlign: TextAlign.left,
+      ),
       backgroundColor: Colors.red[300],
       isLabelVisible: _showNotExcusedHours(),
       alignment: Alignment.topLeft,
@@ -37,11 +40,13 @@ class _LessonListTileState extends State<LessonListTile> {
         child: ListTile(
           title: Row(
             children: [
-              Text(
-                widget.lesson.name,
-                style: Theme.of(context).textTheme.titleMedium,
+              Expanded(
+                child: Text(
+                  widget.lesson.name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               if ((widget.lesson.currentEntry?.files.length ?? 0) > 0) ...[
                 Text(
                   widget.lesson.currentEntry!.files.length.toString(),
@@ -54,10 +59,14 @@ class _LessonListTileState extends State<LessonListTile> {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.lesson.currentEntry?.topicTitle != null) Text(
-                widget.lesson.currentEntry!.topicTitle ?? '-',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-              ),
+              if (widget.lesson.currentEntry?.topicTitle != null)
+                Text(
+                  widget.lesson.currentEntry!.topicTitle ?? '-',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontStyle: FontStyle.italic),
+                ),
               if (widget.lesson.currentEntry?.homework != null) ...[
                 const SizedBox(height: 12),
                 HomeworkBox(
@@ -74,7 +83,8 @@ class _LessonListTileState extends State<LessonListTile> {
                     " ${widget.lesson.teacher} (${widget.lesson.teacherKuerzel})",
                   ),
                   const Spacer(),
-                  Text('${dateFormat.format(widget.lesson.currentEntry?.topicDate ?? DateTime(0))} '),
+                  Text(
+                      '${dateFormat.format(widget.lesson.currentEntry?.topicDate ?? DateTime(0))} '),
                   const Icon(Icons.calendar_today, size: 16)
                 ],
               ),
@@ -88,9 +98,9 @@ class _LessonListTileState extends State<LessonListTile> {
               context,
               MaterialPageRoute(
                   builder: (context) => CourseOverviewAnsicht(
-                    dataFetchURL: widget.lesson.courseURL.toString(),
-                    title: widget.lesson.name,
-                  )),
+                        dataFetchURL: widget.lesson.courseURL.toString(),
+                        title: widget.lesson.name,
+                      )),
             );
           },
         ),

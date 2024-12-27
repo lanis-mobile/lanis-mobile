@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/lessons/definition.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
+
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
 import 'attendances.dart';
@@ -15,42 +16,63 @@ class LessonsStudentView extends StatefulWidget {
   State<StatefulWidget> createState() => _LessonsStudentViewState();
 }
 
-class _LessonsStudentViewState extends State<LessonsStudentView> with TickerProviderStateMixin {
-
+class _LessonsStudentViewState extends State<LessonsStudentView>
+    with TickerProviderStateMixin {
   Widget noDataScreen(context) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.search,
-          size: 60,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search,
+              size: 60,
+            ),
+            Text(AppLocalizations.of(context)!.noCoursesFound)
+          ],
         ),
-        Text(AppLocalizations.of(context)!.noCoursesFound)
-      ],
-    ),
-  );
+      );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.openDrawerCb != null ? AppBar(
-        title: Text(lessonsDefinition.label(context)),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => widget.openDrawerCb!(),
-        ),
-      ) : null,
       body: CombinedAppletBuilder<Lessons>(
-      parser: sph!.parser.lessonsStudentParser,
+        parser: sph!.parser.lessonsStudentParser,
         phpUrl: lessonsDefinition.appletPhpUrl,
         settingsDefaults: lessonsDefinition.settingsDefaults,
         accountType: sph!.session.accountType,
-        builder: (context, lessons, accountType, settings, updateSetting, refresh) {
+        builder:
+            (context, lessons, accountType, settings, updateSetting, refresh) {
           if (lessons.isEmpty) return noDataScreen(context);
-          Lessons attendanceLessons = lessons.where((element) => element.attendances != null).toList();
+          Lessons attendanceLessons =
+              lessons.where((element) => element.attendances != null).toList();
 
           return Scaffold(
+            appBar: widget.openDrawerCb != null
+                ? AppBar(
+                    title: Text(lessonsDefinition.label(context)),
+                    leading: IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => widget.openDrawerCb!(),
+                    ),
+                    actions: [
+                      settings['showHomework'] == 'true'
+                          ? IconButton(
+                              icon: const Icon(Icons.school_outlined),
+                              onPressed: () => updateSetting(
+                                'showHomework',
+                                'false',
+                              ),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.task_outlined),
+                              onPressed: () => updateSetting(
+                                'showHomework',
+                                'true',
+                              ),
+                            ),
+                    ],
+                  )
+                : null,
             body: RefreshIndicator(
               onRefresh: () => refresh!(),
               child: ListView.builder(
@@ -73,7 +95,8 @@ class _LessonsStudentViewState extends State<LessonsStudentView> with TickerProv
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AttendancesScreen(lessons: attendanceLessons),
+                      builder: (context) =>
+                          AttendancesScreen(lessons: attendanceLessons),
                     ),
                   );
                 },
