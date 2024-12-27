@@ -10,7 +10,7 @@ class StudentExamsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateTime today = DateTime(2024, 11, 10);
+    DateTime today = DateTime.now();
     bool todayMarkerShown = false;
     return ListView.builder(
       padding: const EdgeInsets.only(top: 42),
