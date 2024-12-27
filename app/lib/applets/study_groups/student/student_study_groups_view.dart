@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/study_groups/definitions.dart';
+import 'package:sph_plan/applets/study_groups/student/student_course_view.dart';
 import 'package:sph_plan/applets/study_groups/student/student_exams_view.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/models/study_groups.dart';
@@ -41,7 +42,9 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
             studyData.sort((a, b) => a.exam.date.compareTo(b.exam.date));
 
             return Stack(children: [
-              StudentExamsView(studyData: studyData),
+              settings['showExams'] == 'true'
+                  ? StudentExamsView(studyData: studyData)
+                  : StudentCourseView(studyData: data),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -50,11 +53,17 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
                     runAlignment: WrapAlignment.center,
                     spacing: 8.0,
                     children: [
-                      Chip(
-                        label: Text('Klausuren'),
+                      GestureDetector(
+                        onTap: () => updateSetting('showExams', 'true'),
+                        child: Chip(
+                          label: Text('Klausuren'),
+                        ),
                       ),
-                      Chip(
-                        label: Text('Kurse'),
+                      GestureDetector(
+                        onTap: () => updateSetting('showExams', 'false'),
+                        child: Chip(
+                          label: Text('Kurse'),
+                        ),
                       )
                     ],
                   ),

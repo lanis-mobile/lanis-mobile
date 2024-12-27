@@ -14,7 +14,9 @@ final studyGroupsDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.studyGroups,
   supportedAccountTypes: [AccountType.student],
   allowOffline: true,
-  settingsDefaults: {},
+  settingsDefaults: {
+    'showExams': 'true',
+  },
   refreshInterval: const Duration(minutes: 15),
   bodyBuilder: (context, accountType) {
     return StudentStudyGroupsView();
