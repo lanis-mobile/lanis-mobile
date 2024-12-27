@@ -79,7 +79,7 @@ class Themes {
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: amoledColors[AmoledColor.background],
-          surfaceTintColor:amoledColors[AmoledColor.background],
+          surfaceTintColor: amoledColors[AmoledColor.background],
         ),
         dialogTheme: DialogTheme(
           backgroundColor: amoledColors[AmoledColor.secondary],
