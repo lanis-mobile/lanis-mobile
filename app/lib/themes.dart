@@ -97,6 +97,7 @@ class Themes {
           onSecondary: themes.darkTheme!.colorScheme.onSecondaryContainer,
           error: themes.darkTheme!.colorScheme.error,
           onError: themes.darkTheme!.colorScheme.onError,
+          errorContainer: themes.darkTheme!.colorScheme.errorContainer,
           surface: themes.darkTheme!.colorScheme.surface,
           onSurface: themes.darkTheme!.colorScheme.onSurface,
           surfaceContainerHigh: amoledColors[AmoledColor.background],
