@@ -232,5 +232,8 @@
   "install": "Installieren",
   "notificationPermanentlyDenied": "Bitte erlaube Benachrichtigungen für diese App.",
   "open": "Öffnen",
-  "close": "Schließen"
+  "close": "Schließen",
+
+  "studyGroups": "Lerngruppen",
+  "daysUntilNextExam": "{days, plural, =0{Heute} one{1 Tag} other{{days} Tage}} bis zur nächsten Klausur"
 }

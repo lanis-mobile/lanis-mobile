@@ -234,5 +234,6 @@
   "open": "Open",
   "close": "Close",
 
-  "studyGroups": "Study groups"
+  "studyGroups": "Study groups",
+  "daysUntilNextExam": "{days, plural, =0{Today} one{1 day} other{{days} days}} until the next exam"
 }
