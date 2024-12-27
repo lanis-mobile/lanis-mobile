@@ -42,7 +42,6 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         accountType: sph!.session.accountType,
         builder:
             (context, lessons, accountType, settings, updateSetting, refresh) {
-          if (lessons.isEmpty) return noDataScreen(context);
           Lessons? attendanceLessons;
 
           if (settings['showHomework'] == 'true') {
@@ -72,7 +71,9 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
           return Scaffold(
             appBar: widget.openDrawerCb != null
                 ? AppBar(
-                    title: Text(lessonsDefinition.label(context)),
+                    title: Text(settings['showHomework'] == 'true'
+                        ? AppLocalizations.of(context)!.homework
+                        : lessonsDefinition.label(context)),
                     leading: IconButton(
                       icon: const Icon(Icons.menu),
                       onPressed: () => widget.openDrawerCb!(),
@@ -104,18 +105,26 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                 : null,
             body: RefreshIndicator(
               onRefresh: () => refresh!(),
-              child: ListView.builder(
-                itemCount: lessons.length,
-                itemBuilder: (BuildContext context, int index) => Padding(
-                  padding: EdgeInsets.only(
-                    top: 4,
-                    bottom: index == lessons.length - 1 ? 80 : 0,
-                    left: 8,
-                    right: 8,
-                  ),
-                  child: LessonListTile(lesson: lessons[index]),
-                ),
-              ),
+              child: lessons.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: lessons.length,
+                      itemBuilder: (BuildContext context, int index) => Padding(
+                        padding: EdgeInsets.only(
+                          top: 4,
+                          bottom: index == lessons.length - 1 ? 80 : 0,
+                          left: 8,
+                          right: 8,
+                        ),
+                        child: LessonListTile(lesson: lessons[index]),
+                      ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        noDataScreen(context),
+                      ],
+                    ),
             ),
             floatingActionButton: Visibility(
               visible:
