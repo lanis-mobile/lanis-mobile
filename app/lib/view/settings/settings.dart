@@ -139,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: Icons.school_rounded,
           screen: (context) => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AboutScreen()),
+            MaterialPageRoute(builder: (context) => AboutSettings()),
           ),
       )
     ]),
