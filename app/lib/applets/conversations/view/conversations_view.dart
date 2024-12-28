@@ -97,7 +97,8 @@ class JumpToNotification extends Notification {
 }
 
 class ConversationsView extends StatefulWidget {
-  const ConversationsView({super.key});
+  final Function? openDrawerCb;
+  const ConversationsView({super.key, this.openDrawerCb });
 
   @override
   State<StatefulWidget> createState() => _ConversationsViewState();
@@ -447,33 +448,41 @@ class _ConversationsViewState extends State<ConversationsView> {
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener(
-      onNotification: (notification) {
-        if (notification is CheckTileNotification) {
-          if (!toggleMode) {
-            openToggleMode();
+    return Scaffold(
+      appBar: widget.openDrawerCb != null ? AppBar(
+        title: Text(conversationsDefinition.label(context)),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => widget.openDrawerCb!(),
+        ),
+      ) : null,
+      body: NotificationListener(
+        onNotification: (notification) {
+          if (notification is CheckTileNotification) {
+            if (!toggleMode) {
+              openToggleMode();
+            }
+
+            setState(() {
+              checkedTiles[notification.id!] =
+              !(checkedTiles[notification.id!] ?? false);
+            });
+            return true;
+          } else if (notification is JumpToNotification) {
+            scrollController.jumpTo(notification.position!);
+            return true;
           }
 
-          setState(() {
-            checkedTiles[notification.id!] =
-                !(checkedTiles[notification.id!] ?? false);
-          });
-          return true;
-        } else if (notification is JumpToNotification) {
-          scrollController.jumpTo(notification.position!);
-          return true;
-        }
-
-        return false;
-      },
-      child: Scaffold(
-          body: CombinedAppletBuilder<List<OverviewEntry>>(
-              parser: sph!.parser.conversationsParser,
-              phpUrl: conversationsDefinition.appletPhpUrl,
-              settingsDefaults: conversationsDefinition.settingsDefaults,
-              accountType: sph!.session.accountType,
-              builder: (context, data, accountType, settings, updateSetting, refresh) {
-               return RefreshIndicator(
+          return false;
+        },
+        child: Scaffold(
+            body: CombinedAppletBuilder<List<OverviewEntry>>(
+                parser: sph!.parser.conversationsParser,
+                phpUrl: conversationsDefinition.appletPhpUrl,
+                settingsDefaults: conversationsDefinition.settingsDefaults,
+                accountType: sph!.session.accountType,
+                builder: (context, data, accountType, settings, updateSetting, refresh) {
+                  return RefreshIndicator(
                       key: _refreshKey,
                       edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
                       onRefresh: refresh!,
@@ -529,153 +538,154 @@ class _ConversationsViewState extends State<ConversationsView> {
                           )
                         ],
                       ));
-              }),
-          floatingActionButton: toggleMode
-              ? disableToggleButton
-                  ? FloatingActionButton(
-                      onPressed: null,
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: const CircularProgressIndicator(),
-                      ))
-                  : FloatingActionButton.extended(
-                      icon: Icon(Icons.visibility),
-                      label: Text(AppLocalizations.of(context)!.hideShow),
-                      onPressed: () async {
+                }),
+            floatingActionButton: toggleMode
+                ? disableToggleButton
+                ? FloatingActionButton(
+                onPressed: null,
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: const CircularProgressIndicator(),
+                ))
+                : FloatingActionButton.extended(
+                icon: Icon(Icons.visibility),
+                label: Text(AppLocalizations.of(context)!.hideShow),
+                onPressed: () async {
+                  setState(() {
+                    disableToggleButton = true;
+                  });
+
+                  // So you don't see each tile being toggled
+                  Map<String, bool> toggled = {};
+
+                  for (final tile in checkedTiles.entries) {
+                    if (tile.value == true) {
+                      final isHidden = filter.entries
+                          .where((element) => element.id == tile.key)
+                          .first
+                          .hidden;
+
+                      late bool result;
+                      try {
+                        if (isHidden) {
+                          result = await sph!.parser.conversationsParser
+                              .showConversation(tile.key);
+                        } else {
+                          result = await sph!.parser.conversationsParser
+                              .hideConversation(tile.key);
+                        }
+                      } on NoConnectionException {
                         setState(() {
-                          disableToggleButton = true;
+                          disableToggleButton = false;
                         });
 
-                        // So you don't see each tile being toggled
-                        Map<String, bool> toggled = {};
-
-                        for (final tile in checkedTiles.entries) {
-                          if (tile.value == true) {
-                            final isHidden = filter.entries
-                                .where((element) => element.id == tile.key)
-                                .first
-                                .hidden;
-
-                            late bool result;
-                            try {
-                              if (isHidden) {
-                                result = await sph!.parser.conversationsParser
-                                    .showConversation(tile.key);
-                              } else {
-                                result = await sph!.parser.conversationsParser
-                                    .hideConversation(tile.key);
-                              }
-                            } on NoConnectionException {
-                              setState(() {
-                                disableToggleButton = false;
-                              });
-
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                        icon: const Icon(Icons.wifi_off),
-                                        title: Text(
-                                            AppLocalizations.of(context)!
-                                                .noInternetConnection2),
-                                        actions: [
-                                          FilledButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text(
-                                                  AppLocalizations.of(context)!
-                                                      .back))
-                                        ],
-                                      ));
-                              return;
-                            }
-
-                            if (!result) {
-                              setState(() {
-                                disableToggleButton = false;
-                              });
-
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                        icon: const Icon(Icons.error),
-                                        title: Text(
-                                            AppLocalizations.of(context)!
-                                                .errorOccurred),
-                                        actions: [
-                                          FilledButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text(
-                                                  AppLocalizations.of(context)!
-                                                      .back))
-                                        ],
-                                      ));
-                              return;
-                            }
-
-                            toggled.addEntries([tile]);
-                            checkedTiles[tile.key] = false;
-                          }
-                        }
-
-                        for (final id in toggled.keys) {
-                          filter.toggleEntry(id, hidden: true);
-                        }
-
-                        filter.pushEntries();
-                        closeToggleMode();
-                      })
-              : FloatingActionButton(
-                  onPressed: () async {
-                    if (sph!.parser.conversationsParser.cachedCanChooseType != null) {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        if (sph!.parser.conversationsParser.cachedCanChooseType!) {
-                          return const TypeChooser();
-                        }
-                        return const CreateConversation(chatType: null);
-                      }));
-                      return;
-                    }
-
-                    setState(() {
-                      loadingCreateButton = true;
-                    });
-
-                    bool canChooseType;
-                    try {
-                      canChooseType =
-                          await sph!.parser.conversationsParser.canChooseType();
-                    } on NoConnectionException {
-                      setState(() {
-                        loadingCreateButton = false;
-                      });
-                      return;
-                    }
-
-                    setState(() {
-                      loadingCreateButton = false;
-                    });
-
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      if (canChooseType) {
-                        return const TypeChooser();
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              icon: const Icon(Icons.wifi_off),
+                              title: Text(
+                                  AppLocalizations.of(context)!
+                                      .noInternetConnection2),
+                              actions: [
+                                FilledButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .back))
+                              ],
+                            ));
+                        return;
                       }
-                      return const CreateConversation(chatType: null);
-                    }));
-                  },
-                  child: loadingCreateButton
-                      ? SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: const CircularProgressIndicator(),
-                        )
-                      : const Icon(Icons.edit),
-                )),
+
+                      if (!result) {
+                        setState(() {
+                          disableToggleButton = false;
+                        });
+
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              icon: const Icon(Icons.error),
+                              title: Text(
+                                  AppLocalizations.of(context)!
+                                      .errorOccurred),
+                              actions: [
+                                FilledButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .back))
+                              ],
+                            ));
+                        return;
+                      }
+
+                      toggled.addEntries([tile]);
+                      checkedTiles[tile.key] = false;
+                    }
+                  }
+
+                  for (final id in toggled.keys) {
+                    filter.toggleEntry(id, hidden: true);
+                  }
+
+                  filter.pushEntries();
+                  closeToggleMode();
+                })
+                : FloatingActionButton(
+              onPressed: () async {
+                if (sph!.parser.conversationsParser.cachedCanChooseType != null) {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    if (sph!.parser.conversationsParser.cachedCanChooseType!) {
+                      return const TypeChooser();
+                    }
+                    return const CreateConversation(chatType: null);
+                  }));
+                  return;
+                }
+
+                setState(() {
+                  loadingCreateButton = true;
+                });
+
+                bool canChooseType;
+                try {
+                  canChooseType =
+                  await sph!.parser.conversationsParser.canChooseType();
+                } on NoConnectionException {
+                  setState(() {
+                    loadingCreateButton = false;
+                  });
+                  return;
+                }
+
+                setState(() {
+                  loadingCreateButton = false;
+                });
+
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  if (canChooseType) {
+                    return const TypeChooser();
+                  }
+                  return const CreateConversation(chatType: null);
+                }));
+              },
+              child: loadingCreateButton
+                  ? SizedBox(
+                width: 24,
+                height: 24,
+                child: const CircularProgressIndicator(),
+              )
+                  : const Icon(Icons.edit),
+            )),
+      ),
     );
   }
 }
@@ -701,7 +711,7 @@ class ConversationTile extends StatelessWidget {
             ? Theme.of(context)
                 .colorScheme
                 .surfaceContainerLow
-                .withOpacity(0.75)
+                .withValues(alpha: 0.8)
             : null,
         child: Stack(
           alignment: Alignment.center,
@@ -719,11 +729,11 @@ class ConversationTile extends StatelessWidget {
                           ? Theme.of(context)
                               .colorScheme
                               .surfaceContainerHigh
-                              .withOpacity(0.5)
+                              .withValues(alpha: 0.5)
                           : Theme.of(context)
                               .colorScheme
                               .surfaceContainerLow
-                              .withOpacity(0.8),
+                              .withValues(alpha: 0.8),
                       size: 65,
                     ),
                   ),

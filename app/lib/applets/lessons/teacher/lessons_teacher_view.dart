@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LessonsTeacherView extends StatefulWidget {
-  const LessonsTeacherView({super.key});
+  final Function? openDrawerCb;
+  const LessonsTeacherView({super.key, this.openDrawerCb});
 
   @override
   State<LessonsTeacherView> createState() => _LessonsTeacherViewState();
