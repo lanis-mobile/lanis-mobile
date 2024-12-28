@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +26,8 @@ void main() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
+  enableTransparentNavigationBar();
+
   authenticationState.login();
 
   await setupBackgroundService(accountDatabase);
@@ -34,6 +39,25 @@ void main() async {
       child: const App(),
     ),
   );
+}
+
+// Or translucent when 3-Way.
+Future<void> enableTransparentNavigationBar() async {
+  if (Platform.isAndroid) {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+    int androidVersion = androidInfo.version.sdkInt;
+
+    // Android 10 and above
+    if (androidVersion >= 29) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.transparent,
+        ),
+      );
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+  }
 }
 
 class App extends StatelessWidget {
@@ -52,7 +76,11 @@ class App extends StatelessWidget {
           if (snapshot.data!['color'] == 'standard') {
             theme = Themes.standardTheme;
           } else if (snapshot.data!['color'] != 'standard' && snapshot.data!['color'] != 'dynamic') {
-            theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
+            if (Themes.flutterColorThemes.containsKey(snapshot.data!['color'])) {
+              theme = Themes.flutterColorThemes[snapshot.data!['color']!]!;
+            } else {
+              theme = Themes.standardTheme;
+            }
           } else {
             theme = Themes.standardTheme;
           }
@@ -102,7 +130,7 @@ class App extends StatelessWidget {
               SfGlobalLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
+            home: const Scaffold(
               body: StartupScreen(),
             ),
           );
@@ -115,7 +143,7 @@ class App extends StatelessWidget {
 Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
   return ListView(children: [
     Container(
-      color: Colors.red.withOpacity(0.1),
+      color: Colors.red.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.only(
             left: 20.0, right: 20.0, top: 32.0, bottom: 32.0),
