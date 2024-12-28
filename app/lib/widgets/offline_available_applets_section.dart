@@ -71,7 +71,7 @@ class _OfflineAvailableAppletsSectionState extends State<OfflineAvailableApplets
                     appBar: AppBar(
                       title: Text(offlineApplet.definition.label(context)),
                     ),
-                    body: offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student),
+                    body: offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student, () {}),
                   ),
                 ),
               );

@@ -12,10 +12,8 @@ import '../background_service.dart';
 import '../core/sph/sph.dart';
 
 typedef StringBuildContextCallback = String Function(BuildContext context);
-typedef WidgetBuildBody = Widget Function(
-    BuildContext context, AccountType accountType);
-typedef BackgroundTaskFunction = Future<void> Function(
-    SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit);
+typedef WidgetBuildBody = Widget Function(BuildContext context, AccountType accountType, Function openDrawerCb);
+typedef BackgroundTaskFunction = Future<void> Function(SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit);
 
 enum AppletType {
   nested,

@@ -20,7 +20,7 @@ final dataStorageDefinition = AppletDefinition(
   allowOffline: false,
   settingsDefaults: {},
   refreshInterval: const Duration(minutes: 5),
-  bodyBuilder: (context, accountType) {
+  bodyBuilder: (context, accountType, openDrawerCb) {
     return DataStorageRootView();
   },
 );

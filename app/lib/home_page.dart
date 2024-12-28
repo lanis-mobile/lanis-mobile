@@ -28,7 +28,7 @@ class Destination {
   final bool addDivider;
   final String Function(BuildContext) label;
   final ActionFunction? action;
-  final Widget Function(BuildContext, AccountType)? body;
+  final Widget Function(BuildContext, AccountType, Function openDrawerCb)? body;
   late final bool isSupported;
 
   Destination(
@@ -51,7 +51,7 @@ class Destination {
           ? (context) =>
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                 return appletDefinition.bodyBuilder!(
-                    context, sph!.session.accountType);
+                    context, sph!.session.accountType, () {});
               }))
           : null,
       addDivider: appletDefinition.addDivider,
@@ -74,6 +74,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+
   late int selectedDestinationDrawer;
   late bool doesSupportAnyApplet = false;
   List<Destination> destinations = [];
@@ -223,7 +225,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     final Color imageColor =
-        Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+        Theme.of(context).colorScheme.inversePrimary.withValues(alpha: 0.5);
     final Color textColor =
         imageColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
 
@@ -350,11 +352,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(doesSupportAnyApplet
-            ? destinations[selectedDestinationDrawer].label(context)
-            : AppLocalizations.of(context)!.openLanisInBrowser),
-      ),
+      key: _drawerKey,
       body: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -386,7 +384,9 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: doesSupportAnyApplet
                 ? destinations[selectedDestinationDrawer].body!(
-                context, sph!.session.accountType)
+                context, sph!.session.accountType, () {
+              _drawerKey.currentState!.openDrawer();
+            })
                 : noAppsSupported(),
           )
         ],

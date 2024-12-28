@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import '../../core/applet_parser.dart';
 import '../../models/client_status_exceptions.dart';
 import '../../models/substitution.dart';
-import '../../utils/logger.dart';
 
 class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
   final DateFormat entryFormat = DateFormat('dd_MM_yyyy');
@@ -211,10 +210,6 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
   }
 
   List<SubstitutionInfo> parseInformationTables(Element element) {
-    // Select table by multiple classes
-    // Is this a good way? No. Does it work? Yes. Hopefully.
-    var infoHeaders = element.querySelectorAll('h3.hidden-xs');
-    logger.d('Found ${infoHeaders.length} info headers');
     List<SubstitutionInfo> infos = [];
 
     List<Element> tables = element.getElementsByClassName('infos');

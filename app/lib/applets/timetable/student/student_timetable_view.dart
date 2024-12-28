@@ -10,7 +10,8 @@ import '../../../core/sph/sph.dart';
 import '../../../models/timetable.dart';
 
 class StudentTimetableView extends StatefulWidget {
-  const StudentTimetableView({super.key});
+  final Function? openDrawerCb;
+  const StudentTimetableView({super.key, this.openDrawerCb});
 
   @override
   State<StudentTimetableView> createState() => _StudentTimetableViewState();
@@ -88,6 +89,13 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
         };
 
         return Scaffold(
+            appBar: widget.openDrawerCb != null ? AppBar(
+              title: Text(timeTableDefinition.label(context)),
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              ),
+            ) : null,
             body: Stack(
               children: [
                 SfCalendar(

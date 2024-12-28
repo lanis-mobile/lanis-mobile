@@ -18,7 +18,7 @@ final substitutionDefinition = AppletDefinition(
   refreshInterval: Duration(minutes: 10),
   settingsDefaults: {},
   notificationTask: substitutionsBackgroundTask,
-  bodyBuilder: (context, accountType) {
-    return SubstitutionsView();
+  bodyBuilder: (context, accountType, openDrawerCb) {
+    return SubstitutionsView(openDrawerCb: openDrawerCb,);
   },
 );

@@ -17,8 +17,8 @@ final conversationsDefinition = AppletDefinition(
   settingsDefaults: {},
   notificationTask: (sph, accountType, toolkit) async {return;},
   refreshInterval: const Duration(minutes: 2),
-  bodyBuilder: (context, accountType) {
-    return ConversationsView();
+  bodyBuilder: (context, accountType, openDrawerCb) {
+    return ConversationsView(openDrawerCb: openDrawerCb);
   },
 
 );

@@ -16,7 +16,8 @@ import '../../widgets/error_view.dart';
 import '../../utils/logger.dart';
 
 class CalendarView extends StatefulWidget {
-  const CalendarView({super.key});
+  final Function? openDrawerCb;
+  const CalendarView({super.key, this.openDrawerCb});
 
   @override
   State<CalendarView> createState() => _CalendarViewState();
@@ -345,183 +346,194 @@ class _CalendarViewState extends State<CalendarView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Focus(
-            onFocusChange: (hasFocus) {
-              if (hasFocus == true && noTrigger == false) {
-                FocusManager.instance.primaryFocus?.consumeKeyboardToken();
+    return Scaffold(
+      appBar: widget.openDrawerCb != null
+          ? AppBar(
+        title: Text(calendarDefinition.label(context)),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => widget.openDrawerCb!(),
+        ),
+      )
+          : null,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Focus(
+              onFocusChange: (hasFocus) {
+                if (hasFocus == true && noTrigger == false) {
+                  FocusManager.instance.primaryFocus?.consumeKeyboardToken();
 
-                if (keyboardObserver.value == KeyboardStatus.closed) {
-                  FocusManager.instance.primaryFocus?.unfocus();
+                  if (keyboardObserver.value == KeyboardStatus.closed) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
                 }
-              }
-            },
-            child: SearchAnchor.bar(
-              searchController: searchController,
-              isFullScreen: false,
-              viewLeading: IconButton(
-                  onPressed: () {
-                    searchController.closeView(null);
-                  },
-                  icon: Icon(Icons.arrow_back)
+              },
+              child: SearchAnchor.bar(
+                searchController: searchController,
+                isFullScreen: false,
+                viewLeading: IconButton(
+                    onPressed: () {
+                      searchController.closeView(null);
+                    },
+                    icon: Icon(Icons.arrow_back)
+                ),
+                barTrailing: [
+                  if (!_selectedDay!.isSameDay(DateTime.now())) IconButton(
+                    icon: const Icon(Icons.restore),
+                    onPressed: () {
+                      setState(() {
+                        searchController.text = "";
+                        _selectedDay = DateTime.now();
+                        _focusedDay = DateTime.now();
+                      });
+                    },
+                  ),
+                ],
+                onSubmitted: (_) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                suggestionsBuilder: (context, _searchController) {
+                  final results = fuzzySearchEventList(_searchController.text);
+
+                  return results.map((event) => ListTile(
+                    title: Text(event.title),
+                    subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                    leading: event.endTime.isBefore(DateTime.now()) ? const Icon(Icons.done) : const Icon(Icons.event),
+                    onTap: () async {
+                      setState(() {
+                        _selectedDay = event.startTime;
+                        _focusedDay = event.startTime;
+                      });
+                      searchController.closeView(null);
+
+                      noTrigger = true;
+                      if (keyboardObserver.value == KeyboardStatus.closed) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      }
+
+                      await openEventBottomSheet(event).whenComplete(() {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        noTrigger = false;
+                      });
+                    },
+                  ),
+                  ).toList();
+                },
               ),
-              barTrailing: [
-                if (!_selectedDay!.isSameDay(DateTime.now())) IconButton(
-                  icon: const Icon(Icons.restore),
-                  onPressed: () {
-                    setState(() {
-                      searchController.text = "";
-                      _selectedDay = DateTime.now();
-                      _focusedDay = DateTime.now();
-                    });
-                  },
-                ),
-              ],
-              onSubmitted: (_) {
-                FocusManager.instance.primaryFocus?.unfocus();
-              },
-              suggestionsBuilder: (context, _searchController) {
-                final results = fuzzySearchEventList(_searchController.text);
-
-                return results.map((event) => ListTile(
-                  title: Text(event.title),
-                  subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
-                  leading: event.endTime.isBefore(DateTime.now()) ? const Icon(Icons.done) : const Icon(Icons.event),
-                  onTap: () async {
-                    setState(() {
-                      _selectedDay = event.startTime;
-                      _focusedDay = event.startTime;
-                    });
-                    searchController.closeView(null);
-
-                    noTrigger = true;
-                    if (keyboardObserver.value == KeyboardStatus.closed) {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    }
-
-                    await openEventBottomSheet(event).whenComplete(() {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      noTrigger = false;
-                    });
-                  },
-                ),
-                ).toList();
-              },
             ),
           ),
-        ),
-        Expanded(
-            child: CombinedAppletBuilder<List<CalendarEvent>>(
-                parser: sph!.parser.calendarParser,
-                phpUrl: calendarDefinition.appletPhpUrl,
-                settingsDefaults: calendarDefinition.settingsDefaults,
-                accountType: sph!.session.accountType,
-                builder: (context, data, accountType, settings, updateSetting, refresh) {
-                  eventList = data;
-                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+          Expanded(
+              child: CombinedAppletBuilder<List<CalendarEvent>>(
+                  parser: sph!.parser.calendarParser,
+                  phpUrl: calendarDefinition.appletPhpUrl,
+                  settingsDefaults: calendarDefinition.settingsDefaults,
+                  accountType: sph!.session.accountType,
+                  builder: (context, data, accountType, settings, updateSetting, refresh) {
+                    eventList = data;
+                    _selectedEvents.value = _getEventsForDay(_selectedDay!);
 
-                  return Column(
-                    children: [
-                      TableCalendar<CalendarEvent>(
-                        locale: AppLocalizations.of(context)!.locale,
-                        firstDay: DateTime.utc(2020),
-                        lastDay: DateTime.utc(2030),
-                        availableCalendarFormats: {
-                          CalendarFormat.month:
-                          AppLocalizations.of(context)!.calendarFormatMonth,
-                          CalendarFormat.twoWeeks:
-                          AppLocalizations.of(context)!.calendarFormatTwoWeeks,
-                          CalendarFormat.week:
-                          AppLocalizations.of(context)!.calendarFormatWeek,
-                        },
-                        focusedDay: _focusedDay,
-                        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                        calendarFormat: _calendarFormat,
-                        eventLoader: _getEventsForDay,
-                        startingDayOfWeek: StartingDayOfWeek.monday,
-                        calendarStyle: CalendarStyle(
-                            outsideDaysVisible: false,
-                            defaultDecoration:
-                            const BoxDecoration(shape: BoxShape.circle),
-                            selectedDecoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                shape: BoxShape.circle),
-                            selectedTextStyle: TextStyle(
-                                fontSize: 16.0,
-                                color: Theme.of(context).colorScheme.onPrimary),
-                            todayDecoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondary,
-                              shape: BoxShape.circle,
-                            ),
-                            todayTextStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onSecondary,
-                              fontSize: 16,
-                            ),
-                            markerDecoration: BoxDecoration(
+                    return Column(
+                      children: [
+                        TableCalendar<CalendarEvent>(
+                          locale: AppLocalizations.of(context)!.locale,
+                          firstDay: DateTime.utc(2020),
+                          lastDay: DateTime.utc(2030),
+                          availableCalendarFormats: {
+                            CalendarFormat.month:
+                            AppLocalizations.of(context)!.calendarFormatMonth,
+                            CalendarFormat.twoWeeks:
+                            AppLocalizations.of(context)!.calendarFormatTwoWeeks,
+                            CalendarFormat.week:
+                            AppLocalizations.of(context)!.calendarFormatWeek,
+                          },
+                          focusedDay: _focusedDay,
+                          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                          calendarFormat: _calendarFormat,
+                          eventLoader: _getEventsForDay,
+                          startingDayOfWeek: StartingDayOfWeek.monday,
+                          calendarStyle: CalendarStyle(
+                              outsideDaysVisible: false,
+                              defaultDecoration:
+                              const BoxDecoration(shape: BoxShape.circle),
+                              selectedDecoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle),
+                              selectedTextStyle: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Theme.of(context).colorScheme.onPrimary),
+                              todayDecoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.secondary,
                                 shape: BoxShape.circle,
-                                color: Theme.of(context).colorScheme.inversePrimary)),
-                        onDaySelected: _onDaySelected,
-                        pageJumpingEnabled: true,
-                        onFormatChanged: (format) {
-                          if (_calendarFormat != format) {
-                            setState(() {
-                              _calendarFormat = format;
-                            });
-                          }
-                        },
-                        headerStyle: HeaderStyle(
-                          formatButtonTextStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary),
-                          formatButtonDecoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                        onPageChanged: (focusedDay) {
-                          _focusedDay = focusedDay;
-                        },
-                      ),
-                      Expanded(
-                        child: ValueListenableBuilder<List<CalendarEvent>>(
-                          valueListenable: _selectedEvents,
-                          builder: (context, value, _) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: ListView.builder(
-                                itemCount: value.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8, right: 8, bottom: 4),
-                                    child: Card(
-                                      child: ListTile(
-                                        title: Text(value[index].title),
-                                        trailing: const Icon(Icons.arrow_right),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        onTap: () async {
-                                          await openEventBottomSheet(value[index]);
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
                               ),
-                            );
+                              todayTextStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.onSecondary,
+                                fontSize: 16,
+                              ),
+                              markerDecoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Theme.of(context).colorScheme.inversePrimary)),
+                          onDaySelected: _onDaySelected,
+                          pageJumpingEnabled: true,
+                          onFormatChanged: (format) {
+                            if (_calendarFormat != format) {
+                              setState(() {
+                                _calendarFormat = format;
+                              });
+                            }
+                          },
+                          headerStyle: HeaderStyle(
+                            formatButtonTextStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary),
+                            formatButtonDecoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          onPageChanged: (focusedDay) {
+                            _focusedDay = focusedDay;
                           },
                         ),
-                      ),
-                    ],
-                  );
-                }
-            )
-        ),
-      ],
+                        Expanded(
+                          child: ValueListenableBuilder<List<CalendarEvent>>(
+                            valueListenable: _selectedEvents,
+                            builder: (context, value, _) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: ListView.builder(
+                                  itemCount: value.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 8, right: 8, bottom: 4),
+                                      child: Card(
+                                        child: ListTile(
+                                          title: Text(value[index].title),
+                                          trailing: const Icon(Icons.arrow_right),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          onTap: () async {
+                                            await openEventBottomSheet(value[index]);
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+              )
+          ),
+        ],
+      ),
     );
   }
 }
