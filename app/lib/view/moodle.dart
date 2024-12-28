@@ -546,81 +546,83 @@ class _MoodleWebViewState extends State<MoodleWebView> {
           ],
         ),
         bottomNavigationBar: isLoggedIn
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ValueListenableBuilder(
-                      valueListenable: progressIndicator,
-                      builder: (context, progress, _) {
-                        return Visibility(
-                          visible: progress != 0,
-                          maintainSize: true,
-                          maintainState: true,
-                          maintainAnimation: true,
-                          child: LinearProgressIndicator(
-                            value: progress / 100,
-                          ),
-                        );
-                      }),
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: refresh, icon: const Icon(Icons.refresh)),
-                      IconButton(
-                          onPressed: () async {
-                            if (error != null) {
-                              await Clipboard.setData(ClipboardData(
-                                  text: errorUrl?.rawValue ?? "Unknown error"));
-
-                              return;
-                            }
-
-                            if (webViewController != null) {
-                              await Clipboard.setData(ClipboardData(
-                                  text: (await webViewController!.getUrl())!
-                                      .rawValue));
-                            }
-                          },
-                          icon: const Icon(Icons.link)),
-                      Expanded(
-                        child: error == null
-                            ? Center(
-                                child: ValueListenableBuilder(
-                                valueListenable: currentPageTitle,
-                                builder: (context, title, _) => Text(
-                                  title,
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ))
-                            : SizedBox.shrink(),
-                      ),
-                      ValueListenableBuilder(
-                          valueListenable: canGoBack,
-                          builder: (context, can, _) {
-                            return IconButton(
-                                onPressed: can
-                                    ? () {
-                                        webViewController?.goBack();
-                                      }
-                                    : null,
-                                icon: const Icon(Icons.arrow_back));
-                          }),
-                      ValueListenableBuilder(
-                          valueListenable: canGoForward,
-                          builder: (context, can, _) {
-                            return IconButton(
-                                onPressed: can
-                                    ? () {
-                                        webViewController?.goForward();
-                                      }
-                                    : null,
-                                icon: const Icon(Icons.arrow_forward));
-                          }),
-                    ],
-                  ),
-                ],
-              )
+            ? SafeArea(
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ValueListenableBuilder(
+                        valueListenable: progressIndicator,
+                        builder: (context, progress, _) {
+                          return Visibility(
+                            visible: progress != 0,
+                            maintainSize: true,
+                            maintainState: true,
+                            maintainAnimation: true,
+                            child: LinearProgressIndicator(
+                              value: progress / 100,
+                            ),
+                          );
+                        }),
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: refresh, icon: const Icon(Icons.refresh)),
+                        IconButton(
+                            onPressed: () async {
+                              if (error != null) {
+                                await Clipboard.setData(ClipboardData(
+                                    text: errorUrl?.rawValue ?? "Unknown error"));
+              
+                                return;
+                              }
+              
+                              if (webViewController != null) {
+                                await Clipboard.setData(ClipboardData(
+                                    text: (await webViewController!.getUrl())!
+                                        .rawValue));
+                              }
+                            },
+                            icon: const Icon(Icons.link)),
+                        Expanded(
+                          child: error == null
+                              ? Center(
+                                  child: ValueListenableBuilder(
+                                  valueListenable: currentPageTitle,
+                                  builder: (context, title, _) => Text(
+                                    title,
+                                    style: Theme.of(context).textTheme.labelLarge,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ))
+                              : SizedBox.shrink(),
+                        ),
+                        ValueListenableBuilder(
+                            valueListenable: canGoBack,
+                            builder: (context, can, _) {
+                              return IconButton(
+                                  onPressed: can
+                                      ? () {
+                                          webViewController?.goBack();
+                                        }
+                                      : null,
+                                  icon: const Icon(Icons.arrow_back));
+                            }),
+                        ValueListenableBuilder(
+                            valueListenable: canGoForward,
+                            builder: (context, can, _) {
+                              return IconButton(
+                                  onPressed: can
+                                      ? () {
+                                          webViewController?.goForward();
+                                        }
+                                      : null,
+                                  icon: const Icon(Icons.arrow_forward));
+                            }),
+                      ],
+                    ),
+                  ],
+                ),
+            )
             : SizedBox.shrink());
   }
 }
