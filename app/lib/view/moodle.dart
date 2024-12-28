@@ -11,6 +11,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io' as dio_core;
 
 import '../core/connection_checker.dart';
+import '../core/native_adapter_instance.dart';
 import '../core/sph/sph.dart';
 import '../utils/file_operations.dart';
 
@@ -77,6 +78,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     try {
       final dio = Dio(BaseOptions(validateStatus: (status) => status != null));
       final jar = CookieJar();
+      dio.httpClientAdapter = getNativeAdapterInstance();
       dio.options.followRedirects = false;
       dio.interceptors.add(dio_plugin.CookieManager(jar));
 

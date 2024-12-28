@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
@@ -28,11 +29,13 @@ class SessionHandler {
   /// a Map containing the user data parsed from
   /// 'https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData'
   Map<String, String> userData = {};
+  AccountType? _accountType;
 
   /// Lanis fast travel menu obtained from
   /// 'https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps'
   List<dynamic> travelMenu = [];
 
+  AccountType get accountType => _accountType!;
 
   SessionHandler({required this.sph, String? withLoginURL,});
 
@@ -63,7 +66,8 @@ class SessionHandler {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
         });
-        return handler.next(options); //continue
+        options.queryParameters['_cachebreaker'] = DateTime.now().millisecondsSinceEpoch.toString();
+        return handler.next(options);
       },
     ));
     dio.options.followRedirects = false;
@@ -100,7 +104,12 @@ class SessionHandler {
     travelMenu = await getFastTravelMenu();
     if (!withoutData) {
       accountDatabase.updateLastLogin(sph.account.localId);
-      userData = await fetchUserData();
+
+      final response = await dio.get(
+          "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
+      userData = parseUserData(parse(response.data));
+      _accountType = parseAccountType(parse(response.data));
+
       await accountDatabase.setAccountType(sph.account.localId, accountType);
     }
 
@@ -190,11 +199,8 @@ class SessionHandler {
     return jsonDecode(response.data.toString())["entrys"];
   }
 
-  ///parsed personal information of the user.
-  Future<Map<String, String>> fetchUserData() async {
-    final response = await dio.get(
-        "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
-    var document = parse(response.data);
+  ///Parses the user data from the user data page.
+  Map<String, String> parseUserData(Document document) {
     var userDataTableBody =
     document.querySelector("div.col-md-12 table.table.table-striped tbody");
 
@@ -215,6 +221,21 @@ class SessionHandler {
     } else {
       return {};
     }
+
+  }
+
+  AccountType parseAccountType(Document document) {
+    final iconClassList = document.querySelector('.nav.navbar-nav.navbar-right>li>a>i')!.classes;
+    if (iconClassList.contains('fa-child')) {
+      return AccountType.student;
+    } else if (iconClassList.contains('fa-user-circle')) {
+      return AccountType.parent;
+    } else if (iconClassList.contains('fa-user')) {
+      return AccountType.teacher;
+    } else {
+      logger.f('Unknown account type observed, while parsing account data');
+      throw Exception('Unknown account type');
+    }
   }
 
   bool doesSupportFeature(AppletDefinition applet) {
@@ -225,15 +246,5 @@ class SessionHandler {
       return false;
     }
     return applet.supportedAccountTypes.contains(accountType);
-  }
-  
-
-  AccountType get accountType => _getAccountType();
-  AccountType _getAccountType() {
-    if (userData.containsKey("klasse")) {
-      return AccountType.student;
-    } else {
-      return AccountType.teacher;
-    }
   }
 }

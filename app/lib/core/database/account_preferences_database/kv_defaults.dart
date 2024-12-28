@@ -8,5 +8,5 @@ const Map<String, String> kvDefaults = {
   "theme": "system",
   "isAmoled": "false",
   "substitutionsFilter": "",
-  "lastPushMessageHash": "",
+  "lastPushMessageHash": ""
 };

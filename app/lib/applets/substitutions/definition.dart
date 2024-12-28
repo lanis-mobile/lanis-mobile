@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_view.dart';
 
 import '../../models/account_types.dart';
