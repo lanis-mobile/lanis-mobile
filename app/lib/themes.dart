@@ -87,6 +87,8 @@ class Themes {
           surfaceTintColor: amoledColors[AmoledColor.third],
         ),
         colorScheme: themes.darkTheme?.colorScheme.copyWith(
+          surfaceContainer: amoledColors[AmoledColor.background],
+          surfaceContainerHighest: themes.darkTheme?.cardColor,
           surfaceContainerHigh: amoledColors[AmoledColor.background],
           surfaceContainerLow: amoledColors[AmoledColor.secondary],
           surfaceContainerLowest: amoledColors[AmoledColor.third],
