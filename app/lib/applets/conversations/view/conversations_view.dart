@@ -741,7 +741,7 @@ class ConversationTile extends StatelessWidget {
                               ? Theme.of(context)
                                 .colorScheme
                                 .surfaceContainerHighest
-                                .withValues(alpha: 0.5)
+                                .withValues(alpha: 0.7)
                               : Theme.of(context)
                                 .colorScheme
                                 .surfaceContainerHigh
