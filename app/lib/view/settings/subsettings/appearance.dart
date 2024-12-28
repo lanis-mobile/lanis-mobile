@@ -82,7 +82,7 @@ class _AppearanceSettingsState
                   ),
                   MinimalSwitchTile(
                       title: Text(
-                        AppLocalizations.of(context)!.blackMode,
+                        AppLocalizations.of(context)!.amoledMode,
                       ),
                       leading: Icon(Icons.contrast_rounded),
                       contentPadding:

@@ -41,7 +41,7 @@
   "theme": "Thema",
   "light": "Hell",
   "dark": "Dunkel",
-  "blackMode": "Schwarzer Modus",
+  "amoledMode": "AMOLED / Mitternachts modus",
   "system": "System",
   "accentColor": "Akzent Farbe",
   "standard": "Standart",
