@@ -23,6 +23,12 @@ void main() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+    ),
+  );
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   authenticationState.login();
