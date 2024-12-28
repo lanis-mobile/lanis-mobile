@@ -32,13 +32,16 @@ class SettingsPage extends StatelessWidget {
   final Text title;
   final List<Widget> children;
   final EdgeInsets contentPadding;
+  final void Function()? back;
 
-  const SettingsPage(
-      {super.key,
-      required this.backgroundColor,
-      required this.title,
-      this.contentPadding = EdgeInsets.zero,
-      required this.children});
+  const SettingsPage({
+    super.key,
+    required this.backgroundColor,
+    required this.title,
+    this.contentPadding = EdgeInsets.zero,
+    this.back,
+    required this.children,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +50,7 @@ class SettingsPage extends StatelessWidget {
       appBar: LargeAppBar(
         title: title,
         backgroundColor: backgroundColor,
+        back: back,
       ),
       body: Padding(
         padding: contentPadding,
@@ -64,12 +68,14 @@ class SettingsPageWithRefreshIndicator extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsets contentPadding;
   final Future<void> Function() onRefresh;
+  final void Function()? back;
 
   const SettingsPageWithRefreshIndicator(
       {super.key,
       required this.backgroundColor,
       required this.title,
       this.contentPadding = EdgeInsets.zero,
+      this.back,
       required this.onRefresh,
       required this.children});
 
@@ -80,6 +86,7 @@ class SettingsPageWithRefreshIndicator extends StatelessWidget {
       appBar: LargeAppBar(
         title: title,
         backgroundColor: backgroundColor,
+        back: back,
       ),
       body: Padding(
         padding: contentPadding,
@@ -102,6 +109,7 @@ class SettingsPageWithStreamBuilder extends StatelessWidget {
   final Text title;
   final SettingsListBuilder builder;
   final EdgeInsets contentPadding;
+  final void Function()? back;
   final Stream<Map<String, String?>> subscription;
 
   const SettingsPageWithStreamBuilder(
@@ -109,6 +117,7 @@ class SettingsPageWithStreamBuilder extends StatelessWidget {
       required this.backgroundColor,
       required this.title,
       this.contentPadding = EdgeInsets.zero,
+      this.back,
       required this.subscription,
       required this.builder});
 
@@ -119,6 +128,7 @@ class SettingsPageWithStreamBuilder extends StatelessWidget {
       appBar: LargeAppBar(
         title: title,
         backgroundColor: backgroundColor,
+        back: back,
       ),
       body: Padding(
         padding: contentPadding,

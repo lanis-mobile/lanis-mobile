@@ -12,6 +12,7 @@ import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
 import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
+import '../../utils/press_tile.dart';
 
 class SettingsGroup {
   final List<SettingsTile> tiles;
@@ -148,7 +149,41 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     ]),
   ];
 
-  BorderRadius getRadius(int index, int length) {
+  @override
+  Widget build(BuildContext context) {
+    return SettingsPage(
+      backgroundColor: backgroundColor,
+      title: Text(
+        "Settings",
+      ),
+      children: List.generate(settingsTiles.length, (groupIndex) {
+        return Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 12.0),
+          child: Column(
+            spacing: 2.0,
+              children: List.generate(settingsTiles[groupIndex].tiles.length,
+                  (tileIndex) {
+            return SettingsTileWidget(
+              tile: settingsTiles[groupIndex].tiles[tileIndex],
+              index: tileIndex,
+              length: settingsTiles[groupIndex].tiles.length,
+              foregroundColor: foregroundColor,
+            );
+          })),
+        );
+      }),
+    );
+  }
+}
+
+class SettingsTileWidget extends StatefulWidget {
+  final SettingsTile tile;
+  final int index;
+  final int length;
+  final Color foregroundColor;
+  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length});
+
+  static BorderRadius getRadius(int index, int length) {
     if (index == 0 && length > 1) {
       return BorderRadius.only(
           topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0));
@@ -164,99 +199,60 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsPage(
-      backgroundColor: backgroundColor,
-      title: Text(
-        "Settings",
-      ),
-      children: List.generate(settingsTiles.length, (groupIndex) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
-          child: Column(
-              children: List.generate(settingsTiles[groupIndex].tiles.length,
-                  (tileIndex) {
-            return FutureBuilder(
-              future: Future.wait([
-                settingsTiles[groupIndex].tiles[tileIndex].show(),
-                settingsTiles[groupIndex].tiles[tileIndex].subtitle(context),
-              ]),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return SizedBox.shrink();
-                }
+  State<SettingsTileWidget> createState() => _SettingsTileWidgetState();
+}
 
-                return Visibility(
-                  visible: snapshot.data![0] as bool,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 2.0),
-                    child: Material(
-                      color: foregroundColor,
-                      borderRadius: getRadius(
-                          tileIndex, settingsTiles[groupIndex].tiles.length),
-                      child: InkWell(
-                        onTap: () async {
-                          await settingsTiles[groupIndex]
-                              .tiles[tileIndex]
-                              .screen(context);
-                        },
-                        borderRadius: getRadius(
-                            tileIndex, settingsTiles[groupIndex].tiles.length),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 12.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                  settingsTiles[groupIndex]
-                                      .tiles[tileIndex]
-                                      .icon,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface),
-                              SizedBox(
-                                width: 16,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    settingsTiles[groupIndex]
-                                        .tiles[tileIndex]
-                                        .title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                        ),
-                                  ),
-                                  Text(
-                                    snapshot.data![1] as String,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+class _SettingsTileWidgetState extends State<SettingsTileWidget> {
+  String subtitle = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Future.wait([
+        widget.tile.show(),
+        widget.tile.subtitle(context),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return PressTile(
+            title: widget.tile.title,
+            subtitle: subtitle,
+            icon: widget.tile.icon,
+            onPressed: () async {
+              await widget.tile.screen(context);
+
+              setState(() {
+
+              });
+            },
+            foregroundColor: widget.foregroundColor,
+            borderRadius: SettingsTileWidget.getRadius(
+                widget.index, widget.length),
+          );
+        }
+
+        subtitle = snapshot.data![1] as String;
+
+        return Visibility(
+          visible: snapshot.data![0] as bool,
+            child: PressTile(
+              title: widget.tile.title,
+              subtitle: subtitle,
+              icon: widget.tile.icon,
+              onPressed: () async {
+                await widget.tile.screen(context);
+
+                setState(() {
+
+                });
               },
-            );
-          })),
+              foregroundColor: widget.foregroundColor,
+              borderRadius: SettingsTileWidget.getRadius(
+                  widget.index, widget.length),
+            )
         );
-      }),
+      },
     );
   }
 }
+
