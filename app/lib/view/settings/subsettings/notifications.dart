@@ -9,6 +9,7 @@ import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/utils/switch_tile.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/callout.dart';
@@ -88,7 +89,7 @@ class _NotificationSettingsState
     return SettingsPageWithStreamBuilder(
         backgroundColor: backgroundColor,
         title: Text(
-          "Notifications",
+          AppLocalizations.of(context)!.notifications,
         ),
         subscription: sph!.prefs.kv.subscribeMultiple(getDatabaseKeys()),
         builder: (context, snapshot) {
@@ -108,9 +109,9 @@ class _NotificationSettingsState
               Callout(
                 leading: Icon(Icons.error_rounded),
                 title: Text(
-                  "You didn’t authorise notifications!",
+                  AppLocalizations.of(context)!.deniedNotificationPermissions,
                 ),
-                buttonText: Text("Open system settings"),
+                buttonText: Text(AppLocalizations.of(context)!.openSystemSettings),
                 onPressed: () {
                   AppSettings.openAppSettings(
                       type: AppSettingsType.notification);
@@ -143,7 +144,7 @@ class _NotificationSettingsState
                         horizontal: 20.0, vertical: 8.0),
                     child: MinimalSwitchTile(
                       title: Text(
-                        "Use notifications",
+                        AppLocalizations.of(context)!.useNotifications,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                               color: notificationsAllowed
                                   ? Theme.of(context)
@@ -156,7 +157,7 @@ class _NotificationSettingsState
                       ),
                       subtitle: widget.accountCount > 1
                           ? Text(
-                              "For this account",
+                          AppLocalizations.of(context)!.forThisAccount,
                             )
                           : null,
                       value: notificationsEnabled,
@@ -179,7 +180,7 @@ class _NotificationSettingsState
                   padding: const EdgeInsets.only(left: 16.0),
                   child: SliderTile(
                     title: Text(
-                      "Update interval",
+                      AppLocalizations.of(context)!.updateInterval,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                             color: notificationsActive
                                 ? Theme.of(context).colorScheme.onSurface
@@ -264,7 +265,7 @@ class _NotificationSettingsState
                   padding: const EdgeInsets.only(left: 16.0),
                   child: SliderTile(
                     title: Text(
-                      "Update interval",
+                      AppLocalizations.of(context)!.updateInterval,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                             color: notificationsAllowed
                                 ? Theme.of(context).colorScheme.onSurface
@@ -274,7 +275,7 @@ class _NotificationSettingsState
                           ),
                     ),
                     subtitle: Text(
-                      "For every account",
+                      AppLocalizations.of(context)!.forEveryAccount,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -328,7 +329,7 @@ class _NotificationSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                "The frequency and time at which everything is updated depends on various factors relating to the end device.",
+                AppLocalizations.of(context)!.settingsInfoNotifications,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -343,14 +344,14 @@ class _NotificationSettingsState
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: "Other settings are available in the ",
+                      text: AppLocalizations.of(context)!.otherSettingsAvailablePart1,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     TextSpan(
-                      text: "system settings",
+                      text: AppLocalizations.of(context)!.systemSettings,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             decoration: TextDecoration.underline,
@@ -362,7 +363,7 @@ class _NotificationSettingsState
                         },
                     ),
                     TextSpan(
-                      text: ".",
+                      text: AppLocalizations.of(context)!.otherSettingsAvailablePart2,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,

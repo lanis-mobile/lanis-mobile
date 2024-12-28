@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/logger.dart';
@@ -68,7 +69,7 @@ class AvatarTile extends StatelessWidget {
 }
 
 class AboutLink {
-  final String title;
+  final String Function(BuildContext context) title;
   final Future<void> Function(BuildContext context) onTap;
   final IconData iconData;
 
@@ -109,41 +110,41 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
 
   final List<AboutLink> links = [
     AboutLink(
-      title: "GitHub Repository",
+      title: (context) => AppLocalizations.of(context)!.githubRepository,
       iconData: Icons.code_outlined,
       onTap: (context) =>
           launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile")),
     ),
     AboutLink(
-      title: "Discord Server",
+      title: (context) => AppLocalizations.of(context)!.discordServer,
       iconData: Icons.diversity_3_outlined,
       onTap: (context) => launchUrl(Uri.parse("https://discord.gg/sWJXZ8FsU7")),
     ),
     AboutLink(
-      title: "Feature request",
+      title: (context) => AppLocalizations.of(context)!.featureRequest,
       iconData: Icons.add_comment_outlined,
       onTap: (context) => launchUrl(Uri.parse(
           "https://github.com/alessioC42/lanis-mobile/issues/new/choose")),
     ),
     AboutLink(
-      title: "Latest release",
+      title: (context) => AppLocalizations.of(context)!.latestRelease,
       iconData: Icons.update_outlined,
       onTap: (context) => launchUrl(Uri.parse(
           "https://github.com/alessioC42/lanis-mobile/releases/latest")),
     ),
     AboutLink(
-      title: "Privacy policy",
+      title: (context) => AppLocalizations.of(context)!.privacyPolicy,
       iconData: Icons.security_outlined,
       onTap: (context) => launchUrl(Uri.parse(
           "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
     ),
     AboutLink(
-      title: "Open-Source licenses",
+      title: (context) => AppLocalizations.of(context)!.openSourceLicenses,
       iconData: Icons.info_outline_rounded,
       onTap: (context) async => showLicensePage(context: context),
     ),
     AboutLink(
-      title: "Build information",
+      title: (context) => AppLocalizations.of(context)!.buildInformation,
       iconData: Icons.build_outlined,
       onTap: (context) async {
         final packageInfo = await PackageInfo.fromPlatform();
@@ -152,7 +153,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: const Text("App Information"),
+                title: Text(AppLocalizations.of(context)!.appInformation),
                 content: Text(
                     "appName: ${packageInfo.appName}\npackageName: ${packageInfo.packageName}\nversion: ${packageInfo.version}\nbuildNumber: ${packageInfo.buildNumber}\nisDebug: $kDebugMode\nisProfile: $kProfileMode\nisRelease: $kReleaseMode\n"),
               );
@@ -172,7 +173,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
   Widget build(BuildContext context) {
     return SettingsPageWithRefreshIndicator(
         backgroundColor: backgroundColor,
-        title: Text("About Lanis-Mobile"),
+        title: Text(AppLocalizations.of(context)!.about),
         onRefresh: () {
           return getContributors();
         },
@@ -190,7 +191,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                     spacing: 16.0,
                     children: [
                       Text(
-                        "Contributors",
+                        AppLocalizations.of(context)!.contributors,
                         style: Theme.of(context).textTheme.labelLarge!.copyWith(
                             color: Theme.of(context).colorScheme.primary),
                       ),
@@ -319,7 +320,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              "More information",
+              AppLocalizations.of(context)!.moreInformation,
               style: Theme.of(context)
                   .textTheme
                   .labelLarge!
@@ -332,7 +333,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
           for (var link in links)
             ListTile(
               leading: Icon(link.iconData),
-              title: Text(link.title),
+              title: Text(link.title(context)),
               onTap: () => link.onTap(context),
             ),
           if (error) ...[
@@ -353,7 +354,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                       height: 8.0,
                     ),
                     Text(
-                      "Normally you would see contributors but an error occurred. Most likely you don't have an internet connection.",
+                      AppLocalizations.of(context)!.settingsErrorAbout,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color:
                               Theme.of(context).colorScheme.onSurfaceVariant),

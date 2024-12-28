@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -23,13 +26,7 @@ void main() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent,
-    ),
-  );
-
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  enableTransparentNavigationBar();
 
   authenticationState.login();
 
@@ -42,6 +39,25 @@ void main() async {
       child: const App(),
     ),
   );
+}
+
+// Or translucent when 3-Way.
+Future<void> enableTransparentNavigationBar() async {
+  if (Platform.isAndroid) {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+    int androidVersion = androidInfo.version.sdkInt;
+
+    // Android 10 and above
+    if (androidVersion >= 29) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.transparent,
+        ),
+      );
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+  }
 }
 
 class App extends StatelessWidget {

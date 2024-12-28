@@ -9,6 +9,7 @@ import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
@@ -21,7 +22,7 @@ class SettingsGroup {
 }
 
 class SettingsTile {
-  final String title;
+  final String Function(BuildContext context) title;
   final Future<String> Function(BuildContext context) subtitle;
   final IconData icon;
   final Future<void> Function(BuildContext context) screen;
@@ -50,9 +51,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   final List<SettingsGroup> settingsTiles = [
     SettingsGroup(tiles: [
       SettingsTile(
-          title: "Appearance",
+          title: (context) => AppLocalizations.of(context)!.appearance,
           subtitle: (context) async {
-            return "Dark theme, colours";
+            return AppLocalizations.of(context)!.darkModeColoursList;
           },
           icon: Icons.palette_rounded,
           screen: (context) => Navigator.push(
@@ -60,7 +61,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => AppearanceSettings()),
               )),
       SettingsTile(
-        title: "Language",
+        title: (context) => AppLocalizations.of(context)!.language,
         subtitle: (context) async {
           String code = Localizations.localeOf(context).languageCode;
 
@@ -86,9 +87,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
         },
       ),
       SettingsTile(
-          title: "Notifications",
+          title: (context) => AppLocalizations.of(context)!.notifications,
           subtitle: (context) async {
-            return "Interval, applets";
+            return AppLocalizations.of(context)!.intervalAppletsList;
           },
           icon: Icons.notifications_rounded,
           screen: (context) async {
@@ -105,7 +106,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             );
           }),
       SettingsTile(
-          title: "Clear cache",
+          title: (context) => AppLocalizations.of(context)!.clearCache,
           subtitle: (context) async {
             Map<String, int> cacheStats = {'fileNum': 0, 'size': 0};
 
@@ -113,7 +114,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
 
             cacheStats = CacheSettings.dirStatSync(dir.path);
 
-            return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? "file" : "files"} (${cacheStats['size']! ~/ 1024} KB)";
+            return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? AppLocalizations.of(context)!.file : AppLocalizations.of(context)!.files} (${cacheStats['size']! ~/ 1024} KB)";
           },
           icon: Icons.storage_rounded,
           screen: (context) => Navigator.push(
@@ -123,9 +124,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     ]),
     SettingsGroup(tiles: [
       SettingsTile(
-        title: "User data",
+        title: (context) => AppLocalizations.of(context)!.userData,
         subtitle: (context) async {
-          return "Age, name, class";
+          return AppLocalizations.of(context)!.ageNameClassList;
         },
         icon: Icons.account_circle_rounded,
         screen: (context) => Navigator.push(
@@ -136,9 +137,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     ]),
     SettingsGroup(tiles: [
       SettingsTile(
-        title: "About Lanis-Mobile",
+        title: (context) => AppLocalizations.of(context)!.about,
         subtitle: (context) async {
-          return "Contributors, links, licenses";
+          return AppLocalizations.of(context)!.contributorsLinksLicensesList;
         },
         icon: Icons.school_rounded,
         screen: (context) => Navigator.push(
@@ -154,13 +155,12 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     return SettingsPage(
       backgroundColor: backgroundColor,
       title: Text(
-        "Settings",
+        AppLocalizations.of(context)!.settings,
       ),
       children: List.generate(settingsTiles.length, (groupIndex) {
         return Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 12.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
           child: Column(
-            spacing: 2.0,
               children: List.generate(settingsTiles[groupIndex].tiles.length,
                   (tileIndex) {
             return SettingsTileWidget(
@@ -214,29 +214,10 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
       ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return PressTile(
-            title: widget.tile.title,
-            subtitle: subtitle,
-            icon: widget.tile.icon,
-            onPressed: () async {
-              await widget.tile.screen(context);
-
-              setState(() {
-
-              });
-            },
-            foregroundColor: widget.foregroundColor,
-            borderRadius: SettingsTileWidget.getRadius(
-                widget.index, widget.length),
-          );
-        }
-
-        subtitle = snapshot.data![1] as String;
-
-        return Visibility(
-          visible: snapshot.data![0] as bool,
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 2.0),
             child: PressTile(
-              title: widget.tile.title,
+              title: widget.tile.title(context),
               subtitle: subtitle,
               icon: widget.tile.icon,
               onPressed: () async {
@@ -249,6 +230,31 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
               foregroundColor: widget.foregroundColor,
               borderRadius: SettingsTileWidget.getRadius(
                   widget.index, widget.length),
+            ),
+          );
+        }
+
+        subtitle = snapshot.data![1] as String;
+
+        return Visibility(
+          visible: snapshot.data![0] as bool,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 2.0),
+              child: PressTile(
+                title: widget.tile.title(context),
+                subtitle: subtitle,
+                icon: widget.tile.icon,
+                onPressed: () async {
+                  await widget.tile.screen(context);
+
+                  setState(() {
+
+                  });
+                },
+                foregroundColor: widget.foregroundColor,
+                borderRadius: SettingsTileWidget.getRadius(
+                    widget.index, widget.length),
+              ),
             )
         );
       },

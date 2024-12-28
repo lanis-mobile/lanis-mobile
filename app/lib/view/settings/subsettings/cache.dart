@@ -4,6 +4,7 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/callout.dart';
@@ -59,12 +60,12 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text("Clear cache"),
+      title: Text(AppLocalizations.of(context)!.clearCache),
       backgroundColor: backgroundColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
       children: [
         Text(
-          "All files that you have ever downloaded form the cache. You can empty it here to free up storage space. Documents older than 7 days are automatically deleted. ",
+          AppLocalizations.of(context)!.settingsInfoClearCache,
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -75,9 +76,9 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
         ),
         Callout(
           leading: Icon(Icons.delete_forever_rounded),
-          title: Text("Do you want to permanently empty your cache?"),
+          title: Text(AppLocalizations.of(context)!.questionPermanentlyEmptyCache),
           buttonText: Text(
-            cacheStats['fileNum'] != 0 ? "Clear cache" : "Cache is empty!",
+            cacheStats['fileNum'] != 0 ? AppLocalizations.of(context)!.clearCache : AppLocalizations.of(context)!.cacheEmpty,
           ),
           onPressed: cacheStats['fileNum'] != 0
               ? () {
@@ -89,7 +90,7 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
           height: 24.0,
         ),
         Text(
-          "Space used",
+          AppLocalizations.of(context)!.spaceUsed,
           style: Theme.of(context)
               .textTheme
               .labelLarge!
@@ -103,7 +104,7 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${cacheStats['fileNum'].toString()} ${cacheStats['fileNum'] == 1 ? "file" : "files"}",
+              "${cacheStats['fileNum'].toString()} ${cacheStats['fileNum'] == 1 ? AppLocalizations.of(context)!.file : AppLocalizations.of(context)!.files}",
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
@@ -137,13 +138,13 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
             children: [
               TextSpan(
                 text:
-                    "Other storage settings, like resetting the whole app storage, can be found in the ",
+                AppLocalizations.of(context)!.otherStorageSettingsAvailablePart1,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
               TextSpan(
-                text: "system settings",
+                text: AppLocalizations.of(context)!.systemSettings,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       decoration: TextDecoration.underline,
@@ -154,7 +155,7 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
                   },
               ),
               TextSpan(
-                text: ".",
+                text: AppLocalizations.of(context)!.otherStorageSettingsAvailablePart2,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

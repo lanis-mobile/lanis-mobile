@@ -4,6 +4,7 @@ import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/utils/radio_pills.dart';
 import 'package:sph_plan/utils/switch_tile.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppearanceSettings extends SettingsColours {
   const AppearanceSettings({super.key});
@@ -31,7 +32,7 @@ class _AppearanceSettingsState
   Widget build(BuildContext context) {
     return SettingsPageWithStreamBuilder(
         backgroundColor: backgroundColor,
-        title: Text("Appearance"),
+        title: Text(AppLocalizations.of(context)!.appearance),
         subscription: accountDatabase.kv
             .subscribeMultiple(['color', 'theme', 'isAmoled']),
         builder: (context, snapshot) {
@@ -39,7 +40,7 @@ class _AppearanceSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                "Theme",
+                AppLocalizations.of(context)!.theme,
                 style: Theme.of(context)
                     .textTheme
                     .labelLarge!
@@ -59,15 +60,15 @@ class _AppearanceSettingsState
                   color: foregroundColor,
                   pills: [
                     RadioPillGroupItem.vertical(
-                        title: Text("System"),
+                        title: Text(AppLocalizations.of(context)!.system),
                         leading: Icon(Icons.phone_android_rounded),
                         value: "system"),
                     RadioPillGroupItem.vertical(
-                        title: Text("Light"),
+                        title: Text(AppLocalizations.of(context)!.light),
                         leading: Icon(Icons.light_mode_rounded),
                         value: "light"),
                     RadioPillGroupItem.vertical(
-                        title: Text("Dark"),
+                        title: Text(AppLocalizations.of(context)!.dark),
                         leading: Icon(Icons.dark_mode_rounded),
                         value: "dark"),
                   ],
@@ -81,7 +82,7 @@ class _AppearanceSettingsState
                   ),
                   MinimalSwitchTile(
                       title: Text(
-                        "Black Mode",
+                        AppLocalizations.of(context)!.blackMode,
                       ),
                       leading: Icon(Icons.contrast_rounded),
                       contentPadding:
@@ -100,7 +101,7 @@ class _AppearanceSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                "Accent colour",
+                AppLocalizations.of(context)!.accentColor,
                 style: Theme.of(context)
                     .textTheme
                     .labelLarge!
@@ -120,7 +121,7 @@ class _AppearanceSettingsState
                   color: foregroundColor,
                   pills: [
                     RadioPillGroupItem.horizontal(
-                        title: Text("Standard"),
+                        title: Text(AppLocalizations.of(context)!.standard),
                         value: "standard",
                         trailing: TrailingCircle(
                           color: Themes.standardTheme.lightTheme!.colorScheme
@@ -132,7 +133,8 @@ class _AppearanceSettingsState
                         )),
                     if (dynamicTheme != null)
                       RadioPillGroupItem.horizontal(
-                          title: Text("Material You"),
+                          title:
+                              Text(AppLocalizations.of(context)!.dynamicColor),
                           value: "dynamic",
                           trailing: TrailingCircle.custom(
                             selectedBackgroundColor:
@@ -209,6 +211,34 @@ class _AppearanceSettingsState
                       ],
                     );
                   },
+                )),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 28.0,
+                    ),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 20.0,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    SizedBox(
+                      height: 8.0,
+                    ),
+                    Text(
+                      dynamicTheme == null
+                          ? AppLocalizations.of(context)!
+                          .settingsUnsupportedInfoAppearance
+                      : AppLocalizations.of(context)!
+                          .settingsInfoDynamicColor,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color:
+                          Theme.of(context).colorScheme.onSurfaceVariant),
+                    )
+                  ],
                 )),
           ];
         });

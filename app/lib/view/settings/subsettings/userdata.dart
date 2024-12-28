@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 
@@ -15,7 +16,7 @@ class _UserDataSettingsState extends SettingsColoursState<UserDataSettings> {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text("User data"),
+      title: Text(AppLocalizations.of(context)!.userData),
       backgroundColor: backgroundColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
       children: [
@@ -42,7 +43,7 @@ class _UserDataSettingsState extends SettingsColoursState<UserDataSettings> {
           height: 8.0,
         ),
         Text(
-          "All user data is stored on the Lanis servers.",
+          AppLocalizations.of(context)!.settingsInfoUserData,
           style: Theme.of(context).textTheme.bodySmall!.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
