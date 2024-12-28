@@ -34,7 +34,6 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
 
   Map<String, String?>? globalSettings;
   Future<void> Function(String, String)? globalUpdateSetting;
-  Lessons? attendanceLessons;
   Lessons? homeworkLessons;
 
   @override
@@ -96,6 +95,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         accountType: sph!.session.accountType,
         builder:
             (context, lessons, accountType, settings, updateSetting, refresh) {
+          Lessons? attendanceLessons;
           homeworkLessons = lessons
               .where((element) => element.currentEntry?.homework != null)
               .toList();
@@ -160,7 +160,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
             ),
             floatingActionButton: Visibility(
               visible:
-                  attendanceLessons != null && attendanceLessons!.isNotEmpty,
+                  attendanceLessons != null && attendanceLessons.isNotEmpty,
               child: FloatingActionButton.extended(
                 onPressed: () {
                   Navigator.push(
