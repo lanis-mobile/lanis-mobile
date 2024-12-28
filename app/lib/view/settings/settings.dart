@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:sph_plan/utils/large_appbar.dart';
+import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
@@ -38,14 +38,14 @@ class SettingsTile {
       this.show = alwaysShow});
 }
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends SettingsColours {
   const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   final List<SettingsGroup> settingsTiles = [
     SettingsGroup(tiles: [
       SettingsTile(
@@ -55,9 +55,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
           icon: Icons.palette_rounded,
           screen: (context) => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AppearanceSettings()),
-          )),
+                context,
+                MaterialPageRoute(builder: (context) => AppearanceSettings()),
+              )),
       SettingsTile(
         title: "Language",
         subtitle: (context) async {
@@ -91,14 +91,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
           icon: Icons.notifications_rounded,
           screen: (context) async {
-            int accountCount = await accountDatabase.select(accountDatabase.accountsTable).get().then((value) => value.length);
+            int accountCount = await accountDatabase
+                .select(accountDatabase.accountsTable)
+                .get()
+                .then((value) => value.length);
 
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NotificationSettings(accountCount: accountCount)),
+              MaterialPageRoute(
+                  builder: (context) =>
+                      NotificationSettings(accountCount: accountCount)),
             );
-          }
-      ),
+          }),
       SettingsTile(
           title: "Clear cache",
           subtitle: (context) async {
@@ -112,35 +116,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
           icon: Icons.storage_rounded,
           screen: (context) => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CacheSettings()),
-          )
+                context,
+                MaterialPageRoute(builder: (context) => CacheSettings()),
+              )),
+    ]),
+    SettingsGroup(tiles: [
+      SettingsTile(
+        title: "User data",
+        subtitle: (context) async {
+          return "Age, name, class";
+        },
+        icon: Icons.account_circle_rounded,
+        screen: (context) => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => UserDataSettings()),
+        ),
       ),
     ]),
     SettingsGroup(tiles: [
       SettingsTile(
-          title: "User data",
-          subtitle: (context) async {
-            return "Age, name, class";
-          },
-          icon: Icons.account_circle_rounded,
-          screen: (context) => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => UserDataSettings()),
-          ),
-      ),
-    ]),
-    SettingsGroup(tiles: [
-      SettingsTile(
-          title: "About Lanis-Mobile",
-          subtitle: (context) async {
-            return "Contributors, links, licenses";
-          },
-          icon: Icons.school_rounded,
-          screen: (context) => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AboutSettings()),
-          ),
+        title: "About Lanis-Mobile",
+        subtitle: (context) async {
+          return "Contributors, links, licenses";
+        },
+        icon: Icons.school_rounded,
+        screen: (context) => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AboutSettings()),
+        ),
       )
     ]),
   ];
@@ -162,111 +165,98 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-      appBar: LargeAppBar(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-        title: Text(
-          "Settings",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+    return SettingsPage(
+      backgroundColor: backgroundColor,
+      title: Text(
+        "Settings",
       ),
-      body: CustomScrollView(
-        slivers: [
-          ...List.generate(settingsTiles.length, (groupIndex) {
-            return SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 16.0, right: 16.0, bottom: 10.0),
-                child: Column(
-                    children: List.generate(
-                        settingsTiles[groupIndex].tiles.length, (tileIndex) {
-                  return FutureBuilder(
-                    future: Future.wait([
-                      settingsTiles[groupIndex].tiles[tileIndex].show(),
-                      settingsTiles[groupIndex].tiles[tileIndex].subtitle(context),
-                    ]),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState != ConnectionState.done) {
-                        return SizedBox.shrink();
-                      }
+      children: List.generate(settingsTiles.length, (groupIndex) {
+        return Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
+          child: Column(
+              children: List.generate(settingsTiles[groupIndex].tiles.length,
+                  (tileIndex) {
+            return FutureBuilder(
+              future: Future.wait([
+                settingsTiles[groupIndex].tiles[tileIndex].show(),
+                settingsTiles[groupIndex].tiles[tileIndex].subtitle(context),
+              ]),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return SizedBox.shrink();
+                }
 
-                      return Visibility(
-                        visible: snapshot.data![0] as bool,
+                return Visibility(
+                  visible: snapshot.data![0] as bool,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 2.0),
+                    child: Material(
+                      color: foregroundColor,
+                      borderRadius: getRadius(
+                          tileIndex, settingsTiles[groupIndex].tiles.length),
+                      child: InkWell(
+                        onTap: () async {
+                          await settingsTiles[groupIndex]
+                              .tiles[tileIndex]
+                              .screen(context);
+                        },
+                        borderRadius: getRadius(
+                            tileIndex, settingsTiles[groupIndex].tiles.length),
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: 2.0),
-                          child: Material(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerLow,
-                            borderRadius: getRadius(tileIndex,
-                                settingsTiles[groupIndex].tiles.length),
-                            child: InkWell(
-                              onTap: () async {
-                                await settingsTiles[groupIndex]
-                                    .tiles[tileIndex]
-                                    .screen(context);
-                              },
-                              borderRadius: getRadius(tileIndex,
-                                  settingsTiles[groupIndex].tiles.length),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0, vertical: 12.0),
-                                child: Row(
-                                  children: [
-                                    Icon(settingsTiles[groupIndex]
-                                        .tiles[tileIndex]
-                                        .icon,
-                                        color: Theme.of(context).colorScheme.onSurface
-                                    ),
-                                    SizedBox(
-                                      width: 16,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          settingsTiles[groupIndex]
-                                              .tiles[tileIndex]
-                                              .title,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface,
-                                              ),
-                                        ),
-                                        Text(
-                                          snapshot.data![1] as String,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0, vertical: 12.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                  settingsTiles[groupIndex]
+                                      .tiles[tileIndex]
+                                      .icon,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
+                              SizedBox(
+                                width: 16,
                               ),
-                            ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    settingsTiles[groupIndex]
+                                        .tiles[tileIndex]
+                                        .title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                  ),
+                                  Text(
+                                    snapshot.data![1] as String,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall!
+                                        .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                  );
-                })),
-              ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             );
-          })
-        ],
-      ),
+          })),
+        );
+      }),
     );
   }
 }

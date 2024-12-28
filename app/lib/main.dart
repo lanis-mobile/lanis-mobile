@@ -22,6 +22,8 @@ void main() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   await setupBackgroundService(accountDatabase);
   await initializeNotifications();
   await initializeDateFormatting();

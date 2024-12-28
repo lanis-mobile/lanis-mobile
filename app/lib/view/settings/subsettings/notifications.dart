@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
-import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/utils/switch_tile.dart';
+import 'package:sph_plan/view/settings/settings_page_builder.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/callout.dart';
 import '../../../utils/slider_tile.dart';
 
-class NotificationSettings extends StatefulWidget {
+class NotificationSettings extends SettingsColours {
   final int accountCount;
 
   const NotificationSettings({super.key, required this.accountCount});
@@ -23,7 +23,8 @@ class NotificationSettings extends StatefulWidget {
   State<NotificationSettings> createState() => _NotificationSettingsState();
 }
 
-class _NotificationSettingsState extends State<NotificationSettings> {
+class _NotificationSettingsState
+    extends SettingsColoursState<NotificationSettings> {
   final Map<String, AppletDefinition> supportedApplets = {};
 
   double notificationInterval = 15.0;
@@ -84,331 +85,294 @@ class _NotificationSettingsState extends State<NotificationSettings> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-        appBar: LargeAppBar(
-          title: Text("Notifications",),
+    return SettingsPageWithStreamBuilder(
+        backgroundColor: backgroundColor,
+        title: Text(
+          "Notifications",
         ),
-        body: StreamBuilder(
-            stream: sph!.prefs.kv.subscribeMultiple(getDatabaseKeys()),
-            builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return LinearProgressIndicator();
-              }
+        subscription: sph!.prefs.kv.subscribeMultiple(getDatabaseKeys()),
+        builder: (context, snapshot) {
+          List<String> applets = snapshot.data!.keys.toList()..sort();
+          applets.removeWhere((element) => !element.endsWith('.php'));
 
-              List<String> applets = snapshot.data!.keys.toList()..sort();
-              applets.removeWhere((element) => !element.endsWith('.php'));
-
-              final bool notificationsAllowed =
+          final bool notificationsAllowed =
+              notificationPermissionStatus == PermissionStatus.granted;
+          final bool notificationsEnabled =
+              (snapshot.data!['notifications-allow'] ?? 'true') == 'true';
+          final bool notificationsActive =
+              (snapshot.data!['notifications-allow'] ?? 'true') == 'true' &&
                   notificationPermissionStatus == PermissionStatus.granted;
-              final bool notificationsEnabled =
-                  (snapshot.data!['notifications-allow'] ?? 'true') == 'true';
-              final bool notificationsActive =
-                  (snapshot.data!['notifications-allow'] ?? 'true') == 'true' &&
-                      notificationPermissionStatus == PermissionStatus.granted;
 
-              return ListView(
-                children: [
-                  if (!notificationsAllowed) ...[
-                    Callout(
-                      leading: Icon(Icons.error_rounded),
+          return [
+            if (!notificationsAllowed) ...[
+              Callout(
+                leading: Icon(Icons.error_rounded),
+                title: Text(
+                  "You didn’t authorise notifications!",
+                ),
+                buttonText: Text("Open system settings"),
+                onPressed: () {
+                  AppSettings.openAppSettings(
+                      type: AppSettingsType.notification);
+                },
+                backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                buttonTextColor: Theme.of(context).colorScheme.onError,
+                foregroundColor: Theme.of(context).colorScheme.error,
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              ),
+              SizedBox(
+                height: 24.0,
+              ),
+            ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: GestureDetector(
+                onTap: notificationsAllowed
+                    ? () {
+                        sph!.prefs.kv.set('notifications-allow',
+                            (!notificationsEnabled).toString());
+                      }
+                    : null,
+                child: Card.filled(
+                  color: notificationsAllowed
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 8.0),
+                    child: MinimalSwitchTile(
                       title: Text(
-                        "You didn’t authorise notifications!",
+                        "Use notifications",
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              color: notificationsAllowed
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                            ),
                       ),
-                      buttonText: Text("Open system settings"),
-                      onPressed: () {
-                        AppSettings.openAppSettings(
-                            type: AppSettingsType.notification);
-                      },
-                      backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                      buttonTextColor: Theme.of(context).colorScheme.onError,
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                    ),
-                    SizedBox(
-                      height: 24.0,
-                    ),
-                  ],
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: GestureDetector(
-                      onTap: notificationsAllowed
-                          ? () {
-                              sph!.prefs.kv.set('notifications-allow',
-                                  (!notificationsEnabled).toString());
+                      subtitle: widget.accountCount > 1
+                          ? Text(
+                              "For this account",
+                            )
+                          : null,
+                      value: notificationsEnabled,
+                      onChanged: notificationsAllowed
+                          ? (value) {
+                              sph!.prefs.kv
+                                  .set('notifications-allow', value.toString());
                             }
                           : null,
-                      child: Card.filled(
-                        color: notificationsAllowed
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                        margin: EdgeInsets.zero,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 8.0),
-                          child: MinimalSwitchTile(
-                            title: Text(
-                              "Use notifications",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(
-                                    color: notificationsAllowed
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                  ),
-                            ),
-                            subtitle: widget.accountCount > 1
-                                ? Text(
-                                    "For this account",
-                                  )
-                                : null,
-                            value: notificationsEnabled,
-                            onChanged: notificationsAllowed
-                                ? (value) {
-                                    sph!.prefs.kv.set('notifications-allow',
-                                        value.toString());
-                                  }
-                                : null,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
-                  SizedBox(
-                    height: 24.0,
-                  ),
-                  if (Platform.isAndroid && widget.accountCount == 1) ...[
-                    Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: SliderTile(
-                          title: Text(
-                            "Update interval",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(
-                                  color: notificationsActive
-                                      ? Theme.of(context).colorScheme.onSurface
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                ),
-                          ),
-                          leading: Icon(
-                            Icons.schedule_rounded,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 24.0,
+            ),
+            if (Platform.isAndroid && widget.accountCount == 1) ...[
+              Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: SliderTile(
+                    title: Text(
+                      "Update interval",
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                             color: notificationsActive
                                 ? Theme.of(context).colorScheme.onSurface
                                 : Theme.of(context)
                                     .colorScheme
                                     .onSurfaceVariant,
                           ),
-                          value: notificationInterval,
-                          onChanged: notificationsActive
-                              ? (val) {
-                                  setState(() {
-                                    notificationInterval = val;
-                                  });
-                                }
-                              : null,
-                          onChangedEnd: notificationsActive
-                              ? (val) {
-                                  accountDatabase.kv.set(
-                                      'notifications-android-target-interval-minutes',
-                                      val.round().toString());
-                                }
-                              : null,
-                          label: notificationInterval.round().toString(),
-                          min: 15.0,
-                          max: 180.0,
-                          divisions: 11,
-                          inactiveColor:
-                              Theme.of(context).colorScheme.surfaceDim,
-                        )),
-                    SizedBox(
-                      height: 8.0,
                     ),
-                  ],
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      "Applets",
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                            color: notificationsActive
-                                ? Theme.of(context).colorScheme.primary
+                    leading: Icon(
+                      Icons.schedule_rounded,
+                      color: notificationsActive
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    value: notificationInterval,
+                    onChanged: notificationsActive
+                        ? (val) {
+                            setState(() {
+                              notificationInterval = val;
+                            });
+                          }
+                        : null,
+                    onChangedEnd: notificationsActive
+                        ? (val) {
+                            accountDatabase.kv.set(
+                                'notifications-android-target-interval-minutes',
+                                val.round().toString());
+                          }
+                        : null,
+                    label: notificationInterval.round().toString(),
+                    min: 15.0,
+                    max: 180.0,
+                    divisions: 11,
+                    inactiveColor: sliderColor,
+                  )),
+              SizedBox(
+                height: 8.0,
+              ),
+            ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                "Applets",
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: notificationsActive
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            ...applets.map((key) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: MinimalSwitchTile(
+                    title: Text(
+                      supportedApplets[key]?.label(context) ?? key,
+                    ),
+                    leading: Icon(
+                      supportedApplets[key]?.selectedIcon.icon,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                    value: (snapshot.data![key] ?? 'true') == 'true',
+                    onChanged: notificationsActive
+                        ? (value) {
+                            sph!.prefs.kv.set(key, value.toString());
+                          }
+                        : null,
+                    useInkWell: true,
+                  ),
+                )),
+            SizedBox(
+              height: 12.0,
+            ),
+            if (Platform.isAndroid && widget.accountCount > 1) ...[
+              Divider(),
+              SizedBox(
+                height: 16.0,
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: SliderTile(
+                    title: Text(
+                      "Update interval",
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: notificationsAllowed
+                                ? Theme.of(context).colorScheme.onSurface
                                 : Theme.of(context)
                                     .colorScheme
                                     .onSurfaceVariant,
                           ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  ...applets.map((key) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: MinimalSwitchTile(
-                          title: Text(
-                            supportedApplets[key]?.label(context) ?? key,
-                          ),
-                          leading: Icon(
-                            supportedApplets[key]?.selectedIcon.icon,
-                          ),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 16.0),
-                          value: (snapshot.data![key] ?? 'true') == 'true',
-                          onChanged: notificationsActive
-                              ? (value) {
-                                  sph!.prefs.kv.set(key, value.toString());
-                                }
-                              : null,
-                          useInkWell: true,
-                        ),
-                      )),
-                  SizedBox(
-                    height: 12.0,
-                  ),
-                  if (Platform.isAndroid && widget.accountCount > 1) ...[
-                    Divider(),
-                    SizedBox(
-                      height: 16.0,
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: SliderTile(
-                          title: Text(
-                            "Update interval",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(
-                                  color: notificationsAllowed
-                                      ? Theme.of(context).colorScheme.onSurface
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                ),
-                          ),
-                          subtitle: Text(
-                            "For every account",
-                            style:
-                                Theme.of(context).textTheme.bodySmall!.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                          ),
-                          leading: Icon(Icons.schedule_rounded,
-                              color: notificationsAllowed
-                                  ? Theme.of(context).colorScheme.onSurface
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant),
-                          value: notificationInterval,
-                          onChanged: notificationsAllowed
-                              ? (val) {
-                                  setState(() {
-                                    notificationInterval = val;
-                                  });
-                                }
-                              : null,
-                          onChangedEnd: notificationsAllowed
-                              ? (val) {
-                                  accountDatabase.kv.set(
-                                      'notifications-android-target-interval-minutes',
-                                      val.round().toString());
-                                }
-                              : null,
-                          label: notificationInterval.round().toString(),
-                          min: 15.0,
-                          max: 180.0,
-                          divisions: 11,
-                          inactiveColor:
-                              Theme.of(context).colorScheme.surfaceDim,
-                        )),
-                    SizedBox(
-                      height: 16.0,
-                    ),
-                  ],
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          size: 20.0,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      "The frequency and time at which everything is updated depends on various factors relating to the end device.",
+                    subtitle: Text(
+                      "For every account",
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 4.0,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Other settings are available in the ",
-                            style:
-                                Theme.of(context).textTheme.bodySmall!.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                          ),
-                          TextSpan(
-                            text: "system settings",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  decoration: TextDecoration.underline,
-                                ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                AppSettings.openAppSettings(
-                                    type: AppSettingsType.notification);
-                              },
-                          ),
-                          TextSpan(
-                            text: ".",
-                            style:
-                                Theme.of(context).textTheme.bodySmall!.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                          )
-                        ],
-                      ),
-                    ),
+                    leading: Icon(Icons.schedule_rounded,
+                        color: notificationsAllowed
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).colorScheme.onSurfaceVariant),
+                    value: notificationInterval,
+                    onChanged: notificationsAllowed
+                        ? (val) {
+                            setState(() {
+                              notificationInterval = val;
+                            });
+                          }
+                        : null,
+                    onChangedEnd: notificationsAllowed
+                        ? (val) {
+                            accountDatabase.kv.set(
+                                'notifications-android-target-interval-minutes',
+                                val.round().toString());
+                          }
+                        : null,
+                    label: notificationInterval.round().toString(),
+                    min: 15.0,
+                    max: 180.0,
+                    divisions: 11,
+                    inactiveColor: sliderColor,
+                  )),
+              SizedBox(
+                height: 16.0,
+              ),
+            ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 20.0,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   )
                 ],
-              );
-            }));
+              ),
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                "The frequency and time at which everything is updated depends on various factors relating to the end device.",
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+            SizedBox(
+              height: 4.0,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Other settings are available in the ",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    TextSpan(
+                      text: "system settings",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          AppSettings.openAppSettings(
+                              type: AppSettingsType.notification);
+                        },
+                    ),
+                    TextSpan(
+                      text: ".",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    )
+                  ],
+                ),
+              ),
+            )
+          ];
+        });
   }
 }
