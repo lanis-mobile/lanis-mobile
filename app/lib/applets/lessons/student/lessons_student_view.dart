@@ -32,9 +32,63 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         ),
       );
 
+  Map<String, String?>? globalSettings;
+  Future<void> Function(String, String)? globalUpdateSetting;
+  Lessons? attendanceLessons;
+  Lessons? homeworkLessons;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.openDrawerCb != null
+          ? AppBar(
+              title: Text(lessonsDefinition.label(context)),
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              ),
+              actions: globalSettings != null &&
+                      globalUpdateSetting != null &&
+                      homeworkLessons != null &&
+                      homeworkLessons!.isNotEmpty
+                  ? [
+                      globalSettings!['showHomework'] == 'true'
+                          ? Tooltip(
+                              message: AppLocalizations.of(context)!.lessons,
+                              child: IconButton(
+                                icon: const Icon(Icons.school_outlined),
+                                onPressed: () {
+                                  globalUpdateSetting!(
+                                    'showHomework',
+                                    'false',
+                                  );
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    setState(() {});
+                                  });
+                                },
+                              ),
+                            )
+                          : Tooltip(
+                              message: AppLocalizations.of(context)!.homework,
+                              child: IconButton(
+                                icon: const Icon(Icons.task_outlined),
+                                onPressed: () {
+                                  globalUpdateSetting!(
+                                    'showHomework',
+                                    'true',
+                                  );
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    setState(() {});
+                                  });
+                                },
+                              ),
+                            ),
+                    ]
+                  : null,
+            )
+          : null,
       body: CombinedAppletBuilder<Lessons>(
         parser: sph!.parser.lessonsStudentParser,
         phpUrl: lessonsDefinition.appletPhpUrl,
@@ -42,12 +96,24 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         accountType: sph!.session.accountType,
         builder:
             (context, lessons, accountType, settings, updateSetting, refresh) {
-          Lessons? attendanceLessons;
+          homeworkLessons = lessons
+              .where((element) => element.currentEntry?.homework != null)
+              .toList();
+
+          if (globalUpdateSetting == null || globalSettings == null) {
+            globalUpdateSetting = updateSetting;
+            globalSettings = settings;
+            if (settings['showHomework'] == 'true' &&
+                homeworkLessons!.isEmpty) {
+              updateSetting('showHomework', 'false');
+            }
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {});
+            });
+          }
 
           if (settings['showHomework'] == 'true') {
-            lessons = lessons
-                .where((element) => element.currentEntry?.homework != null)
-                .toList();
+            lessons = homeworkLessons!;
 
             lessons.sort((a, b) {
               if (a.currentEntry!.homework!.homeWorkDone ==
@@ -69,40 +135,6 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
           }
 
           return Scaffold(
-            appBar: widget.openDrawerCb != null
-                ? AppBar(
-                    title: Text(settings['showHomework'] == 'true'
-                        ? AppLocalizations.of(context)!.homework
-                        : lessonsDefinition.label(context)),
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => widget.openDrawerCb!(),
-                    ),
-                    actions: [
-                      settings['showHomework'] == 'true'
-                          ? Tooltip(
-                              message: AppLocalizations.of(context)!.lessons,
-                              child: IconButton(
-                                icon: const Icon(Icons.school_outlined),
-                                onPressed: () => updateSetting(
-                                  'showHomework',
-                                  'false',
-                                ),
-                              ),
-                            )
-                          : Tooltip(
-                              message: AppLocalizations.of(context)!.homework,
-                              child: IconButton(
-                                icon: const Icon(Icons.task_outlined),
-                                onPressed: () => updateSetting(
-                                  'showHomework',
-                                  'true',
-                                ),
-                              ),
-                            ),
-                    ],
-                  )
-                : null,
             body: RefreshIndicator(
               onRefresh: () => refresh!(),
               child: lessons.isNotEmpty
@@ -128,7 +160,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
             ),
             floatingActionButton: Visibility(
               visible:
-                  attendanceLessons != null && attendanceLessons.isNotEmpty,
+                  attendanceLessons != null && attendanceLessons!.isNotEmpty,
               child: FloatingActionButton.extended(
                 onPressed: () {
                   Navigator.push(
