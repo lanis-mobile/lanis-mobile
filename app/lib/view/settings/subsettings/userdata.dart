@@ -1,55 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import 'package:sph_plan/view/settings/info_button.dart';
 
 import '../../../core/sph/sph.dart';
 
-class UserdataAnsicht extends StatefulWidget {
-  const UserdataAnsicht({super.key});
+class UserDataSettings extends SettingsColours {
+  const UserDataSettings({super.key});
 
   @override
-  State<StatefulWidget> createState() => _UserdataAnsichtState();
+  State<UserDataSettings> createState() => _UserDataSettingsState();
 }
 
-class _UserdataAnsichtState extends State<UserdataAnsicht> {
-  double padding = 10.0;
-
-  List<ListTile> userDataListTiles = [];
-
-  @override
-  void initState() {
-    super.initState();
-    loadUserData();
-  }
-
-  void loadUserData() {
-    setState(() {
-      userDataListTiles.clear();
-      (sph!.session.userData).forEach((key, value) {
-        userDataListTiles.add(ListTile(
-          title: Text(value),
-          subtitle: Text(toBeginningOfSentenceCase(key)!),
-        ));
-      });
-    });
-  }
-
+class _UserDataSettingsState extends SettingsColoursState<UserDataSettings> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.userData),
-        actions: [
-          InfoButton(
-              infoText: AppLocalizations.of(context)!.settingsInfoUserData,
-              context: context)
-        ],
-      ),
-      body: ListView(
-        children: userDataListTiles,
-      ),
+    return SettingsPage(
+      title: Text(AppLocalizations.of(context)!.userData),
+      backgroundColor: backgroundColor,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+      children: [
+        for (var key in sph!.session.userData.keys)
+          ListTile(
+            title: Text(sph!.session.userData[key]!),
+            subtitle: Text(toBeginningOfSentenceCase(key)!),
+            contentPadding: EdgeInsets.zero,
+          ),
+        SizedBox(
+          height: 24.0,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              size: 20.0,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            )
+          ],
+        ),
+        SizedBox(
+          height: 8.0,
+        ),
+        Text(
+          AppLocalizations.of(context)!.settingsInfoUserData,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+      ],
     );
   }
 }

@@ -27,20 +27,17 @@ class Themes {
 
   static final Map<String, Themes> flutterColorThemes = {
     "pink": getNewTheme(Colors.pink),
-    "rot": getNewTheme(Colors.red),
-    "dunkelorange": getNewTheme(Colors.deepOrange),
+    "red": getNewTheme(Colors.red),
     "orange": getNewTheme(Colors.orange),
-    "gelb": getNewTheme(Colors.yellow),
-    "lindgrün": getNewTheme(Colors.lime),
-    "hellgrün": getNewTheme(Colors.lightGreen),
-    "grün": getNewTheme(Colors.green),
-    "seegrün": getNewTheme(Colors.teal),
-    "türkis": getNewTheme(Colors.cyan),
-    "hellblau": getNewTheme(Colors.lightBlue),
-    "blau": getNewTheme(Colors.blue),
-    "indigoblau": getNewTheme(Colors.indigo),
-    "lila": getNewTheme(Colors.purple),
-    "braun": getNewTheme(Colors.brown[900]!),
+    "yellow": getNewTheme(Colors.yellow),
+    "lime": getNewTheme(Colors.lime),
+    "light_green": getNewTheme(Colors.lightGreen),
+    "green": getNewTheme(Colors.green),
+    "teal": getNewTheme(Colors.teal),
+    "cyan": getNewTheme(Colors.cyan),
+    "blue": getNewTheme(Colors.blue),
+    "indigo": getNewTheme(Colors.indigo),
+    "purple": getNewTheme(Colors.purple),
   };
 
   // Will be later set by DynamicColorBuilder in main.dart App().
