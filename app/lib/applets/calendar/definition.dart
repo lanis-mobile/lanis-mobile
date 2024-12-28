@@ -16,7 +16,7 @@ final calendarDefinition = AppletDefinition(
   allowOffline: false,
   settingsDefaults: {},
   refreshInterval: const Duration(hours: 1),
-  bodyBuilder: (context, accountType) {
-    return CalendarView();
+  bodyBuilder: (context, accountType, openDrawerCb) {
+    return CalendarView(openDrawerCb: openDrawerCb);
   },
 );

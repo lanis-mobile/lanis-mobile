@@ -18,11 +18,11 @@ final lessonsDefinition = AppletDefinition(
   settingsDefaults: {},
   notificationTask: (sph, accountType, toolkit) async {},
   refreshInterval: const Duration(minutes: 15),
-  bodyBuilder: (context, accountType) {
+  bodyBuilder: (context, accountType, openDrawerCb) {
     if (accountType == AccountType.student) {
-      return LessonsStudentView();
+      return LessonsStudentView(openDrawerCb: openDrawerCb);
     } else if (accountType == AccountType.teacher) {
-      return LessonsTeacherView();
+      return LessonsTeacherView(openDrawerCb: openDrawerCb);
     }
     throw UnimplementedError('This account type is not supported jet');
   },

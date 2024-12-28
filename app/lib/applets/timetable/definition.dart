@@ -4,8 +4,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/timetable/student/student_timetable_view.dart';
 
 import '../../models/account_types.dart';
-import '../../models/timetable.dart';
-import '../calendar/calendar_view.dart';
 
 final timeTableDefinition = AppletDefinition(
   appletPhpUrl: 'stundenplan.php',
@@ -21,9 +19,9 @@ final timeTableDefinition = AppletDefinition(
     'student-selected-type': 'TimeTableType.own',
     'current-timetable-view': 'CalendarView.workWeek',
   },
-  bodyBuilder: (context, accountType) {
+  bodyBuilder: (context, accountType, openDrawerCb) {
     if (accountType == AccountType.student) {
-      return StudentTimetableView();
+      return StudentTimetableView(openDrawerCb: openDrawerCb);
     } else {
       return Placeholder();
     }
