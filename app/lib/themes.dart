@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 enum AmoledColor {
   background,
   secondary,
-  third
+  third,
 }
 
 // Only a collection of themes
@@ -89,7 +89,7 @@ class Themes {
         colorScheme: themes.darkTheme?.colorScheme.copyWith(
           surfaceContainer: amoledColors[AmoledColor.background],
           surfaceContainerHighest: themes.darkTheme?.cardColor,
-          surfaceContainerHigh: amoledColors[AmoledColor.background],
+          surfaceContainerHigh: amoledColors[AmoledColor.third],
           surfaceContainerLow: amoledColors[AmoledColor.secondary],
           surfaceContainerLowest: amoledColors[AmoledColor.third],
         )
