@@ -98,7 +98,7 @@ class App extends StatelessWidget {
           if (snapshot.data?['color'] == 'dynamic') {
             var dynamicTheme = Themes.dynamicTheme;
             var darkTheme = dynamicTheme.darkTheme;
-            if (snapshot.data!['isAmoled'] == 'true') {
+            if (snapshot.data!['is-amoled'] == true) {
               darkTheme = Themes.getAmoledThemes(dynamicTheme).darkTheme;
             }
 
