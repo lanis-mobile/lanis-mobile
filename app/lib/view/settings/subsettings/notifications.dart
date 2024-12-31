@@ -61,13 +61,13 @@ class _NotificationSettingsState
   void initVars() async {
     notificationPermissionStatus = await Permission.notification.status;
 
-    final String interval = (await accountDatabase.kv
-            .get('notifications-android-target-interval-minutes')) ??
-        '15';
+    final int interval =
+        await accountDatabase.kv
+          .get('notifications-android-target-interval-minutes');
 
     setState(() {
       notificationPermissionStatus = notificationPermissionStatus;
-      notificationInterval = double.parse(interval);
+      notificationInterval = interval.toDouble();
     });
   }
 
@@ -98,10 +98,8 @@ class _NotificationSettingsState
 
           final bool notificationsAllowed =
               notificationPermissionStatus == PermissionStatus.granted;
-          final bool notificationsEnabled =
-              (snapshot.data!['notifications-allow'] ?? 'true') == 'true';
-          final bool notificationsActive =
-              (snapshot.data!['notifications-allow'] ?? 'true') == 'true' &&
+          final bool notificationsEnabled = (snapshot.data!['notifications-allow'] ?? true) == true;
+          final bool notificationsActive = (snapshot.data!['notifications-allow'] ?? true) == true &&
                   notificationPermissionStatus == PermissionStatus.granted;
 
           return [
@@ -130,8 +128,7 @@ class _NotificationSettingsState
               child: GestureDetector(
                 onTap: notificationsAllowed
                     ? () {
-                        sph!.prefs.kv.set('notifications-allow',
-                            (!notificationsEnabled).toString());
+                        sph!.prefs.kv.set('notifications-allow', !notificationsEnabled);
                       }
                     : null,
                 child: Card.filled(
@@ -164,7 +161,7 @@ class _NotificationSettingsState
                       onChanged: notificationsAllowed
                           ? (value) {
                               sph!.prefs.kv
-                                  .set('notifications-allow', value.toString());
+                                  .set('notifications-allow', value);
                             }
                           : null,
                     ),
@@ -207,7 +204,7 @@ class _NotificationSettingsState
                         ? (val) {
                             accountDatabase.kv.set(
                                 'notifications-android-target-interval-minutes',
-                                val.round().toString());
+                                val.round());
                           }
                         : null,
                     label: notificationInterval.round().toString(),
@@ -244,10 +241,10 @@ class _NotificationSettingsState
                       supportedApplets[key]?.selectedIcon.icon,
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                    value: (snapshot.data![key] ?? 'true') == 'true',
+                    value: (snapshot.data![key] ?? true) == true,
                     onChanged: notificationsActive
                         ? (value) {
-                            sph!.prefs.kv.set(key, value.toString());
+                            sph!.prefs.kv.set(key, value);
                           }
                         : null,
                     useInkWell: true,
@@ -297,7 +294,7 @@ class _NotificationSettingsState
                         ? (val) {
                             accountDatabase.kv.set(
                                 'notifications-android-target-interval-minutes',
-                                val.round().toString());
+                                val.round());
                           }
                         : null,
                     label: notificationInterval.round().toString(),

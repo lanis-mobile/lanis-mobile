@@ -14,7 +14,9 @@ final conversationsDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.messages,
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
-  settingsDefaults: {},
+  settingsDefaults: {
+
+  },
   notificationTask: (sph, accountType, toolkit) async {return;},
   refreshInterval: const Duration(minutes: 2),
   bodyBuilder: (context, accountType, openDrawerCb) {
