@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -9,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../models/account_types.dart';
 import '../../../utils/logger.dart';
 import '../../sph/sph.dart';
-import '../account_preferences_database/kv_defaults.dart';
+import 'kv_defaults.dart';
 
 part 'account_db.g.dart';
 
@@ -210,33 +211,34 @@ class KV {
 
   KV(this.db);
 
-  Future<void> set(String key, String value) async {
-    await db.into(db.appPreferencesTable).insert(AppPreferencesTableCompanion.insert(key: key, value: Value(value)), mode: InsertMode.insertOrReplace);
+  Future<void> set(String key, dynamic value) async {
+    final insert = jsonEncode({'v': value});
+    await db.into(db.appPreferencesTable).insert(AppPreferencesTableCompanion.insert(key: key, value: Value(insert)), mode: InsertMode.insertOrReplace);
   }
 
-  Future<String?> get(String key) async {
+  Future<dynamic> get(String key) async {
     final val = (await (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).getSingleOrNull())?.value;
     if (val == null && kvDefaults.keys.contains(key)) {
-      set(key, kvDefaults[key]!);
+      await set(key, kvDefaults[key]!);
       return kvDefaults[key];
     }
-    return val;
+    return val != null ? jsonDecode(val)['v'] : null;
   }
 
-  Stream<String?> subscribe(String key) {
+  Stream<dynamic> subscribe(String key) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).watchSingleOrNull();
     return stream.map((event) {
       if (event?.value == null && kvDefaults.containsKey(key)) {
         return kvDefaults[key];
       }
-      return event?.value;
+      return event?.value != null ? jsonDecode(event!.value!)['v'] : null;
     });
   }
 
-  Stream<Map<String, String?>> subscribeMultiple(List<String> keys) {
+  Stream<Map<String, dynamic>> subscribeMultiple(List<String> keys) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.isIn(keys))).watch();
     return stream.map((event) {
-      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
       for (var key in keys) {
         if (!result.containsKey(key) && kvDefaults.containsKey(key)) {
           result[key] = kvDefaults[key];

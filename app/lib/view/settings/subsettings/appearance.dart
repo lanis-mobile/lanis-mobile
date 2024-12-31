@@ -88,9 +88,9 @@ class _AppearanceSettingsState
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 16.0),
                       useInkWell: true,
-                      value: snapshot.data!['isAmoled'] == 'true',
+                      value: snapshot.data!['isAmoled'],
                       onChanged: (value) {
-                        accountDatabase.kv.set('isAmoled', value.toString());
+                        accountDatabase.kv.set('isAmoled', value);
                       }),
                 ],
               ),

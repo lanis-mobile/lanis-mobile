@@ -26,7 +26,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   for (final account in accounts) {
     final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
     final sph = SPH(account: clearTextAccount);
-    if ((await sph.prefs.kv.get('notifications-allow')??'true') == 'true') {
+    if (await sph.prefs.kv.get('notifications-allow')) {
       await Workmanager().cancelAll();
       return;
     }
@@ -43,7 +43,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   );
 
   if (Platform.isAndroid) {
-    final int min = int.parse(await accountDatabase.kv.get('notifications-android-target-interval-minutes') ?? '15');
+    final int min = await accountDatabase.kv.get('notifications-android-target-interval-minutes') ?? 15;
     await Workmanager().registerPeriodicTask(identifier, identifier,
       frequency: Duration(minutes: min),
       constraints: workManagerConstraints,
@@ -92,14 +92,14 @@ void callbackDispatcher() {
       for (final account in accounts) {
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
         final sph = SPH(account: clearTextAccount);
-        if ((await sph.prefs.kv.get('notifications-allow')??'true') != 'true') {
+        if (await sph.prefs.kv.get('notifications-allow')) {
           sph.prefs.close();
           continue;
         }
         bool authenticated = false;
         for (final applet in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
           if (applet.supportedAccountTypes.contains(sph.session.accountType)
-           && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}')??'true') == 'true'
+           && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ?? true)
           ) {
             if (!authenticated) {
               await sph.session.prepareDio();

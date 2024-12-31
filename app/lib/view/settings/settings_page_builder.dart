@@ -102,7 +102,7 @@ class SettingsPageWithRefreshIndicator extends StatelessWidget {
 }
 
 typedef SettingsListBuilder = List<Widget> Function(
-    BuildContext context, AsyncSnapshot<Map<String, String?>> snapshot);
+    BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot);
 
 class SettingsPageWithStreamBuilder extends StatelessWidget {
   final Color backgroundColor;
@@ -110,16 +110,16 @@ class SettingsPageWithStreamBuilder extends StatelessWidget {
   final SettingsListBuilder builder;
   final EdgeInsets contentPadding;
   final void Function()? back;
-  final Stream<Map<String, String?>> subscription;
+  final Stream<Map<String, dynamic>> subscription;
 
   const SettingsPageWithStreamBuilder(
-      {super.key,
-      required this.backgroundColor,
-      required this.title,
-      this.contentPadding = EdgeInsets.zero,
-      this.back,
-      required this.subscription,
-      required this.builder});
+    {super.key,
+    required this.backgroundColor,
+    required this.title,
+    this.contentPadding = EdgeInsets.zero,
+    this.back,
+    required this.subscription,
+    required this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -133,16 +133,17 @@ class SettingsPageWithStreamBuilder extends StatelessWidget {
       body: Padding(
         padding: contentPadding,
         child: StreamBuilder(
-            stream: subscription,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return LinearProgressIndicator();
-              }
+          stream: subscription,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return LinearProgressIndicator();
+            }
 
-              return ListView(
-                children: builder(context, snapshot),
-              );
-            }),
+            return ListView(
+              children: builder(context, snapshot),
+            );
+          },
+        ),
       ),
     );
   }
