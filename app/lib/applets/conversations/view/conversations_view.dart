@@ -3,7 +3,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/conversations/definition.dart';
 import 'package:sph_plan/applets/conversations/parser.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
-import '../../../core/database/account_database/account_db.dart';
 import '../../../core/sph/sph.dart';
 import '../../../models/client_status_exceptions.dart';
 import '../../../models/conversations.dart';
@@ -477,76 +476,69 @@ class _ConversationsViewState extends State<ConversationsView> {
           return false;
         },
         child: Scaffold(
-            body: StreamBuilder(
-              stream: accountDatabase.kv
-                  .subscribeMultiple(['isAmoled']),
-              builder: (context, snapshot) {
-                return CombinedAppletBuilder<List<OverviewEntry>>(
-                    parser: sph!.parser.conversationsParser,
-                    phpUrl: conversationsDefinition.appletPhpUrl,
-                    settingsDefaults: conversationsDefinition.settingsDefaults,
-                    accountType: sph!.session.accountType,
-                    builder: (context, data, accountType, settings, updateSetting, refresh) {
-                      return RefreshIndicator(
-                          key: _refreshKey,
-                          edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
-                          onRefresh: refresh!,
-                          child: CustomScrollView(
-                            controller: scrollController,
-                            physics: AlwaysScrollableScrollPhysics(),
-                            slivers: [
-                              PinnedHeaderSliver(
-                                child: ScrolledDownContainer(
-                                    child: toggleMode
-                                        ? toggleModeAppBar()
-                                        : searchWidget()),
-                              ),
-                              SliverVariedExtentList.builder(
-                                itemCount: data.length + 1,
-                                itemExtentBuilder: (index, _) {
-                                  if (index > data.length - 1) {
-                                    return tileSize * 2.5;
-                                  }
+            body: CombinedAppletBuilder<List<OverviewEntry>>(
+                parser: sph!.parser.conversationsParser,
+                phpUrl: conversationsDefinition.appletPhpUrl,
+                settingsDefaults: conversationsDefinition.settingsDefaults,
+                accountType: sph!.session.accountType,
+                builder: (context, data, accountType, settings, updateSetting, refresh) {
+                  return RefreshIndicator(
+                      key: _refreshKey,
+                      edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
+                      onRefresh: refresh!,
+                      child: CustomScrollView(
+                        controller: scrollController,
+                        physics: AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          PinnedHeaderSliver(
+                            child: ScrolledDownContainer(
+                                child: toggleMode
+                                    ? toggleModeAppBar()
+                                    : searchWidget()),
+                          ),
+                          SliverVariedExtentList.builder(
+                            itemCount: data.length + 1,
+                            itemExtentBuilder: (index, _) {
+                              if (index > data.length - 1) {
+                                return tileSize * 2.5;
+                              }
 
-                                  return tileSize;
-                                },
-                                itemBuilder: (context, index) {
-                                  if (index > data.length - 1) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 12.0, left: 12.0, right: 12.0),
-                                      child: ListTile(
-                                        title: Text(
-                                          AppLocalizations.of(context)!
-                                              .noFurtherEntries,
-                                          textAlign: TextAlign.center,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge,
-                                        ),
-                                        subtitle: Text(
-                                          AppLocalizations.of(context)!
-                                              .conversationNote,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    );
-                                  }
+                              return tileSize;
+                            },
+                            itemBuilder: (context, index) {
+                              if (index > data.length - 1) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 12.0, left: 12.0, right: 12.0),
+                                  child: ListTile(
+                                    title: Text(
+                                      AppLocalizations.of(context)!
+                                          .noFurtherEntries,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                    subtitle: Text(
+                                      AppLocalizations.of(context)!
+                                          .conversationNote,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              }
 
-                                  return ConversationTile(
-                                    entry: data[index],
-                                    toggleMode: toggleMode,
-                                    checked: checkedTiles[data[index].id] ??
-                                        false,
-                                    isAmoled: snapshot.data?['isAmoled'] == 'true',
-                                  );
-                                },
-                              )
-                            ],
-                          ));
-                    });
-              }
-            ),
+                              return ConversationTile(
+                                entry: data[index],
+                                toggleMode: toggleMode,
+                                checked: checkedTiles[data[index].id] ??
+                                    false,
+                              );
+                            },
+                          )
+                        ],
+                      ));
+                }),
             floatingActionButton: toggleMode
                 ? disableToggleButton
                 ? FloatingActionButton(
@@ -702,13 +694,12 @@ class ConversationTile extends StatelessWidget {
   final OverviewEntry entry;
   final bool toggleMode;
   final bool checked;
-  final bool isAmoled;
 
   const ConversationTile(
       {super.key,
       required this.entry,
       required this.toggleMode,
-      required this.checked, required this.isAmoled});
+      required this.checked});
 
   @override
   Widget build(BuildContext context) {
@@ -717,9 +708,7 @@ class ConversationTile extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.all(0),
         color: entry.hidden
-            ? isAmoled
-              ? Theme.of(context).colorScheme.surfaceContainerLowest
-              : Theme.of(context)
+            ? Theme.of(context)
                 .colorScheme
                 .surfaceContainerLow
                 .withValues(alpha: 0.8)
@@ -737,15 +726,10 @@ class ConversationTile extends StatelessWidget {
                     child: Icon(
                       Icons.visibility_off,
                       color: Theme.of(context).brightness == Brightness.dark
-                          ? isAmoled
-                              ? Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.7)
-                              : Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHigh
-                                .withValues(alpha: 0.5)
+                          ? Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.5)
                           : Theme.of(context)
                               .colorScheme
                               .surfaceContainerLow
