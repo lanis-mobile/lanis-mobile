@@ -32,8 +32,8 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         ),
       );
 
-  Map<String, String?>? globalSettings;
-  Future<void> Function(String, String)? globalUpdateSetting;
+  Map<String, dynamic>? globalSettings;
+  Future<void> Function(String, dynamic)? globalUpdateSetting;
   Lessons? homeworkLessons;
 
   @override
@@ -51,7 +51,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                       homeworkLessons != null &&
                       homeworkLessons!.isNotEmpty
                   ? [
-                      globalSettings!['showHomework'] == 'true'
+                      globalSettings!['showHomework'] == true
                           ? Tooltip(
                               message: AppLocalizations.of(context)!.lessons,
                               child: IconButton(
@@ -59,7 +59,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                                 onPressed: () {
                                   globalUpdateSetting!(
                                     'showHomework',
-                                    'false',
+                                    false,
                                   );
                                   WidgetsBinding.instance
                                       .addPostFrameCallback((_) {
@@ -75,7 +75,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                                 onPressed: () {
                                   globalUpdateSetting!(
                                     'showHomework',
-                                    'true',
+                                    true,
                                   );
                                   WidgetsBinding.instance
                                       .addPostFrameCallback((_) {
@@ -103,16 +103,16 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
           if (globalUpdateSetting == null || globalSettings == null) {
             globalUpdateSetting = updateSetting;
             globalSettings = settings;
-            if (settings['showHomework'] == 'true' &&
+            if (settings['showHomework'] == true &&
                 homeworkLessons!.isEmpty) {
-              updateSetting('showHomework', 'false');
+              updateSetting('showHomework', false);
             }
             WidgetsBinding.instance.addPostFrameCallback((_) {
               setState(() {});
             });
           }
 
-          if (settings['showHomework'] == 'true') {
+          if (settings['showHomework'] == true) {
             lessons = homeworkLessons!;
 
             lessons.sort((a, b) {

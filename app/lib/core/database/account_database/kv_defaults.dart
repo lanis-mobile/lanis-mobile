@@ -3,5 +3,5 @@ const Map<String, dynamic> kvDefaults = {
   "last-app-version": "0.0.0",
   "color": "standard",
   "theme": "system",
-  "isAmoled": false,
+  "is-amoled": false,
 };

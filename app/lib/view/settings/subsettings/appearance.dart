@@ -34,7 +34,7 @@ class _AppearanceSettingsState
         backgroundColor: backgroundColor,
         title: Text(AppLocalizations.of(context)!.appearance),
         subscription: accountDatabase.kv
-            .subscribeMultiple(['color', 'theme', 'isAmoled']),
+            .subscribeMultiple(['color', 'theme', 'is-amoled']),
         builder: (context, snapshot) {
           return [
             Padding(
@@ -88,9 +88,9 @@ class _AppearanceSettingsState
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 16.0),
                       useInkWell: true,
-                      value: snapshot.data!['isAmoled'],
+                      value: snapshot.data!['is-amoled'],
                       onChanged: (value) {
-                        accountDatabase.kv.set('isAmoled', value);
+                        accountDatabase.kv.set('is-amoled', value);
                       }),
                 ],
               ),

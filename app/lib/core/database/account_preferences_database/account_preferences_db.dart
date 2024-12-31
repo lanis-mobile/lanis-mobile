@@ -125,10 +125,10 @@ class KV {
     });
   }
 
-  Stream<Map<String, String?>> subscribeAllApplet(String appletId, Map<String, String?> defaults) {
+  Stream<Map<String, dynamic>> subscribeAllApplet(String appletId, Map<String, dynamic> defaults) {
     final stream = (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).watch();
     return stream.map((event) {
-      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
       for (var key in defaults.keys) {
         if (!result.containsKey(key) && defaults.containsKey(key)) {
           result[key] = defaults[key];
@@ -137,8 +137,9 @@ class KV {
       return result;
     });
   }
-  Future<Map<String, String?>> getAllApplet(String appletId, Map<String, String?> defaults) async {
-    final result = Map<String, String?>.fromEntries((await (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).get()).map((e) => MapEntry(e.key, e.value)));
+
+  Future<Map<String, dynamic>> getAllApplet(String appletId, Map<String, dynamic> defaults) async {
+    final result = Map<String, dynamic>.fromEntries((await (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).get()).map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
     for (var key in defaults.keys) {
       if (!result.containsKey(key) && defaults.containsKey(key)) {
         result[key] = defaults[key];
@@ -147,7 +148,8 @@ class KV {
     return result;
   }
 
-  Future<void> setAppletValue(String appletId, String key, String value) async {
-    await db.into(db.appletPreferencesTable).insert(AppletPreferencesTableCompanion.insert(appletId: appletId, key: key, value: Value(value)), mode: InsertMode.insertOrReplace);
+  Future<void> setAppletValue(String appletId, String key, dynamic value) async {
+    final insert = jsonEncode({'v': value});
+    await db.into(db.appletPreferencesTable).insert(AppletPreferencesTableCompanion.insert(appletId: appletId, key: key, value: Value(insert)), mode: InsertMode.insertOrReplace);
   }
 }

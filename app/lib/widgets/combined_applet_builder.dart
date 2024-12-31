@@ -7,14 +7,14 @@ import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
 
 typedef RefreshFunction = Future<void> Function();
-typedef UpdateSetting = Future<void> Function(String key, String value);
+typedef UpdateSetting = Future<void> Function(String key, dynamic value);
 typedef BuilderFunction<T> = Widget Function(BuildContext, T, AccountType,
-    Map<String, String?>, UpdateSetting, RefreshFunction? refresh);
+    Map<String, dynamic>, UpdateSetting, RefreshFunction? refresh);
 
 class CombinedAppletBuilder<T> extends StatefulWidget {
   final AppletParser<T> parser;
   final String phpUrl;
-  final Map<String, String?> settingsDefaults;
+  final Map<String, dynamic> settingsDefaults;
   final AccountType accountType;
   final BuilderFunction<T> builder;
   const CombinedAppletBuilder({
@@ -32,7 +32,7 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
 }
 
 class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
-  late Map<String, String?> appletSettings;
+  late Map<String, dynamic> appletSettings;
   bool _loading = true;
 
   Widget _errorWidget(Function refresh) {
@@ -95,13 +95,13 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
             children: [
               if (snapshot.data?.contentStatus == ContentStatus.offline) Container(
                 height: 32,
-                color: Theme.of(context).secondaryHeaderColor.withOpacity(0.7),
+                color: Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.7),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.offline_pin,
-                      color: Theme.of(context).primaryColor.withOpacity(0.8),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
                     ),
                     SizedBox(
                       width: 4,
@@ -110,7 +110,7 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                       '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
                       style: TextStyle(
                         color:
-                            Theme.of(context).primaryColor.withOpacity(0.8),
+                            Theme.of(context).primaryColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -122,7 +122,7 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                   snapshot.data!.content as T,
                   widget.accountType,
                   appletSettings,
-                      (String key, String value) async {
+                      (String key, dynamic value) async {
                     await sph!.prefs.kv.setAppletValue(widget.phpUrl, key, value);
                     setState(() {
                       appletSettings[key] = value;
