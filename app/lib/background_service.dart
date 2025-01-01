@@ -89,6 +89,11 @@ void callbackDispatcher() {
       initializeNotifications();
 
       AccountDatabase accountDatabase = AccountDatabase();
+
+      if (!await isTaskWithinConstraints(accountDatabase)) {
+        return Future.value(false);
+      }
+
       final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
       for (final account in accounts) {
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
