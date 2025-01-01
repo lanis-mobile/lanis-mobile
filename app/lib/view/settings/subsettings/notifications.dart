@@ -15,6 +15,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/callout.dart';
+import '../../../utils/range_slider_tile.dart';
 import '../../../utils/slider_tile.dart';
 
 class NotificationSettings extends SettingsColours {
@@ -108,14 +109,14 @@ class _NotificationSettingsState
           List<String> applets = snapshot.data!.keys.toList()..sort();
           applets.removeWhere((element) => !element.endsWith('.php'));
 
-          final bool notificationsAllowed =
+          final bool notificationsPermissionAllowed =
               notificationPermissionStatus == PermissionStatus.granted;
           final bool notificationsEnabled = (snapshot.data!['notifications-allow'] ?? true) == true;
           final bool notificationsActive = (snapshot.data!['notifications-allow'] ?? true) == true &&
                   notificationPermissionStatus == PermissionStatus.granted;
 
           return [
-            if (!notificationsAllowed) ...[
+            if (!notificationsPermissionAllowed) ...[
               Callout(
                 leading: Icon(Icons.error_rounded),
                 title: Text(
@@ -138,13 +139,13 @@ class _NotificationSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: GestureDetector(
-                onTap: notificationsAllowed
+                onTap: notificationsPermissionAllowed
                     ? () {
                         sph!.prefs.kv.set('notifications-allow', !notificationsEnabled);
                       }
                     : null,
                 child: Card.filled(
-                  color: notificationsAllowed
+                  color: notificationsPermissionAllowed
                       ? Theme.of(context).colorScheme.primaryContainer
                       : Theme.of(context).colorScheme.surfaceContainerHighest,
                   margin: EdgeInsets.zero,
@@ -155,7 +156,7 @@ class _NotificationSettingsState
                       title: Text(
                         AppLocalizations.of(context)!.useNotifications,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              color: notificationsAllowed
+                              color: notificationsPermissionAllowed
                                   ? Theme.of(context)
                                       .colorScheme
                                       .onPrimaryContainer
@@ -170,7 +171,7 @@ class _NotificationSettingsState
                             )
                           : null,
                       value: notificationsEnabled,
-                      onChanged: notificationsAllowed
+                      onChanged: notificationsPermissionAllowed
                           ? (value) {
                               sph!.prefs.kv
                                   .set('notifications-allow', value);
@@ -225,7 +226,7 @@ class _NotificationSettingsState
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, top: 8.0),
                 child: Text(
-                  AppLocalizations.of(context)!.backgroundService,
+                  "${AppLocalizations.of(context)!.backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context)!.forEveryAccount})' : ""}",
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
                         color: notificationsActive
                             ? Theme.of(context).colorScheme.primary
@@ -233,32 +234,77 @@ class _NotificationSettingsState
                       ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    spacing: 8.0,
-                    children: [
-                      for (int dayIndex = 1; dayIndex < 8; dayIndex++) FilterChip(
-                        label: Text(
-                          DateFormat.E(AppLocalizations.of(context)!.localeName).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
-                        ),
-                        selected: androidEnabledDays[dayIndex - 1],
-                        onSelected: (val) {
-                          setState(() {
-                            androidEnabledDays[dayIndex - 1] = val;
-                          });
-                          accountDatabase.kv.set('notifications-android-allowed-days', androidEnabledDays);
-                        },
+              SizedBox(
+                height: 8.0,
+              ),
+              Row(
+                children: [
+                  SizedBox(width: 16.0,),
+                  Icon(
+                      Icons.calendar_month,
+                      color: notificationsPermissionAllowed
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context).colorScheme.onSurfaceVariant),
+                  SizedBox(width: 24.0,),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        spacing: 8.0,
+                        children: [
+                          for (int dayIndex = 1; dayIndex < 8; dayIndex++) FilterChip(
+                            label: Text(
+                              DateFormat.E(AppLocalizations.of(context)!.localeName).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
+                            ),
+                            selected: androidEnabledDays[dayIndex - 1],
+                            onSelected: (val) {
+                              setState(() {
+                                androidEnabledDays[dayIndex - 1] = val;
+                              });
+                              accountDatabase.kv.set('notifications-android-allowed-days', androidEnabledDays);
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  SizedBox(width: 16.0,),
+                ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: RangeSlider(
+                padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+                child: RangeSliderTile(
+                  title: Row(
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.timePeriod,
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: notificationsPermissionAllowed
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
+                        ),
+                      ),
+                      Spacer(),
+                      Text(
+                        "${androidStartTime.format(context)} - ${androidEndTime.format(context)}",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: notificationsPermissionAllowed
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(width: 16.0,),
+                    ],
+                  ),
+                  leading: Icon(
+                    Icons.schedule_outlined,
+                    color: notificationsPermissionAllowed
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context).colorScheme.onSurfaceVariant),
                   values: RangeValues(
                     minutesSinceZero(androidStartTime).toDouble(),
                     minutesSinceZero(androidEndTime).toDouble(),
@@ -287,36 +333,45 @@ class _NotificationSettingsState
               Padding(
                   padding: const EdgeInsets.only(left: 16.0),
                   child: SliderTile(
-                    title: Text(
-                      AppLocalizations.of(context)!.updateInterval,
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: notificationsAllowed
+                    title: Row(
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.updateInterval,
+                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: notificationsPermissionAllowed
                                 ? Theme.of(context).colorScheme.onSurface
                                 : Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
+                        ),
+                        Spacer(),
+                        Text(
+                          "${androidNotificationInterval.round()} min",
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: notificationsPermissionAllowed
+                                ? Theme.of(context).colorScheme.onSurface
+                                : Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                        ),
+                        SizedBox(width: 16.0,),
+                      ],
                     ),
-                    subtitle: widget.accountCount > 1 ? Text(
-                      AppLocalizations.of(context)!.forEveryAccount,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ) : null,
-                    leading: Icon(Icons.schedule_rounded,
-                        color: notificationsAllowed
+                    leading: Icon(Icons.timer_outlined,
+                        color: notificationsPermissionAllowed
                             ? Theme.of(context).colorScheme.onSurface
                             : Theme.of(context).colorScheme.onSurfaceVariant),
                     value: androidNotificationInterval,
-                    onChanged: notificationsAllowed
+                    onChanged: notificationsPermissionAllowed
                         ? (val) {
                             setState(() {
                               androidNotificationInterval = val;
                             });
                           }
                         : null,
-                    onChangedEnd: notificationsAllowed
+                    onChangedEnd: notificationsPermissionAllowed
                         ? (val) {
                             accountDatabase.kv.set(
                                 'notifications-android-target-interval-minutes',

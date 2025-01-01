@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SliderTile extends StatelessWidget {
-  final Text title;
-  final Text? subtitle;
+  final Widget title;
+  final Widget? subtitle;
   final Widget? leading;
   final double value;
   final Function(double)? onChanged;

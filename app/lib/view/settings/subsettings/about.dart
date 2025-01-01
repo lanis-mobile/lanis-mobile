@@ -117,7 +117,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
     ),
     AboutLink(
       title: (context) => AppLocalizations.of(context)!.discordServer,
-      iconData: Icons.diversity_3_outlined,
+      iconData: Icons.discord,
       onTap: (context) => launchUrl(Uri.parse("https://discord.gg/sWJXZ8FsU7")),
     ),
     AboutLink(
