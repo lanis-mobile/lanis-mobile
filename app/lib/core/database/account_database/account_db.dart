@@ -225,6 +225,24 @@ class KV {
     return val != null ? jsonDecode(val)['v'] : null;
   }
 
+  Future<Map<String, dynamic>> getMultiple(List<String> keys) {
+    return (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.isIn(keys))).get().then((event) {
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
+      for (var key in keys) {
+        if (!result.containsKey(key) && kvDefaults.containsKey(key)) {
+          result[key] = kvDefaults[key];
+        }
+      }
+      return result;
+    });
+  }
+
+  Future<void> setMultiple(Map<String, dynamic> values) async {
+    for (var entry in values.entries) {
+      await set(entry.key, entry.value);
+    }
+  }
+
   Stream<dynamic> subscribe(String key) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).watchSingleOrNull();
     return stream.map((event) {

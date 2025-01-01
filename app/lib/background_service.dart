@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount;
+import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount, accountDatabase;
 import 'core/sph/sph.dart' show SPH;
 
 const identifier = "io.github.alessioc42.pushservice";
@@ -43,7 +44,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   );
 
   if (Platform.isAndroid) {
-    final int min = await accountDatabase.kv.get('notifications-android-target-interval-minutes') ?? 15;
+    final int min = await accountDatabase.kv.get('notifications-android-target-interval-minutes');
     await Workmanager().registerPeriodicTask(identifier, identifier,
       frequency: Duration(minutes: min),
       constraints: workManagerConstraints,
@@ -174,4 +175,20 @@ class BackgroundTaskToolkit {
     var hashed = sha256.convert(bytes);
     return hashed.toString();
   }
+}
+
+Future<bool> isTaskWithinConstraints(AccountDatabase accountDB) async {
+  final globalSettings =
+      await accountDatabase.kv.getMultiple(
+      ['notifications-android-allowed-days',
+        'notifications-android-start-time',
+        'notifications-android-end-time']);
+  TimeOfDay currentTime = TimeOfDay.now();
+  TimeOfDay startTime = TimeOfDay(hour: globalSettings['notifications-android-start-time'][0], minute: globalSettings['notifications-android-start-time'][1]);
+  TimeOfDay endTime = TimeOfDay(hour: globalSettings['notifications-android-end-time'][0], minute: globalSettings['notifications-android-end-time'][1]);
+  if (currentTime.hour < startTime.hour || currentTime.hour > endTime.hour) {
+    return false;
+  }
+  int currentDayIndex = DateTime.now().weekday - 1;
+  return globalSettings['notifications-android-allowed-days'][currentDayIndex];
 }
