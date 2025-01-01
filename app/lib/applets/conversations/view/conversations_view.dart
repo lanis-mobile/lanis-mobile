@@ -728,8 +728,8 @@ class ConversationTile extends StatelessWidget {
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Theme.of(context)
                               .colorScheme
-                              .surfaceContainerHigh
-                              .withValues(alpha: 0.5)
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.05)
                           : Theme.of(context)
                               .colorScheme
                               .surfaceContainerLow
