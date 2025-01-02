@@ -136,8 +136,8 @@
   "settingsErrorAbout": "Normally you would see contributors but an error occurred. Most likely you don't have an internet connection.",
   "notificationAccountBoundExplanation": "These settings only affect the account you are currently logged on to. The update interval is shared by all accounts.",
   "useNotifications": "Use notifications",
-  "intervalAppletsList": "Interval, applets",
-  "darkModeColoursList": "Dark mode, accent colours",
+  "intervalAppletsList": "Background service, Applets",
+  "darkModeColoursList": "Dark mode, Accent colours",
   "ageNameClassList": "Age, name, class",
   "contributorsLinksLicensesList": "Contributors, links, licenses",
   "deniedNotificationPermissions": "You didn’t authorise notifications!",
@@ -258,5 +258,7 @@
   "install": "Install",
   "notificationPermanentlyDenied": "Please activate notifications in the app settings.",
   "open": "Open",
-  "close": "Close"
+  "close": "Close",
+  "backgroundService": "Background service",
+  "timePeriod": "Time period"
 }

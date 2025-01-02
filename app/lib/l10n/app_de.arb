@@ -136,7 +136,7 @@
   "settingsErrorAbout": "Normalerweise sollten die Mitwirkenden der App angezeigt werden, aber ein Fehler ist aufgetreten. Du hast sehr wahrscheinlich keine Internetverbindung.",
   "notificationAccountBoundExplanation": "Diese Einstellungen betreffen nur das angemeldete Konto. Das Aktualisierungsintervall ist für alle Konten gleich.",
   "useNotifications": "Benachrichtigungen verwenden",
-  "intervalAppletsList": "Intervall, applets",
+  "intervalAppletsList": "Hintergrunddienst, Applets",
   "darkModeColoursList": "Dunkler Modus, Akzentfarben",
   "ageNameClassList": "Alter, Name, Klasse",
   "contributorsLinksLicensesList": "Mitwirkende, Links, Lizenzen",
@@ -258,5 +258,7 @@
   "install": "Installieren",
   "notificationPermanentlyDenied": "Bitte erlaube Benachrichtigungen für diese App.",
   "open": "Öffnen",
-  "close": "Schließen"
+  "close": "Schließen",
+  "backgroundService": "Hintergrunddienst",
+  "timePeriod": "Zeitraum"
 }

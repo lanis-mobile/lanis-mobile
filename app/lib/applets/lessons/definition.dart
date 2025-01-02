@@ -18,7 +18,6 @@ final lessonsDefinition = AppletDefinition(
   settingsDefaults: {
     'showHomework': false,
   },
-  notificationTask: (sph, accountType, toolkit) async {},
   refreshInterval: const Duration(minutes: 15),
   bodyBuilder: (context, accountType, openDrawerCb) {
     if (accountType == AccountType.student) {

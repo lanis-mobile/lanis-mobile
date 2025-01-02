@@ -1,3 +1,4 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 import '../../background_service.dart';
@@ -24,7 +25,13 @@ Future<void> substitutionsBackgroundTask(SPH sph, AccountType accountType, Backg
 
     messageBody += "$entryText\n";
   }
-  tools.sendMessage('${allSubstitutions.length} Einträge im Vertretungsplan', messageBody, id: 0, avoidDuplicateSending: true);
+  tools.sendMessage(
+      title: '${allSubstitutions.length} Einträge im Vertretungsplan',
+      message: messageBody,
+      id: 0,
+      importance: Importance.defaultImportance,
+      avoidDuplicateSending: true
+  );
 }
 
 String weekDayGer(String dateString) {
