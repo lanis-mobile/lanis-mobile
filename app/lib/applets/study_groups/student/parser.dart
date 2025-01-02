@@ -143,8 +143,6 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
 
       courseRow.add(email ?? "");
 
-      print(courseRow);
-
       courseData.add(courseRow);
     });
 
