@@ -4,6 +4,7 @@ import 'package:sph_plan/applets/definitions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/account_types.dart';
+import 'background.dart';
 
 final conversationsDefinition = AppletDefinition(
   appletPhpUrl: 'nachrichten.php',
@@ -15,7 +16,7 @@ final conversationsDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
   settingsDefaults: {},
-  notificationTask: (sph, accountType, toolkit) async {return;},
+  notificationTask: conversationsBackgroundTask,
   refreshInterval: const Duration(minutes: 2),
   bodyBuilder: (context, accountType, openDrawerCb) {
     return ConversationsView(openDrawerCb: openDrawerCb);

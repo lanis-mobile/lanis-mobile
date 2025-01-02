@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -86,33 +88,34 @@ class KV {
 
   KV(this.db);
 
-  Future<void> set(String key, String value) async {
-    await db.into(db.appPreferencesTable).insert(AppPreferencesTableCompanion.insert(key: key, value: Value(value)), mode: InsertMode.insertOrReplace);
+  Future<void> set(String key, dynamic value) async {
+    final insert = jsonEncode({'v': value});
+    await db.into(db.appPreferencesTable).insert(AppPreferencesTableCompanion.insert(key: key, value: Value(insert)), mode: InsertMode.insertOrReplace);
   }
 
-  Future<String?> get(String key) async {
+  Future<dynamic> get(String key) async {
     final val = (await (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).getSingleOrNull())?.value;
     if (val == null && kvDefaults.keys.contains(key)) {
-      set(key, kvDefaults[key]!);
+      await set(key, kvDefaults[key]!);
       return kvDefaults[key];
     }
-    return val;
+    return val != null ? jsonDecode(val)['v'] : null;
   }
 
-  Stream<String?> subscribe(String key) {
+  Stream<dynamic> subscribe(String key) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.equals(key))).watchSingleOrNull();
     return stream.map((event) {
       if (event?.value == null && kvDefaults.containsKey(key)) {
         return kvDefaults[key];
       }
-      return event?.value;
+      return event?.value != null ? jsonDecode(event!.value!)['v'] : null;
     });
   }
 
-  Stream<Map<String, String?>> subscribeMultiple(List<String> keys) {
+  Stream<Map<String, dynamic>> subscribeMultiple(List<String> keys) {
     final stream = (db.select(db.appPreferencesTable)..where((tbl) => tbl.key.isIn(keys))).watch();
     return stream.map((event) {
-      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
       for (var key in keys) {
         if (!result.containsKey(key)) {
           result[key] = kvDefaults.containsKey(key) ? kvDefaults[key] : null;
@@ -122,10 +125,10 @@ class KV {
     });
   }
 
-  Stream<Map<String, String?>> subscribeAllApplet(String appletId, Map<String, String?> defaults) {
+  Stream<Map<String, dynamic>> subscribeAllApplet(String appletId, Map<String, dynamic> defaults) {
     final stream = (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).watch();
     return stream.map((event) {
-      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value)));
+      final result = Map.fromEntries(event.map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
       for (var key in defaults.keys) {
         if (!result.containsKey(key) && defaults.containsKey(key)) {
           result[key] = defaults[key];
@@ -134,8 +137,9 @@ class KV {
       return result;
     });
   }
-  Future<Map<String, String?>> getAllApplet(String appletId, Map<String, String?> defaults) async {
-    final result = Map<String, String?>.fromEntries((await (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).get()).map((e) => MapEntry(e.key, e.value)));
+
+  Future<Map<String, dynamic>> getAllApplet(String appletId, Map<String, dynamic> defaults) async {
+    final result = Map<String, dynamic>.fromEntries((await (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId))).get()).map((e) => MapEntry(e.key, e.value != null ? jsonDecode(e.value!)['v'] : null)));
     for (var key in defaults.keys) {
       if (!result.containsKey(key) && defaults.containsKey(key)) {
         result[key] = defaults[key];
@@ -144,7 +148,8 @@ class KV {
     return result;
   }
 
-  Future<void> setAppletValue(String appletId, String key, String value) async {
-    await db.into(db.appletPreferencesTable).insert(AppletPreferencesTableCompanion.insert(appletId: appletId, key: key, value: Value(value)), mode: InsertMode.insertOrReplace);
+  Future<void> setAppletValue(String appletId, String key, dynamic value) async {
+    final insert = jsonEncode({'v': value});
+    await db.into(db.appletPreferencesTable).insert(AppletPreferencesTableCompanion.insert(appletId: appletId, key: key, value: Value(insert)), mode: InsertMode.insertOrReplace);
   }
 }

@@ -66,7 +66,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
             settings['student-selected-type'] == 'TimeTableType.own'
                 ? TimeTableType.own
                 : TimeTableType.all;
-        bool showByWeek = settings['student-selected-week'] == 'true';
+        bool showByWeek = settings['student-selected-week'] == true;
         List<TimetableDay> selectedPlan =
             getSelectedPlan(timetable, selectedType);
         final List<String> uniqueBadges = selectedPlan
@@ -81,7 +81,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
         }
 
-        final CalendarView view = switch (settings['current-timetable-view']!) {
+        final CalendarView view = switch (settings['current-timetable-view']! as String) {
           "CalendarView.day" => CalendarView.day,
           "CalendarView.week" => CalendarView.week,
           "CalendarView.workWeek" => CalendarView.workWeek,
@@ -200,8 +200,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
                       GestureDetector(
                         onTap: () {
-                          updateSettings('student-selected-week',
-                              (currentWeekIndex == 0) ? 'false' : 'true');
+                          updateSettings('student-selected-week', currentWeekIndex != 0);
                           currentWeekIndex = (currentWeekIndex + 1) %
                               (uniqueBadges.length + 1);
                         },

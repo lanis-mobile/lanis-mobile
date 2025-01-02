@@ -15,8 +15,9 @@ final lessonsDefinition = AppletDefinition(
   label: (context) => AppLocalizations.of(context)!.lessons,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   allowOffline: false,
-  settingsDefaults: {},
-  notificationTask: (sph, accountType, toolkit) async {},
+  settingsDefaults: {
+    'showHomework': false,
+  },
   refreshInterval: const Duration(minutes: 15),
   bodyBuilder: (context, accountType, openDrawerCb) {
     if (accountType == AccountType.student) {

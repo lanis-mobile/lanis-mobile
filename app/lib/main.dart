@@ -66,8 +66,8 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: accountDatabase.kv.subscribeMultiple(['color', 'theme', 'isAmoled']),
-      builder: (BuildContext context, AsyncSnapshot<Map<String, String?>> snapshot) {
+      stream: accountDatabase.kv.subscribeMultiple(['color', 'theme', 'is-amoled']),
+      builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
         late ThemeMode mode;
         late Themes theme;
         if (snapshot.hasData) {
@@ -84,8 +84,8 @@ class App extends StatelessWidget {
           } else {
             theme = Themes.standardTheme;
           }
-          if (snapshot.data!['isAmoled'] == 'true') {
-            theme = Themes.getAmoledThemes();
+          if (snapshot.data!['is-amoled'] == true) {
+            theme = Themes.getAmoledThemes(theme);
           }
         } else {
           mode = ThemeMode.system;
@@ -96,7 +96,16 @@ class App extends StatelessWidget {
             Themes.dynamicTheme = Themes.getNewTheme(lightDynamic.primary);
           }
           if (snapshot.data?['color'] == 'dynamic') {
-            theme = Themes.dynamicTheme;
+            var dynamicTheme = Themes.dynamicTheme;
+            var darkTheme = dynamicTheme.darkTheme;
+            if (snapshot.data!['is-amoled'] == true) {
+              darkTheme = Themes.getAmoledThemes(dynamicTheme).darkTheme;
+            }
+
+            theme = Themes(
+              dynamicTheme.lightTheme,
+              darkTheme
+            );
           }
 
           if (mode == ThemeMode.light ||

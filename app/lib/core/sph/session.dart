@@ -238,13 +238,13 @@ class SessionHandler {
     }
   }
 
-  bool doesSupportFeature(AppletDefinition applet) {
+  bool doesSupportFeature(AppletDefinition applet, {AccountType? overrideAccountType}) {
     var app = travelMenu
       .where((element) => element["link"].toString() == applet.appletPhpUrl)
       .singleOrNull;
     if (app == null) {
       return false;
     }
-    return applet.supportedAccountTypes.contains(accountType);
+    return applet.supportedAccountTypes.contains(overrideAccountType ?? accountType);
   }
 }

@@ -136,7 +136,7 @@
   "settingsErrorAbout": "Normalerweise sollten die Mitwirkenden der App angezeigt werden, aber ein Fehler ist aufgetreten. Du hast sehr wahrscheinlich keine Internetverbindung.",
   "notificationAccountBoundExplanation": "Diese Einstellungen betreffen nur das angemeldete Konto. Das Aktualisierungsintervall ist für alle Konten gleich.",
   "useNotifications": "Benachrichtigungen verwenden",
-  "intervalAppletsList": "Intervall, applets",
+  "intervalAppletsList": "Hintergrunddienst, Applets",
   "darkModeColoursList": "Dunkler Modus, Akzentfarben",
   "ageNameClassList": "Alter, Name, Klasse",
   "contributorsLinksLicensesList": "Mitwirkende, Links, Lizenzen",
@@ -259,9 +259,10 @@
   "notificationPermanentlyDenied": "Bitte erlaube Benachrichtigungen für diese App.",
   "open": "Öffnen",
   "close": "Schließen",
-
   "studyGroups": "Lerngruppen",
   "daysUntilNextExam": "{days, plural, =0{Heute} one{1 Tag} other{{days} Tage}} bis zur nächsten Klausur",
   "daysUntilExam": "{days, plural, =0{Heute ist die Klausur.} one{1 Tag bis zur Klausur.} other{{days} Tage bis zur Klausur.}}",
-  "daysSinceExam": "{days, plural, one{1 Tag ist vergangen.} other{{days} Tage sind vergangen.}}"
+  "daysSinceExam": "{days, plural, one{1 Tag ist vergangen.} other{{days} Tage sind vergangen.}}",
+  "backgroundService": "Hintergrunddienst",
+  "timePeriod": "Zeitraum"
 }

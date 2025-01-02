@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+
+enum AmoledColor {
+  background,
+  secondary,
+  third,
+}
+
 // Only a collection of themes
 // Used for ColorModeNotifier to set the app theme dynamically
 class Themes {
@@ -48,37 +55,44 @@ class Themes {
 
   static Themes standardTheme = getNewTheme(Colors.deepPurple);
 
-  static Themes getAmoledThemes() {
+  static Themes getAmoledThemes(Themes themes) {
     // Colors for Amoled Mode
-    final Map<String, Color> amoledColors = {
-      "background": Colors.black,
-      "secondary": const Color(0xFF0f0f0f),
-      "third": const Color(0xFF0a0a0a),
+    final Map<AmoledColor, Color> amoledColors = {
+      AmoledColor.background: Colors.black,
+      AmoledColor.secondary: const Color(0xFF0f0f0f),
+      AmoledColor.third: const Color(0xFF0a0a0a),
     };
 
     return Themes(
-      Themes.standardTheme.lightTheme,
-      Themes.standardTheme.darkTheme?.copyWith(
+      themes.lightTheme,
+      themes.darkTheme?.copyWith(
         // Amoled Background & Themes for required Components
-        scaffoldBackgroundColor: amoledColors["background"],
+        scaffoldBackgroundColor: amoledColors[AmoledColor.background],
         navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: amoledColors["background"],
+          backgroundColor: amoledColors[AmoledColor.background],
         ),
         navigationDrawerTheme: NavigationDrawerThemeData(
-          backgroundColor: amoledColors["background"],
+          backgroundColor: amoledColors[AmoledColor.background],
         ),
         appBarTheme: AppBarTheme(
-          backgroundColor: amoledColors["background"],
-          surfaceTintColor: amoledColors["background"],
+          backgroundColor: amoledColors[AmoledColor.background],
+          surfaceTintColor: amoledColors[AmoledColor.background],
         ),
         dialogTheme: DialogTheme(
-          backgroundColor: amoledColors["secondary"],
-          surfaceTintColor: amoledColors["secondary"],
+          backgroundColor: amoledColors[AmoledColor.secondary],
+          surfaceTintColor: amoledColors[AmoledColor.secondary],
         ),
         bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: amoledColors["third"],
-          surfaceTintColor: amoledColors["third"],
+          backgroundColor: amoledColors[AmoledColor.third],
+          surfaceTintColor: amoledColors[AmoledColor.third],
         ),
+        colorScheme: themes.darkTheme?.colorScheme.copyWith(
+          surfaceContainer: amoledColors[AmoledColor.background],
+          surfaceContainerHighest: themes.darkTheme?.cardColor,
+          surfaceContainerHigh: amoledColors[AmoledColor.third],
+          surfaceContainerLow: amoledColors[AmoledColor.secondary],
+          surfaceContainerLowest: amoledColors[AmoledColor.third],
+        )
       ),
     );
   }
