@@ -263,5 +263,5 @@
   "studyGroups": "Lerngruppen",
   "daysUntilNextExam": "{days, plural, =0{Heute} one{1 Tag} other{{days} Tage}} bis zur nächsten Klausur",
   "daysUntilExam": "{days, plural, =0{Heute ist die Klausur.} one{1 Tag bis zur Klausur.} other{{days} Tage bis zur Klausur.}}",
-  "daysSinceExam": "{days, plural, one{1 Tag seit der Klausur.} other{{days} Tage seit der Klausur.}}"
+  "daysSinceExam": "{days, plural, one{1 Tag ist vergangen.} other{{days} Tage sind vergangen.}}"
 }
