@@ -7,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/applets/definitions.dart';
+import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount, accountDatabase;
+import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount;
 import 'core/sph/sph.dart' show SPH;
 
 const identifier = "io.github.alessioc42.pushservice";
@@ -24,13 +25,17 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   }
 
   final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
+  int disabledCount = 0;
   for (final account in accounts) {
     final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
     final sph = SPH(account: clearTextAccount);
-    if (await sph.prefs.kv.get('notifications-allow')) {
-      await Workmanager().cancelAll();
-      return;
+    if (!await sph.prefs.kv.get('notifications-allow')) {
+      disabledCount++;
     }
+  }
+  if (disabledCount == accounts.length) {
+    await Workmanager().cancelAll();
+    return;
   }
 
   await Workmanager().initialize(callbackDispatcher,
@@ -86,25 +91,26 @@ void callbackDispatcher() {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     try {
       backgroundLogger.i("Background fetch triggered");
-      initializeNotifications();
+      await initializeNotifications();
 
       AccountDatabase accountDatabase = AccountDatabase();
 
       if (!await isTaskWithinConstraints(accountDatabase)) {
-        return Future.value(false);
+        backgroundLogger.w('Task not within constraints... aborting');
+        return Future.value(true);
       }
 
       final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
       for (final account in accounts) {
         final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
         final sph = SPH(account: clearTextAccount);
-        if (await sph.prefs.kv.get('notifications-allow')) {
+        if (!await sph.prefs.kv.get('notifications-allow')) {
           sph.prefs.close();
           continue;
         }
         bool authenticated = false;
         for (final applet in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
-          if (applet.supportedAccountTypes.contains(sph.session.accountType)
+          if (applet.supportedAccountTypes.contains(clearTextAccount.accountType)
            && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ?? true)
           ) {
             if (!authenticated) {
@@ -112,10 +118,10 @@ void callbackDispatcher() {
               await sph.session.authenticate(withoutData: true);
               authenticated = true;
             }
-            if (!sph.session.doesSupportFeature(applet)) {
+            if (!sph.session.doesSupportFeature(applet, overrideAccountType: clearTextAccount.accountType)) {
               continue;
             }
-            await applet.notificationTask!(sph, sph.session.accountType, BackgroundTaskToolkit(sph, applet.appletPhpUrl, multiAccount: accounts.length > 1));
+            await applet.notificationTask!(sph, clearTextAccount.accountType?? AccountType.student, BackgroundTaskToolkit(sph, applet.appletPhpUrl, multiAccount: accounts.length > 1));
           }
         }
         if (authenticated) {
@@ -123,6 +129,8 @@ void callbackDispatcher() {
         }
         sph.prefs.close();
       }
+      accountDatabase.close();
+      backgroundLogger.i("Background fetch completed");
       return Future.value(true);
     } catch (e, s) {
       backgroundLogger.f('Error in background fetch');
@@ -143,7 +151,16 @@ class BackgroundTaskToolkit {
     return id + _sph.account.localId * 10000;
   }
 
-  Future<void> sendMessage(String title, String message, {int id = 0, bool avoidDuplicateSending = false}) async {
+  /// Sends a notification to the user
+  ///
+  /// [title] is the title of the notification
+  /// [message] is the message of the notification
+  /// [id] is the id of the notification, must be between 0 and 10000
+  /// [avoidDuplicateSending] if true, the message will not be sent if the same message was sent before
+  Future<void> sendMessage({required String title,required String message, int id = 0, bool avoidDuplicateSending = false, Importance importance = Importance.high, Priority priority = Priority.high}) async {
+    if (id > 10000 || id < 0) {
+      throw ArgumentError('id must be between 0 and 10000');
+    }
     id = _seedId(id);
     message = multiAccount ? '${_sph.account.username.toLowerCase()}@${_sph.account.schoolName}\n$message' : message;
     if (avoidDuplicateSending) {
@@ -158,7 +175,7 @@ class BackgroundTaskToolkit {
     try {
       final androidDetails = AndroidNotificationDetails(
         'io.github.alessioc42.sphplan', 'lanis-mobile',
-        channelDescription: "SPH Benachrichtigungen",
+        channelDescription: "Applet notifications",
         importance: Importance.high,
         priority: Priority.high,
         styleInformation: BigTextStyleInformation(message),
@@ -184,7 +201,7 @@ class BackgroundTaskToolkit {
 
 Future<bool> isTaskWithinConstraints(AccountDatabase accountDB) async {
   final globalSettings =
-      await accountDatabase.kv.getMultiple(
+      await accountDB.kv.getMultiple(
       ['notifications-android-allowed-days',
         'notifications-android-start-time',
         'notifications-android-end-time']);

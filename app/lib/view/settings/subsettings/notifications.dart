@@ -15,6 +15,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/callout.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/range_slider_tile.dart';
 import '../../../utils/slider_tile.dart';
 
@@ -211,8 +212,9 @@ class _NotificationSettingsState
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                     value: (snapshot.data![key] ?? true) == true,
                     onChanged: notificationsActive
-                        ? (value) {
-                            sph!.prefs.kv.set(key, value);
+                        ? (value) async {
+                            await sph!.prefs.kv.set(key, value);
+                            logger.i('Set $key to $value');
                           }
                         : null,
                     useInkWell: true,
@@ -228,10 +230,10 @@ class _NotificationSettingsState
                 child: Text(
                   "${AppLocalizations.of(context)!.backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context)!.forEveryAccount})' : ""}",
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: notificationsActive
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: notificationsActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               SizedBox(
