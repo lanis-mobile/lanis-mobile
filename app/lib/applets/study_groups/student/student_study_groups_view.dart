@@ -55,7 +55,7 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
                     : Tooltip(
                         message: AppLocalizations.of(context)!.studyGroups,
                         child: IconButton(
-                          icon: Icon(Icons.groups),
+                          icon: Icon(Icons.groups_outlined),
                           onPressed: () => updateSetting('showExams', 'false'),
                         ),
                       ),

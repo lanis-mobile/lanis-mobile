@@ -36,6 +36,9 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
       String courseName = data[1].split('(')[0].trim();
       String teacher = data[2].split('(')[0].trim();
       String teacherKuerzel = data[2].split('(')[1].split(')')[0].trim();
+      String? picture = data[4].isNotEmpty ? data[4] : null;
+      String? fileName = data[5].isNotEmpty ? data[5] : null;
+      Uri? email = data[6].isNotEmpty ? Uri.parse(data[6]) : null;
 
       // Filters mapped by courseName
       List<List<String>> examsInCourse = examData.data
@@ -47,6 +50,10 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
         courseName: courseName,
         teacher: teacher,
         teacherKuerzel: teacherKuerzel,
+        picture: picture != null
+            ? (name: fileName!, url: picture)
+            : null,
+        email: email,
         exams: examsInCourse
             .map((e) => StudentExam(
                   date: DateTime.parse(
@@ -97,20 +104,47 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
 
     // Courses parse tbody
     List<List<String>> courseData = [];
-    courses.querySelectorAll('tbody tr').forEach((element) {
+
+    courses.querySelectorAll('tbody tr').forEach((row) {
       List<String> courseRow = [];
-      element.querySelectorAll('td').forEach((element) {
-        String html = element.innerHtml;
-        if (html.contains('<br>')) {
-          courseRow.add(html
-              .split('<br>')
-              .map((e) => e.trim())
-              .where((e) => e.isNotEmpty)
-              .join('|'));
-        } else {
-          courseRow.add(element.text.trim());
-        }
-      });
+
+      courseRow.add(row.children[0].text.trim());
+      courseRow.add(row.children[1].text.trim());
+
+      final teacherElement = row.children[2];
+      final linkElement = teacherElement.querySelector("a");
+      String teacher = "";
+      String? email;
+
+      if (linkElement != null) {
+        final emailTextElement = teacherElement.querySelector("a small");
+
+        email = "mailto:${emailTextElement!.text.trim()}";
+        emailTextElement.remove();
+        teacher = teacherElement.text.trim();
+        courseRow.add(teacher);
+      } else {
+        courseRow.add(teacherElement.text.trim());
+      }
+
+      courseRow.add(row.children[3].innerHtml
+          .split('<br>')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .join('|'));
+
+      final imageElement = row.children[2].querySelector("img");
+      if (imageElement != null) {
+        courseRow.add("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userFoto&b=show&&t=l&p=${imageElement.attributes["src"]!.split("-")[2]}");
+        courseRow.add(imageElement.attributes["src"]!);
+      } else {
+        courseRow.addAll(["", ""]);
+      }
+
+      courseRow.add(email ?? "");
+
+      print(courseRow);
+
       courseData.add(courseRow);
     });
 
