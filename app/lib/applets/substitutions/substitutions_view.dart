@@ -45,7 +45,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
   }
 
   List<Widget> getSubstitutionViews(SubstitutionPlan substitutionPlan,
-      RefreshFunction? refresh, Map<String, String?> settings) {
+      RefreshFunction? refresh) {
     double deviceWidth = MediaQuery.of(context).size.width;
 
     List<Widget> substitutionViews = [];
@@ -247,7 +247,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
-                    children: getSubstitutionViews(data, refresh, settings),
+                    children: getSubstitutionViews(data, refresh),
                   ),
                 )
               ],

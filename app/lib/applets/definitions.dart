@@ -30,7 +30,7 @@ class AppletDefinition {
   final List<AccountType> supportedAccountTypes;
   final bool allowOffline;
   final Duration refreshInterval;
-  final Map<String, String?> settingsDefaults;
+  final Map<String, dynamic> settingsDefaults;
   WidgetBuildBody? bodyBuilder;
   BackgroundTaskFunction? notificationTask;
 
