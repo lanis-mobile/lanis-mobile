@@ -50,9 +50,7 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
         courseName: courseName,
         teacher: teacher,
         teacherKuerzel: teacherKuerzel,
-        picture: picture != null
-            ? (name: fileName!, url: picture)
-            : null,
+        picture: picture != null ? (name: fileName!, url: picture) : null,
         email: email,
         exams: examsInCourse
             .map((e) => StudentExam(
@@ -135,7 +133,8 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
 
       final imageElement = row.children[2].querySelector("img");
       if (imageElement != null) {
-        courseRow.add("https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userFoto&b=show&&t=l&p=${imageElement.attributes["src"]!.split("-")[2]}");
+        courseRow.add(
+            "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userFoto&b=show&&t=l&p=${imageElement.attributes["src"]!.split("-")[2]}");
         courseRow.add(imageElement.attributes["src"]!);
       } else {
         courseRow.addAll(["", ""]);

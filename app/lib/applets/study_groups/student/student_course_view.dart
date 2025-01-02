@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class StudentCourseView extends StatelessWidget {
   final List<StudentStudyGroups> studyData;
+
   const StudentCourseView({super.key, required this.studyData});
 
   BorderRadius getRadius(final int index, final int length) {
@@ -17,11 +18,9 @@ class StudentCourseView extends StatelessWidget {
 
     if (index == 0) {
       return BorderRadius.vertical(top: Radius.circular(12.0));
-    }
-    else if (index == 1 && length == 2) {
+    } else if (index == 1 && length == 2) {
       return BorderRadius.vertical(bottom: Radius.circular(12.0));
-    }
-    else {
+    } else {
       if (index == length - 1) {
         return BorderRadius.vertical(bottom: Radius.circular(12.0));
       }
@@ -30,7 +29,8 @@ class StudentCourseView extends StatelessWidget {
     }
   }
 
-  Future<File> getImage(BuildContext context, ({String name, String url}) picture) async {
+  Future<File> getImage(
+      BuildContext context, ({String name, String url}) picture) async {
     String path = await sph!.storage.downloadFile(picture.url, picture.name);
     return File(path);
   }
@@ -55,10 +55,10 @@ class StudentCourseView extends StatelessWidget {
             if (years.containsKey(index))
               Padding(
                 padding: const EdgeInsets.only(
-                    left: 8.0,
-                    right: 8.0,
-                    top: 16.0,
-                    bottom: 8.0,
+                  left: 8.0,
+                  right: 8.0,
+                  top: 16.0,
+                  bottom: 8.0,
                 ),
                 child: Row(
                   spacing: 8,
@@ -74,7 +74,9 @@ class StudentCourseView extends StatelessWidget {
                 ),
               )
             else
-              SizedBox(height: 8.0,),
+              SizedBox(
+                height: 8.0,
+              ),
             Card(
               margin: EdgeInsets.symmetric(horizontal: 8.0),
               child: Padding(
@@ -86,11 +88,16 @@ class StudentCourseView extends StatelessWidget {
                     if (studyData[index].picture != null) ...[
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           FutureBuilder(
-                            future: getImage(context, studyData[index].picture!),
+                            future:
+                                getImage(context, studyData[index].picture!),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState != ConnectionState.done || snapshot.data == null || snapshot.hasError) {
+                              if (snapshot.connectionState !=
+                                      ConnectionState.done ||
+                                  snapshot.data == null ||
+                                  snapshot.hasError) {
                                 return CircleAvatar(
                                   radius: 25.0,
                                   child: Icon(Icons.person),
@@ -100,15 +107,23 @@ class StudentCourseView extends StatelessWidget {
                               return CircleAvatar(
                                 radius: 25.0,
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(100.0),
-                                    child: Image.file(snapshot.data!)
-                                ),
+                                    borderRadius: BorderRadius.circular(100.0),
+                                    child: Image.file(snapshot.data!)),
                               );
                             },
                           ),
+                          if (studyData[index].email != null)
+                            IconButton.filledTonal(
+                              onPressed: () {
+                                launchUrl(studyData[index].email!);
+                              },
+                              icon: Icon(Icons.email_rounded),
+                            ),
                         ],
                       ),
-                      SizedBox(height: 8.0,)
+                      SizedBox(
+                        height: 8.0,
+                      )
                     ],
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -120,15 +135,21 @@ class StudentCourseView extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                            "${studyData[index].teacher} (${studyData[index].teacherKuerzel})",
-                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant
-                          ),
+                          "${studyData[index].teacher} (${studyData[index].teacherKuerzel})",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant),
                         ),
-
                       ],
                     ),
-                    if (exams.isNotEmpty) SizedBox(height: 8.0,),
+                    if (exams.isNotEmpty)
+                      SizedBox(
+                        height: 8.0,
+                      ),
                     for (int i = 0; i < exams.length; i++)
                       Card.filled(
                         margin: EdgeInsets.zero,
@@ -136,34 +157,19 @@ class StudentCourseView extends StatelessWidget {
                           borderRadius: getRadius(i, exams.length),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(exams[i].type),
-                              exams[i].duration.isEmpty
-                                  ? Text(exams[i].time)
-                                  : Text('${exams[i].time} (${exams[i].duration})'),
-                              Text(DateFormat('dd.MM.yy').format(exams[i].date)),
-                            ],
-                          )
-                        ),
-                      ),
-                    if (studyData[index].email != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            OutlinedButton.icon(
-                                onPressed: () {
-                                  launchUrl(studyData[index].email!);
-                                },
-                                icon: Icon(Icons.email_rounded),
-                                label: Text("E-Mail")
-                            )
-                          ],
-                        ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(exams[i].type),
+                                exams[i].duration.isEmpty
+                                    ? Text(exams[i].time)
+                                    : Text(
+                                        '${exams[i].time} (${exams[i].duration})'),
+                                Text(DateFormat('dd.MM.yy')
+                                    .format(exams[i].date)),
+                              ],
+                            )),
                       ),
                   ],
                 ),
