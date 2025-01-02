@@ -40,7 +40,9 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
 
           return Scaffold(
             appBar: AppBar(
-              title: Text(studyGroupsDefinition.label(context)),
+              title: settings['showExams'] != 'true'
+                  ? Text(AppLocalizations.of(context)!.studyGroups)
+                  : Text(AppLocalizations.of(context)!.exams),
               actions: [
                 settings['showExams'] != 'true'
                     ? Tooltip(

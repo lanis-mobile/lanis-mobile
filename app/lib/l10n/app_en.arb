@@ -261,5 +261,7 @@
   "close": "Close",
 
   "studyGroups": "Study groups",
-  "daysUntilNextExam": "{days, plural, =0{Today} one{1 day} other{{days} days}} until the next exam"
+  "daysUntilNextExam": "{days, plural, =0{Today} one{1 day} other{{days} days}} until the next exam",
+  "daysUntilExam": "{days, plural, =0{Today is the exam.} one{1 day until the exam.} other{{days} days until the exam.}}",
+  "daysSinceExam": "{days, plural, one{1 day since the exam.} other{{days} days since the exam.}}"
 }
