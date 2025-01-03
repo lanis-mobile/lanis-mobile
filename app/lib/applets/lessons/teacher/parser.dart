@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 
 import '../../../models/lessons_teacher.dart';
+import '../../substitutions/parser.dart';
 
 class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
 
   LessonsTeacherParser(super.sph, super.appletDefinition);
-
 
   @override
   Future<LessonsTeacherHome> getHome() async {
@@ -18,7 +18,7 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
     if (courseFoldersElement == null) {
       throw Exception('Could not find course folders');
     }
-    final List<CourseFolder> courseFolders = [];
+    final List<CourseFolderStartPage> courseFolders = [];
     for (final Element courseFolderElement in courseFoldersElement.children) {
       final String url = courseFolderElement.querySelector('div.thumbnail>div.caption>h3>a')!.attributes['href']!;
       final String title = courseFolderElement.querySelector('div.thumbnail>div.caption>h3')!.text.trim();
@@ -32,11 +32,11 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
       final DateTime? lastEntryDateTime = lastEntryDate.isNotEmpty ? DateFormat('dd.MM.yyyy').tryParse(lastEntryDate) : null;
 
       courseFolders.add(
-        CourseFolder(
+        CourseFolderStartPage(
           id: RegExp(r'id=(\d+)').firstMatch(url)!.group(1)!,
           name: title,
           topic: courseTopic,
-          entryInformation: lastEntryTopic != '' ? CourseFolderEntryInformation(
+          entryInformation: lastEntryTopic != '' ? CourseFolderStartPageEntryInformation(
             topic: lastEntryTopic,
             date: lastEntryDateTime!,
             homework: homework != '' ? (homework != 'Keine Hausaufgaben hinterlegt!' ? homework : null) : null
@@ -47,6 +47,44 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
 
     return LessonsTeacherHome(
       courseFolders: courseFolders
+    );
+  }
+
+  Future<CourseFolderDetails> getCourseFolderDetails(String courseId) async  {
+    final response = await sph.session.dio.get('https://start.schulportal.hessen.de/meinunterricht.php?a=view&id=$courseId');
+    final Document document = parse(response.data);
+
+    List<CourseFolderHistoryEntry> history = [];
+    final historyTable = document.getElementById('historyTable');
+    for (Element entryRow in historyTable?.children[1].children??[]) {
+
+      // extract dd.MM.yyyy via regex from entryRow.children[0].text
+      final String dateStr = RegExp(r'(\d{2}\.\d{2}\.\d{4})').firstMatch(entryRow.children[0].text)?.group(1)??'';
+
+      final contentResults = entryRow.children[2].getElementsByClassName('far fa-comment-alt');
+      final homeworkResults = entryRow.children[2].getElementsByClassName('fas fa-home');
+
+      history.add(
+        CourseFolderHistoryEntry(
+            topic: entryRow.getElementsByClassName('thema')[0].text.trim(),
+            date: DateFormat('dd.MM.yyyy').parse(dateStr),
+            schoolHours: SubstitutionsParser.parseHours(entryRow.children[0].getElementsByTagName('small')[0].text.trim()),
+            files: [],
+            attendanceActionRequired: false, //todo
+          content: contentResults.isNotEmpty ? contentResults[0].nextElementSibling?.text : null,
+          homework: homeworkResults.isNotEmpty ? homeworkResults[0].nextElementSibling?.text : null
+        )
+      );
+    }
+
+    Element? countAndNameElement = document.querySelector('#content>h1>small');
+    String text = countAndNameElement?.text.trim() ?? '';
+    return CourseFolderDetails(
+      courseName: document.getElementsByTagName('title')[0].text.split('-')[0].trim(),
+      studentCount: int.parse(text.trim().split('-')[0].trim()),
+      lerningGroupsUrl: Uri.tryParse(document.querySelector('#content>h1>small>a')?.attributes['href']??''),
+      courseTopic: (document.querySelector('#content>h1')?.children.last.text.trim().replaceFirst('Thema:', '')??'').trim(),
+      history: history,
     );
   }
 }

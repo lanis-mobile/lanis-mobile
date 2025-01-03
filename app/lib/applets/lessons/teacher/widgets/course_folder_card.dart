@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../models/lessons_teacher.dart';
 
 class CourseFolderCard extends StatelessWidget {
-  final CourseFolder courseFolder;
+  final CourseFolderStartPage courseFolder;
   final void Function() onTap;
   const CourseFolderCard(
       {super.key, required this.courseFolder, required this.onTap});

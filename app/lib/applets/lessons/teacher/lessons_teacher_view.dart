@@ -66,7 +66,7 @@ class _LessonsTeacherViewState extends State<LessonsTeacherView> {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => TeacherCourseDetailView(
-                        courseID: data.courseFolders[index].id,
+                        courseFolder: data.courseFolders[index],
                       ),
                     ),
                   );
