@@ -116,6 +116,8 @@ class _NotificationSettingsState
           final bool notificationsActive = (snapshot.data!['notifications-allow'] ?? true) == true &&
                   notificationPermissionStatus == PermissionStatus.granted;
 
+          final bool activateBackgroundServices = (widget.accountCount == 1 && notificationsActive) || widget.accountCount > 1;
+
           return [
             if (!notificationsPermissionAllowed) ...[
               Callout(
@@ -221,16 +223,16 @@ class _NotificationSettingsState
                   ),
                 )),
             SizedBox(
-              height: 12.0,
+              height: 8.0,
             ),
             if (Platform.isAndroid) ...[
               const Divider(),
               Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+                padding: const EdgeInsets.only(left: 16.0, top: 12.0),
                 child: Text(
                   "${AppLocalizations.of(context)!.backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context)!.forEveryAccount})' : ""}",
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: notificationsActive
+                    color: activateBackgroundServices
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -244,7 +246,7 @@ class _NotificationSettingsState
                   SizedBox(width: 16.0,),
                   Icon(
                       Icons.calendar_month,
-                      color: notificationsPermissionAllowed
+                      color: activateBackgroundServices
                           ? Theme.of(context).colorScheme.onSurface
                           : Theme.of(context).colorScheme.onSurfaceVariant),
                   SizedBox(width: 24.0,),
@@ -259,12 +261,12 @@ class _NotificationSettingsState
                               DateFormat.E(AppLocalizations.of(context)!.localeName).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
                             ),
                             selected: androidEnabledDays[dayIndex - 1],
-                            onSelected: (val) {
+                            onSelected: activateBackgroundServices ? (val) {
                               setState(() {
                                 androidEnabledDays[dayIndex - 1] = val;
                               });
                               accountDatabase.kv.set('notifications-android-allowed-days', androidEnabledDays);
-                            },
+                            } : null,
                           ),
                         ],
                       ),
@@ -281,7 +283,7 @@ class _NotificationSettingsState
                       Text(
                         AppLocalizations.of(context)!.timePeriod,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: notificationsPermissionAllowed
+                          color: activateBackgroundServices
                               ? Theme.of(context).colorScheme.onSurface
                               : Theme.of(context)
                               .colorScheme
@@ -292,7 +294,7 @@ class _NotificationSettingsState
                       Text(
                         "${androidStartTime.format(context)} - ${androidEndTime.format(context)}",
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: notificationsPermissionAllowed
+                          color: activateBackgroundServices
                               ? Theme.of(context).colorScheme.onSurface
                               : Theme.of(context)
                               .colorScheme
@@ -304,7 +306,7 @@ class _NotificationSettingsState
                   ),
                   leading: Icon(
                     Icons.schedule_outlined,
-                    color: notificationsPermissionAllowed
+                    color: activateBackgroundServices
                         ? Theme.of(context).colorScheme.onSurface
                         : Theme.of(context).colorScheme.onSurfaceVariant),
                   values: RangeValues(
@@ -318,12 +320,12 @@ class _NotificationSettingsState
                     androidStartTime.format(context),
                     androidEndTime.format(context),
                   ),
-                  onChanged: (newValues) {
+                  onChanged: activateBackgroundServices ? (newValues) {
                     setState(() {
                       androidStartTime = timeFromMinutesSinceZero(newValues.start.round());
                       androidEndTime = timeFromMinutesSinceZero(newValues.end.round());
                     });
-                  },
+                  } : null,
                   onChangeEnd: (newValues) {
                     accountDatabase.kv.setMultiple({
                       'notifications-android-start-time': [androidStartTime.hour, androidStartTime.minute],
@@ -340,7 +342,7 @@ class _NotificationSettingsState
                         Text(
                           AppLocalizations.of(context)!.updateInterval,
                           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: notificationsPermissionAllowed
+                            color: activateBackgroundServices
                                 ? Theme.of(context).colorScheme.onSurface
                                 : Theme.of(context)
                                 .colorScheme
@@ -351,7 +353,7 @@ class _NotificationSettingsState
                         Text(
                           "${androidNotificationInterval.round()} min",
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: notificationsPermissionAllowed
+                            color: activateBackgroundServices
                                 ? Theme.of(context).colorScheme.onSurface
                                 : Theme.of(context)
                                 .colorScheme
@@ -362,24 +364,22 @@ class _NotificationSettingsState
                       ],
                     ),
                     leading: Icon(Icons.timer_outlined,
-                        color: notificationsPermissionAllowed
+                        color: activateBackgroundServices
                             ? Theme.of(context).colorScheme.onSurface
                             : Theme.of(context).colorScheme.onSurfaceVariant),
                     value: androidNotificationInterval,
-                    onChanged: notificationsPermissionAllowed
+                    onChanged: activateBackgroundServices
                         ? (val) {
                             setState(() {
                               androidNotificationInterval = val;
                             });
                           }
                         : null,
-                    onChangedEnd: notificationsPermissionAllowed
-                        ? (val) {
+                    onChangedEnd: (val) {
                             accountDatabase.kv.set(
                                 'notifications-android-target-interval-minutes',
                                 val.round());
-                          }
-                        : null,
+                          },
                     label: "${androidNotificationInterval.round().toString()} min",
                     min: 15.0,
                     max: 180.0,
