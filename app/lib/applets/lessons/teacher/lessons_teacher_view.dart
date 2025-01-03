@@ -6,6 +6,7 @@ import 'package:sph_plan/widgets/marquee.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons_teacher.dart';
+import 'course_detail_view/course_detail_view.dart';
 
 class LessonsTeacherView extends StatefulWidget {
   final Function? openDrawerCb;
@@ -19,34 +20,36 @@ class _LessonsTeacherViewState extends State<LessonsTeacherView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.openDrawerCb != null ? AppBar(
-        title: Text(lessonsDefinition.label(context)),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => widget.openDrawerCb!(),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(20),
-          child: Container(
-            color: Colors.redAccent,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 8,
-              children: [
-                SizedBox(width: 8),
-                const Icon(Icons.warning),
-                Expanded(
-                  child: MarqueeWidget(child: Text(
-                    'Early teacher access, please report bugs and expect errors!',
-                  ),
-                  ),
-                ),
-                SizedBox(width: 8),
-              ],
-            ),
-          )
-        ),
-      ) : null,
+      appBar: widget.openDrawerCb != null
+          ? AppBar(
+              title: Text(lessonsDefinition.label(context)),
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              ),
+              bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(20),
+                  child: Container(
+                    color: Colors.redAccent,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 8,
+                      children: [
+                        SizedBox(width: 8),
+                        const Icon(Icons.warning),
+                        Expanded(
+                          child: MarqueeWidget(
+                            child: Text(
+                              'Early teacher access, please report bugs and expect errors!',
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                      ],
+                    ),
+                  )),
+            )
+          : null,
       body: CombinedAppletBuilder<LessonsTeacherHome>(
         parser: sph!.parser.lessonsTeacherParser,
         phpUrl: lessonsDefinition.appletPhpUrl,
@@ -59,6 +62,16 @@ class _LessonsTeacherViewState extends State<LessonsTeacherView> {
               itemCount: data.courseFolders.length,
               itemBuilder: (context, index) => CourseFolderCard(
                 courseFolder: data.courseFolders[index],
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => TeacherCourseDetailView(
+                        courseID: data.courseFolders[index].id,
+                      ),
+                    ),
+                  );
+                  refresh();
+                },
               ),
             ),
           );

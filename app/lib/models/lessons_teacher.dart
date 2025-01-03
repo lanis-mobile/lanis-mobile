@@ -25,8 +25,9 @@ class CourseFolder {
   final String name;
   final String topic;
   final CourseFolderEntryInformation? entryInformation;
+  final String id;
 
-  CourseFolder({required this.name, required this.topic, this.entryInformation});
+  CourseFolder({required this.name, required this.topic, required this.id, this.entryInformation});
 }
 class CourseFolderEntryInformation {
   final String topic;
