@@ -1,5 +1,6 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/calendar/calendar_export.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:sph_plan/utils/keyboard_observer.dart';
@@ -354,6 +355,19 @@ class _CalendarViewState extends State<CalendarView> {
           icon: const Icon(Icons.menu),
           onPressed: () => widget.openDrawerCb!(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CalendarExport(),
+                ),
+              );
+            },
+          ),
+        ],
       )
           : null,
       body: Column(

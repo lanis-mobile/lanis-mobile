@@ -181,7 +181,8 @@ class SettingsTileWidget extends StatefulWidget {
   final int index;
   final int length;
   final Color foregroundColor;
-  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length});
+  final bool disableSetState;
+  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length, this.disableSetState = false});
 
   static BorderRadius getRadius(int index, int length) {
     if (index == 0 && length > 1) {
@@ -223,9 +224,11 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
               onPressed: () async {
                 await widget.tile.screen(context);
 
-                setState(() {
+                if (!widget.disableSetState) {
+                  setState(() {
 
-                });
+                  });
+                }
               },
               foregroundColor: widget.foregroundColor,
               borderRadius: SettingsTileWidget.getRadius(
@@ -247,9 +250,11 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
                 onPressed: () async {
                   await widget.tile.screen(context);
 
-                  setState(() {
+                  if (!widget.disableSetState) {
+                    setState(() {
 
-                  });
+                    });
+                  }
                 },
                 foregroundColor: widget.foregroundColor,
                 borderRadius: SettingsTileWidget.getRadius(

@@ -86,4 +86,30 @@ class CalendarParser extends AppletParser<List<CalendarEvent>> {
       throw UnknownException();
     }
   }
+
+  Future<({Set<int> years, String subscriptionLink})> getExports() async {
+    final response = await sph.session.dio.get("https://start.schulportal.hessen.de/kalender.php");
+
+    final Set<int> years = {};
+
+    final regex = RegExp(r"year=(\d\d\d\d)");
+    final matches = regex.allMatches(response.data);
+    for (var match in matches) {
+      years.add(int.parse(match.group(1)!));
+    }
+
+    final iCalSubLink = await sph.session.dio.post("https://start.schulportal.hessen.de/kalender.php",
+        data: {
+        "f": "iCalAbo",
+        },
+      options: Options(
+        headers: {
+          "Content-Type":
+          "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+      )
+    );
+
+    return (years: years, subscriptionLink: iCalSubLink.data as String);
+  }
 }
