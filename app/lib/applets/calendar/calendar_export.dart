@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:sph_plan/utils/file_operations.dart';
 import 'package:sph_plan/view/settings/settings.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/sph/sph.dart';
 
@@ -18,7 +19,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
   Widget build(BuildContext context) {
     return SettingsPage(
         backgroundColor: backgroundColor,
-        title: Text("Calendar export"),
+        title: Text(AppLocalizations.of(context)!.calendarExport),
         children: [
           FutureBuilder(
             future: sph!.parser.calendarParser.getExports(),
@@ -32,7 +33,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                 child: Column(
                   children: [
                     Text(
-                      "Please select the format you would like to export your calendar in. Note that some information can't be exported.",
+                      AppLocalizations.of(context)!.calendarExportHint,
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
@@ -44,7 +45,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     SettingsTileWidget(
                         tile: SettingsTile(
                           title: (context) => "PDF",
-                          subtitle: (context) async => "Day, week, years",
+                          subtitle: (context) async => AppLocalizations.of(context)!.dayWeekYearsList,
                           icon: Icons.picture_as_pdf,
                           screen: (context) async => Navigator.push(
                             context,
@@ -59,7 +60,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     SettingsTileWidget(
                         tile: SettingsTile(
                           title: (context) => "iCal / ICS",
-                          subtitle: (context) async => "Automatic updates, years, importable",
+                          subtitle: (context) async => AppLocalizations.of(context)!.updatesYearsImportableList,
                           icon: Icons.date_range,
                           screen: (context) async => Navigator.push(
                             context,
@@ -74,7 +75,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     SettingsTileWidget(
                         tile: SettingsTile(
                           title: (context) => "CSV",
-                          subtitle: (context) async => "Years, importable",
+                          subtitle: (context) async => AppLocalizations.of(context)!.yearsImportableList,
                           icon: Icons.description,
                           screen: (context) async => Navigator.push(
                             context,
@@ -116,12 +117,12 @@ class _CalendarExportPdfState extends SettingsColoursState<CalendarExportPdf> {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text("PDF export"),
+      title: Text(AppLocalizations.of(context)!.pdfExport),
       backgroundColor: backgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: selected != null ? () async {
           showFileModal(context, FileInfo(
-            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-calendar.pdf",
+            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-${AppLocalizations.of(context)!.calendar.toLowerCase()}.pdf",
             url: Uri.parse(selected!.link),
           ));
         } : null,
@@ -136,7 +137,7 @@ class _CalendarExportPdfState extends SettingsColoursState<CalendarExportPdf> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Day",
+                AppLocalizations.of(context)!.day,
                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
                     color: Theme.of(context).colorScheme.primary
                 ),
@@ -145,24 +146,24 @@ class _CalendarExportPdfState extends SettingsColoursState<CalendarExportPdf> {
                 height: 8.0,
               ),
               RadioListTile(
-                  value: (type: "today", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=1"),
+                  value: (type: AppLocalizations.of(context)!.today.toLowerCase(), link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=1"),
                   groupValue: selected,
                   onChanged: onChanged,
-                  title: Text("Today"),
+                  title: Text(AppLocalizations.of(context)!.today),
                 contentPadding: EdgeInsets.zero,
               ),
               RadioListTile(
-                  value: (type: "tomorrow", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=2"),
+                  value: (type: AppLocalizations.of(context)!.tomorrow.toLowerCase(), link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=2"),
                   groupValue: selected,
                   onChanged: onChanged,
-                  title: Text("Tomorrow"),
+                  title: Text(AppLocalizations.of(context)!.tomorrow),
                 contentPadding: EdgeInsets.zero,
               ),
               SizedBox(
                 height: 24.0,
               ),
               Text(
-                "Week",
+                AppLocalizations.of(context)!.week,
                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
                     color: Theme.of(context).colorScheme.primary
                 ),
@@ -171,17 +172,17 @@ class _CalendarExportPdfState extends SettingsColoursState<CalendarExportPdf> {
                 height: 8.0,
               ),
               RadioListTile(
-                value: (type: "current-week", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=1"),
+                value: (type: AppLocalizations.of(context)!.currentWeek.toLowerCase().replaceAll(" ", "-"), link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=1"),
                 groupValue: selected,
                 onChanged: onChanged,
-                title: Text("Current week"),
+                title: Text(AppLocalizations.of(context)!.currentWeek),
                 contentPadding: EdgeInsets.zero,
               ),
               RadioListTile(
-                value: (type: "next-week", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=2"),
+                value: (type: AppLocalizations.of(context)!.nextWeek.toLowerCase().replaceAll(" ", "-"), link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=2"),
                 groupValue: selected,
                 onChanged: onChanged,
-                title: Text("Next week"),
+                title: Text(AppLocalizations.of(context)!.nextWeek),
                 contentPadding: EdgeInsets.zero,
               ),
               for (int year in widget.years) ...[
@@ -198,24 +199,24 @@ class _CalendarExportPdfState extends SettingsColoursState<CalendarExportPdf> {
                   height: 8.0,
                 ),
                 RadioListTile(
-                  value: (type: "short-$year", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&year=$year"),
+                  value: (type: "${AppLocalizations.of(context)!.short}-$year", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&year=$year"),
                   groupValue: selected,
                   onChanged: onChanged,
-                  title: Text("Shortened calendar"),
+                  title: Text(AppLocalizations.of(context)!.shortenedCalendar),
                   contentPadding: EdgeInsets.zero,
                 ),
                 RadioListTile(
-                  value: (type: "extended-$year", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf-extended&year=$year"),
+                  value: (type: "${AppLocalizations.of(context)!.extended}-$year", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf-extended&year=$year"),
                   groupValue: selected,
                   onChanged: onChanged,
-                  title: Text("Calendar with event descriptions"),
+                  title: Text(AppLocalizations.of(context)!.extendedCalendar),
                   contentPadding: EdgeInsets.zero,
                 ),
                 RadioListTile(
-                  value: (type: "wall-$year", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=wandkalender&year=$year"),
+                  value: (type: "${AppLocalizations.of(context)!.wall}-$year", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=wandkalender&year=$year"),
                   groupValue: selected,
                   onChanged: onChanged,
-                  title: Text("Wall calendar"),
+                  title: Text(AppLocalizations.of(context)!.wallCalendar),
                   contentPadding: EdgeInsets.zero,
                 ),
               ]
@@ -247,12 +248,12 @@ class _CalendarExportCsvState extends SettingsColoursState<CalendarExportCsv> {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text("CSV export"),
+      title: Text(AppLocalizations.of(context)!.csvExport),
       backgroundColor: backgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: selected != null ? () async {
           showFileModal(context, FileInfo(
-            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-calendar.csv",
+            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-${AppLocalizations.of(context)!.calendar.toLowerCase()}.csv",
             url: Uri.parse(selected!.link),
           ));
         } : null,
@@ -267,7 +268,7 @@ class _CalendarExportCsvState extends SettingsColoursState<CalendarExportCsv> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Years",
+                AppLocalizations.of(context)!.years,
                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
                     color: Theme.of(context).colorScheme.primary
                 ),
@@ -313,12 +314,12 @@ class _CalendarExportICalState extends SettingsColoursState<CalendarExportICal> 
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text("iCal / ICS export"),
+      title: Text(AppLocalizations.of(context)!.iCalICSExport),
       backgroundColor: backgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: selected != null ? () async {
           showFileModal(context, FileInfo(
-            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-calendar.ics",
+            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-${AppLocalizations.of(context)!.calendar.toLowerCase()}.ics",
             url: Uri.parse(selected!.link),
           ));
         } : null,
@@ -344,13 +345,13 @@ class _CalendarExportICalState extends SettingsColoursState<CalendarExportICal> 
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Subscription",
+                        AppLocalizations.of(context)!.subscription,
                         style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             color: Theme.of(context).colorScheme.onSurface
                         ),
                       ),
                       Text(
-                        "You can import this link into your calendar app to have an automatically updating calendar. It will also cover multiple years.",
+                        AppLocalizations.of(context)!.subscriptionHint,
                         style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant
                         ),
@@ -370,8 +371,9 @@ class _CalendarExportICalState extends SettingsColoursState<CalendarExportICal> 
                               child: InkWell(
                                 onTap: () {
                                   Clipboard.setData(ClipboardData(text: widget.subscriptionLink));
+                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text("Copied to clipboard"),
+                                    content: Text(AppLocalizations.of(context)!.linkCopied),
                                   ));
                                 },
                                 borderRadius: BorderRadius.circular(12.0),
@@ -407,7 +409,7 @@ class _CalendarExportICalState extends SettingsColoursState<CalendarExportICal> 
                 height: 24.0,
               ),
               Text(
-                "Years",
+                AppLocalizations.of(context)!.years,
                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
                     color: Theme.of(context).colorScheme.primary
                 ),
