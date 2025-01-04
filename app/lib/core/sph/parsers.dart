@@ -1,16 +1,18 @@
-import 'package:sph_plan/applets/calendar/parser.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
-import 'package:sph_plan/applets/conversations/parser.dart';
+import 'package:sph_plan/applets/calendar/parser.dart';
 import 'package:sph_plan/applets/conversations/definition.dart';
+import 'package:sph_plan/applets/conversations/parser.dart';
+import 'package:sph_plan/applets/data_storage/definition.dart';
+import 'package:sph_plan/applets/data_storage/parser.dart';
 import 'package:sph_plan/applets/lessons/definition.dart';
 import 'package:sph_plan/applets/lessons/student/parser.dart';
 import 'package:sph_plan/applets/lessons/teacher/parser.dart';
-import 'package:sph_plan/applets/timetable/student/parser.dart';
-import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/applets/study_groups/definitions.dart';
+import 'package:sph_plan/applets/study_groups/student/parser.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/substitutions/parser.dart';
-import 'package:sph_plan/applets/data_storage/definition.dart';
-import 'package:sph_plan/applets/data_storage/parser.dart';
+import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/applets/timetable/student/parser.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 
 class Parsers {
@@ -23,6 +25,7 @@ class Parsers {
   DataStorageParser? _dataStorageParser;
   TimetableStudentParser? _timetableStudentParser;
   ConversationsParser? _conversationsParser;
+  StudyGroupsStudentParser? _studyGroupsStudentParser;
 
   Parsers({required this.sph});
 
@@ -52,12 +55,19 @@ class Parsers {
   }
 
   TimetableStudentParser get timetableStudentParser {
-    _timetableStudentParser ??= TimetableStudentParser(sph, timeTableDefinition);
+    _timetableStudentParser ??=
+        TimetableStudentParser(sph, timeTableDefinition);
     return _timetableStudentParser!;
   }
 
   ConversationsParser get conversationsParser {
     _conversationsParser ??= ConversationsParser(sph, conversationsDefinition);
     return _conversationsParser!;
+  }
+
+  StudyGroupsStudentParser get studyGroupsStudentParser {
+    _studyGroupsStudentParser ??=
+        StudyGroupsStudentParser(sph, studyGroupsDefinition);
+    return _studyGroupsStudentParser!;
   }
 }

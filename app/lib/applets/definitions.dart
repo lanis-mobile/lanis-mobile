@@ -3,6 +3,7 @@ import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/applets/conversations/definition.dart';
 import 'package:sph_plan/applets/data_storage/definition.dart';
 import 'package:sph_plan/applets/lessons/definition.dart';
+import 'package:sph_plan/applets/study_groups/definitions.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
@@ -51,7 +52,6 @@ class AppletDefinition {
   });
 }
 
-
 class AppDefinitions {
   static List<AppletDefinition> applets = [
     substitutionDefinition,
@@ -60,17 +60,22 @@ class AppDefinitions {
     conversationsDefinition,
     lessonsDefinition,
     dataStorageDefinition,
+    studyGroupsDefinition
   ];
 
   static bool isAppletSupported(AccountType accountType, String phpIdentifier) {
-    return applets.any((element) => element.supportedAccountTypes.contains(accountType) && element.appletPhpUrl == phpIdentifier);
+    return applets.any((element) =>
+        element.supportedAccountTypes.contains(accountType) &&
+        element.appletPhpUrl == phpIdentifier);
   }
 
   static getByPhpIdentifier(String phpIdentifier) {
-    return applets.firstWhere((element) => element.appletPhpUrl == phpIdentifier);
+    return applets
+        .firstWhere((element) => element.appletPhpUrl == phpIdentifier);
   }
 
   static getIndexByPhpIdentifier(String phpIdentifier) {
-    return applets.indexWhere((element) => element.appletPhpUrl == phpIdentifier);
+    return applets
+        .indexWhere((element) => element.appletPhpUrl == phpIdentifier);
   }
 }
