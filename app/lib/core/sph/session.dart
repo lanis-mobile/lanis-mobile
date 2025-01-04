@@ -65,6 +65,7 @@ class SessionHandler {
         options.headers.addAll({
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
+          'User-Agent': 'Lanis-Mobile'
         });
         options.queryParameters['_cachebreaker'] = DateTime.now().millisecondsSinceEpoch.toString();
         return handler.next(options);

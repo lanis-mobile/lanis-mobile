@@ -50,7 +50,13 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
             itemCount: data.history.length,
             itemBuilder: (context, index) => Padding(
               padding: EdgeInsets.only(left: 4, right: 4, bottom: index == data.history.length - 1 ? 80 : 0),
-              child: CourseFolderHistoryEntryCard(entry: data.history[index], courseId: widget.courseFolder.id,),
+              child: CourseFolderHistoryEntryCard(
+                entry: data.history[index],
+                courseId: widget.courseFolder.id,
+                onDeleted: () async {
+                  await loadData();
+                },
+              ),
             ),
           ),
       ) : Center(
@@ -67,13 +73,15 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
         icon: Icon(Icons.add),
         onPressed: () async {
           final result = await Navigator.of(context).push<bool?>(
-              MaterialPageRoute(builder: (context) => CourseCreateNewEntry(courseFolderDetails: data))
+            MaterialPageRoute(builder: (context) => CourseCreateNewEntry(courseFolderDetails: data))
           );
-          if (result == true) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag erstellt')));
-            await loadData();
-          } else if (result == false) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag konnte nicht erstellt werden'), backgroundColor: Colors.red,));
+          if (mounted) {
+            if (result == true) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag erstellt')));
+              await loadData();
+            } else if (result == false) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag konnte nicht erstellt werden'), backgroundColor: Colors.red,));
+            }
           }
         },
       ),

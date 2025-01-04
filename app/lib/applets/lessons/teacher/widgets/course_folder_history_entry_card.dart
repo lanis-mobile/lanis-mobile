@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/lessons/teacher/widgets/right_bottom_card_button.dart';
 import 'package:sph_plan/applets/lessons/teacher/widgets/upload_file_to_course_chip.dart';
 
+import '../../../../core/sph/sph.dart';
 import '../../../../models/lessons_teacher.dart';
 import 'course_folder_history_entry_file_chip.dart';
 import 'line_constraint_text.dart';
@@ -12,7 +13,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class CourseFolderHistoryEntryCard extends StatefulWidget {
   final CourseFolderHistoryEntry entry;
   final String courseId;
-  const CourseFolderHistoryEntryCard({super.key, required this.entry, required this.courseId});
+  final void Function() onDeleted;
+  const CourseFolderHistoryEntryCard({super.key, required this.onDeleted, required this.entry, required this.courseId});
 
   @override
   State<CourseFolderHistoryEntryCard> createState() => _CourseFolderHistoryEntryCardState();
@@ -24,6 +26,45 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
   bool get _isToday {
     final now = DateTime.now();
     return widget.entry.date.year == now.year && widget.entry.date.month == now.month && widget.entry.date.day == now.day;
+  }
+
+  void deleteEntryButtonPressed() async {
+    final bool? delete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Eintrag löschen'),
+          content: Text('Möchtest du diesen Eintrag wirklich löschen?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text('Löschen'),
+            ),
+          ],
+        );
+      },
+    );
+    if (delete == true) {
+      final result = await sph!.parser.lessonsTeacherParser.deleteEntry(widget.courseId, widget.entry.id);
+      if (result) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Eintrag gelöscht'),
+        ));
+        widget.onDeleted();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Eintrag konnte nicht gelöscht werden'),
+        ));
+      }
+    }
   }
 
   @override
@@ -82,6 +123,7 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
                   onSelected: (String value) {
                     switch (value) {
                       case 'Eintrag löschen':
+                        deleteEntryButtonPressed();
                         break;
                       case 'Eintrag bearbeiten':
                         break;
