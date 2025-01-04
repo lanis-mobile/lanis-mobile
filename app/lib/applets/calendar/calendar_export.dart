@@ -26,6 +26,25 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return LinearProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.errorOccurred,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
+                      SizedBox(
+                        height: 24.0,
+                      ),
+                    ],
+                  )
+                );
               }
 
               return Padding(
