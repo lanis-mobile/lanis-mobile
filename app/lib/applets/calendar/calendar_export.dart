@@ -153,23 +153,23 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                                         ),
                                         SizedBox(
                                             height: 36.0,
-                                            child: ListView(
-                                              scrollDirection: Axis.horizontal,
-                                              shrinkWrap: true,
-                                              children: [
-                                                Material(
-                                                  color: Theme.of(context).colorScheme.primaryContainer,
-                                                  borderRadius: BorderRadius.circular(12.0),
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      Clipboard.setData(ClipboardData(text: snapshot.data!.subscriptionLink));
-                                                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                        content: Text(AppLocalizations.of(context)!.linkCopied),
-                                                      ));
-                                                    },
-                                                    borderRadius: BorderRadius.circular(12.0),
-                                                    child: Padding(
+                                            child: Material(
+                                              color: Theme.of(context).colorScheme.primaryContainer,
+                                              borderRadius: BorderRadius.circular(12.0),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  Clipboard.setData(ClipboardData(text: snapshot.data!.subscriptionLink));
+                                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                    content: Text(AppLocalizations.of(context)!.linkCopied),
+                                                  ));
+                                                },
+                                                borderRadius: BorderRadius.circular(12.0),
+                                                child: ListView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  shrinkWrap: true,
+                                                  children: [
+                                                    Padding(
                                                         padding: const EdgeInsets.all(8.0),
                                                         child: Row(
                                                           children: [
@@ -187,10 +187,10 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                                                             ),
                                                           ],
                                                         )
-                                                    ),
-                                                  ),
-                                                )
-                                              ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
                                             )
                                         )
                                       ],
