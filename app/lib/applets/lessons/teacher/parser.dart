@@ -64,15 +64,33 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
       final contentResults = entryRow.children[2].getElementsByClassName('far fa-comment-alt');
       final homeworkResults = entryRow.children[2].getElementsByClassName('fas fa-home');
 
+      List<CourseFolderHistoryEntryFile> remoteFiles = [];
+      for (final fileDiv in entryRow.getElementsByClassName('file')) {
+        final fileName = fileDiv.attributes['data-file']!;
+        final fileId = fileDiv.attributes['data-entry']!;
+        final url = 'https://start.schulportal.hessen.de/meinunterricht.php?a=downloadFile&id=$courseId&e=$fileId&f=$fileName';
+        remoteFiles.add(
+          CourseFolderHistoryEntryFile(
+            name: fileName,
+            extension: fileDiv.attributes['data-extension']!,
+            isVisibleForStudents: fileDiv.getElementsByClassName('fa fa-child fileVisibility')[0].classes.contains('on'),
+            url: Uri.parse(url),
+            entryId: fileId,
+          )
+        );
+      }
+
       history.add(
         CourseFolderHistoryEntry(
-            topic: entryRow.getElementsByClassName('thema')[0].text.trim(),
-            date: DateFormat('dd.MM.yyyy').parse(dateStr),
-            schoolHours: SubstitutionsParser.parseHours(entryRow.children[0].getElementsByTagName('small')[0].text.trim()),
-            files: [],
-            attendanceActionRequired: false, //todo
+          id: entryRow.attributes['data-entry']!,
+          topic: entryRow.getElementsByClassName('thema')[0].text.trim(),
+          date: DateFormat('dd.MM.yyyy').parse(dateStr),
+          schoolHours: SubstitutionsParser.parseHours(entryRow.children[0].getElementsByTagName('small')[0].text.trim()),
+          files: remoteFiles,
+          attendanceActionRequired: entryRow.children[3].querySelectorAll('div.btn-group').last.children[0].classes.contains('btn-danger'),
           content: contentResults.isNotEmpty ? contentResults[0].nextElementSibling?.text : null,
-          homework: homeworkResults.isNotEmpty ? homeworkResults[0].nextElementSibling?.text : null
+          homework: homeworkResults.isNotEmpty ? homeworkResults[0].nextElementSibling?.text : null,
+          studentUploadFileCount: entryRow.children[3].querySelectorAll('div.btn-group')[1].querySelector('button.btn>span.badge')?.text,
         )
       );
     }

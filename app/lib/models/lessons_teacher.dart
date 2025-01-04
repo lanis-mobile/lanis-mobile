@@ -47,6 +47,7 @@ class CourseFolderDetails {
 }
 
 class CourseFolderHistoryEntry {
+  final String id;
   final String topic;
   final DateTime date;
   final String schoolHours;
@@ -54,33 +55,17 @@ class CourseFolderHistoryEntry {
   final String? content;
   final List<CourseFolderHistoryEntryFile> files;
   final bool attendanceActionRequired;
+  final String? studentUploadFileCount;
 
-  CourseFolderHistoryEntry({required this.topic, required this.date, required this.schoolHours, this.homework, this.content, required this.files, required this.attendanceActionRequired});
-
-  Map<String, dynamic> toJson() {
-    final List<Map<String, dynamic>> filesJson = files.map((CourseFolderHistoryEntryFile file) {
-      return {
-        'name': file.name,
-        'url': file.url.toString(),
-        'isVisibleForStudents': file.isVisibleForStudents
-      };
-    }).toList();
-    return {
-      'topic': topic,
-      'date': date.toIso8601String(),
-      'schoolHours': schoolHours,
-      'homework': homework,
-      'content': content,
-      'files': filesJson,
-      'attendanceActionRequired': attendanceActionRequired
-    };
-  }
+  CourseFolderHistoryEntry({required this.id, required this.topic, required this.studentUploadFileCount, required this.date, required this.schoolHours, this.homework, this.content, required this.files, required this.attendanceActionRequired});
 }
 
 class CourseFolderHistoryEntryFile {
   final String name;
+  final String extension;
+  final String entryId;
   final Uri url;
-  final bool isVisibleForStudents;
+  bool isVisibleForStudents;
 
-  CourseFolderHistoryEntryFile({required this.name, required this.url, required this.isVisibleForStudents});
+  CourseFolderHistoryEntryFile({required this.name, required this.entryId, required this.url, required this.isVisibleForStudents, required this.extension});
 }

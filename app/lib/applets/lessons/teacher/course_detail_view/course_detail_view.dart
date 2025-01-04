@@ -4,6 +4,7 @@ import '../../../../core/sph/sph.dart';
 import '../../../../models/lessons_teacher.dart';
 import '../widgets/course_folder_history_entry_card.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class TeacherCourseDetailView extends StatefulWidget {
   final CourseFolderStartPage courseFolder;
   const TeacherCourseDetailView({super.key, required this.courseFolder});
@@ -17,7 +18,10 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
   bool _loading = true;
   late CourseFolderDetails data;
 
-  void loadData() async {
+  Future<void> loadData() async {
+    setState(() {
+      _loading = true;
+    });
     data = await sph!.parser.lessonsTeacherParser.getCourseFolderDetails(widget.courseFolder.id);
     setState(() {
       _loading = false;
@@ -38,11 +42,22 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
       ),
       body: _loading ? Center(
         child: CircularProgressIndicator(),
-      ) : ListView.builder(
-        itemCount: data.history.length,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: CourseFolderHistoryEntryCard(entry: data.history[index]),
+      ) : data.history.isNotEmpty ? RefreshIndicator(
+          onRefresh: loadData,
+          child: ListView.builder(
+            itemCount: data.history.length,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: CourseFolderHistoryEntryCard(entry: data.history[index], courseId: widget.courseFolder.id,),
+            ),
+          ),
+      ) : Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.info, size: 64,),
+            Text(AppLocalizations.of(context)!.noEntries, style: Theme.of(context).textTheme.titleLarge,),
+          ],
         ),
       ),
     );

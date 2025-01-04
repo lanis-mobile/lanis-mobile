@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../utils/logger.dart';
-
 class LineConstraintText extends StatefulWidget {
   final String data;
   final int maxLines;
@@ -19,7 +17,6 @@ class _LineConstraintTextState extends State<LineConstraintText> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        logger.i('LineConstraintText onTap');
         setState(() {
           _expanded = !_expanded;
         });
