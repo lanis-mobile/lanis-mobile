@@ -357,7 +357,7 @@ class _CalendarViewState extends State<CalendarView> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.download_outlined),
+            icon: const Icon(Icons.download_rounded),
             onPressed: () {
               Navigator.push(
                 context,
