@@ -1,9 +1,13 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 
 import '../../../models/lessons_teacher.dart';
+import '../../../utils/logger.dart';
 import '../../substitutions/parser.dart';
 
 class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
@@ -97,12 +101,82 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
 
     Element? countAndNameElement = document.querySelector('#content>h1>small');
     String text = countAndNameElement?.text.trim() ?? '';
+
+    final writeBox = document.getElementById('writeBox')!;
+    final entryOptionIcons = writeBox.querySelectorAll('div.form-group>label.col-sm-3.control-label>span.fa');
+    List<String> selectableSchoolHours = document.getElementById('stundenVon')!.children.map((e) => e.text).toList();
+    selectableSchoolHours = selectableSchoolHours.where((elem) => elem != '').toList(growable: false);
+
+    logger.i(selectableSchoolHours);
+
     return CourseFolderDetails(
+      courseId: courseId,
+      newEntryConstraints: CourseFolderNewEntryConstraints(
+        topicVisibleForStudents: entryOptionIcons[2].classes.contains('fa-child'),
+        contentVisibleForStudents: entryOptionIcons[3].classes.contains('fa-child'),
+        homeworkVisibleForStudents: entryOptionIcons[4].classes.contains('fa-child'),
+        schoolHours: selectableSchoolHours,
+      ),
       courseName: document.getElementsByTagName('title')[0].text.split('-')[0].trim(),
       studentCount: int.parse(text.trim().split('-')[0].trim()),
-      lerningGroupsUrl: Uri.tryParse(document.querySelector('#content>h1>small>a')?.attributes['href']??''),
+      learningGroupsUrl: Uri.tryParse(document.querySelector('#content>h1>small>a')?.attributes['href']??''),
       courseTopic: (document.querySelector('#content>h1')?.children.last.text.trim().replaceFirst('Thema:', '')??'').trim(),
       history: history,
     );
+  }
+
+  Future<bool> postNewEntry({
+    /// Course ID
+    required String book,
+    /// dd.MM.yyyy
+    required String datum,
+    required bool zeigeauchvorheran,
+    required String stundenVon,
+    required String stundenBis,
+    required String subject,
+    required String inhalt,
+    required String homework,
+    /// later str "1" or "0"
+    required bool abgabe,
+    /// dd.MM.yyyy
+    required String abgabeBisDate,
+    /// HH:mm
+    required String abgabeBisTime,
+    /// yyyy-MM-dd+HH:mm
+    required String abgabeBis,
+    required bool abgabeSichtbar,
+  }) async {
+    final data = {
+      'a': 'newBookEntry',
+      'book': book,
+      'datum': datum,
+      'zeigeauchvorheran': zeigeauchvorheran ? 'ja' : 'nein',
+      'stundenVon': stundenVon,
+      'stundenBis': stundenBis,
+      'subject': subject,
+      'inhalt': inhalt,
+      'homework': homework,
+      'abgabe': abgabe ? '1' : '0',
+      'abgabeBis': abgabeBis,
+      'abgabeSichtbar': abgabeSichtbar ? "Alle" : "Lehrende",
+    };
+    final response = await sph.session.dio.post("https://start.schulportal.hessen.de/meinunterricht.php",
+      data: data,
+      queryParameters: data,
+      options: Options(
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest",
+        }
+      ),
+    );
+    try {
+      jsonDecode(response.data);
+      return true;
+    } catch (e) {
+      logger.e(e);
+      return false;
+    }
   }
 }

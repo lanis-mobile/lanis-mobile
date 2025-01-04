@@ -5,6 +5,8 @@ import '../../../../models/lessons_teacher.dart';
 import '../widgets/course_folder_history_entry_card.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'course_create_new_entry.dart';
 class TeacherCourseDetailView extends StatefulWidget {
   final CourseFolderStartPage courseFolder;
   const TeacherCourseDetailView({super.key, required this.courseFolder});
@@ -47,7 +49,7 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
           child: ListView.builder(
             itemCount: data.history.length,
             itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: EdgeInsets.only(left: 4, right: 4, bottom: index == data.history.length - 1 ? 80 : 0),
               child: CourseFolderHistoryEntryCard(entry: data.history[index], courseId: widget.courseFolder.id,),
             ),
           ),
@@ -59,6 +61,21 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
             Text(AppLocalizations.of(context)!.noEntries, style: Theme.of(context).textTheme.titleLarge,),
           ],
         ),
+      ),
+      floatingActionButton: _loading ? null : FloatingActionButton.extended(
+        label: Text('Neuer Eintrag'),
+        icon: Icon(Icons.add),
+        onPressed: () async {
+          final result = await Navigator.of(context).push<bool?>(
+              MaterialPageRoute(builder: (context) => CourseCreateNewEntry(courseFolderDetails: data))
+          );
+          if (result == true) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag erstellt')));
+            await loadData();
+          } else if (result == false) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag konnte nicht erstellt werden'), backgroundColor: Colors.red,));
+          }
+        },
       ),
     );
   }

@@ -38,12 +38,14 @@ class CourseFolderStartPageEntryInformation {
 }
 
 class CourseFolderDetails {
+  final String courseId;
   final int studentCount;
   final String courseName;
   final String courseTopic;
-  final Uri? lerningGroupsUrl;
+  final Uri? learningGroupsUrl;
   final List<CourseFolderHistoryEntry> history;
-  CourseFolderDetails({required this.studentCount, required this.courseName, required this.courseTopic, this.lerningGroupsUrl, required this.history});
+  final CourseFolderNewEntryConstraints newEntryConstraints;
+  CourseFolderDetails({required this.courseId, required this.studentCount, required this.courseName, required this.newEntryConstraints, required this.courseTopic, this.learningGroupsUrl, required this.history});
 }
 
 class CourseFolderHistoryEntry {
@@ -68,4 +70,13 @@ class CourseFolderHistoryEntryFile {
   bool isVisibleForStudents;
 
   CourseFolderHistoryEntryFile({required this.name, required this.entryId, required this.url, required this.isVisibleForStudents, required this.extension});
+}
+
+class CourseFolderNewEntryConstraints {
+  final bool topicVisibleForStudents;
+  final bool contentVisibleForStudents;
+  final bool homeworkVisibleForStudents;
+  final List<String> schoolHours;
+
+  CourseFolderNewEntryConstraints({required this.topicVisibleForStudents, required this.contentVisibleForStudents, required this.homeworkVisibleForStudents, required this.schoolHours});
 }
