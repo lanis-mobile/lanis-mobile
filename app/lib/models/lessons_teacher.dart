@@ -57,9 +57,10 @@ class CourseFolderHistoryEntry {
   final String? content;
   final List<CourseFolderHistoryEntryFile> files;
   final bool attendanceActionRequired;
+  final bool isAvailableInAdvance;
   final String? studentUploadFileCount;
 
-  CourseFolderHistoryEntry({required this.id, required this.topic, required this.studentUploadFileCount, required this.date, required this.schoolHours, this.homework, this.content, required this.files, required this.attendanceActionRequired});
+  CourseFolderHistoryEntry({required this.id, required this.isAvailableInAdvance, required this.topic, required this.studentUploadFileCount, required this.date, required this.schoolHours, this.homework, this.content, required this.files, required this.attendanceActionRequired});
 }
 
 class CourseFolderHistoryEntryFile {

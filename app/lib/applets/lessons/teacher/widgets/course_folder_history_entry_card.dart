@@ -28,6 +28,11 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
     return widget.entry.date.year == now.year && widget.entry.date.month == now.month && widget.entry.date.day == now.day;
   }
 
+  bool _isDayInFuture(DateTime date) {
+    final now = DateTime.now();
+    return date.isAfter(now);
+  }
+
   void deleteEntryButtonPressed() async {
     final bool? delete = await showDialog<bool>(
       context: context,
@@ -87,12 +92,11 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
                           children: [
                             Icon(Icons.schedule, size: 18),
-                            SizedBox(width: 4),
                             Text(AppLocalizations.of(context)!.dateWithHours(DateFormat.yMEd(Localizations.localeOf(context).toString()).format(widget.entry.date), widget.entry.schoolHours)),
-                            if (_isToday) ...[
-                              SizedBox(width: 4),
+                            if (_isToday)
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.green,
@@ -106,8 +110,29 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
                                     ),
                                   ),
                                 ),
-                              )
-                            ],
+                              ),
+                            if (_isDayInFuture(widget.entry.date))
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.greenAccent,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    spacing: 4,
+                                    children: [
+                                      Text('Vorab',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Icon(widget.entry.isAvailableInAdvance ? Icons.visibility : Icons.visibility_off, size: 16, color: Colors.white),
+                                    ],
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                         LineConstraintText(
@@ -167,7 +192,7 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
                       padding: const EdgeInsets.all(8),
                       child: Row(
                         children: [
-                          Icon(Icons.topic,
+                          Icon(Icons.text_snippet_outlined,
                               color: Theme.of(context).colorScheme.onTertiaryContainer),
                           const SizedBox(width: 8),
                           Expanded(

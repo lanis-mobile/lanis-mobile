@@ -109,6 +109,7 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
         date: DateFormat('dd.MM.yyyy').parse(dateStr),
         schoolHours: SubstitutionsParser.parseHours(
             entryRow.children[0].getElementsByTagName('small')[0].text.trim()),
+        isAvailableInAdvance: entryRow.children[0].querySelector('i.fa.fa-child') != null,
         files: remoteFiles,
         attendanceActionRequired: entryRow.children[3]
             .querySelectorAll('div.btn-group')
