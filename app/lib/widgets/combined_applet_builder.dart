@@ -20,6 +20,8 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
   final AccountType accountType;
   final BuilderFunction<T> builder;
   final bool showErrorAppBar;
+  final AppBar? loadingAppBar;
+
   const CombinedAppletBuilder({
     super.key,
     required this.parser,
@@ -28,6 +30,7 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
     required this.accountType,
     required this.builder,
     this.showErrorAppBar = false,
+    this.loadingAppBar,
   });
 
   @override
@@ -41,6 +44,7 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
 
   Widget _loadingState() {
     return Scaffold(
+      appBar: widget.loadingAppBar,
       body: Center(
         child: CircularProgressIndicator(),
       ),
@@ -86,29 +90,36 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (snapshot.data?.contentStatus == ContentStatus.offline) Container(
-                height: 32,
-                color: Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.7),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.offline_pin,
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                    ),
-                    SizedBox(
-                      width: 4,
-                    ),
-                    Text(
-                      '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
-                      style: TextStyle(
-                        color:
-                            Theme.of(context).primaryColor.withValues(alpha: 0.8),
+              if (snapshot.data?.contentStatus == ContentStatus.offline)
+                Container(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: SafeArea(
+                    left: false,
+                    right: false,
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.offline_pin,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          SizedBox(
+                            width: 4,
+                          ),
+                          Text(
+                              '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
+                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
               Expanded(
                 child: widget.builder(
                   context,

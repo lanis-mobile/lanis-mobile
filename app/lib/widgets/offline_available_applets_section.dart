@@ -67,12 +67,7 @@ class _OfflineAvailableAppletsSectionState extends State<OfflineAvailableApplets
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(
-                      title: Text(offlineApplet.definition.label(context)),
-                    ),
-                    body: offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student, () {}),
-                  ),
+                  builder: (context) => offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student, null),
                 ),
               );
             }

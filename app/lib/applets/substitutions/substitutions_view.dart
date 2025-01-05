@@ -188,13 +188,13 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.openDrawerCb != null ? AppBar(
+      appBar: AppBar(
         title: Text(substitutionDefinition.label(context)),
-        leading: IconButton(
+        leading: widget.openDrawerCb != null ? IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () => widget.openDrawerCb!(),
-        ),
-      ) : null,
+        ) : null,
+      ),
       body: CombinedAppletBuilder<SubstitutionPlan>(
         accountType: sph!.session.accountType,
         parser: sph!.parser.substitutionsParser,
