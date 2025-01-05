@@ -192,8 +192,8 @@ class SubstitutionDay {
         substitutions = (json['substitutions'] as List)
             .map((i) => Substitution.fromJson(i))
             .toList(),
-        infos = (json['infos'] as List)
-            .map((i) => SubstitutionInfo.fromJson(i))
+        infos = (json['infos'] as List?)
+            ?.map((i) => SubstitutionInfo.fromJson(i))
             .toList();
 
   SubstitutionDay withDayInfo(List<SubstitutionInfo> info) {
