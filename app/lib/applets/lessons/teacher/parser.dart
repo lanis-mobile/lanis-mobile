@@ -205,28 +205,32 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
       'a': 'newBookEntry',
       'book': book,
       'datum': datum,
-      'zeigeauchvorheran': zeigeauchvorheran ? 'ja' : 'nein',
+      if (zeigeauchvorheran) 'zeigeauchvorheran': 'ja',
       'stundenVon': stundenVon,
       'stundenBis': stundenBis,
       'subject': subject,
       'inhalt': inhalt,
       'homework': homework,
       'abgabe': abgabe ? '1' : '0',
+      'abgabeBisDate': abgabeBisDate,
+      'abgabeBisTime': abgabeBisTime,
       'abgabeBis': abgabeBis,
-      'abgabeSichtbar': abgabeSichtbar ? "Alle" : "Lehrende",
+      'abgabeSichtbar	': abgabeSichtbar ? "Alle" : "Lehrende",
     };
-    final response = await sph.session.dio.post(
-      "https://start.schulportal.hessen.de/meinunterricht.php",
-      data: data,
-      queryParameters: data,
-      options: Options(
+    try {
+      final response = await sph.session.dio.post(
+        "https://start.schulportal.hessen.de/meinunterricht.php",
+        data: data,
+        options: Options(
           contentType: "application/x-www-form-urlencoded; charset=UTF-8",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "X-Requested-With": "XMLHttpRequest",
-          }),
-    );
-    try {
+          },
+        ),
+      );
+
+      logger.i(response.data);
       jsonDecode(response.data);
       return true;
     } catch (e) {
@@ -276,4 +280,3 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
     return response.data == '1';
   }
 }
-

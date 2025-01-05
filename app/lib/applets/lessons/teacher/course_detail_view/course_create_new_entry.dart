@@ -325,8 +325,8 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
                       homework: _entryHomeworkController.text,
                       abgabe: _useDocumentSubmission,
                       abgabeBisDate: DateFormat('dd.MM.yyyy').format(_selectedDocumentSubmissionDeadline),
-                      abgabeBisTime: '${_selectedDocumentSubmissionTime.hour}:${_selectedDocumentSubmissionTime.minute}',
-                      abgabeBis: '${DateFormat('yyyy-MM-dd').format(_selectedDocumentSubmissionDeadline)}+${_selectedDocumentSubmissionTime.hour}:${_selectedDocumentSubmissionTime.minute}',
+                      abgabeBisTime: HHmm(_selectedDocumentSubmissionTime),
+                      abgabeBis: '${DateFormat('yyyy-MM-dd').format(_selectedDocumentSubmissionDeadline)}+${HHmm(_selectedDocumentSubmissionTime)}:00',
                       abgabeSichtbar: _everySubmissionVisibleForStudents,
                     );
                     Navigator.of(context).pop(); // Close loading dialog
@@ -341,4 +341,8 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
       ),
     );
   }
+}
+
+String HHmm(TimeOfDay time) {
+  return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
