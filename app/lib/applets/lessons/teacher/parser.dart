@@ -234,41 +234,21 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
     }
   }
 
-  /*
-await fetch("https://start.schulportal.hessen.de/meinunterricht.php", {
-    "credentials": "include",
-    "headers": {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0",
-        "Accept": "* /*",
-  "Accept-Language": "en-US,en;q=0.5",
-  "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-  "X-Requested-With": "XMLHttpRequest",
-  "Sec-Fetch-Dest": "empty",
-  "Sec-Fetch-Mode": "cors",
-  "Sec-Fetch-Site": "same-origin",
-  "Priority": "u=0",
-  "Pragma": "no-cache",
-  "Cache-Control": "no-cache"
-},
-"referrer": "https://start.schulportal.hessen.de/meinunterricht.php?a=view&id=3",
-"body": "a=deleteBookEntry&b=3&e=6&pw=U2FsdGVkX18nBilsKX9sxvcBUKR09k2mo0whJ6PPbVE%3D",
-"method": "POST",
-"mode": "cors"
-});
-   */
-   */
-
+  // Fragile request, do not touch!
   Future<bool> deleteEntry(String courseId, String entryId) async {
     final data = {
       'a': 'deleteBookEntry',
-      'b': entryId,
-      'e': courseId,
+      'b': courseId,
+      'e': entryId,
       'pw': sph.session.cryptor.encryptString(sph.account.password),
     };
 
+    // password has to be encoded correctly, du to special characters
+    final encodedData = data.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
+
     final response = await sph.session.dio.post(
       "https://start.schulportal.hessen.de/meinunterricht.php",
-      data: data,
+      data: encodedData,
       options: Options(
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         headers: {
@@ -291,9 +271,6 @@ await fetch("https://start.schulportal.hessen.de/meinunterricht.php", {
         },
       ),
     );
-
-    logger.i(response.requestOptions.headers);
-    logger.d(response.data);
 
     return response.data == '1';
   }

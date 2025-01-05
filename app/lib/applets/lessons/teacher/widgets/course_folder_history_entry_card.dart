@@ -13,8 +13,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class CourseFolderHistoryEntryCard extends StatefulWidget {
   final CourseFolderHistoryEntry entry;
   final String courseId;
-  final void Function() onDeleted;
-  const CourseFolderHistoryEntryCard({super.key, required this.onDeleted, required this.entry, required this.courseId});
+  final void Function() afterDeleted;
+  const CourseFolderHistoryEntryCard({super.key, required this.afterDeleted, required this.entry, required this.courseId});
 
   @override
   State<CourseFolderHistoryEntryCard> createState() => _CourseFolderHistoryEntryCardState();
@@ -58,7 +58,8 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Eintrag gelöscht'),
         ));
-        widget.onDeleted();
+        await Future.delayed(Duration(seconds: 1));
+        widget.afterDeleted();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Eintrag konnte nicht gelöscht werden'),

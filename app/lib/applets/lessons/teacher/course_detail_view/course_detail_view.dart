@@ -53,19 +53,24 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
               child: CourseFolderHistoryEntryCard(
                 entry: data.history[index],
                 courseId: widget.courseFolder.id,
-                onDeleted: () async {
+                afterDeleted: () async {
                   await loadData();
                 },
               ),
             ),
           ),
-      ) : Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.info, size: 64,),
-            Text(AppLocalizations.of(context)!.noEntries, style: Theme.of(context).textTheme.titleLarge,),
-          ],
+      ) : RefreshIndicator(
+        onRefresh: loadData,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              SizedBox(height: 64,),
+              Icon(Icons.info, size: 48,),
+              Text(AppLocalizations.of(context)!.noEntries, style: Theme.of(context).textTheme.titleLarge,),
+            ],
+          ),
         ),
       ),
       floatingActionButton: _loading ? null : FloatingActionButton.extended(
