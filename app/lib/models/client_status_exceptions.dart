@@ -1,9 +1,6 @@
 interface class LanisException implements Exception {
   late String cause;
   LanisException(this.cause);
-  LanisException.fromCode(dynamic data) {
-    cause = data.toString();
-  }
 }
 
 class WrongCredentialsException implements LanisException {

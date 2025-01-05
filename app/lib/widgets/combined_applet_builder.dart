@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/models/account_types.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
+import 'error_view.dart';
 
 typedef RefreshFunction = Future<void> Function();
 typedef UpdateSetting = Future<void> Function(String key, dynamic value);
@@ -17,6 +19,7 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
   final Map<String, dynamic> settingsDefaults;
   final AccountType accountType;
   final BuilderFunction<T> builder;
+  final bool showErrorAppBar;
   const CombinedAppletBuilder({
     super.key,
     required this.parser,
@@ -24,6 +27,7 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
     required this.settingsDefaults,
     required this.accountType,
     required this.builder,
+    this.showErrorAppBar = false,
   });
 
   @override
@@ -35,29 +39,11 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
   late Map<String, dynamic> appletSettings;
   bool _loading = true;
 
-  Widget _errorWidget(Function refresh) {
-    return Center(
-      child: Column(
-        children: [
-          Icon(Icons.error),
-          Text(AppLocalizations.of(context)!.errorOccurred),
-          SizedBox(
-            height: 30,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              refresh();
-            },
-            child: Text(AppLocalizations.of(context)!.tryAgain),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _loadingState() {
-    return Center(
-      child: CircularProgressIndicator(),
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 
@@ -82,8 +68,15 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
       stream: widget.parser.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
-          return _errorWidget(
-              () => widget.parser.fetchData(forceRefresh: true));
+          return Scaffold(
+            body: ErrorView(
+              showAppBar: widget.showErrorAppBar,
+              error: snapshot.data!.contentStatus == ContentStatus.offline
+                  ? NoConnectionException()
+                  : UnknownException(),
+              retry: () => widget.parser.fetchData(forceRefresh: true),
+            ),
+          );
         } else if (!snapshot.hasData ||
             snapshot.data?.status == FetcherStatus.fetching ||
             _loading) {

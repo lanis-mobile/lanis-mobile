@@ -336,7 +336,6 @@ class _CalendarViewState extends State<CalendarView> {
           builder: (context) {
             return ErrorView(
               error: ex,
-              name: "einem Kalenderereignis",
             );
           },
         );

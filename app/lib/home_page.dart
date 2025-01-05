@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:sph_plan/core/connection_checker.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
 import 'package:sph_plan/models/account_types.dart';
@@ -353,44 +352,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          StreamBuilder(
-            stream: connectionChecker.statusStream,
-            builder: (context, snapshot) {
-              if (snapshot.data == ConnectionStatus.connected) {
-                return const SizedBox();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(Icons.signal_wifi_off),
-                    ),
-                    Text(
-                      AppLocalizations.of(context)!.noInternetConnection1,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          Expanded(
-            child: doesSupportAnyApplet
-                ? destinations[selectedDestinationDrawer].body!(
-                context, sph!.session.accountType, () {
+      body: doesSupportAnyApplet
+          ? destinations[selectedDestinationDrawer].body!(
+              context, sph!.session.accountType, () {
               _drawerKey.currentState!.openDrawer();
             })
-                : noAppsSupported(),
-          )
-        ],
-      ),
+          : noAppsSupported(),
       bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
       drawer: navDrawer(context),
     );
