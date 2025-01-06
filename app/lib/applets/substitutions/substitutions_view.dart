@@ -192,6 +192,9 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
       parser: sph!.parser.substitutionsParser,
       phpUrl: substitutionDefinition.appletPhpUrl,
       settingsDefaults: substitutionDefinition.settingsDefaults,
+      loadingAppBar: AppBar(
+        title: Text(substitutionDefinition.label(context)),
+      ),
       builder: (context, data, accountType, settings, updateSetting, refresh) {
         if (data.days.isEmpty) {
           // GlobalKeys for RefreshIndicator and Refresh-FAB

@@ -78,7 +78,9 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
               error: snapshot.data!.contentStatus == ContentStatus.offline
                   ? NoConnectionException()
                   : UnknownException(),
-              retry: () => widget.parser.fetchData(forceRefresh: true),
+              retry: snapshot.data!.contentStatus == ContentStatus.online
+                  ? () => widget.parser.fetchData(forceRefresh: true)
+                  : null,
             ),
           );
         } else if (!snapshot.hasData ||
