@@ -55,24 +55,26 @@ class _OfflineAvailableAppletsSectionState extends State<OfflineAvailableApplets
         child: LinearProgressIndicator(),
       );
     }
-    return Column(
-      children: possibleOfflineApplets.map(
-            (offlineApplet) => ListTile(
-            title: Text(offlineApplet.definition.label(context)),
-            subtitle: Text(offlineApplet.userDisplayName),
-            leading: offlineApplet.definition.icon,
-            onTap: () async {
-              ClearTextAccount acc = await accountDatabase.getClearTextAccountFromId(offlineApplet.localUserId);
-              sph = SPH(account: acc);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student, null),
-                ),
-              );
-            }
-        ),
-      ).toList(growable: false),
+    return SafeArea(
+      child: Column(
+        children: possibleOfflineApplets.map(
+              (offlineApplet) => ListTile(
+              title: Text(offlineApplet.definition.label(context)),
+              subtitle: Text(offlineApplet.userDisplayName),
+              leading: offlineApplet.definition.icon,
+              onTap: () async {
+                ClearTextAccount acc = await accountDatabase.getClearTextAccountFromId(offlineApplet.localUserId);
+                sph = SPH(account: acc);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student, null),
+                  ),
+                );
+              }
+          ),
+        ).toList(growable: false),
+      ),
     );
   }
 }
