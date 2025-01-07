@@ -29,71 +29,73 @@ void showFileModal(BuildContext context, FileInfo file) {
       context: context,
       showDragHandle: true,
       builder: (context) {
-        return SizedBox(
-          width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const SizedBox(width: 22.0),
-                    Icon(getIconByFileExtension(file.extension)),
-                    const SizedBox(width: 10.0),
-                    Expanded(
-                      child: Text(file.name ?? AppLocalizations.of(context)!.unknownFile, overflow: TextOverflow.ellipsis,),),
-                    Text(file.size ?? "", style: Theme.of(context).textTheme.labelMedium),
-                    const SizedBox(width: 22.0),
-                  ],
-                ),
-                SizedBox(height: 8,),
-                Divider(),
-                MenuItemButton(
-                  onPressed: () => {
-                    launchFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
-                  },
-                  child: Row(
+        return SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Padding(padding: EdgeInsets.only(left: 10.0)),
-                      Icon(Icons.open_in_new),
-                      Padding(padding: EdgeInsets.only(right: 8.0)),
-                      Text(AppLocalizations.of(context)!.openFile)
+                      const SizedBox(width: 22.0),
+                      Icon(getIconByFileExtension(file.extension)),
+                      const SizedBox(width: 10.0),
+                      Expanded(
+                        child: Text(file.name ?? AppLocalizations.of(context)!.unknownFile, overflow: TextOverflow.ellipsis,),),
+                      Text(file.size ?? "", style: Theme.of(context).textTheme.labelMedium),
+                      const SizedBox(width: 22.0),
                     ],
                   ),
-                ),
-                if (!Platform.isIOS) (
+                  SizedBox(height: 8,),
+                  Divider(),
                   MenuItemButton(
                     onPressed: () => {
-                      saveFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
+                      launchFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
                     },
                     child: Row(
                       children: [
                         Padding(padding: EdgeInsets.only(left: 10.0)),
-                        Icon(Icons.save_alt_rounded),
+                        Icon(Icons.open_in_new),
                         Padding(padding: EdgeInsets.only(right: 8.0)),
-                        Text(AppLocalizations.of(context)!.saveFile)
+                        Text(AppLocalizations.of(context)!.openFile)
                       ],
                     ),
+                  ),
+                  if (!Platform.isIOS) (
+                    MenuItemButton(
+                      onPressed: () => {
+                        saveFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
+                      },
+                      child: Row(
+                        children: [
+                          Padding(padding: EdgeInsets.only(left: 10.0)),
+                          Icon(Icons.save_alt_rounded),
+                          Padding(padding: EdgeInsets.only(right: 8.0)),
+                          Text(AppLocalizations.of(context)!.saveFile)
+                        ],
+                      ),
+                    )
+                  ),
+                  if (!Platform.isLinux) (
+                    MenuItemButton(
+                      onPressed: () => {
+                        shareFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
+                      },
+                      child: Row(
+                        children: [
+                          Padding(padding: EdgeInsets.only(left: 10.0)),
+                          Icon(Icons.share_rounded),
+                          Padding(padding: EdgeInsets.only(right: 8.0)),
+                          Text(AppLocalizations.of(context)!.shareFile)
+                        ],
+                      ),
+                    )
                   )
-                ),
-                if (!Platform.isLinux) (
-                  MenuItemButton(
-                    onPressed: () => {
-                      shareFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
-                    },
-                    child: Row(
-                      children: [
-                        Padding(padding: EdgeInsets.only(left: 10.0)),
-                        Icon(Icons.share_rounded),
-                        Padding(padding: EdgeInsets.only(right: 8.0)),
-                        Text(AppLocalizations.of(context)!.shareFile)
-                      ],
-                    ),
-                  )
-                )
-              ],
+                ],
+              ),
             ),
           ),
         );

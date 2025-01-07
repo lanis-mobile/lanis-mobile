@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
+import 'package:sph_plan/applets/substitutions/substitutions_filter_settings.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_listtile.dart';
 import 'package:sph_plan/models/substitution.dart';
 
@@ -187,25 +188,39 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: widget.openDrawerCb != null ? AppBar(
+    return CombinedAppletBuilder<SubstitutionPlan>(
+      accountType: sph!.session.accountType,
+      parser: sph!.parser.substitutionsParser,
+      phpUrl: substitutionDefinition.appletPhpUrl,
+      settingsDefaults: substitutionDefinition.settingsDefaults,
+      loadingAppBar: AppBar(
         title: Text(substitutionDefinition.label(context)),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => widget.openDrawerCb!(),
-        ),
-      ) : null,
-      body: CombinedAppletBuilder<SubstitutionPlan>(
-        accountType: sph!.session.accountType,
-        parser: sph!.parser.substitutionsParser,
-        phpUrl: substitutionDefinition.appletPhpUrl,
-        settingsDefaults: substitutionDefinition.settingsDefaults,
-        builder: (context, data, accountType, settings, updateSetting, refresh) {
-          if (data.days.isEmpty) {
-            // GlobalKeys for RefreshIndicator and Refresh-FAB
-            globalKeys += List.generate(
-                data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-            return RefreshIndicator(
+        leading: Icon(Icons.menu), // will be fixed with Builder Redesign
+      ),
+      builder: (context, data, accountType, settings, updateSetting, refresh) {
+        if (data.days.isEmpty) {
+          // GlobalKeys for RefreshIndicator and Refresh-FAB
+          globalKeys += List.generate(
+              data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(substitutionDefinition.label(context)),
+              leading: widget.openDrawerCb != null ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              ) : null,
+            ),
+            floatingActionButton: widget.openDrawerCb != null ? FloatingActionButton(
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SubstitutionsFilterSettings(),
+                  )
+                );
+              },
+              child: const Icon(Icons.filter_alt),
+            ): null,
+            body: RefreshIndicator(
               key: globalKeys[0],
               notificationPredicate: refresh != null ? (_) => true : (_) => false,
               onRefresh: refresh ?? () async {},
@@ -232,13 +247,32 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                   )
                 ],
               ),
-            );
-          } else {
-            globalKeys += List.generate(
-                data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-            _tabController = TabController(length: data.days.length, vsync: this);
+            ),
+          );
+        } else {
+          globalKeys += List.generate(
+              data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
+          _tabController = TabController(length: data.days.length, vsync: this);
 
-            return Column(
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(substitutionDefinition.label(context)),
+              leading: widget.openDrawerCb != null ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              ) : null,
+            ),
+            floatingActionButton: widget.openDrawerCb != null ? FloatingActionButton(
+              onPressed: () async {
+                await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => SubstitutionsFilterSettings(),
+                    )
+                );
+              },
+              child: const Icon(Icons.filter_alt),
+            ): null,
+            body: Column(
               children: [
                 TabBar(
                     isScrollable: true,
@@ -251,10 +285,10 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                   ),
                 )
               ],
-            );
-          }
-        },
-      ),
+            ),
+          );
+        }
+      },
     );
   }
 }

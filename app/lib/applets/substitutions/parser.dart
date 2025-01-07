@@ -15,6 +15,22 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
   final DateFormat entryFormat = DateFormat('dd_MM_yyyy');
   SubstitutionsParser(super.sph, super.appletDefinition);
 
+  SubstitutionFilter localFilter = {};
+
+  saveFilterToStorage() {
+    sph.prefs.kv.setAppletValue('vertretungsplan.php', 'filter', localFilter);
+  }
+
+  loadFilterFromStorage() async {
+    localFilter = (await sph.prefs.kv.getAppletValue(
+                'vertretungsplan.php', 'filter') as Map<String, dynamic>?)
+            ?.map((key, value) => MapEntry(
+                key,
+                (value as Map<String, dynamic>).map((k, v) =>
+                    MapEntry(k, v is List ? v.cast<String>() : v as bool)))) ??
+        {};
+  }
+
   @override
   SubstitutionPlan typeFromJson(String json) {
     return SubstitutionPlan.fromJson(jsonDecode(json));
@@ -22,6 +38,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
 
   @override
   Future<SubstitutionPlan> getHome() async {
+    await loadFilterFromStorage();
     String document = await getSubstitutionPlanDocument();
     Document parsedDocument = parse(document);
     DateTime? lastEdit = parseLastEditDate(document);
@@ -34,16 +51,15 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
 
     final fullPlan = SubstitutionPlan();
     fullPlan.lastUpdated = lastEdit ?? DateTime.now();
-    List<Future<SubstitutionDay>> futures = dates.map((date) => getSubstitutionsAJAX(date)).toList();
+    List<Future<SubstitutionDay>> futures =
+        dates.map((date) => getSubstitutionsAJAX(date)).toList();
     List<SubstitutionDay> plans = await Future.wait(futures);
     for (SubstitutionDay day in plans) {
-      fullPlan.add(
-          day.withDayInfo(
-            parseInformationTables(parsedDocument.getElementById('tag${entryFormat.format(day.dateTime)}')!)
-          )
-      );
+      fullPlan.add(day.withDayInfo(parseInformationTables(parsedDocument
+          .getElementById('tag${entryFormat.format(day.dateTime)}')!)));
     }
     await fullPlan.removeEmptyDays();
+    fullPlan.filterAll(localFilter);
     return fullPlan;
   }
 
@@ -227,8 +243,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
         if (tmpInfo != null) {
           infos.add(tmpInfo);
         }
-        tmpInfo =
-            SubstitutionInfo(header: cells[0].text.trim(), values: []);
+        tmpInfo = SubstitutionInfo(header: cells[0].text.trim(), values: []);
       } else {
         tmpInfo?.values.add(cells[0].innerHtml.trim());
       }

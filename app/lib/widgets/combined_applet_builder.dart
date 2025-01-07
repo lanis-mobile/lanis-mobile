@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/models/account_types.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
+import 'error_view.dart';
 
 typedef RefreshFunction = Future<void> Function();
 typedef UpdateSetting = Future<void> Function(String key, dynamic value);
@@ -17,6 +19,9 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
   final Map<String, dynamic> settingsDefaults;
   final AccountType accountType;
   final BuilderFunction<T> builder;
+  final bool showErrorAppBar;
+  final AppBar? loadingAppBar;
+
   const CombinedAppletBuilder({
     super.key,
     required this.parser,
@@ -24,6 +29,8 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
     required this.settingsDefaults,
     required this.accountType,
     required this.builder,
+    this.showErrorAppBar = false,
+    this.loadingAppBar,
   });
 
   @override
@@ -35,29 +42,12 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
   late Map<String, dynamic> appletSettings;
   bool _loading = true;
 
-  Widget _errorWidget(Function refresh) {
-    return Center(
-      child: Column(
-        children: [
-          Icon(Icons.error),
-          Text(AppLocalizations.of(context)!.errorOccurred),
-          SizedBox(
-            height: 30,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              refresh();
-            },
-            child: Text(AppLocalizations.of(context)!.tryAgain),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _loadingState() {
-    return Center(
-      child: CircularProgressIndicator(),
+    return Scaffold(
+      appBar: widget.loadingAppBar,
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 
@@ -82,8 +72,17 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
       stream: widget.parser.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
-          return _errorWidget(
-              () => widget.parser.fetchData(forceRefresh: true));
+          return Scaffold(
+            body: ErrorView(
+              showAppBar: widget.showErrorAppBar,
+              error: snapshot.data!.contentStatus == ContentStatus.offline
+                  ? NoConnectionException()
+                  : UnknownException(),
+              retry: snapshot.data!.contentStatus == ContentStatus.online
+                  ? () => widget.parser.fetchData(forceRefresh: true)
+                  : null,
+            ),
+          );
         } else if (!snapshot.hasData ||
             snapshot.data?.status == FetcherStatus.fetching ||
             _loading) {
@@ -93,29 +92,36 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (snapshot.data?.contentStatus == ContentStatus.offline) Container(
-                height: 32,
-                color: Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.7),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.offline_pin,
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                    ),
-                    SizedBox(
-                      width: 4,
-                    ),
-                    Text(
-                      '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
-                      style: TextStyle(
-                        color:
-                            Theme.of(context).primaryColor.withValues(alpha: 0.8),
+              if (snapshot.data?.contentStatus == ContentStatus.offline)
+                Container(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: SafeArea(
+                    left: false,
+                    right: false,
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.offline_pin,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          SizedBox(
+                            width: 4,
+                          ),
+                          Text(
+                              '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
+                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
               Expanded(
                 child: widget.builder(
                   context,

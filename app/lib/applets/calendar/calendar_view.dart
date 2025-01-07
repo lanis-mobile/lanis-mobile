@@ -336,7 +336,6 @@ class _CalendarViewState extends State<CalendarView> {
           builder: (context) {
             return ErrorView(
               error: ex,
-              name: "einem Kalenderereignis",
             );
           },
         );
@@ -354,8 +353,7 @@ class _CalendarViewState extends State<CalendarView> {
           icon: const Icon(Icons.menu),
           onPressed: () => widget.openDrawerCb!(),
         ),
-      )
-          : null,
+      ) : null,
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

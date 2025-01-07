@@ -35,7 +35,7 @@ class SessionHandler {
   /// 'https://start.schulportal.hessen.de/startseite.php?a=ajax&f=apps'
   List<dynamic> travelMenu = [];
 
-  AccountType get accountType => _accountType!;
+  AccountType get accountType => _accountType ?? sph.account.accountType!;
 
   SessionHandler({required this.sph, String? withLoginURL,});
 
