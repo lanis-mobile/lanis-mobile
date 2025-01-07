@@ -5,7 +5,7 @@ abstract class SettingsColours extends StatefulWidget {
   const SettingsColours({super.key});
 }
 
-abstract class SettingsColoursState<T extends SettingsColours>
+abstract class SettingsColoursState<T extends StatefulWidget>
     extends State<T> {
   Color foregroundColor = Colors.transparent;
   Color backgroundColor = Colors.transparent;
@@ -33,6 +33,7 @@ class SettingsPage extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsets contentPadding;
   final void Function()? back;
+  final Widget? floatingActionButton;
 
   const SettingsPage({
     super.key,
@@ -41,6 +42,7 @@ class SettingsPage extends StatelessWidget {
     this.contentPadding = EdgeInsets.zero,
     this.back,
     required this.children,
+    this.floatingActionButton,
   });
 
   @override
@@ -58,6 +60,7 @@ class SettingsPage extends StatelessWidget {
           children: children,
         ),
       ),
+      floatingActionButton: floatingActionButton,
     );
   }
 }
