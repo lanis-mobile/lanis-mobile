@@ -66,7 +66,7 @@ class StudentExam {
 
   factory StudentExam.fromJson(Map<String, dynamic> json) {
     return StudentExam(
-      date: DateTime.parse(json['date']),
+      date: DateTime.parse(json['day']),
       duration: json['duration'],
       time: json['time'],
       type: json['type'],

@@ -70,6 +70,7 @@ class AppletParser<T> {
           addResponse(
             FetcherResponse(
               status: FetcherStatus.error,
+              contentStatus: ContentStatus.offline,
             ),
           );
         }
@@ -85,8 +86,8 @@ class AppletParser<T> {
         addResponse(
             FetcherResponse<T>(status: FetcherStatus.done, content: data));
         isEmpty = false;
-      }).catchError((ex) async {
-        logger.e(ex);
+      }).catchError((ex, stack) async {
+        logger.e(ex, stackTrace: stack);
         if (!secondTry) {
           await sph.session.authenticate();
           await fetchData(forceRefresh: true, secondTry: true);
