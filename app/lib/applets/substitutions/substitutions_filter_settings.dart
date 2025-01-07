@@ -42,10 +42,12 @@ class _SubstitutionsFilterSettingsState extends State<SubstitutionsFilterSetting
             const SubstitutionFilterEditor(objKey: "Hinweis", title: "Hinweis"),
             const SubstitutionFilterEditor(objKey: "Fach_alt", title: "Fach (Alt)"),
             const SubstitutionFilterEditor(objKey: "Raum_alt", title: "Raum (Alt)"),
-            ListTile(
-                leading: const Icon(Icons.help),
-                title: Text(AppLocalizations.of(context)!.howItWorks),
-                subtitle: Text(AppLocalizations.of(context)!.howItWorksText)
+            SafeArea(
+              child: ListTile(
+                  leading: const Icon(Icons.help),
+                  title: Text(AppLocalizations.of(context)!.howItWorks),
+                  subtitle: Text(AppLocalizations.of(context)!.howItWorksText)
+              ),
             )
           ],
         ));
