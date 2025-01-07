@@ -358,7 +358,7 @@ class _CalendarViewState extends State<CalendarView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
             child: Focus(
               onFocusChange: (hasFocus) {
                 if (hasFocus == true && noTrigger == false) {
