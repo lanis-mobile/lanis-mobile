@@ -108,7 +108,6 @@ class _UploadScreenState extends State<UploadScreen> {
                 ),
                 body: ErrorView(
                     error: snapshot.error as LanisException,
-                    name: "einer Abgabe",
                 ),
               );
             }
@@ -197,9 +196,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                         appBar: AppBar(),
                                         body: ErrorView(
                                             error: ex,
-                                            name:
-                                                "Hochladen von einer Datei/Dateien",
-                                            ),
+                                        ),
                                       );
                                     }));
                                     return;
@@ -688,9 +685,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                           appBar: AppBar(),
                                                           body: ErrorView(
                                                               error: ex,
-                                                              name:
-                                                                  "Löschen einer Datei",
-                                                              ),
+                                                          ),
                                                         );
                                                       }));
                                                       return;

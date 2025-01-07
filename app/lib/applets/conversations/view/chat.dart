@@ -356,7 +356,6 @@ class _ConversationsChatState extends State<ConversationsChat>
               if (snapshot.error is LanisException) {
                 return ErrorView(
                   error: snapshot.error as LanisException,
-                  name: AppLocalizations.of(context)!.singleMessages,
                   showAppBar: true,
                   retry: () {
                     Navigator.of(context).pushReplacement(

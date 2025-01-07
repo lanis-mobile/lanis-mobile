@@ -70,6 +70,7 @@ class AppletParser<T> {
           addResponse(
             FetcherResponse(
               status: FetcherStatus.error,
+              contentStatus: ContentStatus.offline,
             ),
           );
         }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -20,9 +21,13 @@ import 'core/database/account_database/account_db.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    return errorWidget(details);
-  };
+
+  if (kReleaseMode) {
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      return errorWidget(details);
+    };
+  }
+
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
@@ -141,65 +146,62 @@ class App extends StatelessWidget {
 }
 
 Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
-  return ListView(children: [
-    Container(
-      color: Colors.red.withValues(alpha: 0.1),
-      child: Padding(
-        padding: const EdgeInsets.only(
-            left: 20.0, right: 20.0, top: 32.0, bottom: 32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.warning,
-              size: 60,
+  return Container(
+    color: Color.fromARGB(255, 249, 222, 220),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: 20.0, vertical: 32.0,),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.warning_rounded,
+            size: 60,
+            color: Color.fromARGB(255, 179, 38, 30),
+          ),
+          SizedBox(height: 24,),
+          DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 179, 38, 30),
             ),
-            const Padding(
-              padding: EdgeInsets.all(35),
-              child: Text("Whoops! An error occurred.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  )),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 35, left: 20, right: 20),
-              child: Text(
-                "Problem: ${details.exception.toString()}",
+            child: Text("Whoops! An error occurred.",
                 textAlign: TextAlign.center,
-              ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 35),
-              child: FilledButton(
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(
-                      text: Trace.from(details.stack!).terse.toString()));
-                },
-                style: ButtonStyle(
-                  overlayColor: WidgetStateProperty.resolveWith((states) {
-                    return Colors.redAccent;
-                  }),
-                  foregroundColor: WidgetStateProperty.resolveWith((states) {
-                    return Colors.white;
-                  }),
-                  backgroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.pressed)) {
-                      return Colors.redAccent;
-                    }
-                    return Colors.red;
-                  }),
-                ),
-                child: const Text(
-                  "Copy error details to clipboard",
-                ),
-              ),
+          ),
+          SizedBox(height: 8,),
+          DefaultTextStyle(
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color.fromARGB(255, 179, 38, 30),
             ),
-          ],
-        ),
+            child: Text(
+              "Problem: ${details.exception.toString()}",
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 24,),
+          FilledButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(
+                  text: Trace.from(details.stack!).terse.toString()));
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return Color.fromARGB(255, 198, 40, 32);
+                }
+                return Color.fromARGB(255, 179, 38, 30);
+              }),
+            ),
+            child: const Text(
+              "Copy error details to clipboard",
+            ),
+          ),
+        ],
       ),
-    )
-  ]);
+    ),
+  );
 }
