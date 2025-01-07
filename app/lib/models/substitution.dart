@@ -264,6 +264,6 @@ class SubstitutionInfo {
       };
 
   SubstitutionInfo.fromJson(Map<String, dynamic> json)
-      : header = json['header'],
-        values = json['values'];
+      : header = json['header'] as String,
+        values = (json['values'] as List<dynamic>).map((e) => e as String).toList();
 }

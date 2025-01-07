@@ -152,4 +152,9 @@ class KV {
     final insert = jsonEncode({'v': value});
     await db.into(db.appletPreferencesTable).insert(AppletPreferencesTableCompanion.insert(appletId: appletId, key: key, value: Value(insert)), mode: InsertMode.insertOrReplace);
   }
+
+  Future<dynamic> getAppletValue(String appletId, String key) async {
+    final val = (await (db.select(db.appletPreferencesTable)..where((tbl) => tbl.appletId.equals(appletId) & tbl.key.equals(key))).getSingleOrNull())?.value;
+    return val != null ? jsonDecode(val)['v'] : null;
+  }
 }
