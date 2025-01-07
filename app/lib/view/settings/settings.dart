@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
@@ -11,6 +12,7 @@ import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../applets/calendar/calendar_export.dart';
 import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
 import '../../utils/press_tile.dart';
@@ -122,6 +124,21 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
     ]),
+    if (sph!.session.doesSupportFeature(calendarDefinition)) SettingsGroup(
+      tiles: [
+        SettingsTile(
+          title: (context) => AppLocalizations.of(context)!.calendarExport,
+          subtitle: (context) async => 'PDF, iCal, ICS, CSV',
+          icon: Icons.download_rounded,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CalendarExport(),
+            ),
+          ),
+        ),
+      ]
+    ),
     SettingsGroup(tiles: [
       SettingsTile(
         title: (context) => AppLocalizations.of(context)!.userData,
