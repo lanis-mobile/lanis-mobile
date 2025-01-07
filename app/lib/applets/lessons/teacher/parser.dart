@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
@@ -187,20 +188,19 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
     required String subject,
     required String inhalt,
     required String homework,
-
-    /// later str "1" or "0"
     required bool abgabe,
-
-    /// dd.MM.yyyy
-    required String abgabeBisDate,
-
-    /// HH:mm
-    required String abgabeBisTime,
-
-    /// yyyy-MM-dd+HH:mm
-    required String abgabeBis,
+    required DateTime abgabeBisDate,
+    required TimeOfDay abgabeBisTime,
     required bool abgabeSichtbar,
   }) async {
+    final DateTime abgabeDateTime = DateTime(
+      abgabeBisDate.year,
+      abgabeBisDate.month,
+      abgabeBisDate.day,
+      abgabeBisTime.hour,
+      abgabeBisTime.minute,
+      0,
+    );
     final data = {
       'a': 'newBookEntry',
       'book': book,
@@ -212,11 +212,12 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
       'inhalt': inhalt,
       'homework': homework,
       'abgabe': abgabe ? '1' : '0',
-      'abgabeBisDate': abgabeBisDate,
-      'abgabeBisTime': abgabeBisTime,
-      'abgabeBis': abgabeBis,
-      'abgabeSichtbar	': abgabeSichtbar ? "Alle" : "Lehrende",
+      'abgabeBisDate': DateFormat('dd.MM.yyyy').format(abgabeDateTime),
+      'abgabeBisTime': DateFormat('HH:mm').format(abgabeDateTime),
+      'abgabeBis': DateFormat('yyyy-MM-dd HH:mm:ss').format(abgabeDateTime),
+      'abgabeSichtbar': abgabeSichtbar ? "Alle" : "Lehrende",
     };
+
     try {
       final response = await sph.session.dio.post(
         "https://start.schulportal.hessen.de/meinunterricht.php",
@@ -224,13 +225,27 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
         options: Options(
           contentType: "application/x-www-form-urlencoded; charset=UTF-8",
           headers: {
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Length": "296",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "X-Requested-With": "XMLHttpRequest",
+            "Host": "start.schulportal.hessen.de",
+            "Origin": "https://start.schulportal.hessen.de",
+            "Pragma": "no-cache",
+            "Priority": "u=0",
+            "Referer": "https://start.schulportal.hessen.de/meinunterricht.php?a=view&id=3",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "no-cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0",
+            "X-Requested-With": "XMLHttpRequest"
           },
         ),
       );
 
-      logger.i(response.data);
       jsonDecode(response.data);
       return true;
     } catch (e) {

@@ -324,9 +324,8 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
                       inhalt: _entryContentController.text,
                       homework: _entryHomeworkController.text,
                       abgabe: _useDocumentSubmission,
-                      abgabeBisDate: DateFormat('dd.MM.yyyy').format(_selectedDocumentSubmissionDeadline),
-                      abgabeBisTime: HHmm(_selectedDocumentSubmissionTime),
-                      abgabeBis: '${DateFormat('yyyy-MM-dd').format(_selectedDocumentSubmissionDeadline)}+${HHmm(_selectedDocumentSubmissionTime)}:00',
+                      abgabeBisDate: _selectedDocumentSubmissionDeadline,
+                      abgabeBisTime: _selectedDocumentSubmissionTime,
                       abgabeSichtbar: _everySubmissionVisibleForStudents,
                     );
                     Navigator.of(context).pop(); // Close loading dialog
