@@ -152,7 +152,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   Future<void> sendMessage(String text) async {
     MessageState state = MessageState.first;
     if (chat.last is Message) {
-      DateTime date = chat.last.parsedDate;
+      DateTime date = chat.last.date;
       if (date.isToday) {
         state = MessageState.series;
       }
@@ -168,7 +168,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     );
 
     setState(() {
-      DateTime lastMessageDate = chat.last.parsedDate;
+      DateTime lastMessageDate = chat.last.date;
       if (lastMessageDate.isToday) {
         chat.add(textMessage);
       } else {
