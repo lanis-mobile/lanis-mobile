@@ -1,1 +1,1 @@
-display the substitution plan of a school in the Lanis system
+App for the Hesse school portal.

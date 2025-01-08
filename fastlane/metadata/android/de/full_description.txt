@@ -1,1 +1,13 @@
-<p><i>lanis mobile</i> ist eine Android Anwendung, um den Vertretungsplan einer Schule (+andere Elemente des SPH) im Lanis-System anzuzeigen.</p><p><b>Datenschutz:</b> Alle Daten werden verschlüsselt auf dem Gerät gespeichert. Die gesamte Kommunikation erfolgt direkt mit den Lanis-Servern. Sensible Daten (wie Noten, Anwesenheiten, etc.) werden durch Ende-zu-Ende-Verschlüsselung geschützt.</p><p><br><b>Features:</b></p><ul><li>Login</li><li>Vertretungsplan</li><li>Vertretungsplan Push benachrichtigungen</li><li>Schulkalender</li><li>Lanis eingeloggt im browser öffnen</li><li>Benutzerdaten</li><li>Mein Unterricht</li><li>Nachrichten</li></ul><p><b>Mitarbeit:</b> Dieses Projekt ist stark von Bug-Reports anderer Schulen oder von neuen Mitarbeitern abhängig. Der Grund dafür liegt in der modularen Natur, die es äußerst schwierig macht, eine universelle Lanis-App zu erstellen.</p>
+This app is a pilot project in the school district of Groß-Gerau and Main-Taunus-Kreis
+
+This app provides easy access to Lanis/the Hessen school portal. The functions include:
+
+    Display of the substitution plan
+    Push notifications for the substitution plan
+    Advanced filter functions of the substitution plan
+    Access to the school calendar
+    Support for ‘My lessons’ (interface for teachers in progress)
+    Support for messages
+    Timetable view (interface of the teachers in progress)
+    Direct 1-click login to the Lanis website
+    File storage (retrieval of files)

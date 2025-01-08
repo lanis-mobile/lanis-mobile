@@ -1,1 +1,1 @@
-Vertretungsplan einer Schule im Lanis-System anzeigen
+App rund um das Schulportal Hessen.
