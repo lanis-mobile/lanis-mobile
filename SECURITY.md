@@ -5,7 +5,7 @@ Alessio Caputo
 
 65428 Rüsselsheim am Main
 
-E-Mail: alessioc42.dev@gmail.com
+E-Mail: lanis-mobile@alessioc42.dev
 
 
 ## Das Schulportal Hessen
