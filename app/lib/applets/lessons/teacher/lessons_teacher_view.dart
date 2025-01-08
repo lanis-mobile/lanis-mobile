@@ -40,7 +40,7 @@ class _LessonsTeacherViewState extends State<LessonsTeacherView> {
                         Expanded(
                           child: MarqueeWidget(
                             child: Text(
-                              'Early teacher access, please report bugs and expect errors!',
+                              'Vorschau-Version für Lehrer! Zur Zeit nur teilweise funktionsfähig.',
                             ),
                           ),
                         ),
