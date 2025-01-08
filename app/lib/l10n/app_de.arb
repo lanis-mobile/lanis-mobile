@@ -291,5 +291,6 @@
   "subscription": "Abonnement",
   "subscriptionHint": "Du kannst diesen Link in deine Kalender-App importieren, um einen automatisch aktualisierenden Kalender zu haben. Er ist auch jahresübergreifend. Halte diesen Link geheim, da er von jeden benutzt werden kann.",
   "linkCopied": "Link wurde kopiert!",
-  "feedback": "Feedback zur App \uD83D\uDC49\uD83D\uDC48"
+  "feedback": "Feedback zur App \uD83D\uDC49\uD83D\uDC48",
+  "resetAccount": "Account zurücksetzen"
 }

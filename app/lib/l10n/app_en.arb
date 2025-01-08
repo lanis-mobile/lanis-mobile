@@ -291,5 +291,6 @@
   "subscription": "Subscription",
   "subscriptionHint": "You can import this link into your calendar app to have an automatically updating calendar. It will also cover multiple years. Keep this link private because it can be used by anyone.",
   "linkCopied": "Link was copied!",
-  "feedback": "Feedback for the App \uD83D\uDC49\uD83D\uDC48"
+  "feedback": "Feedback for the App \uD83D\uDC49\uD83D\uDC48",
+  "resetAccount": "Reset account"
 }

@@ -13,6 +13,7 @@ import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/widgets/offline_available_applets_section.dart';
+import 'package:sph_plan/widgets/reset_account_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StartupScreen extends StatefulWidget {
@@ -128,7 +129,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
         return Text(
           "lanis-mobile ${packageInfo.data?.version}",
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
         );
       },
     );
@@ -245,13 +246,8 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
                 },
                 tooltip: AppLocalizations.of(context)!.checkStatus,
               ),
-              authenticationState.exception.value is NoConnectionException
-                  ? const Icon(
-                Icons.wifi_off,
-                size: 48,
-              )
-                  : const Icon(
-                Icons.error,
+              Icon(
+                authenticationState.exception.value is NoConnectionException ? Icons.wifi_off : Icons.error,
                 size: 48,
               ),
               IconButton(
@@ -268,19 +264,39 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
             child: Text(text),
           ),
           if (authenticationState.exception.value is! NoConnectionException && authenticationState.exception.value is! LanisDownException)
-            Text.rich(TextSpan(
-                text: AppLocalizations.of(context)!.startupErrorMessage,
-                children: [
-                  TextSpan(
-                      text: "\n\n${authenticationState.exception.value.runtimeType}: ${authenticationState.exception.value?.cause}",
-                      style: Theme.of(context).textTheme.labelLarge)
-                ])),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Text.rich(
+                TextSpan(
+                  text: AppLocalizations.of(context)!.startupErrorMessage,
+                  children: [
+                    TextSpan(
+                        text: "\n\n${authenticationState.exception.value.runtimeType}: ${authenticationState.exception.value?.cause}",
+                        style: Theme.of(context).textTheme.labelLarge)
+                  ],
+                ),
+              ),
+            ),
+          if (authenticationState.exception.value is WrongCredentialsException) Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: ElevatedButton.icon(
+              icon: Icon(Icons.lock_reset),
+              label: Text(AppLocalizations.of(context)!.resetAccount),
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => ResetAccountPage()
+                  ),
+                );
+              },
+            ),
+          ),
           if (authenticationState.exception.value is LanisDownException)
             Text.rich(TextSpan(children: [
               TextSpan(
                   text: AppLocalizations.of(context)!.lanisDownErrorMessage,
                   style: Theme.of(context).textTheme.labelLarge)
-            ])),
+            ], ), ),
             Flexible(child: SingleChildScrollView(
               child: OfflineAvailableAppletsSection(),
             ),
