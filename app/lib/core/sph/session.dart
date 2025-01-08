@@ -65,6 +65,7 @@ class SessionHandler {
         options.headers.addAll({
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
+          'User-Agent': 'Lanis-Mobile'
         });
         options.queryParameters['_cachebreaker'] = DateTime.now().millisecondsSinceEpoch.toString();
         return handler.next(options);
@@ -182,8 +183,14 @@ class SessionHandler {
     logger.i("Refreshing session");
     try {
       var response = await dio.post("https://start.schulportal.hessen.de/ajax_login.php",
-          queryParameters: {"name": sid},
-          options: Options(contentType: "application/x-www-form-urlencoded"));
+          data: 'name=${Uri.encodeComponent(sid)}',
+          options: Options(
+            contentType: "application/x-www-form-urlencoded",
+            headers: {
+              'x-requested-with': 'XMLHttpRequest',
+            },
+          ),
+      );
       if (response.statusCode == 503) {
         throw LanisDownException();
       }

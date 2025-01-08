@@ -13,7 +13,6 @@ import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
 import '../../../models/client_status_exceptions.dart';
 
-
 class UploadScreen extends StatefulWidget {
   final String url;
   final String name;
@@ -75,7 +74,7 @@ class _UploadScreenState extends State<UploadScreen> {
         margin:
             const EdgeInsets.only(left: 16, right: 16, top: 4.0, bottom: 4.0),
         decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12)),
         child: Text(
           text,
@@ -88,7 +87,7 @@ class _UploadScreenState extends State<UploadScreen> {
         padding: const EdgeInsets.symmetric(vertical: 2.0),
         decoration: BoxDecoration(
             color:
-                color ?? Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                color ?? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [...widgets],
@@ -176,8 +175,9 @@ class _UploadScreenState extends State<UploadScreen> {
                                   List<FileStatus> fileStatus;
 
                                   try {
-                                    fileStatus =
-                                        await sph!.parser.lessonsStudentParser.uploadFile(
+                                    fileStatus = await sph!
+                                        .parser.lessonsStudentParser
+                                        .uploadFile(
                                       course: snapshot.data["course_id"],
                                       entry: snapshot.data["entry_id"],
                                       upload: snapshot.data["upload_id"],
@@ -544,7 +544,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                             ),
                                           );
                                         });
-                                    sph!.storage.downloadFile(
+                                    sph!.storage
+                                        .downloadFile(
                                             snapshot.data["public_files"][index]
                                                 .url,
                                             snapshot.data["public_files"][index]
@@ -587,7 +588,7 @@ class _UploadScreenState extends State<UploadScreen> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .secondary
-                                .withOpacity(0.15),
+                                .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12)),
                         child: Text(
                           "Du hast nichts abgegeben!",
@@ -655,7 +656,9 @@ class _UploadScreenState extends State<UploadScreen> {
                                                             "Versuche die Datei(en) zu löschen...");
                                                     String response;
                                                     try {
-                                                      response = await sph!.parser.lessonsStudentParser
+                                                      response = await sph!
+                                                          .parser
+                                                          .lessonsStudentParser
                                                           .deleteUploadedFile(
                                                         course: snapshot
                                                             .data["course_id"],
@@ -667,11 +670,11 @@ class _UploadScreenState extends State<UploadScreen> {
                                                             .data["own_files"]
                                                                 [index]
                                                             .index,
-                                                        userPasswordEncrypted:
-                                                        sph!.session.cryptor
-                                                                .encryptString(
-                                                                    passwordController
-                                                                        .text),
+                                                        userPasswordEncrypted: sph!
+                                                            .session.cryptor
+                                                            .encryptString(
+                                                                passwordController
+                                                                    .text),
                                                       );
                                                     } on LanisException catch (ex) {
                                                       ScaffoldMessenger.of(
@@ -821,7 +824,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .primary
-                                        .withOpacity(0.15),
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(12)),
                                 child: Column(
                                   children: [

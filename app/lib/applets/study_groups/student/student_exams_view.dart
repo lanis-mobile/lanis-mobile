@@ -27,17 +27,18 @@ class StudentExamsView extends StatelessWidget {
           children: [
             if (showMarker && difference != 0)
               Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      Text(DateFormat('dd.MM.yy').format(today)),
-                      Expanded(child: Divider()),
-                      // Show days until next exam
-                      Text(AppLocalizations.of(context)!
-                          .daysUntilNextExam(difference)),
-                    ],
-                  )),
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    Text(DateFormat('dd.MM.yy').format(today)),
+                    Expanded(child: Divider()),
+                    // Show days until next exam
+                    Text(AppLocalizations.of(context)!
+                        .daysUntilNextExam(difference)),
+                  ],
+                ),
+              ),
             FocusedMenu(
               items: [
                 FocusedMenuItem(
