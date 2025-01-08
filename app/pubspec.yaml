@@ -75,8 +75,8 @@ dependencies:
   drift_flutter: ^0.2.1
   flutter_keychain: ^2.5.0
   flutter_phoenix: ^1.1.1
-  flutter_widget_from_html: ^0.15.3
   native_dio_adapter: ^1.3.0
+  flutter_widget_from_html_core: ^0.15.2
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:

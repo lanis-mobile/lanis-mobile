@@ -1,7 +1,7 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_filter_settings.dart';
