@@ -88,7 +88,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return androidInfo.version.sdkInt >= 33;
         },
       ),
-      SettingsTile(
+      if (Platform.isAndroid) SettingsTile(
           title: (context) => AppLocalizations.of(context)!.notifications,
           subtitle: (context) async {
             return AppLocalizations.of(context)!.intervalAppletsList;
