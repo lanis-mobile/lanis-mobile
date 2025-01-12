@@ -97,7 +97,8 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           CourseOverviewAnsicht(
-                                            dataFetchURL: data!.semester1URL.toString(),
+                                            dataFetchURL:
+                                                data!.semester1URL.toString(),
                                             title: widget.title,
                                           )),
                                 );
@@ -116,15 +117,19 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                   List<GestureDetector> files = [];
                   for (FileInfo file in data!.history[index].files) {
                     files.add(GestureDetector(
-                      onLongPress: () {
-                        showFileModal(context, file);
-                      },
-                      child: ActionChip(
-                        label: Text(file.name ?? "..."),
-                        onPressed: () => launchFile(context, file.url.toString(), file.name ?? '', file.size, () {},
-                        ),
-                      ))
-                    );
+                        onLongPress: () {
+                          showFileModal(context, file);
+                        },
+                        child: ActionChip(
+                          label: Text(file.name ?? "..."),
+                          onPressed: () => launchFile(
+                            context,
+                            file.url.toString(),
+                            file.name ?? '',
+                            file.size,
+                            () {},
+                          ),
+                        )));
                   }
 
                   List<Widget> uploads = [];
@@ -188,7 +193,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                 padding: const EdgeInsets.only(
                                     left: 6.0, right: 12.0),
                                 child: Text(
-                                  upload.date?? "",
+                                  upload.date ?? "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
                                 ),
@@ -268,10 +273,15 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                               size: 15,
                                             ),
                                           ),
-                                          Text(AppLocalizations.of(context)!.dateWithHours(
-                                              dateFormat.format(data!.history[index].topicDate!),
-                                              data!.history[index].schoolHours ?? ""
-                                            ),
+                                          Text(
+                                            AppLocalizations.of(context)!
+                                                .dateWithHours(
+                                                    dateFormat.format(data!
+                                                        .history[index]
+                                                        .topicDate!),
+                                                    data!.history[index]
+                                                            .schoolHours ??
+                                                        ""),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .labelSmall,
@@ -279,11 +289,14 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                         ],
                                       ),
                                       Visibility(
-                                        visible: data!.history[index].presence != null,
+                                        visible:
+                                            data!.history[index].presence !=
+                                                null,
                                         child: Row(
                                           children: [
                                             Text(
-                                              (data!.history[index].presence??'')
+                                              (data!.history[index].presence ??
+                                                      '')
                                                   .replaceAll(
                                                       "andere schulische Veranstaltung",
                                                       "a.s.V."),
@@ -312,20 +325,23 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                           .textTheme
                                           .titleLarge),
                                 ],
-                                if (data!.history[index].description != null) ...[
+                                if (data!.history[index].description !=
+                                    null) ...[
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 4, bottom: 4),
                                     child: FormattedText(
                                       text: data!.history[index].description!,
-                                      formatStyle: DefaultFormatStyle(context: context),
+                                      formatStyle:
+                                          DefaultFormatStyle(context: context),
                                     ),
                                   ),
                                 ],
-                                if (data!.history[index].homework != null) HomeworkBox(
+                                if (data!.history[index].homework != null)
+                                  HomeworkBox(
                                     currentEntry: data!.history[index],
                                     courseID: data!.courseID,
-                                ),
+                                  ),
                                 Visibility(
                                   visible: files.isNotEmpty,
                                   child: Padding(
@@ -368,44 +384,50 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       bottom: index == data!.marks.length - 1 ? 14 : 8,
                     ),
                     child: Card(
+                      child: Padding(
+                          padding: EdgeInsets.all(padding),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ListTile(
-                            title: Text(
-                              data!.marks[index].name,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            trailing: Text(
-                              data!.marks[index].mark,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20.0),
-                            ),
-                            subtitle: Text(
-                              data!.marks[index].date,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                          if (data!.marks[index].comment != null)
-                            ListTile(
-                              title: Text(
-                                "${AppLocalizations.of(context)?.comment ?? ""}: ",
-                                style: Theme.of(context).textTheme.titleSmall,
-                                textAlign: TextAlign.left,
-                              ),
-                              subtitle: Text(
-                                data!.marks[index].comment ?? "",
-                                style: TextStyle(
-                                  fontSize: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .fontSize,
-                                  fontStyle: FontStyle.italic,
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  data!.marks[index].name,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              Text(
+                                data!.marks[index].mark,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20.0),
+                              ),
+                              SizedBox(width: 4),
+                            ],
+                          ),
+                          if (data!.marks[index].comment != null) ...[
+                            Text(
+                              "${AppLocalizations.of(context)?.comment ?? ""}: ",
+                              style: Theme.of(context).textTheme.titleSmall,
+                              textAlign: TextAlign.left,
                             ),
+                            Text(
+                              data!.marks[index].comment ?? "",
+                              style: TextStyle(
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .fontSize,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
-                    ),
+                      ),
+                    )
                   );
                 },
               )
@@ -419,9 +441,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       padding: EdgeInsets.only(
                         left: padding,
                         right: padding,
-                        bottom: index == data!.exams.length - 1
-                            ? 14
-                            : 8,
+                        bottom: index == data!.exams.length - 1 ? 14 : 8,
                       ),
                       child: Card(
                           child: ListTile(
@@ -430,7 +450,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         subtitle: Text(
-                          data!.exams[index].value??'',
+                          data!.exams[index].value ?? '',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )));
@@ -453,13 +473,12 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                     child: Card(
                       child: ListTile(
                         title: Text(
-                          toBeginningOfSentenceCase(
-                              key),
+                          toBeginningOfSentenceCase(key),
                         ),
                         trailing: Text(
                           value,
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20.0),
+                              fontWeight: FontWeight.bold, fontSize: 20.0),
                         ),
                       ),
                     ),
