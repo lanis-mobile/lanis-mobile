@@ -368,6 +368,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       bottom: index == data!.marks.length - 1 ? 14 : 8,
                     ),
                     child: Card(
+                      margin: EdgeInsets.zero,
                       child: Column(
                         children: [
                           ListTile(
