@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
@@ -16,6 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
+
+const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -74,6 +77,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+  final showFeedback = randomBool(0.3) && surveyUrl != null;
 
   late int selectedDestinationDrawer;
   late bool doesSupportAnyApplet = false;
@@ -360,6 +364,28 @@ class _HomePageState extends State<HomePage> {
           : noAppsSupported(),
       bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
       drawer: navDrawer(context),
+      floatingActionButton: showFeedback ? Padding(
+        padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
+        child: ElevatedButton(
+            onPressed: (){
+              launchUrl(Uri.parse(surveyUrl!));
+            },
+            child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Icon(Icons.feedback),
+              Text(AppLocalizations.of(context)!.feedback)
+            ],
+          ),
+        ),
+      ) : null,
+      floatingActionButtonLocation: showFeedback ? FloatingActionButtonLocation.startDocked : null,
     );
   }
+}
+
+bool randomBool(double chance) {
+  return Random().nextDouble() < chance;
 }

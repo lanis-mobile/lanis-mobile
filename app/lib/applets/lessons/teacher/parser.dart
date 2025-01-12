@@ -17,7 +17,7 @@ class LessonsTeacherParser extends AppletParser<LessonsTeacherHome> {
   @override
   Future<LessonsTeacherHome> getHome() async {
     final response = await sph.session.dio
-        .get('https://start.schulportal.hessen.de/meinunterricht.php');
+        .get('https://start.schulportal.hessen.de/meinunterricht.php?jump=no');
     final Document document = parse(response.data);
     final Element? courseFoldersElement = document.getElementById('hefte');
     if (courseFoldersElement == null) {
