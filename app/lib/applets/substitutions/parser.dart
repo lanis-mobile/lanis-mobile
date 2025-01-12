@@ -46,6 +46,9 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
 
     if (dates.isEmpty) {
       SubstitutionPlan plan = parseSubstitutionsNonAJAX(parsedDocument);
+      plan.removeEmptyDays();
+      plan.filterAll(localFilter);
+
       return plan;
     }
 
@@ -58,7 +61,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
       fullPlan.add(day.withDayInfo(parseInformationTables(parsedDocument
           .getElementById('tag${entryFormat.format(day.dateTime)}')!)));
     }
-    await fullPlan.removeEmptyDays();
+    fullPlan.removeEmptyDays();
     fullPlan.filterAll(localFilter);
     return fullPlan;
   }

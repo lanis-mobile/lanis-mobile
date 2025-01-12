@@ -224,7 +224,7 @@ class SubstitutionPlan {
     return allSubs;
   }
 
-  Future<void> removeEmptyDays() async {
+  void removeEmptyDays() {
     days.removeWhere((day) =>
         day.substitutions.isEmpty &&
         ((day.infos == null && day.infos!.isEmpty)));
