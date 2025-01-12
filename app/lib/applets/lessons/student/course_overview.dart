@@ -368,46 +368,42 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                       bottom: index == data!.marks.length - 1 ? 14 : 8,
                     ),
                     child: Card(
-                      child: ListTile(
-                        title: Text(
-                          data!.marks[index].name,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text(
+                              data!.marks[index].name,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            trailing: Text(
+                              data!.marks[index].mark,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20.0),
+                            ),
+                            subtitle: Text(
                               data!.marks[index].date,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            if (data!.marks[index].comment != null)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "\n${AppLocalizations.of(context)?.comment ?? ""}: ",
-                                    style: Theme.of(context).textTheme.titleSmall,
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  Text(
-                                    data!.marks[index].comment ?? "",
-                                    style: TextStyle(
-                                      fontSize: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .fontSize,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  )
-                                ],
-                              )
-                          ],
-                        ),
-                        trailing: Text(
-                          data!.marks[index].mark,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20.0),
-                        ),
+                          ),
+                          if (data!.marks[index].comment != null)
+                            ListTile(
+                              title: Text(
+                                "${AppLocalizations.of(context)?.comment ?? ""}: ",
+                                style: Theme.of(context).textTheme.titleSmall,
+                                textAlign: TextAlign.left,
+                              ),
+                              subtitle: Text(
+                                data!.marks[index].comment ?? "",
+                                style: TextStyle(
+                                  fontSize: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .fontSize,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   );
