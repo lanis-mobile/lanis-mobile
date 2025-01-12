@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
@@ -16,6 +17,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
+
+const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
+final DateTime showAfterDate = DateTime(2025, 1, 20);
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -360,6 +364,37 @@ class _HomePageState extends State<HomePage> {
           : noAppsSupported(),
       bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
       drawer: navDrawer(context),
+      floatingActionButton: showAfterDate.isAfter(DateTime.now()) ? StreamBuilder(
+        stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
+        builder: (context, snapshot) {
+          return Visibility(
+            visible: !snapshot.hasData || !snapshot.data,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    await launchUrl(Uri.parse(surveyUrl!));
+                    await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
+                  },
+                  child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Icon(Icons.feedback),
+                    Text(AppLocalizations.of(context)!.feedback)
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      ) : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
     );
   }
+}
+
+bool randomBool(double chance) {
+  return Random().nextDouble() < chance;
 }

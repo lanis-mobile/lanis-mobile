@@ -205,7 +205,7 @@ class LoginFormState extends State<LoginForm> {
                                           .primary),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () => launchUrl(Uri.parse(
-                                        "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
+                                        "https://lanis-mobile.github.io/policy/")),
                                 ),
                                 TextSpan(
                                   text: AppLocalizations.of(context)!
