@@ -295,7 +295,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
             name: row.children[0].text.trim(),
             date: row.children[1].text.trim(),
             mark: row.children[2].text.trim(),
-            comment: 'Well done, you inserted a test comment'
+            comment: comment,
           ));
         }
       }
