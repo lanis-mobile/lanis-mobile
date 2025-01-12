@@ -44,23 +44,21 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     DateTime? lastEdit = parseLastEditDate(document);
     var dates = getSubstitutionDates(document);
 
-    if (dates.isEmpty) {
-      SubstitutionPlan plan = parseSubstitutionsNonAJAX(parsedDocument);
-      plan.removeEmptyDays();
-      plan.filterAll(localFilter);
-
-      return plan;
-    }
-
-    final fullPlan = SubstitutionPlan();
+    var fullPlan = SubstitutionPlan();
     fullPlan.lastUpdated = lastEdit ?? DateTime.now();
-    List<Future<SubstitutionDay>> futures =
-        dates.map((date) => getSubstitutionsAJAX(date)).toList();
-    List<SubstitutionDay> plans = await Future.wait(futures);
-    for (SubstitutionDay day in plans) {
-      fullPlan.add(day.withDayInfo(parseInformationTables(parsedDocument
-          .getElementById('tag${entryFormat.format(day.dateTime)}')!)));
+
+    if (dates.isEmpty) {
+      fullPlan = parseSubstitutionsNonAJAX(parsedDocument);
+    } else {
+      List<Future<SubstitutionDay>> futures =
+      dates.map((date) => getSubstitutionsAJAX(date)).toList();
+      List<SubstitutionDay> plans = await Future.wait(futures);
+      for (SubstitutionDay day in plans) {
+        fullPlan.add(day.withDayInfo(parseInformationTables(parsedDocument
+            .getElementById('tag${entryFormat.format(day.dateTime)}')!)));
+      }
     }
+
     fullPlan.removeEmptyDays();
     fullPlan.filterAll(localFilter);
     return fullPlan;
@@ -88,7 +86,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
       DateTime parsedDate = entryFormat.parse(date);
       String parsedDateStr = parsedDate.format('dd.MM.yyyy');
       SubstitutionDay substitutionDay =
-          SubstitutionDay(parsedDate: parsedDateStr);
+          SubstitutionDay(parsedDate: parsedDateStr, infos: parseInformationTables(document.getElementById('tag$date')!));
       final vtable = document.querySelector("#vtable$date");
       if (vtable == null) {
         return fullPlan;
