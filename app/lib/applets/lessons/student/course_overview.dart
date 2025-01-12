@@ -381,15 +381,25 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             if (data!.marks[index].comment != null)
-                              Text(
-                                data!.marks[index].comment ?? "",
-                                style: TextStyle(
-                                  fontSize: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .fontSize,
-                                  fontStyle: FontStyle.italic,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "\n${AppLocalizations.of(context)?.comment ?? ""}: ",
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  Text(
+                                    data!.marks[index].comment ?? "",
+                                    style: TextStyle(
+                                      fontSize: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .fontSize,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  )
+                                ],
                               )
                           ],
                         ),
