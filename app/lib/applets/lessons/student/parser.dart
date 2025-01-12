@@ -266,17 +266,28 @@ class LessonsStudentParser extends AppletParser<Lessons> {
         attendances[row.children[0].text.trim()] = row.children[1].text.trim();
       });
 
-      //leistungen
+      // Marks / Grades
       var marksSection = document.getElementById("marks");
       List markTableRows =
       marksSection?.querySelectorAll("table>tbody>tr") as List;
 
       List<LessonMark> marks = [];
 
-      for (var row in markTableRows) {
+      for (Element row in markTableRows) {
         var encodedElements = row.getElementsByClassName("hidden_encoded");
         for (var e in encodedElements) {
           e.innerHtml = "";
+        }
+
+        String? comment;
+        Element? mnCommentElement = row.nextElementSibling;
+        if (mnCommentElement != null) {
+          Element element = mnCommentElement;
+          Element commentElement = element.querySelectorAll("td")[1];
+          comment = commentElement.text.trim().split(":").sublist(1).join();
+          if (comment.trim().isEmpty) {
+            comment = null;
+          }
         }
 
         if (row.children.length == 3) {
@@ -284,9 +295,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
             name: row.children[0].text.trim(),
             date: row.children[1].text.trim(),
             mark: row.children[2].text.trim(),
-            comment: (row.children.length == 2)
-                ? row.children[1].text.trim().split(":").sublist(1).join(":")
-                : null,
+            comment: comment
           ));
         }
       }
