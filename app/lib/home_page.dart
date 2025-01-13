@@ -19,7 +19,6 @@ import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
 
 const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
-final DateTime showAfterDate = DateTime(2025, 1, 20);
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -364,7 +363,7 @@ class _HomePageState extends State<HomePage> {
           : noAppsSupported(),
       bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
       drawer: navDrawer(context),
-      floatingActionButton: showAfterDate.isAfter(DateTime.now()) ? StreamBuilder(
+      floatingActionButton: StreamBuilder(
         stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
         builder: (context, snapshot) {
           return Visibility(
@@ -389,7 +388,7 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         }
-      ) : null,
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
     );
   }
