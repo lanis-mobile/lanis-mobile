@@ -278,7 +278,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
               ),
             ),
           if (authenticationState.exception.value is WrongCredentialsException) Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: ElevatedButton.icon(
               icon: Icon(Icons.lock_reset),
               label: Text(AppLocalizations.of(context)!.resetAccount),

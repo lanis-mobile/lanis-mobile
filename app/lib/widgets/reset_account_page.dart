@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/utils/large_appbar.dart';
 
 import '../core/sph/sph.dart';
+import '../utils/authentication_state.dart';
 
 class ResetAccountPage extends StatefulWidget {
   const ResetAccountPage({super.key});
@@ -60,8 +62,8 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
           ),
           ListTile(
             leading: Icon(Icons.info),
-            title: Text("Wrong password!"),
-            subtitle: Text("Your password seems to be wrong! This can happen, when you change your password or your account gets deleted. Either change your password or remove your account entirely to resolve the issue."),
+            title: Text(AppLocalizations.of(context)!.wrongPassword),
+            subtitle: Text(AppLocalizations.of(context)!.wrongPasswordHint),
           ),
           Padding(
             padding: EdgeInsets.all(12.0),
@@ -71,23 +73,62 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
               children: [
                 ElevatedButton.icon(
                   onPressed: () async {
+                    TextEditingController controller = TextEditingController();
+                    final String? newPassword = await showDialog<String>(
+                      context: context,
+                      builder: (context) => SimpleDialog(
+                        title: Text(AppLocalizations.of(context)!.changePassword),
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: controller,
+                              autofillHints: [AutofillHints.password],
+                              autocorrect: false,
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(context)!.authPasswordHint,
+                              ),
+                              autovalidateMode: AutovalidateMode.always,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return AppLocalizations.of(context)!.authValidationError;
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              onPressed: (){
+                                if (controller.text.isEmpty) return;
+                                Navigator.of(context).pop(controller.text);
+                              },
+                              child: Text(AppLocalizations.of(context)!.changePassword),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                    if (newPassword == null) return;
+                    await accountDatabase.updatePassword(sph!.account.localId, newPassword);
+                    if (mounted) {
+                      authenticationState.reset(context);
+                    }
                   },
                   icon: Icon(Icons.password),
-                  label: Text("Change password"),
+                  label: Text(AppLocalizations.of(context)!.changePassword),
                 ),
                 ElevatedButton.icon(
-                  onPressed: (){
-
+                  onPressed: () async {
+                    await accountDatabase.deleteAccount(sph!.account.localId);
+                    if (mounted) {
+                      authenticationState.reset(context);
+                    }
                   },
                   icon: Icon(Icons.no_accounts),
-                  label: Text("Remove account"),
-                ),
-                ElevatedButton.icon(
-                  onPressed: (){
-
-                  },
-                  icon: Icon(Icons.no_accounts),
-                  label: Text("Remove all Accounts"),
+                  label: Text(AppLocalizations.of(context)!.removeAccount),
                 ),
               ],
             ),
