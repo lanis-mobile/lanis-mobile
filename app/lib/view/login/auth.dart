@@ -153,6 +153,7 @@ class LoginFormState extends State<LoginForm> {
                     TextFormField(
                       controller: usernameController,
                       enabled: schoolIDController.text != "",
+                      autofillHints: [AutofillHints.username],
                       autocorrect: false,
                       decoration: InputDecoration(
                           labelText:
@@ -171,6 +172,7 @@ class LoginFormState extends State<LoginForm> {
                     TextFormField(
                       controller: passwordController,
                       enabled: schoolIDController.text.isNotEmpty,
+                      autofillHints: [AutofillHints.password],
                       autocorrect: false,
                       obscureText: true,
                       decoration: InputDecoration(

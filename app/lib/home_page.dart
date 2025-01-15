@@ -141,9 +141,9 @@ class _HomePageState extends State<HomePage> {
       icon: Icon(Icons.logout),
       selectedIcon: Icon(Icons.logout_outlined),
       label: (context) => AppLocalizations.of(context)!.logout,
-      action: (context) {
-        sph!.session.deAuthenticate();
-        accountDatabase.deleteAccount(sph!.account.localId);
+      action: (context) async {
+        await sph!.session.deAuthenticate();
+        await accountDatabase.deleteAccount(sph!.account.localId);
         authenticationState.reset(context);
       }
     ),
