@@ -131,7 +131,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                       selectedPlan,
                       currentWeekIndex == 0
                           ? null
-                          : uniqueBadges[currentWeekIndex - 1]),
+                          : uniqueBadges[currentWeekIndex - 1],
+                      settings['hidden-lessons']),
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
@@ -163,11 +164,28 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                     Padding(
                                       padding:
                                           const EdgeInsets.only(bottom: 8.0),
-                                      child: Text(
-                                        selected.name ?? "Unbekanntes Fach",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            selected.name ?? "Unbekanntes Fach",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge,
+                                          ),
+                                          IconButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                updateSettings(
+                                                    'hidden-lessons', [
+                                                  ...settings['hidden-lessons'],
+                                                  selected.id
+                                                ]);
+                                              },
+                                              icon: const Icon(
+                                                  Icons.hide_image_outlined)),
+                                        ],
                                       ),
                                     ),
                                     if (selected.raum != null)
@@ -285,8 +303,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
 class TimeTableDataSource extends CalendarDataSource {
   BuildContext context;
-  TimeTableDataSource(
-      this.context, List<TimetableDay>? data, String? weekBadge) {
+  TimeTableDataSource(this.context, List<TimetableDay>? data, String? weekBadge,
+      List<dynamic>? hiddenLessons) {
     final now = DateTime.now();
     final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
@@ -325,7 +343,8 @@ class TimeTableDataSource extends CalendarDataSource {
             color: entryColor,
             id: "$dayIndex-$lessonIndex-1"));
 
-        if (isCurrentWeek(lesson, true)) {
+        if (isCurrentWeek(lesson, true) &&
+            (hiddenLessons == null || !hiddenLessons.contains(lesson.id))) {
           events.add(Appointment(
               startTime: startTime,
               endTime: endTime,
@@ -336,15 +355,17 @@ class TimeTableDataSource extends CalendarDataSource {
               id: "$dayIndex-$lessonIndex-2"));
         }
 
-        //1 week later
-        events.add(Appointment(
-            startTime: startTime.add(const Duration(days: 7)),
-            endTime: endTime.add(const Duration(days: 7)),
-            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
-            location: lesson.raum,
-            notes: lesson.lehrer,
-            color: entryColor,
-            id: "$dayIndex-$lessonIndex-3"));
+        if (hiddenLessons == null || !hiddenLessons.contains(lesson.id)) {
+          //1 week later
+          events.add(Appointment(
+              startTime: startTime.add(const Duration(days: 7)),
+              endTime: endTime.add(const Duration(days: 7)),
+              subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
+              location: lesson.raum,
+              notes: lesson.lehrer,
+              color: entryColor,
+              id: "$dayIndex-$lessonIndex-3"));
+        }
       }
     }
 

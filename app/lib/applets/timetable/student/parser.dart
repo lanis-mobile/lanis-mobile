@@ -121,10 +121,12 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
       var endTime = timeslotOffsetFirstRow
           ? timeSlots[y + duration - 1].$2
           : timeSlots[y - 1 + duration - 1].$2;
+      // Id unique for every subject. Added with startTime to make it unique
+      // even if lessons are removed.
       var id = row.attributes['data-mix'];
 
       result.add(TimetableSubject(
-          id: id,
+          id: '$id-${startTime.hour}-${startTime.minute}',
           name: name,
           raum: raum,
           lehrer: lehrer,
