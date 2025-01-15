@@ -174,8 +174,13 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                           renderMode: RenderMode.column,
                           onTapUrl: (url) => launchUrl(Uri.parse(url)),
                           customStylesBuilder: (element) {
-                            if (element.localName == 'a') {
-                              element.attributes['style'] = '';
+                            if (element.localName == 'a' &&
+                                element.attributes['style'] != null) {
+                              RegExp regex =
+                                  RegExp(r'background-color:\s*[^;]+;');
+                              element.attributes['style'] = element
+                                  .attributes['style']!
+                                  .replaceAll(regex, '');
                             }
                             return null;
                           },
