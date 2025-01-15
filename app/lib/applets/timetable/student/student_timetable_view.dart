@@ -63,10 +63,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
       accountType: AccountType.student,
       loadingAppBar: AppBar(
         title: Text(timeTableDefinition.label(context)),
-        leading: widget.openDrawerCb != null ? IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => widget.openDrawerCb!(),
-        ) : null,
+        leading: widget.openDrawerCb != null
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              )
+            : null,
       ),
       builder: (context, timetable, _, settings, updateSettings, refresh) {
         TimeTableType selectedType =
@@ -88,58 +90,61 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
         }
 
-        final CalendarView view = switch (settings['current-timetable-view']! as String) {
+        final CalendarView view =
+            switch (settings['current-timetable-view']! as String) {
           "CalendarView.day" => CalendarView.day,
           "CalendarView.week" => CalendarView.week,
           "CalendarView.workWeek" => CalendarView.workWeek,
           String() => throw UnimplementedError(),
         };
 
-          return Scaffold(
-              appBar: AppBar(
-                title: Text(timeTableDefinition.label(context)),
-                leading: widget.openDrawerCb != null ? IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => widget.openDrawerCb!(),
-                ) : null,
-              ),
-              body: Stack(
-                children: [
-                  SfCalendar(
-                    headerStyle: CalendarHeaderStyle(
-                        textAlign: TextAlign.left,
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor),
-                    headerDateFormat: " ", // This needs to be a space
-                    view: view,
-                    allowedViews: [
-                      CalendarView.day,
-                      CalendarView.week,
-                      CalendarView.workWeek,
-                    ],
-                    timeSlotViewSettings: const TimeSlotViewSettings(
-                      timeFormat: "HH:mm",
-                    ),
-                    firstDayOfWeek: DateTime.monday,
-                    dataSource: TimeTableDataSource(
-                        context,
-                        selectedPlan,
-                        currentWeekIndex == 0
-                            ? null
-                            : uniqueBadges[currentWeekIndex - 1]),
-                    minDate: DateTime.now(),
-                    maxDate: DateTime.now().add(const Duration(days: 7)),
-                    controller: controller,
-                    onViewChanged: (_) => updateSettings(
-                        'current-timetable-view', controller.view.toString()),
-                    onTap: (details) {
-                      if (details.appointments != null) {
-                        final appointment = details.appointments!.first;
+        return Scaffold(
+            appBar: AppBar(
+              title: Text(timeTableDefinition.label(context)),
+              leading: widget.openDrawerCb != null
+                  ? IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => widget.openDrawerCb!(),
+                    )
+                  : null,
+            ),
+            body: Stack(
+              children: [
+                SfCalendar(
+                  headerStyle: CalendarHeaderStyle(
+                      textAlign: TextAlign.left,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor),
+                  headerDateFormat: " ", // This needs to be a space
+                  view: view,
+                  allowedViews: [
+                    CalendarView.day,
+                    CalendarView.week,
+                    CalendarView.workWeek,
+                  ],
+                  timeSlotViewSettings: const TimeSlotViewSettings(
+                    timeFormat: "HH:mm",
+                  ),
+                  firstDayOfWeek: DateTime.monday,
+                  dataSource: TimeTableDataSource(
+                      context,
+                      selectedPlan,
+                      currentWeekIndex == 0
+                          ? null
+                          : uniqueBadges[currentWeekIndex - 1]),
+                  minDate: DateTime.now(),
+                  maxDate: DateTime.now().add(const Duration(days: 7)),
+                  controller: controller,
+                  onViewChanged: (_) => updateSettings(
+                      'current-timetable-view', controller.view.toString()),
+                  onTap: (details) {
+                    if (details.appointments != null) {
+                      final appointment = details.appointments!.first;
 
-                        final helperIDs =
-                            appointment.id.split("-").map(int.parse).toList();
-                        final TimetableSubject selected =
-                            selectedPlan[helperIDs[0]][helperIDs[1]];
+                      final helperIDs =
+                          appointment.id.split("-").map(int.parse).toList();
+                      final TimetableSubject selected =
+                          selectedPlan[helperIDs[0]][helperIDs[1]];
 
                       showModalBottomSheet(
                           context: context,
@@ -207,7 +212,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
                       GestureDetector(
                         onTap: () {
-                          updateSettings('student-selected-week', currentWeekIndex != 0);
+                          updateSettings(
+                              'student-selected-week', currentWeekIndex != 0);
                           currentWeekIndex = (currentWeekIndex + 1) %
                               (uniqueBadges.length + 1);
                         },
