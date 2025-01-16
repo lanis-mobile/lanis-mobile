@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
@@ -49,6 +50,60 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     final firstDayOfYear = DateTime(now.year, 1, 1);
     final days = now.difference(firstDayOfYear).inDays;
     return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
+  }
+
+  void showColorPicker(dynamic settings,
+      Future<void> Function(String, dynamic) updateSettings, lesson) {
+    Color selectedColor = TimeTableHelper.getColorForLesson(settings, lesson);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: selectedColor,
+              onColorChanged: (c) => {
+                selectedColor = c,
+              },
+              enableAlpha: false,
+              labelTypes: [],
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Clear'),
+              onPressed: () {
+                updateSettings('lesson-colors', {
+                  ...settings['lesson-colors'],
+                  lesson.id.split('-')[0]: null
+                });
+
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Set'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+
+                if (settings['lesson-colors'] == null) {
+                  settings['lesson-colors'] = {};
+                }
+                updateSettings('lesson-colors', {
+                  ...settings['lesson-colors'],
+                  lesson.id.split('-')[0]:
+                      selectedColor.toHexString(enableAlpha: false)
+                });
+
+                print(settings['lesson-colors']);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -132,7 +187,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                       currentWeekIndex == 0
                           ? null
                           : uniqueBadges[currentWeekIndex - 1],
-                      settings['hidden-lessons']),
+                      settings),
                   minDate: DateTime.now(),
                   maxDate: DateTime.now().add(const Duration(days: 7)),
                   controller: controller,
@@ -174,17 +229,39 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                 .textTheme
                                                 .titleLarge,
                                           ),
-                                          IconButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                                updateSettings(
-                                                    'hidden-lessons', [
-                                                  ...settings['hidden-lessons'],
-                                                  selected.id
-                                                ]);
-                                              },
-                                              icon: const Icon(
-                                                  Icons.hide_image_outlined)),
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                  onPressed: () {
+                                                    showColorPicker(
+                                                        settings,
+                                                        updateSettings,
+                                                        selected);
+                                                  },
+                                                  icon: Container(
+                                                    width: 24,
+                                                    height: 24,
+                                                    decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: TimeTableHelper
+                                                            .getColorForLesson(
+                                                                settings,
+                                                                selected)),
+                                                  )),
+                                              IconButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                    updateSettings(
+                                                        'hidden-lessons', [
+                                                      ...settings[
+                                                          'hidden-lessons'],
+                                                      selected.id
+                                                    ]);
+                                                  },
+                                                  icon: const Icon(Icons
+                                                      .hide_image_outlined)),
+                                            ],
+                                          )
                                         ],
                                       ),
                                     ),
@@ -301,10 +378,23 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
   }
 }
 
+class TimeTableHelper {
+  static Color getColorForLesson(dynamic settings, lesson) {
+    if (settings['lesson-colors'] == null) {
+      return RandomColor.bySeed(lesson.name!).primary;
+    }
+    if (settings['lesson-colors'][lesson.id.split('-')[0]] != null) {
+      return Color(int.parse(settings['lesson-colors'][lesson.id.split('-')[0]],
+          radix: 16));
+    }
+    return RandomColor.bySeed(lesson.name!).primary;
+  }
+}
+
 class TimeTableDataSource extends CalendarDataSource {
   BuildContext context;
-  TimeTableDataSource(this.context, List<TimetableDay>? data, String? weekBadge,
-      List<dynamic>? hiddenLessons) {
+  TimeTableDataSource(
+      this.context, List<TimetableDay>? data, String? weekBadge, settings) {
     final now = DateTime.now();
     final lastMonday = now.subtract(Duration(days: now.weekday - 1));
     var events = <Appointment>[];
@@ -325,13 +415,18 @@ class TimeTableDataSource extends CalendarDataSource {
       final date = lastMonday.add(Duration(days: dayIndex));
 
       for (var (lessonIndex, lesson) in day.indexed) {
+        List<dynamic>? hiddenLessons = settings['hidden-lessons'];
+        if (hiddenLessons != null && hiddenLessons.contains(lesson.id)) {
+          continue;
+        }
         // Use the calculated date for the startTime and endTime
         final startTime = DateTime(date.year, date.month, date.day,
             lesson.startTime.hour, lesson.startTime.minute);
         final endTime = DateTime(date.year, date.month, date.day,
             lesson.endTime.hour, lesson.endTime.minute);
 
-        final Color entryColor = RandomColor.bySeed(lesson.name!).primary;
+        final Color entryColor =
+            TimeTableHelper.getColorForLesson(settings, lesson);
 
         //1 week before
         events.add(Appointment(
@@ -343,8 +438,7 @@ class TimeTableDataSource extends CalendarDataSource {
             color: entryColor,
             id: "$dayIndex-$lessonIndex-1"));
 
-        if (isCurrentWeek(lesson, true) &&
-            (hiddenLessons == null || !hiddenLessons.contains(lesson.id))) {
+        if (isCurrentWeek(lesson, true)) {
           events.add(Appointment(
               startTime: startTime,
               endTime: endTime,
@@ -355,17 +449,15 @@ class TimeTableDataSource extends CalendarDataSource {
               id: "$dayIndex-$lessonIndex-2"));
         }
 
-        if (hiddenLessons == null || !hiddenLessons.contains(lesson.id)) {
-          //1 week later
-          events.add(Appointment(
-              startTime: startTime.add(const Duration(days: 7)),
-              endTime: endTime.add(const Duration(days: 7)),
-              subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
-              location: lesson.raum,
-              notes: lesson.lehrer,
-              color: entryColor,
-              id: "$dayIndex-$lessonIndex-3"));
-        }
+        //1 week later
+        events.add(Appointment(
+            startTime: startTime.add(const Duration(days: 7)),
+            endTime: endTime.add(const Duration(days: 7)),
+            subject: "${lesson.name!} ${lesson.lehrer} ${lesson.raum ?? ""}",
+            location: lesson.raum,
+            notes: lesson.lehrer,
+            color: entryColor,
+            id: "$dayIndex-$lessonIndex-3"));
       }
     }
 
