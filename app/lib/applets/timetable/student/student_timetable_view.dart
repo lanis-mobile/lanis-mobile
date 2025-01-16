@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/random_color.dart';
@@ -257,6 +258,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                           'hidden-lessons'],
                                                       selected.id
                                                     ]);
+                                                    showSnackbar(context,
+                                                        '${selected.name} was hidden. To unhide it, go to the settings.',
+                                                        seconds: 3);
                                                   },
                                                   icon: const Icon(Icons
                                                       .hide_image_outlined)),
