@@ -7,6 +7,7 @@ import 'package:sph_plan/applets/substitutions/definition.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_filter_settings.dart';
 import 'package:sph_plan/applets/substitutions/substitutions_listtile.dart';
 import 'package:sph_plan/models/substitution.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/sph/sph.dart';
 import '../../widgets/combined_applet_builder.dart';
@@ -45,8 +46,8 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     );
   }
 
-  List<Widget> getSubstitutionViews(SubstitutionPlan substitutionPlan,
-      RefreshFunction? refresh) {
+  List<Widget> getSubstitutionViews(
+      SubstitutionPlan substitutionPlan, RefreshFunction? refresh) {
     double deviceWidth = MediaQuery.of(context).size.width;
 
     List<Widget> substitutionViews = [];
@@ -67,7 +68,8 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
           child: Column(children: [
             if (_tabController != null &&
-                substitutionPlan.days[dayIndex].infos != null) Padding(
+                substitutionPlan.days[dayIndex].infos != null &&
+                substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
               padding: const EdgeInsets.only(
                   bottom: 8.0, right: 8.0, left: 8.0),
               child: ElevatedButton(
@@ -160,21 +162,35 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
             padding: const EdgeInsets.only(right: 16, left: 16, bottom: 16),
             child: ListView(shrinkWrap: true, children: [
               ...infos.map((info) => Column(
-                spacing: 4.0,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(info.header,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                  SelectionArea(
-                    child: HtmlWidget(
-                      info.values.join('<br>'),
-                      renderMode: RenderMode.column,
-                    ),
-                  ),
-                  SizedBox(height: 8.0,),
-                ],
-              )),
+                    spacing: 4.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(info.header,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      SelectionArea(
+                        child: HtmlWidget(
+                          info.values.join('<br>'),
+                          renderMode: RenderMode.column,
+                          onTapUrl: (url) => launchUrl(Uri.parse(url)),
+                          customStylesBuilder: (element) {
+                            if (element.localName == 'a' &&
+                                element.attributes['style'] != null) {
+                              RegExp regex =
+                                  RegExp(r'background-color:\s*[^;]+;');
+                              element.attributes['style'] = element
+                                  .attributes['style']!
+                                  .replaceAll(regex, '');
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 8.0,
+                      ),
+                    ],
+                  )),
             ]),
           );
         });
@@ -205,24 +221,27 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           return Scaffold(
             appBar: AppBar(
               title: Text(substitutionDefinition.label(context)),
-              leading: widget.openDrawerCb != null ? IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => widget.openDrawerCb!(),
-              ) : null,
+              leading: widget.openDrawerCb != null
+                  ? IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => widget.openDrawerCb!(),
+                    )
+                  : null,
             ),
-            floatingActionButton: widget.openDrawerCb != null ? FloatingActionButton(
-              onPressed: () async {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SubstitutionsFilterSettings(),
+            floatingActionButton: widget.openDrawerCb != null
+                ? FloatingActionButton(
+                    onPressed: () async {
+                      await Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SubstitutionsFilterSettings(),
+                      ));
+                    },
+                    child: const Icon(Icons.filter_alt),
                   )
-                );
-              },
-              child: const Icon(Icons.filter_alt),
-            ): null,
+                : null,
             body: RefreshIndicator(
               key: globalKeys[0],
-              notificationPredicate: refresh != null ? (_) => true : (_) => false,
+              notificationPredicate:
+                  refresh != null ? (_) => true : (_) => false,
               onRefresh: refresh ?? () async {},
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -257,21 +276,23 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           return Scaffold(
             appBar: AppBar(
               title: Text(substitutionDefinition.label(context)),
-              leading: widget.openDrawerCb != null ? IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => widget.openDrawerCb!(),
-              ) : null,
-            ),
-            floatingActionButton: widget.openDrawerCb != null ? FloatingActionButton(
-              onPressed: () async {
-                await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => SubstitutionsFilterSettings(),
+              leading: widget.openDrawerCb != null
+                  ? IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => widget.openDrawerCb!(),
                     )
-                );
-              },
-              child: const Icon(Icons.filter_alt),
-            ): null,
+                  : null,
+            ),
+            floatingActionButton: widget.openDrawerCb != null
+                ? FloatingActionButton(
+                    onPressed: () async {
+                      await Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SubstitutionsFilterSettings(),
+                      ));
+                    },
+                    child: const Icon(Icons.filter_alt),
+                  )
+                : null,
             body: Column(
               children: [
                 TabBar(
