@@ -29,6 +29,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     GlobalKey<RefreshIndicatorState>()
   ];
   TabController? _tabController;
+  String? _selectedDate;
 
   Widget lastWidget({required int entriesLength, required DateTime lastEdit}) {
     return ListTile(
@@ -69,15 +70,16 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           child: Column(children: [
             if (_tabController != null &&
                 substitutionPlan.days[dayIndex].infos != null &&
-                substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
-              padding: const EdgeInsets.only(
-                  bottom: 8.0, right: 8.0, left: 8.0),
-              child: ElevatedButton(
-                  onPressed: () => showSubstitutionInformation(
-                      context, substitutionPlan.days[dayIndex].infos!),
-                  child: Text(AppLocalizations.of(context)!
-                      .substitutionsInformationMessage)),
-            ),
+                substitutionPlan.days[dayIndex].infos!.isNotEmpty)
+              Padding(
+                padding:
+                    const EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+                child: ElevatedButton(
+                    onPressed: () => showSubstitutionInformation(
+                        context, substitutionPlan.days[dayIndex].infos!),
+                    child: Text(AppLocalizations.of(context)!
+                        .substitutionsInformationMessage)),
+              ),
             Expanded(
                 child: (deviceWidth > 505)
                     ? GridView.builder(
@@ -271,7 +273,20 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         } else {
           globalKeys += List.generate(
               data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-          _tabController = TabController(length: data.days.length, vsync: this);
+          int currentIndex = _selectedDate != null
+              ? data.days
+                  .indexWhere((day) => day.parsedDate == _selectedDate)
+                  .clamp(0, data.days.length)
+              : 0;
+
+          if (_tabController != null) _tabController!.dispose();
+          _tabController = TabController(
+              length: data.days.length,
+              vsync: this,
+              initialIndex: currentIndex);
+          _tabController!.addListener(() {
+            _selectedDate = data.days[_tabController!.index].parsedDate;
+          });
 
           return Scaffold(
             appBar: AppBar(
