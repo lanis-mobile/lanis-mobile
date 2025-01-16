@@ -67,7 +67,8 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
           child: Column(children: [
             if (_tabController != null &&
-                substitutionPlan.days[dayIndex].infos != null) Padding(
+                substitutionPlan.days[dayIndex].infos != null &&
+                substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
               padding: const EdgeInsets.only(
                   bottom: 8.0, right: 8.0, left: 8.0),
               child: ElevatedButton(
