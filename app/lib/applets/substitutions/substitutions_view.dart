@@ -67,50 +67,33 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         onRefresh: refresh ?? () async {},
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: Column(children: [
-            if (_tabController != null &&
-                substitutionPlan.days[dayIndex].infos != null &&
-                substitutionPlan.days[dayIndex].infos!.isNotEmpty)
-              Padding(
-                padding:
-                    const EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+          child: ListView(
+            children: [
+              if (_tabController != null &&
+                  substitutionPlan.days[dayIndex].infos != null &&
+                  substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
+                padding: const EdgeInsets.only(
+                    bottom: 8.0, right: 8.0, left: 8.0),
                 child: ElevatedButton(
                     onPressed: () => showSubstitutionInformation(
                         context, substitutionPlan.days[dayIndex].infos!),
                     child: Text(AppLocalizations.of(context)!
                         .substitutionsInformationMessage)),
               ),
-            Expanded(
-                child: ListView(
-                  children: [
-                    if (_tabController != null &&
-                        substitutionPlan.days[dayIndex].infos != null &&
-                        substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
-                      padding: const EdgeInsets.only(
-                          bottom: 8.0, right: 8.0, left: 8.0),
-                      child: ElevatedButton(
-                          onPressed: () => showSubstitutionInformation(
-                              context, substitutionPlan.days[dayIndex].infos!),
-                          child: Text(AppLocalizations.of(context)!
-                              .substitutionsInformationMessage)),
+              MasonryView(
+                listOfItem: substitutionPlan.days[dayIndex].substitutions,
+                numberOfColumn: deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
+                itemPadding: 4.0,
+                itemBuilder: (data) {
+                  return Card(
+                    child: SubstitutionListTile(
+                      substitutionData: data,
                     ),
-                    MasonryView(
-                      listOfItem: substitutionPlan.days[dayIndex].substitutions,
-                      numberOfColumn: deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
-                      itemPadding: 4.0,
-                      itemBuilder: (data) {
-                        return Card(
-                          child: SubstitutionListTile(
-                            substitutionData: data,
-                          ),
-                        );
-                      } ,
-                    ),
-                    lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
-                    SizedBox(height: 16),
-                  ],
-                ),
+                  );
+                } ,
               ),
+              lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
+              SizedBox(height: 16),
             ],
           ),
         ),
