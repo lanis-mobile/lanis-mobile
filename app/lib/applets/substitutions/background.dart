@@ -25,6 +25,11 @@ Future<void> substitutionsBackgroundTask(SPH sph, AccountType accountType, Backg
 
     messageBody += "$entryText\n";
   }
+
+  if (messageBody.isEmpty) {
+    return;
+  }
+
   tools.sendMessage(
       title: '${allSubstitutions.length} Einträge im Vertretungsplan',
       message: messageBody,
