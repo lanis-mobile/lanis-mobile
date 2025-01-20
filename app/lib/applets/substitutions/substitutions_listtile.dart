@@ -119,7 +119,7 @@ class SubstitutionListTile extends StatelessWidget {
             children: [
               if (!doesNoticeExist(substitutionData.klasse)) ...[
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.30,
+
                   child: MarqueeWidget(
                       child: Text(
                     substitutionData.klasse!,
