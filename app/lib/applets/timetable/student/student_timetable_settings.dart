@@ -49,6 +49,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
     final TextEditingController teacherController = TextEditingController();
     final TextEditingController roomController = TextEditingController();
 
+    print(currentDay);
+
     showModalBottomSheet(
         showDragHandle: true,
         useSafeArea: true,
@@ -84,8 +86,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           onChanged: (value) {
                             setState(() {});
                           },
-                          decoration: InputDecoration(
-                              labelText: 'Teacher', helperText: '*required'),
+                          decoration: InputDecoration(labelText: 'Teacher'),
                         ),
                       ),
                       Expanded(
@@ -179,12 +180,11 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                     ],
                   ),
                   ElevatedButton(
-                      onPressed: (teacherController.text.isNotEmpty &&
-                              nameController.text.isNotEmpty)
+                      onPressed: nameController.text.isNotEmpty
                           ? () {
                               TimetableSubject newLesson = TimetableSubject(
                                   id:
-                                      'test-${startTime.hour}-${startTime.minute}',
+                                      'custom${nameController.text.replaceAll('-', '_')}-${startTime.hour}-${startTime.minute}',
                                   name: nameController.text,
                                   raum: roomController.text.isEmpty
                                       ? null
@@ -198,15 +198,10 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                   endTime: endTime);
 
                               if (settings['custom-lessons'] == null) {
-                                settings['custom-lessons'] = [
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ];
+                                settings['custom-lessons'] = ',,,,,,,'
+                                    .split(',')
+                                    .map((_) => [])
+                                    .toList();
                               }
 
                               List<List<TimetableSubject>>? days =
@@ -246,8 +241,6 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
 
   @override
   Widget build(BuildContext context) {
-    int selectedDay = 0;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(timeTableDefinition.label(context)),
@@ -302,7 +295,6 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
 
           return DefaultTabController(
             length: weekDays.length,
-            initialIndex: selectedDay,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -310,11 +302,6 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                   isScrollable: true,
                   tabAlignment: TabAlignment.center,
                   tabs: weekDays.map((dayName) => Tab(text: dayName)).toList(),
-                  onTap: (index) {
-                    setState(() {
-                      selectedDay = index;
-                    });
-                  },
                 ),
                 Expanded(
                   child: TabBarView(
@@ -323,7 +310,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           lessons[weekDays.indexOf(dayName)] ?? [];
                       final List<TimetableSubject>? customDayLessons =
                           customLessons?[weekDays.indexOf(dayName)];
-                      selectedDay = weekDays.indexOf(dayName);
+                      final currentDay = weekDays.indexOf(dayName);
                       return SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -414,7 +401,15 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                               ),
                                               IconButton(
                                                 icon: Icon(Icons.delete),
-                                                onPressed: () => (),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    customLessons![currentDay]
+                                                        .remove(lesson);
+                                                    updateSettings(
+                                                        'custom-lessons',
+                                                        customLessons);
+                                                  });
+                                                },
                                               ),
                                             ],
                                           ),
@@ -430,7 +425,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                                   updateSettings,
                                                   settings,
                                                   customLessons,
-                                                  selectedDay),
+                                                  currentDay),
                                           child: Text('Add custom lesson')),
                                     )
                                   ],
