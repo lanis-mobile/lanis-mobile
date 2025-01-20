@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
@@ -187,6 +188,30 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                             duration: 1,
                             startTime: startTime,
                             endTime: endTime);
+
+                        if (settings['custom-lessons'] == null) {
+                          settings['custom-lessons'] = [
+                            [],
+                            [],
+                            [],
+                            [],
+                            [],
+                            [],
+                            []
+                          ];
+                        }
+
+                        List<List<TimetableSubject>> days =
+                            (settings['custom-lessons'] as List)
+                                .map((e) => (e as List)
+                                    .map((item) => item as TimetableSubject)
+                                    .toList())
+                                .toList();
+                        days[currentDay].add(newLesson);
+
+                        updateSettings('custom-lessons', days);
+                        Navigator.of(context).pop();
+                        showSnackbar(context, 'Lesson ${newLesson.name} added');
                       },
                       child: Text('Add lesson'))
                 ],
@@ -237,7 +262,13 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
           }
 
           List<List<TimetableSubject>>? customLessons =
-              settings['custom-lessons'];
+              (settings['custom-lessons'] as List)
+                  .map((e) => (e as List)
+                      .map((item) => TimetableSubject.fromJson(item))
+                      .toList())
+                  .toList();
+
+          print(customLessons[selectedDay]);
 
           List<String> weekDays =
               DateFormat.EEEE(Platform.localeName).dateSymbols.WEEKDAYS;
@@ -264,6 +295,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                     children: weekDays.map((dayName) {
                       final dayLessons =
                           lessons[weekDays.indexOf(dayName)] ?? [];
+                      final List<TimetableSubject>? customDayLessons =
+                          customLessons[weekDays.indexOf(dayName)];
                       return SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -336,18 +369,27 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                             .labelLarge,
                                       ),
                                     ),
-                                    if (customLessons != null &&
-                                        customLessons[0].isNotEmpty)
-                                      ...customLessons.map((lesson) {
+                                    if (customDayLessons != null &&
+                                        customDayLessons.isNotEmpty)
+                                      ...customDayLessons.map((lesson) {
                                         return ListTile(
                                           dense: true,
-                                          title: Text(lesson[0].name ?? ''),
+                                          title: Text(lesson.name ?? ''),
                                           subtitle: Text(
-                                            "${lesson[0].startTime.format(context)} - ${lesson[0].endTime.format(context)}",
+                                            "${lesson.startTime.format(context)} - ${lesson.endTime.format(context)}",
                                           ),
-                                          trailing: IconButton(
-                                            icon: Icon(Icons.delete),
-                                            onPressed: () => (),
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.edit),
+                                                onPressed: () => (),
+                                              ),
+                                              IconButton(
+                                                icon: Icon(Icons.delete),
+                                                onPressed: () => (),
+                                              ),
+                                            ],
                                           ),
                                         );
                                       }),
