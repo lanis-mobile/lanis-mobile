@@ -38,12 +38,14 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     );
   }
 
-  List<TimetableDay> getSelectedPlan(
-      TimeTable data, TimeTableType selectedType) {
+  List<TimetableDay> getSelectedPlan(TimeTable data, TimeTableType selectedType,
+      Map<String, dynamic> settings) {
+    List<List<TimetableSubject>>? customLessons =
+        TimeTableHelper.getCustomLessons(settings);
     if (selectedType == TimeTableType.own) {
-      return data.planForOwn!;
+      return TimeTableHelper.mergeByIndices(data.planForOwn!, customLessons);
     }
-    return data.planForAll!;
+    return TimeTableHelper.mergeByIndices(data.planForAll!, customLessons);
   }
 
   int getCurrentWeekNumber() {
@@ -97,8 +99,6 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                   lesson.id.split('-')[0]:
                       selectedColor.toHexString(enableAlpha: false)
                 });
-
-                print(settings['lesson-colors']);
               },
             ),
           ],
@@ -133,7 +133,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 : TimeTableType.all;
         bool showByWeek = settings['student-selected-week'] == true;
         List<TimetableDay> selectedPlan =
-            getSelectedPlan(timetable, selectedType);
+            getSelectedPlan(timetable, selectedType, settings);
         final List<String> uniqueBadges = selectedPlan
             .expand((innerList) => innerList.map((e) => e.badge))
             .whereType<String>()
@@ -249,21 +249,24 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                                 settings,
                                                                 selected)),
                                                   )),
-                                              IconButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    updateSettings(
-                                                        'hidden-lessons', [
-                                                      ...settings[
-                                                          'hidden-lessons'],
-                                                      selected.id
-                                                    ]);
-                                                    showSnackbar(context,
-                                                        '${selected.name} was hidden. To unhide it, go to the settings.',
-                                                        seconds: 3);
-                                                  },
-                                                  icon: const Icon(Icons
-                                                      .hide_image_outlined)),
+                                              if (selected.id == null ||
+                                                  !selected.id!
+                                                      .startsWith('custom'))
+                                                IconButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                      updateSettings(
+                                                          'hidden-lessons', [
+                                                        ...settings[
+                                                            'hidden-lessons'],
+                                                        selected.id
+                                                      ]);
+                                                      showSnackbar(context,
+                                                          '${selected.name} was hidden. To unhide it, go to the settings.',
+                                                          seconds: 3);
+                                                    },
+                                                    icon: const Icon(Icons
+                                                        .hide_image_outlined)),
                                             ],
                                           )
                                         ],
@@ -412,6 +415,20 @@ class TimeTableHelper {
 
     return result;
   }
+
+  static List<List<TimetableSubject>>? getCustomLessons(
+      Map<String, dynamic> settings) {
+    return settings['custom-lessons'] == null
+        ? null
+        : (settings['custom-lessons'] as List)
+            .map((e) => (e as List).map((item) {
+                  if (item.runtimeType == TimetableSubject) {
+                    return item as TimetableSubject;
+                  }
+                  return TimetableSubject.fromJson(item);
+                }).toList())
+            .toList();
+  }
 }
 
 class TimeTableDataSource extends CalendarDataSource {
@@ -434,22 +451,7 @@ class TimeTableDataSource extends CalendarDataSource {
               : (weekBadge != lesson.badge);
     }
 
-    List<List<TimetableSubject>>? customLessons =
-        settings['custom-lessons'] == null
-            ? null
-            : (settings['custom-lessons'] as List)
-                .map((e) => (e as List).map((item) {
-                      if (item.runtimeType == TimetableSubject) {
-                        return item as TimetableSubject;
-                      }
-                      return TimetableSubject.fromJson(item);
-                    }).toList())
-                .toList();
-
-    for (var (dayIndex, day)
-        in TimeTableHelper.mergeByIndices<TimetableSubject>(
-                data!, customLessons)
-            .indexed) {
+    for (var (dayIndex, day) in data!.indexed) {
       final date = lastMonday.add(Duration(days: dayIndex));
 
       for (var (lessonIndex, lesson) in day.indexed) {

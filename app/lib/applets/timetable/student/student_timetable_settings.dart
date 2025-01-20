@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/applets/timetable/student/student_timetable_view.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
@@ -34,7 +35,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
       updateSettings,
       Map<String, dynamic> settings,
       List<List<TimetableSubject>>? customLessons,
-      int currentDay) {
+      int currentDay,
+      {TimetableSubject? lesson}) {
     TimeOfDay startTime =
         TimeOfDay(hour: (TimeOfDay.now().hour - 1).clamp(0, 24), minute: 0);
     TimeOfDay endTime = TimeOfDay(hour: TimeOfDay.now().hour, minute: 0);
@@ -49,7 +51,15 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
     final TextEditingController teacherController = TextEditingController();
     final TextEditingController roomController = TextEditingController();
 
-    print(currentDay);
+    if (lesson != null) {
+      nameController.text = lesson.name ?? '';
+      teacherController.text = lesson.lehrer ?? '';
+      roomController.text = lesson.raum ?? '';
+      startTime = lesson.startTime;
+      endTime = lesson.endTime;
+      selectedWeek =
+          lesson.badge == null ? 0 : allBadges.indexOf(lesson.badge) + 1;
+    }
 
     showModalBottomSheet(
         showDragHandle: true,
@@ -205,24 +215,15 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                               }
 
                               List<List<TimetableSubject>>? days =
-                                  settings['custom-lessons'] == null
-                                      ? null
-                                      : (settings['custom-lessons'] as List)
-                                          .map((e) => (e as List).map((item) {
-                                                if (item.runtimeType ==
-                                                    TimetableSubject) {
-                                                  return item
-                                                      as TimetableSubject;
-                                                }
-                                                return TimetableSubject
-                                                    .fromJson(item);
-                                              }).toList())
-                                          .toList();
+                                  TimeTableHelper.getCustomLessons(settings);
 
                               if (days == null) {
                                 throw Exception('days is null');
                               }
 
+                              if (lesson != null) {
+                                days[currentDay].remove(lesson);
+                              }
                               days[currentDay].add(newLesson);
 
                               updateSettings('custom-lessons', days);
@@ -278,16 +279,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
           }
 
           List<List<TimetableSubject>>? customLessons =
-              settings['custom-lessons'] == null
-                  ? null
-                  : (settings['custom-lessons'] as List)
-                      .map((e) => (e as List).map((item) {
-                            if (item.runtimeType == TimetableSubject) {
-                              return item as TimetableSubject;
-                            }
-                            return TimetableSubject.fromJson(item);
-                          }).toList())
-                      .toList();
+              TimeTableHelper.getCustomLessons(settings);
 
           List<String> weekDays =
               DateFormat.EEEE(Platform.localeName).dateSymbols.WEEKDAYS;
@@ -397,7 +389,14 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                             children: [
                                               IconButton(
                                                 icon: Icon(Icons.edit),
-                                                onPressed: () => (),
+                                                onPressed: () =>
+                                                    showCustomLessonDialog(
+                                                        timetable,
+                                                        updateSettings,
+                                                        settings,
+                                                        customLessons,
+                                                        currentDay,
+                                                        lesson: lesson),
                                               ),
                                               IconButton(
                                                 icon: Icon(Icons.delete),
