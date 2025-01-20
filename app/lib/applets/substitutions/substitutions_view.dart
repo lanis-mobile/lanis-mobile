@@ -29,6 +29,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     GlobalKey<RefreshIndicatorState>()
   ];
   TabController? _tabController;
+  String? _selectedDate;
 
   Widget lastWidget({required int entriesLength, required DateTime lastEdit}) {
     return ListTile(
@@ -66,38 +67,33 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         onRefresh: refresh ?? () async {},
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: Column(children: [
-            Expanded(
-                child: ListView(
-                  children: [
-                    if (_tabController != null &&
-                        substitutionPlan.days[dayIndex].infos != null &&
-                        substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
-                      padding: const EdgeInsets.only(
-                          bottom: 8.0, right: 8.0, left: 8.0),
-                      child: ElevatedButton(
-                          onPressed: () => showSubstitutionInformation(
-                              context, substitutionPlan.days[dayIndex].infos!),
-                          child: Text(AppLocalizations.of(context)!
-                              .substitutionsInformationMessage)),
-                    ),
-                    MasonryView(
-                      listOfItem: substitutionPlan.days[dayIndex].substitutions,
-                      numberOfColumn: deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
-                      itemPadding: 4.0,
-                      itemBuilder: (data) {
-                        return Card(
-                          child: SubstitutionListTile(
-                            substitutionData: data,
-                          ),
-                        );
-                      } ,
-                    ),
-                    lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
-                    SizedBox(height: 16),
-                  ],
-                ),
+          child: ListView(
+            children: [
+              if (_tabController != null &&
+                  substitutionPlan.days[dayIndex].infos != null &&
+                  substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
+                padding: const EdgeInsets.only(
+                    bottom: 8.0, right: 8.0, left: 8.0),
+                child: ElevatedButton(
+                    onPressed: () => showSubstitutionInformation(
+                        context, substitutionPlan.days[dayIndex].infos!),
+                    child: Text(AppLocalizations.of(context)!
+                        .substitutionsInformationMessage)),
               ),
+              MasonryView(
+                listOfItem: substitutionPlan.days[dayIndex].substitutions,
+                numberOfColumn: deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
+                itemPadding: 4.0,
+                itemBuilder: (data) {
+                  return Card(
+                    child: SubstitutionListTile(
+                      substitutionData: data,
+                    ),
+                  );
+                } ,
+              ),
+              lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
+              SizedBox(height: 16),
             ],
           ),
         ),
@@ -244,7 +240,20 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         } else {
           globalKeys += List.generate(
               data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-          _tabController = TabController(length: data.days.length, vsync: this);
+          int currentIndex = _selectedDate != null
+              ? data.days
+                  .indexWhere((day) => day.parsedDate == _selectedDate)
+                  .clamp(0, data.days.length)
+              : 0;
+
+          if (_tabController != null) _tabController!.dispose();
+          _tabController = TabController(
+              length: data.days.length,
+              vsync: this,
+              initialIndex: currentIndex);
+          _tabController!.addListener(() {
+            _selectedDate = data.days[_tabController!.index].parsedDate;
+          });
 
           return Scaffold(
             appBar: AppBar(
