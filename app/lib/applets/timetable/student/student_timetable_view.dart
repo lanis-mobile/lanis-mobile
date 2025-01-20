@@ -393,6 +393,25 @@ class TimeTableHelper {
     }
     return RandomColor.bySeed(lesson.name!).primary;
   }
+
+  static List<List<T>> mergeByIndices<T>(
+      List<List<T>> list1, List<List<T>>? list2) {
+    final int maxLength = list1.length > (list2?.length ?? 0)
+        ? list1.length
+        : (list2?.length ?? 0);
+
+    final List<List<T>> result = List.generate(maxLength, (index) {
+      List<T> combined = [];
+      if (index < list1.length) combined.addAll(list1[index]);
+
+      if (list2 != null && index < list2.length) {
+        combined.addAll(list2[index]);
+      }
+      return combined;
+    });
+
+    return result;
+  }
 }
 
 class TimeTableDataSource extends CalendarDataSource {
@@ -415,7 +434,22 @@ class TimeTableDataSource extends CalendarDataSource {
               : (weekBadge != lesson.badge);
     }
 
-    for (var (dayIndex, day) in data!.indexed) {
+    List<List<TimetableSubject>>? customLessons =
+        settings['custom-lessons'] == null
+            ? null
+            : (settings['custom-lessons'] as List)
+                .map((e) => (e as List).map((item) {
+                      if (item.runtimeType == TimetableSubject) {
+                        return item as TimetableSubject;
+                      }
+                      return TimetableSubject.fromJson(item);
+                    }).toList())
+                .toList();
+
+    for (var (dayIndex, day)
+        in TimeTableHelper.mergeByIndices<TimetableSubject>(
+                data!, customLessons)
+            .indexed) {
       final date = lastMonday.add(Duration(days: dayIndex));
 
       for (var (lessonIndex, lesson) in day.indexed) {

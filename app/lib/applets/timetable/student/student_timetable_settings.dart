@@ -69,6 +69,9 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                 children: [
                   TextField(
                     controller: nameController,
+                    onChanged: (value) {
+                      setState(() {});
+                    },
                     decoration: InputDecoration(
                         labelText: 'Lesson name*', helperText: '*required'),
                   ),
@@ -78,7 +81,11 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                       Expanded(
                         child: TextField(
                           controller: teacherController,
-                          decoration: InputDecoration(labelText: 'Teacher'),
+                          onChanged: (value) {
+                            setState(() {});
+                          },
+                          decoration: InputDecoration(
+                              labelText: 'Teacher', helperText: '*required'),
                         ),
                       ),
                       Expanded(
@@ -172,47 +179,63 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                     ],
                   ),
                   ElevatedButton(
-                      onPressed: () {
-                        TimetableSubject newLesson = TimetableSubject(
-                            id: 'test-${startTime.hour}-${startTime.minute}',
-                            name: nameController.text,
-                            raum: roomController.text.isEmpty
-                                ? null
-                                : roomController.text,
-                            lehrer: teacherController.text.isEmpty
-                                ? null
-                                : teacherController.text,
-                            badge: selectedWeek == 0
-                                ? null
-                                : allBadges[selectedWeek - 1],
-                            duration: 1,
-                            startTime: startTime,
-                            endTime: endTime);
+                      onPressed: (teacherController.text.isNotEmpty &&
+                              nameController.text.isNotEmpty)
+                          ? () {
+                              TimetableSubject newLesson = TimetableSubject(
+                                  id:
+                                      'test-${startTime.hour}-${startTime.minute}',
+                                  name: nameController.text,
+                                  raum: roomController.text.isEmpty
+                                      ? null
+                                      : roomController.text,
+                                  lehrer: teacherController.text,
+                                  badge: selectedWeek == 0
+                                      ? null
+                                      : allBadges[selectedWeek - 1],
+                                  duration: 1,
+                                  startTime: startTime,
+                                  endTime: endTime);
 
-                        if (settings['custom-lessons'] == null) {
-                          settings['custom-lessons'] = [
-                            [],
-                            [],
-                            [],
-                            [],
-                            [],
-                            [],
-                            []
-                          ];
-                        }
+                              if (settings['custom-lessons'] == null) {
+                                settings['custom-lessons'] = [
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ];
+                              }
 
-                        List<List<TimetableSubject>> days =
-                            (settings['custom-lessons'] as List)
-                                .map((e) => (e as List)
-                                    .map((item) => item as TimetableSubject)
-                                    .toList())
-                                .toList();
-                        days[currentDay].add(newLesson);
+                              List<List<TimetableSubject>>? days =
+                                  settings['custom-lessons'] == null
+                                      ? null
+                                      : (settings['custom-lessons'] as List)
+                                          .map((e) => (e as List).map((item) {
+                                                if (item.runtimeType ==
+                                                    TimetableSubject) {
+                                                  return item
+                                                      as TimetableSubject;
+                                                }
+                                                return TimetableSubject
+                                                    .fromJson(item);
+                                              }).toList())
+                                          .toList();
 
-                        updateSettings('custom-lessons', days);
-                        Navigator.of(context).pop();
-                        showSnackbar(context, 'Lesson ${newLesson.name} added');
-                      },
+                              if (days == null) {
+                                throw Exception('days is null');
+                              }
+
+                              days[currentDay].add(newLesson);
+
+                              updateSettings('custom-lessons', days);
+                              Navigator.of(context).pop();
+                              showSnackbar(
+                                  context, 'Lesson ${newLesson.name} added');
+                            }
+                          : null,
                       child: Text('Add lesson'))
                 ],
               );
@@ -262,13 +285,16 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
           }
 
           List<List<TimetableSubject>>? customLessons =
-              (settings['custom-lessons'] as List)
-                  .map((e) => (e as List)
-                      .map((item) => TimetableSubject.fromJson(item))
-                      .toList())
-                  .toList();
-
-          print(customLessons[selectedDay]);
+              settings['custom-lessons'] == null
+                  ? null
+                  : (settings['custom-lessons'] as List)
+                      .map((e) => (e as List).map((item) {
+                            if (item.runtimeType == TimetableSubject) {
+                              return item as TimetableSubject;
+                            }
+                            return TimetableSubject.fromJson(item);
+                          }).toList())
+                      .toList();
 
           List<String> weekDays =
               DateFormat.EEEE(Platform.localeName).dateSymbols.WEEKDAYS;
@@ -296,7 +322,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                       final dayLessons =
                           lessons[weekDays.indexOf(dayName)] ?? [];
                       final List<TimetableSubject>? customDayLessons =
-                          customLessons[weekDays.indexOf(dayName)];
+                          customLessons?[weekDays.indexOf(dayName)];
+                      selectedDay = weekDays.indexOf(dayName);
                       return SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
