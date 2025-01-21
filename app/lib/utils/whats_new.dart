@@ -26,10 +26,10 @@ void showUpdateInfoIfRequired(BuildContext context) async {
   final String latestReleaseTag = latestReleaseInfo['tag_name'];
   final String deviceReleaseTag = await getDeviceReleaseTag();
   final String? storageReleaseTag = await sph!.prefs.kv.get('last-app-version');
+  await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
 
   if (storageReleaseTag != deviceReleaseTag) {
     if (latestReleaseTag == deviceReleaseTag) {
-      await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(latestReleaseInfo),
