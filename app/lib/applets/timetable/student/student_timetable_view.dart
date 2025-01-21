@@ -74,7 +74,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Clear'),
+              child: Text(AppLocalizations.of(context)!.clear),
               onPressed: () {
                 updateSettings('lesson-colors', {
                   ...settings['lesson-colors'],
@@ -86,7 +86,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               },
             ),
             ElevatedButton(
-              child: const Text('Set'),
+              child: Text(AppLocalizations.of(context)!.set),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -225,7 +225,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            selected.name ?? "Unbekanntes Fach",
+                                            selected.name ??
+                                                AppLocalizations.of(context)!
+                                                    .unknownLesson,
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .titleLarge,
@@ -261,8 +263,13 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                             'hidden-lessons'],
                                                         selected.id
                                                       ]);
-                                                      showSnackbar(context,
-                                                          '${selected.name} was hidden. To unhide it, go to the settings.',
+                                                      showSnackbar(
+                                                          context,
+                                                          AppLocalizations.of(
+                                                                  context)!
+                                                              .lessonHidden(
+                                                                  selected
+                                                                      .name!),
                                                           seconds: 3);
                                                     },
                                                     icon: const Icon(Icons

@@ -144,8 +144,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     if (sph!.session.doesSupportFeature(timeTableDefinition))
       SettingsGroup(tiles: [
         SettingsTile(
-          title: (context) => 'Customize Timetable',
-          subtitle: (context) async => 'Hidden lessons, custom lessons',
+          title: (context) => AppLocalizations.of(context)!.customizeTimetable,
+          subtitle: (context) async =>
+              AppLocalizations.of(context)!.customizeTimetableDescription,
           icon: Icons.timelapse,
           screen: (context) => Navigator.push(
             context,

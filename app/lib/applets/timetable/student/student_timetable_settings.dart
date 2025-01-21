@@ -85,7 +85,10 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                       setState(() {});
                     },
                     decoration: InputDecoration(
-                        labelText: 'Lesson name*', helperText: '*required'),
+                        labelText:
+                            '${AppLocalizations.of(context)!.lessonName}*',
+                        helperText:
+                            '*${AppLocalizations.of(context)!.required}'),
                   ),
                   Row(
                     spacing: 8.0,
@@ -96,13 +99,15 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           onChanged: (value) {
                             setState(() {});
                           },
-                          decoration: InputDecoration(labelText: 'Teacher'),
+                          decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.teacher),
                         ),
                       ),
                       Expanded(
                         child: TextField(
                           controller: roomController,
-                          decoration: InputDecoration(labelText: 'Room'),
+                          decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.room),
                         ),
                       )
                     ],
@@ -166,7 +171,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                       if (allBadges.isNotEmpty)
                         DropdownMenu(
                           width: 130.0,
-                          label: Text('Week'),
+                          label: Text(AppLocalizations.of(context)!.week),
                           initialSelection: [
                             noBadge,
                             ...allBadges
@@ -229,10 +234,12 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                               updateSettings('custom-lessons', days);
                               Navigator.of(context).pop();
                               showSnackbar(
-                                  context, 'Lesson ${newLesson.name} added');
+                                  context,
+                                  AppLocalizations.of(context)!
+                                      .lessonAdded(newLesson.name!));
                             }
                           : null,
-                      child: Text('Add lesson'))
+                      child: Text(AppLocalizations.of(context)!.addLesson))
                 ],
               );
             }),
@@ -317,7 +324,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        'Hidden lessons',
+                                        AppLocalizations.of(context)!
+                                            .hiddenLessons,
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelLarge,
@@ -348,7 +356,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
-                                          'There are no hidden lessons for this day. You can hide lessons in the timetable',
+                                          AppLocalizations.of(context)!
+                                              .hiddenLessonsDescription,
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall!
@@ -369,7 +378,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        'Custom lessons',
+                                        AppLocalizations.of(context)!
+                                            .customLessons,
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelLarge,
@@ -425,7 +435,9 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                                   settings,
                                                   customLessons,
                                                   currentDay),
-                                          child: Text('Add custom lesson')),
+                                          child: Text(
+                                              AppLocalizations.of(context)!
+                                                  .addLesson)),
                                     )
                                   ],
                                 ),
@@ -455,7 +467,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           height: 8.0,
                         ),
                         Text(
-                          'After you make a change you need to restart the app or switch applets to see the changes.',
+                          AppLocalizations.of(context)!
+                              .customizeTimetableDisclaimer,
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall!
