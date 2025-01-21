@@ -94,6 +94,13 @@ class AccountDatabase extends _$AccountDatabase {
     return encrypter.decrypt64(parts[1], iv: iv);
   }
 
+  Future<void> updatePassword(int id, String newPasswordClearText) async {
+    final passwordHash = await cryptPassword(newPasswordClearText);
+    await (update(accountsTable)..where((tbl) => tbl.id.equals(id))).write(AccountsTableCompanion(
+      passwordHash: Value(passwordHash),
+    ));
+  }
+
   Future<void> setAccountType(int id, AccountType accountType) async {
     await (update(accountsTable)..where((tbl) => tbl.id.equals(id))).write(AccountsTableCompanion(
       accountType: Value(accountType.toString()),
