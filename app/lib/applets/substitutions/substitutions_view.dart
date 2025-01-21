@@ -71,18 +71,20 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
             children: [
               if (_tabController != null &&
                   substitutionPlan.days[dayIndex].infos != null &&
-                  substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
-                padding: const EdgeInsets.only(
-                    bottom: 8.0, right: 8.0, left: 8.0),
-                child: ElevatedButton(
-                    onPressed: () => showSubstitutionInformation(
-                        context, substitutionPlan.days[dayIndex].infos!),
-                    child: Text(AppLocalizations.of(context)!
-                        .substitutionsInformationMessage)),
-              ),
+                  substitutionPlan.days[dayIndex].infos!.isNotEmpty)
+                Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+                  child: ElevatedButton(
+                      onPressed: () => showSubstitutionInformation(
+                          context, substitutionPlan.days[dayIndex].infos!),
+                      child: Text(AppLocalizations.of(context)!
+                          .substitutionsInformationMessage)),
+                ),
               MasonryView(
                 listOfItem: substitutionPlan.days[dayIndex].substitutions,
-                numberOfColumn: deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
+                numberOfColumn:
+                    deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
                 itemPadding: 4.0,
                 itemBuilder: (data) {
                   return Card(
@@ -90,9 +92,11 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                       substitutionData: data,
                     ),
                   );
-                } ,
+                },
               ),
-              lastWidget(entriesLength: entriesLength, lastEdit: substitutionPlan.lastUpdated),
+              lastWidget(
+                  entriesLength: entriesLength,
+                  lastEdit: substitutionPlan.lastUpdated),
               SizedBox(height: 16),
             ],
           ),
@@ -109,10 +113,12 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     for (SubstitutionDay day in substitutionPlan.days) {
       String entryCount = day.substitutions.length.toString();
       tabs.add(Tab(
-        icon: Badge(
-          label: Text(entryCount),
-          child: const Icon(Icons.calendar_today),
-        ),
+        icon: day.substitutions.isNotEmpty
+            ? Badge(
+                label: Text(entryCount),
+                child: const Icon(Icons.calendar_today),
+              )
+            : const Icon(Icons.calendar_today),
         text: formatDate(day.parsedDate),
       ));
     }
