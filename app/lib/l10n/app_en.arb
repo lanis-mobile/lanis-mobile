@@ -305,6 +305,7 @@
   "room": "Room",
   "lessonAdded": "Lesson {lesson} added!",
   "addLesson": "Add lesson",
+  "editLesson": "Edit lesson",
   "hiddenLessons": "Hidden lessons",
   "hiddenLessonsDescription": "There are no hidden lessons for this day. You can hide lessons in the timetable",
   "customLessons": "Custom lessons",

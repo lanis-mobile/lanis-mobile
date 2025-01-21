@@ -273,7 +273,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                           seconds: 3);
                                                     },
                                                     icon: const Icon(Icons
-                                                        .hide_image_outlined)),
+                                                        .visibility_off_outlined)),
                                             ],
                                           )
                                         ],

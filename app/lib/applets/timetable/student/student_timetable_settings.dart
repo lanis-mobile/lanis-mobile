@@ -239,7 +239,9 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                       .lessonAdded(newLesson.name!));
                             }
                           : null,
-                      child: Text(AppLocalizations.of(context)!.addLesson))
+                      child: Text(lesson == null
+                          ? AppLocalizations.of(context)!.addLesson
+                          : AppLocalizations.of(context)!.editLesson)),
                 ],
               );
             }),
