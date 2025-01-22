@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:intl/intl.dart';
 
 class CalendarEvent {
@@ -18,6 +20,7 @@ class CalendarEvent {
   int? category;
   String description;
   String title;
+  Color color;
 
   CalendarEvent({
     required this.startTime,
@@ -37,6 +40,7 @@ class CalendarEvent {
     this.category,
     required this.description,
     required this.title,
+    this.color = const Color(0xFF4242FC),
   });
 
   ///Parses the response of the AJAX SPH events and returns a CalendarEvent object
