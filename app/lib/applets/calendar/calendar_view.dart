@@ -550,18 +550,44 @@ class _CalendarViewState extends State<CalendarView> {
                                       padding: const EdgeInsets.only(
                                           left: 8, right: 8, bottom: 4),
                                       child: Card(
-                                        child: ListTile(
-                                          title: Text(value[index].title),
-                                          trailing:
-                                              const Icon(Icons.arrow_right),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(12),
+                                            onTap: () async {
+                                              await openEventBottomSheet(
+                                                  value[index]);
+                                            },
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 8,
+                                                height: 40,
+                                                decoration: BoxDecoration(
+                                                  color: value[index].color,
+                                                  borderRadius: BorderRadius.circular(8)
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        value[index].title,
+                                                        style: Theme.of(context).textTheme.titleMedium,
+                                                      ),
+                                                      Text(
+                                                        value[index].place ?? value[index].startTime.format("E d MMM y", "de_DE"),
+                                                        style: Theme.of(context).textTheme.bodyMedium,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              Icon(Icons.arrow_right),
+                                              SizedBox(width: 8,)
+                                            ],
                                           ),
-                                          onTap: () async {
-                                            await openEventBottomSheet(
-                                                value[index]);
-                                          },
                                         ),
                                       ),
                                     );
