@@ -404,6 +404,7 @@ class _CalendarViewState extends State<CalendarView> {
                       .map(
                         (event) => ListTile(
                           title: Text(event.title),
+                          iconColor: event.color,
                           subtitle: Text(
                               '${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
                           leading: event.endTime.isBefore(DateTime.now())
@@ -577,7 +578,9 @@ class _CalendarViewState extends State<CalendarView> {
                                                         style: Theme.of(context).textTheme.titleMedium,
                                                       ),
                                                       Text(
-                                                        value[index].place ?? value[index].startTime.format("E d MMM y", "de_DE"),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        value[index].category?.name ?? value[index].place ?? value[index].description,
                                                         style: Theme.of(context).textTheme.bodyMedium,
                                                       ),
                                                     ],
