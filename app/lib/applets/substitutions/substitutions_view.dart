@@ -1,6 +1,7 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_masonry_view/flutter_masonry_view.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/substitutions/definition.dart';
@@ -11,7 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/sph/sph.dart';
 import '../../widgets/combined_applet_builder.dart';
-import 'substitutions_gridtile.dart';
 
 class SubstitutionsView extends StatefulWidget {
   final Function? openDrawerCb;
@@ -29,6 +29,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     GlobalKey<RefreshIndicatorState>()
   ];
   TabController? _tabController;
+  String? _selectedDate;
 
   Widget lastWidget({required int entriesLength, required DateTime lastEdit}) {
     return ListTile(
@@ -66,67 +67,39 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         onRefresh: refresh ?? () async {},
         child: Padding(
           padding: EdgeInsets.only(left: padding, right: padding, top: padding),
-          child: Column(children: [
-            if (_tabController != null &&
-                substitutionPlan.days[dayIndex].infos != null &&
-                substitutionPlan.days[dayIndex].infos!.isNotEmpty) Padding(
-              padding: const EdgeInsets.only(
-                  bottom: 8.0, right: 8.0, left: 8.0),
-              child: ElevatedButton(
-                  onPressed: () => showSubstitutionInformation(
-                      context, substitutionPlan.days[dayIndex].infos!),
-                  child: Text(AppLocalizations.of(context)!
-                      .substitutionsInformationMessage)),
-            ),
-            Expanded(
-                child: (deviceWidth > 505)
-                    ? GridView.builder(
-                        itemCount: entriesLength + 1,
-                        itemBuilder: (context, entryIndex) {
-                          if (entryIndex == entriesLength) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: padding),
-                              child: lastWidget(
-                                  entriesLength: entriesLength,
-                                  lastEdit: substitutionPlan.lastUpdated),
-                            );
-                          }
-
-                          return Card(
-                            child: SubstitutionGridTile(
-                                substitutionData: substitutionPlan
-                                    .days[dayIndex].substitutions[entryIndex]),
-                          );
-                        },
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 500,
-                                childAspectRatio: 20 / 11),
-                      )
-                    : ListView.builder(
-                        itemCount: entriesLength + 1,
-                        itemBuilder: (context, entryIndex) {
-                          if (entryIndex == entriesLength) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: padding),
-                              child: lastWidget(
-                                  entriesLength: entriesLength,
-                                  lastEdit: substitutionPlan.lastUpdated),
-                            );
-                          }
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Card(
-                              child: SubstitutionListTile(
-                                  substitutionData: substitutionPlan
-                                      .days[dayIndex]
-                                      .substitutions[entryIndex]),
-                            ),
-                          );
-                        },
-                      ))
-          ]),
+          child: ListView(
+            children: [
+              if (_tabController != null &&
+                  substitutionPlan.days[dayIndex].infos != null &&
+                  substitutionPlan.days[dayIndex].infos!.isNotEmpty)
+                Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+                  child: ElevatedButton(
+                      onPressed: () => showSubstitutionInformation(
+                          context, substitutionPlan.days[dayIndex].infos!),
+                      child: Text(AppLocalizations.of(context)!
+                          .substitutionsInformationMessage)),
+                ),
+              MasonryView(
+                listOfItem: substitutionPlan.days[dayIndex].substitutions,
+                numberOfColumn:
+                    deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
+                itemPadding: 4.0,
+                itemBuilder: (data) {
+                  return Card(
+                    child: SubstitutionListTile(
+                      substitutionData: data,
+                    ),
+                  );
+                },
+              ),
+              lastWidget(
+                  entriesLength: entriesLength,
+                  lastEdit: substitutionPlan.lastUpdated),
+              SizedBox(height: 16),
+            ],
+          ),
         ),
       ));
     }
@@ -140,10 +113,12 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     for (SubstitutionDay day in substitutionPlan.days) {
       String entryCount = day.substitutions.length.toString();
       tabs.add(Tab(
-        icon: Badge(
-          label: Text(entryCount),
-          child: const Icon(Icons.calendar_today),
-        ),
+        icon: day.substitutions.isNotEmpty
+            ? Badge(
+                label: Text(entryCount),
+                child: const Icon(Icons.calendar_today),
+              )
+            : const Icon(Icons.calendar_today),
         text: formatDate(day.parsedDate),
       ));
     }
@@ -271,7 +246,20 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
         } else {
           globalKeys += List.generate(
               data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
-          _tabController = TabController(length: data.days.length, vsync: this);
+          int currentIndex = _selectedDate != null
+              ? data.days
+                  .indexWhere((day) => day.parsedDate == _selectedDate)
+                  .clamp(0, data.days.length)
+              : 0;
+
+          if (_tabController != null) _tabController!.dispose();
+          _tabController = TabController(
+              length: data.days.length,
+              vsync: this,
+              initialIndex: currentIndex);
+          _tabController!.addListener(() {
+            _selectedDate = data.days[_tabController!.index].parsedDate;
+          });
 
           return Scaffold(
             appBar: AppBar(
