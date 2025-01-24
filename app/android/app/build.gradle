@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "com.example.app"
     compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    // ndkVersion flutter.ndkVersion // Use AGP Version instead of flutter
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
