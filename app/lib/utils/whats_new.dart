@@ -20,16 +20,42 @@ int compareVersions(String version1, String version2) {
   return 0;
 }
 
+void showLocalUpdateInfo(BuildContext context) async {
+  showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => SimpleDialog(
+    title: Text(AppLocalizations.of(context)!.loading),
+    children: [
+      Center(
+        child: CircularProgressIndicator(),
+      )
+    ],
+  ));
+  final deviceReleaseTag = await getDeviceReleaseTag();
+  await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
+  final deviceReleaseInfo = await getReleaseInfo(deviceReleaseTag);
+  if (context.mounted) Navigator.of(context).pop();
+  if (deviceReleaseInfo == null) return;
+  if (context.mounted) {
+    showDialog(
+      context: context,
+      builder: (context) => ReleaseNotesScreen(deviceReleaseInfo),
+    );
+  }
+}
+
 void showUpdateInfoIfRequired(BuildContext context) async {
   final latestReleaseInfo = await getReleaseInfo(null);
   if (latestReleaseInfo == null) return;
   final String latestReleaseTag = latestReleaseInfo['tag_name'];
   final String deviceReleaseTag = await getDeviceReleaseTag();
   final String? storageReleaseTag = await sph!.prefs.kv.get('last-app-version');
+  await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
 
   if (storageReleaseTag != deviceReleaseTag) {
+    await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
     if (latestReleaseTag == deviceReleaseTag) {
-      await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(latestReleaseInfo),

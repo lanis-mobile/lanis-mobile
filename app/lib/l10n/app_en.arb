@@ -78,6 +78,7 @@
   "error": "Error",
   "history": "History",
   "performance": "Performance",
+  "comment": "Comment",
   "exams": "Exams",
   "noFurtherEntries": "No further entries!",
   "noEntries": "No Entries!",
@@ -289,5 +290,14 @@
   "iCalICSExport": "iCal / ICS export",
   "subscription": "Subscription",
   "subscriptionHint": "You can import this link into your calendar app to have an automatically updating calendar. It will also cover multiple years. Keep this link private because it can be used by anyone.",
-  "linkCopied": "Link was copied!"
+  "linkCopied": "Link was copied!",
+  "feedback": "Feedback for the App \uD83D\uDC49\uD83D\uDC48",
+  "inThisUpdate": "In this update",
+  "showReleaseNotesForThisVersion": "Release notes for this version",
+  "feedback": "Feedback for the App \uD83D\uDC49\uD83D\uDC48",
+  "resetAccount": "Reset account",
+  "wrongPassword": "Wrong password!",
+  "wrongPasswordHint": "Your password seems to be incorrect! This can happen if you have changed your password on another device or if your account has been deleted. Either change your password (enter your new password here) or delete your account entirely to resolve this issue.",
+  "changePassword": "Change password",
+  "removeAccount": "Remove account"
 }

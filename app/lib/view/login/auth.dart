@@ -153,6 +153,7 @@ class LoginFormState extends State<LoginForm> {
                     TextFormField(
                       controller: usernameController,
                       enabled: schoolIDController.text != "",
+                      autofillHints: [AutofillHints.username],
                       autocorrect: false,
                       decoration: InputDecoration(
                           labelText:
@@ -171,6 +172,7 @@ class LoginFormState extends State<LoginForm> {
                     TextFormField(
                       controller: passwordController,
                       enabled: schoolIDController.text.isNotEmpty,
+                      autofillHints: [AutofillHints.password],
                       autocorrect: false,
                       obscureText: true,
                       decoration: InputDecoration(
@@ -205,7 +207,7 @@ class LoginFormState extends State<LoginForm> {
                                           .primary),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () => launchUrl(Uri.parse(
-                                        "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
+                                        "https://lanis-mobile.github.io/policy/")),
                                 ),
                                 TextSpan(
                                   text: AppLocalizations.of(context)!

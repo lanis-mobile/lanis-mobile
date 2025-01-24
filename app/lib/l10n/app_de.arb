@@ -78,6 +78,7 @@
   "error": "Fehler",
   "history": "Historie",
   "performance": "Leistungen",
+  "comment": "Kommentar",
   "exams": "Klausuren",
   "noFurtherEntries": "Keine weiteren Einträge!",
   "noEntries": "Keine Einträge!",
@@ -289,5 +290,14 @@
   "iCalICSExport": "iCal- / ICS-Export",
   "subscription": "Abonnement",
   "subscriptionHint": "Du kannst diesen Link in deine Kalender-App importieren, um einen automatisch aktualisierenden Kalender zu haben. Er ist auch jahresübergreifend. Halte diesen Link geheim, da er von jeden benutzt werden kann.",
-  "linkCopied": "Link wurde kopiert!"
+  "linkCopied": "Link wurde kopiert!",
+  "feedback": "Feedback zur App \uD83D\uDC49\uD83D\uDC48",
+  "inThisUpdate": "In diesem Update",
+  "showReleaseNotesForThisVersion": "Zeige die Versionshinweise für diese Version",
+  "feedback": "Feedback zur App \uD83D\uDC49\uD83D\uDC48",
+  "resetAccount": "Account zurücksetzen",
+  "wrongPassword": "Falsches Passwort",
+  "wrongPasswordHint": "Ihr Passwort scheint falsch zu sein! Dies kann passieren, wenn Sie Ihr Passwort auf einem anderen Gerät geändert haben oder wenn Ihr Konto gelöscht wurde. Ändern Sie entweder Ihr Passwort (geben Sie hier Ihr neues Passwort ein) oder löschen Sie Ihr Konto vollständig, um dieses Problem zu beheben.",
+  "changePassword": "Passwort ändern",
+  "removeAccount": "Account entfernen"
 }

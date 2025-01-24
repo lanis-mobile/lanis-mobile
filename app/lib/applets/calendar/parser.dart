@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,21 @@ class CalendarParser extends AppletParser<List<CalendarEvent>> {
     final formatter = DateFormat('yyyy-MM-dd');
 
     try {
+      List<CalendarEventCategory> categories = [];
+
+      final docResponse = await sph.session.dio.get("https://start.schulportal.hessen.de/kalender.php");
+      final lines = docResponse.data.split("var categories = new Array();")[1].split("var groups = new Array();")[0].split("\n");
+      for (String line in lines) {
+        final match = RegExp(r"\{.*\}").firstMatch(line);
+        if (match == null) continue;
+        String trueJson = match.group(0)!.replaceAllMapped(RegExp(r"(\w+):"), (m) => "\"${m[1]}\":").replaceAll("'", '"');
+        final category = jsonDecode(trueJson);
+        final color = Color(int.parse(category['color'].substring(1, 7), radix: 16) + 0xFF000000);
+        categories.add(
+          CalendarEventCategory(id: category['id'], color: color, name: category['name']),
+        );
+      }
+
       final response =
       await sph.session.dio.post("https://start.schulportal.hessen.de/kalender.php",
           queryParameters: {
@@ -43,7 +59,7 @@ class CalendarParser extends AppletParser<List<CalendarEvent>> {
       final data = jsonDecode(response.data);
       List<CalendarEvent> finalData = [];
       for (int i = 0; i < (data as List<dynamic>).length; i++) {
-        finalData.add(CalendarEvent.fromLanisJson(data[i]));
+        finalData.add(CalendarEvent.fromLanisJson(data[i], categories));
       }
 
       return finalData;
