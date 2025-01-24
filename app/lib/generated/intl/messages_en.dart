@@ -39,18 +39,20 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m6(days) =>
       "${Intl.plural(days, zero: 'Today', one: '1 day', other: '${days} days')} until the next exam";
 
-  static String m7(individualSearchHint) =>
+  static String m7(problem) => "Problem: ${problem}";
+
+  static String m8(individualSearchHint) =>
       "${Intl.select(individualSearchHint, {'subject': 'Subject...', 'schedule': 'Date...', 'name': 'Teacher...', 'other': 'Fehler'})}";
 
-  static String m8(time) => "Wait ${time} before next attempt";
+  static String m9(time) => "Wait ${time} before next attempt";
 
-  static String m9(count) =>
+  static String m10(count) =>
       "${Intl.plural(count, zero: 'No schools', one: '1 school', other: '${count} schools')}";
 
-  static String m10(time) =>
+  static String m11(time) =>
       "Not correct? Check whether your filter is set correctly. You may need to contact your school\'s IT department.\nLast edited: ${time}";
 
-  static String m11(week) => "${week}-Week";
+  static String m12(week) => "${week}-Week";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -154,6 +156,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copiedMessage": MessageLookupByLibrary.simpleMessage(
       "Message was copied!",
     ),
+    "copyErrorToClipboard": MessageLookupByLibrary.simpleMessage(
+      "Copy error details to clipboard",
+    ),
     "couldNotLoadDataStorage": MessageLookupByLibrary.simpleMessage(
       "Failed to load Datastorage!",
     ),
@@ -210,6 +215,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "An error has occurred during the automatic configuration of the filter. The reason for this could be that your school is not directly supported. Consider adding your school. Visit the GitHub repository.",
     ),
     "errorOccurred": MessageLookupByLibrary.simpleMessage("An error occurred"),
+    "errorOccurredDetails": m7,
     "errorOccurredWebsite": MessageLookupByLibrary.simpleMessage(
       "An error occurring while accessing the website!",
     ),
@@ -257,7 +263,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "iCalICSExport": MessageLookupByLibrary.simpleMessage("iCal / ICS export"),
     "inThisUpdate": MessageLookupByLibrary.simpleMessage("In this update"),
-    "individualSearchHint": m7,
+    "individualSearchHint": m8,
     "info": MessageLookupByLibrary.simpleMessage("Information"),
     "install": MessageLookupByLibrary.simpleMessage("Install"),
     "intervalAppletsList": MessageLookupByLibrary.simpleMessage(
@@ -313,7 +319,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locale": MessageLookupByLibrary.simpleMessage("en_US"),
     "logIn": MessageLookupByLibrary.simpleMessage("Authenticate"),
     "logInTitle": MessageLookupByLibrary.simpleMessage("Logging in"),
-    "loginTimeout": m8,
+    "loginTimeout": m9,
     "logout": MessageLookupByLibrary.simpleMessage("Logout"),
     "logoutConfirmation": MessageLookupByLibrary.simpleMessage(
       "Do you really want to log out?",
@@ -417,7 +423,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Unfortunately no support",
     ),
     "saveFile": MessageLookupByLibrary.simpleMessage("Save file"),
-    "schoolCountString": m9,
+    "schoolCountString": m10,
     "searchHint": MessageLookupByLibrary.simpleMessage(
       "Subject, teacher, date, ...",
     ),
@@ -537,7 +543,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You can import this link into your calendar app to have an automatically updating calendar. It will also cover multiple years. Keep this link private because it can be used by anyone.",
     ),
     "substitutions": MessageLookupByLibrary.simpleMessage("Substitutions"),
-    "substitutionsEndCardMessage": m10,
+    "substitutionsEndCardMessage": m11,
     "substitutionsFilter": MessageLookupByLibrary.simpleMessage(
       "Substitutions filter",
     ),
@@ -567,7 +573,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "timetableSwitchToPersonal": MessageLookupByLibrary.simpleMessage(
       "Switch to Personal timetable",
     ),
-    "timetableWeek": m11,
+    "timetableWeek": m12,
     "toSemesterOne": MessageLookupByLibrary.simpleMessage("Semester 1"),
     "today": MessageLookupByLibrary.simpleMessage("Today"),
     "tomorrow": MessageLookupByLibrary.simpleMessage("Tomorrow"),

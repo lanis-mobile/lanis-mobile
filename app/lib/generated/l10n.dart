@@ -2615,6 +2615,26 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Problem: {problem}`
+  String errorOccurredDetails(Object problem) {
+    return Intl.message(
+      'Problem: $problem',
+      name: 'errorOccurredDetails',
+      desc: '',
+      args: [problem],
+    );
+  }
+
+  /// `Copy error details to clipboard`
+  String get copyErrorToClipboard {
+    return Intl.message(
+      'Copy error details to clipboard',
+      name: 'copyErrorToClipboard',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

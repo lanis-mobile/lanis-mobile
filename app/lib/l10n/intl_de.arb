@@ -311,5 +311,7 @@
   "unsaltedOrUnknown": "Unbekannte ungesalzene Antwort",
   "notSupported": "Nicht unterstützt",
   "noConnection": "Keine SPH-Verbindung",
-  "accountExists": "Account existiert bereits"
+  "accountExists": "Account existiert bereits",
+  "errorOccurredDetails": "Problem: {problem}",
+  "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren"
 }

@@ -24,11 +24,9 @@ import 'core/database/account_database/account_db.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (kReleaseMode) {
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      return errorWidget(details);
-    };
-  }
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return errorWidget(details);
+  };
 
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
@@ -151,6 +149,10 @@ class App extends StatelessWidget {
 }
 
 Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
+  if(context != null) AppLocalizations.of(context);
+
+  String error = details.exception.toString();
+
   return Container(
     color: Color.fromARGB(255, 249, 222, 220),
     child: Padding(
@@ -172,7 +174,7 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(255, 179, 38, 30),
             ),
-            child: Text("Whoops! An error occurred.",
+            child: Text(AppLocalizations.current.errorOccurred,
                 textAlign: TextAlign.center,
             ),
           ),
@@ -183,7 +185,7 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
               color: Color.fromARGB(255, 179, 38, 30),
             ),
             child: Text(
-              "Problem: ${details.exception.toString()}",
+              AppLocalizations.current.errorOccurredDetails(error),
               textAlign: TextAlign.center,
             ),
           ),
@@ -201,8 +203,8 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
                 return Color.fromARGB(255, 179, 38, 30);
               }),
             ),
-            child: const Text(
-              "Copy error details to clipboard",
+            child: Text(
+              AppLocalizations.current.copyErrorToClipboard,
             ),
           ),
         ],

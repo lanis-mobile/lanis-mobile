@@ -39,18 +39,20 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m6(days) =>
       "${Intl.plural(days, zero: 'Heute', one: '1 Tag', other: '${days} Tage')} bis zur nächsten Klausur";
 
-  static String m7(individualSearchHint) =>
+  static String m7(problem) => "Problem: ${problem}";
+
+  static String m8(individualSearchHint) =>
       "${Intl.select(individualSearchHint, {'subject': 'Betreff...', 'schedule': 'Datum...', 'name': 'Lehrer...', 'other': 'Fehler'})}";
 
-  static String m8(time) => "Warte ${time} vor nächstem Versuch";
+  static String m9(time) => "Warte ${time} vor nächstem Versuch";
 
-  static String m9(count) =>
+  static String m10(count) =>
       "${Intl.plural(count, zero: 'Keine Schulen', one: '1 Schule', other: '${count} Schulen')}";
 
-  static String m10(time) =>
+  static String m11(time) =>
       "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden.\nLetzte Aktualisierung: ${time}";
 
-  static String m11(week) => "${week}-Woche";
+  static String m12(week) => "${week}-Woche";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -162,6 +164,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copiedMessage": MessageLookupByLibrary.simpleMessage(
       "Nachricht wurde kopiert!",
     ),
+    "copyErrorToClipboard": MessageLookupByLibrary.simpleMessage(
+      "Fehler in die Zwischenablage kopieren",
+    ),
     "couldNotLoadDataStorage": MessageLookupByLibrary.simpleMessage(
       "Fehler beim laden vom Dateispeicher!",
     ),
@@ -222,6 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorOccurred": MessageLookupByLibrary.simpleMessage(
       "Ein Fehler ist aufgetreten.",
     ),
+    "errorOccurredDetails": m7,
     "errorOccurredWebsite": MessageLookupByLibrary.simpleMessage(
       "Ein Fehler ist beim Öffnen der Seite aufgetreten!",
     ),
@@ -269,7 +275,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "iCalICSExport": MessageLookupByLibrary.simpleMessage("iCal- / ICS-Export"),
     "inThisUpdate": MessageLookupByLibrary.simpleMessage("In diesem Update"),
-    "individualSearchHint": m7,
+    "individualSearchHint": m8,
     "info": MessageLookupByLibrary.simpleMessage("Information"),
     "install": MessageLookupByLibrary.simpleMessage("Installieren"),
     "intervalAppletsList": MessageLookupByLibrary.simpleMessage(
@@ -327,7 +333,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locale": MessageLookupByLibrary.simpleMessage("de_DE"),
     "logIn": MessageLookupByLibrary.simpleMessage("Anmelden"),
     "logInTitle": MessageLookupByLibrary.simpleMessage("Anmeldung"),
-    "loginTimeout": m8,
+    "loginTimeout": m9,
     "logout": MessageLookupByLibrary.simpleMessage("Logout"),
     "logoutConfirmation": MessageLookupByLibrary.simpleMessage(
       "Bist du sicher, dass du dich abmelden möchtest?",
@@ -451,7 +457,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Leider keine Unterstützung",
     ),
     "saveFile": MessageLookupByLibrary.simpleMessage("Datei speichern"),
-    "schoolCountString": m9,
+    "schoolCountString": m10,
     "searchHint": MessageLookupByLibrary.simpleMessage(
       "Betreff, Lehrer, Datum, Kürzel, ...",
     ),
@@ -575,7 +581,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Du kannst diesen Link in deine Kalender-App importieren, um einen automatisch aktualisierenden Kalender zu haben. Er ist auch jahresübergreifend. Halte diesen Link geheim, da er von jeden benutzt werden kann.",
     ),
     "substitutions": MessageLookupByLibrary.simpleMessage("Vertretungen"),
-    "substitutionsEndCardMessage": m10,
+    "substitutionsEndCardMessage": m11,
     "substitutionsFilter": MessageLookupByLibrary.simpleMessage(
       "Vertretungsplan Filter",
     ),
@@ -607,7 +613,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "timetableSwitchToPersonal": MessageLookupByLibrary.simpleMessage(
       "Wechsel zum Persönlichen Stundenplan",
     ),
-    "timetableWeek": m11,
+    "timetableWeek": m12,
     "toSemesterOne": MessageLookupByLibrary.simpleMessage("Halbjahr 1"),
     "today": MessageLookupByLibrary.simpleMessage("Heute"),
     "tomorrow": MessageLookupByLibrary.simpleMessage("Morgen"),

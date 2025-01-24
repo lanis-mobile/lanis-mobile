@@ -311,5 +311,7 @@
   "unsaltedOrUnknown": "Unsalted response error",
   "notSupported": "Not supported",
   "noConnection": "No SPH connection",
-  "accountExists": "Account already exists"
+  "accountExists": "Account already exists",
+  "errorOccurredDetails": "Problem: {problem}",
+  "copyErrorToClipboard": "Copy error details to clipboard"
 }

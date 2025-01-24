@@ -2,106 +2,72 @@ import 'package:sph_plan/generated/l10n.dart';
 
 abstract class LanisException implements Exception {
   final String cause;
+
   LanisException(this.cause);
 
   @override
   String toString() => cause;
 }
 
-class WrongCredentialsException implements LanisException {
-  @override
-  final String cause;
-
+class WrongCredentialsException extends LanisException {
   WrongCredentialsException([String? cause])
-      : cause = cause ?? AppLocalizations.current.wrongCredentials;
+      : super(cause ?? AppLocalizations.current.wrongCredentials);
 }
 
-class LanisDownException implements LanisException {
-  @override
-  final String cause;
-
+class LanisDownException extends LanisException {
   LanisDownException([String? cause])
-      : cause = cause ?? AppLocalizations.current.lanisDown;
+      : super(cause ?? AppLocalizations.current.lanisDown);
 }
 
-class LoginTimeoutException implements LanisException {
-  @override
-  final String cause;
+class LoginTimeoutException extends LanisException {
   final String time;
 
   LoginTimeoutException(this.time, [String? cause])
-      : cause = (cause ?? AppLocalizations.current.loginTimeout(time))
-      .replaceAll('{time}', time);
+      : super((cause ?? AppLocalizations.current.loginTimeout(time))
+      .replaceAll('{time}', time));
 }
 
-class CredentialsIncompleteException implements LanisException {
-  @override
-  final String cause;
-
+class CredentialsIncompleteException extends LanisException {
   CredentialsIncompleteException([String? cause])
-      : cause = cause ?? AppLocalizations.current.credentialsIncomplete;
+      : super(cause ?? AppLocalizations.current.credentialsIncomplete);
 }
 
-class NetworkException implements LanisException {
-  @override
-  final String cause;
-
+class NetworkException extends LanisException {
   NetworkException([String? cause])
-      : cause = cause ?? AppLocalizations.current.networkError;
+      : super(cause ?? AppLocalizations.current.networkError);
 }
 
-class UnknownException implements LanisException {
-  @override
-  final String cause;
-
+class UnknownException extends LanisException {
   UnknownException([String? cause])
-      : cause = cause ?? AppLocalizations.current.unknownError;
+      : super(cause ?? AppLocalizations.current.unknownError);
 }
 
-class UnauthorizedException implements LanisException {
-  @override
-  final String cause;
-
+class UnauthorizedException extends LanisException {
   UnauthorizedException([String? cause])
-      : cause = cause ?? AppLocalizations.current.unauthorized;
+      : super(cause ?? AppLocalizations.current.unauthorized);
 }
 
-class EncryptionCheckFailedException implements LanisException {
-  @override
-  final String cause;
-
+class EncryptionCheckFailedException extends LanisException {
   EncryptionCheckFailedException([String? cause])
-      : cause = cause ?? AppLocalizations.current.encryptionCheckFailed;
+      : super(cause ?? AppLocalizations.current.encryptionCheckFailed);
 }
 
-class UnsaltedOrUnknownException implements LanisException {
-  @override
-  final String cause;
-
+class UnsaltedOrUnknownException extends LanisException {
   UnsaltedOrUnknownException([String? cause])
-      : cause = cause ?? AppLocalizations.current.unsaltedOrUnknown;
+      : super(cause ?? AppLocalizations.current.unsaltedOrUnknown);
 }
 
-class NotSupportedException implements LanisException {
-  @override
-  final String cause;
-
+class NotSupportedException extends LanisException {
   NotSupportedException([String? cause])
-      : cause = cause ?? AppLocalizations.current.notSupported;
+      : super(cause ?? AppLocalizations.current.notSupported);
 }
 
-class NoConnectionException implements LanisException {
-  @override
-  final String cause;
-
+class NoConnectionException extends LanisException {
   NoConnectionException([String? cause])
-      : cause = cause ?? AppLocalizations.current.noConnection;
+      : super(cause ?? AppLocalizations.current.noConnection);
 }
 
-class AccountAlreadyExistsException implements LanisException {
-  @override
-  final String cause;
-
+class AccountAlreadyExistsException extends LanisException {
   AccountAlreadyExistsException([String? cause])
-      : cause = cause ?? AppLocalizations.current.accountExists;
+      : super(cause ?? AppLocalizations.current.accountExists);
 }
