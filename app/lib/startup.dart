@@ -308,6 +308,8 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    // Sets the apps context as soon as possible
+    AppLocalizations.of(context);
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

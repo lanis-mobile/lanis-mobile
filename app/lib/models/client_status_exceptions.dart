@@ -11,116 +11,97 @@ abstract class LanisException implements Exception {
 class WrongCredentialsException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Falsche Anmeldedaten!';
 
   WrongCredentialsException([String? cause])
-      : cause =
-      cause ?? AppLocalizations.current.wrongCredentials ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.wrongCredentials;
 }
 
 class LanisDownException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Lanis ist down!';
 
   LanisDownException([String? cause])
-      : cause = cause ?? AppLocalizations.current.lanisDown ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.lanisDown;
 }
 
 class LoginTimeoutException implements LanisException {
   @override
   final String cause;
   final String time;
-  static const _fallback = 'Warte {time} vor nächstem Versuch';
 
   LoginTimeoutException(this.time, [String? cause])
       : cause = (cause ?? AppLocalizations.current.loginTimeout(time))
-      ?.replaceAll('{time}', time) ??
-      _fallback.replaceAll('{time}', time);
+      .replaceAll('{time}', time);
 }
 
 class CredentialsIncompleteException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Anmeldedaten unvollständig';
 
   CredentialsIncompleteException([String? cause])
-      : cause = cause ??
-      AppLocalizations.current.credentialsIncomplete ??
-      _fallback;
+      : cause = cause ?? AppLocalizations.current.credentialsIncomplete;
 }
 
 class NetworkException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Netzwerkfehler';
 
   NetworkException([String? cause])
-      : cause = cause ?? AppLocalizations.current.networkError ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.networkError;
 }
 
 class UnknownException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Unbekannter Fehler';
 
   UnknownException([String? cause])
-      : cause = cause ?? AppLocalizations.current.unknownError ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.unknownError;
 }
 
 class UnauthorizedException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Keine Erlaubnis';
 
   UnauthorizedException([String? cause])
-      : cause = cause ?? AppLocalizations.current.unauthorized ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.unauthorized;
 }
 
 class EncryptionCheckFailedException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Verschlüsselungsüberprüfung fehlgeschlagen';
 
   EncryptionCheckFailedException([String? cause])
-      : cause = cause ??
-      AppLocalizations.current.encryptionCheckFailed ??
-      _fallback;
+      : cause = cause ?? AppLocalizations.current.encryptionCheckFailed;
 }
 
 class UnsaltedOrUnknownException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Unbekannte ungesalzene Antwort';
 
   UnsaltedOrUnknownException([String? cause])
-      : cause =
-      cause ?? AppLocalizations.current.unsaltedOrUnknown ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.unsaltedOrUnknown;
 }
 
 class NotSupportedException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Nicht unterstützt';
 
   NotSupportedException([String? cause])
-      : cause = cause ?? AppLocalizations.current.notSupported ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.notSupported;
 }
 
 class NoConnectionException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Keine SPH-Verbindung';
 
   NoConnectionException([String? cause])
-      : cause = cause ?? AppLocalizations.current.noConnection ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.noConnection;
 }
 
 class AccountAlreadyExistsException implements LanisException {
   @override
   final String cause;
-  static const _fallback = 'Account existiert bereits';
 
   AccountAlreadyExistsException([String? cause])
-      : cause = cause ?? AppLocalizations.current.accountExists ?? _fallback;
+      : cause = cause ?? AppLocalizations.current.accountExists;
 }
