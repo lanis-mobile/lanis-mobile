@@ -10,6 +10,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/utils/authentication_state.dart';

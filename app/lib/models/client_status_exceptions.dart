@@ -1,82 +1,126 @@
-interface class LanisException implements Exception {
-  late String cause;
+import 'package:sph_plan/generated/l10n.dart';
+
+abstract class LanisException implements Exception {
+  final String cause;
   LanisException(this.cause);
+
+  @override
+  String toString() => cause;
 }
 
 class WrongCredentialsException implements LanisException {
   @override
-  String cause;
-  WrongCredentialsException([this.cause = "Falsche Anmeldedaten!"]);
+  final String cause;
+  static const _fallback = 'Falsche Anmeldedaten!';
+
+  WrongCredentialsException([String? cause])
+      : cause =
+      cause ?? AppLocalizations.current.wrongCredentials ?? _fallback;
 }
 
 class LanisDownException implements LanisException {
   @override
-  String cause;
-  LanisDownException([this.cause = "Lanis ist down!"]);
+  final String cause;
+  static const _fallback = 'Lanis ist down!';
+
+  LanisDownException([String? cause])
+      : cause = cause ?? AppLocalizations.current.lanisDown ?? _fallback;
 }
 
-class LoginTimeoutException implements WrongCredentialsException {
+class LoginTimeoutException implements LanisException {
   @override
-  String cause;
+  final String cause;
   final String time;
-  LoginTimeoutException(this.time,
-      [this.cause =
-          "Zu oft falsch eingeloggt! Für den nächsten Versuch musst du kurz warten!"]);
+  static const _fallback = 'Warte {time} vor nächstem Versuch';
+
+  LoginTimeoutException(this.time, [String? cause])
+      : cause = (cause ?? AppLocalizations.current.loginTimeout(time))
+      ?.replaceAll('{time}', time) ??
+      _fallback.replaceAll('{time}', time);
 }
 
 class CredentialsIncompleteException implements LanisException {
   @override
-  String cause;
-  CredentialsIncompleteException(
-      [this.cause = "Nicht alle Anmeldedaten angegeben"]);
+  final String cause;
+  static const _fallback = 'Anmeldedaten unvollständig';
+
+  CredentialsIncompleteException([String? cause])
+      : cause = cause ??
+      AppLocalizations.current.credentialsIncomplete ??
+      _fallback;
 }
 
 class NetworkException implements LanisException {
   @override
-  String cause;
-  NetworkException([this.cause = "Netzwerkfehler"]);
+  final String cause;
+  static const _fallback = 'Netzwerkfehler';
+
+  NetworkException([String? cause])
+      : cause = cause ?? AppLocalizations.current.networkError ?? _fallback;
 }
 
 class UnknownException implements LanisException {
   @override
-  String cause;
-  UnknownException([this.cause = "Unbekannter Fehler!"]);
+  final String cause;
+  static const _fallback = 'Unbekannter Fehler';
+
+  UnknownException([String? cause])
+      : cause = cause ?? AppLocalizations.current.unknownError ?? _fallback;
 }
 
 class UnauthorizedException implements LanisException {
   @override
-  String cause;
-  UnauthorizedException([this.cause = "Keine Erlaubnis"]);
+  final String cause;
+  static const _fallback = 'Keine Erlaubnis';
+
+  UnauthorizedException([String? cause])
+      : cause = cause ?? AppLocalizations.current.unauthorized ?? _fallback;
 }
 
 class EncryptionCheckFailedException implements LanisException {
   @override
-  String cause;
-  EncryptionCheckFailedException(
-      [this.cause = "Verschlüsselungsüberprüfung fehlgeschlagen"]);
+  final String cause;
+  static const _fallback = 'Verschlüsselungsüberprüfung fehlgeschlagen';
+
+  EncryptionCheckFailedException([String? cause])
+      : cause = cause ??
+      AppLocalizations.current.encryptionCheckFailed ??
+      _fallback;
 }
 
 class UnsaltedOrUnknownException implements LanisException {
   @override
-  String cause;
-  UnsaltedOrUnknownException(
-      [this.cause = "Unbekannter Fehler! Antwort war nicht salted."]);
+  final String cause;
+  static const _fallback = 'Unbekannte ungesalzene Antwort';
+
+  UnsaltedOrUnknownException([String? cause])
+      : cause =
+      cause ?? AppLocalizations.current.unsaltedOrUnknown ?? _fallback;
 }
 
 class NotSupportedException implements LanisException {
   @override
-  String cause;
-  NotSupportedException([this.cause = "Nicht unterstützt!"]);
+  final String cause;
+  static const _fallback = 'Nicht unterstützt';
+
+  NotSupportedException([String? cause])
+      : cause = cause ?? AppLocalizations.current.notSupported ?? _fallback;
 }
 
 class NoConnectionException implements LanisException {
   @override
-  String cause;
-  NoConnectionException([this.cause = "Keine Verbindung zum SPH"]);
+  final String cause;
+  static const _fallback = 'Keine SPH-Verbindung';
+
+  NoConnectionException([String? cause])
+      : cause = cause ?? AppLocalizations.current.noConnection ?? _fallback;
 }
 
 class AccountAlreadyExistsException implements LanisException {
   @override
-  String cause;
-  AccountAlreadyExistsException([this.cause = "Account existiert bereits"]);
+  final String cause;
+  static const _fallback = 'Account existiert bereits';
+
+  AccountAlreadyExistsException([String? cause])
+      : cause = cause ?? AppLocalizations.current.accountExists ?? _fallback;
 }

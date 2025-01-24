@@ -2495,6 +2495,126 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Wrong credentials!`
+  String get wrongCredentials {
+    return Intl.message(
+      'Wrong credentials!',
+      name: 'wrongCredentials',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lanis is down!`
+  String get lanisDown {
+    return Intl.message(
+      'Lanis is down!',
+      name: 'lanisDown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wait {time} before next attempt`
+  String loginTimeout(Object time) {
+    return Intl.message(
+      'Wait $time before next attempt',
+      name: 'loginTimeout',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `Missing credentials`
+  String get credentialsIncomplete {
+    return Intl.message(
+      'Missing credentials',
+      name: 'credentialsIncomplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network error`
+  String get networkError {
+    return Intl.message(
+      'Network error',
+      name: 'networkError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown error`
+  String get unknownError {
+    return Intl.message(
+      'Unknown error',
+      name: 'unknownError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unauthorized`
+  String get unauthorized {
+    return Intl.message(
+      'Unauthorized',
+      name: 'unauthorized',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Encryption verification failed`
+  String get encryptionCheckFailed {
+    return Intl.message(
+      'Encryption verification failed',
+      name: 'encryptionCheckFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unsalted response error`
+  String get unsaltedOrUnknown {
+    return Intl.message(
+      'Unsalted response error',
+      name: 'unsaltedOrUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not supported`
+  String get notSupported {
+    return Intl.message(
+      'Not supported',
+      name: 'notSupported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No SPH connection`
+  String get noConnection {
+    return Intl.message(
+      'No SPH connection',
+      name: 'noConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account already exists`
+  String get accountExists {
+    return Intl.message(
+      'Account already exists',
+      name: 'accountExists',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -42,18 +42,23 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m7(individualSearchHint) =>
       "${Intl.select(individualSearchHint, {'subject': 'Subject...', 'schedule': 'Date...', 'name': 'Teacher...', 'other': 'Fehler'})}";
 
-  static String m8(count) =>
+  static String m8(time) => "Wait ${time} before next attempt";
+
+  static String m9(count) =>
       "${Intl.plural(count, zero: 'No schools', one: '1 school', other: '${count} schools')}";
 
-  static String m9(time) =>
+  static String m10(time) =>
       "Not correct? Check whether your filter is set correctly. You may need to contact your school\'s IT department.\nLast edited: ${time}";
 
-  static String m10(week) => "${week}-Week";
+  static String m11(week) => "${week}-Week";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("About Lanis-Mobile"),
     "accentColor": MessageLookupByLibrary.simpleMessage("Accent color"),
+    "accountExists": MessageLookupByLibrary.simpleMessage(
+      "Account already exists",
+    ),
     "actionContinue": MessageLookupByLibrary.simpleMessage("Continue"),
     "activateToGetNotification": MessageLookupByLibrary.simpleMessage(
       "Activate it to receive notifications.",
@@ -163,6 +168,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "createResetTooltip": MessageLookupByLibrary.simpleMessage(
       "Reset subject and receivers",
     ),
+    "credentialsIncomplete": MessageLookupByLibrary.simpleMessage(
+      "Missing credentials",
+    ),
     "csvExport": MessageLookupByLibrary.simpleMessage("CSV export"),
     "currentWeek": MessageLookupByLibrary.simpleMessage("Current week"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
@@ -190,6 +198,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dynamicColor": MessageLookupByLibrary.simpleMessage("Dynamic"),
     "enableSubstitutionsInfo": MessageLookupByLibrary.simpleMessage(
       "Show information for substitutions",
+    ),
+    "encryptionCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Encryption verification failed",
     ),
     "error": MessageLookupByLibrary.simpleMessage("Error"),
     "errorCreatingConversation": MessageLookupByLibrary.simpleMessage(
@@ -289,6 +300,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "invisible": MessageLookupByLibrary.simpleMessage("Invisible"),
     "knownReceivers": MessageLookupByLibrary.simpleMessage("Known receivers"),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
+    "lanisDown": MessageLookupByLibrary.simpleMessage("Lanis is down!"),
     "lanisDownError": MessageLookupByLibrary.simpleMessage("Lanis is down!"),
     "lanisDownErrorMessage": MessageLookupByLibrary.simpleMessage(
       "Looks like Lanis is down.\nPlease check the status of Lanis (PaedOrg) on the Website.",
@@ -301,6 +313,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locale": MessageLookupByLibrary.simpleMessage("en_US"),
     "logIn": MessageLookupByLibrary.simpleMessage("Authenticate"),
     "logInTitle": MessageLookupByLibrary.simpleMessage("Logging in"),
+    "loginTimeout": m8,
     "logout": MessageLookupByLibrary.simpleMessage("Logout"),
     "logoutConfirmation": MessageLookupByLibrary.simpleMessage(
       "Do you really want to log out?",
@@ -308,6 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "message": MessageLookupByLibrary.simpleMessage("Message"),
     "messages": MessageLookupByLibrary.simpleMessage("Messages"),
     "moreInformation": MessageLookupByLibrary.simpleMessage("More information"),
+    "networkError": MessageLookupByLibrary.simpleMessage("Network error"),
     "newMessage": MessageLookupByLibrary.simpleMessage("New message"),
     "nextWeek": MessageLookupByLibrary.simpleMessage("Next week"),
     "noAppToOpen": MessageLookupByLibrary.simpleMessage(
@@ -316,6 +330,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noAppleMessageSupport": MessageLookupByLibrary.simpleMessage(
       "Notifications are currently not supported on your device (IOS / IpadOS).",
     ),
+    "noConnection": MessageLookupByLibrary.simpleMessage("No SPH connection"),
     "noCoursesFound": MessageLookupByLibrary.simpleMessage("No courses found."),
     "noDataFound": MessageLookupByLibrary.simpleMessage("No data found."),
     "noEntries": MessageLookupByLibrary.simpleMessage("No Entries!"),
@@ -334,6 +349,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noSupportOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
     ),
+    "notSupported": MessageLookupByLibrary.simpleMessage("Not supported"),
     "note": MessageLookupByLibrary.simpleMessage("Note"),
     "notificationAccountBoundExplanation": MessageLookupByLibrary.simpleMessage(
       "These settings only affect the account you are currently logged on to. The update interval is shared by all accounts.",
@@ -401,7 +417,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Unfortunately no support",
     ),
     "saveFile": MessageLookupByLibrary.simpleMessage("Save file"),
-    "schoolCountString": m8,
+    "schoolCountString": m9,
     "searchHint": MessageLookupByLibrary.simpleMessage(
       "Subject, teacher, date, ...",
     ),
@@ -521,7 +537,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You can import this link into your calendar app to have an automatically updating calendar. It will also cover multiple years. Keep this link private because it can be used by anyone.",
     ),
     "substitutions": MessageLookupByLibrary.simpleMessage("Substitutions"),
-    "substitutionsEndCardMessage": m9,
+    "substitutionsEndCardMessage": m10,
     "substitutionsFilter": MessageLookupByLibrary.simpleMessage(
       "Substitutions filter",
     ),
@@ -551,13 +567,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "timetableSwitchToPersonal": MessageLookupByLibrary.simpleMessage(
       "Switch to Personal timetable",
     ),
-    "timetableWeek": m10,
+    "timetableWeek": m11,
     "toSemesterOne": MessageLookupByLibrary.simpleMessage("Semester 1"),
     "today": MessageLookupByLibrary.simpleMessage("Today"),
     "tomorrow": MessageLookupByLibrary.simpleMessage("Tomorrow"),
     "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
+    "unauthorized": MessageLookupByLibrary.simpleMessage("Unauthorized"),
     "unknown": MessageLookupByLibrary.simpleMessage("Unknown"),
+    "unknownError": MessageLookupByLibrary.simpleMessage("Unknown error"),
     "unknownFile": MessageLookupByLibrary.simpleMessage("Unknown File"),
+    "unsaltedOrUnknown": MessageLookupByLibrary.simpleMessage(
+      "Unsalted response error",
+    ),
     "unsupported": MessageLookupByLibrary.simpleMessage("unsupported"),
     "updateAvailable": MessageLookupByLibrary.simpleMessage("Update available"),
     "updateInterval": MessageLookupByLibrary.simpleMessage("Update interval"),
@@ -573,6 +594,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallCalendar": MessageLookupByLibrary.simpleMessage("Wall calendar"),
     "week": MessageLookupByLibrary.simpleMessage("Week"),
     "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome Back"),
+    "wrongCredentials": MessageLookupByLibrary.simpleMessage(
+      "Wrong credentials!",
+    ),
     "wrongPassword": MessageLookupByLibrary.simpleMessage("Wrong password!"),
     "wrongPasswordHint": MessageLookupByLibrary.simpleMessage(
       "Your password seems to be incorrect! This can happen if you have changed your password on another device or if your account has been deleted. Either change your password (enter your new password here) or delete your account entirely to resolve this issue.",

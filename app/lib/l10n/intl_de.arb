@@ -298,5 +298,18 @@
   "wrongPassword": "Falsches Passwort",
   "wrongPasswordHint": "Ihr Passwort scheint falsch zu sein! Dies kann passieren, wenn Sie Ihr Passwort auf einem anderen Gerät geändert haben oder wenn Ihr Konto gelöscht wurde. Ändern Sie entweder Ihr Passwort (geben Sie hier Ihr neues Passwort ein) oder löschen Sie Ihr Konto vollständig, um dieses Problem zu beheben.",
   "changePassword": "Passwort ändern",
-  "removeAccount": "Account entfernen"
+  "removeAccount": "Account entfernen",
+
+  "wrongCredentials": "Falsche Anmeldedaten!",
+  "lanisDown": "Lanis ist down!",
+  "loginTimeout": "Warte {time} vor nächstem Versuch",
+  "credentialsIncomplete": "Anmeldedaten unvollständig",
+  "networkError": "Netzwerkfehler",
+  "unknownError": "Unbekannter Fehler",
+  "unauthorized": "Keine Erlaubnis",
+  "encryptionCheckFailed": "Verschlüsselungsüberprüfung fehlgeschlagen",
+  "unsaltedOrUnknown": "Unbekannte ungesalzene Antwort",
+  "notSupported": "Nicht unterstützt",
+  "noConnection": "Keine SPH-Verbindung",
+  "accountExists": "Account existiert bereits"
 }

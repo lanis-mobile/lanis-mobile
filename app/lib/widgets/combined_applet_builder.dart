@@ -112,7 +112,7 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                             width: 4,
                           ),
                           Text(
-                              '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
+                              '${AppLocalizations.of(context).offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
                               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               )
