@@ -299,3 +299,7 @@ flutter:
         - asset: fonts/RobotoMono-Regular.ttf
 
   generate: true
+
+flutter_intl:
+  enabled: true
+  class_name: AppLocalizations
