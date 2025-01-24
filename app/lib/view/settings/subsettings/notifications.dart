@@ -258,7 +258,7 @@ class _NotificationSettingsState
                         children: [
                           for (int dayIndex = 1; dayIndex < 8; dayIndex++) FilterChip(
                             label: Text(
-                              DateFormat.E(Localizations.localeOf(context)).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
+                              DateFormat.E(Localizations.localeOf(context).languageCode).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
                             ),
                             selected: androidEnabledDays[dayIndex - 1],
                             onSelected: activateBackgroundServices ? (val) {
