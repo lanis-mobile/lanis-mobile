@@ -6,7 +6,8 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sph_plan/startup.dart';
@@ -131,10 +132,13 @@ class App extends StatelessWidget {
             darkTheme: theme.darkTheme,
             themeMode: mode,
             localizationsDelegates: [
-              ...AppLocalizations.localizationsDelegates,
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
               SfGlobalLocalizations.delegate
             ],
-            supportedLocales: AppLocalizations.supportedLocales,
+            supportedLocales: AppLocalizations.delegate.supportedLocales,
             home: const Scaffold(
               body: StartupScreen(),
             ),

@@ -11,7 +11,7 @@ import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/view/login/auth.dart';
 import 'package:sph_plan/view/login/screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/widgets/offline_available_applets_section.dart';
 import 'package:sph_plan/widgets/reset_account_page.dart';
 import 'package:url_launcher/url_launcher.dart';

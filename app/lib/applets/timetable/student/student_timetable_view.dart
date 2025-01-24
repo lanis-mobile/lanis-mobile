@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/random_color.dart';

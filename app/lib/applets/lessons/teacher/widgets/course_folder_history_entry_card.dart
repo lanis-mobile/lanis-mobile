@@ -8,7 +8,7 @@ import '../../../../models/lessons_teacher.dart';
 import 'course_folder_history_entry_file_chip.dart';
 import 'line_constraint_text.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 class CourseFolderHistoryEntryCard extends StatefulWidget {
   final CourseFolderHistoryEntry entry;

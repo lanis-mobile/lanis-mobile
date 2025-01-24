@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/data_storage/data_storage_root_view.dart';
 import 'package:sph_plan/applets/definitions.dart';
 

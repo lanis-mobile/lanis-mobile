@@ -6,7 +6,7 @@ import 'package:sph_plan/utils/keyboard_observer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';

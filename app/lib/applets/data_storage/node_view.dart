@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/data_storage/folder_listtile.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
