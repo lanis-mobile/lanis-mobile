@@ -18,6 +18,7 @@ import '../../applets/calendar/calendar_export.dart';
 import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
 import '../../utils/press_tile.dart';
+import '../../utils/whats_new.dart';
 
 class SettingsGroup {
   final List<SettingsTile> tiles;
@@ -180,6 +181,13 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           context,
           MaterialPageRoute(builder: (context) => AboutSettings()),
         ),
+      ),
+      SettingsTile(
+        icon: Icons.question_mark,
+        show: () async => true,
+        title: (context) => AppLocalizations.of(context)!.inThisUpdate,
+        subtitle: (context) async => AppLocalizations.of(context)!.showReleaseNotesForThisVersion,
+        screen: (context) async => showLocalUpdateInfo(context),
       )
     ]),
   ];

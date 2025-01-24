@@ -8,7 +8,6 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
 import '../../models/client_status_exceptions.dart';
@@ -56,7 +55,9 @@ class _CalendarViewState extends State<CalendarView> {
     List<CalendarEvent> searchResultsAfterToday = [];
 
     for (var event in eventList) {
-      String searchString = '${event.title} ${event.description} ${event.place??''} ${event.startTime.year}'.toLowerCase();
+      String searchString =
+          '${event.title} ${event.description} ${event.place ?? ''} ${event.startTime.year}'
+              .toLowerCase();
       if (searchString.contains(query.toLowerCase())) {
         if (event.endTime.isBefore(DateTime.now())) {
           searchResultsBeforeToday.add(event);
@@ -74,11 +75,11 @@ class _CalendarViewState extends State<CalendarView> {
     searchResults.addAll(searchResultsAfterToday);
     searchResults.addAll(searchResultsBeforeToday);
 
-
     return searchResults;
   }
 
-  Future<Map<String, dynamic>?> fetchEvent(String id, {secondTry = false}) async {
+  Future<Map<String, dynamic>?> fetchEvent(String id,
+      {secondTry = false}) async {
     try {
       if (secondTry) {
         await sph!.session.authenticate(withoutData: true);
@@ -128,7 +129,8 @@ class _CalendarViewState extends State<CalendarView> {
 
   bool doesEntryExist(dynamic entry) => entry != null && entry != "";
 
-  Widget eventBottomSheet(CalendarEvent calendarData, Map<String, dynamic> singleEventData) {
+  Widget eventBottomSheet(
+      CalendarEvent calendarData, Map<String, dynamic> singleEventData) {
     const double iconSize = 24;
 
     // German-formatted readable date string
@@ -146,10 +148,10 @@ class _CalendarViewState extends State<CalendarView> {
     } else {
       if (startTime == endTime) {
         date +=
-        "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("H:mm", "de_DE")}";
+            "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("H:mm", "de_DE")}";
       } else {
         date +=
-        "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:mm", "de_DE")}";
+            "${calendarData.startTime.format("E d MMM y H:mm", "de_DE")} bis ${calendarData.endTime.format("E MMM d y H:mm", "de_DE")}";
       }
     }
 
@@ -247,8 +249,7 @@ class _CalendarViewState extends State<CalendarView> {
           ],
           // Target group
           if (doesEntryExist(singleEventData["properties"]) &&
-              doesEntryExist(
-                  singleEventData["properties"]["zielgruppen"])) ...[
+              doesEntryExist(singleEventData["properties"]["zielgruppen"])) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0),
               child: Row(
@@ -306,7 +307,9 @@ class _CalendarViewState extends State<CalendarView> {
               ),
             ),
           ],
-          SizedBox(height: 50.0,)
+          SizedBox(
+            height: 50.0,
+          )
         ],
       ),
     );
@@ -348,12 +351,13 @@ class _CalendarViewState extends State<CalendarView> {
     return Scaffold(
       appBar: widget.openDrawerCb != null
           ? AppBar(
-        title: Text(calendarDefinition.label(context)),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => widget.openDrawerCb!(),
-        ),
-      ) : null,
+              title: Text(calendarDefinition.label(context)),
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              ),
+            )
+          : null,
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -376,19 +380,19 @@ class _CalendarViewState extends State<CalendarView> {
                     onPressed: () {
                       searchController.closeView(null);
                     },
-                    icon: Icon(Icons.arrow_back)
-                ),
+                    icon: Icon(Icons.arrow_back)),
                 barTrailing: [
-                  if (!_selectedDay!.isSameDay(DateTime.now())) IconButton(
-                    icon: const Icon(Icons.restore),
-                    onPressed: () {
-                      setState(() {
-                        searchController.text = "";
-                        _selectedDay = DateTime.now();
-                        _focusedDay = DateTime.now();
-                      });
-                    },
-                  ),
+                  if (!_selectedDay!.isSameDay(DateTime.now()))
+                    IconButton(
+                      icon: const Icon(Icons.restore),
+                      onPressed: () {
+                        setState(() {
+                          searchController.text = "";
+                          _selectedDay = DateTime.now();
+                          _focusedDay = DateTime.now();
+                        });
+                      },
+                    ),
                 ],
                 onSubmitted: (_) {
                   FocusManager.instance.primaryFocus?.unfocus();
@@ -396,29 +400,37 @@ class _CalendarViewState extends State<CalendarView> {
                 suggestionsBuilder: (context, _searchController) {
                   final results = fuzzySearchEventList(_searchController.text);
 
-                  return results.map((event) => ListTile(
-                    title: Text(event.title),
-                    subtitle: Text('${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
-                    leading: event.endTime.isBefore(DateTime.now()) ? const Icon(Icons.done) : const Icon(Icons.event),
-                    onTap: () async {
-                      setState(() {
-                        _selectedDay = event.startTime;
-                        _focusedDay = event.startTime;
-                      });
-                      searchController.closeView(null);
+                  return results
+                      .map(
+                        (event) => ListTile(
+                          title: Text(event.title),
+                          iconColor: event.color,
+                          subtitle: Text(
+                              '${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                          leading: event.endTime.isBefore(DateTime.now())
+                              ? const Icon(Icons.done)
+                              : const Icon(Icons.event),
+                          onTap: () async {
+                            setState(() {
+                              _selectedDay = event.startTime;
+                              _focusedDay = event.startTime;
+                            });
+                            searchController.closeView(null);
 
-                      noTrigger = true;
-                      if (keyboardObserver.value == KeyboardStatus.closed) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      }
+                            noTrigger = true;
+                            if (keyboardObserver.value ==
+                                KeyboardStatus.closed) {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                            }
 
-                      await openEventBottomSheet(event).whenComplete(() {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        noTrigger = false;
-                      });
-                    },
-                  ),
-                  ).toList();
+                            await openEventBottomSheet(event).whenComplete(() {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              noTrigger = false;
+                            });
+                          },
+                        ),
+                      )
+                      .toList();
                 },
               ),
             ),
@@ -429,7 +441,8 @@ class _CalendarViewState extends State<CalendarView> {
                   phpUrl: calendarDefinition.appletPhpUrl,
                   settingsDefaults: calendarDefinition.settingsDefaults,
                   accountType: sph!.session.accountType,
-                  builder: (context, data, accountType, settings, updateSetting, refresh) {
+                  builder: (context, data, accountType, settings, updateSetting,
+                      refresh) {
                     eventList = data;
                     _selectedEvents.value = _getEventsForDay(_selectedDay!);
 
@@ -440,40 +453,71 @@ class _CalendarViewState extends State<CalendarView> {
                           firstDay: DateTime.utc(2020),
                           lastDay: DateTime.utc(2030),
                           availableCalendarFormats: {
-                            CalendarFormat.month:
-                            AppLocalizations.of(context)!.calendarFormatMonth,
+                            CalendarFormat.month: AppLocalizations.of(context)!
+                                .calendarFormatMonth,
                             CalendarFormat.twoWeeks:
-                            AppLocalizations.of(context)!.calendarFormatTwoWeeks,
-                            CalendarFormat.week:
-                            AppLocalizations.of(context)!.calendarFormatWeek,
+                                AppLocalizations.of(context)!
+                                    .calendarFormatTwoWeeks,
+                            CalendarFormat.week: AppLocalizations.of(context)!
+                                .calendarFormatWeek,
                           },
                           focusedDay: _focusedDay,
-                          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                          selectedDayPredicate: (day) =>
+                              isSameDay(_selectedDay, day),
                           calendarFormat: _calendarFormat,
                           eventLoader: _getEventsForDay,
                           startingDayOfWeek: StartingDayOfWeek.monday,
                           calendarStyle: CalendarStyle(
-                              outsideDaysVisible: false,
-                              defaultDecoration:
-                              const BoxDecoration(shape: BoxShape.circle),
-                              selectedDecoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  shape: BoxShape.circle),
-                              selectedTextStyle: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Theme.of(context).colorScheme.onPrimary),
-                              todayDecoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.secondary,
-                                shape: BoxShape.circle,
-                              ),
-                              todayTextStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSecondary,
-                                fontSize: 16,
-                              ),
-                              markerDecoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).colorScheme.inversePrimary)),
+                            outsideDaysVisible: false,
+                            defaultDecoration:
+                                const BoxDecoration(shape: BoxShape.circle),
+                            selectedDecoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle),
+                            selectedTextStyle: TextStyle(
+                                fontSize: 16.0,
+                                color: Theme.of(context).colorScheme.onPrimary),
+                            todayDecoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                            todayTextStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                              fontSize: 16,
+                            ),
+                            markerDecoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                            ),
+                            markerSize: 8,
+                            isTodayHighlighted: false,
+                          ),
                           onDaySelected: _onDaySelected,
+                          calendarBuilders: CalendarBuilders(
+                            markerBuilder:
+                                (BuildContext context, date, events) {
+                              if (events.isEmpty) return SizedBox();
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: events.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(top: 21),
+                                    padding: const EdgeInsets.all(1),
+                                    child: Container(
+                                      height: 6,
+                                      width: 6,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: events[index].color),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                           pageJumpingEnabled: true,
                           onFormatChanged: (format) {
                             if (_calendarFormat != format) {
@@ -507,15 +551,46 @@ class _CalendarViewState extends State<CalendarView> {
                                       padding: const EdgeInsets.only(
                                           left: 8, right: 8, bottom: 4),
                                       child: Card(
-                                        child: ListTile(
-                                          title: Text(value[index].title),
-                                          trailing: const Icon(Icons.arrow_right),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(12),
+                                            onTap: () async {
+                                              await openEventBottomSheet(
+                                                  value[index]);
+                                            },
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 8,
+                                                height: 40,
+                                                decoration: BoxDecoration(
+                                                  color: value[index].color,
+                                                  borderRadius: BorderRadius.circular(8)
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        value[index].title,
+                                                        style: Theme.of(context).textTheme.titleMedium,
+                                                      ),
+                                                      Text(
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        value[index].category?.name ?? value[index].place ?? value[index].description,
+                                                        style: Theme.of(context).textTheme.bodyMedium,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              Icon(Icons.arrow_right),
+                                              SizedBox(width: 8,)
+                                            ],
                                           ),
-                                          onTap: () async {
-                                            await openEventBottomSheet(value[index]);
-                                          },
                                         ),
                                       ),
                                     );
@@ -527,9 +602,7 @@ class _CalendarViewState extends State<CalendarView> {
                         ),
                       ],
                     );
-                  }
-              )
-          ),
+                  })),
         ],
       ),
     );
