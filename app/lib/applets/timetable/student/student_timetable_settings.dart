@@ -281,6 +281,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
 
           for (var (dayIndex, day) in timetable.planForAll!.indexed) {
             lessons[dayIndex] = [];
+            if(ids == null) continue;
             for (var lesson in day) {
               if (!ids.contains(lesson.id)) continue;
               lessons[dayIndex]!.add(lesson);

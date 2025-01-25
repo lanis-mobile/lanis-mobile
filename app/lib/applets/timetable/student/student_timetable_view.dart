@@ -259,8 +259,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                       Navigator.pop(context);
                                                       updateSettings(
                                                           'hidden-lessons', [
-                                                        ...settings[
-                                                            'hidden-lessons'],
+                                                        ...?settings[
+                                             <               'hidden-lessons'],
                                                         selected.id
                                                       ]);
                                                       showSnackbar(
