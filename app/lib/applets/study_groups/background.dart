@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sph_plan/background_service.dart';
@@ -9,18 +11,26 @@ Future<void> studyCheckExams(
     SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit) async {
   int checkInterval = 604800; // Check every 7 days for new exams
   // Get account data
-  int? lastScan = sph.prefs.kv.get('last-exam-scan') as int?;
-  Map<int, ScheduledExam> scheduledExams =
-      sph.prefs.kv.get('scheduled-exams') as Map<int, ScheduledExam>? ?? {};
 
-  print('Scheduled exams: $scheduledExams');
+  String? lastScanStr = (await sph.prefs.kv.get('last-exam-scan')) as String?;
+  String? scheduledExamsStr =
+      (await sph.prefs.kv.get('scheduled-exams')) as String?;
+  int? lastScan = lastScanStr == null ? null : jsonDecode(lastScanStr);
+  Map<int, ScheduledExam> scheduledExams = scheduledExamsStr == null
+      ? {}
+      : (jsonDecode(scheduledExamsStr) as Map<String, dynamic>)
+          .map((key, value) => MapEntry(
+                int.parse(key),
+                ScheduledExam.fromJson(value),
+              ));
 
+  List<int> examsToRemove = [];
   for (final exam in scheduledExams.values) {
-    if (DateTime.now().isAfter(exam.date)) {
-      scheduledExams.remove(exam.date.secondsSinceEpoch);
+    if (DateTime.now().subDays(7).isAfter(exam.date)) {
+      examsToRemove.add(exam.date.secondsSinceEpoch);
 
       // Send notification
-      toolkit.sendMessage(
+      await toolkit.sendMessage(
         id: exam.date.secondsSinceEpoch % 10000,
         title: 'Exam',
         message:
@@ -29,6 +39,10 @@ Future<void> studyCheckExams(
         importance: Importance.high,
       );
     }
+  }
+
+  for (int remove in examsToRemove) {
+    scheduledExams.remove(remove);
   }
 
   if (lastScan == null ||
@@ -40,7 +54,7 @@ Future<void> studyCheckExams(
         if (scheduledExams.containsKey(e.date.secondsSinceEpoch)) {
           continue;
         }
-        if (DateTime.now().isAfter(e.date)) {
+        if (DateTime.now().subDays(7).isAfter(e.date)) {
           print(
               'Skipping exam ${exam.courseName} at ${e.date} because it is in the past');
           continue;
@@ -56,14 +70,18 @@ Future<void> studyCheckExams(
       }
     }
 
-    // Save exams
-    sph.prefs.kv.set('scheduled-exams', scheduledExams);
-
     // Save last scan
-    sph.prefs.kv.set('last-exam-scan', DateTime.now().secondsSinceEpoch);
-  } else {
-    print('No new exams');
+    await sph.prefs.kv
+        .set('last-exam-scan', jsonEncode(DateTime.now().secondsSinceEpoch));
   }
+
+  String jsonString = jsonEncode(
+    scheduledExams
+        .map((key, value) => MapEntry(key.toString(), value.toJson())),
+  );
+
+  // Save exams
+  await sph.prefs.kv.set('scheduled-exams', jsonString);
 }
 
 class ScheduledExam {
