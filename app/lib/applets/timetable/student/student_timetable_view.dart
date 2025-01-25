@@ -260,7 +260,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                       updateSettings(
                                                           'hidden-lessons', [
                                                         ...?settings[
-                                             <               'hidden-lessons'],
+                                                            'hidden-lessons'],
                                                         selected.id
                                                       ]);
                                                       showSnackbar(
