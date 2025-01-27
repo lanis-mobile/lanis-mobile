@@ -85,7 +85,23 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
           .trim()
           .contains(RegExp(r'\d{2}\.\d{2}\.\d{4}'))) {
         element.querySelectorAll('td').forEach((element) {
-          examRow.add(element.text.trim());
+          // if there is a span with the class "next" it is the next exam
+          if (element.querySelector('span') != null) {
+            if (element.querySelector('span')!.classes.contains('next')) {
+              // Exclude the span from the text
+              String wholeText = element.text.trim();
+              String text = wholeText
+                  .substring(
+                      0,
+                      wholeText.length -
+                          element.querySelector('span')!.text.length)
+                  .trim()
+                  .replaceAll('\n', '');
+              examRow.add(text);
+            }
+          } else {
+            examRow.add(element.text.trim());
+          }
         });
         examData.add(examRow);
       }
