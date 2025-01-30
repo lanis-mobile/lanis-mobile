@@ -511,7 +511,8 @@ class _CalendarViewState extends State<CalendarView> {
                                       width: 6,
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: events[index].color),
+                                            color: events[index].color,
+                                            border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 0.7)),
                                     ),
                                   );
                                 },
