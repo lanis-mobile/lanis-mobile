@@ -1,150 +1,282 @@
 import 'package:flutter/material.dart';
 
 import '../../models/substitution.dart';
-import '../../widgets/marquee.dart';
+
+class SubstitutionRow extends StatelessWidget {
+  final List<Widget> children;
+  final bool isFirst;
+  final bool isLast;
+
+  const SubstitutionRow(
+      {super.key,
+      required this.children,
+      this.isFirst = false,
+      this.isLast = false});
+
+  BorderRadius getRadius(int index) {
+    if (index == 0 && children.length > 1) {
+      return BorderRadius.only(
+          topLeft: isFirst ? Radius.circular(12.0) : Radius.zero,
+          topRight: isLast ? Radius.circular(12.0) : Radius.zero);
+    } else if (index == 0) {
+      return BorderRadius.circular(12.0);
+    } else if (index == children.length - 1) {
+      return BorderRadius.only(
+        topRight: isFirst ? Radius.circular(12.0) : Radius.zero,
+      );
+    } else {
+      return BorderRadius.zero;
+    }
+  }
+
+  Alignment getAlignment(int index) {
+    if (index == 0) {
+      return Alignment.centerLeft;
+    } else if (index == children.length - 1) {
+      return Alignment.centerRight;
+    } else {
+      return Alignment.center;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      spacing: 2.0,
+      children: List.generate(children.length, (index) {
+        return Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: getRadius(index),
+              color: Colors.red,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: children[index],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
 
 class SubstitutionListTile extends StatelessWidget {
   final Substitution substitutionData;
   const SubstitutionListTile({super.key, required this.substitutionData});
 
-  bool doesNoticeExist(String? info) {
+  bool doesExist(String? info) {
     List empty = [null, "", " ", "-", "---"];
-    return empty.contains(info);
+    return !empty.contains(info);
   }
 
-  Widget? getSubstitutionInfo(
-      BuildContext context, String key, String? value, IconData icon) {
-    if (doesNoticeExist(value)) {
-      return null;
-    }
-
-    return Padding(
-        padding: const EdgeInsets.only(right: 30, left: 30, bottom: 2),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Icon(icon),
-              ),
-              Text(
-                key,
-                style: Theme.of(context).textTheme.labelLarge,
-              )
-            ],
-          ),
-              SubstitutionsFormattedText(value!, Theme.of(context).textTheme.bodyMedium!)
-        ]));
+  bool doesExistList(List<String?> info) {
+    List empty = [null, "", " ", "-", "---"];
+    return info.any((element) => !empty.contains(element));
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: (doesNoticeExist(substitutionData.vertreter) &&
-          doesNoticeExist(substitutionData.lehrer) &&
-          doesNoticeExist(substitutionData.raum) &&
-          doesNoticeExist(substitutionData.fach) &&
-          doesNoticeExist(substitutionData.hinweis)),
-      title: Padding(
-        padding: const EdgeInsets.only(top: 2),
-        child: (substitutionData.art != null)
-            ? MarqueeWidget(
-                direction: Axis.horizontal,
-                child: Text(
-                  substitutionData.art!,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              )
-            : null,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-                top: 0,
-                bottom: (doesNoticeExist(substitutionData.vertreter) &&
-                        doesNoticeExist(substitutionData.lehrer) &&
-                        doesNoticeExist(substitutionData.raum) &&
-                        !doesNoticeExist(substitutionData.fach))
-                    ? 12
-                    : 0),
-            child: Column(
-              children: [
-                getSubstitutionInfo(context, "Vertreter",
-                        substitutionData.vertreter, Icons.person) ??
-                    const SizedBox.shrink(),
-                getSubstitutionInfo(context, "Lehrer", substitutionData.lehrer,
-                        Icons.school) ??
-                    const SizedBox.shrink(),
-                getSubstitutionInfo(
-                        context, "Raum", substitutionData.raum, Icons.room) ??
-                    const SizedBox.shrink(),
-              ],
-            ),
-          ),
-          if (!doesNoticeExist(substitutionData.hinweis)) ...[
-            Padding(
-              padding: EdgeInsets.only(
-                  right: 30,
-                  left: 30,
-                  top: 2,
-                  bottom: doesNoticeExist(substitutionData.fach) ? 12 : 0),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 8.0),
-                        child: Icon(Icons.info),
-                      ),
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: Text(
-                          substitutionData.hinweis!,
-                          overflow: TextOverflow.visible,
-                          softWrap: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4)
-                ],
-              ),
-            )
-          ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (!doesNoticeExist(substitutionData.klasse)) ...[
-                SizedBox(
+    Substitution data = substitutionData;
+    TextTheme textTheme = Theme.of(context).textTheme;
 
-                  child: MarqueeWidget(
-                      child: Text(
-                    substitutionData.klasse!,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  )),
-                ),
-              ],
-              if (!doesNoticeExist(substitutionData.fach)) ...[
-                Text(
-                  substitutionData.fach!,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-              if (!doesNoticeExist(substitutionData.stunde)) ...[
-                Text(
-                  substitutionData.stunde,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ]
-            ],
+    List<Widget> notchChildren = [
+      if (doesExist(data.klasse))
+        Row(
+          spacing: 8.0,
+          children: [
+            Icon(Icons.school_outlined),
+            Text(
+              data.klasse!,
+              style: textTheme.titleMedium,
+            ),
+          ],
+        ),
+      if (doesExist(data.fach))
+        Text(
+          data.fach!,
+          style: textTheme.titleMedium,
+        ),
+      if (doesExist(data.art))
+        Text(
+          data.art!,
+          style: textTheme.titleMedium,
+        ),
+      if (doesExist(data.stunde))
+        Text(
+          data.stunde,
+          style: textTheme.titleMedium,
+        ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        spacing: 2.0,
+        children: [
+          SubstitutionRow(
+            isFirst: true,
+            children: (notchChildren.length > 3)
+                ? notchChildren.sublist(0, 2)
+                : notchChildren,
           ),
+          if (notchChildren.length > 3)
+            SubstitutionRow(
+              children: notchChildren.sublist(2),
+            ),
         ],
       ),
     );
   }
+
+  /*
+   @override
+  Widget build(BuildContext context) {
+    Substitution data = substitutionData;
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: Card(
+        child: Column(
+          spacing: 8.0,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  spacing: 8.0,
+                  children: [
+                    if (doesExist(data.klasse))
+                      Text(
+                        data.klasse!,
+                        style: textTheme.titleMedium,
+                      ),
+                    if (doesExist(data.klasse_alt) && !doesExist(data.klasse))
+                      Text(
+                        data.klasse_alt!,
+                        style: textTheme.titleMedium,
+                      ),
+                    if (doesExist(data.lerngruppe)) Text('(${data.lerngruppe})')
+                  ],
+                ),
+                if (doesExist(data.fach))
+                  Text(
+                    data.fach!,
+                    style: textTheme.titleMedium,
+                  ),
+              ],
+            ),
+            Row(
+              spacing: 8.0,
+              children: [
+                if (doesExistList([data.lehrer, data.vertreter]))
+                  Icon(Icons.school_outlined),
+                // Für Vertreter
+                if (doesExistList([data.vertreter, data.Vertreterkuerzel]))
+                  Text(
+                    [
+                      if (doesExist(data.vertreter)) data.vertreter!,
+                      if (!doesExist(data.vertreter) &&
+                          doesExist(data.Vertreterkuerzel))
+                        data.Vertreterkuerzel!,
+                      if (doesExist(data.vertreter) &&
+                          doesExist(data.Vertreterkuerzel))
+                        "(${data.Vertreterkuerzel})"
+                    ].join(" "),
+                    style: textTheme.bodyLarge,
+                  ),
+                if ((doesExist(data.lehrer) || doesExist(data.Lehrerkuerzel)) &&
+                    (doesExist(data.vertreter) ||
+                        doesExist(data.Vertreterkuerzel)))
+                  Text("->"),
+                if (doesExist(data.lehrer) || doesExist(data.Lehrerkuerzel))
+                  Text(
+                    [
+                      if (doesExist(data.lehrer)) data.lehrer!,
+                      if (!doesExist(data.lehrer) &&
+                          doesExist(data.Lehrerkuerzel))
+                        data.Lehrerkuerzel!,
+                      if (doesExist(data.lehrer) &&
+                          doesExist(data.Lehrerkuerzel))
+                        "(${data.Lehrerkuerzel})"
+                    ].join(" "),
+                    style: textTheme.bodyLarge!.copyWith(
+                      decoration: (doesExist(data.vertreter) &&
+                              doesExist(data.Vertreterkuerzel))
+                          ? TextDecoration.lineThrough
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
+            Row(
+              spacing: 8.0,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  spacing: 8.0,
+                  children: [
+                    if (doesExist(data.raum)) Icon(Icons.room_outlined),
+                    if (doesExist(data.raum))
+                      Text(
+                        data.raum!,
+                        style: textTheme.bodyLarge,
+                      ),
+                  ],
+                ),
+                if (doesExist(data.stunde))
+                  Text(data.stunde,
+                      style: textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      )),
+              ],
+            ),
+            if (doesExistList([data.hinweis, data.hinweis2]))
+              Divider(
+                height: 4.0,
+              ),
+            Row(
+              spacing: 12.0,
+              children: [
+                if (doesExist(data.hinweis))
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 20.0,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                if (doesExist(data.hinweis))
+                  SubstitutionsFormattedText(
+                    data.hinweis!,
+                    Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+              ],
+            ),
+            Row(
+              spacing: 12.0,
+              children: [
+                if (doesExist(data.hinweis2))
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 20.0,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                if (doesExist(data.hinweis2))
+                  SubstitutionsFormattedText(
+                    data.hinweis2!,
+                    Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  } */
 }
 
 /// Takes a string with eventual html tags and applies the necessary formatting according to the tags.

@@ -51,7 +51,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
       fullPlan = parseSubstitutionsNonAJAX(parsedDocument);
     } else {
       List<Future<SubstitutionDay>> futures =
-      dates.map((date) => getSubstitutionsAJAX(date)).toList();
+          dates.map((date) => getSubstitutionsAJAX(date)).toList();
       List<SubstitutionDay> plans = await Future.wait(futures);
       for (SubstitutionDay day in plans) {
         fullPlan.add(day.withDayInfo(parseInformationTables(parsedDocument
@@ -61,6 +61,48 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
 
     fullPlan.removeEmptyDays();
     fullPlan.filterAll(localFilter);
+
+    fullPlan = SubstitutionPlan(days: [
+      SubstitutionDay(parsedDate: '22.01.2025', substitutions: [
+        Substitution(
+            tag: '22.01.2025',
+            tag_en: '01/22/2025',
+            stunde: '2. - 4.',
+            lehrer: 'Muster',
+            vertreter: 'Muster2',
+            klasse: 'Q3',
+            klasse_alt: 'Q2',
+            fach: 'Mathe',
+            fach_alt: 'Deutsch',
+            raum: 'A123',
+            raum_alt: 'B456',
+            hinweis: 'Entfällt',
+            hinweis2: 'Entfällt auch lol',
+            art: 'Entfall',
+            Lehrerkuerzel: 'FRAP',
+            Vertreterkuerzel: 'BBBB',
+            lerngruppe: 'Mathe'),
+        Substitution(
+            tag: '22.01.2025',
+            tag_en: '01/22/2025',
+            stunde: '2. - 4.',
+            lehrer: 'Muster',
+            vertreter: 'Muster2',
+            klasse: 'Q3',
+            klasse_alt: 'Q2',
+            fach: 'Mathe',
+            fach_alt: 'Deutsch',
+            raum: 'A123',
+            raum_alt: 'B456',
+            hinweis: 'Entfällt',
+            hinweis2: 'Entfällt auch lol',
+            Lehrerkuerzel: 'FRAP',
+            Vertreterkuerzel: 'BBBB',
+            lerngruppe: 'Mathe'),
+        ...fullPlan.days[0].substitutions
+      ])
+    ]);
+
     return fullPlan;
   }
 
@@ -85,8 +127,9 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     for (var date in dates) {
       DateTime parsedDate = entryFormat.parse(date);
       String parsedDateStr = parsedDate.format('dd.MM.yyyy');
-      SubstitutionDay substitutionDay =
-          SubstitutionDay(parsedDate: parsedDateStr, infos: parseInformationTables(document.getElementById('tag$date')!));
+      SubstitutionDay substitutionDay = SubstitutionDay(
+          parsedDate: parsedDateStr,
+          infos: parseInformationTables(document.getElementById('tag$date')!));
       final vtable = document.querySelector("#vtable$date");
       if (vtable == null) {
         return fullPlan;
@@ -101,7 +144,8 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
         substitutionDay.add(Substitution(
             tag: parsedDate.format('dd.MM.yyyy'),
             tag_en: date,
-            stunde: SubstitutionsParser.parseHours(fields[headers.indexOf("Stunde")].text.trim()),
+            stunde: SubstitutionsParser.parseHours(
+                fields[headers.indexOf("Stunde")].text.trim()),
             fach: headers.contains("Fach")
                 ? fields[headers.indexOf("Fach")].text.trim()
                 : null,
@@ -223,7 +267,9 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     final numbers =
         RegExp(r'\d+').allMatches(hours).map((m) => m.group(0)!).toList();
     if (numbers.isEmpty || numbers.length > 2) return hours;
-    return numbers.length == 2 ? '${numbers[0]} - ${numbers[1]}' : numbers[0];
+    return numbers.length == 2
+        ? '${numbers[0]}. - ${numbers[1]}.'
+        : '${numbers[0]}.';
   }
 
   List<SubstitutionInfo> parseInformationTables(Element element) {
