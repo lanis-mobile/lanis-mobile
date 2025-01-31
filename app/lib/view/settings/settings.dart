@@ -271,6 +271,15 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
               child: Text(AppLocalizations.of(context)!.language),
             ),
           );
+        } else if (tile.title(context) == AppLocalizations.of(context)!.calendarExport) {
+          return const CalendarExport();
+        } else if (tile.title(context) == AppLocalizations.of(context)!.inThisUpdate) {
+          return Center(
+            child: ElevatedButton(
+              onPressed: () => showLocalUpdateInfo(context),
+              child: Text(AppLocalizations.of(context)!.showReleaseNotesForThisVersion),
+            ),
+          );
         }
         return const Center(child: Text('Not implemented'));
       },
