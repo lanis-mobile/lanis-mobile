@@ -62,6 +62,102 @@ class SubstitutionRow extends StatelessWidget {
   }
 }
 
+class AndroidDesign extends StatelessWidget {
+  final List<Widget> children;
+  final double spacing;
+  final EdgeInsets padding;
+
+  const AndroidDesign(
+      {super.key,
+      required this.children,
+      this.spacing = 2.0,
+      this.padding = const EdgeInsets.all(12.0)});
+
+  BorderRadius getVerticalRadius(int index) {
+    int length = children.length;
+    if (index == 0 && length == 1) {
+      return BorderRadius.circular(12.0);
+    } else if (index == 0) {
+      return BorderRadius.only(
+        topLeft: Radius.circular(12.0),
+        topRight: Radius.circular(12.0),
+      );
+    } else if (index == length - 1) {
+      return BorderRadius.only(
+        bottomLeft: Radius.circular(12.0),
+        bottomRight: Radius.circular(12.0),
+      );
+    } else {
+      return BorderRadius.zero;
+    }
+  }
+
+  BorderRadius getHorizontalRadius(int colIndex, int rowIndex, int length) {
+    if (rowIndex == 0 && length > 1) {
+      return BorderRadius.only(
+          topLeft: colIndex == 0 ? Radius.circular(12.0) : Radius.zero,
+          bottomLeft: colIndex == children.length - 1
+              ? Radius.circular(12.0)
+              : Radius.zero);
+    } else if (rowIndex == 0) {
+      return BorderRadius.circular(12.0);
+    } else if (rowIndex == length - 1) {
+      return BorderRadius.only(
+        topRight: colIndex == 0 ? Radius.circular(12.0) : Radius.zero,
+        bottomRight: colIndex == children.length - 1
+            ? Radius.circular(12.0)
+            : Radius.zero,
+      );
+    } else {
+      return BorderRadius.zero;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      spacing: spacing,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: List.generate(children.length, (index) {
+        Widget child = children[index];
+        if (child.runtimeType == Row) {
+          Row row = child as Row;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 2.0,
+            children: List.generate(row.children.length, (rowIndex) {
+              return Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: getHorizontalRadius(
+                        index, rowIndex, row.children.length),
+                    color: Colors.red,
+                  ),
+                  child: Padding(
+                    padding: padding,
+                    child: row.children[rowIndex],
+                  ),
+                ),
+              );
+            }),
+          );
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: getVerticalRadius(index),
+            color: Colors.red,
+          ),
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
+        );
+      }),
+    );
+  }
+}
+
 class SubstitutionListTile extends StatelessWidget {
   final Substitution substitutionData;
   const SubstitutionListTile({super.key, required this.substitutionData});
@@ -83,15 +179,17 @@ class SubstitutionListTile extends StatelessWidget {
 
     List<Widget> notchChildren = [
       if (doesExist(data.klasse))
-        Row(
-          spacing: 8.0,
-          children: [
-            Icon(Icons.school_outlined),
-            Text(
-              data.klasse!,
-              style: textTheme.titleMedium,
-            ),
-          ],
+        SizedBox(
+          child: Row(
+            spacing: 8.0,
+            children: [
+              Icon(Icons.school_outlined),
+              Text(
+                data.klasse!,
+                style: textTheme.titleMedium,
+              ),
+            ],
+          ),
         ),
       if (doesExist(data.fach))
         Text(
@@ -112,19 +210,21 @@ class SubstitutionListTile extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
+      child: AndroidDesign(
         spacing: 2.0,
+        padding: const EdgeInsets.all(8.0),
         children: [
-          SubstitutionRow(
-            isFirst: true,
+          Row(
             children: (notchChildren.length > 3)
                 ? notchChildren.sublist(0, 2)
                 : notchChildren,
           ),
           if (notchChildren.length > 3)
-            SubstitutionRow(
+            Row(
               children: notchChildren.sublist(2),
             ),
+          Text('Lol'),
+          Text('Serh langer Text zum testen. Serh langer Text zum testen'),
         ],
       ),
     );
