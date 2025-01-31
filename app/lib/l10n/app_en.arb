@@ -23,6 +23,7 @@
   "telemetry": "Telemetry",
   "sendAnonymousBugReports": "Send anonymous bug reports",
   "appInformation": "App information",
+  "selectASetting": "Select a setting",
 
   "noSupportOpenInBrowser": "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
   "noInternetConnection1": "No internet connection. Some data is still available.",

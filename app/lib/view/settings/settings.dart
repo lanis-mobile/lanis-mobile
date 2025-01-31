@@ -11,6 +11,7 @@ import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/utils/responsive.dart';
 
 import '../../applets/calendar/calendar_export.dart';
 import '../../core/database/account_database/account_db.dart';
@@ -175,39 +176,122 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     ]),
   ];
 
+  SettingsTile? selectedTile;
+
   @override
   Widget build(BuildContext context) {
-    return SettingsPage(
-      backgroundColor: backgroundColor,
-      title: Text(
-        AppLocalizations.of(context)!.settings,
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+    final double availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
+    
+    Widget settingsList = SizedBox(
+      height: availableHeight,
+      child: ListView.builder(
+        itemCount: settingsTiles.length,
+        itemBuilder: (context, groupIndex) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                settingsTiles[groupIndex].tiles.length,
+                (tileIndex) {
+                  final tile = settingsTiles[groupIndex].tiles[tileIndex];
+                  return SettingsTileWidget(
+                    tile: tile,
+                    index: tileIndex,
+                    length: settingsTiles[groupIndex].tiles.length,
+                    foregroundColor: foregroundColor,
+                    selected: isTablet && selectedTile == tile,
+                    onSelect: isTablet ? (tile) {
+                      setState(() => selectedTile = tile);
+                    } : null,
+                  );
+                }
+              ),
+            ),
+          );
+        },
       ),
-      children: List.generate(settingsTiles.length, (groupIndex) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
-          child: Column(
-              children: List.generate(settingsTiles[groupIndex].tiles.length,
-                  (tileIndex) {
-            return SettingsTileWidget(
-              tile: settingsTiles[groupIndex].tiles[tileIndex],
-              index: tileIndex,
-              length: settingsTiles[groupIndex].tiles.length,
-              foregroundColor: foregroundColor,
-            );
-          })),
-        );
-      }),
+    );
+
+    if (!isTablet) {
+      return SettingsPage(
+        backgroundColor: backgroundColor,
+        title: Text(AppLocalizations.of(context)!.settings),
+        children: [settingsList],
+      );
+    }
+
+    // Tablet layout
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.settings),
+        backgroundColor: backgroundColor,
+      ),
+      body: Row(
+        children: [
+          SizedBox(
+            width: 300, // Fixed width for settings list
+            child: settingsList,
+          ),
+          const VerticalDivider(width: 1),
+          Expanded(
+            child: selectedTile != null
+                ? _buildSettingDetail(selectedTile!)
+                : Center(
+                    child: Text(
+                      AppLocalizations.of(context)!.selectASetting,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingDetail(SettingsTile tile) {
+    return Builder(
+      builder: (context) {
+        if (tile.title(context) == AppLocalizations.of(context)!.appearance) {
+          return AppearanceSettings();
+        } else if (tile.title(context) == AppLocalizations.of(context)!.notifications) {
+          return NotificationSettings(accountCount: 1);
+        } else if (tile.title(context) == AppLocalizations.of(context)!.clearCache) {
+          return CacheSettings();
+        } else if (tile.title(context) == AppLocalizations.of(context)!.userData) {
+          return UserDataSettings();
+        } else if (tile.title(context) == AppLocalizations.of(context)!.about) {
+          return AboutSettings();
+        } else if (tile.title(context) == AppLocalizations.of(context)!.language) {
+          return Center(
+            child: ElevatedButton(
+              onPressed: () => tile.screen(context),
+              child: Text(AppLocalizations.of(context)!.language),
+            ),
+          );
+        }
+        return const Center(child: Text('Not implemented'));
+      },
     );
   }
 }
 
+// Remove the SettingsDetailPanel class as it's no longer needed
+
+// Update SettingsTileWidget to handle navigation differently
 class SettingsTileWidget extends StatefulWidget {
   final SettingsTile tile;
   final int index;
   final int length;
   final Color foregroundColor;
   final bool disableSetState;
-  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length, this.disableSetState = false});
+  final bool selected;
+  final Function(SettingsTile)? onSelect;
+  final bool preventNavigation;
+
+  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length, this.disableSetState = false, this.selected = false, this.onSelect, this.preventNavigation = false});
 
   static BorderRadius getRadius(int index, int length) {
     if (index == 0 && length > 1) {
@@ -240,54 +324,37 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
       ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 2.0),
-            child: PressTile(
-              title: widget.tile.title(context),
-              subtitle: subtitle,
-              icon: widget.tile.icon,
-              onPressed: () async {
-                await widget.tile.screen(context);
-
-                if (!widget.disableSetState) {
-                  setState(() {
-
-                  });
-                }
-              },
-              foregroundColor: widget.foregroundColor,
-              borderRadius: SettingsTileWidget.getRadius(
-                  widget.index, widget.length),
-            ),
-          );
+          return _buildTile(subtitle);
         }
 
         subtitle = snapshot.data![1] as String;
 
         return Visibility(
           visible: snapshot.data![0] as bool,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 2.0),
-              child: PressTile(
-                title: widget.tile.title(context),
-                subtitle: subtitle,
-                icon: widget.tile.icon,
-                onPressed: () async {
-                  await widget.tile.screen(context);
-
-                  if (!widget.disableSetState) {
-                    setState(() {
-
-                    });
-                  }
-                },
-                foregroundColor: widget.foregroundColor,
-                borderRadius: SettingsTileWidget.getRadius(
-                    widget.index, widget.length),
-              ),
-            )
+          child: _buildTile(subtitle),
         );
       },
+    );
+  }
+
+  Widget _buildTile(String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2.0),
+      child: PressTile(
+        title: widget.tile.title(context),
+        subtitle: subtitle,
+        icon: widget.tile.icon,
+        selected: widget.selected,
+        onPressed: () {
+          if (widget.onSelect != null) {
+            widget.onSelect!(widget.tile);
+          } else {
+            widget.tile.screen(context);
+          }
+        },
+        foregroundColor: widget.foregroundColor,
+        borderRadius: SettingsTileWidget.getRadius(widget.index, widget.length),
+      ),
     );
   }
 }

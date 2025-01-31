@@ -7,12 +7,23 @@ class PressTile extends StatelessWidget {
   final void Function()? onPressed;
   final Color? foregroundColor;
   final BorderRadius? borderRadius;
-  const PressTile({super.key, required this.title, required this.subtitle, required this.icon, this.onPressed, this.foregroundColor, this.borderRadius});
+  final bool selected;
+
+  const PressTile({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    this.onPressed,
+    this.foregroundColor,
+    this.borderRadius,
+    this.selected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: foregroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
+      color: selected ? Theme.of(context).colorScheme.primaryContainer : foregroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: borderRadius ?? BorderRadius.circular(12.0),
       child: InkWell(
         onTap: onPressed,
