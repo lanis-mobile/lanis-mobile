@@ -87,10 +87,8 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                     deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
                 itemPadding: 4.0,
                 itemBuilder: (data) {
-                  return Card(
-                    child: SubstitutionListTile(
-                      substitutionData: data,
-                    ),
+                  return SubstitutionListTile(
+                    substitutionData: data,
                   );
                 },
               ),
