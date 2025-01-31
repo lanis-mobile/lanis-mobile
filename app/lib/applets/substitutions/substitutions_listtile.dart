@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:sph_plan/widgets/marquee.dart';
 
 import '../../models/substitution.dart';
 
@@ -92,9 +95,9 @@ class AndroidDesign extends StatelessWidget {
                         ? Align(
                             alignment:
                                 getAlignment(rowIndex, row.children.length),
-                            child: row.children[rowIndex],
+                            child: scrollItem(row.children[rowIndex]),
                           )
-                        : row.children[rowIndex],
+                        : scrollItem(row.children[rowIndex]),
                   ),
                 ),
               );
@@ -109,11 +112,60 @@ class AndroidDesign extends StatelessWidget {
           ),
           child: Padding(
             padding: padding,
-            child: child,
+            child: scrollItem(child),
           ),
         );
       }),
     );
+  }
+
+  Widget scrollItem(Widget child) {
+    Widget originalChild = child;
+    if (child.runtimeType == SizedBox) {
+      child = (child as SizedBox).child!;
+    }
+
+    if (child.runtimeType == Row &&
+        (child as Row).children.length == 2 &&
+        child.children[0].runtimeType == Icon) {
+      return Row(
+        spacing: child.spacing,
+        children: [
+          child.children[0],
+          Expanded(
+            child: MarqueeWidget(
+              curve: Curves.linear,
+              outCurve: Curves.linear,
+              animationDuration: (child.children[1].runtimeType == Text)
+                  ? Duration(
+                      milliseconds: (3000 +
+                              clampDouble(
+                                  (child.children[1] as Text).data!.length *
+                                          100 -
+                                      3000,
+                                  0,
+                                  10000))
+                          .round())
+                  : const Duration(milliseconds: 6000),
+              child: child.children[1],
+            ),
+          ),
+        ],
+      );
+    } else {
+      return MarqueeWidget(
+        curve: Curves.linear,
+        outCurve: Curves.linear,
+        animationDuration: (child.runtimeType == Text)
+            ? Duration(
+                milliseconds: (3000 +
+                        clampDouble((child as Text).data!.length * 100 - 3000,
+                            0, 15000))
+                    .round())
+            : const Duration(milliseconds: 6000),
+        child: originalChild,
+      );
+    }
   }
 }
 
@@ -138,17 +190,15 @@ class SubstitutionListTile extends StatelessWidget {
 
     List<Widget> notchChildren = [
       if (doesExist(data.klasse))
-        SizedBox(
-          child: Row(
-            spacing: 8.0,
-            children: [
-              Icon(Icons.school_outlined),
-              Text(
-                data.klasse!,
-                style: textTheme.titleMedium,
-              ),
-            ],
-          ),
+        Row(
+          spacing: 8.0,
+          children: [
+            Icon(Icons.school_outlined),
+            Text(
+              data.klasse!,
+              style: textTheme.titleMedium,
+            ),
+          ],
         ),
       if (doesExist(data.fach))
         Text(
@@ -203,7 +253,11 @@ class SubstitutionListTile extends StatelessWidget {
                   Icon(
                     Icons.info_outline_rounded,
                   ),
-                  Text(data.hinweis2!, style: textTheme.titleMedium)
+                  Text(
+                    data.hinweis2!,
+                    style: textTheme.titleMedium,
+                    maxLines: 10,
+                  )
                 ],
               ),
             )
