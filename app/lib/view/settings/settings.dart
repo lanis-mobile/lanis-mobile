@@ -283,9 +283,6 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   }
 }
 
-// Remove the SettingsDetailPanel class as it's no longer needed
-
-// Update SettingsTileWidget to handle navigation differently
 class SettingsTileWidget extends StatefulWidget {
   final SettingsTile tile;
   final int index;
