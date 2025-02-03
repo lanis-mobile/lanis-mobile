@@ -180,7 +180,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width >= 600;
+    final isTablet = Responsive.isTablet(context);
     final double availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
     
     Widget settingsList = SizedBox(
@@ -254,32 +254,28 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   Widget _buildSettingDetail(SettingsTile tile) {
     return Builder(
       builder: (context) {
+        final isTablet = Responsive.isTablet(context);
         if (tile.title(context) == AppLocalizations.of(context)!.appearance) {
-          return AppearanceSettings();
+          return AppearanceSettings(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.notifications) {
-          return NotificationSettings(accountCount: 1);
+          return NotificationSettings(accountCount: 1, showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.clearCache) {
-          return CacheSettings();
+          return CacheSettings(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.userData) {
-          return UserDataSettings();
+          return UserDataSettings(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.about) {
-          return AboutSettings();
+          return AboutSettings(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.language) {
-          return Center(
-            child: ElevatedButton(
-              onPressed: () => tile.screen(context),
-              child: Text(AppLocalizations.of(context)!.language),
-            ),
-          );
+          tile.screen(context); // Directly open language settings
+          return const SizedBox.shrink(); // Return empty widget since we're navigating away
         } else if (tile.title(context) == AppLocalizations.of(context)!.calendarExport) {
-          return const CalendarExport();
+          return CalendarExport(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.inThisUpdate) {
-          return Center(
-            child: ElevatedButton(
-              onPressed: () => showLocalUpdateInfo(context),
-              child: Text(AppLocalizations.of(context)!.showReleaseNotesForThisVersion),
-            ),
-          );
+          // Schedule the dialog to show after the build is complete
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showLocalUpdateInfo(context);
+          });
+          return const SizedBox.shrink(); // Return empty widget since we're showing dialog
         }
         return const Center(child: Text('Not implemented'));
       },

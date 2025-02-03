@@ -78,7 +78,8 @@ class AboutLink {
 }
 
 class AboutSettings extends SettingsColours {
-  const AboutSettings({super.key});
+  final bool showBackButton;
+  const AboutSettings({super.key, this.showBackButton = true});
 
   @override
   State<AboutSettings> createState() => _AboutSettingsState();
@@ -174,6 +175,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
     return SettingsPageWithRefreshIndicator(
         backgroundColor: backgroundColor,
         title: Text(AppLocalizations.of(context)!.about),
+        showBackButton: widget.showBackButton,
         onRefresh: () {
           return getContributors();
         },
