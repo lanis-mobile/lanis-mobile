@@ -1,18 +1,21 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
-import 'package:sph_plan/applets/calendar/definition.dart';
-import 'package:sph_plan/widgets/combined_applet_builder.dart';
-import 'package:sph_plan/utils/keyboard_observer.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:sph_plan/applets/calendar/definition.dart';
+import 'package:sph_plan/utils/keyboard_observer.dart';
+import 'package:sph_plan/widgets/combined_applet_builder.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import 'package:sph_plan/generated/l10n.dart';
+
 
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
 import '../../models/client_status_exceptions.dart';
-import '../../widgets/error_view.dart';
 import '../../utils/logger.dart';
+import '../../widgets/error_view.dart';
 
 class CalendarView extends StatefulWidget {
   final Function? openDrawerCb;
@@ -511,7 +514,22 @@ class _CalendarViewState extends State<CalendarView> {
                                       width: 6,
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: events[index].color),
+                                          color: events[index].color,
+                                          border: (events[index]
+                                                              .color
+                                                              .computeLuminance() -
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .surface
+                                                              .computeLuminance())
+                                                      .abs() <
+                                                  0.02
+                                              ? Border.all(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                                  width: 0.75)
+                                              : null),
                                     ),
                                   );
                                 },
@@ -552,43 +570,61 @@ class _CalendarViewState extends State<CalendarView> {
                                           left: 8, right: 8, bottom: 4),
                                       child: Card(
                                         child: InkWell(
-                                          borderRadius: BorderRadius.circular(12),
-                                            onTap: () async {
-                                              await openEventBottomSheet(
-                                                  value[index]);
-                                            },
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          onTap: () async {
+                                            await openEventBottomSheet(
+                                                value[index]);
+                                          },
                                           child: Row(
                                             children: [
                                               Container(
                                                 width: 8,
                                                 height: 40,
                                                 decoration: BoxDecoration(
-                                                  color: value[index].color,
-                                                  borderRadius: BorderRadius.circular(8)
-                                                ),
+                                                    color: value[index].color,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8)),
                                               ),
                                               Expanded(
                                                 child: Padding(
-                                                  padding: const EdgeInsets.all(8),
+                                                  padding:
+                                                      const EdgeInsets.all(8),
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         value[index].title,
-                                                        style: Theme.of(context).textTheme.titleMedium,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium,
                                                       ),
                                                       Text(
                                                         maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        value[index].category?.name ?? value[index].place ?? value[index].description,
-                                                        style: Theme.of(context).textTheme.bodyMedium,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        value[index]
+                                                                .category
+                                                                ?.name ??
+                                                            value[index]
+                                                                .place ??
+                                                            value[index]
+                                                                .description,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .bodyMedium,
                                                       ),
                                                     ],
                                                   ),
                                                 ),
                                               ),
                                               Icon(Icons.arrow_right),
-                                              SizedBox(width: 8,)
+                                              SizedBox(
+                                                width: 8,
+                                              )
                                             ],
                                           ),
                                         ),
