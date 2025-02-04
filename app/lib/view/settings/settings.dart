@@ -216,6 +216,10 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                   selected: isTablet && selectedTile == tile,
                   onSelect: isTablet
                       ? (tile) {
+                          if (tile.title(context) ==
+                              AppLocalizations.of(context)!.language) {
+                            return tile.screen(context);
+                          }
                           setState(() => selectedTile = tile);
                         }
                       : null,
@@ -276,11 +280,6 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return UserDataSettings(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.about) {
           return AboutSettings(showBackButton: !isTablet);
-        } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.language) {
-          tile.screen(context); // Directly open language settings
-          return const SizedBox
-              .shrink(); // Return empty widget since we're navigating away
         } else if (tile.title(context) ==
             AppLocalizations.of(context)!.calendarExport) {
           return CalendarExport(showBackButton: !isTablet);
