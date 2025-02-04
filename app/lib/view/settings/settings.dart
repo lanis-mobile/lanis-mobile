@@ -5,6 +5,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
+import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/utils/responsive.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
@@ -180,27 +181,19 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   SettingsTile? selectedTile;
 
   @override
-  void initState() {
-    super.initState();
-    // Delay to make sure its loaded already
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted &&
-          Responsive.isTablet(context) &&
-          settingsTiles.isNotEmpty &&
-          settingsTiles[0].tiles.isNotEmpty) {
-        setState(() {
-          selectedTile = settingsTiles[0].tiles[0];
-        });
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTablet(context);
     final double availableHeight = MediaQuery.of(context).size.height -
         kToolbarHeight -
         MediaQuery.of(context).padding.top;
+
+    if (mounted &&
+        Responsive.isTablet(context) &&
+        settingsTiles.isNotEmpty &&
+        settingsTiles[0].tiles.isNotEmpty &&
+        selectedTile == null) {
+      selectedTile = settingsTiles[0].tiles[0];
+    }
 
     Widget settingsList = SizedBox(
       height: availableHeight,
@@ -257,14 +250,8 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           ),
           const VerticalDivider(width: 1),
           Expanded(
-            child: selectedTile != null
-                ? _buildSettingDetail(selectedTile!)
-                : Center(
-                    child: Text(
-                      AppLocalizations.of(context)!.selectASetting,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ),
+            // At this point selectedTile should/can never be null
+            child: _buildSettingDetail(selectedTile!),
           ),
         ],
       ),
@@ -299,21 +286,24 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return CalendarExport(showBackButton: !isTablet);
         } else if (tile.title(context) ==
             AppLocalizations.of(context)!.inThisUpdate) {
-          // Schedule the dialog to show after the build is complete
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
-            showLocalUpdateInfo(context, dialog: true);
-          });
-
           return FutureBuilder(
               future: showLocalUpdateInfo(context, dialog: false),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data != null) {
-                  return snapshot.data!;
+                  return Scaffold(
+                    appBar: LargeAppBar(
+                        showBackButton: false,
+                        backgroundColor: backgroundColor,
+                        title:
+                            Text(AppLocalizations.of(context)!.inThisUpdate)),
+                    body: snapshot.data as Widget,
+                  );
                 }
                 return const Center(child: CircularProgressIndicator());
               });
         }
-        return const Center(child: Text('Not implemented'));
+        return Center(
+            child: Text(AppLocalizations.of(context)!.notImplemented));
       },
     );
   }

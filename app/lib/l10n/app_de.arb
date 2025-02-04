@@ -23,7 +23,6 @@
   "telemetry": "Telemetrie",
   "sendAnonymousBugReports": "Anonyme Bugreports senden",
   "appInformation": "App Informationen",
-  "selectASetting": "Wähle eine Einstellung",
 
   "noSupportOpenInBrowser": "Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen.",
   "noInternetConnection1": "Keine Verbindung! Geladene Daten sind noch aufrufbar!",
@@ -161,6 +160,7 @@
   "privacyPolicy": "Datenschutzerklärung",
   "openSourceLicenses": "Open-Source Lizenzen",
   "buildInformation": "Build Informationen",
+  "notImplemented": "Nicht implementiert",
 
   "introWelcomeTitle": "Willkommen",
   "introForStudentsByStudentsTitle": "Von Schülern. Für Schüler.",
