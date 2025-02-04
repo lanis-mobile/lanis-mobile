@@ -179,6 +179,19 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   SettingsTile? selectedTile;
 
   @override
+  void initState() {
+    super.initState();
+    // Delay to make sure its loaded already
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && Responsive.isTablet(context) && settingsTiles.isNotEmpty && settingsTiles[0].tiles.isNotEmpty) {
+        setState(() {
+          selectedTile = settingsTiles[0].tiles[0];
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTablet(context);
     final double availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
