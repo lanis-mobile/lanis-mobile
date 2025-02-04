@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
+import 'package:sph_plan/utils/responsive.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
-import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:sph_plan/utils/responsive.dart';
 
 import '../../applets/calendar/calendar_export.dart';
 import '../../core/database/account_database/account_db.dart';
@@ -90,25 +90,26 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return androidInfo.version.sdkInt >= 33;
         },
       ),
-      if (Platform.isAndroid) SettingsTile(
-          title: (context) => AppLocalizations.of(context)!.notifications,
-          subtitle: (context) async {
-            return AppLocalizations.of(context)!.intervalAppletsList;
-          },
-          icon: Icons.notifications_rounded,
-          screen: (context) async {
-            int accountCount = await accountDatabase
-                .select(accountDatabase.accountsTable)
-                .get()
-                .then((value) => value.length);
+      if (Platform.isAndroid)
+        SettingsTile(
+            title: (context) => AppLocalizations.of(context)!.notifications,
+            subtitle: (context) async {
+              return AppLocalizations.of(context)!.intervalAppletsList;
+            },
+            icon: Icons.notifications_rounded,
+            screen: (context) async {
+              int accountCount = await accountDatabase
+                  .select(accountDatabase.accountsTable)
+                  .get()
+                  .then((value) => value.length);
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      NotificationSettings(accountCount: accountCount)),
-            );
-          }),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NotificationSettings(accountCount: accountCount)),
+              );
+            }),
       SettingsTile(
           title: (context) => AppLocalizations.of(context)!.clearCache,
           subtitle: (context) async {
@@ -126,8 +127,8 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
     ]),
-    if (sph!.session.doesSupportFeature(calendarDefinition)) SettingsGroup(
-      tiles: [
+    if (sph!.session.doesSupportFeature(calendarDefinition))
+      SettingsGroup(tiles: [
         SettingsTile(
           title: (context) => AppLocalizations.of(context)!.calendarExport,
           subtitle: (context) async => 'PDF, iCal, ICS, CSV',
@@ -139,8 +140,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             ),
           ),
         ),
-      ]
-    ),
+      ]),
     SettingsGroup(tiles: [
       SettingsTile(
         title: (context) => AppLocalizations.of(context)!.userData,
@@ -170,7 +170,8 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
         icon: Icons.question_mark,
         show: () async => true,
         title: (context) => AppLocalizations.of(context)!.inThisUpdate,
-        subtitle: (context) async => AppLocalizations.of(context)!.showReleaseNotesForThisVersion,
+        subtitle: (context) async =>
+            AppLocalizations.of(context)!.showReleaseNotesForThisVersion,
         screen: (context) async => showLocalUpdateInfo(context),
       )
     ]),
@@ -183,7 +184,10 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     super.initState();
     // Delay to make sure its loaded already
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && Responsive.isTablet(context) && settingsTiles.isNotEmpty && settingsTiles[0].tiles.isNotEmpty) {
+      if (mounted &&
+          Responsive.isTablet(context) &&
+          settingsTiles.isNotEmpty &&
+          settingsTiles[0].tiles.isNotEmpty) {
         setState(() {
           selectedTile = settingsTiles[0].tiles[0];
         });
@@ -194,33 +198,36 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTablet(context);
-    final double availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
-    
+    final double availableHeight = MediaQuery.of(context).size.height -
+        kToolbarHeight -
+        MediaQuery.of(context).padding.top;
+
     Widget settingsList = SizedBox(
       height: availableHeight,
       child: ListView.builder(
         itemCount: settingsTiles.length,
         itemBuilder: (context, groupIndex) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                settingsTiles[groupIndex].tiles.length,
-                (tileIndex) {
-                  final tile = settingsTiles[groupIndex].tiles[tileIndex];
-                  return SettingsTileWidget(
-                    tile: tile,
-                    index: tileIndex,
-                    length: settingsTiles[groupIndex].tiles.length,
-                    foregroundColor: foregroundColor,
-                    selected: isTablet && selectedTile == tile,
-                    onSelect: isTablet ? (tile) {
-                      setState(() => selectedTile = tile);
-                    } : null,
-                  );
-                }
-              ),
+              children: List.generate(settingsTiles[groupIndex].tiles.length,
+                  (tileIndex) {
+                final tile = settingsTiles[groupIndex].tiles[tileIndex];
+                return SettingsTileWidget(
+                  tile: tile,
+                  index: tileIndex,
+                  length: settingsTiles[groupIndex].tiles.length,
+                  foregroundColor: foregroundColor,
+                  selected: isTablet && selectedTile == tile,
+                  onSelect: isTablet
+                      ? (tile) {
+                          setState(() => selectedTile = tile);
+                        }
+                      : null,
+                );
+              }),
             ),
           );
         },
@@ -270,25 +277,41 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
         final isTablet = Responsive.isTablet(context);
         if (tile.title(context) == AppLocalizations.of(context)!.appearance) {
           return AppearanceSettings(showBackButton: !isTablet);
-        } else if (tile.title(context) == AppLocalizations.of(context)!.notifications) {
-          return NotificationSettings(accountCount: 1, showBackButton: !isTablet);
-        } else if (tile.title(context) == AppLocalizations.of(context)!.clearCache) {
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.notifications) {
+          return NotificationSettings(
+              accountCount: 1, showBackButton: !isTablet);
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.clearCache) {
           return CacheSettings(showBackButton: !isTablet);
-        } else if (tile.title(context) == AppLocalizations.of(context)!.userData) {
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.userData) {
           return UserDataSettings(showBackButton: !isTablet);
         } else if (tile.title(context) == AppLocalizations.of(context)!.about) {
           return AboutSettings(showBackButton: !isTablet);
-        } else if (tile.title(context) == AppLocalizations.of(context)!.language) {
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.language) {
           tile.screen(context); // Directly open language settings
-          return const SizedBox.shrink(); // Return empty widget since we're navigating away
-        } else if (tile.title(context) == AppLocalizations.of(context)!.calendarExport) {
+          return const SizedBox
+              .shrink(); // Return empty widget since we're navigating away
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.calendarExport) {
           return CalendarExport(showBackButton: !isTablet);
-        } else if (tile.title(context) == AppLocalizations.of(context)!.inThisUpdate) {
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.inThisUpdate) {
           // Schedule the dialog to show after the build is complete
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showLocalUpdateInfo(context);
+          WidgetsBinding.instance!.addPostFrameCallback((_) {
+            showLocalUpdateInfo(context, dialog: true);
           });
-          return const SizedBox.shrink(); // Return empty widget since we're showing dialog
+
+          return FutureBuilder(
+              future: showLocalUpdateInfo(context, dialog: false),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return snapshot.data!;
+                }
+                return const Center(child: CircularProgressIndicator());
+              });
         }
         return const Center(child: Text('Not implemented'));
       },
@@ -306,7 +329,16 @@ class SettingsTileWidget extends StatefulWidget {
   final Function(SettingsTile)? onSelect;
   final bool preventNavigation;
 
-  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length, this.disableSetState = false, this.selected = false, this.onSelect, this.preventNavigation = false});
+  const SettingsTileWidget(
+      {super.key,
+      required this.tile,
+      required this.foregroundColor,
+      required this.index,
+      required this.length,
+      this.disableSetState = false,
+      this.selected = false,
+      this.onSelect,
+      this.preventNavigation = false});
 
   static BorderRadius getRadius(int index, int length) {
     if (index == 0 && length > 1) {
@@ -373,4 +405,3 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
     );
   }
 }
-
