@@ -76,29 +76,16 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
 
     // Exams parse tbody
     List<List<String>> examData = [];
+    RegExp dateRegex = RegExp(r'.{2}, \d{2}\.\d{2}\.\d{4}');
     examTable.querySelectorAll('tbody tr').forEach((element) {
       List<String> examRow = [];
       // Check if first element contains a date
-      if (element
-          .querySelector('td')!
-          .text
-          .trim()
-          .contains(RegExp(r'\d{2}\.\d{2}\.\d{4}'))) {
-        element.querySelectorAll('td').forEach((element) {
-          // if there is a span with the class "next" it is the next exam
-          if (element.querySelector('span') != null) {
-            if (element.querySelector('span')!.classes.contains('next')) {
-              // Exclude the span from the text
-              String wholeText = element.text.trim();
-              String text = wholeText
-                  .substring(
-                      0,
-                      wholeText.length -
-                          element.querySelector('span')!.text.length)
-                  .trim()
-                  .replaceAll('\n', '');
-              examRow.add(text);
-            }
+      if (element.querySelector('td')!.text.trim().contains(dateRegex)) {
+        element.querySelectorAll('td').asMap().forEach((index, element) {
+          if (index == 0) {
+            RegExpMatch? match = dateRegex.firstMatch(element.text.trim());
+            // Match must be true, because of above if
+            examRow.add(match!.group(0)!);
           } else {
             examRow.add(element.text.trim());
           }
