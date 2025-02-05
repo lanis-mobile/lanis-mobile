@@ -2486,16 +2486,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Remove account`
-  String get removeAccount {
-    return Intl.message(
-      'Remove account',
-      name: 'removeAccount',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Customize Timetable`
   String get customizeTimetable {
     return Intl.message(
@@ -2596,11 +2586,6 @@ class AppLocalizations {
     return Intl.message('Clear', name: 'clear', desc: '', args: []);
   }
 
-  /// `Set`
-  String get set {
-    return Intl.message('Set', name: 'set', desc: '', args: []);
-  }
-
   /// `Unknown lesson`
   String get unknownLesson {
     return Intl.message(
@@ -2618,6 +2603,16 @@ class AppLocalizations {
       name: 'lessonHidden',
       desc: '',
       args: [lesson],
+    );
+  }
+
+  /// `Remove account`
+  String get removeAccount {
+    return Intl.message(
+      'Remove account',
+      name: 'removeAccount',
+      desc: '',
+      args: [],
     );
   }
 

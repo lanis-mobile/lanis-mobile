@@ -465,7 +465,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendMessagePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Write your message here...",
     ),
-    "set": MessageLookupByLibrary.simpleMessage("Set"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "settingsErrorAbout": MessageLookupByLibrary.simpleMessage(
       "Normally you would see contributors but an error occurred. Most likely you don\'t have an internet connection.",

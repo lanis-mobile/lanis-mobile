@@ -86,7 +86,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               },
             ),
             ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.set),
+              child: Text(AppLocalizations.of(context)!.select),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -97,7 +97,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 updateSettings('lesson-colors', {
                   ...settings['lesson-colors'],
                   lesson.id.split('-')[0]:
-                      selectedColor.toHexString(enableAlpha: false)
+                    selectedColor.toHexString(enableAlpha: false)
                 });
               },
             ),

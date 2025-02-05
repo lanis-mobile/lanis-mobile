@@ -128,9 +128,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
     ]),
-    if (sph!.session.doesSupportFeature(calendarDefinition))
+    if (sph!.session.doesSupportFeature(calendarDefinition) || sph!.session.doesSupportFeature(timeTableDefinition))
       SettingsGroup(tiles: [
-        SettingsTile(
+        if (sph!.session.doesSupportFeature(calendarDefinition)) SettingsTile(
           title: (context) => AppLocalizations.of(context)!.calendarExport,
           subtitle: (context) async => 'PDF, iCal, ICS, CSV',
           icon: Icons.download_rounded,
@@ -141,13 +141,10 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             ),
           ),
         ),
-      ]),
-    if (sph!.session.doesSupportFeature(timeTableDefinition))
-      SettingsGroup(tiles: [
-        SettingsTile(
+        if (sph!.session.doesSupportFeature(timeTableDefinition)) SettingsTile(
           title: (context) => AppLocalizations.of(context)!.customizeTimetable,
           subtitle: (context) async =>
-              AppLocalizations.of(context)!.customizeTimetableDescription,
+          AppLocalizations.of(context)!.customizeTimetableDescription,
           icon: Icons.timelapse,
           screen: (context) => Navigator.push(
             context,

@@ -149,7 +149,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkStatus": MessageLookupByLibrary.simpleMessage(
       "Serverstatus überprüfen",
     ),
-    "clear": MessageLookupByLibrary.simpleMessage("Löschen"),
+    "clear": MessageLookupByLibrary.simpleMessage("Zurücksetzen"),
     "clearAll": MessageLookupByLibrary.simpleMessage("Alles löschen"),
     "clearCache": MessageLookupByLibrary.simpleMessage("Cache leeren"),
     "close": MessageLookupByLibrary.simpleMessage("Schließen"),
@@ -503,7 +503,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendMessagePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Schreibe hier deine Nachricht...",
     ),
-    "set": MessageLookupByLibrary.simpleMessage("Setzen"),
     "settings": MessageLookupByLibrary.simpleMessage("Einstellungen"),
     "settingsErrorAbout": MessageLookupByLibrary.simpleMessage(
       "Normalerweise sollten die Mitwirkenden der App angezeigt werden, aber ein Fehler ist aufgetreten. Du hast sehr wahrscheinlich keine Internetverbindung.",
