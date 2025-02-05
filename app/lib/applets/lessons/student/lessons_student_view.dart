@@ -5,6 +5,8 @@ import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
+import '../../../utils/file_picker.dart';
+import '../../../utils/logger.dart';
 import 'attendances.dart';
 import 'lesson_list_tile.dart';
 
@@ -39,6 +41,19 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // TODO: REMOVE THIS AFTER YOU'RE DONE BAKA!!!!!!!!!!!!
+      floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            List<String> allowedExtensions = [".pdf", ".ltx", ".md", ".docx", ".txt"];
+            PickedFile? pickedFile = await pickSingleFile(context, allowedExtensions);
+            if (pickedFile == null) {
+              logger.e("Picked file is NULL!");
+            } else {
+              String name = pickedFile.name!;
+              logger.i("Name of picked file is: \"$name\"");
+            }
+          }
+      ),
       appBar: widget.openDrawerCb != null
           ? AppBar(
               title: Text(lessonsDefinition.label(context)),

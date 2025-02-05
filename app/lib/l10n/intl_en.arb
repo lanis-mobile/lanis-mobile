@@ -119,6 +119,10 @@
   "shareFile": "Share file",
   "unknownFile": "Unknown File",
 
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "fileManager": "Files",
+
   "setupNonStudentTitle": "Teachers or parent account",
   "setupNonStudent": "You obviously have a non-student account. You can still use the app, but some features may not work.",
   "setupFilterSubstitutionsTitle": "Filter substitutions",

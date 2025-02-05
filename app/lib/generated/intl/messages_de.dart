@@ -138,6 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "calendarFormatWeek": MessageLookupByLibrary.simpleMessage("zwei Wochen"),
     "calendarWeek": MessageLookupByLibrary.simpleMessage("Kalenderwoche"),
     "calendarWeekShort": MessageLookupByLibrary.simpleMessage("ΚW"),
+    "camera": MessageLookupByLibrary.simpleMessage("Kamera"),
     "cancel": MessageLookupByLibrary.simpleMessage("Abbrechen"),
     "changePassword": MessageLookupByLibrary.simpleMessage("Passwort ändern"),
     "checkStatus": MessageLookupByLibrary.simpleMessage(
@@ -243,6 +244,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "featureRequest": MessageLookupByLibrary.simpleMessage("Feature-Anfrage"),
     "feedback": MessageLookupByLibrary.simpleMessage("Feedback zur App 👉👈"),
     "file": MessageLookupByLibrary.simpleMessage("Datei"),
+    "fileManager": MessageLookupByLibrary.simpleMessage("Dateien"),
     "files": MessageLookupByLibrary.simpleMessage("Dateien"),
     "forEveryAccount": MessageLookupByLibrary.simpleMessage(
       "Für jeden Account",
@@ -250,6 +252,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forThisAccount": MessageLookupByLibrary.simpleMessage(
       "Für diesen Account",
     ),
+    "gallery": MessageLookupByLibrary.simpleMessage("Gallerie"),
     "githubRepository": MessageLookupByLibrary.simpleMessage(
       "GitHub-Repository",
     ),
@@ -318,7 +321,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bekannte Empfänger",
     ),
     "language": MessageLookupByLibrary.simpleMessage("Sprache"),
-    "lanisDown": MessageLookupByLibrary.simpleMessage("Lanis ist down!"),
+    "lanisDown": MessageLookupByLibrary.simpleMessage(
+      "Lanis ist nicht erreichbar!",
+    ),
     "lanisDownError": MessageLookupByLibrary.simpleMessage(
       "Lanis ist nicht aufrufbar!",
     ),

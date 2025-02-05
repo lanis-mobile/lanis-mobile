@@ -44,7 +44,7 @@ void showFileModal(BuildContext context, FileInfo file) {
                       Icon(getIconByFileExtension(file.extension)),
                       const SizedBox(width: 10.0),
                       Expanded(
-                        child: Text(file.name ?? AppLocalizations.of(context)!.unknownFile, overflow: TextOverflow.ellipsis,),),
+                        child: Text(file.name ?? AppLocalizations.of(context).unknownFile, overflow: TextOverflow.ellipsis,),),
                       Text(file.size ?? "", style: Theme.of(context).textTheme.labelMedium),
                       const SizedBox(width: 22.0),
                     ],
@@ -53,28 +53,28 @@ void showFileModal(BuildContext context, FileInfo file) {
                   Divider(),
                   MenuItemButton(
                     onPressed: () => {
-                      launchFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
+                      launchFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context).unknownFile, file.size, () {})
                     },
                     child: Row(
                       children: [
                         Padding(padding: EdgeInsets.only(left: 10.0)),
                         Icon(Icons.open_in_new),
                         Padding(padding: EdgeInsets.only(right: 8.0)),
-                        Text(AppLocalizations.of(context)!.openFile)
+                        Text(AppLocalizations.of(context).openFile)
                       ],
                     ),
                   ),
                   if (!Platform.isIOS) (
                     MenuItemButton(
                       onPressed: () => {
-                        saveFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
+                        saveFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context).unknownFile, file.size, () {})
                       },
                       child: Row(
                         children: [
                           Padding(padding: EdgeInsets.only(left: 10.0)),
                           Icon(Icons.save_alt_rounded),
                           Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context)!.saveFile)
+                          Text(AppLocalizations.of(context).saveFile)
                         ],
                       ),
                     )
@@ -82,14 +82,14 @@ void showFileModal(BuildContext context, FileInfo file) {
                   if (!Platform.isLinux) (
                     MenuItemButton(
                       onPressed: () => {
-                        shareFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context)!.unknownFile, file.size, () {})
+                        shareFile(context, file.url.toString(), file.name ?? AppLocalizations.of(context).unknownFile, file.size, () {})
                       },
                       child: Row(
                         children: [
                           Padding(padding: EdgeInsets.only(left: 10.0)),
                           Icon(Icons.share_rounded),
                           Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context)!.shareFile)
+                          Text(AppLocalizations.of(context).shareFile)
                         ],
                       ),
                     )
@@ -124,10 +124,10 @@ void launchFile(BuildContext context, String url, String filename,
         showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text("${AppLocalizations.of(context)!.error}!"),
+              title: Text("${AppLocalizations.of(context).error}!"),
               icon: const Icon(Icons.error),
               content: Text(
-                  AppLocalizations.of(context)!.noAppToOpen),
+                  AppLocalizations.of(context).noAppToOpen),
               actions: [
                 FilledButton(
                   child: const Text('Ok'),

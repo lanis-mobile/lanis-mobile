@@ -132,6 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "calendarFormatWeek": MessageLookupByLibrary.simpleMessage("two Weeks"),
     "calendarWeek": MessageLookupByLibrary.simpleMessage("Calendar Week"),
     "calendarWeekShort": MessageLookupByLibrary.simpleMessage("CW"),
+    "camera": MessageLookupByLibrary.simpleMessage("Camera"),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "changePassword": MessageLookupByLibrary.simpleMessage("Change password"),
     "checkStatus": MessageLookupByLibrary.simpleMessage("Check server status"),
@@ -233,11 +234,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Feedback for the App 👉👈",
     ),
     "file": MessageLookupByLibrary.simpleMessage("file"),
+    "fileManager": MessageLookupByLibrary.simpleMessage("Files"),
     "files": MessageLookupByLibrary.simpleMessage("files"),
     "forEveryAccount": MessageLookupByLibrary.simpleMessage(
       "For every account",
     ),
     "forThisAccount": MessageLookupByLibrary.simpleMessage("For this account"),
+    "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
     "githubRepository": MessageLookupByLibrary.simpleMessage(
       "GitHub repository",
     ),

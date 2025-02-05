@@ -927,6 +927,21 @@ class AppLocalizations {
     );
   }
 
+  /// `Camera`
+  String get camera {
+    return Intl.message('Camera', name: 'camera', desc: '', args: []);
+  }
+
+  /// `Gallery`
+  String get gallery {
+    return Intl.message('Gallery', name: 'gallery', desc: '', args: []);
+  }
+
+  /// `Files`
+  String get fileManager {
+    return Intl.message('Files', name: 'fileManager', desc: '', args: []);
+  }
+
   /// `Teachers or parent account`
   String get setupNonStudentTitle {
     return Intl.message(

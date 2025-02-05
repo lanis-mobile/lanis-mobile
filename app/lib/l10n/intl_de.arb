@@ -119,6 +119,10 @@
   "shareFile": "Datei teilen",
   "unknownFile": "Unbekannte Datei",
 
+  "camera": "Kamera",
+  "gallery": "Gallerie",
+  "fileManager": "Dateien",
+
   "setupNonStudentTitle": "Lehrkräfte oder Elternaccount",
   "setupNonStudent": "Du hast offenbar einen nicht-Schüleraccount. Du kannst die App trotzdem verwenden, aber es kann sein, dass einige Features nicht funktionieren.",
   "setupFilterSubstitutionsTitle": "Vertretungen filtern",
