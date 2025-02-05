@@ -2501,6 +2501,126 @@ class AppLocalizations {
     );
   }
 
+  /// `Customize Timetable`
+  String get customizeTimetable {
+    return Intl.message(
+      'Customize Timetable',
+      name: 'customizeTimetable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hidden lessons, custom lessons`
+  String get customizeTimetableDescription {
+    return Intl.message(
+      'Hidden lessons, custom lessons',
+      name: 'customizeTimetableDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After you make a change you need to restart the app or switch applets to see the changes.`
+  String get customizeTimetableDisclaimer {
+    return Intl.message(
+      'After you make a change you need to restart the app or switch applets to see the changes.',
+      name: 'customizeTimetableDisclaimer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lesson name`
+  String get lessonName {
+    return Intl.message('Lesson name', name: 'lessonName', desc: '', args: []);
+  }
+
+  /// `required`
+  String get required {
+    return Intl.message('required', name: 'required', desc: '', args: []);
+  }
+
+  /// `Room`
+  String get room {
+    return Intl.message('Room', name: 'room', desc: '', args: []);
+  }
+
+  /// `Lesson {lesson} added!`
+  String lessonAdded(Object lesson) {
+    return Intl.message(
+      'Lesson $lesson added!',
+      name: 'lessonAdded',
+      desc: '',
+      args: [lesson],
+    );
+  }
+
+  /// `Add lesson`
+  String get addLesson {
+    return Intl.message('Add lesson', name: 'addLesson', desc: '', args: []);
+  }
+
+  /// `Edit lesson`
+  String get editLesson {
+    return Intl.message('Edit lesson', name: 'editLesson', desc: '', args: []);
+  }
+
+  /// `Hidden lessons`
+  String get hiddenLessons {
+    return Intl.message(
+      'Hidden lessons',
+      name: 'hiddenLessons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `There are no hidden lessons for this day. You can hide lessons in the timetable`
+  String get hiddenLessonsDescription {
+    return Intl.message(
+      'There are no hidden lessons for this day. You can hide lessons in the timetable',
+      name: 'hiddenLessonsDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom lessons`
+  String get customLessons {
+    return Intl.message(
+      'Custom lessons',
+      name: 'customLessons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear`
+  String get clear {
+    return Intl.message('Clear', name: 'clear', desc: '', args: []);
+  }
+
+  /// `Unknown lesson`
+  String get unknownLesson {
+    return Intl.message(
+      'Unknown lesson',
+      name: 'unknownLesson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{lesson} was hidden. To show it again, you need to remove it in the settings.`
+  String lessonHidden(Object lesson) {
+    return Intl.message(
+      '$lesson was hidden. To show it again, you need to remove it in the settings.',
+      name: 'lessonHidden',
+      desc: '',
+      args: [lesson],
+    );
+  }
+
   /// `Remove account`
   String get removeAccount {
     return Intl.message(

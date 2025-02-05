@@ -44,15 +44,20 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m8(individualSearchHint) =>
       "${Intl.select(individualSearchHint, {'subject': 'Subject...', 'schedule': 'Date...', 'name': 'Teacher...', 'other': 'Fehler'})}";
 
-  static String m9(time) => "Wait ${time} before next attempt";
+  static String m9(lesson) => "Lesson ${lesson} added!";
 
-  static String m10(count) =>
+  static String m10(lesson) =>
+      "${lesson} was hidden. To show it again, you need to remove it in the settings.";
+
+  static String m11(time) => "Wait ${time} before next attempt";
+
+  static String m12(count) =>
       "${Intl.plural(count, zero: 'No schools', one: '1 school', other: '${count} schools')}";
 
-  static String m11(time) =>
+  static String m13(time) =>
       "Not correct? Check whether your filter is set correctly. You may need to contact your school\'s IT department.\nLast edited: ${time}";
 
-  static String m12(week) => "${week}-Week";
+  static String m14(week) => "${week}-Week";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -66,6 +71,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Activate it to receive notifications.",
     ),
     "addFilter": MessageLookupByLibrary.simpleMessage("Add filter"),
+    "addLesson": MessageLookupByLibrary.simpleMessage("Add lesson"),
     "addReceivers": MessageLookupByLibrary.simpleMessage("Add receiver"),
     "addReceiversHint": MessageLookupByLibrary.simpleMessage(
       "e. g. names or abbreviations",
@@ -136,6 +142,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "changePassword": MessageLookupByLibrary.simpleMessage("Change password"),
     "checkStatus": MessageLookupByLibrary.simpleMessage("Check server status"),
+    "clear": MessageLookupByLibrary.simpleMessage("Clear"),
     "clearAll": MessageLookupByLibrary.simpleMessage("Clear all"),
     "clearCache": MessageLookupByLibrary.simpleMessage("Clear cache"),
     "close": MessageLookupByLibrary.simpleMessage("Close"),
@@ -179,6 +186,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "csvExport": MessageLookupByLibrary.simpleMessage("CSV export"),
     "currentWeek": MessageLookupByLibrary.simpleMessage("Current week"),
+    "customLessons": MessageLookupByLibrary.simpleMessage("Custom lessons"),
+    "customizeTimetable": MessageLookupByLibrary.simpleMessage(
+      "Customize Timetable",
+    ),
+    "customizeTimetableDescription": MessageLookupByLibrary.simpleMessage(
+      "Hidden lessons, custom lessons",
+    ),
+    "customizeTimetableDisclaimer": MessageLookupByLibrary.simpleMessage(
+      "After you make a change you need to restart the app or switch applets to see the changes.",
+    ),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "darkModeColoursList": MessageLookupByLibrary.simpleMessage(
       "Dark mode, Accent colours",
@@ -202,6 +219,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "discordServer": MessageLookupByLibrary.simpleMessage("Discord server"),
     "done": MessageLookupByLibrary.simpleMessage("Done"),
     "dynamicColor": MessageLookupByLibrary.simpleMessage("Dynamic"),
+    "editLesson": MessageLookupByLibrary.simpleMessage("Edit lesson"),
     "enableSubstitutionsInfo": MessageLookupByLibrary.simpleMessage(
       "Show information for substitutions",
     ),
@@ -245,6 +263,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "GitHub repository",
     ),
     "granted": MessageLookupByLibrary.simpleMessage("Granted"),
+    "hiddenLessons": MessageLookupByLibrary.simpleMessage("Hidden lessons"),
+    "hiddenLessonsDescription": MessageLookupByLibrary.simpleMessage(
+      "There are no hidden lessons for this day. You can hide lessons in the timetable",
+    ),
     "hideNote": MessageLookupByLibrary.simpleMessage(
       "If the conversation receives new replies, it will be shown again. After every receiver hides it, it will be deleted.",
     ),
@@ -315,6 +337,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Looks like Lanis is down.\nPlease check the status of Lanis (PaedOrg) on the Website.",
     ),
     "latestRelease": MessageLookupByLibrary.simpleMessage("Latest release"),
+    "lessonAdded": m9,
+    "lessonHidden": m10,
+    "lessonName": MessageLookupByLibrary.simpleMessage("Lesson name"),
     "lessons": MessageLookupByLibrary.simpleMessage("Lessons"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "linkCopied": MessageLookupByLibrary.simpleMessage("Link was copied!"),
@@ -322,7 +347,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locale": MessageLookupByLibrary.simpleMessage("en_US"),
     "logIn": MessageLookupByLibrary.simpleMessage("Authenticate"),
     "logInTitle": MessageLookupByLibrary.simpleMessage("Logging in"),
-    "loginTimeout": m9,
+    "loginTimeout": m11,
     "logout": MessageLookupByLibrary.simpleMessage("Logout"),
     "logoutConfirmation": MessageLookupByLibrary.simpleMessage(
       "Do you really want to log out?",
@@ -420,13 +445,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "reportError": MessageLookupByLibrary.simpleMessage(
       "A problem occurred. Please report it in case of repeated occurrence.",
     ),
+    "required": MessageLookupByLibrary.simpleMessage("required"),
     "reset": MessageLookupByLibrary.simpleMessage("Reset"),
     "resetAccount": MessageLookupByLibrary.simpleMessage("Reset account"),
+    "room": MessageLookupByLibrary.simpleMessage("Room"),
     "sadlyNoSupport": MessageLookupByLibrary.simpleMessage(
       "Unfortunately no support",
     ),
     "saveFile": MessageLookupByLibrary.simpleMessage("Save file"),
-    "schoolCountString": m10,
+    "schoolCountString": m12,
     "searchHint": MessageLookupByLibrary.simpleMessage(
       "Subject, teacher, date, ...",
     ),
@@ -546,7 +573,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You can import this link into your calendar app to have an automatically updating calendar. It will also cover multiple years. Keep this link private because it can be used by anyone.",
     ),
     "substitutions": MessageLookupByLibrary.simpleMessage("Substitutions"),
-    "substitutionsEndCardMessage": m11,
+    "substitutionsEndCardMessage": m13,
     "substitutionsFilter": MessageLookupByLibrary.simpleMessage(
       "Substitutions filter",
     ),
@@ -576,7 +603,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "timetableSwitchToPersonal": MessageLookupByLibrary.simpleMessage(
       "Switch to Personal timetable",
     ),
-    "timetableWeek": m12,
+    "timetableWeek": m14,
     "toSemesterOne": MessageLookupByLibrary.simpleMessage("Semester 1"),
     "today": MessageLookupByLibrary.simpleMessage("Today"),
     "tomorrow": MessageLookupByLibrary.simpleMessage("Tomorrow"),
@@ -585,6 +612,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unknown": MessageLookupByLibrary.simpleMessage("Unknown"),
     "unknownError": MessageLookupByLibrary.simpleMessage("Unknown error"),
     "unknownFile": MessageLookupByLibrary.simpleMessage("Unknown File"),
+    "unknownLesson": MessageLookupByLibrary.simpleMessage("Unknown lesson"),
     "unsaltedOrUnknown": MessageLookupByLibrary.simpleMessage(
       "Unsalted response error",
     ),
