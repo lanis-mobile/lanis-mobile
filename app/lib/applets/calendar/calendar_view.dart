@@ -1,6 +1,5 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/utils/keyboard_observer.dart';
@@ -452,16 +451,16 @@ class _CalendarViewState extends State<CalendarView> {
                     return Column(
                       children: [
                         TableCalendar<CalendarEvent>(
-                          locale: AppLocalizations.of(context)!.locale,
+                          locale: AppLocalizations.of(context).locale,
                           firstDay: DateTime.utc(2020),
                           lastDay: DateTime.utc(2030),
                           availableCalendarFormats: {
-                            CalendarFormat.month: AppLocalizations.of(context)!
+                            CalendarFormat.month: AppLocalizations.of(context)
                                 .calendarFormatMonth,
                             CalendarFormat.twoWeeks:
-                                AppLocalizations.of(context)!
+                                AppLocalizations.of(context)
                                     .calendarFormatTwoWeeks,
-                            CalendarFormat.week: AppLocalizations.of(context)!
+                            CalendarFormat.week: AppLocalizations.of(context)
                                 .calendarFormatWeek,
                           },
                           focusedDay: _focusedDay,
