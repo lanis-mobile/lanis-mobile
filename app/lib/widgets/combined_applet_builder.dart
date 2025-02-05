@@ -2,7 +2,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/models/account_types.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
 import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
@@ -112,7 +112,7 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                             width: 4,
                           ),
                           Text(
-                              '${AppLocalizations.of(context)!.offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
+                              '${AppLocalizations.of(context).offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
                               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               )

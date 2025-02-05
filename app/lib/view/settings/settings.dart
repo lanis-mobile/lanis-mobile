@@ -10,7 +10,7 @@ import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
 import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../applets/calendar/calendar_export.dart';
 import '../../core/database/account_database/account_db.dart';

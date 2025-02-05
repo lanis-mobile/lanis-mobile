@@ -8,6 +8,9 @@ import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:sph_plan/generated/l10n.dart';
+
+
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
 import '../../models/client_status_exceptions.dart';
