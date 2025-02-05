@@ -76,16 +76,19 @@ class StudyGroupsStudentParser extends AppletParser<List<StudentStudyGroups>> {
 
     // Exams parse tbody
     List<List<String>> examData = [];
+    RegExp dateRegex = RegExp(r'.{2}, \d{2}\.\d{2}\.\d{4}');
     examTable.querySelectorAll('tbody tr').forEach((element) {
       List<String> examRow = [];
       // Check if first element contains a date
-      if (element
-          .querySelector('td')!
-          .text
-          .trim()
-          .contains(RegExp(r'\d{2}\.\d{2}\.\d{4}'))) {
-        element.querySelectorAll('td').forEach((element) {
-          examRow.add(element.text.trim());
+      if (element.querySelector('td')!.text.trim().contains(dateRegex)) {
+        element.querySelectorAll('td').asMap().forEach((index, element) {
+          if (index == 0) {
+            RegExpMatch? match = dateRegex.firstMatch(element.text.trim());
+            // Match must be true, because of above if
+            examRow.add(match!.group(0)!);
+          } else {
+            examRow.add(element.text.trim());
+          }
         });
         examData.add(examRow);
       }
