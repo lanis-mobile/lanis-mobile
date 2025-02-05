@@ -315,5 +315,21 @@
   "clear": "Clear",
   "set": "Set",
   "unknownLesson": "Unknown lesson",
-  "lessonHidden": "{lesson} was hidden. To show it again, you need to remove it in the settings."
+  "lessonHidden": "{lesson} was hidden. To show it again, you need to remove it in the settings.",
+  "removeAccount": "Remove account",
+
+  "wrongCredentials": "Wrong credentials!",
+  "lanisDown": "Lanis is down!",
+  "loginTimeout": "Wait {time} before next attempt",
+  "credentialsIncomplete": "Missing credentials",
+  "networkError": "Network error",
+  "unknownError": "Unknown error",
+  "unauthorized": "Unauthorized",
+  "encryptionCheckFailed": "Encryption verification failed",
+  "unsaltedOrUnknown": "Unsalted response error",
+  "notSupported": "Not supported",
+  "noConnection": "No SPH connection",
+  "accountExists": "Account already exists",
+  "errorOccurredDetails": "Problem: {problem}",
+  "copyErrorToClipboard": "Copy error details to clipboard"
 }

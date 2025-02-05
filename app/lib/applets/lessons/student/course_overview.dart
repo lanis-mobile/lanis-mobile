@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/lessons/student/upload_page.dart';
 
 import '../../../core/sph/sph.dart';

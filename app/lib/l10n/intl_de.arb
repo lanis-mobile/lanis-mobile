@@ -315,5 +315,21 @@
   "clear": "Löschen",
   "set": "Setzen",
   "unknownLesson": "Unbekannte Stunde",
-  "lessonHidden": "{lesson} wurde ausgeblendet! Du kannst diese in den Einstellungen wieder einblenden."
+  "lessonHidden": "{lesson} wurde ausgeblendet! Du kannst diese in den Einstellungen wieder einblenden.",
+  "removeAccount": "Account entfernen",
+
+  "wrongCredentials": "Falsche Anmeldedaten!",
+  "lanisDown": "Lanis ist nicht erreichbar!",
+  "loginTimeout": "Warte {time} vor nächstem Versuch",
+  "credentialsIncomplete": "Anmeldedaten unvollständig",
+  "networkError": "Netzwerkfehler",
+  "unknownError": "Unbekannter Fehler",
+  "unauthorized": "Keine Erlaubnis",
+  "encryptionCheckFailed": "Verschlüsselungsüberprüfung fehlgeschlagen",
+  "unsaltedOrUnknown": "Unbekannte ungesalzene Antwort",
+  "notSupported": "Nicht unterstützt",
+  "noConnection": "Keine SPH-Verbindung",
+  "accountExists": "Account existiert bereits",
+  "errorOccurredDetails": "Problem: {problem}",
+  "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren"
 }
