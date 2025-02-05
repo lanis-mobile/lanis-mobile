@@ -294,10 +294,24 @@
   "feedback": "Feedback for the App \uD83D\uDC49\uD83D\uDC48",
   "inThisUpdate": "In this update",
   "showReleaseNotesForThisVersion": "Release notes for this version",
-  "feedback": "Feedback for the App \uD83D\uDC49\uD83D\uDC48",
   "resetAccount": "Reset account",
   "wrongPassword": "Wrong password!",
   "wrongPasswordHint": "Your password seems to be incorrect! This can happen if you have changed your password on another device or if your account has been deleted. Either change your password (enter your new password here) or delete your account entirely to resolve this issue.",
   "changePassword": "Change password",
-  "removeAccount": "Remove account"
+  "removeAccount": "Remove account",
+
+  "wrongCredentials": "Wrong credentials!",
+  "lanisDown": "Lanis is down!",
+  "loginTimeout": "Wait {time} before next attempt",
+  "credentialsIncomplete": "Missing credentials",
+  "networkError": "Network error",
+  "unknownError": "Unknown error",
+  "unauthorized": "Unauthorized",
+  "encryptionCheckFailed": "Encryption verification failed",
+  "unsaltedOrUnknown": "Unsalted response error",
+  "notSupported": "Not supported",
+  "noConnection": "No SPH connection",
+  "accountExists": "Account already exists",
+  "errorOccurredDetails": "Problem: {problem}",
+  "copyErrorToClipboard": "Copy error details to clipboard"
 }

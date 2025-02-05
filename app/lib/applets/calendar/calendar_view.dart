@@ -1,12 +1,14 @@
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/utils/keyboard_observer.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:sph_plan/generated/l10n.dart';
+
 
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
@@ -449,16 +451,16 @@ class _CalendarViewState extends State<CalendarView> {
                     return Column(
                       children: [
                         TableCalendar<CalendarEvent>(
-                          locale: AppLocalizations.of(context)!.locale,
+                          locale: AppLocalizations.of(context).locale,
                           firstDay: DateTime.utc(2020),
                           lastDay: DateTime.utc(2030),
                           availableCalendarFormats: {
-                            CalendarFormat.month: AppLocalizations.of(context)!
+                            CalendarFormat.month: AppLocalizations.of(context)
                                 .calendarFormatMonth,
                             CalendarFormat.twoWeeks:
-                                AppLocalizations.of(context)!
+                                AppLocalizations.of(context)
                                     .calendarFormatTwoWeeks,
-                            CalendarFormat.week: AppLocalizations.of(context)!
+                            CalendarFormat.week: AppLocalizations.of(context)
                                 .calendarFormatWeek,
                           },
                           focusedDay: _focusedDay,

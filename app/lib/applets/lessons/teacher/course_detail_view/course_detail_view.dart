@@ -4,7 +4,7 @@ import '../../../../core/sph/sph.dart';
 import '../../../../models/lessons_teacher.dart';
 import '../widgets/course_folder_history_entry_card.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import 'course_create_new_entry.dart';
 class TeacherCourseDetailView extends StatefulWidget {
