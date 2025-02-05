@@ -301,7 +301,7 @@
   "removeAccount": "Account entfernen",
 
   "wrongCredentials": "Falsche Anmeldedaten!",
-  "lanisDown": "Lanis ist down!",
+  "lanisDown": "Lanis ist nicht erreichbar!",
   "loginTimeout": "Warte {time} vor nächstem Versuch",
   "credentialsIncomplete": "Anmeldedaten unvollständig",
   "networkError": "Netzwerkfehler",
