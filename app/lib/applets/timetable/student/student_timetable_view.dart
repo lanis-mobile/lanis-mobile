@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/models/account_types.dart';
-import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:sph_plan/utils/random_color.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';

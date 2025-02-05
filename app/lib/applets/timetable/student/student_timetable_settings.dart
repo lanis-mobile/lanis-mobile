@@ -1,7 +1,6 @@
 import 'dart:io';
-
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
@@ -86,9 +85,9 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                     },
                     decoration: InputDecoration(
                         labelText:
-                            '${AppLocalizations.of(context)!.lessonName}*',
+                            '${AppLocalizations.of(context).lessonName}*',
                         helperText:
-                            '*${AppLocalizations.of(context)!.required}'),
+                            '*${AppLocalizations.of(context).required}'),
                   ),
                   Row(
                     spacing: 8.0,
@@ -100,14 +99,14 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                             setState(() {});
                           },
                           decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context)!.teacher),
+                              labelText: AppLocalizations.of(context).teacher),
                         ),
                       ),
                       Expanded(
                         child: TextField(
                           controller: roomController,
                           decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context)!.room),
+                              labelText: AppLocalizations.of(context).room),
                         ),
                       )
                     ],
@@ -171,7 +170,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                       if (allBadges.isNotEmpty)
                         DropdownMenu(
                           width: 130.0,
-                          label: Text(AppLocalizations.of(context)!.week),
+                          label: Text(AppLocalizations.of(context).week),
                           initialSelection: [
                             noBadge,
                             ...allBadges
@@ -186,7 +185,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                               .map((badge) => DropdownMenuEntry(
                                     value: badge,
                                     label: badge != noBadge
-                                        ? AppLocalizations.of(context)!
+                                        ? AppLocalizations.of(context)
                                             .timetableWeek(badge ?? '')
                                         : badge!,
                                   ))
@@ -235,13 +234,13 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                               Navigator.of(context).pop();
                               showSnackbar(
                                   context,
-                                  AppLocalizations.of(context)!
+                                  AppLocalizations.of(context)
                                       .lessonAdded(newLesson.name!));
                             }
                           : null,
                       child: Text(lesson == null
-                          ? AppLocalizations.of(context)!.addLesson
-                          : AppLocalizations.of(context)!.editLesson)),
+                          ? AppLocalizations.of(context).addLesson
+                          : AppLocalizations.of(context).editLesson)),
                 ],
               );
             }),
@@ -327,7 +326,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        AppLocalizations.of(context)!
+                                        AppLocalizations.of(context)
                                             .hiddenLessons,
                                         style: Theme.of(context)
                                             .textTheme
@@ -359,7 +358,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
-                                          AppLocalizations.of(context)!
+                                          AppLocalizations.of(context)
                                               .hiddenLessonsDescription,
                                           style: Theme.of(context)
                                               .textTheme
@@ -381,7 +380,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        AppLocalizations.of(context)!
+                                        AppLocalizations.of(context)
                                             .customLessons,
                                         style: Theme.of(context)
                                             .textTheme
@@ -439,7 +438,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                                   customLessons,
                                                   currentDay),
                                           child: Text(
-                                              AppLocalizations.of(context)!
+                                              AppLocalizations.of(context)
                                                   .addLesson)),
                                     )
                                   ],
@@ -470,7 +469,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           height: 8.0,
                         ),
                         Text(
-                          AppLocalizations.of(context)!
+                          AppLocalizations.of(context)
                               .customizeTimetableDisclaimer,
                           style: Theme.of(context)
                               .textTheme
