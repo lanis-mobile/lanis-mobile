@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/study_groups/definitions.dart';
 import 'package:sph_plan/applets/study_groups/student/student_course_view.dart';
 import 'package:sph_plan/applets/study_groups/student/student_exams_view.dart';
