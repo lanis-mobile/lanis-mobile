@@ -93,7 +93,7 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                       ),
                     )
                   ),
-                  if (allowedMethods[1]) (
+                  if (allowedMethods[1] && documentScannerSupported) (
                     MenuItemButton(
                       onPressed: () async {
                         pickedFile = await pickFileUsingDocumentScanner();
