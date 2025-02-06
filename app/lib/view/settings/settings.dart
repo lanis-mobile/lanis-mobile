@@ -155,9 +155,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             screen: (context) => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    const StudentTimetableSettings(showBack: false),
-              ),
+                builder: (context) => const StudentTimetableSettings()),
             ),
           ),
       ]),
@@ -304,7 +302,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return CalendarExport(showBackButton: !isTablet);
         } else if (tile.title(context) ==
             AppLocalizations.of(context)!.customizeTimetable) {
-          return StudentTimetableSettings();
+          return StudentTimetableSettings(showBack: !isTablet);
         } else if (tile.title(context) ==
             AppLocalizations.of(context)!.inThisUpdate) {
           return FutureBuilder(

@@ -258,7 +258,8 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
       appBar: LargeAppBar(
         title: Text(timeTableDefinition.label(context)),
         back: () => Navigator.of(context).pop(),
-        showBackButton: !widget.showBack,
+        showBackButton: widget.showBack,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
       body: CombinedAppletBuilder<TimeTable>(
         parser: sph!.parser.timetableStudentParser,
