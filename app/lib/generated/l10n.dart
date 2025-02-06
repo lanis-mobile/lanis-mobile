@@ -932,6 +932,16 @@ class AppLocalizations {
     return Intl.message('Camera', name: 'camera', desc: '', args: []);
   }
 
+  /// `Document scanner`
+  String get documentScanner {
+    return Intl.message(
+      'Document scanner',
+      name: 'documentScanner',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Gallery`
   String get gallery {
     return Intl.message('Gallery', name: 'gallery', desc: '', args: []);

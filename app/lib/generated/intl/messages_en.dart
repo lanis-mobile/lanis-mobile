@@ -217,6 +217,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Change the URL to the autoset provider here to test your implementation before creating a PR for your school.",
     ),
     "discordServer": MessageLookupByLibrary.simpleMessage("Discord server"),
+    "documentScanner": MessageLookupByLibrary.simpleMessage("Document scanner"),
     "done": MessageLookupByLibrary.simpleMessage("Done"),
     "dynamicColor": MessageLookupByLibrary.simpleMessage("Dynamic"),
     "editLesson": MessageLookupByLibrary.simpleMessage("Edit lesson"),
