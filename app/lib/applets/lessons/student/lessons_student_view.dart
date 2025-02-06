@@ -29,7 +29,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
               Icons.search,
               size: 60,
             ),
-            Text(AppLocalizations.of(context)!.noCoursesFound)
+            Text(AppLocalizations.of(context).noCoursesFound)
           ],
         ),
       );
@@ -44,12 +44,12 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
       // TODO: REMOVE THIS AFTER YOU'RE DONE BAKA!!!!!!!!!!!!
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            List<String> allowedExtensions = [".pdf", ".ltx", ".md", ".docx", ".txt"];
+            List<String> allowedExtensions = ["pdf", "ltx", "md", "docx", "txt"];
             PickedFile? pickedFile = await pickSingleFile(context, allowedExtensions);
             if (pickedFile == null) {
               logger.e("Picked file is NULL!");
             } else {
-              String name = pickedFile.name!;
+              String name = pickedFile.name;
               logger.i("Name of picked file is: \"$name\"");
             }
           }
@@ -68,7 +68,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                   ? [
                       globalSettings!['showHomework'] == true
                           ? Tooltip(
-                              message: AppLocalizations.of(context)!.lessons,
+                              message: AppLocalizations.of(context).lessons,
                               child: IconButton(
                                 icon: const Icon(Icons.school_outlined),
                                 onPressed: () {
@@ -84,7 +84,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                               ),
                             )
                           : Tooltip(
-                              message: AppLocalizations.of(context)!.homework,
+                              message: AppLocalizations.of(context).homework,
                               child: IconButton(
                                 icon: const Icon(Icons.task_outlined),
                                 onPressed: () {
@@ -186,7 +186,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                     ),
                   );
                 },
-                label: Text(AppLocalizations.of(context)!.attendances),
+                label: Text(AppLocalizations.of(context).attendances),
                 icon: const Icon(Icons.access_alarm),
               ),
             ),

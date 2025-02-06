@@ -51,7 +51,7 @@ Future<PickedFile?> pickSingleFile(BuildContext context, List<String>? allowedEx
 
 /// Allowed Methods (Position in [List<bool>]):
 /// ```
-/// 0 = DocumentsUI (File Picker)
+/// 0 = File Manager (currently DocumentsUI will be changed later)
 /// 1 = Scan Document
 /// 2 = Camera
 /// 3 = Gallery
@@ -74,8 +74,8 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                   if (allowedMethods[0]) (
                     MenuItemButton(
                       onPressed: () async {
-                        Navigator.pop(context);
                         pickedFile = await pickFileUsingDocumentsUI(allowedExtensions);
+                        Navigator.pop(context);
                       },
                       child: Row(
                         children: [
@@ -90,8 +90,8 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                   if (allowedMethods[1]) (
                     MenuItemButton(
                       onPressed: () async {
-                        Navigator.pop(context);
                         pickedFile = await pickFileUsingDocumentScanner();
+                        Navigator.pop(context);
                       },
                       child: Row(
                         children: [
@@ -106,8 +106,8 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                   if (allowedMethods[2]) (
                     MenuItemButton(
                       onPressed: () async {
-                        Navigator.pop(context);
                         pickedFile = await pickFileUsingCamera();
+                        Navigator.pop(context);
                       },
                       child: Row(
                         children: [
@@ -122,8 +122,8 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                   if (allowedMethods[3]) (
                     MenuItemButton(
                       onPressed: () async {
-                        Navigator.pop(context);
                         pickedFile = await pickFileUsingGallery();
+                        Navigator.pop(context);
                       },
                       child: Row(
                         children: [
@@ -145,6 +145,7 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
   return pickedFile;
 }
 
+// TODO: Use default file manager instead of DocumentsUI
 Future<PickedFile?> pickFileUsingDocumentsUI(List<String>? allowedExtensions) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
