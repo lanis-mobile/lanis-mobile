@@ -410,6 +410,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noSupportOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "Es scheint so, als ob dein Account oder deine Schule keine Features dieser App direkt unterstützt! Stattdessen kannst du Lanis noch im Browser öffnen.",
     ),
+    "notImplemented": MessageLookupByLibrary.simpleMessage(
+      "Nicht implementiert",
+    ),
     "notSupported": MessageLookupByLibrary.simpleMessage("Nicht unterstützt"),
     "note": MessageLookupByLibrary.simpleMessage("Hinweis"),
     "notificationAccountBoundExplanation": MessageLookupByLibrary.simpleMessage(
@@ -557,7 +560,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Zeige nur eingeblendete",
     ),
     "showReleaseNotesForThisVersion": MessageLookupByLibrary.simpleMessage(
-      "Zeige die Versionshinweise für diese Version",
+      "Versionshinweise für diese Version",
     ),
     "simpleSearch": MessageLookupByLibrary.simpleMessage("Einfache Suche"),
     "singleMessages": MessageLookupByLibrary.simpleMessage(

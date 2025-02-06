@@ -380,6 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noSupportOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "It seems that your account or school does not directly support any features of this app! Instead, you can still open Lanis in your browser.",
     ),
+    "notImplemented": MessageLookupByLibrary.simpleMessage("Not implemented"),
     "notSupported": MessageLookupByLibrary.simpleMessage("Not supported"),
     "note": MessageLookupByLibrary.simpleMessage("Note"),
     "notificationAccountBoundExplanation": MessageLookupByLibrary.simpleMessage(

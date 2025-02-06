@@ -1322,6 +1322,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Not implemented`
+  String get notImplemented {
+    return Intl.message(
+      'Not implemented',
+      name: 'notImplemented',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Welcome`
   String get introWelcomeTitle {
     return Intl.message(
