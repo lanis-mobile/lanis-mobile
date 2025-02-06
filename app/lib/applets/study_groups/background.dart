@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:dart_date/dart_date.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sph_plan/background_service.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/models/study_groups.dart';
+import 'package:sph_plan/utils/logger.dart';
 
 Future<void> studyCheckExams(
     SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit) async {
@@ -24,25 +24,31 @@ Future<void> studyCheckExams(
                 ScheduledExam.fromJson(value),
               ));
 
-  List<int> examsToRemove = [];
   for (final exam in scheduledExams.values) {
-    if (DateTime.now().subDays(7).isAfter(exam.date)) {
-      examsToRemove.add(exam.date.secondsSinceEpoch);
+    for (final notification in exam.notifications.entries) {
+      int numSentCount = 0;
+      if (notification.key < DateTime.now().secondsSinceEpoch) {
+        if (!notification.value) {
+          backgroundLogger
+              .i("Sending notification for exam ${exam.name} at ${exam.date}");
 
-      // Send notification
-      await toolkit.sendMessage(
-        id: exam.date.secondsSinceEpoch % 10000,
-        title: 'Exam',
-        message:
-            'You have an exam in ${exam.name} at ${exam.date.format('HH:mm')}',
-        avoidDuplicateSending: true,
-        importance: Importance.high,
-      );
+          toolkit.sendMessage(
+            title: 'Klausur in ${exam.name}',
+            message:
+                'Am ${exam.date.format('dd.MM.yyyy')} findet eine Klausur in ${exam.name} statt.',
+            id: exam.date.secondsSinceEpoch % 10000,
+          );
+          exam.notifications[notification.key] = true;
+        } else {
+          numSentCount++;
+        }
+      }
+
+      // If two notifications have been sent, remove the notification
+      if (numSentCount >= 2) {
+        exam.notifications.remove(notification.key);
+      }
     }
-  }
-
-  for (int remove in examsToRemove) {
-    scheduledExams.remove(remove);
   }
 
   if (lastScan == null ||
@@ -55,16 +61,19 @@ Future<void> studyCheckExams(
           continue;
         }
         if (DateTime.now().subDays(7).isAfter(e.date)) {
-          print(
-              'Skipping exam ${exam.courseName} at ${e.date} because it is in the past');
+          backgroundLogger
+              .i("Skipping exam ${exam.courseName} because it is too old");
           continue;
         }
 
         final scheduledExam = ScheduledExam(
-          name: exam.courseName,
-          date: e.date,
-          duration: e.duration,
-        );
+            name: exam.courseName,
+            date: e.date,
+            duration: e.duration,
+            notifications: {
+              e.date.subDays(2).secondsSinceEpoch: false,
+              e.date.subDays(7).secondsSinceEpoch: false,
+            });
 
         scheduledExams[e.date.secondsSinceEpoch] = scheduledExam;
       }
@@ -88,14 +97,20 @@ class ScheduledExam {
   final String name;
   final DateTime date;
   final String? duration;
+  final Map<int, bool> notifications;
 
-  ScheduledExam({required this.name, required this.date, this.duration});
+  ScheduledExam(
+      {required this.name,
+      required this.date,
+      this.duration,
+      required this.notifications});
 
   factory ScheduledExam.fromJson(Map<String, dynamic> json) {
     return ScheduledExam(
       name: json['name'],
       date: DateTime.parse(json['date']),
       duration: json['duration'],
+      notifications: json['notifications'],
     );
   }
 
@@ -104,6 +119,7 @@ class ScheduledExam {
       'name': name,
       'date': date.toIso8601String(),
       'duration': duration,
+      'notifications': notifications,
     };
   }
 }
