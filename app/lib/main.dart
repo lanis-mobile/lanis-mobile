@@ -6,7 +6,8 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sph_plan/startup.dart';
@@ -131,10 +132,13 @@ class App extends StatelessWidget {
             darkTheme: theme.darkTheme,
             themeMode: mode,
             localizationsDelegates: [
-              ...AppLocalizations.localizationsDelegates,
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
               SfGlobalLocalizations.delegate
             ],
-            supportedLocales: AppLocalizations.supportedLocales,
+            supportedLocales: AppLocalizations.delegate.supportedLocales,
             home: const Scaffold(
               body: StartupScreen(),
             ),
@@ -146,6 +150,10 @@ class App extends StatelessWidget {
 }
 
 Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
+  if(context != null) AppLocalizations.of(context);
+
+  String error = details.exception.toString();
+
   return Container(
     color: Color.fromARGB(255, 249, 222, 220),
     child: Padding(
@@ -167,7 +175,7 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(255, 179, 38, 30),
             ),
-            child: Text("Whoops! An error occurred.",
+            child: Text(AppLocalizations.current.errorOccurred,
                 textAlign: TextAlign.center,
             ),
           ),
@@ -178,7 +186,7 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
               color: Color.fromARGB(255, 179, 38, 30),
             ),
             child: Text(
-              "Problem: ${details.exception.toString()}",
+              AppLocalizations.current.errorOccurredDetails(error),
               textAlign: TextAlign.center,
             ),
           ),
@@ -196,8 +204,8 @@ Widget errorWidget(FlutterErrorDetails details, {BuildContext? context}) {
                 return Color.fromARGB(255, 179, 38, 30);
               }),
             ),
-            child: const Text(
-              "Copy error details to clipboard",
+            child: Text(
+              AppLocalizations.current.copyErrorToClipboard,
             ),
           ),
         ],

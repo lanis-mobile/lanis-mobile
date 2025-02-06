@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/logger.dart';

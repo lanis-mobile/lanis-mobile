@@ -11,7 +11,7 @@ import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/database/account_database/kv_defaults.dart';
 import 'package:sph_plan/utils/switch_tile.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../utils/callout.dart';
@@ -260,7 +260,7 @@ class _NotificationSettingsState
                         children: [
                           for (int dayIndex = 1; dayIndex < 8; dayIndex++) FilterChip(
                             label: Text(
-                              DateFormat.E(AppLocalizations.of(context)!.localeName).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
+                              DateFormat.E(Localizations.localeOf(context).languageCode).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
                             ),
                             selected: androidEnabledDays[dayIndex - 1],
                             onSelected: activateBackgroundServices ? (val) {

@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/utils/responsive.dart';
+import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/applets/timetable/student/student_timetable_settings.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/appearance.dart';
@@ -128,9 +130,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
     ]),
-    if (sph!.session.doesSupportFeature(calendarDefinition))
+    if (sph!.session.doesSupportFeature(calendarDefinition) || sph!.session.doesSupportFeature(timeTableDefinition))
       SettingsGroup(tiles: [
-        SettingsTile(
+        if (sph!.session.doesSupportFeature(calendarDefinition)) SettingsTile(
           title: (context) => AppLocalizations.of(context)!.calendarExport,
           subtitle: (context) async => 'PDF, iCal, ICS, CSV',
           icon: Icons.download_rounded,
@@ -138,6 +140,18 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => const CalendarExport(),
+            ),
+          ),
+        ),
+        if (sph!.session.doesSupportFeature(timeTableDefinition)) SettingsTile(
+          title: (context) => AppLocalizations.of(context)!.customizeTimetable,
+          subtitle: (context) async =>
+          AppLocalizations.of(context)!.customizeTimetableDescription,
+          icon: Icons.timelapse,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StudentTimetableSettings(),
             ),
           ),
         ),
@@ -302,7 +316,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
               });
         }
         return Center(
-            child: Text(AppLocalizations.of(context)!.notImplemented));
+            child: Text(AppLocalizations.of(context)!.noResults));
       },
     );
   }
