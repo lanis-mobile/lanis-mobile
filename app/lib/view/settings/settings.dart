@@ -298,6 +298,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             AppLocalizations.of(context)!.calendarExport) {
           return CalendarExport(showBackButton: !isTablet);
         } else if (tile.title(context) ==
+            AppLocalizations.of(context)!.customizeTimetable) {
+          return StudentTimetableSettings();
+        } else if (tile.title(context) ==
             AppLocalizations.of(context)!.inThisUpdate) {
           return FutureBuilder(
               future: showLocalUpdateInfo(context, dialog: false),
