@@ -41,17 +41,13 @@ const storageChannel = MethodChannel('io.github.lanis-mobile/storage');
 
 /// Allows the user to pick any file using any supported method
 Future<PickedFile?> pickSingleFile(BuildContext context, List<String>? allowedExtensions) async {
-  if (Platform.isIOS) {
-    return pickFileUsingDocumentsUI(allowedExtensions);
-  } else {
-    List<bool> allowedMethods = [true, true, true, true];
-    return showPickerUI(context, allowedMethods, allowedExtensions);
-  }
+  List<bool> allowedMethods = [true, true, true, true];
+  return showPickerUI(context, allowedMethods, allowedExtensions);
 }
 
 /// Allowed Methods (Position in [List<bool>]):
 /// ```
-/// 0 = File Manager (currently DocumentsUI will be changed later)
+/// 0 = File Manager
 /// 1 = Scan Document
 /// 2 = Camera
 /// 3 = Gallery
@@ -119,7 +115,7 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                       ),
                     )
                   ),
-                  if (allowedMethods[3]) (
+                  if (allowedMethods[3] && Platform.isIOS) ( // DocumentsUI supports galleries and the photo picker is horrible (from a user perspective)
                     MenuItemButton(
                       onPressed: () async {
                         pickedFile = await pickFileUsingGallery();
@@ -145,7 +141,6 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
   return pickedFile;
 }
 
-// TODO: Use default file manager instead of DocumentsUI
 Future<PickedFile?> pickFileUsingDocumentsUI(List<String>? allowedExtensions) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -170,7 +165,12 @@ Future<PickedFile?> pickFileUsingCamera() async {
   return null;
 }
 
+/// This will return null if called on anything other than iOS
 Future<PickedFile?> pickFileUsingGallery() async {
-  return null;
+  if (Platform.isIOS) {
+    return null;
+  } else {
+    return null;
+  }
 }
 
