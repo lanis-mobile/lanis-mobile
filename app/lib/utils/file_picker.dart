@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:sph_plan/utils/logger.dart';
 
 import '../generated/l10n.dart';
 
@@ -48,11 +50,19 @@ Future<PickedFile?> pickSingleFile(BuildContext context, List<String>? allowedEx
 /// Allowed Methods (Position in [List<bool>]):
 /// ```
 /// 0 = File Manager
-/// 1 = Scan Document
+/// 1 = Scan Document (Requires API >= 26)
 /// 2 = Camera
-/// 3 = Gallery
+/// 3 = Gallery (iOS Only)
 /// ```
 Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods, List<String>? allowedExtensions) async {
+  bool documentScannerSupported = true;
+
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  final androidInfo = await deviceInfo.androidInfo;
+  if (androidInfo.version.sdkInt < 26) {
+    documentScannerSupported = false;
+  }
+
   PickedFile? pickedFile;
   await showModalBottomSheet(
       context: context,
@@ -157,7 +167,10 @@ Future<PickedFile?> pickFileUsingDocumentsUI(List<String>? allowedExtensions) as
   }
 }
 
+// TODO: Add iOS support
 Future<PickedFile?> pickFileUsingDocumentScanner() async {
+  String? path = await storageChannel.invokeMethod("scanDocument");
+  logger.d("path is: $path");
   return null;
 }
 

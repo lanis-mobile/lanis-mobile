@@ -1,6 +1,7 @@
 package com.example.app
 
 import android.content.Intent
+import android.net.Uri
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -12,6 +13,7 @@ import java.io.IOException
 
 class MainActivity: FlutterActivity() {
     private val createFileCode = 1404
+    private val scanDocumentCode = 4200
     private var filePath = ""
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -24,6 +26,14 @@ class MainActivity: FlutterActivity() {
                     filePath = call.argument<String>("filePath").toString()
                     createFile(call.argument<String>("fileName").toString(), call.argument<String>("mimeType").toString())
                 }
+                "scanDocument" -> {
+                    val uri: Uri? = scanDocument()
+                    if (uri != null) {
+                        result.success(uri.path)
+                    } else {
+                        result.success(null)
+                    }
+                }
                 else -> {
                     result.notImplemented()
                 }
@@ -33,21 +43,26 @@ class MainActivity: FlutterActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == createFileCode) {
-            data?.data?.let { uri ->
-                try {
-                    contentResolver.openFileDescriptor(uri, "w")?.use {
-                        FileInputStream(filePath).use { inputStream ->
-                            FileOutputStream(it.fileDescriptor).use { outputStream ->
-                                inputStream.copyTo(outputStream)
+        when (requestCode) {
+            createFileCode -> {
+                data?.data?.let { uri ->
+                    try {
+                        contentResolver.openFileDescriptor(uri, "w")?.use {
+                            FileInputStream(filePath).use { inputStream ->
+                                FileOutputStream(it.fileDescriptor).use { outputStream ->
+                                    inputStream.copyTo(outputStream)
+                                }
                             }
                         }
+                    } catch (e: FileNotFoundException) {
+                        e.printStackTrace()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
                     }
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                } catch (e: IOException) {
-                    e.printStackTrace()
                 }
+            }
+            scanDocumentCode -> {
+                throw NotImplementedError()
             }
         }
     }
@@ -59,6 +74,13 @@ class MainActivity: FlutterActivity() {
             putExtra(Intent.EXTRA_TITLE, fileName)
         }
         startActivityForResult(intent, createFileCode)
+    }
+
+    /**
+     * Returns the file path
+     */
+    private fun scanDocument(): Uri? {
+        return null // TODO: Implement
     }
 
     companion object {

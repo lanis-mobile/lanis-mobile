@@ -6,7 +6,6 @@
         android:enableOnBackInvokedCallback="true"
         android:localeConfig="@xml/locales_config">
 
-    >
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,6 +27,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".AppScanActivity" android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -64,6 +66,9 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <!-- Document Scanner is not available on older APIs so safe to ignore -->
+    <uses-sdk tools:overrideLibrary="com.zynksoftware.documentscanner, org.opencv"/>
 
     <!-- Provide required visibility configuration for API level 30 and above -->
     <queries>
