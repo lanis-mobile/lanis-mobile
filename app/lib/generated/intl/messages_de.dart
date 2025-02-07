@@ -650,6 +650,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tomorrow": MessageLookupByLibrary.simpleMessage("Morgen"),
     "tryAgain": MessageLookupByLibrary.simpleMessage("Erneut versuchen"),
     "unauthorized": MessageLookupByLibrary.simpleMessage("Keine Erlaubnis"),
+    "undo": MessageLookupByLibrary.simpleMessage("Rückgängig"),
     "unknown": MessageLookupByLibrary.simpleMessage("Unbekannt"),
     "unknownError": MessageLookupByLibrary.simpleMessage("Unbekannter Fehler"),
     "unknownFile": MessageLookupByLibrary.simpleMessage("Unbekannte Datei"),

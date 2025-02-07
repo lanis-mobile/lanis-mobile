@@ -75,7 +75,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.clear),
+              child: Text(AppLocalizations.of(context).clear),
               onPressed: () {
                 updateSettings('lesson-colors', {
                   ...settings['lesson-colors'],
@@ -87,7 +87,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               },
             ),
             ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.select),
+              child: Text(AppLocalizations.of(context).select),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -186,10 +186,11 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     CalendarView.workWeek,
                   ],
                   timeSlotViewSettings: TimeSlotViewSettings(
-                    timeFormat: "HH:mm",
-                    startHour: source.earliestHour.floor().toTimeDouble(),
-                    endHour: source.latestHour.ceil().toTimeDouble(),
-                  ),
+                      timeFormat: "HH:mm",
+                      startHour: source.earliestHour.floor().toTimeDouble(),
+                      endHour: source.latestHour.ceil().toTimeDouble(),
+                      timeInterval: Duration(minutes: 30),
+                      timeIntervalHeight: 30),
                   firstDayOfWeek: DateTime.monday,
                   dataSource: source,
                   minDate: DateTime.now(),
@@ -229,7 +230,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                         children: [
                                           Text(
                                             selected.name ??
-                                                AppLocalizations.of(context)!
+                                                AppLocalizations.of(context)
                                                     .unknownLesson,
                                             style: Theme.of(context)
                                                 .textTheme
@@ -266,14 +267,30 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                             'hidden-lessons'],
                                                         selected.id
                                                       ]);
+
                                                       showSnackbar(
                                                           context,
                                                           AppLocalizations.of(
-                                                                  context)!
+                                                                  context)
                                                               .lessonHidden(
                                                                   selected
                                                                       .name!),
-                                                          seconds: 3);
+                                                          seconds: 5,
+                                                          action:
+                                                              SnackBarAction(
+                                                                  label: AppLocalizations.of(
+                                                                          context)
+                                                                      .undo,
+                                                                  onPressed:
+                                                                      () {
+                                                                    updateSettings(
+                                                                        'hidden-lessons',
+                                                                        settings['hidden-lessons']
+                                                                            .where((element) =>
+                                                                                element !=
+                                                                                selected.id)
+                                                                            .toList());
+                                                                  }));
                                                     },
                                                     icon: const Icon(Icons
                                                         .visibility_off_outlined)),
@@ -309,7 +326,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     Padding(
                       padding: const EdgeInsets.only(left: 7, top: 6),
                       child: Text(
-                        '${AppLocalizations.of(context)?.calendarWeek} ${getCurrentWeekNumber()}',
+                        '${AppLocalizations.of(context).calendarWeek} ${getCurrentWeekNumber()}',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.normal,

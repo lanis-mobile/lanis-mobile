@@ -1,7 +1,7 @@
 // Shared classes and functions between the conversation screens.
 
-import 'package:flutter/material.dart';
 import 'package:color_hash/color_hash.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
 
@@ -134,7 +134,8 @@ abstract class BubbleStyles {
     if (theme.brightness == Brightness.dark) {
       other = BubbleStyle(
           mainColor: theme.colorScheme.inversePrimary,
-          pressedColor: theme.colorScheme.inversePrimary.withOpacity(0.65),
+          pressedColor:
+              theme.colorScheme.inversePrimary.withValues(alpha: 0.65),
           mainTextStyle: baseTextStyle.copyWith(
               color: theme.colorScheme.onSurface,
               decorationColor: theme.colorScheme.onPrimary),
@@ -168,7 +169,7 @@ abstract class BubbleStyles {
     } else {
       other = BubbleStyle(
           mainColor: theme.colorScheme.primaryFixed,
-          pressedColor: theme.colorScheme.primaryFixed.withOpacity(0.65),
+          pressedColor: theme.colorScheme.primaryFixed.withValues(alpha: 0.65),
           mainTextStyle: baseTextStyle.copyWith(
               color: theme.colorScheme.onPrimaryFixedVariant,
               decorationColor: theme.colorScheme.onPrimaryFixedVariant),
@@ -180,7 +181,7 @@ abstract class BubbleStyles {
               timeColor: theme.colorScheme.primary,
               linkBackground: theme.colorScheme.primaryFixedDim,
               linkForeground: theme.colorScheme.onPrimaryFixedVariant,
-              codeBackground: theme.colorScheme.primary.withOpacity(0.3),
+              codeBackground: theme.colorScheme.primary.withValues(alpha: 0.3),
               codeForeground: theme.colorScheme.onPrimaryFixedVariant));
 
       own = BubbleStyle(
@@ -254,7 +255,7 @@ class BubbleStyle {
 }
 
 void showSnackbar(final BuildContext context, final String text,
-    {seconds = 1, milliseconds = 0}) {
+    {seconds = 1, milliseconds = 0, final SnackBarAction? action}) {
   if (context.mounted) {
     // Hide the current SnackBar if one is already visible.
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -263,6 +264,7 @@ void showSnackbar(final BuildContext context, final String text,
       SnackBar(
         content: Text(text),
         duration: Duration(seconds: seconds, milliseconds: milliseconds),
+        action: action,
       ),
     );
   }
