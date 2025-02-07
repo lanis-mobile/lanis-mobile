@@ -17,7 +17,7 @@ class MainActivity: FlutterActivity() {
     private val createFileCode = 1404
     private val scanDocumentCode = 4200
     private var filePath = ""
-    private var documentScanResultUri: Uri? = null
+    private var scanDocumentCallback: ((Uri?) -> Unit)? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -30,11 +30,12 @@ class MainActivity: FlutterActivity() {
                     createFile(call.argument<String>("fileName").toString(), call.argument<String>("mimeType").toString())
                 }
                 "scanDocument" -> {
-                    val uri: Uri? = scanDocument()
-                    if (uri != null) {
-                        result.success(uri.path)
-                    } else {
-                        result.success(null)
+                    scanDocument { uri ->
+                        if (uri != null) {
+                            result.success(uri.path)
+                        } else {
+                            result.success(null)
+                        }
                     }
                 }
                 else -> {
@@ -66,10 +67,9 @@ class MainActivity: FlutterActivity() {
             }
             scanDocumentCode -> {
                 data?.data?.let { uri ->
-                    try {
-                        documentScanResultUri = uri
-                    } catch (e: Throwable) {
-                        e.printStackTrace()
+                    scanDocumentCallback?.let { callback ->
+                        callback(uri)
+                        scanDocumentCallback = null
                     }
                 }
             }
@@ -88,7 +88,7 @@ class MainActivity: FlutterActivity() {
     /**
      * Returns the file path
      */
-    private fun scanDocument(): Uri? {
+    private fun scanDocument(callback: (Uri?) -> Unit) {
         val configuration = DocumentScanner.Configuration()
         configuration.imageQuality = 100
         configuration.imageType = Bitmap.CompressFormat.PNG
@@ -98,7 +98,7 @@ class MainActivity: FlutterActivity() {
         val intent = Intent(this, AppScanActivity::class.java)
         startActivityForResult(intent, scanDocumentCode)
 
-        return documentScanResultUri
+        scanDocumentCallback = callback
     }
 
     companion object {

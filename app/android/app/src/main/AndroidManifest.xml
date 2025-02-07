@@ -28,7 +28,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AppScanActivity" android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity android:name=".AppScanActivity" android:theme="@style/Theme.AppCompat.NoActionBar" android:configChanges="orientation|screenSize" />
+
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
