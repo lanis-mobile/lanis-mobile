@@ -63,9 +63,6 @@ class MainActivity: FlutterActivity() {
                     }
                 }
             }
-            scanDocumentCode -> {
-                throw NotImplementedError()
-            }
         }
     }
 
@@ -84,9 +81,11 @@ class MainActivity: FlutterActivity() {
     private fun scanDocument(): Uri? {
         val configuration = DocumentScanner.Configuration()
         configuration.imageQuality = 100
-        configuration.imageType = Bitmap.CompressFormat
-        configuration.galleryButtonEnabled = false // default is false
-        DocumentScanner.init(this, configuration) // or simply DocumentScanner.init(this)
+        configuration.imageType = Bitmap.CompressFormat.PNG
+        configuration.galleryButtonEnabled = true
+        DocumentScanner.init(this, configuration)
+        AppScanActivity.start(this)
+
         return null // TODO: Implement
     }
 
