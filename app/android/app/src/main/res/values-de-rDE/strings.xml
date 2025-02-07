@@ -2,4 +2,6 @@
 <resources>
     <string name="next">Nächstes</string>
     <string name="previous">Vorheriges</string>
+    <string name="scanAnotherPageExt">Möchtest du noch eine Seite scannen?</string>
+    <string name="scanAnotherPage">Mehr Seiten?</string>
 </resources>

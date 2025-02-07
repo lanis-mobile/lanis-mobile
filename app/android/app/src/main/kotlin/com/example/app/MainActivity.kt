@@ -17,6 +17,7 @@ class MainActivity: FlutterActivity() {
     private val createFileCode = 1404
     private val scanDocumentCode = 4200
     private var filePath = ""
+    private var documentScanResultUri: Uri? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -63,6 +64,15 @@ class MainActivity: FlutterActivity() {
                     }
                 }
             }
+            scanDocumentCode -> {
+                data?.data?.let { uri ->
+                    try {
+                        documentScanResultUri = uri
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                    }
+                }
+            }
         }
     }
 
@@ -84,9 +94,11 @@ class MainActivity: FlutterActivity() {
         configuration.imageType = Bitmap.CompressFormat.PNG
         configuration.galleryButtonEnabled = true
         DocumentScanner.init(this, configuration)
-        AppScanActivity.start(this)
 
-        return null // TODO: Implement
+        val intent = Intent(this, AppScanActivity::class.java)
+        startActivityForResult(intent, scanDocumentCode)
+
+        return documentScanResultUri
     }
 
     companion object {

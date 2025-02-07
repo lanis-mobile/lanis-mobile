@@ -1,47 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relativeRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPagerTwo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottomBar" />
-
-    <RelativeLayout
-        android:id="@+id/bottomBar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/zdc_top_bar_height"
-        android:layout_alignParentBottom="true">
-
-        <ImageView
-            android:id="@+id/previousButton"
-            android:layout_width="@dimen/zdc_image_view_icons_dimens"
-            android:layout_height="@dimen/zdc_image_view_icons_dimens"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/zdc_medium_padding"
-            android:contentDescription="@string/previous"
-            android:padding="@dimen/zdc_x_small_padding"
-            android:src="@drawable/rounded_arrow_left_alt_24"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/nextButton"
-            android:layout_width="@dimen/zdc_image_view_icons_dimens"
-            android:layout_height="@dimen/zdc_image_view_icons_dimens"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/zdc_next_arrow_padding"
-            android:contentDescription="@string/next"
-            android:padding="@dimen/zdc_x_small_padding"
-            android:src="@drawable/rounded_arrow_right_alt_24"
-            android:visibility="visible" />
-
-    </RelativeLayout>
 
     <com.zynksoftware.documentscanner.ui.components.ProgressView
         android:id="@+id/progressLayoutApp"

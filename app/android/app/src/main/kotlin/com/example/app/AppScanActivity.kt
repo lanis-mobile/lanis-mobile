@@ -1,22 +1,15 @@
 package com.example.app
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import com.zynksoftware.documentscanner.ScanActivity
 import com.zynksoftware.documentscanner.model.DocumentScannerErrorModel
 import com.zynksoftware.documentscanner.model.ScannerResults
+import java.io.File
 
 class AppScanActivity: ScanActivity() {
-    companion object {
-        private val TAG = AppScanActivity::class.simpleName
-
-        fun start(context: Context) {
-            val intent = Intent(context, AppScanActivity::class.java)
-            context.startActivity(intent)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.app_scan_activity_layout)
@@ -44,7 +37,21 @@ class AppScanActivity: ScanActivity() {
     }
 
     override fun onSuccess(scannerResults: ScannerResults) {
-        TODO("Not yet implemented")
+        val file: File? = scannerResults.croppedImageFile
+
+        if (file != null) {
+            val uri = Uri.fromFile(file)
+
+            val intent = Intent()
+            intent.setData(uri)
+
+            setResult(Activity.RESULT_OK, intent)
+
+            finish()
+        } else {
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+        }
     }
 
 }
