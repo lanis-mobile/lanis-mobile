@@ -107,36 +107,17 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     );
   }
 
-  (TimeOfDay, TimeOfDay) _getTimeRange(List<TimetableDay> plan, Map<String, dynamic> settings) {
+  (TimeOfDay, TimeOfDay) _getTimeRange(List<TimetableDay> plan) {
     TimeOfDay earliest = const TimeOfDay(hour: 23, minute: 59);
     TimeOfDay latest = const TimeOfDay(hour: 0, minute: 0);
 
     for (var day in plan) {
       for (var lesson in day) {
-        // Skip hidden lessons
-        if (settings['hidden-lessons']?.contains(lesson.id) ?? false) {
-          continue;
-        }
         if (_compareTimeOfDay(lesson.startTime, earliest) < 0) {
           earliest = lesson.startTime;
         }
         if (_compareTimeOfDay(lesson.endTime, latest) > 0) {
           latest = lesson.endTime;
-        }
-      }
-    }
-
-    // Check custom lessons
-    List<List<TimetableSubject>>? customLessons = TimeTableHelper.getCustomLessons(settings);
-    if (customLessons != null) {
-      for (var day in customLessons) {
-        for (var lesson in day) {
-          if (_compareTimeOfDay(lesson.startTime, earliest) < 0) {
-            earliest = lesson.startTime;
-          }
-          if (_compareTimeOfDay(lesson.endTime, latest) > 0) {
-            latest = lesson.endTime;
-          }
         }
       }
     }
@@ -206,7 +187,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
           String() => throw UnimplementedError(),
         };
 
-        final (earliest, latest) = _getTimeRange(selectedPlan, settings);
+        final (earliest, latest) = _getTimeRange(selectedPlan);
 
         return Scaffold(
             appBar: AppBar(
