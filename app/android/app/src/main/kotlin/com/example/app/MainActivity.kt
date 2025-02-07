@@ -1,7 +1,9 @@
 package com.example.app
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
+import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -80,6 +82,11 @@ class MainActivity: FlutterActivity() {
      * Returns the file path
      */
     private fun scanDocument(): Uri? {
+        val configuration = DocumentScanner.Configuration()
+        configuration.imageQuality = 100
+        configuration.imageType = Bitmap.CompressFormat
+        configuration.galleryButtonEnabled = false // default is false
+        DocumentScanner.init(this, configuration) // or simply DocumentScanner.init(this)
         return null // TODO: Implement
     }
 
