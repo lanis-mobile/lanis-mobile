@@ -354,7 +354,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "latestRelease": MessageLookupByLibrary.simpleMessage("Neuste Version"),
     "lessonAdded": m9,
     "lessonHidden": m10,
-    "undo_hide" : MessageLookupByLibrary.simpleMessage("Rückgängig"),
     "lessonName": MessageLookupByLibrary.simpleMessage("Stundenname"),
     "lessons": MessageLookupByLibrary.simpleMessage("Unterricht"),
     "light": MessageLookupByLibrary.simpleMessage("Hell"),

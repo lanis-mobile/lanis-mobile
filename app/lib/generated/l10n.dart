@@ -2606,15 +2606,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Undo.`
-  String get undo_hide {
-    return Intl.message(
-      'Undo.', 
-      name: 'undo_hide', 
-      desc: '', 
-      args: []);
-  }
-
   /// `Remove account`
   String get removeAccount {
     return Intl.message(

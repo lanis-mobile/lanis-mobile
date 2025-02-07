@@ -313,7 +313,6 @@
   "clear": "Clear",
   "unknownLesson": "Unknown lesson",
   "lessonHidden": "{lesson} was hidden. To show it again, you need to remove it in the settings.",
-  "undo_hide": "Undo",
   "removeAccount": "Remove account",
 
   "wrongCredentials": "Wrong credentials!",
