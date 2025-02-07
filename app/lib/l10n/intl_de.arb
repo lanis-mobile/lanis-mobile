@@ -314,6 +314,7 @@
   "clear": "Zurücksetzen",
   "unknownLesson": "Unbekannte Stunde",
   "lessonHidden": "{lesson} wurde ausgeblendet! Du kannst diese in den Einstellungen wieder einblenden.",
+  "undo_hide" : "Rückgängig",
   "wrongCredentials": "Falsche Anmeldedaten!",
   "lanisDown": "Lanis ist nicht erreichbar!",
   "loginTimeout": "Warte {time} vor nächstem Versuch",

@@ -107,6 +107,39 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
     );
   }
 
+  (TimeOfDay, TimeOfDay) _getTimeRange(List<TimetableDay> plan) {
+    TimeOfDay earliest = const TimeOfDay(hour: 23, minute: 59);
+    TimeOfDay latest = const TimeOfDay(hour: 0, minute: 0);
+
+    for (var day in plan) {
+      for (var lesson in day) {
+        if (_compareTimeOfDay(lesson.startTime, earliest) < 0) {
+          earliest = lesson.startTime;
+        }
+        if (_compareTimeOfDay(lesson.endTime, latest) > 0) {
+          latest = lesson.endTime;
+        }
+      }
+    }
+
+    // Add 30 minute buffer before and after -> not accurate but good enough
+    earliest = TimeOfDay(
+      hour: earliest.hour,
+      minute: (earliest.minute - 30).clamp(0, 59),
+    );
+    latest = TimeOfDay(
+      hour: latest.hour,
+      minute: (latest.minute + 30).clamp(0, 59),
+    );
+
+    return (earliest, latest);
+  }
+
+  int _compareTimeOfDay(TimeOfDay a, TimeOfDay b) {
+    if (a.hour != b.hour) return a.hour - b.hour;
+    return a.minute - b.minute;
+  }
+
   @override
   Widget build(BuildContext context) {
     var controller = CalendarController();
@@ -154,6 +187,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
           String() => throw UnimplementedError(),
         };
 
+        final (earliest, latest) = _getTimeRange(selectedPlan);
+
         return Scaffold(
             appBar: AppBar(
               title: Text(timeTableDefinition.label(context)),
@@ -178,8 +213,12 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     CalendarView.week,
                     CalendarView.workWeek,
                   ],
-                  timeSlotViewSettings: const TimeSlotViewSettings(
+                  timeSlotViewSettings: TimeSlotViewSettings(
                     timeFormat: "HH:mm",
+                    startHour: earliest.hour.toDouble(),
+                    endHour: latest.hour.toDouble() + 1,
+                    timeInterval: const Duration(minutes: 30),
+                    timeIntervalHeight: 30,
                   ),
                   firstDayOfWeek: DateTime.monday,
                   dataSource: TimeTableDataSource(
@@ -257,23 +296,31 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                 IconButton(
                                                     onPressed: () {
                                                       Navigator.pop(context);
-                                                      updateSettings(
-                                                          'hidden-lessons', [
-                                                        ...?settings[
-                                                            'hidden-lessons'],
+                                                      final newHiddenLessons = [
+                                                        ...?settings['hidden-lessons'],
                                                         selected.id
-                                                      ]);
-                                                      showSnackbar(
-                                                          context,
-                                                          AppLocalizations.of(
-                                                                  context)!
-                                                              .lessonHidden(
-                                                                  selected
-                                                                      .name!),
-                                                          seconds: 3);
+                                                      ];
+                                                      updateSettings(
+                                                          'hidden-lessons',
+                                                          newHiddenLessons);
+                                                      
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(AppLocalizations.of(context)!
+                                                              .lessonHidden(selected.name!)),
+                                                          action: SnackBarAction(
+                                                            label: AppLocalizations.of(context)!.undo_hide,
+                                                            onPressed: () {
+                                                              final List<dynamic> updatedHiddenLessons = 
+                                                                List.from(newHiddenLessons)..remove(selected.id);
+                                                              updateSettings('hidden-lessons', updatedHiddenLessons);
+                                                            },
+                                                          ),
+                                                          duration: const Duration(seconds: 3),
+                                                        ),
+                                                      );
                                                     },
-                                                    icon: const Icon(Icons
-                                                        .visibility_off_outlined)),
+                                                    icon: const Icon(Icons.visibility_off_outlined)),
                                             ],
                                           )
                                         ],
