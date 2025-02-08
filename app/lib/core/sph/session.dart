@@ -106,7 +106,7 @@ class SessionHandler {
 
     travelMenu = await getFastTravelMenu();
     if (!withoutData) {
-      if(!kDebugMode) asyncLogRequest();
+      if(kReleaseMode) asyncLogRequest();
       accountDatabase.updateLastLogin(sph.account.localId);
 
       final response = await dio.get(
