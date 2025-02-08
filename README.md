@@ -56,7 +56,7 @@ der modularen Natur des Schulportals, die es äußerst schwierig macht, eine uni
 
 Scheue dich nicht, einen Bug-Report zu erstellen, wenn du einen Fehler findest. Wir sind immer offen für neue Mitarbeiter/Schüler, die mit uns arbeiten, um die App zu verbessern.
 
-Bug-Reports können auch an <a href="mailto:alessioc42.dev@gmail.com">diese</a> E-Mail-Adresse gesendet werden, falls kein Github-Konto vorhanden ist.
+Bug-Reports können auch an <a href="mailto:lanis-mobile@alessioc42.dev">diese</a> E-Mail-Adresse gesendet werden, falls kein Github-Konto vorhanden ist.
 
 ## How to build (Linux)
 1. Setup Flutter in Android Studio
