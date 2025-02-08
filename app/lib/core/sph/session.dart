@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -22,7 +23,7 @@ import 'sph.dart';
 class SessionHandler {
   SPH sph;
   String? schoolName;
-  
+
   late Cryptor cryptor = Cryptor();
   late CookieJar jar;
   final dio = Dio();
@@ -105,7 +106,7 @@ class SessionHandler {
 
     travelMenu = await getFastTravelMenu();
     if (!withoutData) {
-      asyncLogRequest();
+      if(kReleaseMode) asyncLogRequest();
       accountDatabase.updateLastLogin(sph.account.localId);
 
       final response = await dio.get(
