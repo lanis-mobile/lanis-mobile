@@ -5,8 +5,10 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/native_adapter_instance.dart';
@@ -21,7 +23,7 @@ import 'sph.dart';
 class SessionHandler {
   SPH sph;
   String? schoolName;
-  
+
   late Cryptor cryptor = Cryptor();
   late CookieJar jar;
   final dio = Dio();
@@ -104,6 +106,7 @@ class SessionHandler {
 
     travelMenu = await getFastTravelMenu();
     if (!withoutData) {
+      if(kReleaseMode) asyncLogRequest();
       accountDatabase.updateLastLogin(sph.account.localId);
 
       final response = await dio.get(
@@ -115,6 +118,19 @@ class SessionHandler {
     }
 
     await cryptor.initialize(dio);
+  }
+
+  /// Logs the login by schoolID and version code to the orion server.
+  ///
+  /// server repo: https://github.com/lanis-mobile/school-monitor-backend
+  void asyncLogRequest() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    try {
+      await dio.post("https://lanis-logger.orion.alessioc42.dev/api/log-login?schoolid=${sph.account.schoolID}&versioncode=${packageInfo.buildNumber}");
+      logger.i('Logged account login to orion. (${sph.account.schoolID}, ${packageInfo.buildNumber})');
+    } catch (e) {
+      logger.w('Failed to log account login to orion. (${sph.account.schoolID}, ${packageInfo.buildNumber})');
+    }
   }
 
   Future<void> deAuthenticate() async {

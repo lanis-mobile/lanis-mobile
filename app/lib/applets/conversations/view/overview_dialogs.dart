@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 import 'package:sph_plan/applets/conversations/view/send.dart';
 import '../../../core/connection_checker.dart';

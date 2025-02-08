@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/conversations/view/conversations_view.dart';
 import 'package:sph_plan/applets/definitions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../models/account_types.dart';
 import 'background.dart';

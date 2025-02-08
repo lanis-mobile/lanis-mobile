@@ -6,7 +6,7 @@ import 'package:sph_plan/models/client_status_exceptions.dart';
 import 'package:sph_plan/utils/authentication_state.dart';
 import 'package:sph_plan/view/login/school_selector.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sph_plan/generated/l10n.dart';
 
 import '../../core/sph/sph.dart';
 

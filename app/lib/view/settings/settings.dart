@@ -3,14 +3,16 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
+import 'package:sph_plan/applets/timetable/definition.dart';
+import 'package:sph_plan/applets/timetable/student/student_timetable_settings.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/view/settings/subsettings/about.dart';
+import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
-import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../applets/calendar/calendar_export.dart';
 import '../../core/database/account_database/account_db.dart';
@@ -89,25 +91,26 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return androidInfo.version.sdkInt >= 33;
         },
       ),
-      if (Platform.isAndroid) SettingsTile(
-          title: (context) => AppLocalizations.of(context)!.notifications,
-          subtitle: (context) async {
-            return AppLocalizations.of(context)!.intervalAppletsList;
-          },
-          icon: Icons.notifications_rounded,
-          screen: (context) async {
-            int accountCount = await accountDatabase
-                .select(accountDatabase.accountsTable)
-                .get()
-                .then((value) => value.length);
+      if (Platform.isAndroid)
+        SettingsTile(
+            title: (context) => AppLocalizations.of(context)!.notifications,
+            subtitle: (context) async {
+              return AppLocalizations.of(context)!.intervalAppletsList;
+            },
+            icon: Icons.notifications_rounded,
+            screen: (context) async {
+              int accountCount = await accountDatabase
+                  .select(accountDatabase.accountsTable)
+                  .get()
+                  .then((value) => value.length);
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      NotificationSettings(accountCount: accountCount)),
-            );
-          }),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NotificationSettings(accountCount: accountCount)),
+              );
+            }),
       SettingsTile(
           title: (context) => AppLocalizations.of(context)!.clearCache,
           subtitle: (context) async {
@@ -125,9 +128,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
     ]),
-    if (sph!.session.doesSupportFeature(calendarDefinition)) SettingsGroup(
-      tiles: [
-        SettingsTile(
+    if (sph!.session.doesSupportFeature(calendarDefinition) || sph!.session.doesSupportFeature(timeTableDefinition))
+      SettingsGroup(tiles: [
+        if (sph!.session.doesSupportFeature(calendarDefinition)) SettingsTile(
           title: (context) => AppLocalizations.of(context)!.calendarExport,
           subtitle: (context) async => 'PDF, iCal, ICS, CSV',
           icon: Icons.download_rounded,
@@ -138,8 +141,19 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
             ),
           ),
         ),
-      ]
-    ),
+        if (sph!.session.doesSupportFeature(timeTableDefinition)) SettingsTile(
+          title: (context) => AppLocalizations.of(context)!.customizeTimetable,
+          subtitle: (context) async =>
+          AppLocalizations.of(context)!.customizeTimetableDescription,
+          icon: Icons.timelapse,
+          screen: (context) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StudentTimetableSettings(),
+            ),
+          ),
+        ),
+      ]),
     SettingsGroup(tiles: [
       SettingsTile(
         title: (context) => AppLocalizations.of(context)!.userData,
@@ -207,7 +221,13 @@ class SettingsTileWidget extends StatefulWidget {
   final int length;
   final Color foregroundColor;
   final bool disableSetState;
-  const SettingsTileWidget({super.key, required this.tile, required this.foregroundColor, required this.index, required this.length, this.disableSetState = false});
+  const SettingsTileWidget(
+      {super.key,
+      required this.tile,
+      required this.foregroundColor,
+      required this.index,
+      required this.length,
+      this.disableSetState = false});
 
   static BorderRadius getRadius(int index, int length) {
     if (index == 0 && length > 1) {
@@ -250,14 +270,12 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
                 await widget.tile.screen(context);
 
                 if (!widget.disableSetState) {
-                  setState(() {
-
-                  });
+                  setState(() {});
                 }
               },
               foregroundColor: widget.foregroundColor,
-              borderRadius: SettingsTileWidget.getRadius(
-                  widget.index, widget.length),
+              borderRadius:
+                  SettingsTileWidget.getRadius(widget.index, widget.length),
             ),
           );
         }
@@ -265,7 +283,7 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
         subtitle = snapshot.data![1] as String;
 
         return Visibility(
-          visible: snapshot.data![0] as bool,
+            visible: snapshot.data![0] as bool,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 2.0),
               child: PressTile(
@@ -276,19 +294,15 @@ class _SettingsTileWidgetState extends State<SettingsTileWidget> {
                   await widget.tile.screen(context);
 
                   if (!widget.disableSetState) {
-                    setState(() {
-
-                    });
+                    setState(() {});
                   }
                 },
                 foregroundColor: widget.foregroundColor,
-                borderRadius: SettingsTileWidget.getRadius(
-                    widget.index, widget.length),
+                borderRadius:
+                    SettingsTileWidget.getRadius(widget.index, widget.length),
               ),
-            )
-        );
+            ));
       },
     );
   }
 }
-
