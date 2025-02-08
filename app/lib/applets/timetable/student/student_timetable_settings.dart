@@ -1,10 +1,11 @@
 import 'dart:io';
-import 'package:sph_plan/generated/l10n.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/applets/timetable/student/student_timetable_view.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
@@ -198,7 +199,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           ? () {
                               TimetableSubject newLesson = TimetableSubject(
                                   id:
-                                      'custom${nameController.text.replaceAll('-', '_')}-${startTime.hour}-${startTime.minute}',
+                                      'custom${nameController.text.replaceAll('-', '_')}-$currentDay-${startTime.hour}-${startTime.minute}',
                                   name: nameController.text,
                                   raum: roomController.text.isEmpty
                                       ? null
@@ -280,7 +281,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
 
           for (var (dayIndex, day) in timetable.planForAll!.indexed) {
             lessons[dayIndex] = [];
-            if(ids == null) continue;
+            if (ids == null) continue;
             for (var lesson in day) {
               if (!ids.contains(lesson.id)) continue;
               lessons[dayIndex]!.add(lesson);
