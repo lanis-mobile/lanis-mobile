@@ -55,38 +55,53 @@ class _StudentTimetableBetterViewState
           List<TimetableDay> selectedPlan =
               getSelectedPlan(timetable, selectedType, settings);
 
-          TimeTableData data =
-              TimeTableData(selectedPlan, timetable.weekBadge, settings);
+          TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
 
           return Scaffold(
-            body: Row(
-              children: [
-                Column(
-                  children: [
-                    if (timetable.hours != null)
-                      for (var (index, row) in timetable.hours!.indexed)
-                        Container(
-                          height: 100,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 100,
-                                child: Text(row.label),
-                              ),
-                              Container(
-                                width: 100,
-                                child: Text(row.startTime.format(context)),
-                              ),
-                              Container(
-                                width: 100,
-                                child: Text(row.endTime.format(context)),
-                              ),
-                            ],
-                          ),
-                        )
-                  ],
-                )
-              ],
+            body: SingleChildScrollView(
+              child: Row(
+                children: [
+                  Column(
+                    spacing: 8.0,
+                    children: [
+                      SizedBox(
+                        height: 200,
+                      ),
+                      if (data.hours != null)
+                        for (var (index, row) in data.hours!.indexed)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: row.type == TimeTableRowType.lesson
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainer
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainer
+                                      .withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            width: 80.0,
+                            child: Column(
+                              children: [
+                                Text(row.label),
+                                ...(row.type == TimeTableRowType.lesson
+                                    ? [
+                                        Text(
+                                            "${row.startTime.format(context)} -"),
+                                        Text(row.endTime.format(context))
+                                      ]
+                                    : [
+                                        Text(
+                                            '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
+                                      ]),
+                              ],
+                            ),
+                          )
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         });
@@ -94,28 +109,16 @@ class _StudentTimetableBetterViewState
 }
 
 class TimeTableData {
-  final List<TimeTableRow?> dataRows = [];
+  final List<TimeTableRow> hours = [];
 
-  TimeTableData(List<TimetableDay>? data, String? weekBadge, settings) {
-    for (var (dayIndex, day) in data!.indexed) {
-      for (var (lessonIndex, lesson) in day.indexed) {
-        List<dynamic>? hiddenLessons = settings['hidden-lessons'];
-        if (hiddenLessons != null && hiddenLessons.contains(lesson.id)) {
-          continue;
-        }
-        if (dataRows.length <= lessonIndex) {
-          // Fill with empty rows to match the current lesson index
-          dataRows.addAll(
-              List.generate(lessonIndex - dataRows.length + 1, (_) => null));
-        }
-        if (dataRows[lessonIndex] == null) {
-          dataRows[lessonIndex] = TimeTableRow(TimeTableRowType.lesson,
-              lesson.startTime, lesson.endTime, lesson.stunde.toString());
-        }
+  TimeTableData(List<TimetableDay>? data, TimeTable timetable, settings) {
+    for (var (index, hour) in timetable.hours!.indexed) {
+      if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
+        hours.add(TimeTableRow(TimeTableRowType.pause,
+            timetable.hours![index - 1].endTime, hour.startTime, 'Pause'));
       }
+      hours.add(hour);
     }
-
-    print(dataRows);
   }
 }
 
@@ -170,6 +173,12 @@ class TimeTableRow {
           .toList();
     }
     return row;
+  }
+}
+
+extension TimeOfDayExtension on TimeOfDay {
+  int differenceInMinutes(TimeOfDay other) {
+    return (other.hour - hour) * 60 + other.minute - minute;
   }
 }
 
