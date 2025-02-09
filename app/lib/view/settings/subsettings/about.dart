@@ -287,7 +287,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                             AvatarTile(
                               networkImage: contributors[i]['author']['avatar'],
                               name: contributors[i]['author']['login'],
-                              contributions: "${contributors[i]['total']} ${contributors[i]['author']['total'] == 1 ? "commit" : "commits"}",
+                              contributions: "${contributors[i]['total']} ${contributors[i]['total'] == 1 ? "commit" : "commits"}",
                               avatarSize: 20.0,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
                               color: foregroundColor,
