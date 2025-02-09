@@ -55,15 +55,46 @@ class _StudentTimetableBetterViewState
           List<TimetableDay> selectedPlan =
               getSelectedPlan(timetable, selectedType, settings);
 
+          TimeTableData data =
+              TimeTableData(selectedPlan, timetable.weekBadge, settings);
+
           return Scaffold(
-            body: Column(),
+            body: Row(
+              children: [
+                Column(
+                  children: [
+                    if (timetable.hours != null)
+                      for (var (index, row) in timetable.hours!.indexed)
+                        Container(
+                          height: 100,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 100,
+                                child: Text(row.label),
+                              ),
+                              Container(
+                                width: 100,
+                                child: Text(row.startTime.format(context)),
+                              ),
+                              Container(
+                                width: 100,
+                                child: Text(row.endTime.format(context)),
+                              ),
+                            ],
+                          ),
+                        )
+                  ],
+                )
+              ],
+            ),
           );
         });
   }
 }
 
 class TimeTableData {
-  late final List<dynamic> dataRows;
+  final List<TimeTableRow?> dataRows = [];
 
   TimeTableData(List<TimetableDay>? data, String? weekBadge, settings) {
     for (var (dayIndex, day) in data!.indexed) {
@@ -72,8 +103,19 @@ class TimeTableData {
         if (hiddenLessons != null && hiddenLessons.contains(lesson.id)) {
           continue;
         }
+        if (dataRows.length <= lessonIndex) {
+          // Fill with empty rows to match the current lesson index
+          dataRows.addAll(
+              List.generate(lessonIndex - dataRows.length + 1, (_) => null));
+        }
+        if (dataRows[lessonIndex] == null) {
+          dataRows[lessonIndex] = TimeTableRow(TimeTableRowType.lesson,
+              lesson.startTime, lesson.endTime, lesson.stunde.toString());
+        }
       }
     }
+
+    print(dataRows);
   }
 }
 
@@ -85,6 +127,50 @@ class TimeTableRow {
   final String label;
 
   TimeTableRow(this.type, this.startTime, this.endTime, this.label);
+
+  @override
+  String toString() {
+    return 'TimeTableRow{type: \$type, subjects: \$subjects, startTime: \$startTime, endTime: \$endTime, label: \$label}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is TimeTableRow) {
+      return type == other.type &&
+          subjects == other.subjects &&
+          startTime == other.startTime &&
+          endTime == other.endTime &&
+          label == other.label;
+    }
+    return false;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'subjects': subjects.map((s) => s.toJson()).toList(),
+      'startTime': {'hour': startTime.hour, 'minute': startTime.minute},
+      'endTime': {'hour': endTime.hour, 'minute': endTime.minute},
+      'label': label,
+    };
+  }
+
+  factory TimeTableRow.fromJson(Map<String, dynamic> json) {
+    TimeTableRowType rowType = json['type'] == 'TimeTableRowType.lesson'
+        ? TimeTableRowType.lesson
+        : TimeTableRowType.pause;
+    TimeOfDay start = TimeOfDay(
+        hour: json['startTime']['hour'], minute: json['startTime']['minute']);
+    TimeOfDay end = TimeOfDay(
+        hour: json['endTime']['hour'], minute: json['endTime']['minute']);
+    TimeTableRow row = TimeTableRow(rowType, start, end, json['label']);
+    if (json['subjects'] != null) {
+      row.subjects = (json['subjects'] as List)
+          .map((subjectJson) => TimetableSubject.fromJson(subjectJson))
+          .toList();
+    }
+    return row;
+  }
 }
 
 enum TimeTableRowType { lesson, pause }

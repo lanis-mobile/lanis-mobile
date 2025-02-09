@@ -210,7 +210,9 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                                       : allBadges[selectedWeek - 1],
                                   duration: 1,
                                   startTime: startTime,
-                                  endTime: endTime);
+                                  endTime: endTime,
+                                  // TODO: STUNDE SUPPORT
+                                  stunde: 0);
 
                               if (settings['custom-lessons'] == null) {
                                 settings['custom-lessons'] = ',,,,,,,'
