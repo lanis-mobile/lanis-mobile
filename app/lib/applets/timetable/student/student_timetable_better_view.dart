@@ -35,6 +35,19 @@ class _StudentTimetableBetterViewState
     return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
   }
 
+  BorderRadius _getBorderRadius(bool previous, bool next) {
+    if (previous && next) {
+      return BorderRadius.zero;
+    } else if (previous) {
+      return BorderRadius.only(
+          bottomRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0));
+    } else if (next) {
+      return BorderRadius.only(
+          topRight: Radius.circular(8.0), topLeft: Radius.circular(8.0));
+    }
+    return BorderRadius.all(Radius.circular(8.0));
+  }
+
   final double itemHeight = 60;
   final double headerHeight = 30;
 
@@ -114,7 +127,6 @@ class _StudentTimetableBetterViewState
                         for (int i = 0; i < selectedPlan.length; i++)
                           Expanded(
                             child: Column(
-                              spacing: 8.0,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Container(
@@ -134,37 +146,115 @@ class _StudentTimetableBetterViewState
                                 ),
                                 for (var (index, row) in data.hours!.indexed)
                                   Builder(builder: (context) {
-                                    TimetableSubject? subject =
-                                        selectedPlan[i].where((element) {
+                                    int subjectIndex =
+                                        selectedPlan[i].indexWhere((element) {
                                       if (element.startTime <= row.startTime &&
                                           element.endTime >= row.endTime) {
                                         return true;
                                       }
                                       return false;
-                                    }).firstOrNull;
-                                    return Container(
-                                        decoration: BoxDecoration(
-                                          color: row.type ==
-                                                  TimeTableRowType.lesson
-                                              ? subject != null
-                                                  ? TimeTableHelper
-                                                      .getColorForLesson(
-                                                          settings, subject)
-                                                  : Theme.of(context)
-                                                      .colorScheme
-                                                      .surfaceContainer
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainer
-                                                  .withOpacity(0.5),
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
+                                    });
+                                    TimetableSubject? subject =
+                                        subjectIndex != -1
+                                            ? selectedPlan[i][subjectIndex]
+                                            : null;
+
+                                    bool connectedToNext = false;
+                                    bool connectedToPrevious = false;
+                                    if (subjectIndex != -1) {
+                                      if (index > 0) {
+                                        int subjectIndex = selectedPlan[i]
+                                            .indexWhere((element) {
+                                          if (element.startTime <=
+                                                  data.hours[index - 1]
+                                                      .startTime &&
+                                              element.endTime >=
+                                                  data.hours[index - 1]
+                                                      .endTime) {
+                                            return true;
+                                          }
+                                          return false;
+                                        });
+                                        if (subjectIndex != -1) {
+                                          connectedToPrevious = true;
+                                        }
+                                      }
+                                      if (index < data.hours.length - 1) {
+                                        int subjectIndex = selectedPlan[i]
+                                            .indexWhere((element) {
+                                          if (element.startTime <=
+                                                  data.hours[index + 1]
+                                                      .startTime &&
+                                              element.endTime >=
+                                                  data.hours[index + 1]
+                                                      .endTime) {
+                                            return true;
+                                          }
+                                          return false;
+                                        });
+                                        if (subjectIndex != -1) {
+                                          connectedToNext = true;
+                                        }
+                                      }
+                                    }
+
+                                    Color lessonColor = row.type ==
+                                            TimeTableRowType.lesson
+                                        ? subject != null
+                                            ? TimeTableHelper.getColorForLesson(
+                                                settings, subject)
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainer
+                                            .withOpacity(0.5);
+
+                                    TextStyle? textStyle = Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                            color:
+                                                lessonColor.computeLuminance() >
+                                                        0.5
+                                                    ? Colors.black
+                                                    : Colors.white);
+
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        SizedBox(
+                                          height: connectedToPrevious ? 0 : 8.0,
                                         ),
-                                        height: itemHeight -
-                                            (row.type == TimeTableRowType.lesson
-                                                ? 0
-                                                : 20),
-                                        child: SizedBox());
+                                        Container(
+                                            decoration: BoxDecoration(
+                                              color: lessonColor,
+                                              borderRadius: _getBorderRadius(
+                                                  connectedToPrevious,
+                                                  connectedToNext),
+                                            ),
+                                            height: itemHeight -
+                                                (row.type ==
+                                                        TimeTableRowType.lesson
+                                                    ? 0
+                                                    : 20) +
+                                                (connectedToPrevious ? 8 : 0),
+                                            child: row.type ==
+                                                        TimeTableRowType
+                                                            .lesson &&
+                                                    subject != null &&
+                                                    !connectedToPrevious
+                                                ? Column(
+                                                    children: [
+                                                      Text(subject.name!,
+                                                          style: textStyle)
+                                                    ],
+                                                  )
+                                                : SizedBox()),
+                                      ],
+                                    );
                                   }),
                               ],
                             ),
