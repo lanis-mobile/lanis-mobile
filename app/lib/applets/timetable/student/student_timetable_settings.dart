@@ -202,7 +202,7 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
                           ? () {
                               TimetableSubject newLesson = TimetableSubject(
                                   id:
-                                      'custom${nameController.text.replaceAll('-', '_')}-${startTime.hour}-${startTime.minute}',
+                                      'custom${nameController.text.replaceAll('-', '_')}-$currentDay-${startTime.hour}-${startTime.minute}',
                                   name: nameController.text,
                                   raum: roomController.text.isEmpty
                                       ? null
