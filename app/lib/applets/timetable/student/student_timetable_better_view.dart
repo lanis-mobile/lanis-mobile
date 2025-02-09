@@ -41,7 +41,12 @@ class _StudentTimetableBetterViewState
         phpUrl: timeTableDefinition.appletPhpUrl,
         settingsDefaults: timeTableDefinition.settingsDefaults,
         accountType: AccountType.student,
-        builder: (context, timetable, _, settings, updateSettings, refresh) {
+        builder: (BuildContext context,
+            TimeTable timetable,
+            _,
+            Map<String, dynamic> settings,
+            updateSettings,
+            Future<void> Function()? refresh) {
           TimeTableType selectedType =
               settings['student-selected-type'] == 'TimeTableType.own'
                   ? TimeTableType.own
@@ -50,7 +55,36 @@ class _StudentTimetableBetterViewState
           List<TimetableDay> selectedPlan =
               getSelectedPlan(timetable, selectedType, settings);
 
-          return Scaffold();
+          return Scaffold(
+            body: Column(),
+          );
         });
   }
 }
+
+class TimeTableData {
+  late final List<dynamic> dataRows;
+
+  TimeTableData(List<TimetableDay>? data, String? weekBadge, settings) {
+    for (var (dayIndex, day) in data!.indexed) {
+      for (var (lessonIndex, lesson) in day.indexed) {
+        List<dynamic>? hiddenLessons = settings['hidden-lessons'];
+        if (hiddenLessons != null && hiddenLessons.contains(lesson.id)) {
+          continue;
+        }
+      }
+    }
+  }
+}
+
+class TimeTableRow {
+  final TimeTableRowType type;
+  List<TimetableSubject> subjects = [];
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
+  final String label;
+
+  TimeTableRow(this.type, this.startTime, this.endTime, this.label);
+}
+
+enum TimeTableRowType { lesson, pause }
