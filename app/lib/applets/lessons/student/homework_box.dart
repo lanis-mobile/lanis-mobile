@@ -161,7 +161,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
               width: double.infinity,
               decoration: BoxDecoration(
                 // Default card color as ground color with primary color on top. (primary with opacity 0.1)
-                  color: Color.alphaBlend(Theme.of(context).colorScheme.primary.withOpacity(0.2), Theme.of(context).cardColor),
+                  color: Color.alphaBlend(Theme.of(context).colorScheme.primary.withValues(alpha: 0.2), Theme.of(context).cardColor),
                   borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 8.0),
               child: FormattedText(

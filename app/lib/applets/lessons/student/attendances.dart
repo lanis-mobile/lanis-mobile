@@ -98,11 +98,11 @@ class AttendanceCard extends StatelessWidget {
                         ? Theme.of(context)
                             .colorScheme
                             .secondary
-                            .withOpacity(0.3)
+                            .withValues(alpha: 0.3)
                         : Theme.of(context)
                             .colorScheme
                             .tertiary
-                            .withOpacity(0.1),
+                            .withValues(alpha: 0.1),
                     borderRadius: index == 0
                         ? const BorderRadius.vertical(top: Radius.circular(8))
                         : index == attendances.length - 1

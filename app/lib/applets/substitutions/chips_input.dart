@@ -13,7 +13,7 @@ class StringListEditor extends StatefulWidget {
   });
 
   @override
-  _StringListEditorState createState() => _StringListEditorState();
+  State<StringListEditor> createState() => _StringListEditorState();
 }
 
 class _StringListEditorState extends State<StringListEditor> {

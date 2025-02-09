@@ -52,7 +52,7 @@ class CalendarEvent {
       startTime: formatter.parse(json['Anfang']),
       endTime: formatter.parse(json['Ende']),
       fremdUID: json['FremdUID'],
-      lerngruppe: json['Lerngruppe']??null,
+      lerngruppe: json['Lerngruppe'],
       secret: json['Geheim'] != 'nein',
       id: json['Id'],
       schoolID: json['Institution'],

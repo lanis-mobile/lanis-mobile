@@ -345,6 +345,7 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
   }
 }
 
+// ignore: non_constant_identifier_names
 String HHmm(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }

@@ -134,7 +134,7 @@ abstract class BubbleStyles {
     if (theme.brightness == Brightness.dark) {
       other = BubbleStyle(
           mainColor: theme.colorScheme.inversePrimary,
-          pressedColor: theme.colorScheme.inversePrimary.withOpacity(0.65),
+          pressedColor: theme.colorScheme.inversePrimary.withValues(alpha: 0.65),
           mainTextStyle: baseTextStyle.copyWith(
               color: theme.colorScheme.onSurface,
               decorationColor: theme.colorScheme.onPrimary),
@@ -168,7 +168,7 @@ abstract class BubbleStyles {
     } else {
       other = BubbleStyle(
           mainColor: theme.colorScheme.primaryFixed,
-          pressedColor: theme.colorScheme.primaryFixed.withOpacity(0.65),
+          pressedColor: theme.colorScheme.primaryFixed.withValues(alpha: 0.65),
           mainTextStyle: baseTextStyle.copyWith(
               color: theme.colorScheme.onPrimaryFixedVariant,
               decorationColor: theme.colorScheme.onPrimaryFixedVariant),
@@ -180,7 +180,7 @@ abstract class BubbleStyles {
               timeColor: theme.colorScheme.primary,
               linkBackground: theme.colorScheme.primaryFixedDim,
               linkForeground: theme.colorScheme.onPrimaryFixedVariant,
-              codeBackground: theme.colorScheme.primary.withOpacity(0.3),
+              codeBackground: theme.colorScheme.primary.withValues(alpha: 0.3),
               codeForeground: theme.colorScheme.onPrimaryFixedVariant));
 
       own = BubbleStyle(

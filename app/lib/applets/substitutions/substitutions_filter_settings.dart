@@ -61,7 +61,7 @@ class SubstitutionFilterEditor extends StatefulWidget {
   const SubstitutionFilterEditor({super.key, required this.objKey, required this.title});
 
   @override
-  _SubstitutionFilterEditorState createState() =>
+  State<SubstitutionFilterEditor> createState() =>
       _SubstitutionFilterEditorState();
 }
 

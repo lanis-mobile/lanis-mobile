@@ -18,7 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
 
-const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
+const String surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -372,7 +372,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
               child: ElevatedButton(
                   onPressed: () async {
-                    await launchUrl(Uri.parse(surveyUrl!));
+                    await launchUrl(Uri.parse(surveyUrl));
                     await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
                   },
                   child: Row(

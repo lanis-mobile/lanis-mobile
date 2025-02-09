@@ -123,14 +123,14 @@ class AccountDatabase extends _$AccountDatabase {
   }
 
   Future<ClearTextAccount?> getLastLoggedInAccount() async {
-    final _account = await (select(accountsTable)
+    final account0 = await (select(accountsTable)
           ..orderBy([
             (u) => OrderingTerm(
                 expression: u.lastLogin,
                 mode: OrderingMode.desc,
                 nulls: NullsOrder.first),
           ])).get();
-    final account = _account.isNotEmpty ? _account.first : null;
+    final account = account0.isNotEmpty ? account0.first : null;
     if (account == null) return null;
 
     return ClearTextAccount(
