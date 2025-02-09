@@ -98,15 +98,19 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
           alreadyParsed[rowIndex + i][actualDay] = true;
         }
 
-        result[actualDay].addAll(parseSingeHour(
-            colElement, rowIndex, timeSlots, timeslotOffsetFirstRow));
+        result[actualDay].addAll(parseSingeHour(colElement, rowIndex, timeSlots,
+            timeslotOffsetFirstRow, actualDay));
       }
     }
     return result;
   }
 
-  List<TimetableSubject> parseSingeHour(Element cell, int y,
-      List<(TimeOfDay, TimeOfDay)> timeSlots, bool timeslotOffsetFirstRow) {
+  List<TimetableSubject> parseSingeHour(
+      Element cell,
+      int y,
+      List<(TimeOfDay, TimeOfDay)> timeSlots,
+      bool timeslotOffsetFirstRow,
+      int day) {
     List<TimetableSubject> result = [];
     for (var row in cell.querySelectorAll(".stunde")) {
       var name = row.querySelector("b")?.text.trim();
@@ -126,7 +130,7 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
       var id = row.attributes['data-mix'];
 
       result.add(TimetableSubject(
-          id: '$id-${startTime.hour}-${startTime.minute}',
+          id: '$id-$day-${startTime.hour}-${startTime.minute}',
           name: name,
           raum: raum,
           lehrer: lehrer,
