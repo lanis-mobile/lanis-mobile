@@ -7,7 +7,7 @@ import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/models/timetable.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
-final double itemHeight = 60;
+final double itemHeight = 40;
 final double headerHeight = 30;
 
 class StudentTimetableBetterView extends StatefulWidget {
@@ -57,7 +57,7 @@ class _StudentTimetableBetterViewState
                   : TimeTableType.all;
           bool showByWeek = settings['student-selected-week'] == true;
           List<TimetableDay> selectedPlan =
-              getSelectedPlan(timetable, selectedType, settings);
+              getSelectedPlan(timetable, TimeTableType.own, settings);
 
           TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
 
@@ -85,21 +85,21 @@ class _StudentTimetableBetterViewState
                                     .withOpacity(0.5),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          width: 80.0,
+                          width: 50.0,
                           height: itemHeight -
                               (row.type == TimeTableRowType.lesson ? 0 : 20),
                           child: Column(
                             children: [
-                              Text(row.label),
+                              Text(row.label.replaceAll('Stunde', '')),
                               ...(row.type == TimeTableRowType.lesson
                                   ? [
                                       Text(
                                           "${row.startTime.format(context)} -"),
-                                      Text(row.endTime.format(context))
+                                      // Text(row.endTime.format(context))
                                     ]
                                   : [
-                                      Text(
-                                          '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
+                                      // Text(
+                                      //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
                                     ]),
                             ],
                           ),
@@ -194,20 +194,6 @@ class LessonItem extends StatelessWidget {
     // Check connection for visual continuity on the first lesson (if needed).
     bool connectedToPrevious = false;
     bool connectedToNext = false;
-    if (overlappingSubjects.isNotEmpty) {
-      if (index > 0) {
-        int prevIndex = selectedPlan[i].indexWhere((element) =>
-            element.startTime <= data.hours[index - 1].startTime &&
-            element.endTime >= data.hours[index - 1].endTime);
-        connectedToPrevious = prevIndex != -1;
-      }
-      if (index < data.hours.length - 1) {
-        int nextIndex = selectedPlan[i].indexWhere((element) =>
-            element.startTime <= data.hours[index + 1].startTime &&
-            element.endTime >= data.hours[index + 1].endTime);
-        connectedToNext = nextIndex != -1;
-      }
-    }
 
     return Row(
       children: overlappingSubjects.isNotEmpty
