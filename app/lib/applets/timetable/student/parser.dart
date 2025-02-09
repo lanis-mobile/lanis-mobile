@@ -125,7 +125,8 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
             TimeTableRowType.lesson,
             TimeOfDay(hour: int.parse(splitA[0]), minute: int.parse(splitA[1])),
             TimeOfDay(hour: int.parse(splitB[0]), minute: int.parse(splitB[1])),
-            label.text.trim()));
+            label.text.trim(),
+            rowIndex));
         break;
       }
     }

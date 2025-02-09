@@ -1,3 +1,4 @@
+import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
@@ -34,6 +35,9 @@ class _StudentTimetableBetterViewState
     return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
   }
 
+  final double itemHeight = 60;
+  final double headerHeight = 30;
+
   @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder<TimeTable>(
@@ -58,48 +62,116 @@ class _StudentTimetableBetterViewState
           TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
 
           return Scaffold(
+            appBar: AppBar(),
             body: SingleChildScrollView(
               child: Row(
+                spacing: 4.0,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
                     spacing: 8.0,
                     children: [
                       SizedBox(
-                        height: 200,
+                        height: headerHeight,
                       ),
-                      if (data.hours != null)
-                        for (var (index, row) in data.hours!.indexed)
-                          Container(
-                            decoration: BoxDecoration(
-                              color: row.type == TimeTableRowType.lesson
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainer
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainer
-                                      .withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            width: 80.0,
+                      for (var (index, row) in data.hours!.indexed)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: row.type == TimeTableRowType.lesson
+                                ? Theme.of(context).colorScheme.surfaceContainer
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainer
+                                    .withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          width: 80.0,
+                          height: itemHeight -
+                              (row.type == TimeTableRowType.lesson ? 0 : 20),
+                          child: Column(
+                            children: [
+                              Text(row.label),
+                              ...(row.type == TimeTableRowType.lesson
+                                  ? [
+                                      Text(
+                                          "${row.startTime.format(context)} -"),
+                                      Text(row.endTime.format(context))
+                                    ]
+                                  : [
+                                      Text(
+                                          '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
+                                    ]),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  Expanded(
+                    child: Row(
+                      spacing: 4.0,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        for (int i = 0; i < selectedPlan.length; i++)
+                          Expanded(
                             child: Column(
+                              spacing: 8.0,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text(row.label),
-                                ...(row.type == TimeTableRowType.lesson
-                                    ? [
-                                        Text(
-                                            "${row.startTime.format(context)} -"),
-                                        Text(row.endTime.format(context))
-                                      ]
-                                    : [
-                                        Text(
-                                            '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
-                                      ]),
+                                Container(
+                                  height: headerHeight,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainer,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Text(
+                                    DateTime(2020, 8, 3)
+                                        .add(Duration(days: i))
+                                        .format('E'),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                for (var (index, row) in data.hours!.indexed)
+                                  Builder(builder: (context) {
+                                    TimetableSubject? subject =
+                                        selectedPlan[i].where((element) {
+                                      if (element.startTime <= row.startTime &&
+                                          element.endTime >= row.endTime) {
+                                        return true;
+                                      }
+                                      return false;
+                                    }).firstOrNull;
+                                    return Container(
+                                        decoration: BoxDecoration(
+                                          color: row.type ==
+                                                  TimeTableRowType.lesson
+                                              ? subject != null
+                                                  ? TimeTableHelper
+                                                      .getColorForLesson(
+                                                          settings, subject)
+                                                  : Theme.of(context)
+                                                      .colorScheme
+                                                      .surfaceContainer
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainer
+                                                  .withOpacity(0.5),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        height: itemHeight -
+                                            (row.type == TimeTableRowType.lesson
+                                                ? 0
+                                                : 20),
+                                        child: SizedBox());
+                                  }),
                               ],
                             ),
                           )
-                    ],
-                  ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
@@ -115,7 +187,7 @@ class TimeTableData {
     for (var (index, hour) in timetable.hours!.indexed) {
       if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
         hours.add(TimeTableRow(TimeTableRowType.pause,
-            timetable.hours![index - 1].endTime, hour.startTime, 'Pause'));
+            timetable.hours![index - 1].endTime, hour.startTime, 'Pause', -1));
       }
       hours.add(hour);
     }
@@ -124,12 +196,13 @@ class TimeTableData {
 
 class TimeTableRow {
   final TimeTableRowType type;
-  List<TimetableSubject> subjects = [];
   final TimeOfDay startTime;
   final TimeOfDay endTime;
   final String label;
+  final int lessonIndex;
 
-  TimeTableRow(this.type, this.startTime, this.endTime, this.label);
+  TimeTableRow(
+      this.type, this.startTime, this.endTime, this.label, this.lessonIndex);
 
   @override
   String toString() {
@@ -140,9 +213,9 @@ class TimeTableRow {
   bool operator ==(Object other) {
     if (other is TimeTableRow) {
       return type == other.type &&
-          subjects == other.subjects &&
           startTime == other.startTime &&
           endTime == other.endTime &&
+          lessonIndex == other.lessonIndex &&
           label == other.label;
     }
     return false;
@@ -151,10 +224,10 @@ class TimeTableRow {
   Map<String, dynamic> toJson() {
     return {
       'type': type.toString(),
-      'subjects': subjects.map((s) => s.toJson()).toList(),
       'startTime': {'hour': startTime.hour, 'minute': startTime.minute},
       'endTime': {'hour': endTime.hour, 'minute': endTime.minute},
       'label': label,
+      'lessonIndex': lessonIndex,
     };
   }
 
@@ -166,12 +239,8 @@ class TimeTableRow {
         hour: json['startTime']['hour'], minute: json['startTime']['minute']);
     TimeOfDay end = TimeOfDay(
         hour: json['endTime']['hour'], minute: json['endTime']['minute']);
-    TimeTableRow row = TimeTableRow(rowType, start, end, json['label']);
-    if (json['subjects'] != null) {
-      row.subjects = (json['subjects'] as List)
-          .map((subjectJson) => TimetableSubject.fromJson(subjectJson))
-          .toList();
-    }
+    TimeTableRow row =
+        TimeTableRow(rowType, start, end, json['label'], json['lessonIndex']);
     return row;
   }
 }
@@ -179,6 +248,14 @@ class TimeTableRow {
 extension TimeOfDayExtension on TimeOfDay {
   int differenceInMinutes(TimeOfDay other) {
     return (other.hour - hour) * 60 + other.minute - minute;
+  }
+
+  operator <=(TimeOfDay other) {
+    return hour < other.hour || (hour == other.hour && minute <= other.minute);
+  }
+
+  operator >=(TimeOfDay other) {
+    return hour > other.hour || (hour == other.hour && minute >= other.minute);
   }
 }
 
