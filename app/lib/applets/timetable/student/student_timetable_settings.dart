@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
-import 'package:sph_plan/applets/timetable/student/student_timetable_view.dart';
+import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
