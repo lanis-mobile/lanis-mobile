@@ -37,7 +37,7 @@ class LoginFormState extends State<LoginForm> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-              title: Text(AppLocalizations.of(context)!.logInTitle),
+              title: Text(AppLocalizations.of(context).logInTitle),
               content: const Center(
                 heightFactor: 1.2,
                 child: CircularProgressIndicator(),
@@ -74,7 +74,7 @@ class LoginFormState extends State<LoginForm> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.error),
+            title: Text(AppLocalizations.of(context).error),
             content: Text(ex.cause),
             actions: [
               TextButton(
@@ -130,7 +130,7 @@ class LoginFormState extends State<LoginForm> {
                         children: [
                           const Icon(Icons.person, size: 70),
                           Text(
-                            AppLocalizations.of(context)!.logIn,
+                            AppLocalizations.of(context).logIn,
                             style: const TextStyle(fontSize: 35),
                           )
                         ],
@@ -157,10 +157,10 @@ class LoginFormState extends State<LoginForm> {
                       autocorrect: false,
                       decoration: InputDecoration(
                           labelText:
-                          AppLocalizations.of(context)!.authUsernameHint),
+                          AppLocalizations.of(context).authUsernameHint),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.authValidationError;
+                          return AppLocalizations.of(context).authValidationError;
                         }
 
                         return null;
@@ -176,11 +176,11 @@ class LoginFormState extends State<LoginForm> {
                       autocorrect: false,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.authPasswordHint,
+                        labelText: AppLocalizations.of(context).authPasswordHint,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.authValidationError;
+                          return AppLocalizations.of(context).authValidationError;
                         }
                         return null;
                       },
@@ -195,11 +195,11 @@ class LoginFormState extends State<LoginForm> {
                           value: dseAgree,
                           title: RichText(
                             text: TextSpan(
-                              text: AppLocalizations.of(context)!.authIAccept,
+                              text: AppLocalizations.of(context).authIAccept,
                               style: DefaultTextStyle.of(context).style,
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: AppLocalizations.of(context)!
+                                  text: AppLocalizations.of(context)
                                       .authTermsOfService,
                                   style: TextStyle(
                                       color: Theme.of(context)
@@ -210,7 +210,7 @@ class LoginFormState extends State<LoginForm> {
                                         "https://lanis-mobile.github.io/policy/")),
                                 ),
                                 TextSpan(
-                                  text: AppLocalizations.of(context)!
+                                  text: AppLocalizations.of(context)
                                       .authOfLanisMobile,
                                 ),
                               ],
@@ -236,7 +236,7 @@ class LoginFormState extends State<LoginForm> {
                         }
                       }
                           : null,
-                      child: Text(AppLocalizations.of(context)!.logIn),
+                      child: Text(AppLocalizations.of(context).logIn),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -245,7 +245,7 @@ class LoginFormState extends State<LoginForm> {
                             onPressed: schoolIDController.text.isNotEmpty ? () => launchUrl(Uri.parse(
                                 "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=${schoolIDController.text}")) : null,
                             child: Text(
-                                AppLocalizations.of(context)!.authResetPassword))
+                                AppLocalizations.of(context).authResetPassword))
                       ],
                     )
                   ],

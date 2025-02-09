@@ -18,7 +18,7 @@ class _SubstitutionsFilterSettingsState extends State<SubstitutionsFilterSetting
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.substitutionsFilter),
+          title: Text(AppLocalizations.of(context).substitutionsFilter),
         ),
         body: ListView(
           padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
@@ -29,7 +29,7 @@ class _SubstitutionsFilterSettingsState extends State<SubstitutionsFilterSetting
                 sph!.parser.substitutionsParser.saveFilterToStorage();
                 Navigator.pop(context);
               },
-              child: Text(AppLocalizations.of(context)!.reset),
+              child: Text(AppLocalizations.of(context).reset),
             ),
             const SubstitutionFilterEditor(objKey: "Klasse", title: 'Klasse'),
             const SubstitutionFilterEditor(objKey: "Fach", title: 'Fach'),
@@ -45,8 +45,8 @@ class _SubstitutionsFilterSettingsState extends State<SubstitutionsFilterSetting
             SafeArea(
               child: ListTile(
                   leading: const Icon(Icons.help),
-                  title: Text(AppLocalizations.of(context)!.howItWorks),
-                  subtitle: Text(AppLocalizations.of(context)!.howItWorksText)
+                  title: Text(AppLocalizations.of(context).howItWorks),
+                  subtitle: Text(AppLocalizations.of(context).howItWorksText)
               ),
             )
           ],

@@ -67,7 +67,7 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.storage),
+        title: Text(AppLocalizations.of(context).storage),
         actions: const [
           AsyncSearchAnchor(),
         ],
@@ -82,7 +82,7 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
                   children: [
                     Icon(Icons.error_outline, size: 100),
                     SizedBox(height: 10),
-                    Text(AppLocalizations.of(context)!.couldNotLoadDataStorage),
+                    Text(AppLocalizations.of(context).couldNotLoadDataStorage),
                   ],
                 ))
               : ListView(
@@ -134,7 +134,7 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
       if (_lastOptions.isEmpty) {
         _lastOptions = <Widget>[
           ListTile(
-            title: Text(AppLocalizations.of(context)!.noResults),
+            title: Text(AppLocalizations.of(context).noResults),
           )
         ];
       }

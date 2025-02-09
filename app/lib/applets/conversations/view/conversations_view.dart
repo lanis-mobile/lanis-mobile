@@ -166,7 +166,7 @@ class _ConversationsViewState extends State<ConversationsView> {
               width: 16,
             ),
             Text(
-              AppLocalizations.of(context)!.hideShowConversations,
+              AppLocalizations.of(context).hideShowConversations,
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ],
@@ -208,7 +208,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: SearchBar(
-                    hintText: AppLocalizations.of(context)!
+                    hintText: AppLocalizations.of(context)
                         .individualSearchHint(function.name),
                     textInputAction: TextInputAction.search,
                     controller: advancedSearchControllers[function],
@@ -244,7 +244,7 @@ class _ConversationsViewState extends State<ConversationsView> {
 
             // Simple search
             SearchBar(
-              hintText: AppLocalizations.of(context)!.searchHint,
+              hintText: AppLocalizations.of(context).searchHint,
               textInputAction: TextInputAction.search,
               controller: simpleSearchController,
               onSubmitted: (String text) {
@@ -306,8 +306,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                         });
                       },
                       child: Text(advancedSearch
-                          ? AppLocalizations.of(context)!.simpleSearch
-                          : AppLocalizations.of(context)!.advancedSearch),
+                          ? AppLocalizations.of(context).simpleSearch
+                          : AppLocalizations.of(context).advancedSearch),
                     ),
                     MenuItemButton(
                       leadingIcon: showHidden
@@ -328,8 +328,8 @@ class _ConversationsViewState extends State<ConversationsView> {
 
                       },
                       child: Text(showHidden
-                          ? AppLocalizations.of(context)!.showOnlyVisible
-                          : AppLocalizations.of(context)!.showAll),
+                          ? AppLocalizations.of(context).showOnlyVisible
+                          : AppLocalizations.of(context).showAll),
                     ),
                     const Divider(),
                     MenuItemButton(
@@ -344,7 +344,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                         jumpToTopTile(
                             sph!.parser.conversationsParser.stream.value.content!, oldEntries!);
                       },
-                      child: Text(AppLocalizations.of(context)!.hideShow),
+                      child: Text(AppLocalizations.of(context).hideShow),
                     ),
                   ],
                 ),
@@ -512,7 +512,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                       top: 12.0, left: 12.0, right: 12.0),
                                   child: ListTile(
                                     title: Text(
-                                      AppLocalizations.of(context)!
+                                      AppLocalizations.of(context)
                                           .noFurtherEntries,
                                       textAlign: TextAlign.center,
                                       style: Theme.of(context)
@@ -520,7 +520,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                           .titleLarge,
                                     ),
                                     subtitle: Text(
-                                      AppLocalizations.of(context)!
+                                      AppLocalizations.of(context)
                                           .conversationNote,
                                       textAlign: TextAlign.center,
                                     ),
@@ -550,7 +550,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                 ))
                 : FloatingActionButton.extended(
                 icon: Icon(Icons.visibility),
-                label: Text(AppLocalizations.of(context)!.hideShow),
+                label: Text(AppLocalizations.of(context).hideShow),
                 onPressed: () async {
                   setState(() {
                     disableToggleButton = true;
@@ -585,7 +585,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                             builder: (context) => AlertDialog(
                               icon: const Icon(Icons.wifi_off),
                               title: Text(
-                                  AppLocalizations.of(context)!
+                                  AppLocalizations.of(context)
                                       .noInternetConnection2),
                               actions: [
                                 FilledButton(
@@ -593,7 +593,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                       Navigator.pop(context);
                                     },
                                     child: Text(
-                                        AppLocalizations.of(context)!
+                                        AppLocalizations.of(context)
                                             .back))
                               ],
                             ));
@@ -610,7 +610,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                             builder: (context) => AlertDialog(
                               icon: const Icon(Icons.error),
                               title: Text(
-                                  AppLocalizations.of(context)!
+                                  AppLocalizations.of(context)
                                       .errorOccurred),
                               actions: [
                                 FilledButton(
@@ -618,7 +618,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                       Navigator.pop(context);
                                     },
                                     child: Text(
-                                        AppLocalizations.of(context)!
+                                        AppLocalizations.of(context)
                                             .back))
                               ],
                             ));

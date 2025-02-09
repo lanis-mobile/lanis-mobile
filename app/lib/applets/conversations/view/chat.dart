@@ -93,13 +93,13 @@ class _ConversationsChatState extends State<ConversationsChat>
         context: context,
         builder: (context) => AlertDialog(
           icon: const Icon(Icons.error),
-          title: Text(AppLocalizations.of(context)!.errorOccurred),
+          title: Text(AppLocalizations.of(context).errorOccurred),
           actions: [
             FilledButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text(AppLocalizations.of(context)!.back)
+                child: Text(AppLocalizations.of(context).back)
             )
           ],
         )
@@ -111,13 +111,13 @@ class _ConversationsChatState extends State<ConversationsChat>
         context: context,
         builder: (context) => AlertDialog(
           icon: const Icon(Icons.wifi_off),
-          title: Text(AppLocalizations.of(context)!.noInternetConnection2),
+          title: Text(AppLocalizations.of(context).noInternetConnection2),
           actions: [
             FilledButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text(AppLocalizations.of(context)!.back)
+                child: Text(AppLocalizations.of(context).back)
             )
           ],
         )
@@ -189,7 +189,7 @@ class _ConversationsChatState extends State<ConversationsChat>
       } else {
         chat.last.status = MessageStatus.error;
         showSnackbar(
-            context, AppLocalizations.of(context)!.errorSendingMessage);
+            context, AppLocalizations.of(context).errorSendingMessage);
       }
     });
   }
@@ -331,7 +331,7 @@ class _ConversationsChatState extends State<ConversationsChat>
               return Visibility(
                 visible: isVisible,
                 child: FloatingActionButton.extended(
-                  label: Text(AppLocalizations.of(context)!.newMessage),
+                  label: Text(AppLocalizations.of(context).newMessage),
                   icon: const Icon(Icons.edit),
                   onPressed: () async {
                     final result = await Navigator.of(context).push(MaterialPageRoute(
@@ -404,11 +404,11 @@ class _ConversationsChatState extends State<ConversationsChat>
                                 return AlertDialog(
                                   icon: const Icon(Icons.groups),
                                   title: Text(
-                                      AppLocalizations.of(context)!
+                                      AppLocalizations.of(context)
                                           .conversationTypeName(
                                           ChatType.openChat.name)),
                                   content: Text(
-                                      AppLocalizations.of(context)!
+                                      AppLocalizations.of(context)
                                           .openChatWarning),
                                   actions: [
                                     FilledButton(
@@ -455,14 +455,14 @@ class _ConversationsChatState extends State<ConversationsChat>
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   icon: const Icon(Icons.visibility_off),
-                                  title: Text(AppLocalizations.of(context)!.conversationHide),
-                                  content: Text(AppLocalizations.of(context)!.hideNote),
+                                  title: Text(AppLocalizations.of(context).conversationHide),
+                                  content: Text(AppLocalizations.of(context).hideNote),
                                   actions: [
                                     OutlinedButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
                                         },
-                                        child: Text(AppLocalizations.of(context)!.back)
+                                        child: Text(AppLocalizations.of(context).back)
                                     ),
                                     FilledButton(
                                         onPressed: () async {
@@ -486,7 +486,7 @@ class _ConversationsChatState extends State<ConversationsChat>
 
                                           Navigator.of(context).pop();
                                         },
-                                        child: Text(AppLocalizations.of(context)!.conversationHide)
+                                        child: Text(AppLocalizations.of(context).conversationHide)
                                     )
                                   ],
                                 )
@@ -544,7 +544,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                                       .colorScheme
                                       .surfaceContainerHigh),
                               child: Text(
-                                "${settings.author} ${AppLocalizations.of(context)!.privateConversation}",
+                                "${settings.author} ${AppLocalizations.of(context).privateConversation}",
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -612,7 +612,7 @@ class StatisticWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.receivers),
+        title: Text(AppLocalizations.of(context).receivers),
       ),
       body: ListView(
         children: [
@@ -641,16 +641,16 @@ class StatisticWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.person), AppLocalizations.of(context)!.participants, statistics.countStudents)),
-                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.school), AppLocalizations.of(context)!.supervisors, statistics.countTeachers)),
-                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.supervisor_account), AppLocalizations.of(context)!.parents, statistics.countParents)),
+                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.person), AppLocalizations.of(context).participants, statistics.countStudents)),
+                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.school), AppLocalizations.of(context).supervisors, statistics.countTeachers)),
+                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.supervisor_account), AppLocalizations.of(context).parents, statistics.countParents)),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 15,),
           Text(
-              AppLocalizations.of(context)!.knownReceivers,
+              AppLocalizations.of(context).knownReceivers,
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
           ),
@@ -755,7 +755,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   await Clipboard.setData(
                       ClipboardData(text: widget.message.text));
                   showSnackbar(
-                      context, AppLocalizations.of(context)!.copiedMessage);
+                      context, AppLocalizations.of(context).copiedMessage);
                   controller.value = 0;
                   controller.forward();
                 },

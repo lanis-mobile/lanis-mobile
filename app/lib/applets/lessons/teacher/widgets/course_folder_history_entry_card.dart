@@ -95,7 +95,7 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
                           spacing: 4,
                           children: [
                             Icon(Icons.schedule, size: 18),
-                            Text(AppLocalizations.of(context)!.dateWithHours(DateFormat.yMEd(Localizations.localeOf(context).toString()).format(widget.entry.date), widget.entry.schoolHours)),
+                            Text(AppLocalizations.of(context).dateWithHours(DateFormat.yMEd(Localizations.localeOf(context).toString()).format(widget.entry.date), widget.entry.schoolHours)),
                             if (_isToday)
                               Container(
                                 decoration: BoxDecoration(

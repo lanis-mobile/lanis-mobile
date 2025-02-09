@@ -89,7 +89,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                     ),
                     Text(
                       AppLocalizations.of(
-                          context)!
+                          context)
                           .homework,
                       style: Theme.of(context)
                           .textTheme
@@ -117,7 +117,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                           .showSnackBar(SnackBar(
                           content: Text(
                               AppLocalizations.of(
-                                  context)!
+                                  context)
                                   .homeworkSaving),
                           duration:
                           const Duration(
@@ -132,7 +132,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                               SnackBar(
                                 content: Text(
                                     AppLocalizations.of(
-                                        context)!
+                                        context)
                                         .homeworkSavingError),
                               ));
                         } else {
@@ -146,7 +146,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                           .showSnackBar(SnackBar(
                         content: Text(
                             AppLocalizations.of(
-                                context)!
+                                context)
                                 .homeworkSavingError),
                       ));
                     }

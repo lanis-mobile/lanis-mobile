@@ -52,7 +52,7 @@ class _StringListEditorState extends State<StringListEditor> {
         TextField(
           controller: _controller,
           decoration: InputDecoration(
-            labelText: AppLocalizations.of(context)!.addFilter,
+            labelText: AppLocalizations.of(context).addFilter,
             suffixIcon: IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {

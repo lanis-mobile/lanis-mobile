@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Destination> endDestinations = [
     Destination(
-        label: (context) => AppLocalizations.of(context)!.openMoodle,
+        label: (context) => AppLocalizations.of(context).openMoodle,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
         action: (context) => Navigator.push(context,
             MaterialPageRoute(builder: (context) => const MoodleWebView()))),
     Destination(
-        label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
+        label: (context) => AppLocalizations.of(context).openLanisInBrowser,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
           });
         }),
     Destination(
-      label: (context) => AppLocalizations.of(context)!.settings,
+      label: (context) => AppLocalizations.of(context).settings,
       icon: const Icon(Icons.settings),
       selectedIcon: const Icon(Icons.settings),
       isSupported: true,
@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
       enableDrawer: true,
       icon: Icon(Icons.logout),
       selectedIcon: Icon(Icons.logout_outlined),
-      label: (context) => AppLocalizations.of(context)!.logout,
+      label: (context) => AppLocalizations.of(context).logout,
       action: (context) async {
         await sph!.session.deAuthenticate();
         await accountDatabase.deleteAccount(sph!.account.localId);
@@ -188,11 +188,11 @@ class _HomePageState extends State<HomePage> {
           ),
           Padding(
             padding: const EdgeInsets.all(32),
-            child: Text(AppLocalizations.of(context)!.noSupportOpenInBrowser),
+            child: Text(AppLocalizations.of(context).noSupportOpenInBrowser),
           ),
           ElevatedButton(
               onPressed: () => openLanisInBrowser(context),
-              child: Text(AppLocalizations.of(context)!.openLanisInBrowser))
+              child: Text(AppLocalizations.of(context).openLanisInBrowser))
         ],
       ),
     );
@@ -381,7 +381,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Icon(Icons.feedback),
-                    Text(AppLocalizations.of(context)!.feedback)
+                    Text(AppLocalizations.of(context).feedback)
                   ],
                 ),
               ),

@@ -12,7 +12,7 @@ class AttendancesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.attendances),
+        title: Text(AppLocalizations.of(context).attendances),
       ),
       body: ListView.builder(
         itemCount: lessons.length + 1,
@@ -21,7 +21,7 @@ class AttendancesScreen extends StatelessWidget {
             return Column(
               children: [
                 AttendanceCard(
-                  title: AppLocalizations.of(context)!.allAttendances,
+                  title: AppLocalizations.of(context).allAttendances,
                   teacher: null,
                   attendances: getCombinedAttendances(lessons),
                 ),

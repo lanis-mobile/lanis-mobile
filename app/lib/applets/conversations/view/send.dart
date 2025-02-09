@@ -97,7 +97,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
           builder: (context) {
             return AlertDialog(
               icon: const Icon(Icons.wifi_off),
-              title: Text(AppLocalizations.of(context)!.noInternetConnection2),
+              title: Text(AppLocalizations.of(context).noInternetConnection2),
               actions: [
                 FilledButton(
                     onPressed: () async {
@@ -154,7 +154,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
             return AlertDialog(
               icon: const Icon(Icons.error),
               title:
-                  Text(AppLocalizations.of(context)!.errorCreatingConversation),
+                  Text(AppLocalizations.of(context).errorCreatingConversation),
               actions: [
                 FilledButton(
                     onPressed: () async {
@@ -201,7 +201,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
                   configurations: QuillEditorConfigurations(
                       controller: _controller,
                       placeholder:
-                          AppLocalizations.of(context)!.sendMessagePlaceholder,
+                          AppLocalizations.of(context).sendMessagePlaceholder,
                       padding: const EdgeInsets.symmetric(horizontal: 16.0))),
             ),
             QuillToolbar(

@@ -25,7 +25,7 @@ void showLocalUpdateInfo(BuildContext context) async {
       barrierDismissible: false,
       context: context,
       builder: (context) => SimpleDialog(
-    title: Text(AppLocalizations.of(context)!.loading),
+    title: Text(AppLocalizations.of(context).loading),
     children: [
       Center(
         child: CircularProgressIndicator(),
@@ -139,7 +139,7 @@ class ReleaseNotesScreen extends StatelessWidget {
         children: [
           Expanded(
             child: Markdown(
-              data: releaseInfo['body'] ?? AppLocalizations.of(context)!.error,
+              data: releaseInfo['body'] ?? AppLocalizations.of(context).error,
               padding: const EdgeInsets.all(16),
               onTapLink: (text, href, title) {
                 launchUrl(Uri.parse(href!));
@@ -151,7 +151,7 @@ class ReleaseNotesScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(AppLocalizations.of(context)!.contributors, style: Theme.of(context).textTheme.labelLarge),
+                  child: Text(AppLocalizations.of(context).contributors, style: Theme.of(context).textTheme.labelLarge),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0, top: 4.0, left: 8.0, right: 8.0),
@@ -180,14 +180,14 @@ class ReleaseNotesScreen extends StatelessWidget {
               ],
             ),
           ),
-          Text(AppLocalizations.of(context)!.becomeContributor, style: Theme.of(context).textTheme.labelMedium),
+          Text(AppLocalizations.of(context).becomeContributor, style: Theme.of(context).textTheme.labelMedium),
           const SizedBox(height: 32),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).pop(),
         icon: const Icon(Icons.done),
-        label: Text(AppLocalizations.of(context)!.done),
+        label: Text(AppLocalizations.of(context).done),
       ),
     );
   }
@@ -203,7 +203,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       icon: const Icon(Icons.update, size: 56,),
-      title: Text(AppLocalizations.of(context)!.updateAvailable),
+      title: Text(AppLocalizations.of(context).updateAvailable),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -214,7 +214,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          child: Text(AppLocalizations.of(context)!.info),
+          child: Text(AppLocalizations.of(context).info),
           onPressed: () => showDialog(
             context: context,
             builder: (context) => ReleaseNotesScreen(releaseInfo),
@@ -225,7 +225,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
             Navigator.of(context).pop();
             launchStore();
           },
-          child: Text(AppLocalizations.of(context)!.install),
+          child: Text(AppLocalizations.of(context).install),
         ),
       ],
     );
