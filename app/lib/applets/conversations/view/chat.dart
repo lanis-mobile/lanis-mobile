@@ -24,7 +24,7 @@ class ConversationsChat extends StatefulWidget {
       {super.key, required this.title, required this.id, this.newSettings,
         this.hidden = false});
 
-  ConversationsChat.fromEntry(OverviewEntry entry)
+  ConversationsChat.fromEntry(OverviewEntry entry, {super.key})
       : id = entry.id
       , title = entry.title
       , newSettings = null
@@ -484,7 +484,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                                             sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
                                           }
 
-                                          Navigator.of(context).pop();
+                                          if(context.mounted) Navigator.of(context).pop();
                                         },
                                         child: Text(AppLocalizations.of(context).conversationHide)
                                     )
@@ -754,8 +754,10 @@ class _MessageWidgetState extends State<MessageWidget>
                   HapticFeedback.vibrate();
                   await Clipboard.setData(
                       ClipboardData(text: widget.message.text));
-                  showSnackbar(
+                  if(context.mounted) {
+                    showSnackbar(
                       context, AppLocalizations.of(context).copiedMessage);
+                  }
                   controller.value = 0;
                   controller.forward();
                 },

@@ -126,7 +126,8 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                       sph!.parser.lessonsStudentParser.setHomework(widget.courseID, widget.currentEntry.entryID, value!)
                           .then((val) {
                         if (val != "1") {
-                          ScaffoldMessenger.of(
+                          if(context.mounted) {
+                            ScaffoldMessenger.of(
                               context)
                               .showSnackBar(
                               SnackBar(
@@ -135,6 +136,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                                         context)
                                         .homeworkSavingError),
                               ));
+                          }
                         } else {
                           setState(() {
                             widget.currentEntry.homework!.homeWorkDone =value;

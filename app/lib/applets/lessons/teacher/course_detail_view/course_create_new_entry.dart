@@ -328,8 +328,11 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
                       abgabeBisTime: _selectedDocumentSubmissionTime,
                       abgabeSichtbar: _everySubmissionVisibleForStudents,
                     );
-                    Navigator.of(context).pop(); // Close loading dialog
-                    Navigator.of(context).pop(result); // Close this screen and return result
+                    if(context.mounted) {
+                      Navigator.of(context).pop(); // Close loading dialog
+                      Navigator.of(context)
+                          .pop(result); // Close this screen and return result
+                    }
                   }
                 },
               ),

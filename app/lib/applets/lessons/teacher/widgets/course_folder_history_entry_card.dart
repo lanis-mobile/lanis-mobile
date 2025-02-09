@@ -60,15 +60,19 @@ class _CourseFolderHistoryEntryCardState extends State<CourseFolderHistoryEntryC
     if (delete == true) {
       final result = await sph!.parser.lessonsTeacherParser.deleteEntry(widget.courseId, widget.entry.id);
       if (result) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        if(mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Eintrag gelöscht'),
         ));
+        }
         await Future.delayed(Duration(seconds: 1));
         widget.afterDeleted();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        if(mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Eintrag konnte nicht gelöscht werden'),
         ));
+        }
       }
     }
   }

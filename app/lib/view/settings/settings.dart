@@ -104,12 +104,14 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                   .get()
                   .then((value) => value.length);
 
-              Navigator.push(
+              if(context.mounted) {
+                Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
                         NotificationSettings(accountCount: accountCount)),
               );
+              }
             }),
       SettingsTile(
           title: (context) => AppLocalizations.of(context).clearCache,
@@ -120,7 +122,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
 
             cacheStats = CacheSettings.dirStatSync(dir.path);
 
-            return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? AppLocalizations.of(context).file : AppLocalizations.of(context).files} (${cacheStats['size']! ~/ 1024} KB)";
+            return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? (context.mounted ? AppLocalizations.of(context).file : 'Datei') : (context.mounted ? AppLocalizations.of(context).files : 'Dateien')} (${cacheStats['size']! ~/ 1024} KB)";
           },
           icon: Icons.storage_rounded,
           screen: (context) => Navigator.push(

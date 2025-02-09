@@ -237,7 +237,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                     showWebView = false;
                   });
 
-                  Navigator.pop(context);
+                  if(context.mounted) Navigator.pop(context);
                 }
               },
               child: Visibility(

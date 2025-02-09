@@ -92,7 +92,8 @@ class _ConversationsSendState extends State<ConversationsSend> {
   Future<void> newConversation(String text) async {
     final bool status = await connectionChecker.connected;
     if (!status) {
-      showDialog(
+      if(mounted) {
+        showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -107,6 +108,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
               ],
             );
           });
+      }
       return;
     }
 
@@ -129,26 +131,29 @@ class _ConversationsSendState extends State<ConversationsSend> {
     if (response.success) {
       sph!.parser.conversationsParser.fetchData(forceRefresh: true);
 
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => ConversationsChat(
-              title: widget.creationData!.subject,
-              id: response.id!,
-              newSettings: NewConversationSettings(
-                  firstMessage: textMessage,
-                  settings: ConversationSettings(
-                      id: response.id!,
-                      groupChat:
-                          widget.creationData!.type == ChatType.groupOnly,
-                      onlyPrivateAnswers: widget.creationData!.type ==
-                          ChatType.privateAnswerOnly,
-                      noReply:
-                          widget.creationData!.type == ChatType.noAnswerAllowed,
-                      own: true)))));
+      if(mounted) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ConversationsChat(
+                title: widget.creationData!.subject,
+                id: response.id!,
+                newSettings: NewConversationSettings(
+                    firstMessage: textMessage,
+                    settings: ConversationSettings(
+                        id: response.id!,
+                        groupChat:
+                            widget.creationData!.type == ChatType.groupOnly,
+                        onlyPrivateAnswers: widget.creationData!.type ==
+                            ChatType.privateAnswerOnly,
+                        noReply: widget.creationData!.type ==
+                            ChatType.noAnswerAllowed,
+                        own: true)))));
+      }
     } else {
-      showDialog(
+      if(mounted) {
+        showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -164,6 +169,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
               ],
             );
           });
+      }
     }
   }
 

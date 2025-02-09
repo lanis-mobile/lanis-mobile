@@ -80,7 +80,7 @@ class _TeacherCourseDetailViewState extends State<TeacherCourseDetailView> {
           final result = await Navigator.of(context).push<bool?>(
             MaterialPageRoute(builder: (context) => CourseCreateNewEntry(courseFolderDetails: data))
           );
-          if (mounted) {
+          if (context.mounted) {
             if (result == true) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eintrag erstellt')));
               await loadData();

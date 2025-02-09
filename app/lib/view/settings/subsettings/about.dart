@@ -151,7 +151,8 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
       onTap: (context) async {
         final packageInfo = await PackageInfo.fromPlatform();
 
-        showDialog(
+        if(context.mounted) {
+          showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
@@ -160,6 +161,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                     "appName: ${packageInfo.appName}\npackageName: ${packageInfo.packageName}\nversion: ${packageInfo.version}\nbuildNumber: ${packageInfo.buildNumber}\nisDebug: $kDebugMode\nisProfile: $kProfileMode\nisRelease: $kReleaseMode\n"),
               );
             });
+        }
       },
     ),
   ];

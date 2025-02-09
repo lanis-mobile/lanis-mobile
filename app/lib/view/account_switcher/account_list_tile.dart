@@ -105,7 +105,7 @@ class AccountListTile extends StatelessWidget {
                   sph!.session.deAuthenticate();
                 }
                 await accountDatabase.deleteAccount(dbID);
-                if (restart) {
+                if (restart && context.mounted) {
                   authenticationState.reset(context);
                 }
               }

@@ -113,7 +113,7 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
                     );
                     if (newPassword == null) return;
                     await accountDatabase.updatePassword(sph!.account.localId, newPassword);
-                    if (mounted) {
+                    if (context.mounted) {
                       authenticationState.reset(context);
                     }
                   },
@@ -123,7 +123,7 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     await accountDatabase.deleteAccount(sph!.account.localId);
-                    if (mounted) {
+                    if (context.mounted) {
                       authenticationState.reset(context);
                     }
                   },

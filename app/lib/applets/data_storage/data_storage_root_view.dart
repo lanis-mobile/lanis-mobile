@@ -134,7 +134,7 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
       if (_lastOptions.isEmpty) {
         _lastOptions = <Widget>[
           ListTile(
-            title: Text(AppLocalizations.of(context).noResults),
+            title: Text(context.mounted ? AppLocalizations.of(context).noResults : 'Error'),
           )
         ];
       }

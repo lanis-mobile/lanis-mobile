@@ -67,7 +67,7 @@ class LoginFormState extends State<LoginForm> {
       );
       await sph?.session.deAuthenticate();
       await accountDatabase.setNextLogin(newID);
-      authenticationState.reset(context);
+      if(mounted) authenticationState.reset(context);
     } on LanisException catch (ex) {
       setState(() {
         Navigator.pop(context); //pop dialog

@@ -55,14 +55,14 @@ void showUpdateInfoIfRequired(BuildContext context) async {
 
   if (storageReleaseTag != deviceReleaseTag) {
     await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
-    if (latestReleaseTag == deviceReleaseTag) {
+    if (latestReleaseTag == deviceReleaseTag && context.mounted) {
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(latestReleaseInfo),
       );
     } else {
       final deviceReleaseInfo = await getReleaseInfo(deviceReleaseTag);
-      if (deviceReleaseInfo == null) return;
+      if (deviceReleaseInfo == null || !context.mounted) return;
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(deviceReleaseInfo),
@@ -70,7 +70,7 @@ void showUpdateInfoIfRequired(BuildContext context) async {
     }
   }
 
-  if (compareVersions(latestReleaseTag, deviceReleaseTag) > 0) {
+  if (compareVersions(latestReleaseTag, deviceReleaseTag) > 0 && context.mounted) {
     await showDialog(
       context: context,
       builder: (context) => NewUpdateAvailableDialog(

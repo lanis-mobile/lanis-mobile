@@ -52,12 +52,16 @@ class _SchoolSelectorState extends State<SchoolSelector> {
       });
     } catch (e) {
       // Show a SnackBar to inform the user
-      ScaffoldMessenger.of(widget.outContext).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(widget.outContext).authFailedLoadingSchools),
-          duration: const Duration(seconds: 10),
-        ),
-      );
+      if (widget.outContext.mounted) {
+        ScaffoldMessenger.of(widget.outContext).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations
+                .of(widget.outContext)
+                .authFailedLoadingSchools),
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
       Future.delayed(const Duration(seconds: 10), loadSchoolList);
     }
   }

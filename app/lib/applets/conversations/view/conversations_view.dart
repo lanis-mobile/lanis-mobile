@@ -580,7 +580,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                           disableToggleButton = false;
                         });
 
-                        showDialog(
+                        if(context.mounted) {
+                          showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
                               icon: const Icon(Icons.wifi_off),
@@ -597,6 +598,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                             .back))
                               ],
                             ));
+                        }
                         return;
                       }
 
@@ -605,7 +607,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                           disableToggleButton = false;
                         });
 
-                        showDialog(
+                        if(context.mounted) {
+                          showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
                               icon: const Icon(Icons.error),
@@ -622,6 +625,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                             .back))
                               ],
                             ));
+                        }
                         return;
                       }
 
@@ -669,13 +673,15 @@ class _ConversationsViewState extends State<ConversationsView> {
                   loadingCreateButton = false;
                 });
 
-                Navigator.of(context)
+                if(context.mounted) {
+                  Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) {
                   if (canChooseType) {
                     return const TypeChooser();
                   }
                   return const CreateConversation(chatType: null);
                 }));
+                }
               },
               child: loadingCreateButton
                   ? SizedBox(

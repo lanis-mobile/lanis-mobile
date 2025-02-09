@@ -144,7 +144,7 @@ class _HomePageState extends State<HomePage> {
       action: (context) async {
         await sph!.session.deAuthenticate();
         await accountDatabase.deleteAccount(sph!.account.localId);
-        authenticationState.reset(context);
+        if(context.mounted) authenticationState.reset(context);
       }
     ),
   ];
@@ -164,7 +164,7 @@ class _HomePageState extends State<HomePage> {
     SessionHandler.getLoginURL(sph!.account).then((response) {
       launchUrl(Uri.parse(response));
     }).catchError((ex) {
-      if (context == null) return;
+      if (context == null || !context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(ex.cause),
         duration: const Duration(seconds: 1),
