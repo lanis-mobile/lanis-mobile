@@ -109,6 +109,7 @@ class _StudentTimetableBetterViewState
                   Expanded(
                     child: Row(
                       spacing: 4.0,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         for (int i = 0; i < selectedPlan.length; i++)
@@ -186,10 +187,18 @@ class LessonItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // Filter all lessons that cover the current row's time slot.
     List<TimetableSubject> overlappingSubjects = selectedPlan[i]
+        .where((element) => element.startTime == row.startTime)
+        .toList();
+
+    List<TimetableSubject>? t = selectedPlan[i]
         .where((element) =>
             element.startTime <= row.startTime &&
             element.endTime >= row.endTime)
         .toList();
+
+    if (t.isNotEmpty && overlappingSubjects.isEmpty) {
+      return SizedBox();
+    }
 
     // Check connection for visual continuity on the first lesson (if needed).
     bool connectedToPrevious = false;
@@ -229,9 +238,9 @@ class LessonItem extends StatelessWidget {
                           borderRadius: _getBorderRadius(
                               connectedToPrevious, connectedToNext),
                         ),
-                        height: itemHeight -
-                            (row.type == TimeTableRowType.lesson ? 0 : 20) +
-                            (connectedToPrevious ? 8 : 0),
+                        height: itemHeight * subject.duration +
+                            (8 * (subject.duration - 1)) -
+                            (row.type == TimeTableRowType.lesson ? 0 : 20),
                         child: row.type == TimeTableRowType.lesson &&
                                 !connectedToPrevious
                             ? Column(
