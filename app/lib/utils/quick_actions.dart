@@ -6,8 +6,6 @@ import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/home_page.dart';
-import 'package:sph_plan/main.dart';
-import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/utils/logger.dart';
 
 late final QuickActions quickActions;
@@ -44,6 +42,7 @@ class QuickActionsStartUp {
             } else {
               if(homeKey.currentContext != null) {
                 destination.action?.call(homeKey.currentContext!);
+                logger.i('Opened applet: ${applet.appletPhpUrl}');
               } else {
                 logger.e('Tried to open applet without context');
               }
@@ -59,7 +58,7 @@ class QuickActionsStartUp {
 
           // Wait until the flutter app is fully initialized
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            applet.action?.call();
+            applet.action?.call(homeKey.currentContext);
           });
         }
       }
