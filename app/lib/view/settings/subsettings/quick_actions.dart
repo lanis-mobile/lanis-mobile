@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
@@ -15,6 +17,9 @@ class QuickActions extends StatefulWidget {
 
 class _QuickActionsState extends State<QuickActions> {
   Color backgroundColor = Colors.transparent;
+
+  // Android supports 2 quick actions, iOS only 1
+  final int maxQuickActions = Platform.isAndroid ? 2 : 1;
 
 
   @override
