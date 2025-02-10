@@ -132,12 +132,32 @@ class _StudentTimetableBetterViewState
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-
+                                const SizedBox(
+                                  height: 8.0,
+                                ),
                               ],
                             ),
                           )
                       ],
                     ),
+                  ),
+                  for (int i = 0; i < selectedPlan.length; i++)
+                  LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Stack(
+                          children: [
+                            for (var (index, row) in data.hours!.indexed)
+                              ListItem(
+                                iteration: index,
+                                row: row,
+                                data: data,
+                                timetableDays: selectedPlan,
+                                i: i,
+                                width: constraints.maxWidth,
+                              ),
+                          ],
+                        );
+                      }
                   )
                 ],
               ),
@@ -146,6 +166,118 @@ class _StudentTimetableBetterViewState
         });
   }
 }
+
+class ListItem extends StatelessWidget {
+  final int iteration;
+  final TimeTableRow row;
+  final TimeTableData data;
+  final List<List<TimetableSubject>> timetableDays;
+  final int i;
+  final double width;
+
+  const ListItem({super.key, required this.iteration, required this.row, required this.data, required this.timetableDays, required this.i, required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+
+    double verticalOffset = 0;
+    for (var j = 0; j < iteration; j++) {
+      if (data.hours[j].type == TimeTableRowType.lesson) {
+        verticalOffset += itemHeight;
+      } else {
+        verticalOffset += itemHeight - 20;
+      }
+      verticalOffset += 8;
+    }
+
+    print(verticalOffset);
+
+    double horizontalOffset = i * width + 4;
+
+
+
+    if (row.type == TimeTableRowType.pause) {
+      return ItemBlock(label: 'Pause', height: itemHeight - 20, width: width, offset: verticalOffset, hOffset: horizontalOffset,);
+    }
+
+    final List<TimetableSubject> timetable = timetableDays[i];
+
+
+    List<TimetableSubject> subjects = timetable.where((element) {
+      return element.startTime == row.startTime;
+    }).toList();
+
+    List<TimetableSubject> subjectsInRow = timetable.where((element) {
+      return row.startTime >= element.startTime && row.endTime <= element.endTime;
+    }).toList();
+
+    if (subjects.isEmpty) {
+      return ItemBlock.empty(height: subjectsInRow.isEmpty ? itemHeight + 8 : 0, hOffset: horizontalOffset, offset: verticalOffset, width: width,);
+    }
+
+    int maxSubjectsInRow = 0;
+    for (var subject in subjects) {
+      int maxSubjects = timetable.where((element) {
+        // Return all that start in the range of the current subject
+        return element.startTime >= subject.startTime && element.startTime <= subject.endTime;
+      }).length;
+      if (maxSubjects > maxSubjectsInRow) {
+        maxSubjectsInRow = maxSubjects;
+      }
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        for (var (index, subject) in subjects.indexed)
+          ItemBlock(
+            label: subject.name!,
+            height: itemHeight * subject.duration,
+            color: Colors.red,
+            offset: verticalOffset,
+            hOffset: horizontalOffset + (width / maxSubjectsInRow) * index,
+            width: width / maxSubjectsInRow,
+          ),
+      ],
+    );
+  }
+}
+
+class ItemBlock extends StatelessWidget {
+  final String label;
+  final double height;
+  final Color color;
+  final bool empty;
+  final double offset;
+  final double width;
+  final double? hOffset;
+  const ItemBlock({super.key, required this.label, required this.height, this.color = Colors.white, this.empty = false, required this.offset, required this.width, this.hOffset});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: offset,
+      left: hOffset,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Center(
+          child: Text(label),
+        ),
+      ),
+    );
+  }
+
+
+  const ItemBlock.empty({super.key, required this.height, required this.offset, required this.width, required this.hOffset}) : label = '', color = Colors.white, empty = true;
+
+}
+
 
 
 
