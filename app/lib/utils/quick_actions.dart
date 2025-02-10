@@ -6,6 +6,7 @@ import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/home_page.dart';
+import 'package:sph_plan/main.dart';
 import 'package:sph_plan/utils/logger.dart';
 
 late final QuickActions quickActions;
@@ -23,10 +24,23 @@ class QuickActionsStartUp {
             sph!.session.doesSupportFeature(applet)
         ) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            int appletIndex = AppDefinitions.getIndexByPhpIdentifier(
-                applet.appletPhpUrl);
             logger.i('Opening applet: ${applet.appletPhpUrl}');
-            selectedDestinationDrawer = appletIndex;
+            Destination destination = Destination.fromAppletDefinition(applet);
+            if(destination.enableBottomNavigation) {
+              int appletIndex = AppDefinitions.getIndexByPhpIdentifier(
+                  applet.appletPhpUrl);
+
+              selectedDestinationDrawer = appletIndex;
+
+            } else {
+              if(navigatorKey.currentContext != null) {
+                destination.action?.call(navigatorKey.currentContext!);
+              } else {
+                logger.e('Tried to open applet without context');
+              }
+            }
+
+
           });
           break;
 
