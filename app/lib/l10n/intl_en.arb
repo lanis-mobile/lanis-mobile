@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "locale": "en_US",
   "language": "Language",
   "welcomeBack": "Welcome Back",
@@ -123,16 +124,6 @@
   "documentScanner": "Document scanner",
   "gallery": "Gallery",
   "fileManager": "Files",
-
-  "setupNonStudentTitle": "Teachers or parent account",
-  "setupNonStudent": "You obviously have a non-student account. You can still use the app, but some features may not work.",
-  "setupFilterSubstitutionsTitle": "Filter substitutions",
-  "setupFilterSubstitutions": "There is a filter feature so that you can find the substitutions that are intended for you more quickly! The filter searches the entries for your grade level, class and subject teacher. In order for you to have the best possible experience with the filter (and the display of substitutions), the school must specify the entries completely, e.g. some schools have not specified the teachers of the subjects correctly in their entries and instead specify the substitution or nothing.",
-  "setupSubstitutionsFilterSettings": "Filter settings",
-  "setupPushNotificationsTitle": "Push notifications",
-  "setupPushNotifications": "With notifications, you know directly whether and which substitutions are available for you. You can also set how often the app checks for new substitutions, but sometimes checking is prevented by activated energy saving mode or other factors.",
-  "setupReadyTitle": "You are now ready!",
-  "setupReady": "You can use lanis-mobile now. If you like the app, feel free to leave a review in the Play Store.",
 
   "settingsInfoUserData": "All user data is stored on the Lanis servers.",
   "settingsInfoNotifications": "The frequency and time at which everything is updated depends on various factors relating to the end device.",

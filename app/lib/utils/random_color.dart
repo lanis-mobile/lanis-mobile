@@ -23,9 +23,9 @@ class RandomColor {
     final g = (hash & 0x00FF00) >> 8;
     final b = hash & 0x0000FF;
 
-    final startR = startColor.red;
-    final startG = startColor.green;
-    final startB = startColor.blue;
+    final startR = startColor.r;
+    final startG = startColor.g;
+    final startB = startColor.b;
 
     // Calculate the new color values based on the start color and the hash values
     final newR = ((startR + r) / 2).round();
@@ -39,7 +39,7 @@ class RandomColor {
 class ColorPair {
   final Color primary;
   Color get secondary => primary.computeLuminance() > 0.5 ? Colors.black : Colors.white;
-  Color get inversePrimary => Color.fromARGB(255, 255 - primary.red, 255 - primary.green, 255 - primary.blue).withOpacity(0.75);
+  Color get inversePrimary => Color.fromARGB(255, 255 - primary.r.toInt(), 255 - primary.g.toInt(), 255 - primary.b.toInt()).withValues(alpha: 0.75);
 
   ColorPair(this.primary);
 }

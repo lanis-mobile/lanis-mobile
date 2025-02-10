@@ -81,7 +81,9 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                     MenuItemButton(
                       onPressed: () async {
                         pickedFile = await pickFileUsingDocumentsUI(allowedExtensions);
-                        Navigator.pop(context);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: Row(
                         children: [
@@ -97,7 +99,6 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                     MenuItemButton(
                       onPressed: () async {
                         pickedFile = await pickFileUsingDocumentScanner();
-                        Navigator.pop(context);
                       },
                       child: Row(
                         children: [
@@ -113,7 +114,9 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                     MenuItemButton(
                       onPressed: () async {
                         pickedFile = await pickFileUsingCamera();
-                        Navigator.pop(context);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: Row(
                         children: [
@@ -129,7 +132,9 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
                     MenuItemButton(
                       onPressed: () async {
                         pickedFile = await pickFileUsingGallery();
-                        Navigator.pop(context);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: Row(
                         children: [

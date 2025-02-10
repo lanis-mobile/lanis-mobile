@@ -111,16 +111,16 @@ void launchFile(BuildContext context, String url, String filename,
       builder: (BuildContext context) => downloadDialog(context, fileSize));
 
   sph!.storage.downloadFile(url, filename).then((filepath) async {
-    Navigator.of(context).pop();
+    if(context.mounted) Navigator.of(context).pop();
 
-    if (filepath == "") {
+    if (filepath == "" && context.mounted) {
       showDialog(
           context: context,
           builder: (context) => errorDialog(context));
     } else {
       final result = await OpenFile.open(filepath);
       //sketchy, but "open_file" left us no other choice
-      if (result.message.contains("No APP found to open this file")) {
+      if (result.message.contains("No APP found to open this file") && context.mounted) {
         showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -153,9 +153,9 @@ void saveFile(BuildContext context, String url, String filename, String? fileSiz
       builder: (BuildContext context) => downloadDialog(context, fileSize));
 
   sph!.storage.downloadFile(url, filename).then((filepath) async {
-    Navigator.of(context).pop();
+    if(context.mounted) Navigator.of(context).pop();
 
-    if (filepath == "") {
+    if (filepath == "" && context.mounted) {
       showDialog(
           context: context,
           builder: (context) => errorDialog(context));
@@ -177,9 +177,9 @@ void shareFile(BuildContext context, String url, String filename, String? fileSi
       builder: (BuildContext context) => downloadDialog(context, fileSize));
 
   sph!.storage.downloadFile(url, filename).then((filepath) async {
-    Navigator.of(context).pop();
+    if(context.mounted) Navigator.of(context).pop();
 
-    if (filepath == "") {
+    if (filepath == "" && context.mounted) {
       showDialog(
           context: context,
           builder: (context) => errorDialog(context));
@@ -191,10 +191,10 @@ void shareFile(BuildContext context, String url, String filename, String? fileSi
 }
 
 AlertDialog errorDialog(BuildContext context) => AlertDialog(
-  title: Text("${AppLocalizations.of(context)!.error}!"),
+  title: Text("${AppLocalizations.of(context).error}!"),
   icon: const Icon(Icons.error),
   content: Text(
-      AppLocalizations.of(context)!.reportError),
+      AppLocalizations.of(context).reportError),
   actions: [
     TextButton(
         onPressed: () {

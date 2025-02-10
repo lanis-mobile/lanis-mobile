@@ -34,7 +34,7 @@ class StudentExamsView extends StatelessWidget {
                     Text(DateFormat('dd.MM.yy').format(today)),
                     Expanded(child: Divider()),
                     // Show days until next exam
-                    Text(AppLocalizations.of(context)!
+                    Text(AppLocalizations.of(context)
                         .daysUntilNextExam(difference)),
                   ],
                 ),
@@ -43,9 +43,9 @@ class StudentExamsView extends StatelessWidget {
               items: [
                 FocusedMenuItem(
                   title: difference.isNegative
-                      ? AppLocalizations.of(context)!
+                      ? AppLocalizations.of(context)
                           .daysSinceExam(difference.abs())
-                      : AppLocalizations.of(context)!.daysUntilExam(difference),
+                      : AppLocalizations.of(context).daysUntilExam(difference),
                   icon: difference.isNegative || difference == 0
                       ? Icons.hourglass_bottom_rounded
                       : Icons.hourglass_top_rounded,

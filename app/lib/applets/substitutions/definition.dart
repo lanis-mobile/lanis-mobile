@@ -13,7 +13,7 @@ final substitutionDefinition = AppletDefinition(
   appletType: AppletType.nested,
   addDivider: false,
   allowOffline: true,
-  label: (context) => AppLocalizations.of(context)!.substitutions,
+  label: (context) => AppLocalizations.of(context).substitutions,
   supportedAccountTypes: [AccountType.student, AccountType.teacher],
   refreshInterval: Duration(minutes: 10),
   settingsDefaults: {},
