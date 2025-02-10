@@ -122,7 +122,7 @@ class _QuickActionsState extends State<QuickActions> {
                     ),
                   )),
                   SizedBox(
-                    height: 16.0,
+                    height: 24.0,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -139,6 +139,27 @@ class _QuickActionsState extends State<QuickActions> {
                   ),
                   Text(
                     AppLocalizations.of(context).restartRequired,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 4.0,
+                  ),
+                  Text(
+                    AppLocalizations.of(context).quickActionsDisclaimer(maxQuickActions),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 4.0,
+                  ),
+                  if (Platform.isAndroid) Text(
+                    AppLocalizations.of(context).quickActionsAndroid,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   )
                 ],
               );

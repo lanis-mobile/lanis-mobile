@@ -21,9 +21,13 @@ class QuickActionsStartUp {
     quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       for (final applet in AppDefinitions.applets) {
-        if (applet.appletPhpUrl == shortcutType &&
-            sph!.session.doesSupportFeature(applet)
-        ) {
+        if (applet.appletPhpUrl == shortcutType) {
+
+          if (!sph!.session.doesSupportFeature(applet)) {
+            logger.e('Applet not supported: ${applet.appletPhpUrl}');
+            return;
+          }
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
             logger.i('Opening applet: ${applet.appletPhpUrl}');
             Destination destination = Destination.fromAppletDefinition(applet);
@@ -48,7 +52,6 @@ class QuickActionsStartUp {
 
           });
           break;
-
         }
       }
       for (final applet in AppDefinitions.external) {

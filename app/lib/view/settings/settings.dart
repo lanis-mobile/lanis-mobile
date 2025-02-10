@@ -129,9 +129,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
       SettingsTile(
-        title: (context) => 'Quick Actions',
-        subtitle: (context) async => 'd',
-        icon: Icons.extension_outlined,
+        title: (context) => AppLocalizations.of(context).quickActions,
+        subtitle: (context) async => "${AppLocalizations.of(context).applets}, ${AppLocalizations.of(context).external}",
+        icon: Icons.extension,
         screen: (context) => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QuickActions()),
