@@ -23,6 +23,7 @@ const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTks
 typedef ActionFunction = void Function(BuildContext);
 
 int selectedDestinationDrawer = -1;
+final GlobalKey<HomePageState> homeKey = GlobalKey<HomePageState>();
 
 class Destination {
   final Icon icon;
@@ -74,10 +75,10 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
 
   late bool doesSupportAnyApplet = false;
@@ -97,6 +98,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+  }
+
+  void updateDestination(int newIndex) {
+    setState(() {
+      selectedDestinationDrawer = newIndex;
+    });
   }
 
   final List<Destination> endDestinations = [

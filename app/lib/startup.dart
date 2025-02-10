@@ -59,7 +59,9 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
         await Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => HomePage()),
+              builder: (context) => HomePage(
+                key: homeKey,
+              )),
         );
         break;
 

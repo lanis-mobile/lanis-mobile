@@ -67,8 +67,6 @@ Future<void> enableTransparentNavigationBar() async {
   }
 }
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -141,7 +139,6 @@ class App extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
               SfGlobalLocalizations.delegate
             ],
-            navigatorKey: navigatorKey,
             supportedLocales: AppLocalizations.delegate.supportedLocales,
             home: const Scaffold(
               body: StartupScreen(),

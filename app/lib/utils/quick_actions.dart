@@ -7,6 +7,7 @@ import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/home_page.dart';
 import 'package:sph_plan/main.dart';
+import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/utils/logger.dart';
 
 late final QuickActions quickActions;
@@ -30,11 +31,15 @@ class QuickActionsStartUp {
               int appletIndex = AppDefinitions.getIndexByPhpIdentifier(
                   applet.appletPhpUrl);
 
-              selectedDestinationDrawer = appletIndex;
+              if (homeKey.currentState != null) {
+                homeKey.currentState?.updateDestination(appletIndex);
+              } else {
+                logger.e('Tried to open applet without homeKey');
+              }
 
             } else {
-              if(navigatorKey.currentContext != null) {
-                destination.action?.call(navigatorKey.currentContext!);
+              if(homeKey.currentContext != null) {
+                destination.action?.call(homeKey.currentContext!);
               } else {
                 logger.e('Tried to open applet without context');
               }
