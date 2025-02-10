@@ -8,29 +8,41 @@ import 'package:sph_plan/models/study_groups.dart';
 import 'package:sph_plan/utils/logger.dart';
 
 Future<void> studyCheckExams(
-    SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit) async {
+  SPH sph,
+  AccountType accountType,
+  BackgroundTaskToolkit toolkit,
+) async {
   int checkInterval = 604800; // Check every 7 days for new exams
-  // Get account data
+
+  if (true) {
+    // Clear all scheduled exams
+    // await sph.prefs.kv.set('scheduled-exams', null);
+    await sph.prefs.kv.set('last-exam-scan', null);
+  }
 
   String? lastScanStr = (await sph.prefs.kv.get('last-exam-scan')) as String?;
   String? scheduledExamsStr =
       (await sph.prefs.kv.get('scheduled-exams')) as String?;
-  int? lastScan = lastScanStr == null ? null : jsonDecode(lastScanStr);
+
+  int? lastScan = lastScanStr == null ? null : jsonDecode(lastScanStr) as int;
+
   Map<int, ScheduledExam> scheduledExams = scheduledExamsStr == null
       ? {}
-      : (jsonDecode(scheduledExamsStr) as Map<String, dynamic>)
-          .map((key, value) => MapEntry(
-                int.parse(key),
-                ScheduledExam.fromJson(value),
-              ));
+      : (jsonDecode(scheduledExamsStr) as Map<String, dynamic>).map(
+          (key, value) => MapEntry(
+            int.parse(key),
+            ScheduledExam.fromJson(value as Map<String, dynamic>),
+          ),
+        );
 
   for (final exam in scheduledExams.values) {
-    for (final notification in exam.notifications.entries) {
+    for (final notificationKey in exam.notifications.keys.toList()) {
       int numSentCount = 0;
-      if (notification.key < DateTime.now().secondsSinceEpoch) {
-        if (!notification.value) {
-          backgroundLogger
-              .i("Sending notification for exam ${exam.name} at ${exam.date}");
+      if (notificationKey < DateTime.now().secondsSinceEpoch) {
+        if (exam.notifications[notificationKey] == true) {
+          backgroundLogger.i(
+            "Sending notification for exam ${exam.name} at ${exam.date}",
+          );
 
           toolkit.sendMessage(
             title: 'Klausur in ${exam.name}',
@@ -38,15 +50,19 @@ Future<void> studyCheckExams(
                 'Am ${exam.date.format('dd.MM.yyyy')} findet eine Klausur in ${exam.name} statt.',
             id: exam.date.secondsSinceEpoch % 10000,
           );
-          exam.notifications[notification.key] = true;
+
+          exam.notifications[notificationKey] = true;
+          numSentCount++;
         } else {
           numSentCount++;
         }
       }
 
-      // If two notifications have been sent, remove the notification
       if (numSentCount >= 2) {
-        exam.notifications.remove(notification.key);
+        logger.i(
+          "Removing notification for exam ${exam.name} at ${exam.date}",
+        );
+        exam.notifications.remove(notificationKey);
       }
     }
   }
@@ -61,19 +77,25 @@ Future<void> studyCheckExams(
           continue;
         }
         if (DateTime.now().subDays(7).isAfter(e.date)) {
-          backgroundLogger
-              .i("Skipping exam ${exam.courseName} because it is too old");
+          backgroundLogger.i(
+            "Skipping exam ${exam.courseName} because it is too old",
+          );
           continue;
         }
 
+        backgroundLogger.i(
+          "Adding exam ${exam.courseName} at ${e.date} to scheduled exams",
+        );
+
         final scheduledExam = ScheduledExam(
-            name: exam.courseName,
-            date: e.date,
-            duration: e.duration,
-            notifications: {
-              e.date.subDays(2).secondsSinceEpoch: false,
-              e.date.subDays(7).secondsSinceEpoch: false,
-            });
+          name: exam.courseName,
+          date: e.date,
+          duration: e.duration,
+          notifications: {
+            e.date.subDays(2).secondsSinceEpoch: false,
+            e.date.subDays(7).secondsSinceEpoch: false,
+          },
+        );
 
         scheduledExams[e.date.secondsSinceEpoch] = scheduledExam;
       }
@@ -84,10 +106,9 @@ Future<void> studyCheckExams(
         .set('last-exam-scan', jsonEncode(DateTime.now().secondsSinceEpoch));
   }
 
-  String jsonString = jsonEncode(
-    scheduledExams
-        .map((key, value) => MapEntry(key.toString(), value.toJson())),
-  );
+  String jsonString = jsonEncode(scheduledExams.map(
+    (key, value) => MapEntry(key.toString(), value.toJson()),
+  ));
 
   // Save exams
   await sph.prefs.kv.set('scheduled-exams', jsonString);
@@ -99,27 +120,36 @@ class ScheduledExam {
   final String? duration;
   final Map<int, bool> notifications;
 
-  ScheduledExam(
-      {required this.name,
-      required this.date,
-      this.duration,
-      required this.notifications});
+  ScheduledExam({
+    required this.name,
+    required this.date,
+    this.duration,
+    required this.notifications,
+  });
 
   factory ScheduledExam.fromJson(Map<String, dynamic> json) {
+    final notificationsJson = json['notifications'] as Map<String, dynamic>;
+    final notifications = notificationsJson.map(
+      (key, value) => MapEntry(int.parse(key), value as bool),
+    );
+
     return ScheduledExam(
-      name: json['name'],
-      date: DateTime.parse(json['date']),
-      duration: json['duration'],
-      notifications: json['notifications'],
+      name: json['name'] as String,
+      date: DateTime.parse(json['date'] as String),
+      duration: json['duration'] as String?,
+      notifications: notifications,
     );
   }
 
   Map<String, dynamic> toJson() {
+    final notificationsJson =
+        notifications.map((key, value) => MapEntry(key.toString(), value));
+
     return {
       'name': name,
       'date': date.toIso8601String(),
       'duration': duration,
-      'notifications': notifications,
+      'notifications': notificationsJson,
     };
   }
 }
