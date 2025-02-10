@@ -92,6 +92,11 @@
   "documentScanner": "Dokumentenscanner",
   "gallery": "Gallerie",
   "fileManager": "Dateien",
+  "morePages": "Mehr Seiten?",
+  "scanAnotherPageQuestion": "Möchtest du noch eine Seite scannen?",
+
+  "yes": "Ja",
+  "no": "Nein",
 
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung hängen von verschiedenen Faktoren des Endgeräts ab.",

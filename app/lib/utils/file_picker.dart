@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:sph_plan/utils/file_operations.dart';
 import 'package:sph_plan/utils/logger.dart';
+import 'package:sph_plan/utils/random.dart';
 
 import '../generated/l10n.dart';
 
@@ -64,95 +66,95 @@ Future<PickedFile?> showPickerUI(BuildContext context, List<bool> allowedMethods
   }
 
   PickedFile? pickedFile;
-  await showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (allowedMethods[0]) (
-                    MenuItemButton(
-                      onPressed: () async {
-                        pickedFile = await pickFileUsingDocumentsUI(allowedExtensions);
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Icon(Icons.file_open_rounded),
-                          Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context).fileManager)
-                        ],
-                      ),
-                    )
-                  ),
-                  if (allowedMethods[1] && documentScannerSupported) (
-                    MenuItemButton(
-                      onPressed: () async {
-                        pickedFile = await pickFileUsingDocumentScanner();
-                      },
-                      child: Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Icon(Icons.document_scanner_rounded),
-                          Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context).documentScanner)
-                        ],
-                      ),
-                    )
-                  ),
-                  if (allowedMethods[2]) (
-                    MenuItemButton(
-                      onPressed: () async {
-                        pickedFile = await pickFileUsingCamera();
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Icon(Icons.camera_alt_rounded),
-                          Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context).camera)
-                        ],
-                      ),
-                    )
-                  ),
-                  if (allowedMethods[3] && Platform.isIOS) ( // DocumentsUI supports galleries and the photo picker is horrible (from a user perspective)
-                    MenuItemButton(
-                      onPressed: () async {
-                        pickedFile = await pickFileUsingGallery();
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Icon(Icons.photo_library_rounded),
-                          Padding(padding: EdgeInsets.only(right: 8.0)),
-                          Text(AppLocalizations.of(context).gallery)
-                        ],
-                      ),
-                    )
-                  )
-                ],
+  if (context.mounted) {
+    await showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        builder: (context) {
+          return SafeArea(
+            child: SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (allowedMethods[0])
+                      (MenuItemButton(
+                        onPressed: () async {
+                          pickedFile =
+                              await pickFileUsingDocumentsUI(allowedExtensions);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Padding(padding: EdgeInsets.only(left: 10.0)),
+                            Icon(Icons.file_open_rounded),
+                            Padding(padding: EdgeInsets.only(right: 8.0)),
+                            Text(AppLocalizations.of(context).fileManager)
+                          ],
+                        ),
+                      )),
+                    if (allowedMethods[1] && documentScannerSupported)
+                      (MenuItemButton(
+                        onPressed: () async {
+                          pickedFile =
+                              await pickFileUsingDocumentScanner(context);
+                        },
+                        child: Row(
+                          children: [
+                            Padding(padding: EdgeInsets.only(left: 10.0)),
+                            Icon(Icons.document_scanner_rounded),
+                            Padding(padding: EdgeInsets.only(right: 8.0)),
+                            Text(AppLocalizations.of(context).documentScanner)
+                          ],
+                        ),
+                      )),
+                    if (allowedMethods[2])
+                      (MenuItemButton(
+                        onPressed: () async {
+                          pickedFile = await pickFileUsingCamera();
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Padding(padding: EdgeInsets.only(left: 10.0)),
+                            Icon(Icons.camera_alt_rounded),
+                            Padding(padding: EdgeInsets.only(right: 8.0)),
+                            Text(AppLocalizations.of(context).camera)
+                          ],
+                        ),
+                      )),
+                    if (allowedMethods[3] && Platform.isIOS)
+                      ( // DocumentsUI supports galleries and the photo picker is horrible (from a user perspective)
+                          MenuItemButton(
+                        onPressed: () async {
+                          pickedFile = await pickFileUsingGallery();
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Padding(padding: EdgeInsets.only(left: 10.0)),
+                            Icon(Icons.photo_library_rounded),
+                            Padding(padding: EdgeInsets.only(right: 8.0)),
+                            Text(AppLocalizations.of(context).gallery)
+                          ],
+                        ),
+                      ))
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }
-  );
+          );
+        });
+  }
   return pickedFile;
 }
 
@@ -173,9 +175,49 @@ Future<PickedFile?> pickFileUsingDocumentsUI(List<String>? allowedExtensions) as
 }
 
 // TODO: Add iOS support
-Future<PickedFile?> pickFileUsingDocumentScanner() async {
-  String? path = await storageChannel.invokeMethod("scanDocument");
-  logger.d("path is: $path");
+Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
+  List<String> paths = List.empty(growable: true);
+  bool breakLoop = false;
+
+  while (true) {
+    String? path = await storageChannel.invokeMethod("scanDocument");
+    if (path == null) {
+      return null;
+    }
+
+    final newPath = "$path-${getRandomString(32)}";
+    await moveFile(path, newPath);
+    paths.add(newPath);
+
+    if (context.mounted) {
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context).morePages),
+              content: Text(AppLocalizations.of(context).scanAnotherPageQuestion),
+              actions: <Widget>[
+                ElevatedButton(
+                    onPressed: () {
+                      breakLoop = true;
+                      Navigator.pop(context);
+                    },
+                    child: Text(AppLocalizations.of(context).no)
+                ),
+                FilledButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(AppLocalizations.of(context).yes)
+                )
+              ],
+            );
+          }
+      );
+      if (breakLoop) {
+        break;
+      }
+    }
+  }
+
   return null;
 }
 
@@ -191,4 +233,6 @@ Future<PickedFile?> pickFileUsingGallery() async {
     return null;
   }
 }
+
+
 

@@ -124,6 +124,11 @@
   "documentScanner": "Document scanner",
   "gallery": "Gallery",
   "fileManager": "Files",
+  "morePages": "More pages?",
+  "scanAnotherPageQuestion": "Do you want to scan another page?",
+
+  "yes": "Yes",
+  "no": "No",
 
   "settingsInfoUserData": "All user data is stored on the Lanis servers.",
   "settingsInfoNotifications": "The frequency and time at which everything is updated depends on various factors relating to the end device.",
