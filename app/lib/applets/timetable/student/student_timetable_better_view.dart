@@ -7,7 +7,7 @@ import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/models/timetable.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
-final double itemHeight = 40;
+final double itemHeight = 50;
 final double headerHeight = 30;
 
 class StudentTimetableBetterView extends StatefulWidget {
@@ -36,6 +36,14 @@ class _StudentTimetableBetterViewState
     final firstDayOfYear = DateTime(now.year, 1, 1);
     final days = now.difference(firstDayOfYear).inDays;
     return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
+  }
+
+  double calculateColumnHeight(List<TimeTableRow> rows) {
+    double totalHeight = 0;
+    for (var row in rows) {
+      totalHeight += (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20) + 8;
+    }
+    return totalHeight;
   }
 
   @override
@@ -120,45 +128,42 @@ class _StudentTimetableBetterViewState
                                 Container(
                                   height: headerHeight,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainer,
+                                    color: Theme.of(context).colorScheme.surfaceContainer,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Text(
-                                    DateTime(2020, 8, 3)
-                                        .add(Duration(days: i))
-                                        .format('E'),
+                                    DateTime(2020, 8, 3).add(Duration(days: i)).format('E'),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 8.0,
+                                const SizedBox(height: 8.0),
+                                SizedBox(
+                                  height: calculateColumnHeight(data.hours),
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      return Stack(
+                                        children: [
+                                          for (var (index, row) in data.hours.indexed)
+                                            ListItem(
+                                              iteration: index,
+                                              row: row,
+                                              data: data,
+                                              timetableDays: selectedPlan,
+                                              i: i,
+                                              width: constraints.maxWidth,
+                                            ),
+                                        ],
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
-                          )
+                          ),
+
                       ],
                     ),
                   ),
-                  for (int i = 0; i < selectedPlan.length; i++)
-                  LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Stack(
-                          children: [
-                            for (var (index, row) in data.hours!.indexed)
-                              ListItem(
-                                iteration: index,
-                                row: row,
-                                data: data,
-                                timetableDays: selectedPlan,
-                                i: i,
-                                width: constraints.maxWidth,
-                              ),
-                          ],
-                        );
-                      }
-                  )
                 ],
               ),
             ),
@@ -175,11 +180,18 @@ class ListItem extends StatelessWidget {
   final int i;
   final double width;
 
-  const ListItem({super.key, required this.iteration, required this.row, required this.data, required this.timetableDays, required this.i, required this.width});
+  const ListItem({
+    super.key,
+    required this.iteration,
+    required this.row,
+    required this.data,
+    required this.timetableDays,
+    required this.i,
+    required this.width,
+  });
 
   @override
   Widget build(BuildContext context) {
-
     double verticalOffset = 0;
     for (var j = 0; j < iteration; j++) {
       if (data.hours[j].type == TimeTableRowType.lesson) {
@@ -190,35 +202,43 @@ class ListItem extends StatelessWidget {
       verticalOffset += 8;
     }
 
-    print(verticalOffset);
+    double horizontalOffset = 2;
 
-    double horizontalOffset = i * width + 4;
-
-
-
+    // For pause rows, return a single Positioned widget
     if (row.type == TimeTableRowType.pause) {
-      return ItemBlock(label: 'Pause', height: itemHeight - 20, width: width, offset: verticalOffset, hOffset: horizontalOffset,);
+      return ItemBlock(
+        label: 'Pause',
+        height: itemHeight - 20,
+        width: width,
+        offset: verticalOffset,
+        hOffset: horizontalOffset,
+      );
     }
 
     final List<TimetableSubject> timetable = timetableDays[i];
-
-
     List<TimetableSubject> subjects = timetable.where((element) {
       return element.startTime == row.startTime;
     }).toList();
 
+    // If no matching subject start time, check if row fits inside a subject's duration
     List<TimetableSubject> subjectsInRow = timetable.where((element) {
       return row.startTime >= element.startTime && row.endTime <= element.endTime;
     }).toList();
 
+    // If no subject, return an empty Positioned widget with a pre-determined height (or 0 height)
     if (subjects.isEmpty) {
-      return ItemBlock.empty(height: subjectsInRow.isEmpty ? itemHeight + 8 : 0, hOffset: horizontalOffset, offset: verticalOffset, width: width,);
+      return ItemBlock.empty(
+        height: 0,
+        offset: verticalOffset,
+        width: width,
+        hOffset: horizontalOffset,
+      );
     }
 
+    // Determine horizontal space: calculate max overlapping subjects
     int maxSubjectsInRow = 0;
     for (var subject in subjects) {
       int maxSubjects = timetable.where((element) {
-        // Return all that start in the range of the current subject
         return element.startTime >= subject.startTime && element.startTime <= subject.endTime;
       }).length;
       if (maxSubjects > maxSubjectsInRow) {
@@ -226,23 +246,27 @@ class ListItem extends StatelessWidget {
       }
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        for (var (index, subject) in subjects.indexed)
-          ItemBlock(
-            label: subject.name!,
-            height: itemHeight * subject.duration,
-            color: Colors.red,
-            offset: verticalOffset,
-            hOffset: horizontalOffset + (width / maxSubjectsInRow) * index,
-            width: width / maxSubjectsInRow,
-          ),
-      ],
+    // In this revised version, return a Stack with each subject as a Positioned widget
+    return SizedBox(
+      width: width,
+      child: Stack(
+        children: [
+          for (var (index, subject) in subjects.indexed)
+            ItemBlock(
+              label: subject.name!,
+              height: itemHeight * subject.duration + ((subject.duration - 1) * 8),
+              color: Colors.red,
+              offset: verticalOffset,
+              // Calculate left offset based on subject index and max overlapping subjects
+              hOffset: horizontalOffset + (width / maxSubjectsInRow) * index,
+              width: width / maxSubjectsInRow,
+            ),
+        ],
+      ),
     );
   }
 }
+
 
 class ItemBlock extends StatelessWidget {
   final String label;
@@ -252,7 +276,17 @@ class ItemBlock extends StatelessWidget {
   final double offset;
   final double width;
   final double? hOffset;
-  const ItemBlock({super.key, required this.label, required this.height, this.color = Colors.white, this.empty = false, required this.offset, required this.width, this.hOffset});
+
+  const ItemBlock({
+    super.key,
+    required this.label,
+    required this.height,
+    this.color = Colors.white,
+    this.empty = false,
+    required this.offset,
+    required this.width,
+    this.hOffset,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -260,23 +294,28 @@ class ItemBlock extends StatelessWidget {
       top: offset,
       left: hOffset,
       child: Container(
-        width: width,
+        width: width - ((width > (hOffset ?? 0)) ? (hOffset ?? 0) : 0),
         height: height,
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Center(
-          child: Text(label),
-        ),
+        child: Center(child: Text(label)),
       ),
     );
   }
 
-
-  const ItemBlock.empty({super.key, required this.height, required this.offset, required this.width, required this.hOffset}) : label = '', color = Colors.white, empty = true;
-
+  const ItemBlock.empty({
+    super.key,
+    required this.height,
+    required this.offset,
+    required this.width,
+    required this.hOffset,
+  })  : label = '',
+        color = Colors.white,
+        empty = true;
 }
+
 
 
 
