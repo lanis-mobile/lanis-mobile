@@ -132,14 +132,7 @@ class _StudentTimetableBetterViewState
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                for (var (index, row) in data.hours.indexed)
-                                  LessonItem(
-                                      i: i,
-                                      index: index,
-                                      row: row,
-                                      selectedPlan: selectedPlan,
-                                      settings: settings,
-                                      data: data),
+
                               ],
                             ),
                           )
@@ -154,141 +147,7 @@ class _StudentTimetableBetterViewState
   }
 }
 
-class LessonItem extends StatelessWidget {
-  final int index;
-  final int i;
-  final TimeTableRow row;
-  final List<TimetableDay> selectedPlan;
-  final Map<String, dynamic> settings;
-  final TimeTableData data;
-  const LessonItem(
-      {super.key,
-      required this.index,
-      required this.i,
-      required this.row,
-      required this.selectedPlan,
-      required this.settings,
-      required this.data});
 
-  BorderRadius _getBorderRadius(bool previous, bool next) {
-    if (previous && next) {
-      return BorderRadius.zero;
-    } else if (previous) {
-      return BorderRadius.only(
-          bottomRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0));
-    } else if (next) {
-      return BorderRadius.only(
-          topRight: Radius.circular(8.0), topLeft: Radius.circular(8.0));
-    }
-    return BorderRadius.all(Radius.circular(8.0));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Filter all lessons that cover the current row's time slot.
-    List<TimetableSubject> overlappingSubjects = selectedPlan[i]
-        .where((element) => element.startTime == row.startTime)
-        .toList();
-
-    List<TimetableSubject>? t = selectedPlan[i]
-        .where((element) =>
-            element.startTime <= row.startTime &&
-            element.endTime >= row.endTime)
-        .toList();
-
-    if (t.isNotEmpty && overlappingSubjects.isEmpty) {
-      return SizedBox();
-    }
-
-    // Check connection for visual continuity on the first lesson (if needed).
-    bool connectedToPrevious = false;
-    bool connectedToNext = false;
-
-    return Row(
-      children: overlappingSubjects.isNotEmpty
-          ? overlappingSubjects.map((subject) {
-              Color lessonColor = row.type == TimeTableRowType.lesson
-                  ? TimeTableHelper.getColorForLesson(settings, subject)
-                  : Theme.of(context)
-                      .colorScheme
-                      .surfaceContainer
-                      .withOpacity(0.5);
-              TextStyle? textStyle = Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(
-                      color: lessonColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white);
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: overlappingSubjects.first == subject ? 0 : 1.0,
-                    right: overlappingSubjects.last == subject ? 0 : 1.0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        height: connectedToPrevious ? 0 : 8.0,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: lessonColor,
-                          borderRadius: _getBorderRadius(
-                              connectedToPrevious, connectedToNext),
-                        ),
-                        height: itemHeight * subject.duration +
-                            (8 * (subject.duration - 1)) -
-                            (row.type == TimeTableRowType.lesson ? 0 : 20),
-                        child: row.type == TimeTableRowType.lesson &&
-                                !connectedToPrevious
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    subject.name!,
-                                    style: textStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              )
-                            : const SizedBox(),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList()
-          : [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: connectedToPrevious ? 0 : 8.0,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainer
-                            .withOpacity(0.5),
-                        borderRadius: _getBorderRadius(
-                            connectedToPrevious, connectedToNext),
-                      ),
-                      height: itemHeight -
-                          (row.type == TimeTableRowType.lesson ? 0 : 20) +
-                          (connectedToPrevious ? 8 : 0),
-                      child: const SizedBox(),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-    );
-  }
-}
 
 class TimeTableData {
   final List<TimeTableRow> hours = [];
