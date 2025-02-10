@@ -14,12 +14,6 @@ Future<void> studyCheckExams(
 ) async {
   int checkInterval = 604800; // Check every 7 days for new exams
 
-  if (true) {
-    // Clear all scheduled exams
-    // await sph.prefs.kv.set('scheduled-exams', null);
-    await sph.prefs.kv.set('last-exam-scan', null);
-  }
-
   String? lastScanStr = (await sph.prefs.kv.get('last-exam-scan')) as String?;
   String? scheduledExamsStr =
       (await sph.prefs.kv.get('scheduled-exams')) as String?;
@@ -40,10 +34,6 @@ Future<void> studyCheckExams(
       int numSentCount = 0;
       if (notificationKey < DateTime.now().secondsSinceEpoch) {
         if (exam.notifications[notificationKey] == true) {
-          backgroundLogger.i(
-            "Sending notification for exam ${exam.name} at ${exam.date}",
-          );
-
           toolkit.sendMessage(
             title: 'Klausur in ${exam.name}',
             message:
@@ -82,10 +72,6 @@ Future<void> studyCheckExams(
           );
           continue;
         }
-
-        backgroundLogger.i(
-          "Adding exam ${exam.courseName} at ${e.date} to scheduled exams",
-        );
 
         final scheduledExam = ScheduledExam(
           name: exam.courseName,
