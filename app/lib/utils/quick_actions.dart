@@ -68,7 +68,12 @@ class QuickActionsStartUp {
   }
 
   static Future<void> waitForInitialization() async {
-    await _initializationCompleter.future;
+    await _initializationCompleter.future.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        logger.e('QuickActions initialization timed out. Likely the user is not logged in.');
+      },
+    );
   }
 
   static void setNames(BuildContext context) async {

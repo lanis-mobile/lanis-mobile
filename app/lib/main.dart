@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
@@ -35,7 +36,9 @@ void main() async {
 
   enableTransparentNavigationBar();
 
-  authenticationState.login().then((v) => QuickActionsStartUp());
+  authenticationState.login().then((v) {
+    if(sph?.session != null) QuickActionsStartUp();
+  });
 
   await setupBackgroundService(accountDatabase);
   await initializeNotifications();
