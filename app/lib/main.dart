@@ -35,12 +35,11 @@ void main() async {
 
   enableTransparentNavigationBar();
 
-  authenticationState.login();
+  authenticationState.login().then((v) => QuickActionsStartUp());
 
   await setupBackgroundService(accountDatabase);
   await initializeNotifications();
   await initializeDateFormatting();
-  QuickActionsStartUp();
 
   runApp(
     Phoenix(

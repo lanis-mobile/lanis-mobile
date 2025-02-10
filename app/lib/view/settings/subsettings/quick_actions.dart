@@ -16,8 +16,6 @@ class QuickActions extends StatefulWidget {
 }
 
 class _QuickActionsState extends State<QuickActions> {
-  Color backgroundColor = Colors.transparent;
-
   // Android supports 2 quick actions, iOS only 1
   final int maxQuickActions = Platform.isAndroid ? 2 : 1;
 
@@ -35,7 +33,7 @@ class _QuickActionsState extends State<QuickActions> {
 
     return SettingsPage(
       title: Text('Quick Actions'),
-      backgroundColor: backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),

@@ -57,10 +57,12 @@ class ExternalDefinition {
   final String id;
   final StringBuildContextCallback label;
   final Icon icon = Icon(Icons.open_in_new);
+  final Function()? action;
 
   ExternalDefinition({
     required this.id,
     required this.label,
+    this.action,
   });
 }
 

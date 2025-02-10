@@ -22,6 +22,8 @@ const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTks
 
 typedef ActionFunction = void Function(BuildContext);
 
+int selectedDestinationDrawer = -1;
+
 class Destination {
   final Icon icon;
   final Icon selectedIcon;
@@ -78,7 +80,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
 
-  late int selectedDestinationDrawer;
   late bool doesSupportAnyApplet = false;
   List<Destination> destinations = [];
 
@@ -150,6 +151,7 @@ class _HomePageState extends State<HomePage> {
   ];
 
   void setDefaultDestination() {
+    if (selectedDestinationDrawer != -1) return;
     for (var destination in destinations) {
       if (destination.isSupported && destination.enableBottomNavigation) {
         selectedDestinationDrawer = destinations.indexOf(destination);
@@ -342,6 +344,7 @@ class _HomePageState extends State<HomePage> {
         indexNavbarTranslationLayer.add(null);
       }
     }
+    print(selectedDestinationDrawer);
     return NavigationBar(
       destinations: barDestinations,
       selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
