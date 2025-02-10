@@ -328,5 +328,9 @@
   "noConnection": "No SPH connection",
   "accountExists": "Account already exists",
   "errorOccurredDetails": "Problem: {problem}",
-  "copyErrorToClipboard": "Copy error details to clipboard"
+  "copyErrorToClipboard": "Copy error details to clipboard",
+  "quickActions": "Quick Actions",
+  "applets": "Applets",
+  "external": "External",
+  "restartRequired": "After a change an app restart is required to apply the changes."
 }

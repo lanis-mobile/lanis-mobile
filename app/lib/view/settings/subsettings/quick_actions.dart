@@ -32,7 +32,7 @@ class _QuickActionsState extends State<QuickActions> {
 
 
     return SettingsPage(
-      title: Text('Quick Actions'),
+      title: Text(AppLocalizations.of(context).quickActions),
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       children: [
         Padding(
@@ -55,7 +55,7 @@ class _QuickActionsState extends State<QuickActions> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      "Applets",
+                      AppLocalizations.of(context).applets,
                       style: Theme.of(context).textTheme.labelLarge!.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -91,7 +91,7 @@ class _QuickActionsState extends State<QuickActions> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      "External",
+                      AppLocalizations.of(context).external,
                       style: Theme.of(context).textTheme.labelLarge!.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -138,7 +138,7 @@ class _QuickActionsState extends State<QuickActions> {
                     height: 8.0,
                   ),
                   Text(
-                    'After a change an app restart is required to apply the changes.',
+                    AppLocalizations.of(context).restartRequired,
                   )
                 ],
               );
