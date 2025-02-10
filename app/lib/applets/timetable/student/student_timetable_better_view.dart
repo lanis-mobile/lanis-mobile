@@ -55,6 +55,15 @@ class _StudentTimetableBetterViewState
         phpUrl: timeTableDefinition.appletPhpUrl,
         settingsDefaults: timeTableDefinition.settingsDefaults,
         accountType: AccountType.student,
+        loadingAppBar: AppBar(
+          title: Text(timeTableDefinition.label(context)),
+          leading: widget.openDrawerCb != null
+              ? IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => widget.openDrawerCb!(),
+          )
+              : null,
+        ),
         builder: (BuildContext context,
             TimeTable timetable,
             _,
@@ -72,7 +81,15 @@ class _StudentTimetableBetterViewState
           TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
 
           return Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(
+              title: Text(timeTableDefinition.label(context)),
+              leading: widget.openDrawerCb != null
+                  ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => widget.openDrawerCb!(),
+              )
+                  : null,
+            ),
             body: SingleChildScrollView(
               child: Row(
                 spacing: 4.0,
@@ -330,37 +347,30 @@ class ItemBlock extends StatelessWidget {
         ),
         padding: EdgeInsets.all(4.0),
         child: (!onlyColor && subject != null)
-            ? Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Flexible(
-              child: Text(
+            ? SingleChildScrollView(
+              child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+              Text(
                 subject!.name ?? '',
                 style: textStyle,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            if (subject!.lehrer != null)
-              Flexible(
-                child: Text(
+              if (subject!.lehrer != null)
+                Text(
                   subject!.lehrer!,
                   style: textStyle,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            if (subject!.raum != null)
-              Flexible(
-                child: Text(
+              if (subject!.raum != null)
+                Text(
                   subject!.raum!,
                   style: textStyle,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-          ],
-        )
+                        ],
+                      ),
+            )
             : SizedBox(),
       ),
     );
