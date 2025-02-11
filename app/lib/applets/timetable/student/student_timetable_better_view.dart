@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
 import 'package:sph_plan/core/sph/sph.dart';
@@ -188,6 +189,8 @@ class _StudentTimetableBetterViewState
                                                   i: i,
                                                   width: constraints.maxWidth,
                                                   settings: settings,
+                                                  updateSettings:
+                                                      updateSettings,
                                                 ),
                                             ],
                                           );
@@ -237,6 +240,7 @@ class ListItem extends StatelessWidget {
   final int i;
   final double width;
   final Map<String, dynamic> settings;
+  final Function updateSettings;
 
   const ListItem({
     super.key,
@@ -247,6 +251,7 @@ class ListItem extends StatelessWidget {
     required this.i,
     required this.width,
     required this.settings,
+    required this.updateSettings,
   });
 
   @override
@@ -263,36 +268,58 @@ class ListItem extends StatelessWidget {
 
     double horizontalOffset = 2;
 
-    // For pause rows, return a single Positioned widget
-    if (row.type == TimeTableRowType.pause) {
-      return ItemBlock(
-        height: itemHeight - 20,
-        width: width,
-        offset: verticalOffset,
-        hOffset: horizontalOffset,
-        color: Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.5),
-        onlyColor: true,
-      );
-    }
-
     final List<TimetableSubject> timetable = timetableDays[i];
     List<TimetableSubject> subjects = timetable.where((element) {
       return element.startTime == row.startTime;
     }).toList();
 
-    // If no matching subject start time, check if row fits inside a subject's duration
     List<TimetableSubject> subjectsInRow = timetable.where((element) {
       return row.startTime >= element.startTime &&
           row.endTime <= element.endTime;
     }).toList();
 
+    // For pause rows, return a single Positioned widget
+    if (row.type == TimeTableRowType.pause) {
+      bool hidePause = false;
+      for (var subject in subjectsInRow) {
+        int numPauses = data.hours
+            .where((element) =>
+                element.type == TimeTableRowType.pause &&
+                element.startTime >= subject.startTime &&
+                element.endTime <= subject.endTime)
+            .length;
+        if (numPauses > 0) {
+          hidePause = true;
+          break;
+        }
+      }
+
+      if (!hidePause) {
+        return ItemBlock(
+          height: itemHeight - 20,
+          width: width,
+          offset: verticalOffset,
+          hOffset: horizontalOffset,
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainer
+              .withValues(alpha: 0.5),
+          onlyColor: true,
+          settings: settings,
+          updateSettings: updateSettings,
+        );
+      }
+    }
+
     // If no subject, return an empty Positioned widget with a pre-determined height (or 0 height)
-    if (subjects.isEmpty) {
+    if (subjects.isEmpty || row.type == TimeTableRowType.pause) {
       return ItemBlock.empty(
         height: 0,
         offset: verticalOffset,
         width: width,
         hOffset: horizontalOffset,
+        updateSettings: updateSettings,
+        settings: settings,
       );
     }
 
@@ -324,15 +351,25 @@ class ListItem extends StatelessWidget {
 
               double hOffset = (width / maxNum) * indexInRow;
 
+              int numPauses = data.hours
+                  .where((element) =>
+                      element.type == TimeTableRowType.pause &&
+                      element.startTime >= subject.startTime &&
+                      element.endTime <= subject.endTime)
+                  .length;
+
               return ItemBlock(
                 subject: subject,
                 height: itemHeight * subject.duration +
-                    ((subject.duration - 1) * 8),
+                    ((subject.duration - 1) * 8) +
+                    (numPauses * (itemHeight - 20 + 8)),
                 color: TimeTableHelper.getColorForLesson(settings, subject),
                 offset: verticalOffset,
                 // Calculate left offset based on subject index and max overlapping subjects
                 hOffset: hOffset + (maxNum >= 2 ? 0 : 0),
                 width: (width / maxNum) - (maxNum >= 2 ? 2 : 0),
+                settings: settings,
+                updateSettings: updateSettings,
               );
             }),
         ],
@@ -351,6 +388,9 @@ class ItemBlock extends StatelessWidget {
   final double? hOffset;
   final bool onlyColor;
 
+  final Map<String, dynamic> settings;
+  final Function updateSettings;
+
   const ItemBlock({
     super.key,
     this.subject,
@@ -361,7 +401,107 @@ class ItemBlock extends StatelessWidget {
     required this.width,
     this.hOffset,
     this.onlyColor = false,
+    required this.settings,
+    required this.updateSettings,
   });
+
+  void showSubject(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        builder: (context) {
+          return SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding:
+                  const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          subject?.name ??
+                              AppLocalizations.of(context)!.unknownLesson,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  // showColorPicker(
+                                  // settings, updateSettings, selected);
+                                },
+                                icon: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle, color: color),
+                                )),
+                            if (subject != null &&
+                                (subject?.id == null ||
+                                    !subject!.id!.startsWith('custom')))
+                              IconButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    updateSettings('hidden-lessons', [
+                                      ...?settings['hidden-lessons'],
+                                      subject!.id
+                                    ]);
+                                    showSnackbar(
+                                        context,
+                                        AppLocalizations.of(context)
+                                            .lessonHidden(subject!.name!),
+                                        seconds: 3);
+                                  },
+                                  icon: const Icon(
+                                      Icons.visibility_off_outlined)),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  if (subject?.raum != null)
+                    modalSheetItem(subject!.raum!, Icons.place),
+                  modalSheetItem(
+                    "${subject!.startTime.format(context)} - ${subject!.endTime.format(context)} (${subject!.duration} ${subject!.duration == 1 ? "Stunde" : "Stunden"})",
+                    Icons.access_time,
+                  ),
+                  if (subject?.lehrer != null)
+                    modalSheetItem(subject!.lehrer!, Icons.person),
+                  if (subject?.badge != null)
+                    modalSheetItem(subject!.badge!, Icons.info),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget modalSheetItem(String content, IconData icon) {
+    return Builder(builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 4.0),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Icon(
+                icon,
+                size: 24,
+              ),
+            ),
+            Text(content, style: Theme.of(context).textTheme.labelLarge)
+          ],
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -376,42 +516,45 @@ class ItemBlock extends StatelessWidget {
     return Positioned(
       top: offset,
       left: hOffset,
-      child: Container(
-        width: calcWidth,
-        height: height,
-        clipBehavior:
-            Clip.hardEdge, // Clips any overflow, useful for the y axis
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: min(3, calcWidth / 3)),
-          borderRadius: BorderRadius.circular(8.0),
+      child: InkWell(
+        onTap: subject != null ? () => showSubject(context) : null,
+        child: Container(
+          width: calcWidth,
+          height: height,
+          clipBehavior:
+              Clip.hardEdge, // Clips any overflow, useful for the y axis
+          decoration: BoxDecoration(
+            border: Border.all(color: color, width: min(3, calcWidth / 3)),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          padding: EdgeInsets.all(4.0),
+          child: (!onlyColor && subject != null)
+              ? SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        subject!.name ?? '',
+                        style: textStyle,
+                        maxLines: 1,
+                      ),
+                      if (subject!.lehrer != null)
+                        Text(
+                          subject!.lehrer!,
+                          style: textStyle,
+                          maxLines: 1,
+                        ),
+                      if (subject!.raum != null)
+                        Text(
+                          subject!.raum!,
+                          style: textStyle,
+                          maxLines: 1,
+                        ),
+                    ],
+                  ),
+                )
+              : SizedBox(),
         ),
-        padding: EdgeInsets.all(4.0),
-        child: (!onlyColor && subject != null)
-            ? SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      subject!.name ?? '',
-                      style: textStyle,
-                      maxLines: 1,
-                    ),
-                    if (subject!.lehrer != null)
-                      Text(
-                        subject!.lehrer!,
-                        style: textStyle,
-                        maxLines: 1,
-                      ),
-                    if (subject!.raum != null)
-                      Text(
-                        subject!.raum!,
-                        style: textStyle,
-                        maxLines: 1,
-                      ),
-                  ],
-                ),
-              )
-            : SizedBox(),
       ),
     );
   }
@@ -422,6 +565,8 @@ class ItemBlock extends StatelessWidget {
     required this.offset,
     required this.width,
     required this.hOffset,
+    required this.updateSettings,
+    required this.settings,
   })  : subject = null,
         color = Colors.white,
         onlyColor = false,
@@ -432,7 +577,8 @@ class TimeTableData {
   final List<TimeTableRow> hours = [];
   List<TimetableDay> timetableDays = [];
 
-  TimeTableData(List<TimetableDay>? data, TimeTable timetable, settings) {
+  TimeTableData(List<TimetableDay> data, TimeTable timetable,
+      Map<String, dynamic> settings) {
     for (var (index, hour) in timetable.hours!.indexed) {
       if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
         if (timetable.hours![index - 1].endTime
@@ -449,8 +595,19 @@ class TimeTableData {
       hours.add(hour);
     }
 
+    List<dynamic>? hiddenLessons = settings['hidden-lessons'];
+    for (var day in data) {
+      List<TimetableSubject> dayData = [];
+      for (var subject in day) {
+        if (hiddenLessons == null || !hiddenLessons.contains(subject.id)) {
+          dayData.add(subject);
+        }
+      }
+      timetableDays.add(dayData);
+    }
+
     timetableDays =
-        data?.where((TimetableDay day) => day.isNotEmpty).toList() ?? [];
+        timetableDays.where((TimetableDay day) => day.isNotEmpty).toList();
   }
 }
 
