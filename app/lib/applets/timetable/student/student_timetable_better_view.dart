@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
@@ -107,7 +108,7 @@ class _StudentTimetableBetterViewState
                           SizedBox(
                             height: headerHeight,
                           ),
-                          for (var (index, row) in data.hours!.indexed)
+                          for (var (index, row) in data.hours.indexed)
                             Container(
                               decoration: BoxDecoration(
                                 color: row.type == TimeTableRowType.lesson
@@ -117,10 +118,10 @@ class _StudentTimetableBetterViewState
                                     : Theme.of(context)
                                         .colorScheme
                                         .surfaceContainer
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
-                              width: 50.0,
+                              width: 70.0,
                               height: itemHeight -
                                   (row.type == TimeTableRowType.lesson
                                       ? 0
@@ -339,12 +340,11 @@ class ListItem extends StatelessWidget {
       return a.startTime.compareTo(b.startTime);
     });
 
-    // In this revised version, return a Stack with each subject as a Positioned widget
     return SizedBox(
       width: width,
       child: Stack(
         children: [
-          for (var (index, subject) in subjects.indexed)
+          for (var subject in subjects)
             Builder(builder: (context) {
               int indexInRow = subjectsInRow.indexOf(subject);
               int maxNum = max(maxSubjectsInRow, subjectsInRow.length);
@@ -405,6 +405,58 @@ class ItemBlock extends StatelessWidget {
     required this.updateSettings,
   });
 
+  void showColorPicker(BuildContext context, Map<String, dynamic> settings,
+      Function updateSettings, TimetableSubject lesson) {
+    Color selectedColor = TimeTableHelper.getColorForLesson(settings, lesson);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: selectedColor,
+              onColorChanged: (c) => {
+                selectedColor = c,
+              },
+              enableAlpha: false,
+              labelTypes: [],
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: Text(AppLocalizations.of(context).clear),
+              onPressed: () {
+                updateSettings('lesson-colors', {
+                  ...settings['lesson-colors'],
+                  lesson.id!.split('-')[0]: null
+                });
+
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(AppLocalizations.of(context).select),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+
+                if (settings['lesson-colors'] == null) {
+                  settings['lesson-colors'] = {};
+                }
+                updateSettings('lesson-colors', {
+                  ...settings['lesson-colors'],
+                  lesson.id!.split('-')[0]:
+                      selectedColor.toHexString(enableAlpha: false)
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void showSubject(BuildContext context) {
     showModalBottomSheet(
         context: context,
@@ -427,15 +479,15 @@ class ItemBlock extends StatelessWidget {
                       children: [
                         Text(
                           subject?.name ??
-                              AppLocalizations.of(context)!.unknownLesson,
+                              AppLocalizations.of(context).unknownLesson,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         Row(
                           children: [
                             IconButton(
                                 onPressed: () {
-                                  // showColorPicker(
-                                  // settings, updateSettings, selected);
+                                  showColorPicker(context, settings,
+                                      updateSettings, subject!);
                                 },
                                 icon: Container(
                                   width: 24,
@@ -507,7 +559,7 @@ class ItemBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle textStyle = TextStyle(
       fontSize: 12,
-      // color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+      color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
     );
 
     double calcWidth =
@@ -524,7 +576,8 @@ class ItemBlock extends StatelessWidget {
           clipBehavior:
               Clip.hardEdge, // Clips any overflow, useful for the y axis
           decoration: BoxDecoration(
-            border: Border.all(color: color, width: min(3, calcWidth / 3)),
+            border: Border.all(color: color, width: min(1, calcWidth / 3)),
+            color: color == Colors.white ? Colors.transparent : color,
             borderRadius: BorderRadius.circular(8.0),
           ),
           padding: EdgeInsets.all(4.0),
