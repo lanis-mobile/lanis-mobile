@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
 import 'package:sph_plan/core/sph/sph.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/models/timetable.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
@@ -43,7 +44,9 @@ class _StudentTimetableBetterViewState
   double calculateColumnHeight(List<TimeTableRow> rows) {
     double totalHeight = 0;
     for (var row in rows) {
-      totalHeight += (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20) + 8;
+      totalHeight +=
+          (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20) +
+              8;
     }
     return totalHeight;
   }
@@ -59,9 +62,9 @@ class _StudentTimetableBetterViewState
           title: Text(timeTableDefinition.label(context)),
           leading: widget.openDrawerCb != null
               ? IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => widget.openDrawerCb!(),
-          )
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => widget.openDrawerCb!(),
+                )
               : null,
         ),
         builder: (BuildContext context,
@@ -76,118 +79,152 @@ class _StudentTimetableBetterViewState
                   : TimeTableType.all;
           bool showByWeek = settings['student-selected-week'] == true;
           List<TimetableDay> selectedPlan =
-              getSelectedPlan(timetable, TimeTableType.own, settings);
+              getSelectedPlan(timetable, selectedType, settings);
 
           TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
 
           return Scaffold(
-            appBar: AppBar(
-              title: Text(timeTableDefinition.label(context)),
-              leading: widget.openDrawerCb != null
-                  ? IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => widget.openDrawerCb!(),
-              )
-                  : null,
-            ),
-            body: SingleChildScrollView(
-              child: Row(
-                spacing: 4.0,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    spacing: 8.0,
+              appBar: AppBar(
+                title: Text(timeTableDefinition.label(context)),
+                leading: widget.openDrawerCb != null
+                    ? IconButton(
+                        icon: const Icon(Icons.menu),
+                        onPressed: () => widget.openDrawerCb!(),
+                      )
+                    : null,
+              ),
+              body: RefreshIndicator(
+                onRefresh: refresh!,
+                child: SingleChildScrollView(
+                  child: Row(
+                    spacing: 4.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: headerHeight,
+                      Column(
+                        spacing: 8.0,
+                        children: [
+                          SizedBox(
+                            height: headerHeight,
+                          ),
+                          for (var (index, row) in data.hours!.indexed)
+                            Container(
+                              decoration: BoxDecoration(
+                                color: row.type == TimeTableRowType.lesson
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainer
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainer
+                                        .withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              width: 50.0,
+                              height: itemHeight -
+                                  (row.type == TimeTableRowType.lesson
+                                      ? 0
+                                      : 20),
+                              child: Column(
+                                children: [
+                                  Text(row.label.replaceAll('Stunde', '')),
+                                  ...(row.type == TimeTableRowType.lesson
+                                      ? [
+                                          Text(
+                                              "${row.startTime.format(context)} -"),
+                                          // Text(row.endTime.format(context))
+                                        ]
+                                      : [
+                                          // Text(
+                                          //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
+                                        ]),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
-                      for (var (index, row) in data.hours!.indexed)
-                        Container(
-                          decoration: BoxDecoration(
-                            color: row.type == TimeTableRowType.lesson
-                                ? Theme.of(context).colorScheme.surfaceContainer
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainer
-                                    .withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          width: 50.0,
-                          height: itemHeight -
-                              (row.type == TimeTableRowType.lesson ? 0 : 20),
-                          child: Column(
-                            children: [
-                              Text(row.label.replaceAll('Stunde', '')),
-                              ...(row.type == TimeTableRowType.lesson
-                                  ? [
-                                      Text(
-                                          "${row.startTime.format(context)} -"),
-                                      // Text(row.endTime.format(context))
-                                    ]
-                                  : [
-                                      // Text(
-                                      //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
-                                    ]),
-                            ],
-                          ),
+                      Expanded(
+                        child: Row(
+                          spacing: 4.0,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            for (int i = 0; i < data.timetableDays.length; i++)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Container(
+                                      height: headerHeight,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainer,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      child: Text(
+                                        DateTime(2020, 8, 3)
+                                            .add(Duration(days: i))
+                                            .format('E'),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    SizedBox(
+                                      height: calculateColumnHeight(data.hours),
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return Stack(
+                                            children: [
+                                              for (var (index, row)
+                                                  in data.hours.indexed)
+                                                ListItem(
+                                                  iteration: index,
+                                                  row: row,
+                                                  data: data,
+                                                  timetableDays:
+                                                      data.timetableDays,
+                                                  i: i,
+                                                  width: constraints.maxWidth,
+                                                  settings: settings,
+                                                ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
+                      ),
                     ],
                   ),
-                  Expanded(
-                    child: Row(
-                      spacing: 4.0,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        for (int i = 0; i < selectedPlan.length; i++)
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Container(
-                                  height: headerHeight,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceContainer,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Text(
-                                    DateTime(2020, 8, 3).add(Duration(days: i)).format('E'),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                const SizedBox(height: 8.0),
-                                SizedBox(
-                                  height: calculateColumnHeight(data.hours),
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      return Stack(
-                                        children: [
-                                          for (var (index, row) in data.hours.indexed)
-                                            ListItem(
-                                              iteration: index,
-                                              row: row,
-                                              data: data,
-                                              timetableDays: selectedPlan,
-                                              i: i,
-                                              width: constraints.maxWidth,
-                                              settings: settings,
-                                            ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                      ],
-                    ),
+                ),
+              ),
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    heroTag: "toggle",
+                    tooltip: selectedType == TimeTableType.all
+                        ? AppLocalizations.of(context).timetableSwitchToPersonal
+                        : AppLocalizations.of(context).timetableSwitchToClass,
+                    onPressed: () {
+                      updateSettings(
+                          'student-selected-type',
+                          selectedType == TimeTableType.all
+                              ? 'TimeTableType.own'
+                              : 'TimeTableType.all');
+                    },
+                    child: Icon(selectedType == TimeTableType.all
+                        ? Icons.person
+                        : Icons.people),
                   ),
                 ],
-              ),
-            ),
-          );
+              ));
         });
   }
 }
@@ -208,7 +245,8 @@ class ListItem extends StatelessWidget {
     required this.data,
     required this.timetableDays,
     required this.i,
-    required this.width, required this.settings,
+    required this.width,
+    required this.settings,
   });
 
   @override
@@ -244,7 +282,8 @@ class ListItem extends StatelessWidget {
 
     // If no matching subject start time, check if row fits inside a subject's duration
     List<TimetableSubject> subjectsInRow = timetable.where((element) {
-      return row.startTime >= element.startTime && row.endTime <= element.endTime;
+      return row.startTime >= element.startTime &&
+          row.endTime <= element.endTime;
     }).toList();
 
     // If no subject, return an empty Positioned widget with a pre-determined height (or 0 height)
@@ -261,7 +300,8 @@ class ListItem extends StatelessWidget {
     int maxSubjectsInRow = 0;
     for (var subject in subjects) {
       int maxSubjects = timetable.where((element) {
-        return element.startTime >= subject.startTime && element.startTime < subject.endTime;
+        return element.startTime >= subject.startTime &&
+            element.startTime < subject.endTime;
       }).length;
       if (maxSubjects > maxSubjectsInRow) {
         maxSubjectsInRow = maxSubjects;
@@ -278,31 +318,28 @@ class ListItem extends StatelessWidget {
       child: Stack(
         children: [
           for (var (index, subject) in subjects.indexed)
-            Builder(
-              builder: (context) {
+            Builder(builder: (context) {
+              int indexInRow = subjectsInRow.indexOf(subject);
+              int maxNum = max(maxSubjectsInRow, subjectsInRow.length);
 
-                int indexInRow = subjectsInRow.indexOf(subject);
-                int maxNum = max(maxSubjectsInRow, subjectsInRow.length);
+              double hOffset = (width / maxNum) * indexInRow;
 
-                double hOffset = (width / maxNum) * indexInRow;
-
-                return ItemBlock(
-                  subject: subject,
-                  height: itemHeight * subject.duration + ((subject.duration - 1) * 8),
-                  color: TimeTableHelper.getColorForLesson(settings, subject),
-                  offset: verticalOffset,
-                  // Calculate left offset based on subject index and max overlapping subjects
-                  hOffset: hOffset + (maxNum >= 2 ? 0 : 0),
-                  width: (width / maxNum) - (maxNum >= 2 ? 2 : 0),
-                );
-              }
-            ),
+              return ItemBlock(
+                subject: subject,
+                height: itemHeight * subject.duration +
+                    ((subject.duration - 1) * 8),
+                color: TimeTableHelper.getColorForLesson(settings, subject),
+                offset: verticalOffset,
+                // Calculate left offset based on subject index and max overlapping subjects
+                hOffset: hOffset + (maxNum >= 2 ? 0 : 0),
+                width: (width / maxNum) - (maxNum >= 2 ? 2 : 0),
+              );
+            }),
         ],
       ),
     );
   }
 }
-
 
 class ItemBlock extends StatelessWidget {
   final TimetableSubject? subject;
@@ -328,53 +365,56 @@ class ItemBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     TextStyle textStyle = TextStyle(
       fontSize: 12,
       // color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
     );
 
+    double calcWidth =
+        max(1, width - ((width > (hOffset ?? 0)) ? (hOffset ?? 0) : 0));
+
     return Positioned(
       top: offset,
       left: hOffset,
       child: Container(
-        width: width - ((width > (hOffset ?? 0)) ? (hOffset ?? 0) : 0),
+        width: calcWidth,
         height: height,
-        clipBehavior: Clip.hardEdge, // Clips any overflow, useful for the y axis
+        clipBehavior:
+            Clip.hardEdge, // Clips any overflow, useful for the y axis
         decoration: BoxDecoration(
-          border: Border.all(color: color, width: 3),
+          border: Border.all(color: color, width: min(3, calcWidth / 3)),
           borderRadius: BorderRadius.circular(8.0),
         ),
         padding: EdgeInsets.all(4.0),
         child: (!onlyColor && subject != null)
             ? SingleChildScrollView(
-              child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-              Text(
-                subject!.name ?? '',
-                style: textStyle,
-                maxLines: 1,
-              ),
-              if (subject!.lehrer != null)
-                Text(
-                  subject!.lehrer!,
-                  style: textStyle,
-                  maxLines: 1,
-                ),
-              if (subject!.raum != null)
-                Text(
-                  subject!.raum!,
-                  style: textStyle,
-                  maxLines: 1,
-                ),
-                        ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      subject!.name ?? '',
+                      style: textStyle,
+                      maxLines: 1,
+                    ),
+                    if (subject!.lehrer != null)
+                      Text(
+                        subject!.lehrer!,
+                        style: textStyle,
+                        maxLines: 1,
                       ),
-            )
+                    if (subject!.raum != null)
+                      Text(
+                        subject!.raum!,
+                        style: textStyle,
+                        maxLines: 1,
+                      ),
+                  ],
+                ),
+              )
             : SizedBox(),
       ),
     );
-}
+  }
 
   const ItemBlock.empty({
     super.key,
@@ -388,21 +428,29 @@ class ItemBlock extends StatelessWidget {
         empty = true;
 }
 
-
-
-
-
 class TimeTableData {
   final List<TimeTableRow> hours = [];
+  List<TimetableDay> timetableDays = [];
 
   TimeTableData(List<TimetableDay>? data, TimeTable timetable, settings) {
     for (var (index, hour) in timetable.hours!.indexed) {
       if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
-        hours.add(TimeTableRow(TimeTableRowType.pause,
-            timetable.hours![index - 1].endTime, hour.startTime, 'Pause', -1));
+        if (timetable.hours![index - 1].endTime
+                .differenceInMinutes(hour.startTime) >
+            10) {
+          hours.add(TimeTableRow(
+              TimeTableRowType.pause,
+              timetable.hours![index - 1].endTime,
+              hour.startTime,
+              'Pause',
+              -1));
+        }
       }
       hours.add(hour);
     }
+
+    timetableDays =
+        data?.where((TimetableDay day) => day.isNotEmpty).toList() ?? [];
   }
 }
 
