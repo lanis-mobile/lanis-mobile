@@ -16,8 +16,8 @@ class QuickActions extends StatefulWidget {
 }
 
 class _QuickActionsState extends State<QuickActions> {
-  // Android supports 2 quick actions, iOS only 1
-  final int maxQuickActions = Platform.isAndroid ? 2 : 1;
+  // Android supports 2 quick actions, iOS 4
+  final int maxQuickActions = Platform.isAndroid ? 2 : 4;
 
 
   @override
