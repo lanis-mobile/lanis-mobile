@@ -93,6 +93,7 @@ class AccountDatabase extends _$AccountDatabase {
   static Future<String> decryptPassword(String encryptedPassword) async {
     final String? key = await secureStorage.read(key: 'encryption_key');
     if (key == null) {
+      return '';
       throw Exception('Encryption key not found');
     }
     final cryptKey = Key.fromBase64(key);

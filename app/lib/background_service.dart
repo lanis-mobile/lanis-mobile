@@ -1,24 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:crypto/crypto.dart';
-import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:sph_plan/applets/definitions.dart';
-import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/logger.dart';
-import 'package:workmanager/workmanager.dart';
 
-import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount;
+import 'core/database/account_database/account_db.dart' show AccountDatabase;
 import 'core/sph/sph.dart' show SPH;
 
 const identifier = "io.github.alessioc42.pushservice";
 
 Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   if (!Platform.isAndroid) return; //iOS currently experimental/not supported
-
+  /*
   if ((await Permission.notification.isDenied)) {
     await Workmanager().cancelAll();
     return;
@@ -67,26 +62,29 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
       backgroundLogger.e(e, stackTrace: s);
     }
   }
+
+  */
 }
 
 Future<void> initializeNotifications() async {
   try {
-  FlutterLocalNotificationsPlugin().initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@drawable/ic_launcher'),
-      iOS: DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true
+    FlutterLocalNotificationsPlugin().initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@drawable/ic_launcher'),
+        iOS: DarwinInitializationSettings(
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true),
       ),
-    ),
-  );} catch (e, s) {
+    );
+  } catch (e, s) {
     backgroundLogger.e(e, stackTrace: s);
   }
 }
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
+  /*
   Workmanager().executeTask((task, inputData) async {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     try {
@@ -138,6 +136,8 @@ void callbackDispatcher() {
     }
     return Future.value(false);
   });
+
+   */
 }
 
 class BackgroundTaskToolkit {
@@ -157,15 +157,24 @@ class BackgroundTaskToolkit {
   /// [message] is the message of the notification
   /// [id] is the id of the notification, must be between 0 and 10000
   /// [avoidDuplicateSending] if true, the message will not be sent if the same message was sent before
-  Future<void> sendMessage({required String title,required String message, int id = 0, bool avoidDuplicateSending = false, Importance importance = Importance.high, Priority priority = Priority.high}) async {
+  Future<void> sendMessage(
+      {required String title,
+      required String message,
+      int id = 0,
+      bool avoidDuplicateSending = false,
+      Importance importance = Importance.high,
+      Priority priority = Priority.high}) async {
     if (id > 10000 || id < 0) {
       throw ArgumentError('id must be between 0 and 10000');
     }
     id = _seedId(id);
-    message = multiAccount ? '${_sph.account.username.toLowerCase()}@${_sph.account.schoolName}\n$message' : message;
+    message = multiAccount
+        ? '${_sph.account.username.toLowerCase()}@${_sph.account.schoolName}\n$message'
+        : message;
     if (avoidDuplicateSending) {
       final hash = hashString(message);
-      final lastMessage = await _sph.prefs.getNotificationDuplicates(id, appletId);
+      final lastMessage =
+          await _sph.prefs.getNotificationDuplicates(id, appletId);
       if (lastMessage?.hash == hash) {
         return;
       }
@@ -174,7 +183,8 @@ class BackgroundTaskToolkit {
     }
     try {
       final androidDetails = AndroidNotificationDetails(
-        'io.github.alessioc42.sphplan', 'lanis-mobile',
+        'io.github.alessioc42.sphplan',
+        'lanis-mobile',
         channelDescription: "Applet notifications",
         importance: Importance.high,
         priority: Priority.high,
@@ -182,12 +192,14 @@ class BackgroundTaskToolkit {
         ongoing: false,
       );
       const iOSDetails = DarwinNotificationDetails(
-        presentAlert: false, presentBadge: true,
+        presentAlert: false,
+        presentBadge: true,
       );
-      var platformDetails = NotificationDetails(android: androidDetails, iOS: iOSDetails);
+      var platformDetails =
+          NotificationDetails(android: androidDetails, iOS: iOSDetails);
       await FlutterLocalNotificationsPlugin()
           .show(id, title, message, platformDetails);
-    } catch (e,s) {
+    } catch (e, s) {
       backgroundLogger.e(e, stackTrace: s);
     }
   }
@@ -200,14 +212,18 @@ class BackgroundTaskToolkit {
 }
 
 Future<bool> isTaskWithinConstraints(AccountDatabase accountDB) async {
-  final globalSettings =
-      await accountDB.kv.getMultiple(
-      ['notifications-android-allowed-days',
-        'notifications-android-start-time',
-        'notifications-android-end-time']);
+  final globalSettings = await accountDB.kv.getMultiple([
+    'notifications-android-allowed-days',
+    'notifications-android-start-time',
+    'notifications-android-end-time'
+  ]);
   TimeOfDay currentTime = TimeOfDay.now();
-  TimeOfDay startTime = TimeOfDay(hour: globalSettings['notifications-android-start-time'][0], minute: globalSettings['notifications-android-start-time'][1]);
-  TimeOfDay endTime = TimeOfDay(hour: globalSettings['notifications-android-end-time'][0], minute: globalSettings['notifications-android-end-time'][1]);
+  TimeOfDay startTime = TimeOfDay(
+      hour: globalSettings['notifications-android-start-time'][0],
+      minute: globalSettings['notifications-android-start-time'][1]);
+  TimeOfDay endTime = TimeOfDay(
+      hour: globalSettings['notifications-android-end-time'][0],
+      minute: globalSettings['notifications-android-end-time'][1]);
   if (currentTime.hour < startTime.hour || currentTime.hour > endTime.hour) {
     return false;
   }
