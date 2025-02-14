@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:background_fetch/background_fetch.dart' as bgf;
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -17,10 +18,13 @@ import 'core/sph/sph.dart' show SPH;
 const identifier = "io.github.alessioc42.pushservice";
 
 Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
-  if (!Platform.isAndroid) return; //iOS currently experimental/not supported
+  //
+  //
+  // if (!Platform.isAndroid) return; //iOS currently experimental/not supported
 
   if ((await Permission.notification.isDenied)) {
-    await Workmanager().cancelAll();
+    logger.d("User disallowed notifications");
+    if(Platform.isAndroid) await Workmanager().cancelAll();
     return;
   }
 
@@ -34,21 +38,22 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
     }
   }
   if (disabledCount == accounts.length) {
-    await Workmanager().cancelAll();
+    logger.d("User disallowed notifications");
+    if(Platform.isAndroid) await Workmanager().cancelAll();
     return;
   }
 
-  await Workmanager().initialize(callbackDispatcher,
-      isInDebugMode: kDebugMode);
-  final workManagerConstraints = Constraints(
+  if (Platform.isAndroid) {
+    await Workmanager().initialize(callbackDispatcher,
+        isInDebugMode: kDebugMode);
+    final workManagerConstraints = Constraints(
       networkType: NetworkType.connected,
       requiresBatteryNotLow: true,
       requiresCharging: false,
       requiresDeviceIdle: false,
       requiresStorageNotLow: false,
-  );
+    );
 
-  if (Platform.isAndroid) {
     final int min = await accountDatabase.kv.get('notifications-android-target-interval-minutes');
     await Workmanager().registerPeriodicTask(identifier, identifier,
       frequency: Duration(minutes: min),
@@ -60,9 +65,22 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
 
   if (Platform.isIOS) {
     try {
-      await Workmanager().registerPeriodicTask(identifier, identifier,
-          constraints: workManagerConstraints,
-      );
+      await bgf.BackgroundFetch.configure(bgf.BackgroundFetchConfig(
+          minimumFetchInterval: 15
+      ), (String taskId) async {
+        try {
+          await generalDispatcher();
+        } finally {
+          bgf.BackgroundFetch.finish(taskId);
+        }
+      }, (String taskId) async {
+        bgf.BackgroundFetch.finish(taskId);
+      });
+
+      await bgf.BackgroundFetch.scheduleTask(bgf.TaskConfig(
+          taskId: "com.transistorsoft.notftask",
+          delay: 10000
+      ));
     } catch (e, s) {
       backgroundLogger.e(e, stackTrace: s);
     }
@@ -88,56 +106,61 @@ Future<void> initializeNotifications() async {
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-    try {
-      backgroundLogger.i("Background fetch triggered");
-      await initializeNotifications();
-
-      AccountDatabase accountDatabase = AccountDatabase();
-
-      if (!await isTaskWithinConstraints(accountDatabase)) {
-        backgroundLogger.w('Task not within constraints... aborting');
-        return Future.value(true);
-      }
-
-      final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
-      for (final account in accounts) {
-        final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
-        final sph = SPH(account: clearTextAccount);
-        if (!await sph.prefs.kv.get('notifications-allow')) {
-          sph.prefs.close();
-          continue;
-        }
-        bool authenticated = false;
-        for (final applet in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
-          if (applet.supportedAccountTypes.contains(clearTextAccount.accountType)
-           && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ?? true)
-          ) {
-            if (!authenticated) {
-              await sph.session.prepareDio();
-              await sph.session.authenticate(withoutData: true);
-              authenticated = true;
-            }
-            if (!sph.session.doesSupportFeature(applet, overrideAccountType: clearTextAccount.accountType)) {
-              continue;
-            }
-            await applet.notificationTask!(sph, clearTextAccount.accountType?? AccountType.student, BackgroundTaskToolkit(sph, applet.appletPhpUrl, multiAccount: accounts.length > 1));
-          }
-        }
-        if (authenticated) {
-          await sph.session.deAuthenticate();
-        }
-        sph.prefs.close();
-      }
-      accountDatabase.close();
-      backgroundLogger.i("Background fetch completed");
-      return Future.value(true);
-    } catch (e, s) {
-      backgroundLogger.f('Error in background fetch');
-      backgroundLogger.e(e, stackTrace: s);
-    }
-    return Future.value(false);
+    return await generalDispatcher();
   });
+}
+
+Future<bool> generalDispatcher() async {
+
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  try {
+    backgroundLogger.i("Background fetch triggered");
+    await initializeNotifications();
+
+    AccountDatabase accountDatabase = AccountDatabase();
+
+    if (!await isTaskWithinConstraints(accountDatabase)) {
+      backgroundLogger.w('Task not within constraints... aborting');
+      return Future.value(true);
+    }
+
+    final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
+    for (final account in accounts) {
+      final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
+      final sph = SPH(account: clearTextAccount);
+      if (!await sph.prefs.kv.get('notifications-allow')) {
+        sph.prefs.close();
+        continue;
+      }
+      bool authenticated = false;
+      for (final applet in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+        if (applet.supportedAccountTypes.contains(clearTextAccount.accountType)
+            && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ?? true)
+        ) {
+          if (!authenticated) {
+            await sph.session.prepareDio();
+            await sph.session.authenticate(withoutData: true);
+            authenticated = true;
+          }
+          if (!sph.session.doesSupportFeature(applet, overrideAccountType: clearTextAccount.accountType)) {
+            continue;
+          }
+          await applet.notificationTask!(sph, clearTextAccount.accountType?? AccountType.student, BackgroundTaskToolkit(sph, applet.appletPhpUrl, multiAccount: accounts.length > 1));
+        }
+      }
+      if (authenticated) {
+        await sph.session.deAuthenticate();
+      }
+      sph.prefs.close();
+    }
+    accountDatabase.close();
+    backgroundLogger.i("Background fetch completed");
+    return Future.value(true);
+  } catch (e, s) {
+    backgroundLogger.f('Error in background fetch');
+    backgroundLogger.e(e, stackTrace: s);
+  }
+  return Future.value(false);
 }
 
 class BackgroundTaskToolkit {
