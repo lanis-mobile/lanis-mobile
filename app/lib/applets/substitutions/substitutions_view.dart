@@ -23,8 +23,6 @@ class SubstitutionsView extends StatefulWidget {
 
 class _SubstitutionsViewState extends State<SubstitutionsView>
     with TickerProviderStateMixin {
-  static const double padding = 12.0;
-
   List<GlobalKey<RefreshIndicatorState>> globalKeys = [
     GlobalKey<RefreshIndicatorState>()
   ];
@@ -34,12 +32,12 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
   Widget lastWidget({required int entriesLength, required DateTime lastEdit}) {
     return ListTile(
       title: Center(
-        child: Text(AppLocalizations.of(context)!.noFurtherEntries,
+        child: Text(AppLocalizations.of(context).noFurtherEntries,
             style: const TextStyle(fontSize: 22)),
       ),
       subtitle: Center(
         child: Text(
-          AppLocalizations.of(context)!
+          AppLocalizations.of(context)
               .substitutionsEndCardMessage(lastEdit.format('dd.MM.yyyy HH:mm')),
           textAlign: TextAlign.center,
         ),
@@ -66,7 +64,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
             : (_) => false, // Hide refresh indicator without bloating the code
         onRefresh: refresh ?? () async {},
         child: Padding(
-          padding: EdgeInsets.only(left: padding, right: padding, top: padding),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: ListView(
             children: [
               if (_tabController != null &&
@@ -78,7 +76,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                   child: ElevatedButton(
                       onPressed: () => showSubstitutionInformation(
                           context, substitutionPlan.days[dayIndex].infos!),
-                      child: Text(AppLocalizations.of(context)!
+                      child: Text(AppLocalizations.of(context)
                           .substitutionsInformationMessage)),
                 ),
               MasonryView(
@@ -87,7 +85,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                     deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350,
                 itemPadding: 4.0,
                 itemBuilder: (data) {
-                  return SubstitutionListTile(
+                  return SubstitutionTile(
                     substitutionData: data,
                   );
                 },
@@ -227,7 +225,7 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                         const Icon(Icons.sentiment_dissatisfied, size: 60),
                         Padding(
                           padding: const EdgeInsets.all(35),
-                          child: Text(AppLocalizations.of(context)!.noEntries,
+                          child: Text(AppLocalizations.of(context).noEntries,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontSize: 22,

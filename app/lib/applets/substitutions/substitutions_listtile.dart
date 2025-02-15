@@ -5,21 +5,23 @@ import 'package:sph_plan/widgets/marquee.dart';
 
 import '../../models/substitution.dart';
 
-class AndroidDesign extends StatelessWidget {
+class DividedCard extends StatelessWidget {
   final List<Widget> children;
+  final List<Widget> noMarqueeChildren;
   final double spacing;
   final EdgeInsets padding;
   final bool forceAlignment;
 
-  const AndroidDesign(
+  const DividedCard(
       {super.key,
       required this.children,
+      this.noMarqueeChildren = const [],
       this.spacing = 2.0,
       this.padding = const EdgeInsets.all(12.0),
       this.forceAlignment = false});
 
   BorderRadius getVerticalRadius(int index) {
-    int length = children.length;
+    int length = children.length + noMarqueeChildren.length;
     if (index == 0 && length == 1) {
       return BorderRadius.circular(12.0);
     } else if (index == 0) {
@@ -41,7 +43,7 @@ class AndroidDesign extends StatelessWidget {
     if (rowIndex == 0 && length > 1) {
       return BorderRadius.only(
           topLeft: colIndex == 0 ? Radius.circular(12.0) : Radius.zero,
-          bottomLeft: colIndex == children.length - 1
+          bottomLeft: colIndex == (children.length-1) + noMarqueeChildren.length
               ? Radius.circular(12.0)
               : Radius.zero);
     } else if (rowIndex == 0) {
@@ -49,7 +51,7 @@ class AndroidDesign extends StatelessWidget {
     } else if (rowIndex == length - 1) {
       return BorderRadius.only(
         topRight: colIndex == 0 ? Radius.circular(12.0) : Radius.zero,
-        bottomRight: colIndex == children.length - 1
+        bottomRight: colIndex == (children.length-1) + noMarqueeChildren.length
             ? Radius.circular(12.0)
             : Radius.zero,
       );
@@ -87,7 +89,7 @@ class AndroidDesign extends StatelessWidget {
                     borderRadius: getHorizontalRadius(
                         index, rowIndex, row.children.length),
                     color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                        Theme.of(context).colorScheme.surfaceContainer,
                   ),
                   child: Padding(
                     padding: padding,
@@ -108,11 +110,23 @@ class AndroidDesign extends StatelessWidget {
         return Container(
           decoration: BoxDecoration(
             borderRadius: getVerticalRadius(index),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
           ),
           child: Padding(
             padding: padding,
             child: scrollItem(child),
+          ),
+        );
+      })
+      +List.generate(noMarqueeChildren.length, (index) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: getVerticalRadius(children.length+index),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+          ),
+          child: Padding(
+            padding: padding,
+            child: noMarqueeChildren[index],
           ),
         );
       }),
@@ -169,9 +183,9 @@ class AndroidDesign extends StatelessWidget {
   }
 }
 
-class SubstitutionListTile extends StatelessWidget {
+class SubstitutionTile extends StatelessWidget {
   final Substitution substitutionData;
-  const SubstitutionListTile({super.key, required this.substitutionData});
+  const SubstitutionTile({super.key, required this.substitutionData});
 
   bool doesExist(String? info) {
     List empty = [null, "", " ", "-", "---"];
@@ -218,11 +232,46 @@ class SubstitutionListTile extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: AndroidDesign(
+      padding: const EdgeInsets.symmetric(horizontal: 0.0),
+      child: DividedCard(
         spacing: 2.0,
-        padding: const EdgeInsets.all(8.0),
         forceAlignment: true,
+        noMarqueeChildren: [
+          if (doesExist(data.hinweis))
+            Row(
+              spacing: 12.0,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                ),
+                Flexible(child: Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    data.hinweis!,
+                    style: textTheme.bodyMedium
+                  ),
+                ))
+              ],
+            ),
+          if (doesExist(data.hinweis2))
+            Row(
+              spacing: 12.0,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                ),
+                Flexible(child: Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                      data.hinweis2!,
+                      style: textTheme.bodyMedium
+                  ),
+                ))
+              ],
+            ),
+        ],
         children: [
           Row(
             children: (notchChildren.length > 3)
@@ -233,34 +282,6 @@ class SubstitutionListTile extends StatelessWidget {
             Row(
               children: notchChildren.sublist(2),
             ),
-          if (doesExist(data.hinweis))
-            SizedBox(
-              child: Row(
-                spacing: 12.0,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                  ),
-                  Text(data.hinweis!, style: textTheme.titleMedium)
-                ],
-              ),
-            ),
-          if (doesExist(data.hinweis2))
-            SizedBox(
-              child: Row(
-                spacing: 12.0,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                  ),
-                  Text(
-                    data.hinweis2!,
-                    style: textTheme.titleMedium,
-                    maxLines: 10,
-                  )
-                ],
-              ),
-            )
         ],
       ),
     );
