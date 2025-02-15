@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_keychain/flutter_keychain.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../models/account_types.dart';
@@ -91,12 +92,21 @@ class AccountDatabase extends _$AccountDatabase {
 
   /// Decrypts the encrypted password using the key from secure storage.
   static Future<String> decryptPassword(String encryptedPassword) async {
-    final String? key = await secureStorage.read(key: 'encryption_key');
+    String? key = await secureStorage.read(key: 'encryption_key');
+
+    /// TODO: Temporary migration from flutter_keychain to flutter_secure_storage. Remove in future.
     if (key == null) {
-      // This prompts the user to change their password (maybe reset them completely instead?)
-      return '';
-      throw Exception('Encryption key not found');
+      key = await FlutterKeychain.get(key: 'encryption_key');
+
+      if (key != null) {
+        await secureStorage.write(key: 'encryption_key', value: key);
+        await FlutterKeychain.remove(key: 'encryption_key');
+        logger.i('Migrated encryption key from flutter_keychain to flutter_secure_storage.');
+      } else {
+        throw Exception('Encryption key not found');
+      }
     }
+
     final cryptKey = Key.fromBase64(key);
     final parts = encryptedPassword.split(':');
     if (parts.length != 2) {
