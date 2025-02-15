@@ -62,6 +62,7 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     fullPlan.removeEmptyDays();
     fullPlan.filterAll(localFilter);
 
+    // TODO: REMOVE
     fullPlan = SubstitutionPlan(days: [
       SubstitutionDay(parsedDate: '22.01.2025', substitutions: [
         Substitution(
