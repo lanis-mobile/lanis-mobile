@@ -43,7 +43,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
       Map<String, dynamic> settings) {
     List<List<TimetableSubject>>? customLessons =
         TimeTableHelper.getCustomLessons(settings);
-    if (selectedType == TimeTableType.own) {
+    if (selectedType == TimeTableType.own && data.planForOwn != null) {
       return TimeTableHelper.mergeByIndices(data.planForOwn!, customLessons);
     }
     return TimeTableHelper.mergeByIndices(data.planForAll!, customLessons);
@@ -388,23 +388,25 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     onPressed: refresh,
                     child: const Icon(Icons.refresh),
                   ),
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  heroTag: "toggle",
-                  tooltip: selectedType == TimeTableType.all
-                      ? AppLocalizations.of(context)!.timetableSwitchToPersonal
-                      : AppLocalizations.of(context)!.timetableSwitchToClass,
-                  onPressed: () {
-                    updateSettings(
-                        'student-selected-type',
-                        selectedType == TimeTableType.all
-                            ? 'TimeTableType.own'
-                            : 'TimeTableType.all');
-                  },
-                  child: Icon(selectedType == TimeTableType.all
-                      ? Icons.person
-                      : Icons.people),
-                ),
+                if(timetable.planForOwn != null) ...[
+                  const SizedBox(height: 8),
+                  FloatingActionButton(
+                    heroTag: "toggle",
+                    tooltip: selectedType == TimeTableType.all
+                        ? AppLocalizations.of(context).timetableSwitchToPersonal
+                        : AppLocalizations.of(context).timetableSwitchToClass,
+                    onPressed: () {
+                      updateSettings(
+                          'student-selected-type',
+                          selectedType == TimeTableType.all
+                              ? 'TimeTableType.own'
+                              : 'TimeTableType.all');
+                    },
+                    child: Icon(selectedType == TimeTableType.all
+                        ? Icons.person
+                        : Icons.people),
+                  ),
+                ]
               ],
             ));
       },
