@@ -20,7 +20,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
   Widget build(BuildContext context) {
     return SettingsPage(
         backgroundColor: backgroundColor,
-        title: Text(AppLocalizations.of(context)!.calendarExport),
+        title: Text(AppLocalizations.of(context).calendarExport),
         showBackButton: widget.showBackButton,
         children: [
           FutureBuilder(
