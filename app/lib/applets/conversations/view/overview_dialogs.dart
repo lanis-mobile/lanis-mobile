@@ -21,14 +21,14 @@ class _TypeChooserState extends State<TypeChooser> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.conversationType),
+          title: Text(AppLocalizations.of(context).conversationType),
         ),
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateConversation(chatType: selectedValue,)));
             },
             icon: const Icon(Icons.arrow_forward),
-            label: Text(AppLocalizations.of(context)!.select)
+            label: Text(AppLocalizations.of(context).select)
         ),
         body: ListView.builder(
           itemCount: chatTypes.length,
@@ -47,7 +47,7 @@ class _TypeChooserState extends State<TypeChooser> {
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Icon(chatTypes[index].icon),
                   ),
-                  Text(AppLocalizations.of(context)!
+                  Text(AppLocalizations.of(context)
                       .conversationTypeName(
                       chatTypes[index].name)),
                   if (chatTypes[index] == ChatType.openChat) ...[
@@ -55,7 +55,7 @@ class _TypeChooserState extends State<TypeChooser> {
                     Padding(
                       padding: const EdgeInsets.only(right: 4.0),
                       child: Text(
-                        AppLocalizations.of(context)!
+                        AppLocalizations.of(context)
                             .experimental
                             .toUpperCase(),
                         style: const TextStyle(
@@ -67,7 +67,7 @@ class _TypeChooserState extends State<TypeChooser> {
                 ],
               ),
               subtitle: Text(
-                AppLocalizations.of(context)!
+                AppLocalizations.of(context)
                     .conversationTypeDescription(
                     chatTypes[index].name),
                 textAlign: TextAlign.start,
@@ -104,7 +104,7 @@ class _CreateConversationState extends State<CreateConversation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.createNewConversation),
+        title: Text(AppLocalizations.of(context).createNewConversation),
       ),
       floatingActionButton: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -120,7 +120,7 @@ class _CreateConversationState extends State<CreateConversation> {
                 },
                 heroTag: "clearAll",
                 icon: const Icon(Icons.clear_all),
-                label: Text(AppLocalizations.of(context)!.clearAll)
+                label: Text(AppLocalizations.of(context).clearAll)
             ),
           ),
           FloatingActionButton.extended(
@@ -143,7 +143,7 @@ class _CreateConversationState extends State<CreateConversation> {
                 );
               },
               icon: const Icon(Icons.create),
-              label: Text(AppLocalizations.of(context)!.create)
+              label: Text(AppLocalizations.of(context).create)
           ),
         ],
       ),
@@ -154,7 +154,7 @@ class _CreateConversationState extends State<CreateConversation> {
             child: TextField(
               controller: subjectController,
               decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.subject,
+                hintText: AppLocalizations.of(context).subject,
               ),
               maxLines: null,
               autofocus: true,
@@ -169,9 +169,9 @@ class _CreateConversationState extends State<CreateConversation> {
                   initialItems: receivers,
                   textFieldConfiguration: TextFieldConfiguration(
                     decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!
+                      hintText: AppLocalizations.of(context)
                           .addReceiversHint,
-                      labelText: AppLocalizations.of(context)!
+                      labelText: AppLocalizations.of(context)
                           .addReceivers,
                     ),
                   ),
@@ -179,7 +179,7 @@ class _CreateConversationState extends State<CreateConversation> {
                     return SuggestionConfiguration(
                       title: Text(entry.name),
                       leading: Icon(entry.isTeacher ? Icons.school : Icons.person),
-                      subtitle: entry.isTeacher ? Text(AppLocalizations.of(context)!.teacher) : null,
+                      subtitle: entry.isTeacher ? Text(AppLocalizations.of(context).teacher) : null,
                     );
                   },
                   configureChip: (entry) {
@@ -195,7 +195,7 @@ class _CreateConversationState extends State<CreateConversation> {
                         height: 24,
                         child: CircularProgressIndicator(),
                       ),
-                      title: Text(AppLocalizations.of(context)!.loading),
+                      title: Text(AppLocalizations.of(context).loading),
                     );
 
                   },
@@ -203,13 +203,13 @@ class _CreateConversationState extends State<CreateConversation> {
                     if (connectionChecker.status == ConnectionStatus.disconnected) {
                       return ListTile(
                         leading: const Icon(Icons.wifi_off),
-                        title: Text(AppLocalizations.of(context)!.noInternetConnection2),
+                        title: Text(AppLocalizations.of(context).noInternetConnection2),
                       );
                     }
 
                     return ListTile(
                       leading: const Icon(Icons.person_off),
-                      title: Text(AppLocalizations.of(context)!.noPersonFound),
+                      title: Text(AppLocalizations.of(context).noPersonFound),
                     );
                   },
                   onAdded: (receiverEntry) {

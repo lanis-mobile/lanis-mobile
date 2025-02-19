@@ -110,54 +110,56 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
 
   final List<AboutLink> links = [
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.githubRepository,
+      title: (context) => AppLocalizations.of(context).githubRepository,
       iconData: Icons.code_outlined,
       onTap: (context) =>
           launchUrl(Uri.parse("https://github.com/alessioC42/lanis-mobile")),
     ),
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.discordServer,
+      title: (context) => AppLocalizations.of(context).discordServer,
       iconData: Icons.discord,
       onTap: (context) => launchUrl(Uri.parse("https://discord.gg/sWJXZ8FsU7")),
     ),
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.featureRequest,
+      title: (context) => AppLocalizations.of(context).featureRequest,
       iconData: Icons.add_comment_outlined,
       onTap: (context) => launchUrl(Uri.parse(
           "https://github.com/alessioC42/lanis-mobile/issues/new/choose")),
     ),
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.latestRelease,
+      title: (context) => AppLocalizations.of(context).latestRelease,
       iconData: Icons.update_outlined,
       onTap: (context) => launchUrl(Uri.parse(
           "https://github.com/alessioC42/lanis-mobile/releases/latest")),
     ),
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.privacyPolicy,
+      title: (context) => AppLocalizations.of(context).privacyPolicy,
       iconData: Icons.security_outlined,
       onTap: (context) => launchUrl(Uri.parse(
           "https://github.com/alessioC42/lanis-mobile/blob/main/SECURITY.md")),
     ),
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.openSourceLicenses,
+      title: (context) => AppLocalizations.of(context).openSourceLicenses,
       iconData: Icons.info_outline_rounded,
       onTap: (context) async => showLicensePage(context: context),
     ),
     AboutLink(
-      title: (context) => AppLocalizations.of(context)!.buildInformation,
+      title: (context) => AppLocalizations.of(context).buildInformation,
       iconData: Icons.build_outlined,
       onTap: (context) async {
         final packageInfo = await PackageInfo.fromPlatform();
 
-        showDialog(
+        if(context.mounted) {
+          showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text(AppLocalizations.of(context)!.appInformation),
+                title: Text(AppLocalizations.of(context).appInformation),
                 content: Text(
                     "appName: ${packageInfo.appName}\npackageName: ${packageInfo.packageName}\nversion: ${packageInfo.version}\nbuildNumber: ${packageInfo.buildNumber}\nisDebug: $kDebugMode\nisProfile: $kProfileMode\nisRelease: $kReleaseMode\n"),
               );
             });
+        }
       },
     ),
   ];
@@ -173,7 +175,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
   Widget build(BuildContext context) {
     return SettingsPageWithRefreshIndicator(
         backgroundColor: backgroundColor,
-        title: Text(AppLocalizations.of(context)!.about),
+        title: Text(AppLocalizations.of(context).about),
         onRefresh: () {
           return getContributors();
         },
@@ -191,7 +193,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                     spacing: 16.0,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.contributors,
+                        AppLocalizations.of(context).contributors,
                         style: Theme.of(context).textTheme.labelLarge!.copyWith(
                             color: Theme.of(context).colorScheme.primary),
                       ),
@@ -320,7 +322,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              AppLocalizations.of(context)!.moreInformation,
+              AppLocalizations.of(context).moreInformation,
               style: Theme.of(context)
                   .textTheme
                   .labelLarge!
@@ -354,7 +356,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                       height: 8.0,
                     ),
                     Text(
-                      AppLocalizations.of(context)!.settingsErrorAbout,
+                      AppLocalizations.of(context).settingsErrorAbout,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color:
                               Theme.of(context).colorScheme.onSurfaceVariant),

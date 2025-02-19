@@ -103,7 +103,7 @@ class _NotificationSettingsState
     return SettingsPageWithStreamBuilder(
         backgroundColor: backgroundColor,
         title: Text(
-          AppLocalizations.of(context)!.notifications,
+          AppLocalizations.of(context).notifications,
         ),
         subscription: sph!.prefs.kv.subscribeMultiple(getDatabaseKeys()),
         builder: (context, snapshot) {
@@ -123,9 +123,9 @@ class _NotificationSettingsState
               Callout(
                 leading: Icon(Icons.error_rounded),
                 title: Text(
-                  AppLocalizations.of(context)!.deniedNotificationPermissions,
+                  AppLocalizations.of(context).deniedNotificationPermissions,
                 ),
-                buttonText: Text(AppLocalizations.of(context)!.openSystemSettings),
+                buttonText: Text(AppLocalizations.of(context).openSystemSettings),
                 onPressed: () {
                   AppSettings.openAppSettings(
                       type: AppSettingsType.notification);
@@ -157,7 +157,7 @@ class _NotificationSettingsState
                         horizontal: 20.0, vertical: 8.0),
                     child: MinimalSwitchTile(
                       title: Text(
-                        AppLocalizations.of(context)!.useNotifications,
+                        AppLocalizations.of(context).useNotifications,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                               color: notificationsPermissionAllowed
                                   ? Theme.of(context)
@@ -170,7 +170,7 @@ class _NotificationSettingsState
                       ),
                       subtitle: widget.accountCount > 1
                           ? Text(
-                          AppLocalizations.of(context)!.forThisAccount,
+                          AppLocalizations.of(context).forThisAccount,
                             )
                           : null,
                       value: notificationsEnabled,
@@ -230,7 +230,7 @@ class _NotificationSettingsState
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, top: 12.0),
                 child: Text(
-                  "${AppLocalizations.of(context)!.backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context)!.forEveryAccount})' : ""}",
+                  "${AppLocalizations.of(context).backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context).forEveryAccount})' : ""}",
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
                     color: activateBackgroundServices
                       ? Theme.of(context).colorScheme.primary
@@ -281,7 +281,7 @@ class _NotificationSettingsState
                   title: Row(
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.timePeriod,
+                        AppLocalizations.of(context).timePeriod,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: activateBackgroundServices
                               ? Theme.of(context).colorScheme.onSurface
@@ -340,7 +340,7 @@ class _NotificationSettingsState
                     title: Row(
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.updateInterval,
+                          AppLocalizations.of(context).updateInterval,
                           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                             color: activateBackgroundServices
                                 ? Theme.of(context).colorScheme.onSurface
@@ -409,7 +409,7 @@ class _NotificationSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                AppLocalizations.of(context)!.settingsInfoNotifications,
+                AppLocalizations.of(context).settingsInfoNotifications,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -424,14 +424,14 @@ class _NotificationSettingsState
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: AppLocalizations.of(context)!.otherSettingsAvailablePart1,
+                      text: AppLocalizations.of(context).otherSettingsAvailablePart1,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     TextSpan(
-                      text: AppLocalizations.of(context)!.systemSettings,
+                      text: AppLocalizations.of(context).systemSettings,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             decoration: TextDecoration.underline,
@@ -443,7 +443,7 @@ class _NotificationSettingsState
                         },
                     ),
                     TextSpan(
-                      text: AppLocalizations.of(context)!.otherSettingsAvailablePart2,
+                      text: AppLocalizations.of(context).otherSettingsAvailablePart2,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,

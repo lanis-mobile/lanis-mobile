@@ -18,7 +18,7 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: LargeAppBar(
-        title: Text(AppLocalizations.of(context)!.resetAccount),
+        title: Text(AppLocalizations.of(context).resetAccount),
       ),
       body: ListView(
         children: [
@@ -62,8 +62,8 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
           ),
           ListTile(
             leading: Icon(Icons.info),
-            title: Text(AppLocalizations.of(context)!.wrongPassword),
-            subtitle: Text(AppLocalizations.of(context)!.wrongPasswordHint),
+            title: Text(AppLocalizations.of(context).wrongPassword),
+            subtitle: Text(AppLocalizations.of(context).wrongPasswordHint),
           ),
           Padding(
             padding: EdgeInsets.all(12.0),
@@ -77,7 +77,7 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
                     final String? newPassword = await showDialog<String>(
                       context: context,
                       builder: (context) => SimpleDialog(
-                        title: Text(AppLocalizations.of(context)!.changePassword),
+                        title: Text(AppLocalizations.of(context).changePassword),
                         children: [
                           Padding(
                             padding: EdgeInsets.all(8.0),
@@ -87,12 +87,12 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
                               autocorrect: false,
                               obscureText: true,
                               decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!.authPasswordHint,
+                                labelText: AppLocalizations.of(context).authPasswordHint,
                               ),
                               autovalidateMode: AutovalidateMode.always,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)!.authValidationError;
+                                  return AppLocalizations.of(context).authValidationError;
                                 }
                                 return null;
                               },
@@ -105,7 +105,7 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
                                 if (controller.text.isEmpty) return;
                                 Navigator.of(context).pop(controller.text);
                               },
-                              child: Text(AppLocalizations.of(context)!.changePassword),
+                              child: Text(AppLocalizations.of(context).changePassword),
                             ),
                           )
                         ],
@@ -113,22 +113,22 @@ class _ResetAccountPageState extends State<ResetAccountPage> {
                     );
                     if (newPassword == null) return;
                     await accountDatabase.updatePassword(sph!.account.localId, newPassword);
-                    if (mounted) {
+                    if (context.mounted) {
                       authenticationState.reset(context);
                     }
                   },
                   icon: Icon(Icons.password),
-                  label: Text(AppLocalizations.of(context)!.changePassword),
+                  label: Text(AppLocalizations.of(context).changePassword),
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
                     await accountDatabase.deleteAccount(sph!.account.localId);
-                    if (mounted) {
+                    if (context.mounted) {
                       authenticationState.reset(context);
                     }
                   },
                   icon: Icon(Icons.no_accounts),
-                  label: Text(AppLocalizations.of(context)!.removeAccount),
+                  label: Text(AppLocalizations.of(context).removeAccount),
                 ),
               ],
             ),

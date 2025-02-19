@@ -42,15 +42,19 @@ class _CourseFolderHistoryEntryFileChipState extends State<CourseFolderHistoryEn
     final String responseString = response.data.toString();
     if (responseString == '"1"') {
       widget.onVisibilityChanged(!widget.file.isVisibleForStudents);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Sichtbarkeit erfolgreich geändert'),
         backgroundColor: Colors.green,
       ));
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Fehler beim Ändern der Sichtbarkeit'),
         backgroundColor: Colors.red,
       ));
+      }
     }
   }
 
@@ -102,15 +106,19 @@ class _CourseFolderHistoryEntryFileChipState extends State<CourseFolderHistoryEn
     final String responseString = response.data.toString();
     if (responseString == '"1"') {
       widget.onFileDeleted();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Datei erfolgreich gelöscht'),
         backgroundColor: Colors.green,
       ));
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Fehler beim Löschen der Datei'),
         backgroundColor: Colors.red,
       ));
+      }
     }
   }
 
@@ -187,7 +195,7 @@ class _CourseFolderHistoryEntryFileChipState extends State<CourseFolderHistoryEn
         if (result != null) {
           switch (result) {
             case 'open':
-              showFileModal(context, FileInfo(name: widget.file.name, url: widget.file.url));
+              if(context.mounted) showFileModal(context, FileInfo(name: widget.file.name, url: widget.file.url));
               break;
             case 'visibility':
               changeRemoteVisibility();

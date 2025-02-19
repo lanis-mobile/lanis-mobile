@@ -328,8 +328,11 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
                       abgabeBisTime: _selectedDocumentSubmissionTime,
                       abgabeSichtbar: _everySubmissionVisibleForStudents,
                     );
-                    Navigator.of(context).pop(); // Close loading dialog
-                    Navigator.of(context).pop(result); // Close this screen and return result
+                    if(context.mounted) {
+                      Navigator.of(context).pop(); // Close loading dialog
+                      Navigator.of(context)
+                          .pop(result); // Close this screen and return result
+                    }
                   }
                 },
               ),
@@ -342,6 +345,7 @@ class _CourseCreateNewEntryState extends State<CourseCreateNewEntry> {
   }
 }
 
+// ignore: non_constant_identifier_names
 String HHmm(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }

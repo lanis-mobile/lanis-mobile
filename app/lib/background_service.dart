@@ -12,7 +12,9 @@ import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'core/database/account_database/account_db.dart' show AccountDatabase, ClearTextAccount;
+import 'applets/definitions.dart';
+import 'core/database/account_database/account_db.dart'
+    show AccountDatabase, ClearTextAccount;
 import 'core/sph/sph.dart' show SPH;
 
 const identifier = "io.github.alessioc42.pushservice";
@@ -24,43 +26,48 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
 
   if ((await Permission.notification.isDenied)) {
     logger.d("User disallowed notifications");
-    if(Platform.isAndroid) await Workmanager().cancelAll();
+    await FlutterBackgroundExecutor().cancelAllTasks();
     return;
   }
 
-  final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
+  final accounts =
+      await (accountDatabase.select(accountDatabase.accountsTable)).get();
   int disabledCount = 0;
   for (final account in accounts) {
-    final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
+    final ClearTextAccount clearTextAccount =
+        await AccountDatabase.getAccountFromTableData(account);
     final sph = SPH(account: clearTextAccount);
     if (!await sph.prefs.kv.get('notifications-allow')) {
       disabledCount++;
     }
   }
   if (disabledCount == accounts.length) {
-    logger.d("User disallowed notifications");
-    if(Platform.isAndroid) await Workmanager().cancelAll();
+    await FlutterBackgroundExecutor().cancelAllTasks();
     return;
   }
 
-  if (Platform.isAndroid) {
-    await Workmanager().initialize(callbackDispatcher,
-        isInDebugMode: kDebugMode);
-    final workManagerConstraints = Constraints(
-      networkType: NetworkType.connected,
-      requiresBatteryNotLow: true,
-      requiresCharging: false,
-      requiresDeviceIdle: false,
-      requiresStorageNotLow: false,
-    );
 
-    final int min = await accountDatabase.kv.get('notifications-android-target-interval-minutes');
-    await Workmanager().registerPeriodicTask(identifier, identifier,
-      frequency: Duration(minutes: min),
-      constraints: workManagerConstraints,
-      initialDelay: const Duration(minutes: 0),
-      existingWorkPolicy: ExistingWorkPolicy.replace,
+  if (Platform.isAndroid) {
+    final int min = await accountDatabase.kv
+        .get('notifications-android-target-interval-minutes');
+    logger.i('Setting up background task with interval of $min minutes');
+    await FlutterBackgroundExecutor().createRefreshTask(
+      callback: callbackDispatcher,
+      settings: RefreshTaskSettings(
+        androidDetails: AndroidRefreshTaskDetails(
+          requiresBatteryNotLow: true,
+          requiresCharging: false,
+          requiresDeviceIdle: false,
+          requiresStorageNotLow: false,
+          initialDelay: Duration.zero,
+          repeatInterval: Duration(minutes: min),
+        ),
+        // iosDetails: IosRefreshTaskDetails(taskIdentifier: 'com.dsr_corporation.refresh-task'),
+      ),
     );
+    // To fetch everything immediately
+    await FlutterBackgroundExecutor()
+        .runImmediatelyBackgroundTask(callback: callbackDispatcher);
   }
 
   if (Platform.isIOS) {
@@ -69,7 +76,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
           minimumFetchInterval: 15
       ), (String taskId) async {
         try {
-          await generalDispatcher();
+          await callbackDispatcher();
         } finally {
           bgf.BackgroundFetch.finish(taskId);
         }
@@ -89,29 +96,22 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
 
 Future<void> initializeNotifications() async {
   try {
-  FlutterLocalNotificationsPlugin().initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@drawable/ic_launcher'),
-      iOS: DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true
+    FlutterLocalNotificationsPlugin().initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@drawable/ic_launcher'),
+        iOS: DarwinInitializationSettings(
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true),
       ),
-    ),
-  );} catch (e, s) {
+    );
+  } catch (e, s) {
     backgroundLogger.e(e, stackTrace: s);
   }
 }
 
 @pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    return await generalDispatcher();
-  });
-}
-
-Future<bool> generalDispatcher() async {
-
+Future<void> callbackDispatcher() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   try {
     backgroundLogger.i("Background fetch triggered");
@@ -121,31 +121,40 @@ Future<bool> generalDispatcher() async {
 
     if (!await isTaskWithinConstraints(accountDatabase)) {
       backgroundLogger.w('Task not within constraints... aborting');
-      return Future.value(true);
+      return;
     }
 
-    final accounts = await (accountDatabase.select(accountDatabase.accountsTable)).get();
+    final accounts =
+    await (accountDatabase.select(accountDatabase.accountsTable)).get();
     for (final account in accounts) {
-      final ClearTextAccount clearTextAccount = await AccountDatabase.getAccountFromTableData(account);
+      final ClearTextAccount clearTextAccount =
+      await AccountDatabase.getAccountFromTableData(account);
       final sph = SPH(account: clearTextAccount);
       if (!await sph.prefs.kv.get('notifications-allow')) {
         sph.prefs.close();
         continue;
       }
       bool authenticated = false;
-      for (final applet in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
-        if (applet.supportedAccountTypes.contains(clearTextAccount.accountType)
-            && (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ?? true)
-        ) {
+      for (final applet
+      in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+        if (applet.supportedAccountTypes
+            .contains(clearTextAccount.accountType) &&
+            (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ??
+                true)) {
           if (!authenticated) {
             await sph.session.prepareDio();
             await sph.session.authenticate(withoutData: true);
             authenticated = true;
           }
-          if (!sph.session.doesSupportFeature(applet, overrideAccountType: clearTextAccount.accountType)) {
+          if (!sph.session.doesSupportFeature(applet,
+              overrideAccountType: clearTextAccount.accountType)) {
             continue;
           }
-          await applet.notificationTask!(sph, clearTextAccount.accountType?? AccountType.student, BackgroundTaskToolkit(sph, applet.appletPhpUrl, multiAccount: accounts.length > 1));
+          await applet.notificationTask!(
+              sph,
+              clearTextAccount.accountType ?? AccountType.student,
+              BackgroundTaskToolkit(sph, applet.appletPhpUrl,
+                  multiAccount: accounts.length > 1));
         }
       }
       if (authenticated) {
@@ -155,12 +164,12 @@ Future<bool> generalDispatcher() async {
     }
     accountDatabase.close();
     backgroundLogger.i("Background fetch completed");
-    return Future.value(true);
+    return;
   } catch (e, s) {
     backgroundLogger.f('Error in background fetch');
     backgroundLogger.e(e, stackTrace: s);
   }
-  return Future.value(false);
+  return;
 }
 
 class BackgroundTaskToolkit {
@@ -180,15 +189,24 @@ class BackgroundTaskToolkit {
   /// [message] is the message of the notification
   /// [id] is the id of the notification, must be between 0 and 10000
   /// [avoidDuplicateSending] if true, the message will not be sent if the same message was sent before
-  Future<void> sendMessage({required String title,required String message, int id = 0, bool avoidDuplicateSending = false, Importance importance = Importance.high, Priority priority = Priority.high}) async {
+  Future<void> sendMessage(
+      {required String title,
+      required String message,
+      int id = 0,
+      bool avoidDuplicateSending = false,
+      Importance importance = Importance.high,
+      Priority priority = Priority.high}) async {
     if (id > 10000 || id < 0) {
       throw ArgumentError('id must be between 0 and 10000');
     }
     id = _seedId(id);
-    message = multiAccount ? '${_sph.account.username.toLowerCase()}@${_sph.account.schoolName}\n$message' : message;
+    message = multiAccount
+        ? '${_sph.account.username.toLowerCase()}@${_sph.account.schoolName}\n$message'
+        : message;
     if (avoidDuplicateSending) {
       final hash = hashString(message);
-      final lastMessage = await _sph.prefs.getNotificationDuplicates(id, appletId);
+      final lastMessage =
+          await _sph.prefs.getNotificationDuplicates(id, appletId);
       if (lastMessage?.hash == hash) {
         return;
       }
@@ -197,7 +215,8 @@ class BackgroundTaskToolkit {
     }
     try {
       final androidDetails = AndroidNotificationDetails(
-        'io.github.alessioc42.sphplan', 'lanis-mobile',
+        'io.github.alessioc42.sphplan',
+        'lanis-mobile',
         channelDescription: "Applet notifications",
         importance: Importance.high,
         priority: Priority.high,
@@ -205,12 +224,14 @@ class BackgroundTaskToolkit {
         ongoing: false,
       );
       const iOSDetails = DarwinNotificationDetails(
-        presentAlert: false, presentBadge: true,
+        presentAlert: false,
+        presentBadge: true,
       );
-      var platformDetails = NotificationDetails(android: androidDetails, iOS: iOSDetails);
+      var platformDetails =
+          NotificationDetails(android: androidDetails, iOS: iOSDetails);
       await FlutterLocalNotificationsPlugin()
           .show(id, title, message, platformDetails);
-    } catch (e,s) {
+    } catch (e, s) {
       backgroundLogger.e(e, stackTrace: s);
     }
   }
@@ -223,14 +244,18 @@ class BackgroundTaskToolkit {
 }
 
 Future<bool> isTaskWithinConstraints(AccountDatabase accountDB) async {
-  final globalSettings =
-      await accountDB.kv.getMultiple(
-      ['notifications-android-allowed-days',
-        'notifications-android-start-time',
-        'notifications-android-end-time']);
+  final globalSettings = await accountDB.kv.getMultiple([
+    'notifications-android-allowed-days',
+    'notifications-android-start-time',
+    'notifications-android-end-time'
+  ]);
   TimeOfDay currentTime = TimeOfDay.now();
-  TimeOfDay startTime = TimeOfDay(hour: globalSettings['notifications-android-start-time'][0], minute: globalSettings['notifications-android-start-time'][1]);
-  TimeOfDay endTime = TimeOfDay(hour: globalSettings['notifications-android-end-time'][0], minute: globalSettings['notifications-android-end-time'][1]);
+  TimeOfDay startTime = TimeOfDay(
+      hour: globalSettings['notifications-android-start-time'][0],
+      minute: globalSettings['notifications-android-start-time'][1]);
+  TimeOfDay endTime = TimeOfDay(
+      hour: globalSettings['notifications-android-end-time'][0],
+      minute: globalSettings['notifications-android-end-time'][1]);
   if (currentTime.hour < startTime.hour || currentTime.hour > endTime.hour) {
     return false;
   }
