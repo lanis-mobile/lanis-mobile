@@ -305,9 +305,11 @@ Future<String?> mergeImagesIntoPDF(List<String> paths, BuildContext context) asy
           return pw.Center(
             child: pw.Image(
               pw.MemoryImage(bytes)
-            )
+            ),
+            widthFactor: double.infinity,
           );
-        }
+        },
+        margin: pw.EdgeInsets.zero,
       )
     );
   }
