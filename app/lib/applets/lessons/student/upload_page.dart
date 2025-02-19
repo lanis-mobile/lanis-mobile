@@ -188,17 +188,21 @@ class _UploadScreenState extends State<UploadScreen> {
                                       file5: _multipartFiles.elementAtOrNull(4),
                                     );
                                   } on LanisException catch (ex) {
-                                    ScaffoldMessenger.of(context)
-                                        .hideCurrentSnackBar();
-                                    Navigator.of(context).push(
-                                        MaterialPageRoute(builder: (context) {
-                                      return Scaffold(
-                                        appBar: AppBar(),
-                                        body: ErrorView(
+                                    if(context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .hideCurrentSnackBar();
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (context) {
+                                        return Scaffold(
+                                          appBar: AppBar(),
+                                          body: ErrorView(
                                             error: ex,
-                                        ),
-                                      );
-                                    }));
+                                          ),
+                                        );
+                                      }));
+                                    } else {
+                                      rethrow;
+                                    }
                                     return;
                                   }
 
@@ -551,25 +555,28 @@ class _UploadScreenState extends State<UploadScreen> {
                                             snapshot.data["public_files"][index]
                                                 .name)
                                         .then((filepath) {
-                                      Navigator.of(context).pop();
+                                      if(context.mounted) {
+                                        Navigator.of(context).pop();
 
-                                      if (filepath == "") {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  title: const Text("Fehler!"),
-                                                  content: Text(
-                                                      "Beim Download der Datei ${snapshot.data["public_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
-                                                  actions: [
-                                                    TextButton(
-                                                      child: const Text('OK'),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                  ],
-                                                ));
+                                        if (filepath == "") {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                    title:
+                                                        const Text("Fehler!"),
+                                                    content: Text(
+                                                        "Beim Download der Datei ${snapshot.data["public_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('OK'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ));
+                                        }
                                       } else {
                                         OpenFile.open(filepath);
                                       }
@@ -677,20 +684,24 @@ class _UploadScreenState extends State<UploadScreen> {
                                                                     .text),
                                                       );
                                                     } on LanisException catch (ex) {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .hideCurrentSnackBar();
-                                                      Navigator.of(context).push(
-                                                          MaterialPageRoute(
-                                                              builder:
-                                                                  (context) {
-                                                        return Scaffold(
-                                                          appBar: AppBar(),
-                                                          body: ErrorView(
-                                                              error: ex,
-                                                          ),
-                                                        );
-                                                      }));
+                                                      if(context.mounted) {
+                                                        ScaffoldMessenger.of(
+                                                            context)
+                                                            .hideCurrentSnackBar();
+                                                        Navigator.of(context).push(
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (context) {
+                                                                  return Scaffold(
+                                                                    appBar: AppBar(),
+                                                                    body: ErrorView(
+                                                                      error: ex,
+                                                                    ),
+                                                                  );
+                                                                }));
+                                                      } else {
+                                                        rethrow;
+                                                      }
                                                       return;
                                                     }
 
@@ -759,25 +770,28 @@ class _UploadScreenState extends State<UploadScreen> {
                                             snapshot
                                                 .data["own_files"][index].name)
                                         .then((filepath) {
-                                      Navigator.of(context).pop();
+                                      if(context.mounted) {
+                                        Navigator.of(context).pop();
 
-                                      if (filepath == "") {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  title: const Text("Fehler!"),
-                                                  content: Text(
-                                                      "Beim Download der Datei ${snapshot.data["own_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
-                                                  actions: [
-                                                    TextButton(
-                                                      child: const Text('OK'),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                  ],
-                                                ));
+                                        if (filepath == "") {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                    title:
+                                                        const Text("Fehler!"),
+                                                    content: Text(
+                                                        "Beim Download der Datei ${snapshot.data["own_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                                    actions: [
+                                                      TextButton(
+                                                        child: const Text('OK'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ));
+                                        }
                                       } else {
                                         OpenFile.open(filepath);
                                       }

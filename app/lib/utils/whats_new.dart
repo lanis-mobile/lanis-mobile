@@ -71,14 +71,14 @@ void showUpdateInfoIfRequired(BuildContext context) async {
 
   if (storageReleaseTag != deviceReleaseTag) {
     await sph!.prefs.kv.set('last-app-version', deviceReleaseTag);
-    if (latestReleaseTag == deviceReleaseTag) {
+    if (latestReleaseTag == deviceReleaseTag && context.mounted) {
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(latestReleaseInfo),
       );
     } else {
       final deviceReleaseInfo = await getReleaseInfo(deviceReleaseTag);
-      if (deviceReleaseInfo == null) return;
+      if (deviceReleaseInfo == null || !context.mounted) return;
       await showDialog(
         context: context,
         builder: (context) => ReleaseNotesScreen(deviceReleaseInfo),
@@ -86,7 +86,7 @@ void showUpdateInfoIfRequired(BuildContext context) async {
     }
   }
 
-  if (compareVersions(latestReleaseTag, deviceReleaseTag) > 0) {
+  if (compareVersions(latestReleaseTag, deviceReleaseTag) > 0 && context.mounted) {
     await showDialog(
       context: context,
       builder: (context) => NewUpdateAvailableDialog(
@@ -160,7 +160,7 @@ class ReleaseNotesScreen extends StatelessWidget {
         children: [
           Expanded(
             child: Markdown(
-              data: releaseInfo['body'] ?? AppLocalizations.of(context)!.error,
+              data: releaseInfo['body'] ?? AppLocalizations.of(context).error,
               padding: const EdgeInsets.all(16),
               onTapLink: (text, href, title) {
                 launchUrl(Uri.parse(href!));
@@ -172,8 +172,7 @@ class ReleaseNotesScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(AppLocalizations.of(context)!.contributors,
-                      style: Theme.of(context).textTheme.labelLarge),
+                  child: Text(AppLocalizations.of(context).contributors, style: Theme.of(context).textTheme.labelLarge),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
@@ -205,8 +204,7 @@ class ReleaseNotesScreen extends StatelessWidget {
               ],
             ),
           ),
-          Text(AppLocalizations.of(context)!.becomeContributor,
-              style: Theme.of(context).textTheme.labelMedium),
+          Text(AppLocalizations.of(context).becomeContributor, style: Theme.of(context).textTheme.labelMedium),
           const SizedBox(height: 32),
         ],
       ),
@@ -234,11 +232,8 @@ class NewUpdateAvailableDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      icon: const Icon(
-        Icons.update,
-        size: 56,
-      ),
-      title: Text(AppLocalizations.of(context)!.updateAvailable),
+      icon: const Icon(Icons.update, size: 56,),
+      title: Text(AppLocalizations.of(context).updateAvailable),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -255,7 +250,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          child: Text(AppLocalizations.of(context)!.info),
+          child: Text(AppLocalizations.of(context).info),
           onPressed: () => showDialog(
             context: context,
             builder: (context) => ReleaseNotesScreen(releaseInfo),
@@ -266,7 +261,7 @@ class NewUpdateAvailableDialog extends StatelessWidget {
             Navigator.of(context).pop();
             launchStore();
           },
-          child: Text(AppLocalizations.of(context)!.install),
+          child: Text(AppLocalizations.of(context).install),
         ),
       ],
     );

@@ -12,7 +12,7 @@ final conversationsDefinition = AppletDefinition(
   appletType: AppletType.nested,
   icon: const Icon(Icons.forum),
   selectedIcon: const Icon(Icons.forum_outlined),
-  label: (context) => AppLocalizations.of(context)!.messages,
+  label: (context) => AppLocalizations.of(context).messages,
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
   settingsDefaults: {},

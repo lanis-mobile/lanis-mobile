@@ -321,7 +321,8 @@ class _CalendarViewState extends State<CalendarView> {
     try {
       var singleEvent = await fetchEvent(calendarData.id);
       if (singleEvent == null) return;
-      await showModalBottomSheet(
+      if(mounted) {
+        await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           useSafeArea: true,
@@ -329,6 +330,7 @@ class _CalendarViewState extends State<CalendarView> {
           builder: (context) {
             return eventBottomSheet(calendarData, singleEvent);
           });
+      }
     } on NoConnectionException {
       if (mounted) {
         return;
@@ -399,8 +401,8 @@ class _CalendarViewState extends State<CalendarView> {
                 onSubmitted: (_) {
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
-                suggestionsBuilder: (context, _searchController) {
-                  final results = fuzzySearchEventList(_searchController.text);
+                suggestionsBuilder: (context, searchController) {
+                  final results = fuzzySearchEventList(searchController.text);
 
                   return results
                       .map(

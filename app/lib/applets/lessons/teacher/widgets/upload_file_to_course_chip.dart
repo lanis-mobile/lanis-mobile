@@ -26,7 +26,8 @@ class UploadFileToCourseChip extends StatelessWidget {
     ValueNotifier<double> progressNotifier = ValueNotifier<double>(0.0);
     ValueNotifier<String> fileNameNotifier = ValueNotifier<String>('');
 
-    showDialog(
+    if(context.mounted) {
+      showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -52,6 +53,7 @@ class UploadFileToCourseChip extends StatelessWidget {
         );
       },
     );
+    }
 
     List<MultipartFile> multiPartFiles = [];
     for (PlatformFile file in pickerResult.files) {
@@ -100,12 +102,16 @@ class UploadFileToCourseChip extends StatelessWidget {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if(context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Unbekannter Fehler beim Hochladen'),
         backgroundColor: Colors.red,
       ));
+      } else {
+        rethrow;
+      }
     } finally {
-      Navigator.of(context).pop();
+      if(context.mounted) Navigator.of(context).pop();
     }
 
     if (onFileUploaded != null) {

@@ -237,7 +237,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                     showWebView = false;
                   });
 
-                  Navigator.pop(context);
+                  if(context.mounted) Navigator.pop(context);
                 }
               },
               child: Visibility(
@@ -377,7 +377,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                       height: 24,
                     ),
                     Text(
-                      AppLocalizations.of(context)!.logInTitle,
+                      AppLocalizations.of(context).logInTitle,
                       style: Theme.of(context).textTheme.labelLarge,
                     )
                   ],
@@ -397,7 +397,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         height: 16,
                       ),
                       Text(
-                        AppLocalizations.of(context)!.noInternetConnection2,
+                        AppLocalizations.of(context).noInternetConnection2,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ] else ...[
@@ -409,7 +409,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         height: 16,
                       ),
                       Text(
-                        AppLocalizations.of(context)!.errorOccurred,
+                        AppLocalizations.of(context).errorOccurred,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       SizedBox(
@@ -431,7 +431,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                         onPressed: () async {
                           await getCookies();
                         },
-                        child: Text(AppLocalizations.of(context)!.tryAgain)),
+                        child: Text(AppLocalizations.of(context).tryAgain)),
                   ],
                 ),
               )
@@ -451,8 +451,8 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: Text(
                         error == noInternetError
-                            ? AppLocalizations.of(context)!.noInternetConnection2
-                            : AppLocalizations.of(context)!.errorOccurredWebsite,
+                            ? AppLocalizations.of(context).noInternetConnection2
+                            : AppLocalizations.of(context).errorOccurredWebsite,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -472,7 +472,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 4.0, horizontal: 8.0),
                                 child: Text(
-                                  AppLocalizations.of(context)!.error,
+                                  AppLocalizations.of(context).error,
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelLarge!

@@ -42,7 +42,7 @@ class _AppearanceSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                AppLocalizations.of(context)!.theme,
+                AppLocalizations.of(context).theme,
                 style: Theme.of(context)
                     .textTheme
                     .labelLarge!
@@ -62,15 +62,15 @@ class _AppearanceSettingsState
                   color: foregroundColor,
                   pills: [
                     RadioPillGroupItem.vertical(
-                        title: Text(AppLocalizations.of(context)!.system),
+                        title: Text(AppLocalizations.of(context).system),
                         leading: Icon(Icons.phone_android_rounded),
                         value: "system"),
                     RadioPillGroupItem.vertical(
-                        title: Text(AppLocalizations.of(context)!.light),
+                        title: Text(AppLocalizations.of(context).light),
                         leading: Icon(Icons.light_mode_rounded),
                         value: "light"),
                     RadioPillGroupItem.vertical(
-                        title: Text(AppLocalizations.of(context)!.dark),
+                        title: Text(AppLocalizations.of(context).dark),
                         leading: Icon(Icons.dark_mode_rounded),
                         value: "dark"),
                   ],
@@ -84,7 +84,7 @@ class _AppearanceSettingsState
                   ),
                   MinimalSwitchTile(
                       title: Text(
-                        AppLocalizations.of(context)!.amoledMode,
+                        AppLocalizations.of(context).amoledMode,
                       ),
                       leading: Icon(Icons.contrast_rounded),
                       contentPadding:
@@ -103,7 +103,7 @@ class _AppearanceSettingsState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                AppLocalizations.of(context)!.accentColor,
+                AppLocalizations.of(context).accentColor,
                 style: Theme.of(context)
                     .textTheme
                     .labelLarge!
@@ -123,7 +123,7 @@ class _AppearanceSettingsState
                   color: foregroundColor,
                   pills: [
                     RadioPillGroupItem.horizontal(
-                        title: Text(AppLocalizations.of(context)!.standard),
+                        title: Text(AppLocalizations.of(context).standard),
                         value: "standard",
                         trailing: TrailingCircle(
                           color: Themes.standardTheme.lightTheme!.colorScheme
@@ -136,7 +136,7 @@ class _AppearanceSettingsState
                     if (dynamicTheme != null)
                       RadioPillGroupItem.horizontal(
                           title:
-                              Text(AppLocalizations.of(context)!.dynamicColor),
+                              Text(AppLocalizations.of(context).dynamicColor),
                           value: "dynamic",
                           trailing: TrailingCircle.custom(
                             selectedBackgroundColor:
@@ -232,9 +232,9 @@ class _AppearanceSettingsState
                     ),
                     Text(
                       dynamicTheme == null
-                          ? AppLocalizations.of(context)!
+                          ? AppLocalizations.of(context)
                           .settingsUnsupportedInfoAppearance
-                      : AppLocalizations.of(context)!
+                      : AppLocalizations.of(context)
                           .settingsInfoDynamicColor,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color:

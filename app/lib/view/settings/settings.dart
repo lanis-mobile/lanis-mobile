@@ -58,9 +58,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   final List<SettingsGroup> settingsTiles = [
     SettingsGroup(tiles: [
       SettingsTile(
-          title: (context) => AppLocalizations.of(context)!.appearance,
+          title: (context) => AppLocalizations.of(context).appearance,
           subtitle: (context) async {
-            return AppLocalizations.of(context)!.darkModeColoursList;
+            return AppLocalizations.of(context).darkModeColoursList;
           },
           icon: Icons.palette_rounded,
           screen: (context) => Navigator.push(
@@ -68,7 +68,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => AppearanceSettings()),
               )),
       SettingsTile(
-        title: (context) => AppLocalizations.of(context)!.language,
+        title: (context) => AppLocalizations.of(context).language,
         subtitle: (context) async {
           String code = Localizations.localeOf(context).languageCode;
 
@@ -95,9 +95,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
       ),
       if (Platform.isAndroid)
         SettingsTile(
-            title: (context) => AppLocalizations.of(context)!.notifications,
+            title: (context) => AppLocalizations.of(context).notifications,
             subtitle: (context) async {
-              return AppLocalizations.of(context)!.intervalAppletsList;
+              return AppLocalizations.of(context).intervalAppletsList;
             },
             icon: Icons.notifications_rounded,
             screen: (context) async {
@@ -106,15 +106,17 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                   .get()
                   .then((value) => value.length);
 
-              Navigator.push(
+              if(context.mounted) {
+                Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
                         NotificationSettings(accountCount: accountCount)),
               );
+              }
             }),
       SettingsTile(
-          title: (context) => AppLocalizations.of(context)!.clearCache,
+          title: (context) => AppLocalizations.of(context).clearCache,
           subtitle: (context) async {
             Map<String, int> cacheStats = {'fileNum': 0, 'size': 0};
 
@@ -122,7 +124,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
 
             cacheStats = CacheSettings.dirStatSync(dir.path);
 
-            return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? AppLocalizations.of(context)!.file : AppLocalizations.of(context)!.files} (${cacheStats['size']! ~/ 1024} KB)";
+            return "${cacheStats['fileNum']} ${cacheStats['fileNum'] == 1 ? (context.mounted ? AppLocalizations.of(context).file : 'Datei') : (context.mounted ? AppLocalizations.of(context).files : 'Dateien')} (${cacheStats['size']! ~/ 1024} KB)";
           },
           icon: Icons.storage_rounded,
           screen: (context) => Navigator.push(
@@ -161,9 +163,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
       ]),
     SettingsGroup(tiles: [
       SettingsTile(
-        title: (context) => AppLocalizations.of(context)!.userData,
+        title: (context) => AppLocalizations.of(context).userData,
         subtitle: (context) async {
-          return AppLocalizations.of(context)!.ageNameClassList;
+          return AppLocalizations.of(context).ageNameClassList;
         },
         icon: Icons.account_circle_rounded,
         screen: (context) => Navigator.push(
@@ -174,9 +176,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     ]),
     SettingsGroup(tiles: [
       SettingsTile(
-        title: (context) => AppLocalizations.of(context)!.about,
+        title: (context) => AppLocalizations.of(context).about,
         subtitle: (context) async {
-          return AppLocalizations.of(context)!.contributorsLinksLicensesList;
+          return AppLocalizations.of(context).contributorsLinksLicensesList;
         },
         icon: Icons.school_rounded,
         screen: (context) => Navigator.push(
@@ -187,9 +189,8 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
       SettingsTile(
         icon: Icons.question_mark,
         show: () async => true,
-        title: (context) => AppLocalizations.of(context)!.inThisUpdate,
-        subtitle: (context) async =>
-            AppLocalizations.of(context)!.showReleaseNotesForThisVersion,
+        title: (context) => AppLocalizations.of(context).inThisUpdate,
+        subtitle: (context) async => AppLocalizations.of(context).showReleaseNotesForThisVersion,
         screen: (context) async => showLocalUpdateInfo(context),
       )
     ]),

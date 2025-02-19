@@ -74,7 +74,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.clear),
+              child: Text(AppLocalizations.of(context).clear),
               onPressed: () {
                 updateSettings('lesson-colors', {
                   ...settings['lesson-colors'],
@@ -86,7 +86,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
               },
             ),
             ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.select),
+              child: Text(AppLocalizations.of(context).select),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -226,7 +226,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                         children: [
                                           Text(
                                             selected.name ??
-                                                AppLocalizations.of(context)!
+                                                AppLocalizations.of(context)
                                                     .unknownLesson,
                                             style: Theme.of(context)
                                                 .textTheme
@@ -266,7 +266,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                                       showSnackbar(
                                                           context,
                                                           AppLocalizations.of(
-                                                                  context)!
+                                                                  context)
                                                               .lessonHidden(
                                                                   selected
                                                                       .name!),
@@ -306,7 +306,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                     Padding(
                       padding: const EdgeInsets.only(left: 7, top: 6),
                       child: Text(
-                        '${AppLocalizations.of(context)?.calendarWeek} ${getCurrentWeekNumber()}',
+                        '${AppLocalizations.of(context).calendarWeek} ${getCurrentWeekNumber()}',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.normal,
@@ -340,9 +340,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                 vertical: 4, horizontal: 8),
                             child: Text(
                               (currentWeekIndex < 1)
-                                  ? AppLocalizations.of(context)!
+                                  ? AppLocalizations.of(context)
                                       .timetableAllWeeks
-                                  : AppLocalizations.of(context)!.timetableWeek(
+                                  : AppLocalizations.of(context).timetableWeek(
                                       uniqueBadges[currentWeekIndex - 1]),
                               style: TextStyle(
                                 color: Theme.of(context)
@@ -364,7 +364,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 if (refresh != null)
                   FloatingActionButton(
                     heroTag: "refresh",
-                    tooltip: AppLocalizations.of(context)!.refresh,
+                    tooltip: AppLocalizations.of(context).refresh,
                     onPressed: refresh,
                     child: const Icon(Icons.refresh),
                   ),
@@ -372,8 +372,8 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 FloatingActionButton(
                   heroTag: "toggle",
                   tooltip: selectedType == TimeTableType.all
-                      ? AppLocalizations.of(context)!.timetableSwitchToPersonal
-                      : AppLocalizations.of(context)!.timetableSwitchToClass,
+                      ? AppLocalizations.of(context).timetableSwitchToPersonal
+                      : AppLocalizations.of(context).timetableSwitchToClass,
                   onPressed: () {
                     updateSettings(
                         'student-selected-type',

@@ -35,7 +35,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.errorOccurred,
+                        AppLocalizations.of(context).errorOccurred,
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall!
@@ -54,7 +54,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                 child: Column(
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.calendarExportHint,
+                      AppLocalizations.of(context).calendarExportHint,
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
@@ -66,35 +66,35 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     SettingsTileWidget(
                         tile: SettingsTile(
                           title: (context) => "PDF",
-                          subtitle: (context) async => AppLocalizations.of(context)!.dayWeekYearsList,
+                          subtitle: (context) async => AppLocalizations.of(context).dayWeekYearsList,
                           icon: Icons.picture_as_pdf,
                           screen: (context) async => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => CalendarExportFile(
-                              title: AppLocalizations.of(context)!.pdfExport,
+                              title: AppLocalizations.of(context).pdfExport,
                               fileType: "pdf",
                               entries: [
                                   ExportGroup(
-                                    groupTitle: AppLocalizations.of(context)!.day,
+                                    groupTitle: AppLocalizations.of(context).day,
                                     entries: [
-                                      (title: AppLocalizations.of(context)!.today, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=1", type: AppLocalizations.of(context)!.today.toLowerCase()),
-                                      (title: AppLocalizations.of(context)!.tomorrow, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=2", type: AppLocalizations.of(context)!.tomorrow.toLowerCase()),
+                                      (title: AppLocalizations.of(context).today, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=1", type: AppLocalizations.of(context).today.toLowerCase()),
+                                      (title: AppLocalizations.of(context).tomorrow, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&day=2", type: AppLocalizations.of(context).tomorrow.toLowerCase()),
                                     ]
                                   ),
                                   ExportGroup(
-                                      groupTitle: AppLocalizations.of(context)!.week,
+                                      groupTitle: AppLocalizations.of(context).week,
                                       entries: [
-                                        (title: AppLocalizations.of(context)!.currentWeek, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=1", type: AppLocalizations.of(context)!.currentWeek.toLowerCase().replaceAll(" ", "-")),
-                                        (title: AppLocalizations.of(context)!.nextWeek, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=2", type: AppLocalizations.of(context)!.nextWeek.toLowerCase().replaceAll(" ", "-")),
+                                        (title: AppLocalizations.of(context).currentWeek, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=1", type: AppLocalizations.of(context).currentWeek.toLowerCase().replaceAll(" ", "-")),
+                                        (title: AppLocalizations.of(context).nextWeek, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&week=2", type: AppLocalizations.of(context).nextWeek.toLowerCase().replaceAll(" ", "-")),
                                       ]
                                   ),
                                   for (int year in snapshot.data!.years) ...[
                                     ExportGroup(
                                         groupTitle: "$year / ${year + 1}",
                                         entries: [
-                                          (title: AppLocalizations.of(context)!.shortenedCalendar, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&year=$year", type: "${AppLocalizations.of(context)!.short}-$year"),
-                                          (title: AppLocalizations.of(context)!.extendedCalendar, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf-extended&year=$year", type: "${AppLocalizations.of(context)!.extended}-$year"),
-                                          (title: AppLocalizations.of(context)!.wallCalendar, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=wandkalender&year=$year", type: "${AppLocalizations.of(context)!.wall}-$year"),
+                                          (title: AppLocalizations.of(context).shortenedCalendar, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf&year=$year", type: "${AppLocalizations.of(context).short}-$year"),
+                                          (title: AppLocalizations.of(context).extendedCalendar, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=pdf-extended&year=$year", type: "${AppLocalizations.of(context).extended}-$year"),
+                                          (title: AppLocalizations.of(context).wallCalendar, link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=wandkalender&year=$year", type: "${AppLocalizations.of(context).wall}-$year"),
                                         ]
                                     ),
                                   ]
@@ -110,16 +110,16 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     SettingsTileWidget(
                         tile: SettingsTile(
                           title: (context) => "iCal / ICS",
-                          subtitle: (context) async => AppLocalizations.of(context)!.updatesYearsImportableList,
+                          subtitle: (context) async => AppLocalizations.of(context).updatesYearsImportableList,
                           icon: Icons.date_range,
                           screen: (context) async => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => CalendarExportFile(
-                              title: AppLocalizations.of(context)!.iCalICSExport,
+                              title: AppLocalizations.of(context).iCalICSExport,
                               fileType: "ics",
                               entries: [
                                   ExportGroup(
-                                      groupTitle: AppLocalizations.of(context)!.years,
+                                      groupTitle: AppLocalizations.of(context).years,
                                       entries: [
                                         for (int year in snapshot.data!.years) ...[
                                           (title: "$year / ${year + 1}", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=ical&year=$year", type: "$year"),
@@ -139,13 +139,13 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          AppLocalizations.of(context)!.subscription,
+                                          AppLocalizations.of(context).subscription,
                                           style: Theme.of(context).textTheme.titleMedium!.copyWith(
                                               color: Theme.of(context).colorScheme.onSurface
                                           ),
                                         ),
                                         Text(
-                                          AppLocalizations.of(context)!.subscriptionHint,
+                                          AppLocalizations.of(context).subscriptionHint,
                                           style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                               color: Theme.of(context).colorScheme.onSurfaceVariant
                                           ),
@@ -163,7 +163,7 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                                                   Clipboard.setData(ClipboardData(text: snapshot.data!.subscriptionLink));
                                                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                    content: Text(AppLocalizations.of(context)!.linkCopied),
+                                                    content: Text(AppLocalizations.of(context).linkCopied),
                                                   ));
                                                 },
                                                 borderRadius: BorderRadius.circular(12.0),
@@ -210,16 +210,16 @@ class _CalendarExportState extends SettingsColoursState<CalendarExport> {
                     SettingsTileWidget(
                         tile: SettingsTile(
                           title: (context) => "CSV",
-                          subtitle: (context) async => AppLocalizations.of(context)!.yearsImportableList,
+                          subtitle: (context) async => AppLocalizations.of(context).yearsImportableList,
                           icon: Icons.description,
                           screen: (context) async => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => CalendarExportFile(
-                                title: AppLocalizations.of(context)!.csvExport,
+                                title: AppLocalizations.of(context).csvExport,
                                 fileType: "csv",
                                 entries: [
                                   ExportGroup(
-                                      groupTitle: AppLocalizations.of(context)!.years,
+                                      groupTitle: AppLocalizations.of(context).years,
                                       entries: [
                                         for (int year in snapshot.data!.years) ...[
                                           (title: "$year / ${year + 1}", link: "https://start.schulportal.hessen.de/kalender.php?a=export&export=csv&year=$year", type: "$year"),
@@ -279,7 +279,7 @@ class _CalendarExportFileState extends SettingsColoursState<CalendarExportFile> 
       floatingActionButton: FloatingActionButton(
         onPressed: selected != null ? () async {
           showFileModal(context, FileInfo(
-            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-${AppLocalizations.of(context)!.calendar.toLowerCase()}.${widget.fileType}",
+            name: "${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}-${selected!.type}-${AppLocalizations.of(context).calendar.toLowerCase()}.${widget.fileType}",
             url: Uri.parse(selected!.link),
           ));
         } : null,
