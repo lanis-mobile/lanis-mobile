@@ -97,7 +97,6 @@
   "loading": "Loading...",
   "teacher": "Teacher",
   "clearAll": "Clear all",
-  "cancel": "Cancel",
   "actionContinue": "Continue",
   "back": "Back",
   "create": "Create",
@@ -129,6 +128,8 @@
 
   "yes": "Yes",
   "no": "No",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
 
   "settingsInfoUserData": "All user data is stored on the Lanis servers.",
   "settingsInfoNotifications": "The frequency and time at which everything is updated depends on various factors relating to the end device.",

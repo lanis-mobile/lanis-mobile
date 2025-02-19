@@ -97,6 +97,8 @@
 
   "yes": "Ja",
   "no": "Nein",
+  "confirm": "Bestätigen",
+  "cancel": "Abbrechen",
 
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung hängen von verschiedenen Faktoren des Endgeräts ab.",
