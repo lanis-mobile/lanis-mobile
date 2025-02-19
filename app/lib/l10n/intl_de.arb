@@ -88,6 +88,22 @@
   "shareFile": "Datei teilen",
   "unknownFile": "Unbekannte Datei",
 
+  "camera": "Kamera",
+  "documentScanner": "Dokumentenscanner",
+  "gallery": "Gallerie",
+  "fileManager": "Dateien",
+  "morePages": "Mehr Seiten?",
+  "scanAnotherPageQuestion": "Möchtest du noch eine Seite scannen?",
+  "previousImage": "Vorheriges Bild",
+  "nextImage": "Nächstes Bild",
+  "deleteImage": "Bild löschen",
+  "filename": "Dateiname",
+
+  "yes": "Ja",
+  "no": "Nein",
+  "confirm": "Bestätigen",
+  "cancel": "Abbrechen",
+
   "settingsInfoUserData": "Alle Benutzerdaten sind auf den Lanis-Servern gespeichert.",
   "settingsInfoNotifications": "Die Häufigkeit und der Zeitpunkt der Aktualisierung hängen von verschiedenen Faktoren des Endgeräts ab.",
   "settingsInfoClearCache": "Alle Dateien, die du jemals heruntergeladen hast bilden den Cache. Hier kannst du ihn leeren um Speicherplatz freizugeben. Dateien werden automatisch nach 7 Tagen gelöscht.",
