@@ -125,6 +125,9 @@
   "fileManager": "Files",
   "morePages": "More pages?",
   "scanAnotherPageQuestion": "Do you want to scan another page?",
+  "previousImage": "Previous image",
+  "nextImage": "Next image",
+  "deleteImage": "Delete image",
 
   "yes": "Yes",
   "no": "No",

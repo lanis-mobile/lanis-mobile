@@ -331,6 +331,7 @@ class ImageCyclerScreenState extends State<ImageCyclerScreen> {
                           child: currentIndex > 0 ? IconButton(
                             padding: EdgeInsets.all(0.0),
                             icon: Icon(Icons.arrow_left_rounded, size: 48.0),
+                            tooltip: AppLocalizations.of(context).previousImage,
                             onPressed: () {
                               setState(() {
                                 currentIndex = currentIndex - 1;
@@ -342,6 +343,7 @@ class ImageCyclerScreenState extends State<ImageCyclerScreen> {
                           child: IconButton(
                             padding: EdgeInsets.all(0.0),
                             icon: Icon(Icons.delete_forever_rounded, size: 32.0,),
+                            tooltip: AppLocalizations.of(context).deleteImage,
                             onPressed: () => removeImage(currentIndex),
                           ),
                       ),
@@ -349,6 +351,7 @@ class ImageCyclerScreenState extends State<ImageCyclerScreen> {
                         child: currentIndex < paths.length - 1 ? IconButton(
                           padding: EdgeInsets.all(0.0),
                           icon: Icon(Icons.arrow_right_rounded, size: 48.0),
+                          tooltip: AppLocalizations.of(context).nextImage,
                           onPressed: () {
                             setState(() {
                               currentIndex = currentIndex + 1;

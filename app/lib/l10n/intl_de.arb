@@ -94,6 +94,9 @@
   "fileManager": "Dateien",
   "morePages": "Mehr Seiten?",
   "scanAnotherPageQuestion": "Möchtest du noch eine Seite scannen?",
+  "previousImage": "Vorheriges Bild",
+  "nextImage": "Nächstes Bild",
+  "deleteImage": "Bild löschen",
 
   "yes": "Ja",
   "no": "Nein",
