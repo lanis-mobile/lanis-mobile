@@ -85,8 +85,8 @@ class AccountListTile extends StatelessWidget {
               bool? result = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(AppLocalizations.of(context)!.logout),
-                  content: Text(AppLocalizations.of(context)!.logoutConfirmation),
+                  title: Text(AppLocalizations.of(context).logout),
+                  content: Text(AppLocalizations.of(context).logoutConfirmation),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
@@ -105,7 +105,7 @@ class AccountListTile extends StatelessWidget {
                   sph!.session.deAuthenticate();
                 }
                 await accountDatabase.deleteAccount(dbID);
-                if (restart) {
+                if (restart && context.mounted) {
                   authenticationState.reset(context);
                 }
               }

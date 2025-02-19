@@ -11,7 +11,7 @@ final timeTableDefinition = AppletDefinition(
   selectedIcon: Icon(Icons.timelapse_outlined),
   appletType: AppletType.nested,
   addDivider: false,
-  label: (context) => AppLocalizations.of(context)!.timeTable,
+  label: (context) => AppLocalizations.of(context).timeTable,
   supportedAccountTypes: [AccountType.student],
   refreshInterval: Duration(hours: 1),
   allowOffline: true,

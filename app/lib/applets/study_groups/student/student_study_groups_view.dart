@@ -43,19 +43,19 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
           return Scaffold(
             appBar: AppBar(
               title: settings['showExams'] != 'true'
-                  ? Text(AppLocalizations.of(context)!.studyGroups)
-                  : Text(AppLocalizations.of(context)!.exams),
+                  ? Text(AppLocalizations.of(context).studyGroups)
+                  : Text(AppLocalizations.of(context).exams),
               actions: [
                 settings['showExams'] != 'true'
                     ? Tooltip(
-                        message: AppLocalizations.of(context)!.exams,
+                        message: AppLocalizations.of(context).exams,
                         child: IconButton(
                           icon: Icon(Icons.article_outlined),
                           onPressed: () => updateSetting('showExams', 'true'),
                         ),
                       )
                     : Tooltip(
-                        message: AppLocalizations.of(context)!.studyGroups,
+                        message: AppLocalizations.of(context).studyGroups,
                         child: IconButton(
                           icon: Icon(Icons.groups_outlined),
                           onPressed: () => updateSetting('showExams', 'false'),
