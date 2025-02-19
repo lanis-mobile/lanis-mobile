@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:sph_plan/utils/file_operations.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 
 import '../generated/l10n.dart';
@@ -227,6 +228,8 @@ Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
     return null;
   }
 
+  logger.i(newPaths);
+
   return null;
 }
 
@@ -303,16 +306,21 @@ class ImageCyclerScreenState extends State<ImageCyclerScreen> {
           width: double.infinity,
           height: double.infinity,
           padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
             bottom: MediaQuery.of(context).padding.bottom,
           ),
           child: Column(
             children: [
               if (paths.isNotEmpty)
-                (SizedBox(
-                  child: Image.file(File(paths[currentIndex])),
+                (Expanded(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: InteractiveViewer(
+                      maxScale: 10,
+                      minScale: 1,
+                      child: Image.file(File(paths[currentIndex])),
+                    ),
+                  )
                 )),
-              Expanded(child: SizedBox()), // I know that this code looks stupid but i couldn't find another way
               Align(
                 alignment: Alignment.bottomCenter,
                 child: SizedBox(
