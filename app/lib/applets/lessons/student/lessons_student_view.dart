@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/lessons/definition.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
@@ -49,8 +50,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
             if (pickedFile == null) {
               logger.e("Picked file is NULL!");
             } else {
-              String name = pickedFile.name;
-              logger.i("Name of picked file is: \"$name\"");
+              OpenFile.open(pickedFile.path);
             }
           }
       ),
