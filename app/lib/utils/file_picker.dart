@@ -246,8 +246,7 @@ Future<PickedFile?> pickFileUsingGallery() async {
   }
 }
 
-Future<List<String>?> imageCycler(
-    BuildContext context, List<String> paths) async {
+Future<List<String>?> imageCycler(BuildContext context, List<String> paths) async {
   return await Navigator.push(
     context,
     MaterialPageRoute(
@@ -295,7 +294,7 @@ class ImageCyclerScreenState extends State<ImageCyclerScreen> {
           IconButton(
             icon: Icon(Icons.check_rounded),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.pop(context, paths);
             },
             tooltip: AppLocalizations.of(context).confirm,
           ),
