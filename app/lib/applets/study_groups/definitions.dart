@@ -11,7 +11,7 @@ final studyGroupsDefinition = AppletDefinition(
   appletType: AppletType.navigation,
   icon: const Icon(Icons.groups),
   selectedIcon: const Icon(Icons.groups_outlined),
-  label: (context) => AppLocalizations.of(context)!.studyGroups,
+  label: (context) => AppLocalizations.of(context).studyGroups,
   supportedAccountTypes: [AccountType.student],
   allowOffline: true,
   settingsDefaults: {

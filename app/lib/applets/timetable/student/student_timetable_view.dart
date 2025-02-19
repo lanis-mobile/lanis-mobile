@@ -360,9 +360,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                                 vertical: 4, horizontal: 8),
                             child: Text(
                               (currentWeekIndex < 1)
-                                  ? AppLocalizations.of(context)!
+                                  ? AppLocalizations.of(context)
                                       .timetableAllWeeks
-                                  : AppLocalizations.of(context)!.timetableWeek(
+                                  : AppLocalizations.of(context).timetableWeek(
                                       uniqueBadges[currentWeekIndex - 1]),
                               style: TextStyle(
                                 color: Theme.of(context)
@@ -384,7 +384,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
                 if (refresh != null)
                   FloatingActionButton(
                     heroTag: "refresh",
-                    tooltip: AppLocalizations.of(context)!.refresh,
+                    tooltip: AppLocalizations.of(context).refresh,
                     onPressed: refresh,
                     child: const Icon(Icons.refresh),
                   ),

@@ -48,9 +48,9 @@ class DefaultFormatStyle extends FormatStyle {
   DefaultFormatStyle({required this.context}) : super(
     textStyle: Theme.of(context).textTheme.bodyMedium!,
     timeColor: Theme.of(context).colorScheme.primary,
-    linkBackground: Theme.of(context).colorScheme.primary.withOpacity(0.25),
+    linkBackground: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
     linkForeground: Theme.of(context).colorScheme.primary,
-    codeBackground: Theme.of(context).colorScheme.secondary.withOpacity(0.25),
+    codeBackground: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.25),
     codeForeground: Theme.of(context).colorScheme.onSurface
   );
 }

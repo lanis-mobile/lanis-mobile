@@ -134,8 +134,7 @@ abstract class BubbleStyles {
     if (theme.brightness == Brightness.dark) {
       other = BubbleStyle(
           mainColor: theme.colorScheme.inversePrimary,
-          pressedColor:
-              theme.colorScheme.inversePrimary.withValues(alpha: 0.65),
+          pressedColor: theme.colorScheme.inversePrimary.withValues(alpha: 0.65),
           mainTextStyle: baseTextStyle.copyWith(
               color: theme.colorScheme.onSurface,
               decorationColor: theme.colorScheme.onPrimary),

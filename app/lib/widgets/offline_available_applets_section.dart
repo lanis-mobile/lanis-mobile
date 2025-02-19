@@ -65,12 +65,14 @@ class _OfflineAvailableAppletsSectionState extends State<OfflineAvailableApplets
               onTap: () async {
                 ClearTextAccount acc = await accountDatabase.getClearTextAccountFromId(offlineApplet.localUserId);
                 sph = SPH(account: acc);
-                Navigator.push(
+                if(context.mounted) {
+                  Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => offlineApplet.definition.bodyBuilder!(context, acc.accountType ?? AccountType.student, null),
                   ),
                 );
+                }
               }
           ),
         ).toList(growable: false),
