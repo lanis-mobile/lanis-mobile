@@ -3,16 +3,14 @@ import 'dart:io';
 import 'package:background_fetch/background_fetch.dart' as bgf;
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_executor/flutter_background_executor.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/utils/logger.dart';
-import 'package:workmanager/workmanager.dart';
 
-import 'applets/definitions.dart';
 import 'core/database/account_database/account_db.dart'
     show AccountDatabase, ClearTextAccount;
 import 'core/sph/sph.dart' show SPH;
@@ -20,9 +18,6 @@ import 'core/sph/sph.dart' show SPH;
 const identifier = "io.github.alessioc42.pushservice";
 
 Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
-  //
-  //
-  // if (!Platform.isAndroid) return; //iOS currently experimental/not supported
 
   if ((await Permission.notification.isDenied)) {
     logger.d("User disallowed notifications");
