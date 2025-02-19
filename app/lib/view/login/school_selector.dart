@@ -52,12 +52,16 @@ class _SchoolSelectorState extends State<SchoolSelector> {
       });
     } catch (e) {
       // Show a SnackBar to inform the user
-      ScaffoldMessenger.of(widget.outContext).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(widget.outContext)!.authFailedLoadingSchools),
-          duration: const Duration(seconds: 10),
-        ),
-      );
+      if (widget.outContext.mounted) {
+        ScaffoldMessenger.of(widget.outContext).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations
+                .of(widget.outContext)
+                .authFailedLoadingSchools),
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
       Future.delayed(const Duration(seconds: 10), loadSchoolList);
     }
   }
@@ -95,7 +99,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
   Widget build(BuildContext context) {
     return ActionChip(
       avatar: const Icon(Icons.account_balance),
-        label: Text(selectedSchool != null ? "${selectedSchool!.name} - ${selectedSchool!.city}" : AppLocalizations.of(context)!.selectSchool),
+        label: Text(selectedSchool != null ? "${selectedSchool!.name} - ${selectedSchool!.city}" : AppLocalizations.of(context).selectSchool),
       onPressed: schoolBezirke != null ? () async {
         showDialog(
           context: context,
@@ -110,7 +114,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
                         child: Icon(Icons.search),
                       ),
                       controller: searchController,
-                      hintText: AppLocalizations.of(context)!.searchSchools,
+                      hintText: AppLocalizations.of(context).searchSchools,
                       autoFocus: true,
                     ),
                   ),
@@ -130,7 +134,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
                                     bezirk.name,
                                     style: Theme.of(context).textTheme.titleMedium,
                                   ),
-                                  subtitle: Text(AppLocalizations.of(context)!.schoolCountString(bezirk.schools.length),
+                                  subtitle: Text(AppLocalizations.of(context).schoolCountString(bezirk.schools.length),
                                     style: Theme.of(context).textTheme.titleSmall,
                                   ),
                                   initiallyExpanded: bezirk.schools.length < 4,
@@ -165,7 +169,7 @@ class _SchoolSelectorState extends State<SchoolSelector> {
                               Padding(
                                 padding: const EdgeInsets.all(20.0),
                                 child: Text(
-                                  AppLocalizations.of(context)!.noSchoolsFound,
+                                  AppLocalizations.of(context).noSchoolsFound,
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                               ),

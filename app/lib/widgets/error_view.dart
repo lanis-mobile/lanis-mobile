@@ -34,8 +34,8 @@ class ErrorView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Text(
               error is! NoConnectionException
-                  ? AppLocalizations.of(context)!.errorOccurred
-                  : AppLocalizations.of(context)!.noInternetConnection2,
+                  ? AppLocalizations.of(context).errorOccurred
+                  : AppLocalizations.of(context).noInternetConnection2,
               textAlign: TextAlign.center,
               style:
               const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -47,7 +47,7 @@ class ErrorView extends StatelessWidget {
           children: [
             FilledButton(
                 onPressed: retry,
-                child: Text(AppLocalizations.of(context)!.tryAgain)
+                child: Text(AppLocalizations.of(context).tryAgain)
             ),
           ],
         ),

@@ -82,7 +82,7 @@ class _DataStorageNodeViewState extends State<DataStorageNodeView> {
                   children: [
                     Icon(Icons.error_outline, size: 100),
                     SizedBox(height: 10),
-                    Text(AppLocalizations.of(context)!.couldNotLoadFiles),
+                    Text(AppLocalizations.of(context).couldNotLoadFiles),
                   ],
                 ))
               : ListView(

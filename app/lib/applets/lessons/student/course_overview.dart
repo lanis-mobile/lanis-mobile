@@ -62,7 +62,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
               Icons.search,
               size: 60,
             ),
-            Text(AppLocalizations.of(context)!.noDataFound)
+            Text(AppLocalizations.of(context).noDataFound)
           ],
         ),
       );
@@ -104,7 +104,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                 );
                               },
                               child: Text(
-                                  AppLocalizations.of(context)!.toSemesterOne,
+                                  AppLocalizations.of(context).toSemesterOne,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -273,7 +273,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                               size: 15,
                                             ),
                                           ),
-                                          Text(AppLocalizations.of(context)!.dateWithHours(
+                                          Text(AppLocalizations.of(context).dateWithHours(
                                               dateFormat.format(data!.history[index].topicDate!),
                                               data!.history[index].schoolHours ?? ""
                                             ),
@@ -393,7 +393,7 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           if (data!.marks[index].comment != null)
                             ListTile(
                               title: Text(
-                                "${AppLocalizations.of(context)?.comment ?? ""}: ",
+                                "${AppLocalizations.of(context).comment}: ",
                                 style: Theme.of(context).textTheme.titleSmall,
                                 textAlign: TextAlign.left,
                               ),
@@ -521,21 +521,21 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
           NavigationDestination(
             icon: const Icon(Icons.history),
             selectedIcon: const Icon(Icons.history_outlined),
-            label: AppLocalizations.of(context)!.history,
+            label: AppLocalizations.of(context).history,
           ),
           NavigationDestination(
             icon: const Icon(Icons.star),
             selectedIcon: const Icon(Icons.star_outline),
-            label: AppLocalizations.of(context)!.performance,
+            label: AppLocalizations.of(context).performance,
           ),
           NavigationDestination(
               icon: const Icon(Icons.draw),
               selectedIcon: const Icon(Icons.draw_outlined),
-              label: AppLocalizations.of(context)!.exams),
+              label: AppLocalizations.of(context).exams),
           NavigationDestination(
             icon: const Icon(Icons.list),
             selectedIcon: const Icon(Icons.list_outlined),
-            label: AppLocalizations.of(context)!.attendances,
+            label: AppLocalizations.of(context).attendances,
           )
         ],
       ),

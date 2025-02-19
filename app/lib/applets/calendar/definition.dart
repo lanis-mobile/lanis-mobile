@@ -11,7 +11,7 @@ final calendarDefinition = AppletDefinition(
   appletType: AppletType.nested,
   icon: const Icon(Icons.calendar_today),
   selectedIcon: const Icon(Icons.calendar_today_outlined),
-  label: (context) => AppLocalizations.of(context)!.calendar,
+  label: (context) => AppLocalizations.of(context).calendar,
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,
   settingsDefaults: {},

@@ -89,7 +89,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                     ),
                     Text(
                       AppLocalizations.of(
-                          context)!
+                          context)
                           .homework,
                       style: Theme.of(context)
                           .textTheme
@@ -117,7 +117,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                           .showSnackBar(SnackBar(
                           content: Text(
                               AppLocalizations.of(
-                                  context)!
+                                  context)
                                   .homeworkSaving),
                           duration:
                           const Duration(
@@ -126,15 +126,17 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                       sph!.parser.lessonsStudentParser.setHomework(widget.courseID, widget.currentEntry.entryID, value!)
                           .then((val) {
                         if (val != "1") {
-                          ScaffoldMessenger.of(
+                          if(context.mounted) {
+                            ScaffoldMessenger.of(
                               context)
                               .showSnackBar(
                               SnackBar(
                                 content: Text(
                                     AppLocalizations.of(
-                                        context)!
+                                        context)
                                         .homeworkSavingError),
                               ));
+                          }
                         } else {
                           setState(() {
                             widget.currentEntry.homework!.homeWorkDone =value;
@@ -146,7 +148,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
                           .showSnackBar(SnackBar(
                         content: Text(
                             AppLocalizations.of(
-                                context)!
+                                context)
                                 .homeworkSavingError),
                       ));
                     }
@@ -159,7 +161,7 @@ class _HomeworkBoxState extends State<HomeworkBox> with WidgetsBindingObserver {
               width: double.infinity,
               decoration: BoxDecoration(
                 // Default card color as ground color with primary color on top. (primary with opacity 0.1)
-                  color: Color.alphaBlend(Theme.of(context).colorScheme.primary.withOpacity(0.2), Theme.of(context).cardColor),
+                  color: Color.alphaBlend(Theme.of(context).colorScheme.primary.withValues(alpha: 0.2), Theme.of(context).cardColor),
                   borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 8.0),
               child: FormattedText(

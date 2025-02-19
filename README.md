@@ -67,7 +67,8 @@ flutter config --jdk-dir=/usr/lib/jvm/java-17-openjdk # The path may differ base
 
 # 4. Generate the code
 dart run build_runner build
+dart run intl_utils:generate
 
 # 5. Build
-flutter build YOUR_PLATFORM # Release doesn't work for adb or apk because of some signing stuff
+flutter build YOUR_PLATFORM --release --dart-define=cronetHttpNoPlay=true # For release mode signing is required
 ```
