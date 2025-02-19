@@ -18,7 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
 
-const String? surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
+const String surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
 typedef ActionFunction = void Function(BuildContext);
 
@@ -108,7 +108,7 @@ class HomePageState extends State<HomePage> {
 
   final List<Destination> endDestinations = [
     Destination(
-        label: (context) => AppLocalizations.of(context)!.openMoodle,
+        label: (context) => AppLocalizations.of(context).openMoodle,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
@@ -118,7 +118,7 @@ class HomePageState extends State<HomePage> {
         action: (context) => Navigator.push(context,
             MaterialPageRoute(builder: (context) => const MoodleWebView()))),
     Destination(
-        label: (context) => AppLocalizations.of(context)!.openLanisInBrowser,
+        label: (context) => AppLocalizations.of(context).openLanisInBrowser,
         icon: const Icon(Icons.open_in_new),
         selectedIcon: const Icon(Icons.open_in_new),
         isSupported: true,
@@ -130,7 +130,7 @@ class HomePageState extends State<HomePage> {
           });
         }),
     Destination(
-      label: (context) => AppLocalizations.of(context)!.settings,
+      label: (context) => AppLocalizations.of(context).settings,
       icon: const Icon(Icons.settings),
       selectedIcon: const Icon(Icons.settings),
       isSupported: true,
@@ -148,11 +148,11 @@ class HomePageState extends State<HomePage> {
       enableDrawer: true,
       icon: Icon(Icons.logout),
       selectedIcon: Icon(Icons.logout_outlined),
-      label: (context) => AppLocalizations.of(context)!.logout,
+      label: (context) => AppLocalizations.of(context).logout,
       action: (context) async {
         await sph!.session.deAuthenticate();
         await accountDatabase.deleteAccount(sph!.account.localId);
-        authenticationState.reset(context);
+        if(context.mounted) authenticationState.reset(context);
       }
     ),
   ];
@@ -173,7 +173,7 @@ class HomePageState extends State<HomePage> {
     SessionHandler.getLoginURL(sph!.account).then((response) {
       launchUrl(Uri.parse(response));
     }).catchError((ex) {
-      if (context == null) return;
+      if (context == null || !context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(ex.cause),
         duration: const Duration(seconds: 1),
@@ -197,11 +197,11 @@ class HomePageState extends State<HomePage> {
           ),
           Padding(
             padding: const EdgeInsets.all(32),
-            child: Text(AppLocalizations.of(context)!.noSupportOpenInBrowser),
+            child: Text(AppLocalizations.of(context).noSupportOpenInBrowser),
           ),
           ElevatedButton(
               onPressed: () => openLanisInBrowser(context),
-              child: Text(AppLocalizations.of(context)!.openLanisInBrowser))
+              child: Text(AppLocalizations.of(context).openLanisInBrowser))
         ],
       ),
     );
@@ -381,7 +381,7 @@ class HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
               child: ElevatedButton(
                   onPressed: () async {
-                    await launchUrl(Uri.parse(surveyUrl!));
+                    await launchUrl(Uri.parse(surveyUrl));
                     await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
                   },
                   child: Row(
@@ -390,7 +390,7 @@ class HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Icon(Icons.feedback),
-                    Text(AppLocalizations.of(context)!.feedback)
+                    Text(AppLocalizations.of(context).feedback)
                   ],
                 ),
               ),
