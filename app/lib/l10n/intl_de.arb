@@ -97,6 +97,7 @@
   "previousImage": "Vorheriges Bild",
   "nextImage": "Nächstes Bild",
   "deleteImage": "Bild löschen",
+  "filename": "Dateiname",
 
   "yes": "Ja",
   "no": "Nein",

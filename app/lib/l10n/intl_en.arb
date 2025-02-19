@@ -128,6 +128,7 @@
   "previousImage": "Previous image",
   "nextImage": "Next image",
   "deleteImage": "Delete image",
+  "filename": "Filename",
 
   "yes": "Yes",
   "no": "No",

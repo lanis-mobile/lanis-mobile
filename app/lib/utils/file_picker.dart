@@ -7,9 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/utils/file_operations.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import '../generated/l10n.dart';
 
@@ -85,8 +86,7 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                     if (allowedMethods[0])
                       (MenuItemButton(
                         onPressed: () async {
-                          pickedFile =
-                              await pickFileUsingDocumentsUI(allowedExtensions);
+                          pickedFile = await pickFileUsingDocumentsUI(allowedExtensions);
                           if (context.mounted) {
                             Navigator.pop(context);
                           }
@@ -103,8 +103,11 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                     if (allowedMethods[1] && documentScannerSupported)
                       (MenuItemButton(
                         onPressed: () async {
-                          pickedFile =
-                              await pickFileUsingDocumentScanner(context);
+                          pickedFile = await pickFileUsingDocumentScanner(context);
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
                         },
                         child: Row(
                           children: [
@@ -228,9 +231,19 @@ Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
     return null;
   }
 
-  logger.i(newPaths);
+  String? filePath;
+  if (context.mounted) {
+    filePath = await mergeImagesIntoPDF(newPaths, context);
+  }
 
-  return null;
+  if (filePath == null) {
+    return null;
+  }
+
+  File file = File(filePath);
+
+  PickedFile pickedFile = PickedFile(name: filePath.split("/").last, path: filePath, size: await file.length());
+  return pickedFile;
 }
 
 Future<PickedFile?> pickFileUsingCamera() async {
@@ -244,6 +257,67 @@ Future<PickedFile?> pickFileUsingGallery() async {
   } else {
     return null;
   }
+}
+
+Future<String?> mergeImagesIntoPDF(List<String> paths, BuildContext context) async {
+  final TextEditingController controller = TextEditingController();
+  String? pdfName;
+
+  await showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(AppLocalizations.of(context).filename),
+        content: TextField(
+          controller: controller,
+        ),
+        actions: [
+          TextButton(
+            child: Text(AppLocalizations.of(context).cancel),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          FilledButton(
+            child: Text(AppLocalizations.of(context).confirm),
+            onPressed: () {
+              Navigator.of(context).pop();
+              final text = controller.text;
+              if (text.endsWith(".pdf")) {
+                pdfName = controller.text;
+              } else {
+                pdfName = "${controller.text}.pdf";
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+
+  pw.Document pdf = pw.Document();
+  for (String path in paths) {
+    File file = File(path);
+    final bytes = await file.readAsBytes();
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Image(
+              pw.MemoryImage(bytes)
+            )
+          );
+        }
+      )
+    );
+  }
+
+  final cache = (await getApplicationCacheDirectory()).path;
+  final path = "$cache/$pdfName";
+  final file = File(path);
+  file.create();
+  file.writeAsBytes(await pdf.save());
+  return path;
 }
 
 Future<List<String>?> imageCycler(BuildContext context, List<String> paths) async {
