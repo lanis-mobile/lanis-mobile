@@ -24,8 +24,8 @@ class AuthenticationState {
     status.value = LoginStatus.waiting;
     exception.value = null;
     sph = null;
-
-    final account = await accountDatabase.getLastLoggedInAccount();
+    late final ClearTextAccount? account;
+    account = await accountDatabase.getLastLoggedInAccount();
     logger.i("Last logged in account: $account");
     if (account != null) {
       sph = SPH(account: account);

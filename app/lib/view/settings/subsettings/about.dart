@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
@@ -6,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/generated/l10n.dart';
 
+import '../../../core/sph/sph.dart';
 import '../../../utils/logger.dart';
 
 class AvatarTile extends StatelessWidget {
@@ -95,12 +95,10 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
     });
 
     try {
-      Dio dio = Dio();
-      dio.options.headers['X-Requested-With'] = 'XMLHttpRequest';
-      final response = await dio.get(
-          'https://github.com/lanis-mobile/lanis-mobile/graphs/contributors-data');
+      final response = await sph!.session.dio.get(
+          'https://api.github.com/repos/lanis-mobile/lanis-mobile/contributors');
       setState(() {
-        contributors = response.data.reversed.toList();
+        contributors = response.data;
       });
     } catch (e) {
       logger.e(e);
@@ -213,7 +211,8 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                                     color: foregroundColor,
                                     borderRadius: BorderRadius.circular(12.0),
                                     child: InkWell(
-                                      onTap: () => launchUrl(Uri.parse("https://github.com/${contributors[1]['author']['path']}")),
+                                      onTap: () => launchUrl(Uri.parse(
+                                          contributors[0]['html_url'])),
                                       borderRadius: BorderRadius.circular(12.0),
                                       child: Column(
                                         mainAxisAlignment:
@@ -223,10 +222,10 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                                           CircleAvatar(
                                             radius: 38.0,
                                             backgroundImage: NetworkImage(
-                                                contributors[0]['author']['avatar']),
+                                                contributors[0]['avatar_url']),
                                           ),
                                           Text(
-                                            contributors[0]['author']['login'],
+                                            contributors[0]['login'],
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyLarge!
@@ -236,7 +235,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                                                         .onSurface),
                                           ),
                                           Text(
-                                            "${contributors[0]['total']} commits",
+                                            "${contributors[0]['contributions']} commits",
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall!
@@ -258,25 +257,35 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                                       Expanded(
                                         flex: 5500,
                                         child: AvatarTile(
-                                          networkImage: contributors[1]['author']['avatar'],
-                                          name: contributors[1]['author']['login'],
-                                          contributions: "${contributors[1]['total']} commits",
+                                          networkImage: contributors[1]
+                                              ['avatar_url'],
+                                          name: contributors[1]['login'],
+                                          contributions:
+                                              "${contributors[1]['contributions']} commits",
                                           avatarSize: 24.0,
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 16.0),
                                           color: foregroundColor,
-                                          onTap: () => launchUrl(Uri.parse("https://github.com/${contributors[1]['author']['path']}")),
+                                          onTap: () => launchUrl(Uri.parse(
+                                              contributors[1]['html_url'])),
                                         ),
                                       ),
                                       Expanded(
                                         flex: 4500,
                                         child: AvatarTile(
-                                          networkImage: contributors[2]['author']['avatar'],
-                                          name: contributors[2]['author']['login'],
-                                          contributions: "${contributors[2]['total']} commits",
+                                          networkImage: contributors[2]
+                                              ['avatar_url'],
+                                          name: contributors[2]['login'],
+                                          contributions:
+                                              "${contributors[2]['contributions']} commits",
                                           avatarSize: 24.0,
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 16.0),
                                           color: foregroundColor,
-                                          onTap: () => launchUrl(Uri.parse("https://github.com/${contributors[2]['author']['path']}")),
+                                          onTap: () => launchUrl(Uri.parse(
+                                              contributors[2]['html_url'])),
                                         ),
                                       ),
                                     ],
@@ -287,13 +296,16 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
                           ),
                           for (var i = 3; i < contributors.length; i++)
                             AvatarTile(
-                              networkImage: contributors[i]['author']['avatar'],
-                              name: contributors[i]['author']['login'],
-                              contributions: "${contributors[i]['total']} ${contributors[i]['total'] == 1 ? "commit" : "commits"}",
+                              networkImage: contributors[i]['avatar_url'],
+                              name: contributors[i]['login'],
+                              contributions:
+                                  "${contributors[i]['contributions']} ${contributors[i]['contributions'] == 1 ? "commit" : "commits"}",
                               avatarSize: 20.0,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 12.0),
                               color: foregroundColor,
-                              onTap: () => launchUrl(Uri.parse("https://github.com/${contributors[i]['author']['path']}")),
+                              onTap: () => launchUrl(
+                                  Uri.parse(contributors[i]['html_url'])),
                             ),
                         ],
                       )
