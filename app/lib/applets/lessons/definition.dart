@@ -13,7 +13,7 @@ final lessonsDefinition = AppletDefinition(
   icon: const Icon(Icons.school),
   selectedIcon: const Icon(Icons.school_outlined),
   label: (context) => AppLocalizations.of(context).lessons,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher],
+  supportedAccountTypes: [AccountType.student, AccountType.parent, AccountType.teacher],
   allowOffline: false,
   settingsDefaults: {
     'showHomework': false,

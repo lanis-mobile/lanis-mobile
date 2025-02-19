@@ -60,12 +60,12 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text(AppLocalizations.of(context)!.clearCache),
+      title: Text(AppLocalizations.of(context).clearCache),
       backgroundColor: backgroundColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
       children: [
         Text(
-          AppLocalizations.of(context)!.settingsInfoClearCache,
+          AppLocalizations.of(context).settingsInfoClearCache,
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -76,9 +76,9 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
         ),
         Callout(
           leading: Icon(Icons.delete_forever_rounded),
-          title: Text(AppLocalizations.of(context)!.questionPermanentlyEmptyCache),
+          title: Text(AppLocalizations.of(context).questionPermanentlyEmptyCache),
           buttonText: Text(
-            cacheStats['fileNum'] != 0 ? AppLocalizations.of(context)!.clearCache : AppLocalizations.of(context)!.cacheEmpty,
+            cacheStats['fileNum'] != 0 ? AppLocalizations.of(context).clearCache : AppLocalizations.of(context).cacheEmpty,
           ),
           onPressed: cacheStats['fileNum'] != 0
               ? () {
@@ -90,7 +90,7 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
           height: 24.0,
         ),
         Text(
-          AppLocalizations.of(context)!.spaceUsed,
+          AppLocalizations.of(context).spaceUsed,
           style: Theme.of(context)
               .textTheme
               .labelLarge!
@@ -104,7 +104,7 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${cacheStats['fileNum'].toString()} ${cacheStats['fileNum'] == 1 ? AppLocalizations.of(context)!.file : AppLocalizations.of(context)!.files}",
+              "${cacheStats['fileNum'].toString()} ${cacheStats['fileNum'] == 1 ? AppLocalizations.of(context).file : AppLocalizations.of(context).files}",
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
@@ -138,13 +138,13 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
             children: [
               TextSpan(
                 text:
-                AppLocalizations.of(context)!.otherStorageSettingsAvailablePart1,
+                AppLocalizations.of(context).otherStorageSettingsAvailablePart1,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
               TextSpan(
-                text: AppLocalizations.of(context)!.systemSettings,
+                text: AppLocalizations.of(context).systemSettings,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       decoration: TextDecoration.underline,
@@ -155,7 +155,7 @@ class _CacheSettingsState extends SettingsColoursState<CacheSettings> {
                   },
               ),
               TextSpan(
-                text: AppLocalizations.of(context)!.otherStorageSettingsAvailablePart2,
+                text: AppLocalizations.of(context).otherStorageSettingsAvailablePart2,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

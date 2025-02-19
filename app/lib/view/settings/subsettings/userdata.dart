@@ -16,7 +16,7 @@ class _UserDataSettingsState extends SettingsColoursState<UserDataSettings> {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: Text(AppLocalizations.of(context)!.userData),
+      title: Text(AppLocalizations.of(context).userData),
       backgroundColor: backgroundColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
       children: [
@@ -43,7 +43,7 @@ class _UserDataSettingsState extends SettingsColoursState<UserDataSettings> {
           height: 8.0,
         ),
         Text(
-          AppLocalizations.of(context)!.settingsInfoUserData,
+          AppLocalizations.of(context).settingsInfoUserData,
           style: Theme.of(context).textTheme.bodySmall!.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),

@@ -27,7 +27,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
               Icons.search,
               size: 60,
             ),
-            Text(AppLocalizations.of(context)!.noCoursesFound)
+            Text(AppLocalizations.of(context).noCoursesFound)
           ],
         ),
       );
@@ -53,7 +53,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                   ? [
                       globalSettings!['showHomework'] == true
                           ? Tooltip(
-                              message: AppLocalizations.of(context)!.lessons,
+                              message: AppLocalizations.of(context).lessons,
                               child: IconButton(
                                 icon: const Icon(Icons.school_outlined),
                                 onPressed: () {
@@ -69,7 +69,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                               ),
                             )
                           : Tooltip(
-                              message: AppLocalizations.of(context)!.homework,
+                              message: AppLocalizations.of(context).homework,
                               child: IconButton(
                                 icon: const Icon(Icons.task_outlined),
                                 onPressed: () {
@@ -171,7 +171,7 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                     ),
                   );
                 },
-                label: Text(AppLocalizations.of(context)!.attendances),
+                label: Text(AppLocalizations.of(context).attendances),
                 icon: const Icon(Icons.access_alarm),
               ),
             ),

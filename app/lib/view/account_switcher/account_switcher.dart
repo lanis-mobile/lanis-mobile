@@ -41,7 +41,7 @@ class _AccountSwitcherState extends State<AccountSwitcher> {
                   }
                   await sph!.session.deAuthenticate();
                   await accountDatabase.setNextLogin(account.id);
-                  authenticationState.reset(context);
+                  if(context.mounted) authenticationState.reset(context);
                 }, dbID: account.id,
               );
             },

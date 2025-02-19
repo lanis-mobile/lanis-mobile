@@ -101,20 +101,20 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       if (mounted) {
         await showDialog(context: context, builder: (context) => AlertDialog(
           icon: Icon(Icons.notifications_off),
-          title: Text(AppLocalizations.of(context)!.notifications),
-          content: Text(AppLocalizations.of(context)!.notificationPermanentlyDenied),
+          title: Text(AppLocalizations.of(context).notifications),
+          content: Text(AppLocalizations.of(context).notificationPermanentlyDenied),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(AppLocalizations.of(context)!.close),
+              child: Text(AppLocalizations.of(context).close),
             ),
             TextButton(
               onPressed: () {
                 AppSettings.openAppSettings(asAnotherTask: false, type: AppSettingsType.notification);
               },
-              child: Text(AppLocalizations.of(context)!.open),
+              child: Text(AppLocalizations.of(context).open),
             ),
           ],
         ));
@@ -169,27 +169,27 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   Widget tipText(EdgeInsets padding, EdgeInsets margin, double? width) {
     List<Widget> toolTips = <Widget>[
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage1,
+          text: AppLocalizations.of(context).startUpMessage1,
           children: [toolTipIcon(Icons.code)])),
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage2,
+          text: AppLocalizations.of(context).startUpMessage2,
           children: [toolTipIcon(Icons.people)])),
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage3,
+          text: AppLocalizations.of(context).startUpMessage3,
           children: [toolTipIcon(Icons.filter_alt)])),
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage4,
+          text: AppLocalizations.of(context).startUpMessage4,
           children: [toolTipIcon(Icons.star)])),
-      Text(AppLocalizations.of(context)!.startUpMessage5),
-      Text(AppLocalizations.of(context)!.startUpMessage6),
+      Text(AppLocalizations.of(context).startUpMessage5),
+      Text(AppLocalizations.of(context).startUpMessage6),
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage7,
+          text: AppLocalizations.of(context).startUpMessage7,
           children: [toolTipIcon(Icons.favorite)])),
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage8,
+          text: AppLocalizations.of(context).startUpMessage8,
           children: [toolTipIcon(Icons.code)])),
       Text.rich(TextSpan(
-          text: AppLocalizations.of(context)!.startUpMessage9,
+          text: AppLocalizations.of(context).startUpMessage9,
           children: [toolTipIcon(Icons.settings)])),
     ];
 
@@ -218,11 +218,11 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   }
 
   BottomSheet errorDialog(BuildContext context) {
-    var text = AppLocalizations.of(context)!.startupError;
+    var text = AppLocalizations.of(context).startupError;
     if (authenticationState.exception.value is LanisDownException) {
-      text = AppLocalizations.of(context)!.lanisDownError;
+      text = AppLocalizations.of(context).lanisDownError;
     } else if (authenticationState.exception.value is NoConnectionException) {
-      text = AppLocalizations.of(context)!.noInternetConnection2;
+      text = AppLocalizations.of(context).noInternetConnection2;
     }
     return BottomSheet(
       enableDrag: false,
@@ -244,7 +244,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
                   launchUrl(Uri.parse(
                       "https://info.schulportal.hessen.de/status-des-schulportal-hessen/"));
                 },
-                tooltip: AppLocalizations.of(context)!.checkStatus,
+                tooltip: AppLocalizations.of(context).checkStatus,
               ),
               Icon(
                 authenticationState.exception.value is NoConnectionException ? Icons.wifi_off : Icons.error,
@@ -255,7 +255,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                tooltip: AppLocalizations.of(context)!.tryAgain,
+                tooltip: AppLocalizations.of(context).tryAgain,
               )
             ],
           ),
@@ -268,7 +268,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text.rich(
                 TextSpan(
-                  text: AppLocalizations.of(context)!.startupErrorMessage,
+                  text: AppLocalizations.of(context).startupErrorMessage,
                   children: [
                     TextSpan(
                         text: "\n\n${authenticationState.exception.value.runtimeType}: ${authenticationState.exception.value?.cause}",
@@ -281,7 +281,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: ElevatedButton.icon(
               icon: Icon(Icons.lock_reset),
-              label: Text(AppLocalizations.of(context)!.resetAccount),
+              label: Text(AppLocalizations.of(context).resetAccount),
               onPressed: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
@@ -294,7 +294,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
           if (authenticationState.exception.value is LanisDownException)
             Text.rich(TextSpan(children: [
               TextSpan(
-                  text: AppLocalizations.of(context)!.lanisDownErrorMessage,
+                  text: AppLocalizations.of(context).lanisDownErrorMessage,
                   style: Theme.of(context).textTheme.labelLarge)
             ], ), ),
             Flexible(child: SingleChildScrollView(

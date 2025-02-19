@@ -25,8 +25,8 @@ class LessonsStudentParser extends AppletParser<Lessons> {
     var document = parse(encryptedHTML);
 
     var kursmappenDOM = document.getElementById("mappen");
-    final _row = kursmappenDOM?.getElementsByClassName("row");
-    var mappen = _row!.isEmpty ? null : _row[0].children;
+    final row = kursmappenDOM?.getElementsByClassName("row");
+    var mappen = row!.isEmpty ? null : row[0].children;
     if (mappen != null) {
       for (var mappe in mappen) {
         String url = mappe.querySelector("a.btn.btn-primary")!.attributes["href"]!;
