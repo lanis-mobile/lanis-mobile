@@ -25,7 +25,10 @@ class _QuickActionsState extends State<QuickActions> {
 
     List<AppletDefinition> applets = [];
     for (final applet in AppDefinitions.applets) {
-      if (sph!.session.doesSupportFeature(applet)) {
+      if (
+      sph!.session.doesSupportFeature(applet) &&
+          (!Platform.isAndroid || applet.appletType != AppletType.navigation)
+      ) {
         applets.add(applet);
       }
     }
@@ -44,8 +47,7 @@ class _QuickActionsState extends State<QuickActions> {
                 return Container();
               }
 
-              final String? quickActionsString = snapshot.data;
-              List<String> quickActions = quickActionsString == null ? [] : quickActionsString.split(',');
+              final List<String> quickActions = List<String>.from(snapshot.data ?? []);
               // Remove any empty or null strings
               quickActions.removeWhere((element) => element.isEmpty);
 
@@ -80,7 +82,7 @@ class _QuickActionsState extends State<QuickActions> {
                         } else {
                           quickActions.remove(applet.appletPhpUrl);
                         }
-                        accountDatabase.kv.set('quick-actions', quickActions.join(','));
+                        accountDatabase.kv.set('quick-actions', quickActions);
                       },
                       useInkWell: true,
                     ),
@@ -116,7 +118,7 @@ class _QuickActionsState extends State<QuickActions> {
                         } else {
                           quickActions.remove(external.id);
                         }
-                        accountDatabase.kv.set('quick-actions', quickActions.join(','));
+                        accountDatabase.kv.set('quick-actions', quickActions);
                       },
                       useInkWell: true,
                     ),

@@ -10,12 +10,15 @@ import 'package:sph_plan/utils/logger.dart';
 
 late final QuickActions quickActions;
 bool _quickActionsSet = false;
+bool _requestFailed = false;
 
 class QuickActionsStartUp {
 
   static final Completer<void> _initializationCompleter = Completer<void>();
+  bool _initialized = false;
 
   QuickActionsStartUp() {
+    if(_initialized) return;
     quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       for (final applet in AppDefinitions.applets) {
@@ -29,6 +32,7 @@ class QuickActionsStartUp {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             logger.i('Opening applet: ${applet.appletPhpUrl}');
             Destination destination = Destination.fromAppletDefinition(applet);
+            if(homeKey.currentContext != null) Navigator.popUntil(homeKey.currentContext!, (route) => route.isFirst);
             if(destination.enableBottomNavigation) {
               int appletIndex = AppDefinitions.getIndexByPhpIdentifier(
                   applet.appletPhpUrl);
@@ -63,24 +67,35 @@ class QuickActionsStartUp {
         }
       }
     });
+    logger.i('Initialized quick actions');
     _initializationCompleter.complete();
+    _initialized = true;
   }
 
-  static Future<void> waitForInitialization() async {
-    await _initializationCompleter.future.timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        logger.e('QuickActions initialization timed out. Likely the user is not logged in.');
-      },
-    );
+  static Future<bool> waitForInitialization() async {
+    try {
+      await _initializationCompleter.future.timeout(
+        const Duration(seconds: 20),
+        onTimeout: () => throw TimeoutException('QuickActions initialization timed out.'),
+      );
+      return true;
+    } on TimeoutException catch (_) {
+      logger.e('QuickActions initialization timed out. Likely the user is not logged in.');
+      return false;
+    }
   }
 
   static void setNames(BuildContext context) async {
     if (_quickActionsSet) return;
-    await waitForInitialization();
-    String? enabledShortcuts = await accountDatabase.kv.get('quick-actions');
+    if (_requestFailed) return;
+    var result = await waitForInitialization();
+    if (!result) {
+      _requestFailed = true;
+      return;
+    }
+    if (_quickActionsSet) return;
+    List<String> enabledShortcutsList = List<String>.from((await accountDatabase.kv.get('quick-actions')) ?? []);
     if (!context.mounted) return;
-    List enabledShortcutsList = enabledShortcuts?.split(',') ?? [];
 
     List<ShortcutItem> shortcuts = [];
     for (final applet in AppDefinitions.applets) {
