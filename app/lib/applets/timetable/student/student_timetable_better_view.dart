@@ -38,23 +38,6 @@ class _StudentTimetableBetterViewState
     return TimeTableHelper.mergeByIndices(data.planForAll!, customLessons);
   }
 
-  int getCurrentWeekNumber() {
-    final now = DateTime.now();
-    final firstDayOfYear = DateTime(now.year, 1, 1);
-    final days = now.difference(firstDayOfYear).inDays;
-    return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
-  }
-
-  double calculateColumnHeight(List<TimeTableRow> rows) {
-    double totalHeight = 0;
-    for (var row in rows) {
-      totalHeight +=
-          (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20) +
-              8;
-    }
-    return totalHeight;
-  }
-
   int currentWeekIndex = -1;
 
   @override
@@ -98,10 +81,18 @@ class _StudentTimetableBetterViewState
                 : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
           }
 
-          TimeTableData data = TimeTableData(selectedPlan, timetable, settings,
-              currentWeekIndex == 0 ? null : uniqueBadges[currentWeekIndex - 1]);
+          TimeTableData data = TimeTableData(
+              selectedPlan,
+              timetable,
+              settings,
+              currentWeekIndex == 0
+                  ? null
+                  : uniqueBadges[currentWeekIndex - 1]);
 
-          headerHeight = timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? 40 : 26;
+          headerHeight =
+              timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty
+                  ? 40
+                  : 26;
 
           return Scaffold(
               appBar: AppBar(
@@ -113,180 +104,237 @@ class _StudentTimetableBetterViewState
                       )
                     : null,
                 actions: [
-                  if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
-                    TextButton(
-                      onPressed: () {
-                        updateSettings(
-                        'student-selected-week', currentWeekIndex != 0);
-                        currentWeekIndex = (currentWeekIndex + 1) %
-                        (uniqueBadges.length + 1);
-                        },
-                      child: Text(
-                        (currentWeekIndex < 1)
-                            ? AppLocalizations.of(context)
-                            .timetableAllWeeks
-                            : AppLocalizations.of(context).timetableWeek(
-                            uniqueBadges[currentWeekIndex - 1]),
-                      ),
-                    ),
-                ],
-              ),
-              body: RefreshIndicator(
-                onRefresh: refresh!,
-                child: SingleChildScrollView(
-                  child: Stack(
-                    children: [
-                      Row(
-                        spacing: 4.0,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            spacing: 8.0,
-                            children: [
-                              SizedBox(
-                                height: headerHeight,
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      Text("KW ${getCurrentWeekNumber()}"),
-                                      timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? Text("${timetable.weekBadge!}-Woche") : SizedBox(),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              for (var (index, row) in data.hours.indexed)
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: row.type == TimeTableRowType.lesson
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainer
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainer
-                                            .withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  width: hourWidth,
-                                  height: itemHeight -
-                                      (row.type == TimeTableRowType.lesson
-                                          ? 0
-                                          : 20),
-                                  child: Column(
-                                    children: [
-                                      Text(row.label.replaceAll('Stunde', '')),
-                                      ...(row.type == TimeTableRowType.lesson
-                                          ? [
-                                              Text(
-                                                  "${row.startTime.format(context)} -"),
-                                              // Text(row.endTime.format(context))
-                                            ]
-                                          : [
-                                              // Text(
-                                              //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
-                                            ]),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Expanded(
-                            child: Row(
-                              spacing: 4.0,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                for (int i = 0; i < data.timetableDays.length; i++)
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        SizedBox(
-                                          height: headerHeight - 26,
-                                        ),
-                                        Container(
-                                          height: 26,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainer,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                DateTime(2020, 8, 3)
-                                                    .add(Duration(days: i))
-                                                    .format('E'),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8.0),
-                                        SizedBox(
-                                          height: calculateColumnHeight(data.hours),
-                                          child: LayoutBuilder(
-                                            builder: (context, constraints) {
-                                              return Stack(
-                                                children: [
-                                                  for (var (index, row)
-                                                      in data.hours.indexed)
-                                                    ListItem(
-                                                      iteration: index,
-                                                      row: row,
-                                                      data: data,
-                                                      timetableDays:
-                                                          data.timetableDays,
-                                                      i: i,
-                                                      width: constraints.maxWidth,
-                                                      settings: settings,
-                                                      updateSettings:
-                                                          updateSettings,
-                                                    ),
-                                                ],
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      children: [
+                        if (uniqueBadges.isNotEmpty &&
+                            timetable.weekBadge != null)
+                          TextButton(
+                            onPressed: () {
+                              updateSettings('student-selected-week',
+                                  currentWeekIndex != 0);
+                              currentWeekIndex = (currentWeekIndex + 1) %
+                                  (uniqueBadges.length + 1);
+                            },
+                            child: Text(
+                              (currentWeekIndex < 1)
+                                  ? AppLocalizations.of(context)
+                                      .timetableAllWeeks
+                                  : AppLocalizations.of(context).timetableWeek(
+                                      uniqueBadges[currentWeekIndex - 1]),
                             ),
                           ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              body: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: TimeTableView(
+                  data: data,
+                  timetable: timetable,
+                  settings: settings,
+                  updateSettings: updateSettings,
+                  refresh: refresh,
+                ),
+              ),
+              floatingActionButton: timetable.planForOwn != null
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                          heroTag: "toggle",
+                          tooltip: selectedType == TimeTableType.all
+                              ? AppLocalizations.of(context)
+                                  .timetableSwitchToPersonal
+                              : AppLocalizations.of(context)
+                                  .timetableSwitchToClass,
+                          onPressed: () {
+                            updateSettings(
+                                'student-selected-type',
+                                selectedType == TimeTableType.all
+                                    ? 'TimeTableType.own'
+                                    : 'TimeTableType.all');
+                          },
+                          child: Icon(selectedType == TimeTableType.all
+                              ? Icons.person
+                              : Icons.people),
+                        ),
+                      ],
+                    )
+                  : null);
+        });
+  }
+}
+
+class TimeTableView extends StatelessWidget {
+  final TimeTableData data;
+  final TimeTable timetable;
+  final Map<String, dynamic> settings;
+  final Function updateSettings;
+  final Future<void> Function()? refresh;
+
+  double calculateColumnHeight(List<TimeTableRow> rows) {
+    double totalHeight = 0;
+    for (var row in rows) {
+      totalHeight +=
+          (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20) +
+              8;
+    }
+    return totalHeight;
+  }
+
+  int getCurrentWeekNumber() {
+    final now = DateTime.now();
+    final firstDayOfYear = DateTime(now.year, 1, 1);
+    final days = now.difference(firstDayOfYear).inDays;
+    return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
+  }
+
+  const TimeTableView(
+      {super.key,
+      required this.data,
+      required this.timetable,
+      required this.settings,
+      required this.updateSettings,
+      this.refresh});
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: refresh!,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Stack(
+          children: [
+            Row(
+              spacing: 4.0,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  spacing: 8.0,
+                  children: [
+                    SizedBox(
+                      height: headerHeight,
+                      width: hourWidth,
+                      child: Column(
+                        children: [
+                          Text("KW ${getCurrentWeekNumber()}"),
+                          timetable.weekBadge != null &&
+                                  timetable.weekBadge!.isNotEmpty
+                              ? Text(
+                                  AppLocalizations.of(context)
+                                      .timetableWeek(timetable.weekBadge!),
+                                  style: TextStyle(
+                                      overflow: TextOverflow.ellipsis))
+                              : SizedBox(),
                         ],
                       ),
-                      TimeMarkerWidget(data: data, timetable: timetable),
+                    ),
+                    for (var (row) in data.hours)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: row.type == TimeTableRowType.lesson
+                              ? Theme.of(context).colorScheme.surfaceContainer
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainer
+                                  .withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        width: hourWidth,
+                        height: itemHeight -
+                            (row.type == TimeTableRowType.lesson ? 0 : 20),
+                        child: Column(
+                          children: [
+                            Text(row.label.replaceAll('Stunde', '')),
+                            ...(row.type == TimeTableRowType.lesson
+                                ? [
+                                    Text("${row.startTime.format(context)} -"),
+                                    // Text(row.endTime.format(context))
+                                  ]
+                                : [
+                                    // Text(
+                                    //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
+                                  ]),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                Expanded(
+                  child: Row(
+                    spacing: 4.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      for (int i = 0; i < data.timetableDays.length; i++)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SizedBox(
+                                height: headerHeight - 26,
+                              ),
+                              Container(
+                                height: 26,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainer,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateTime(2020, 8, 3)
+                                          .add(Duration(days: i))
+                                          .format('E'),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8.0),
+                              SizedBox(
+                                height: calculateColumnHeight(data.hours),
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return Stack(
+                                      children: [
+                                        for (var (index, row)
+                                            in data.hours.indexed)
+                                          ListItem(
+                                            iteration: index,
+                                            row: row,
+                                            data: data,
+                                            timetableDays: data.timetableDays,
+                                            i: i,
+                                            width: constraints.maxWidth,
+                                            settings: settings,
+                                            updateSettings: updateSettings,
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
-              ),
-              floatingActionButton: timetable.planForOwn != null ? Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                    heroTag: "toggle",
-                    tooltip: selectedType == TimeTableType.all
-                        ? AppLocalizations.of(context).timetableSwitchToPersonal
-                        : AppLocalizations.of(context).timetableSwitchToClass,
-                    onPressed: () {
-                      updateSettings(
-                          'student-selected-type',
-                          selectedType == TimeTableType.all
-                              ? 'TimeTableType.own'
-                              : 'TimeTableType.all');
-                    },
-                    child: Icon(selectedType == TimeTableType.all
-                        ? Icons.person
-                        : Icons.people),
-                  ),
-                ],
-              ) : null);
-        });
+              ],
+            ),
+            TimeMarkerWidget(data: data, timetable: timetable),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -305,15 +353,13 @@ class TimeMarkerWidget extends StatefulWidget {
 }
 
 class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
-
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final int msUntilNextMinute =
-        (60 - now.second) * 1000 - now.millisecond;
+    final int msUntilNextMinute = (60 - now.second) * 1000 - now.millisecond;
     _timer = Timer(Duration(milliseconds: msUntilNextMinute), () {
       if (mounted) setState(() {});
       _timer = Timer.periodic(Duration(minutes: 1), (timer) {
@@ -330,36 +376,53 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
 
   @override
   Widget build(BuildContext context) {
-
-    double offset = 0;
+    double offset = 8;
     final now = TimeOfDay.fromDateTime(DateTime.now());
-    for (var (index, lesson) in widget.data.hours!.indexed) {
+
+    if (now < widget.data.hours.first.startTime) {
+      return SizedBox();
+    }
+
+    if (now > widget.data.hours.last.endTime) {
+      return SizedBox();
+    }
+
+    for (var (lesson) in widget.data.hours) {
       // Check if lesson is already over and add the height of the lesson (or height of break)
       // If in the lesson add percentage of the lesson that has already passed
-      offset += 8;
+      final height =
+          lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20;
       if (now >= lesson.startTime && now <= lesson.endTime) {
-        offset += (now.differenceInMinutes(lesson.startTime) /
-                lesson.startTime.differenceInMinutes(lesson.endTime)) *
-            (lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20);
-        offset += 8;
+        final diff = height *
+            ((-now.differenceInMinutes(lesson.startTime)) /
+                lesson.startTime.differenceInMinutes(lesson.endTime));
+        offset += diff;
+
         break;
-      } else {
-        offset += lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20;
+      } else if (now > lesson.endTime) {
+        offset += height + 8;
       }
     }
 
     // Padding for the sidebar
     final barWidth = hourWidth + 4;
-    final dayWidth = (MediaQuery.of(context).size.width - barWidth - 2) / widget.data.timetableDays.length;
+    final dayWidth = (MediaQuery.of(context).size.width - barWidth - 10) /
+        widget.data.timetableDays.length;
 
     // Current day 0 Monday, 6 Sunday
     var currentDay = (DateTime.now().weekday - 1) % 7;
 
+    const double lineHeight = 2;
     return Positioned(
-      top: headerHeight + offset,
-      left: hourWidth + 4 + (currentDay * (dayWidth)) + (currentDay > 0 ? (currentDay - 1) * 2 : 0),
+      top: headerHeight + offset - (lineHeight / 2),
+      left: hourWidth +
+          4 +
+          (currentDay * (dayWidth)) +
+          (currentDay > 0 ? (currentDay - 1) * 2 : 0),
       child: Container(
-        color: Colors.red, width: dayWidth - 2, height: 3,
+        color: Colors.red,
+        width: dayWidth - 2,
+        height: lineHeight,
       ),
     );
   }
@@ -765,13 +828,13 @@ class TimeTableData {
 
   bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
     return (weekBadge == null ||
-        weekBadge == "" ||
-        lesson.badge == null ||
-        lesson.badge == "")
+            weekBadge == "" ||
+            lesson.badge == null ||
+            lesson.badge == "")
         ? true
         : sameWeek
-        ? (weekBadge == lesson.badge)
-        : (weekBadge != lesson.badge);
+            ? (weekBadge == lesson.badge)
+            : (weekBadge != lesson.badge);
   }
 
   TimeTableData(List<TimetableDay> data, TimeTable timetable,
@@ -796,7 +859,8 @@ class TimeTableData {
     for (var day in data) {
       List<TimetableSubject> dayData = [];
       for (var subject in day) {
-        if (isCurrentWeek(subject, true) && (hiddenLessons == null || !hiddenLessons.contains(subject.id))) {
+        if (isCurrentWeek(subject, true) &&
+            (hiddenLessons == null || !hiddenLessons.contains(subject.id))) {
           dayData.add(subject);
         }
       }
