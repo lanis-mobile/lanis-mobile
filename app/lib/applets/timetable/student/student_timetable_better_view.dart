@@ -13,7 +13,7 @@ import 'package:sph_plan/models/timetable.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
 final double itemHeight = 40;
-final double headerHeight = 30;
+double headerHeight = 40;
 
 class StudentTimetableBetterView extends StatefulWidget {
   final Function? openDrawerCb;
@@ -85,6 +85,8 @@ class _StudentTimetableBetterViewState
 
           TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
 
+          headerHeight = timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? 40 : 26;
+
           return Scaffold(
               appBar: AppBar(
                 title: Text(timeTableDefinition.label(context)),
@@ -107,6 +109,14 @@ class _StudentTimetableBetterViewState
                         children: [
                           SizedBox(
                             height: headerHeight,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  Text("KW ${getCurrentWeekNumber()}"),
+                                  timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? Text("${timetable.weekBadge!}-Woche") : SizedBox(),
+                                ],
+                              ),
+                            ),
                           ),
                           for (var (index, row) in data.hours.indexed)
                             Container(
@@ -156,8 +166,11 @@ class _StudentTimetableBetterViewState
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
+                                    SizedBox(
+                                      height: headerHeight - 26,
+                                    ),
                                     Container(
-                                      height: headerHeight,
+                                      height: 26,
                                       decoration: BoxDecoration(
                                         color: Theme.of(context)
                                             .colorScheme
@@ -165,11 +178,16 @@ class _StudentTimetableBetterViewState
                                         borderRadius:
                                             BorderRadius.circular(8.0),
                                       ),
-                                      child: Text(
-                                        DateTime(2020, 8, 3)
-                                            .add(Duration(days: i))
-                                            .format('E'),
-                                        textAlign: TextAlign.center,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            DateTime(2020, 8, 3)
+                                                .add(Duration(days: i))
+                                                .format('E'),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     const SizedBox(height: 8.0),
