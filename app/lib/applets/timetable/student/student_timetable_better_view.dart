@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:dart_date/dart_date.dart';
@@ -54,6 +55,8 @@ class _StudentTimetableBetterViewState
     return totalHeight;
   }
 
+  int currentWeekIndex = -1;
+
   @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder<TimeTable>(
@@ -83,8 +86,20 @@ class _StudentTimetableBetterViewState
           bool showByWeek = settings['student-selected-week'] == true;
           List<TimetableDay> selectedPlan =
               getSelectedPlan(timetable, selectedType, settings);
+          final List<String> uniqueBadges = selectedPlan
+              .expand((innerList) => innerList.map((e) => e.badge))
+              .whereType<String>()
+              .toSet()
+              .toList();
 
-          TimeTableData data = TimeTableData(selectedPlan, timetable, settings);
+          if (currentWeekIndex == -1) {
+            currentWeekIndex = (showByWeek || timetable.weekBadge == null)
+                ? 0
+                : uniqueBadges.indexOf(timetable.weekBadge!) + 1;
+          }
+
+          TimeTableData data = TimeTableData(selectedPlan, timetable, settings,
+              currentWeekIndex == 0 ? null : uniqueBadges[currentWeekIndex - 1]);
 
           headerHeight = timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? 40 : 26;
 
@@ -97,6 +112,24 @@ class _StudentTimetableBetterViewState
                         onPressed: () => widget.openDrawerCb!(),
                       )
                     : null,
+                actions: [
+                  if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
+                    TextButton(
+                      onPressed: () {
+                        updateSettings(
+                        'student-selected-week', currentWeekIndex != 0);
+                        currentWeekIndex = (currentWeekIndex + 1) %
+                        (uniqueBadges.length + 1);
+                        },
+                      child: Text(
+                        (currentWeekIndex < 1)
+                            ? AppLocalizations.of(context)
+                            .timetableAllWeeks
+                            : AppLocalizations.of(context).timetableWeek(
+                            uniqueBadges[currentWeekIndex - 1]),
+                      ),
+                    ),
+                ],
               ),
               body: RefreshIndicator(
                 onRefresh: refresh!,
@@ -227,41 +260,7 @@ class _StudentTimetableBetterViewState
                           ),
                         ],
                       ),
-                      Builder(
-                        builder: (context) {
-
-                          double offset = 0;
-                          final now = TimeOfDay.fromDateTime(DateTime.now());
-                          for (var (index, lesson) in timetable.hours!.indexed) {
-                            if (now > lesson.endTime) {
-                              offset += lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20;
-                              offset += 8;
-                            }
-                            if (now >= lesson.startTime && now <= lesson.endTime) {
-                              offset += 8;
-                              offset += (now.minute / 60) * (lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20);
-                            }
-                            if (now < lesson.startTime) {
-                              continue;
-                            }
-                          }
-
-                          // Padding for the sidebar
-                          final barWidth = hourWidth + 4;
-                          final dayWidth = (MediaQuery.of(context).size.width - barWidth - 2) / data.timetableDays.length;
-
-                          // Current day 0 Monday, 6 Sunday
-                          var currentDay = (DateTime.now().weekday - 1) % 7;
-
-                          return Positioned(
-                            top: headerHeight + offset,
-                            left: hourWidth + 4 + (currentDay * (dayWidth)) + (currentDay > 0 ? (currentDay - 1) * 2 : 0),
-                            child: Container(
-                              color: Colors.red, width: dayWidth - 2, height: 3,
-                            ),
-                          );
-                        }
-                      ),
+                      TimeMarkerWidget(data: data, timetable: timetable),
                     ],
                   ),
                 ),
@@ -288,6 +287,81 @@ class _StudentTimetableBetterViewState
                 ],
               ) : null);
         });
+  }
+}
+
+class TimeMarkerWidget extends StatefulWidget {
+  const TimeMarkerWidget({
+    super.key,
+    required this.data,
+    required this.timetable,
+  });
+
+  final TimeTableData data;
+  final TimeTable timetable;
+
+  @override
+  State<TimeMarkerWidget> createState() => _TimeMarkerWidgetState();
+}
+
+class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
+
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    final int msUntilNextMinute =
+        (60 - now.second) * 1000 - now.millisecond;
+    _timer = Timer(Duration(milliseconds: msUntilNextMinute), () {
+      if (mounted) setState(() {});
+      _timer = Timer.periodic(Duration(minutes: 1), (timer) {
+        if (mounted) setState(() {});
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    double offset = 0;
+    final now = TimeOfDay.fromDateTime(DateTime.now());
+    for (var (index, lesson) in widget.data.hours!.indexed) {
+      // Check if lesson is already over and add the height of the lesson (or height of break)
+      // If in the lesson add percentage of the lesson that has already passed
+      offset += 8;
+      if (now >= lesson.startTime && now <= lesson.endTime) {
+        offset += (now.differenceInMinutes(lesson.startTime) /
+                lesson.startTime.differenceInMinutes(lesson.endTime)) *
+            (lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20);
+        offset += 8;
+        break;
+      } else {
+        offset += lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20;
+      }
+    }
+
+    // Padding for the sidebar
+    final barWidth = hourWidth + 4;
+    final dayWidth = (MediaQuery.of(context).size.width - barWidth - 2) / widget.data.timetableDays.length;
+
+    // Current day 0 Monday, 6 Sunday
+    var currentDay = (DateTime.now().weekday - 1) % 7;
+
+    return Positioned(
+      top: headerHeight + offset,
+      left: hourWidth + 4 + (currentDay * (dayWidth)) + (currentDay > 0 ? (currentDay - 1) * 2 : 0),
+      child: Container(
+        color: Colors.red, width: dayWidth - 2, height: 3,
+      ),
+    );
   }
 }
 
@@ -686,10 +760,22 @@ class ItemBlock extends StatelessWidget {
 
 class TimeTableData {
   final List<TimeTableRow> hours = [];
+  late final String? weekBadge;
   List<TimetableDay> timetableDays = [];
 
+  bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
+    return (weekBadge == null ||
+        weekBadge == "" ||
+        lesson.badge == null ||
+        lesson.badge == "")
+        ? true
+        : sameWeek
+        ? (weekBadge == lesson.badge)
+        : (weekBadge != lesson.badge);
+  }
+
   TimeTableData(List<TimetableDay> data, TimeTable timetable,
-      Map<String, dynamic> settings) {
+      Map<String, dynamic> settings, this.weekBadge) {
     for (var (index, hour) in timetable.hours!.indexed) {
       if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
         if (timetable.hours![index - 1].endTime
@@ -710,7 +796,7 @@ class TimeTableData {
     for (var day in data) {
       List<TimetableSubject> dayData = [];
       for (var subject in day) {
-        if (hiddenLessons == null || !hiddenLessons.contains(subject.id)) {
+        if (isCurrentWeek(subject, true) && (hiddenLessons == null || !hiddenLessons.contains(subject.id))) {
           dayData.add(subject);
         }
       }
