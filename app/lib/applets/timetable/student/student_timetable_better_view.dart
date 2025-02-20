@@ -30,7 +30,7 @@ class _StudentTimetableBetterViewState
       Map<String, dynamic> settings) {
     List<List<TimetableSubject>>? customLessons =
         TimeTableHelper.getCustomLessons(settings);
-    if (selectedType == TimeTableType.own) {
+    if (selectedType == TimeTableType.own && data.planForOwn != null) {
       return TimeTableHelper.mergeByIndices(data.planForOwn!, customLessons);
     }
     return TimeTableHelper.mergeByIndices(data.planForAll!, customLessons);
@@ -208,7 +208,7 @@ class _StudentTimetableBetterViewState
                   ),
                 ),
               ),
-              floatingActionButton: Column(
+              floatingActionButton: timetable.planForOwn != null ? Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   FloatingActionButton(
@@ -228,7 +228,7 @@ class _StudentTimetableBetterViewState
                         : Icons.people),
                   ),
                 ],
-              ));
+              ) : null);
         });
   }
 }
