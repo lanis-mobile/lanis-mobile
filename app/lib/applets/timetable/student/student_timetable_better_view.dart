@@ -14,6 +14,7 @@ import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
 final double itemHeight = 40;
 double headerHeight = 40;
+final double hourWidth = 70;
 
 class StudentTimetableBetterView extends StatefulWidget {
   final Function? openDrawerCb;
@@ -100,127 +101,166 @@ class _StudentTimetableBetterViewState
               body: RefreshIndicator(
                 onRefresh: refresh!,
                 child: SingleChildScrollView(
-                  child: Row(
-                    spacing: 4.0,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Column(
-                        spacing: 8.0,
+                      Row(
+                        spacing: 4.0,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: headerHeight,
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  Text("KW ${getCurrentWeekNumber()}"),
-                                  timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? Text("${timetable.weekBadge!}-Woche") : SizedBox(),
-                                ],
-                              ),
-                            ),
-                          ),
-                          for (var (index, row) in data.hours.indexed)
-                            Container(
-                              decoration: BoxDecoration(
-                                color: row.type == TimeTableRowType.lesson
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainer
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainer
-                                        .withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              width: 70.0,
-                              height: itemHeight -
-                                  (row.type == TimeTableRowType.lesson
-                                      ? 0
-                                      : 20),
-                              child: Column(
-                                children: [
-                                  Text(row.label.replaceAll('Stunde', '')),
-                                  ...(row.type == TimeTableRowType.lesson
-                                      ? [
-                                          Text(
-                                              "${row.startTime.format(context)} -"),
-                                          // Text(row.endTime.format(context))
-                                        ]
-                                      : [
-                                          // Text(
-                                          //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
-                                        ]),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      Expanded(
-                        child: Row(
-                          spacing: 4.0,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            for (int i = 0; i < data.timetableDays.length; i++)
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    SizedBox(
-                                      height: headerHeight - 26,
-                                    ),
-                                    Container(
-                                      height: 26,
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainer,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            DateTime(2020, 8, 3)
-                                                .add(Duration(days: i))
-                                                .format('E'),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8.0),
-                                    SizedBox(
-                                      height: calculateColumnHeight(data.hours),
-                                      child: LayoutBuilder(
-                                        builder: (context, constraints) {
-                                          return Stack(
-                                            children: [
-                                              for (var (index, row)
-                                                  in data.hours.indexed)
-                                                ListItem(
-                                                  iteration: index,
-                                                  row: row,
-                                                  data: data,
-                                                  timetableDays:
-                                                      data.timetableDays,
-                                                  i: i,
-                                                  width: constraints.maxWidth,
-                                                  settings: settings,
-                                                  updateSettings:
-                                                      updateSettings,
-                                                ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                          Column(
+                            spacing: 8.0,
+                            children: [
+                              SizedBox(
+                                height: headerHeight,
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      Text("KW ${getCurrentWeekNumber()}"),
+                                      timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty ? Text("${timetable.weekBadge!}-Woche") : SizedBox(),
+                                    ],
+                                  ),
                                 ),
                               ),
-                          ],
-                        ),
+                              for (var (index, row) in data.hours.indexed)
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: row.type == TimeTableRowType.lesson
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainer
+                                            .withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  width: hourWidth,
+                                  height: itemHeight -
+                                      (row.type == TimeTableRowType.lesson
+                                          ? 0
+                                          : 20),
+                                  child: Column(
+                                    children: [
+                                      Text(row.label.replaceAll('Stunde', '')),
+                                      ...(row.type == TimeTableRowType.lesson
+                                          ? [
+                                              Text(
+                                                  "${row.startTime.format(context)} -"),
+                                              // Text(row.endTime.format(context))
+                                            ]
+                                          : [
+                                              // Text(
+                                              //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
+                                            ]),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Expanded(
+                            child: Row(
+                              spacing: 4.0,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                for (int i = 0; i < data.timetableDays.length; i++)
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        SizedBox(
+                                          height: headerHeight - 26,
+                                        ),
+                                        Container(
+                                          height: 26,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainer,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                DateTime(2020, 8, 3)
+                                                    .add(Duration(days: i))
+                                                    .format('E'),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8.0),
+                                        SizedBox(
+                                          height: calculateColumnHeight(data.hours),
+                                          child: LayoutBuilder(
+                                            builder: (context, constraints) {
+                                              return Stack(
+                                                children: [
+                                                  for (var (index, row)
+                                                      in data.hours.indexed)
+                                                    ListItem(
+                                                      iteration: index,
+                                                      row: row,
+                                                      data: data,
+                                                      timetableDays:
+                                                          data.timetableDays,
+                                                      i: i,
+                                                      width: constraints.maxWidth,
+                                                      settings: settings,
+                                                      updateSettings:
+                                                          updateSettings,
+                                                    ),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Builder(
+                        builder: (context) {
+
+                          double offset = 0;
+                          final now = TimeOfDay.fromDateTime(DateTime.now());
+                          for (var (index, lesson) in timetable.hours!.indexed) {
+                            if (now > lesson.endTime) {
+                              offset += lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20;
+                              offset += 8;
+                            }
+                            if (now >= lesson.startTime && now <= lesson.endTime) {
+                              offset += 8;
+                              offset += (now.minute / 60) * (lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20);
+                            }
+                            if (now < lesson.startTime) {
+                              continue;
+                            }
+                          }
+
+                          // Padding for the sidebar
+                          final barWidth = hourWidth + 4;
+                          final dayWidth = (MediaQuery.of(context).size.width - barWidth - 2) / data.timetableDays.length;
+
+                          // Current day 0 Monday, 6 Sunday
+                          var currentDay = (DateTime.now().weekday - 1) % 7;
+
+                          return Positioned(
+                            top: headerHeight + offset,
+                            left: hourWidth + 4 + (currentDay * (dayWidth)) + (currentDay > 0 ? (currentDay - 1) * 2 : 0),
+                            child: Container(
+                              color: Colors.red, width: dayWidth - 2, height: 3,
+                            ),
+                          );
+                        }
                       ),
                     ],
                   ),
