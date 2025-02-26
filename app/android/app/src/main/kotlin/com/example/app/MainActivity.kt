@@ -1,15 +1,9 @@
 package com.example.app
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -123,40 +117,12 @@ class MainActivity: FlutterActivity() {
      * Take a photo using the system camera and return the image as path
      */
     private fun takePhoto(callback: (Uri?) -> Unit) {
-        var cameraPermissionGranted = false
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(intent, takePhotoCode)
 
-        val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { // WARUUUUM
-            isGranted: Boolean ->
-                if (isGranted) {
-                    cameraPermissionGranted = true
-                } else {
-                    val text = R.string.errorCameraRefused
-                    val duration = Toast.LENGTH_SHORT
-
-                    val toast = Toast.makeText(this, text, duration)
-                    toast.show()
-                }
-            }
-
-
-        when {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
-                cameraPermissionGranted = true
-            }
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        }
-
-        if (cameraPermissionGranted) {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent, takePhotoCode)
-
-            takePhotoCallback = callback
-        } else {
-            callback(null)
-        }
+        takePhotoCallback = callback
     }
+
 
     companion object {
         private const val STORAGE_CHANNEL = "io.github.lanis-mobile/storage"
