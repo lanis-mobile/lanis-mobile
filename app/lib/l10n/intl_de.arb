@@ -89,6 +89,7 @@
   "unknownFile": "Unbekannte Datei",
 
   "camera": "Kamera",
+  "cameraPermissionToast": "Bitte erlaube den Kamera zugriff",
   "documentScanner": "Dokumentenscanner",
   "gallery": "Gallerie",
   "fileManager": "Dateien",

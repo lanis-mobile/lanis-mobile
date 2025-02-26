@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/utils/file_operations.dart';
 import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
@@ -44,6 +45,7 @@ extension Actions on PickedFile {
 }
 
 const storageChannel = MethodChannel('io.github.lanis-mobile/storage');
+const utilsChannel = MethodChannel('io.github.lanis-mobile/utils');
 
 /// Allows the user to pick any file using any supported method
 Future<PickedFile?> pickSingleFile(
@@ -122,7 +124,7 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                     if (allowedMethods[2])
                       (MenuItemButton(
                         onPressed: () async {
-                          pickedFile = await pickFileUsingCamera();
+                          pickedFile = await pickFileUsingCamera(context);
                           if (context.mounted) {
                             Navigator.pop(context);
                           }
@@ -184,7 +186,16 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
 
 
 // TODO: Add iOS support
-Future<PickedFile?> pickFileUsingCamera() async {
+Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
+  var status = await Permission.camera.status;
+  if (status.isDenied || status.isPermanentlyDenied) {
+    final request = await Permission.camera.request();
+    if ((request.isDenied || request.isPermanentlyDenied) && context.mounted) {
+      await utilsChannel.invokeMethod("showToastShort", { "text": AppLocalizations.of(context).cameraPermissionToast }); // Just why do I need a library or native code to do this
+      return null;
+    }
+  }
+
   String? path = await storageChannel.invokeMethod("takePhoto");
   logger.d("Path: $path");
   return null;

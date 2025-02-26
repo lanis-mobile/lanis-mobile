@@ -120,6 +120,7 @@
   "unknownFile": "Unknown File",
 
   "camera": "Camera",
+  "cameraPermissionToast": "Please grant camera permission",
   "documentScanner": "Document scanner",
   "gallery": "Gallery",
   "fileManager": "Files",

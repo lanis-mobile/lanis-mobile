@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
+import android.widget.Toast
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -24,9 +25,20 @@ class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger,
-            STORAGE_CHANNEL
-        ).setMethodCallHandler { call, result ->
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, UTILS_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "showToastShort" -> {
+                    val text = call.argument<String>("text").toString()
+                    showToast(text, Toast.LENGTH_SHORT)
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, STORAGE_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "saveFile" -> {
                     filePath = call.argument<String>("filePath").toString()
@@ -123,8 +135,14 @@ class MainActivity: FlutterActivity() {
         takePhotoCallback = callback
     }
 
+    private fun showToast(text: String, duration: Int) {
+        val toast = Toast.makeText(this, text, duration)
+        toast.show()
+    }
+
 
     companion object {
+        private const val UTILS_CHANNEL = "io.github.lanis-mobile/utils"
         private const val STORAGE_CHANNEL = "io.github.lanis-mobile/storage"
     }
 }
