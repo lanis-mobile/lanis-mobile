@@ -9,6 +9,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/utils/file_operations.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -184,7 +185,9 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
 
 // TODO: Add iOS support
 Future<PickedFile?> pickFileUsingCamera() async {
-  String? path = await storageChannel.invokeMethod("makePhoto");
+  String? path = await storageChannel.invokeMethod("takePhoto");
+  logger.d("Path: $path");
+  return null;
 }
 
 /// This will return null if called on anything other than iOS
