@@ -210,9 +210,11 @@ class SubstitutionDay {
 /// A data class to store all substitution information available
 class SubstitutionPlan {
   final List<SubstitutionDay> days;
-  DateTime lastUpdated = DateTime.now();
+  DateTime lastUpdated;
 
-  SubstitutionPlan({List<SubstitutionDay>? days}) : days = days ?? [];
+  SubstitutionPlan({List<SubstitutionDay>? days, DateTime? lastUpdated}) 
+      : days = days ?? [],
+        lastUpdated = lastUpdated ?? DateTime.now();
 
   void add(SubstitutionDay substitutionDay) {
     days.add(substitutionDay);
