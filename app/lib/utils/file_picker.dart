@@ -181,6 +181,22 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
   }
 }
 
+
+// TODO: Add iOS support
+Future<PickedFile?> pickFileUsingCamera() async {
+  String? path = await storageChannel.invokeMethod("makePhoto");
+}
+
+/// This will return null if called on anything other than iOS
+Future<PickedFile?> pickFileUsingGallery() async {
+  if (Platform.isIOS) {
+    return null;
+  } else {
+    return null;
+  }
+}
+
+
 // TODO: Add iOS support
 Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
   List<String> paths = List.empty(growable: true);
@@ -244,19 +260,6 @@ Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
 
   PickedFile pickedFile = PickedFile(name: filePath.split("/").last, path: filePath, size: await file.length());
   return pickedFile;
-}
-
-Future<PickedFile?> pickFileUsingCamera() async {
-  return null;
-}
-
-/// This will return null if called on anything other than iOS
-Future<PickedFile?> pickFileUsingGallery() async {
-  if (Platform.isIOS) {
-    return null;
-  } else {
-    return null;
-  }
 }
 
 Future<String?> mergeImagesIntoPDF(List<String> paths, BuildContext context) async {

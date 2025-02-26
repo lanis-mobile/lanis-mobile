@@ -3,6 +3,7 @@ package com.example.app
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -16,8 +17,10 @@ import java.io.IOException
 class MainActivity: FlutterActivity() {
     private val createFileCode = 1404
     private val scanDocumentCode = 4200
+    private val takePhotoCode = 4242
     private var filePath = ""
     private var scanDocumentCallback: ((Uri?) -> Unit)? = null
+    private var takePhotoCallback: ((Uri?) -> Unit)? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -31,11 +34,12 @@ class MainActivity: FlutterActivity() {
                 }
                 "scanDocument" -> {
                     scanDocument { uri ->
-                        if (uri != null) {
-                            result.success(uri.path)
-                        } else {
-                            result.success(null)
-                        }
+                        result.success(uri)
+                    }
+                }
+                "takePhoto" -> {
+                    takePhoto { uri ->
+                        result.success(uri)
                     }
                 }
                 else -> {
@@ -73,6 +77,14 @@ class MainActivity: FlutterActivity() {
                     }
                 }
             }
+            takePhotoCode -> {
+                data?.data?.let { uri ->
+                    takePhotoCallback?.let { callback ->
+                        callback(uri)
+                        takePhotoCallback = null
+                    }
+                }
+            }
         }
     }
 
@@ -99,6 +111,16 @@ class MainActivity: FlutterActivity() {
         startActivityForResult(intent, scanDocumentCode)
 
         scanDocumentCallback = callback
+    }
+
+    /**
+     * Take a photo using the system camera and return the image as path
+     */
+    private fun takePhoto(callback: (Uri?) -> Unit) {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(intent, takePhotoCode)
+
+        takePhotoCallback = callback
     }
 
     companion object {
