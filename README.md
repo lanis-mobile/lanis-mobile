@@ -45,12 +45,7 @@ Deine App für das hessische Schulportal! In Zusammenarbeit mit dem staatlichen 
 </div>
 </details>
 
-## Hilf mit!
-Wir sind offen für neue Collaborator. Aber auch wenn du nicht coden kannst, bist du in der Lage einen Beitrag zur App zu leisten. Du kannst den Vertretungsplan deiner Schule anpassen. Siehe [hier](https://github.com/alessioC42/lanis-mobile-autoconfig/issues/1) und [hier](https://github.com/alessioC42/lanis-mobile-autoconfig)
-
 ## Mitarbeit
-[Schulkonfiguration der Vertretungspläne](https://github.com/alessioC42/lanis-mobile-autoconfig)
-
 Dieses Projekt ist stark von Bug-Reports anderer Schulen oder von neuen Mitarbeitern abhängig. Der Grund dafür liegt in
 der modularen Natur des Schulportals, die es äußerst schwierig macht, eine universelle Lanis-App zu entwickeln.
 
