@@ -1,12 +1,19 @@
 package com.example.app
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import com.example.app.AppScanActivity
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -16,11 +23,27 @@ import java.io.IOException
 class MainActivity: FlutterActivity() {
     private val createFileCode = 1404
     private val scanDocumentCode = 4200
+    private val takePhotoCode = 4242
     private var filePath = ""
+    private var photoUri: Uri? = null
     private var scanDocumentCallback: ((Uri?) -> Unit)? = null
+    private var takePhotoCallback: ((Uri?) -> Unit)? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, UTILS_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "showToastShort" -> {
+                    val text = call.argument<String>("text").toString()
+                    showToast(text, Toast.LENGTH_SHORT)
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, STORAGE_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "saveFile" -> {
@@ -29,6 +52,11 @@ class MainActivity: FlutterActivity() {
                 }
                 "scanDocument" -> {
                     scanDocument { uri ->
+                        result.success(uri)
+                    }
+                }
+                "takePhoto" -> {
+                    takePhoto { uri ->
                         result.success(uri)
                     }
                 }
@@ -68,6 +96,16 @@ class MainActivity: FlutterActivity() {
                     }
                 }
             }
+
+            takePhotoCode -> {
+                takePhotoCallback?.let { callback ->
+                    if (resultCode == RESULT_OK) {
+                        callback(photoUri)
+                    } else {
+                        callback(null)
+                    }
+                }
+            }
         }
     }
 
@@ -96,7 +134,27 @@ class MainActivity: FlutterActivity() {
         scanDocumentCallback = callback
     }
 
+    /**
+     * Take a photo using the system camera and return the image as path
+     */
+    private fun takePhoto(callback: (Uri?) -> Unit) {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val photo = File(context.cacheDir, "Whyyyyy1234aabbcc.jpg")
+        photoUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photo) // JUST WHY
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        startActivityForResult(intent, takePhotoCode)
+
+        takePhotoCallback = callback
+    }
+
+    private fun showToast(text: String, duration: Int) {
+        val toast = Toast.makeText(this, text, duration)
+        toast.show()
+    }
+
+
     companion object {
+        private const val UTILS_CHANNEL = "io.github.lanis-mobile/utils"
         private const val STORAGE_CHANNEL = "io.github.lanis-mobile/storage"
     }
 }
