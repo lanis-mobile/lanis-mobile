@@ -223,12 +223,13 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                 slivers: [
                   SliverFillRemaining(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Spacer(),
                         const Icon(Icons.sentiment_dissatisfied, size: 60),
                         Padding(
-                          padding: const EdgeInsets.all(35),
+                          padding: const EdgeInsets.all(32),
                           child: Text(AppLocalizations.of(context).noEntries,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
@@ -236,6 +237,15 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                                 fontWeight: FontWeight.bold,
                               )),
                         ),
+                        Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .substitutionsLastEdit(data.lastUpdated.format('dd.MM.yyyy HH:mm')),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
                       ],
                     ),
                   )

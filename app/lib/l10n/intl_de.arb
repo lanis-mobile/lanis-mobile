@@ -61,6 +61,7 @@
   "noFurtherEntries": "Keine weiteren Einträge!",
   "noEntries": "Keine Einträge!",
   "substitutionsEndCardMessage": "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden.\nLetzte Aktualisierung: {time}",
+  "substitutionsLastEdit": "Letzte Aktualisierung: {time}",
   "substitutionsInformationMessage": "Es liegen Anmerkungen zu diesem Tag vor",
   "logout": "Logout",
   "logoutConfirmation": "Bist du sicher, dass du dich abmelden möchtest?",
