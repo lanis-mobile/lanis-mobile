@@ -8,7 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/utils/file_operations.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -48,7 +50,7 @@ const utilsChannel = MethodChannel('io.github.lanis-mobile/utils');
 /// Allows the user to pick any file using any supported method
 Future<PickedFile?> pickSingleFile(
     BuildContext context, List<String>? allowedExtensions) async {
-  List<bool> allowedMethods = [true, true, true];
+  List<bool> allowedMethods = [true, true, true, true];
   return showPickerUI(context, allowedMethods, allowedExtensions);
 }
 
@@ -119,7 +121,24 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                           ],
                         ),
                       )),
-                    if (allowedMethods[2] && Platform.isIOS)
+                    if (allowedMethods[2])
+                      (MenuItemButton(
+                        onPressed: () async {
+                          pickedFile = await pickFileUsingCamera(context);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Padding(padding: EdgeInsets.only(left: 10.0)),
+                            Icon(Icons.camera_alt_rounded),
+                            Padding(padding: EdgeInsets.only(right: 8.0)),
+                            Text(AppLocalizations.of(context).camera)
+                          ],
+                        ),
+                      )),
+                    if (allowedMethods[3] && Platform.isIOS)
                       ( // DocumentsUI supports galleries and the photo picker is horrible (from a user perspective)
                           MenuItemButton(
                         onPressed: () async {
@@ -163,6 +182,23 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
         name: firstFile.name, path: firstFile.path, size: firstFile.size);
     return pickedFile;
   }
+}
+
+
+// TODO: Add iOS support
+Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
+  var status = await Permission.camera.status;
+  if (status.isDenied || status.isPermanentlyDenied) {
+    final request = await Permission.camera.request();
+    if ((request.isDenied || request.isPermanentlyDenied) && context.mounted) {
+      await utilsChannel.invokeMethod("showToastShort", { "text": AppLocalizations.of(context).cameraPermissionToast }); // Just why do I need a library or native code to do this
+      return null;
+    }
+  }
+
+  String? path = await storageChannel.invokeMethod("takePhoto");
+  logger.d("Path: $path");
+  return null;
 }
 
 /// This will return null if called on anything other than iOS
