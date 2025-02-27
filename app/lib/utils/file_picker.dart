@@ -5,11 +5,13 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/utils/file_operations.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -234,67 +236,75 @@ Future<PickedFile?> pickFileUsingGallery() async {
 
 // TODO: Add iOS support
 Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
-  List<String> paths = List.empty(growable: true);
-  bool breakLoop = false;
+  if (Platform.isAndroid) {
 
-  while (true) {
-    String? path = await storageChannel.invokeMethod("scanDocument");
-    if (path == null) {
+    List<String> paths = List.empty(growable: true);
+    bool breakLoop = false;
+
+    while (true) {
+      String? path = await storageChannel.invokeMethod("scanDocument");
+      if (path == null) {
+        return null;
+      }
+
+      final newPath = "$path-${getRandomString(32)}";
+      await moveFile(path, newPath);
+      paths.add(newPath);
+
+      if (context.mounted) {
+        await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(AppLocalizations.of(context).morePages),
+                content:
+                Text(AppLocalizations.of(context).scanAnotherPageQuestion),
+                actions: <Widget>[
+                  ElevatedButton(
+                      onPressed: () {
+                        breakLoop = true;
+                        Navigator.pop(context);
+                      },
+                      child: Text(AppLocalizations.of(context).no)),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(AppLocalizations.of(context).yes))
+                ],
+              );
+            });
+        if (breakLoop) {
+          break;
+        }
+      }
+    }
+    List<String>? newPaths;
+    if (context.mounted) {
+      newPaths = await imageCycler(context, paths);
+    }
+
+    if (newPaths == null) {
       return null;
     }
 
-    final newPath = "$path-${getRandomString(32)}";
-    await moveFile(path, newPath);
-    paths.add(newPath);
-
+    String? filePath;
     if (context.mounted) {
-      await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(AppLocalizations.of(context).morePages),
-              content:
-                  Text(AppLocalizations.of(context).scanAnotherPageQuestion),
-              actions: <Widget>[
-                ElevatedButton(
-                    onPressed: () {
-                      breakLoop = true;
-                      Navigator.pop(context);
-                    },
-                    child: Text(AppLocalizations.of(context).no)),
-                FilledButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(AppLocalizations.of(context).yes))
-              ],
-            );
-          });
-      if (breakLoop) {
-        break;
-      }
+      filePath = await mergeImagesIntoPDF(newPaths, context);
     }
-  }
-  List<String>? newPaths;
-  if (context.mounted) {
-    newPaths = await imageCycler(context, paths);
-  }
 
-  if (newPaths == null) {
+    if (filePath == null) {
+      return null;
+    }
+
+    File file = File(filePath);
+
+    PickedFile pickedFile = PickedFile(name: filePath.split("/").last, path: filePath, size: await file.length());
+    return pickedFile;
+  } else {
+    var document = await FlutterDocScanner().getScannedDocumentAsPdf();
+    logger.d("Path of Doc is: ${document.toString()}");
+
     return null;
   }
-
-  String? filePath;
-  if (context.mounted) {
-    filePath = await mergeImagesIntoPDF(newPaths, context);
-  }
-
-  if (filePath == null) {
-    return null;
-  }
-
-  File file = File(filePath);
-
-  PickedFile pickedFile = PickedFile(name: filePath.split("/").last, path: filePath, size: await file.length());
-  return pickedFile;
 }
 
 Future<String?> askFileName(BuildContext context) async {
