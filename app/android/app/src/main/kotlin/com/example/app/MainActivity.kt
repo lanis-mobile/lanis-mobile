@@ -1,13 +1,11 @@
 package com.example.app
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -25,6 +23,7 @@ class MainActivity: FlutterActivity() {
     private val takePhotoCode = 4242
     private var filePath = ""
     private var photoUri: Uri? = null
+    private var photoPath: String? = null
     private var scanDocumentCallback: ((Uri?) -> Unit)? = null
     private var takePhotoCallback: ((Uri?) -> Unit)? = null
 
@@ -61,7 +60,7 @@ class MainActivity: FlutterActivity() {
                 "takePhoto" -> {
                     takePhoto { uri ->
                         if (uri != null) {
-                            result.success(uri.path)
+                            result.success(photoPath)
                         } else {
                             result.success(null)
                         }
@@ -147,6 +146,7 @@ class MainActivity: FlutterActivity() {
     private fun takePhoto(callback: (Uri?) -> Unit) {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         val photo = File(context.cacheDir, "Whyyyyy1234aabbcc.jpg")
+        photoPath = photo.path;
         photoUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photo) // JUST WHY
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         startActivityForResult(intent, takePhotoCode)

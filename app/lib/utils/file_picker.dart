@@ -10,7 +10,6 @@ import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/utils/file_operations.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -90,7 +89,7 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                       (MenuItemButton(
                         onPressed: () async {
                           pickedFile = await pickFileUsingDocumentsUI(allowedExtensions);
-                          if (context.mounted) {
+                          if (context.mounted && pickedFile != null) {
                             Navigator.pop(context);
                           }
                         },
@@ -125,7 +124,7 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                       (MenuItemButton(
                         onPressed: () async {
                           pickedFile = await pickFileUsingCamera(context);
-                          if (context.mounted) {
+                          if (context.mounted && pickedFile != null) {
                             Navigator.pop(context);
                           }
                         },
@@ -138,8 +137,8 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                           ],
                         ),
                       )),
-                    if (allowedMethods[3] && Platform.isIOS)
-                      ( // DocumentsUI supports galleries and the photo picker is horrible (from a user perspective)
+                    if (allowedMethods[3] && Platform.isIOS) // DocumentsUI supports galleries and the photo picker is horrible (from a user perspective)
+                      (
                           MenuItemButton(
                         onPressed: () async {
                           pickedFile = await pickFileUsingGallery();
@@ -197,7 +196,29 @@ Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
   }
 
   String? path = await storageChannel.invokeMethod("takePhoto");
-  logger.d("Path: $path");
+
+  if (path == null) {
+    return null;
+  }
+
+  if (context.mounted) {
+    String? name = await askFileName(context);
+
+    if (name == null) {
+      return null;
+    }
+
+    if (!name.endsWith(".jpg")) {
+      name = "$name.jpg";
+    }
+
+    String newPath = path.replaceAll(path.split("/").last, name);
+    await moveFile(path, newPath);
+
+    PickedFile pickedFile = PickedFile(name: newPath.split("/").last, path: newPath, size: await File(newPath).length());
+    return pickedFile;
+  }
+
   return null;
 }
 
@@ -276,41 +297,49 @@ Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
   return pickedFile;
 }
 
-Future<String?> mergeImagesIntoPDF(List<String> paths, BuildContext context) async {
+Future<String?> askFileName(BuildContext context) async {
+  String? result;
   final TextEditingController controller = TextEditingController();
-  String? pdfName;
 
   await showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(AppLocalizations.of(context).filename),
-        content: TextField(
-          controller: controller,
+  context: context,
+  builder: (context) {
+    return AlertDialog(
+      title: Text(AppLocalizations.of(context).filename),
+      content: TextField(
+        controller: controller,
+      ),
+      actions: [
+        TextButton(
+          child: Text(AppLocalizations.of(context).cancel),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        actions: [
-          TextButton(
-            child: Text(AppLocalizations.of(context).cancel),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          FilledButton(
-            child: Text(AppLocalizations.of(context).confirm),
-            onPressed: () {
-              Navigator.of(context).pop();
-              final text = controller.text;
-              if (text.endsWith(".pdf")) {
-                pdfName = controller.text;
-              } else {
-                pdfName = "${controller.text}.pdf";
-              }
-            },
-          ),
-        ],
-      );
-    },
+        FilledButton(
+          child: Text(AppLocalizations.of(context).confirm),
+          onPressed: () {
+            Navigator.of(context).pop();
+            result = controller.text;
+          },
+        ),
+      ],
+    );
+  },
   );
+
+  return result;
+}
+
+Future<String?> mergeImagesIntoPDF(List<String> paths, BuildContext context) async {
+  String? pathName = await askFileName(context);
+  if (pathName == null) {
+    return null;
+  }
+
+  if (!pathName.endsWith(".pdf")) {
+    pathName = "$pathName.pdf";
+  }
 
   pw.Document pdf = pw.Document();
   for (String path in paths) {
@@ -332,7 +361,7 @@ Future<String?> mergeImagesIntoPDF(List<String> paths, BuildContext context) asy
   }
 
   final cache = (await getApplicationCacheDirectory()).path;
-  final path = "$cache/$pdfName";
+  final path = "$cache/$pathName";
   final file = File(path);
   file.create();
   file.writeAsBytes(await pdf.save());
