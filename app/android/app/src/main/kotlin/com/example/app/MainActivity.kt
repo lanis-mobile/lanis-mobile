@@ -52,12 +52,20 @@ class MainActivity: FlutterActivity() {
                 }
                 "scanDocument" -> {
                     scanDocument { uri ->
-                        result.success(uri)
+                        if (uri != null) {
+                            result.success(uri.path)
+                        } else {
+                            result.success(null)
+                        }
                     }
                 }
                 "takePhoto" -> {
                     takePhoto { uri ->
-                        result.success(uri)
+                        if (uri != null) {
+                            result.success(uri.path)
+                        } else {
+                            result.success(null)
+                        }
                     }
                 }
                 else -> {
