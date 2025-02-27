@@ -1,14 +1,19 @@
 package com.example.app
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import com.example.app.AppScanActivity
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -20,6 +25,7 @@ class MainActivity: FlutterActivity() {
     private val scanDocumentCode = 4200
     private val takePhotoCode = 4242
     private var filePath = ""
+    private var photoUri: Uri? = null
     private var scanDocumentCallback: ((Uri?) -> Unit)? = null
     private var takePhotoCallback: ((Uri?) -> Unit)? = null
 
@@ -81,6 +87,7 @@ class MainActivity: FlutterActivity() {
                     }
                 }
             }
+
             scanDocumentCode -> {
                 data?.data?.let { uri ->
                     scanDocumentCallback?.let { callback ->
@@ -89,11 +96,13 @@ class MainActivity: FlutterActivity() {
                     }
                 }
             }
+
             takePhotoCode -> {
-                data?.data?.let { uri ->
-                    takePhotoCallback?.let { callback ->
-                        callback(uri)
-                        takePhotoCallback = null
+                takePhotoCallback?.let { callback ->
+                    if (resultCode == RESULT_OK) {
+                        callback(photoUri)
+                    } else {
+                        callback(null)
                     }
                 }
             }
@@ -130,6 +139,9 @@ class MainActivity: FlutterActivity() {
      */
     private fun takePhoto(callback: (Uri?) -> Unit) {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val photo = File(context.cacheDir, "Whyyyyy1234aabbcc.jpg")
+        photoUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photo) // JUST WHY
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         startActivityForResult(intent, takePhotoCode)
 
         takePhotoCallback = callback

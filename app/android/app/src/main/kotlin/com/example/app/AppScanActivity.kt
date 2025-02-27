@@ -1,6 +1,5 @@
 package com.example.app
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -37,7 +36,7 @@ class AppScanActivity: ScanActivity() {
                 val toast = Toast.makeText(this, text, duration)
                 toast.show()
 
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
             }
             DocumentScannerErrorModel.ErrorMessage.CAMERA_USE_CASE_BINDING_FAILED -> {
@@ -54,7 +53,7 @@ class AppScanActivity: ScanActivity() {
                 val toast = Toast.makeText(this, text, duration)
                 toast.show()
 
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
             }
             DocumentScannerErrorModel.ErrorMessage.INVALID_IMAGE -> {
@@ -99,7 +98,7 @@ class AppScanActivity: ScanActivity() {
                 val toast = Toast.makeText(this, text, duration)
                 toast.show()
 
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
             }
             null -> {
@@ -109,7 +108,7 @@ class AppScanActivity: ScanActivity() {
                 val toast = Toast.makeText(this, text, duration)
                 toast.show()
 
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
             }
         }
@@ -124,11 +123,11 @@ class AppScanActivity: ScanActivity() {
             val intent = Intent()
             intent.setData(uri)
 
-            setResult(Activity.RESULT_OK, intent)
+            setResult(RESULT_OK, intent)
 
             finish()
         } else {
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         }
     }
