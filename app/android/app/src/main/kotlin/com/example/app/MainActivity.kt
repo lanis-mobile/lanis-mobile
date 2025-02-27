@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.example.app.AppScanActivity
 import com.zynksoftware.documentscanner.ui.DocumentScanner
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
