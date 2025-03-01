@@ -61,6 +61,7 @@
   "noFurtherEntries": "No further entries!",
   "noEntries": "No Entries!",
   "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.\nLast edited: {time}",
+  "substitutionsLastEdit": "Last edit: {time}",
   "substitutionsInformationMessage": "There is information available for this day",
   "logout": "Logout",
   "logoutConfirmation": "Do you really want to log out?",
