@@ -64,10 +64,12 @@ Future<PickedFile?> showPickerUI(BuildContext context,
     List<bool> allowedMethods, List<String>? allowedExtensions) async {
   bool documentScannerSupported = true;
 
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  final androidInfo = await deviceInfo.androidInfo;
-  if (androidInfo.version.sdkInt < 26) {
-    documentScannerSupported = false;
+  if (Platform.isAndroid) {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+    if (androidInfo.version.sdkInt < 26) {
+      documentScannerSupported = false;
+    }
   }
 
   PickedFile? pickedFile;
@@ -186,12 +188,14 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
 
 // TODO: Add iOS support
 Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
-  var status = await Permission.camera.status;
-  if (status.isDenied || status.isPermanentlyDenied) {
-    final request = await Permission.camera.request();
-    if ((request.isDenied || request.isPermanentlyDenied) && context.mounted) {
-      await utilsChannel.invokeMethod("showToastShort", { "text": AppLocalizations.of(context).cameraPermissionToast }); // Just why do I need a library or native code to do this
-      return null;
+  if (!Platform.isIOS) {
+    var status = await Permission.camera.status;
+    if (status.isDenied || status.isPermanentlyDenied) {
+      final request = await Permission.camera.request();
+      if ((request.isDenied || request.isPermanentlyDenied) && context.mounted) {
+        await utilsChannel.invokeMethod("showToastShort", { "text": AppLocalizations.of(context).cameraPermissionToast }); // Just why do I need a library or native code to do this
+        return null;
+      }
     }
   }
 
