@@ -5,11 +5,13 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/utils/file_operations.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -285,6 +287,16 @@ Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
     }
   }
   List<String>? newPaths;
+
+  //dynamic scannedDocuments;
+  //try {
+  //  scannedDocuments = await FlutterDocScanner().getScanDocuments(page: 3) ?? 'Unknown platform documents';
+  //} on PlatformException {
+  //  return null;
+  //}
+//
+  //logger.d("scannedDocuments: $scannedDocuments");
+
   if (context.mounted) {
     newPaths = await imageCycler(context, paths);
   }
