@@ -8,6 +8,7 @@ import 'package:sph_plan/applets/timetable/student/student_timetable_better_view
 import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/models/account_types.dart';
+import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
 import '../../../core/sph/sph.dart';
@@ -247,29 +248,15 @@ class _StudentTimetableSettingsState extends State<StudentTimetableSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: LargeAppBar(
         title: Text(timeTableDefinition.label(context)),
-        leading: widget.openDrawerCb != null
-            ? IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => widget.openDrawerCb!(),
-              )
-            : null,
       ),
+      backgroundColor: Colors.transparent,
       body: CombinedAppletBuilder<TimeTable>(
         parser: sph!.parser.timetableStudentParser,
         phpUrl: timeTableDefinition.appletPhpUrl,
         settingsDefaults: timeTableDefinition.settingsDefaults,
         accountType: AccountType.student,
-        loadingAppBar: AppBar(
-          title: Text(timeTableDefinition.label(context)),
-          leading: widget.openDrawerCb != null
-              ? IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => widget.openDrawerCb!(),
-                )
-              : null,
-        ),
         builder: (context, timetable, _, settings, updateSettings, refresh) {
           final ids = settings['hidden-lessons'];
           Map<int, List<TimetableSubject>> lessons = {};
