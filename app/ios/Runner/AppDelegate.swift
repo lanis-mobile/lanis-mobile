@@ -14,6 +14,7 @@ import Flutter
 
       utilsChannel.setMethodCallHandler({(call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
           if (call.method == "showToastShort") {
+              result(FlutterMethodNotImplemented)
           } else {
               result(FlutterMethodNotImplemented)
           }

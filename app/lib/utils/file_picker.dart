@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -109,7 +110,7 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                         onPressed: () async {
                           pickedFile = await pickFileUsingDocumentScanner(context);
 
-                          if (context.mounted) {
+                          if (context.mounted && pickedFile != null) {
                             Navigator.pop(context);
                           }
                         },
@@ -143,8 +144,8 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                       (
                           MenuItemButton(
                         onPressed: () async {
-                          pickedFile = await pickFileUsingGallery();
-                          if (context.mounted) {
+                          pickedFile = await pickFileUsingGallery(context);
+                          if (context.mounted && pickedFile != null) {
                             Navigator.pop(context);
                           }
                         },
@@ -227,12 +228,33 @@ Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
 }
 
 /// This will return null if called on anything other than iOS
-Future<PickedFile?> pickFileUsingGallery() async {
+Future<PickedFile?> pickFileUsingGallery(BuildContext context) async {
   if (Platform.isIOS) {
-    return null;
-  } else {
-    return null;
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image == null) {
+      return null;
+    }
+
+    if (context.mounted) {
+      final name = await askFileName(context);
+
+      if (name == null) {
+        return null;
+      }
+
+      final String extension = image.path.split(".").last;
+      final path = "${(await getApplicationCacheDirectory()).path}/$name.$extension";
+      await moveFile(image.path, path);
+      final file = File(path);
+      final size = await file.length();
+
+      final PickedFile pickedFile = PickedFile(name: name, size: size, path: file.path);
+      return pickedFile;
+    }
   }
+  return null;
 }
 
 
