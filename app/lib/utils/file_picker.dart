@@ -250,7 +250,7 @@ Future<PickedFile?> pickFileUsingGallery(BuildContext context) async {
       final file = File(path);
       final size = await file.length();
 
-      final PickedFile pickedFile = PickedFile(name: name, size: size, path: file.path);
+      final PickedFile pickedFile = PickedFile(name: file.path.split("/").last, size: size, path: file.path);
       return pickedFile;
     }
   }
