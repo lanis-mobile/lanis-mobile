@@ -217,21 +217,24 @@ class TimeTableView extends StatelessWidget {
                 Column(
                   spacing: 8.0,
                   children: [
-                    SizedBox(
-                      height: headerHeight,
-                      width: hourWidth,
-                      child: Column(
-                        children: [
-                          Text("KW ${getCurrentWeekNumber()}"),
-                          timetable.weekBadge != null &&
-                                  timetable.weekBadge!.isNotEmpty
-                              ? Text(
-                                  AppLocalizations.of(context)
-                                      .timetableWeek(timetable.weekBadge!),
-                                  style: TextStyle(
-                                      overflow: TextOverflow.ellipsis))
-                              : SizedBox(),
-                        ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: SizedBox(
+                        height: headerHeight - 4,
+                        width: hourWidth,
+                        child: Column(
+                          children: [
+                            Text("KW ${getCurrentWeekNumber()}"),
+                            timetable.weekBadge != null &&
+                                    timetable.weekBadge!.isNotEmpty
+                                ? Text(
+                                    AppLocalizations.of(context)
+                                        .timetableWeek(timetable.weekBadge!),
+                                    style: TextStyle(
+                                        overflow: TextOverflow.ellipsis, fontSize: 10))
+                                : SizedBox(),
+                          ],
+                        ),
                       ),
                     ),
                     for (var (row) in data.hours)
@@ -284,27 +287,41 @@ class TimeTableView extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(
-                                height: headerHeight - 26,
-                              ),
                               Container(
-                                height: 26,
+                                height: 40,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surfaceContainer,
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      DateTime(2020, 8, 3)
-                                          .add(Duration(days: i))
-                                          .format('E'),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
+                                child: Builder(
+                                  builder: (context) {
+
+                                    var today = DateTime.now().startOfWeek;
+                                    var monday = DateTime(today.year, today.month, today.day - (today.weekday - 1) + 7);
+
+                                    return Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          monday
+                                              .add(Duration(days: i))
+                                              .format('E'),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        Text(
+                                          monday
+                                              .add(Duration(days: i))
+                                              .format('dd.MM.'),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }
                                 ),
                               ),
                               const SizedBox(height: 8.0),
