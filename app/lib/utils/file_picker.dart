@@ -11,7 +11,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/utils/file_operations.dart';
-import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -244,58 +243,75 @@ Future<PickedFile?> pickFileUsingGallery(BuildContext context) async {
   return null;
 }
 
-
-// TODO: Add iOS support
 Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
   List<String> paths = List.empty(growable: true);
   bool breakLoop = false;
 
-  while (true) {
-    String? path = await storageChannel.invokeMethod("scanDocument");
-    if (path == null) {
+  if (Platform.isAndroid) {
+    while (true) {
+      String? path = await storageChannel.invokeMethod("scanDocument");
+      if (path == null) {
+        return null;
+      }
+
+      final newPath = "$path-${getRandomString(32)}";
+      await moveFile(path, newPath);
+      paths.add(newPath);
+
+      if (context.mounted) {
+        await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(AppLocalizations.of(context).morePages),
+                content:
+                    Text(AppLocalizations.of(context).scanAnotherPageQuestion),
+                actions: <Widget>[
+                  ElevatedButton(
+                      onPressed: () {
+                        breakLoop = true;
+                        Navigator.pop(context);
+                      },
+                      child: Text(AppLocalizations.of(context).no)),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(AppLocalizations.of(context).yes))
+                ],
+              );
+            });
+        if (breakLoop) {
+          break;
+        }
+      }
+    }
+  } else if (Platform.isIOS) {
+
+    dynamic scannedDocuments;
+    try {
+      scannedDocuments = await FlutterDocScanner().getScannedDocumentAsImages(page: 4);
+    } on PlatformException {
       return null;
     }
 
-    final newPath = "$path-${getRandomString(32)}";
-    await moveFile(path, newPath);
-    paths.add(newPath);
+    final Map<Object?, Object?> map = scannedDocuments;
+    final Object? uris = map["Uri"];
 
-    if (context.mounted) {
-      await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(AppLocalizations.of(context).morePages),
-              content:
-                  Text(AppLocalizations.of(context).scanAnotherPageQuestion),
-              actions: <Widget>[
-                ElevatedButton(
-                    onPressed: () {
-                      breakLoop = true;
-                      Navigator.pop(context);
-                    },
-                    child: Text(AppLocalizations.of(context).no)),
-                FilledButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(AppLocalizations.of(context).yes))
-              ],
-            );
-          });
-      if (breakLoop) {
-        break;
-      }
+    if (uris == null || uris.runtimeType != String) {
+      return null;
     }
+
+    // Couldn't find the proper/intended way to parse this String and the examples just print the raw thing in the Terminal
+    final String dirtyUris = uris.toString().replaceAll("[", "").replaceAll("]", "").replaceAll("}", "").replaceAll("Page{imageUri=", "").replaceAll(", ", ",");
+    final List<String> uriStringList = dirtyUris.split(",");
+
+    for (final String s in uriStringList) {
+      final uri = Uri.parse(s);
+      paths.add(uri.path);
+    }
+  } else {
+    return null;
   }
   List<String>? newPaths;
-
-  //dynamic scannedDocuments;
-  //try {
-  //  scannedDocuments = await FlutterDocScanner().getScanDocuments(page: 3) ?? 'Unknown platform documents';
-  //} on PlatformException {
-  //  return null;
-  //}
-//
-  //logger.d("scannedDocuments: $scannedDocuments");
 
   if (context.mounted) {
     newPaths = await imageCycler(context, paths);
