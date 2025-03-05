@@ -302,10 +302,15 @@ class TimeTableView extends StatelessWidget {
                           }).toList(),
                         );
                       } else {
+                        var initialIndex = (DateTime.now().weekday - 1) % 7;
+                        if (initialIndex >= days.length) {
+                          initialIndex = 0;
+                        }
                         return SizedBox(
                           height: calculateColumnHeight(data.hours) + 48,
                           child: DefaultTabController(
                             length: days.length,
+                            initialIndex: initialIndex,
                             child: TabBarView(
                               children: days.map((e) {
                                 return Padding(
