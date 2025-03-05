@@ -180,9 +180,10 @@ class TimeTableView extends StatelessWidget {
   double calculateColumnHeight(List<TimeTableRow> rows) {
     double totalHeight = 0;
     for (var row in rows) {
-      totalHeight +=
-          (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - pauseHeight) +
-              8;
+      totalHeight += (row.type == TimeTableRowType.lesson
+              ? itemHeight
+              : itemHeight - pauseHeight) +
+          8;
     }
     return totalHeight;
   }
@@ -231,7 +232,8 @@ class TimeTableView extends StatelessWidget {
                                     AppLocalizations.of(context)
                                         .timetableWeek(timetable.weekBadge!),
                                     style: TextStyle(
-                                        overflow: TextOverflow.ellipsis, fontSize: 10))
+                                        overflow: TextOverflow.ellipsis,
+                                        fontSize: 10))
                                 : SizedBox(),
                           ],
                         ),
@@ -249,22 +251,25 @@ class TimeTableView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         width: hourWidth,
-                        height: row.type == TimeTableRowType.lesson ? itemHeight : pauseHeight,
+                        height: row.type == TimeTableRowType.lesson
+                            ? itemHeight
+                            : pauseHeight,
                         child: Column(
                           children: [
                             Text(row.label,
-                            style: TextStyle(
-                              fontSize: 12,
-                            )
-                            ),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                )),
                             ...(row.type == TimeTableRowType.lesson
                                 ? [
-                                    Text(row.startTime.format(context), style: TextStyle(
-                                      fontSize: 10,
-                                    )),
-                                  Text(row.endTime.format(context), style: TextStyle(
-                                    fontSize: 10,
-                                  )),
+                                    Text(row.startTime.format(context),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                        )),
+                                    Text(row.endTime.format(context),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                        )),
                                     // Text(row.endTime.format(context))
                                   ]
                                 : [
@@ -295,34 +300,32 @@ class TimeTableView extends StatelessWidget {
                                       .surfaceContainer,
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                child: Builder(
-                                  builder: (context) {
+                                child: Builder(builder: (context) {
+                                  var today = DateTime.now().startOfWeek;
+                                  var monday = DateTime(today.year, today.month,
+                                      today.day - (today.weekday - 1) + 7);
 
-                                    var today = DateTime.now().startOfWeek;
-                                    var monday = DateTime(today.year, today.month, today.day - (today.weekday - 1) + 7);
-
-                                    return Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          monday
-                                              .add(Duration(days: i))
-                                              .format('E'),
-                                          textAlign: TextAlign.center,
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        monday
+                                            .add(Duration(days: i))
+                                            .format('E'),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        monday
+                                            .add(Duration(days: i))
+                                            .format('dd.MM.'),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 10,
                                         ),
-                                        Text(
-                                          monday
-                                              .add(Duration(days: i))
-                                              .format('dd.MM.'),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }
-                                ),
+                                      ),
+                                    ],
+                                  );
+                                }),
                               ),
                               const SizedBox(height: 8.0),
                               SizedBox(
@@ -783,16 +786,17 @@ class ItemBlock extends StatelessWidget {
 
   Widget _colorContainer(double width, {Widget? child}) {
     return Container(
-        width: width,
-        height: height,
-        clipBehavior:
-        Clip.hardEdge, // Clips any overflow, useful for the y axis
-        decoration: BoxDecoration(
+      width: width,
+      height: height,
+      clipBehavior: Clip.hardEdge, // Clips any overflow, useful for the y axis
+      decoration: BoxDecoration(
         border: Border.all(color: color, width: min(1, width / 3)),
-    color: color == Colors.white ? Colors.transparent : color,
-    borderRadius: BorderRadius.circular(8.0),
-    ),             padding: EdgeInsets.all(4.0),
-      child: child,);
+        color: color == Colors.white ? Colors.transparent : color,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      padding: EdgeInsets.all(4.0),
+      child: child,
+    );
   }
 
   @override
@@ -808,38 +812,42 @@ class ItemBlock extends StatelessWidget {
     return Positioned(
       top: offset,
       left: hOffset,
-      child: disableAction ? _colorContainer(calcWidth, child: SizedBox()) : InkWell(
-        onTap: subject != null ? () => showSubject(context) : null,
-        child: _colorContainer(
-          calcWidth,
-          child: onlyColor ? SizedBox () : (!onlyColor && subject != null)
-              ? SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        subject!.name ?? '',
-                        style: textStyle,
-                        maxLines: 1,
-                      ),
-                      if (subject!.lehrer != null)
-                        Text(
-                          subject!.lehrer!,
-                          style: textStyle,
-                          maxLines: 1,
-                        ),
-                      if (subject!.raum != null)
-                        Text(
-                          subject!.raum!,
-                          style: textStyle,
-                          maxLines: 1,
-                        ),
-                    ],
-                  ),
-                )
-              : SizedBox(),
-        ),
-      ),
+      child: disableAction
+          ? _colorContainer(calcWidth, child: SizedBox())
+          : InkWell(
+              onTap: subject != null ? () => showSubject(context) : null,
+              child: _colorContainer(
+                calcWidth,
+                child: onlyColor
+                    ? SizedBox()
+                    : (!onlyColor && subject != null)
+                        ? SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  subject!.name ?? '',
+                                  style: textStyle,
+                                  maxLines: 1,
+                                ),
+                                if (subject!.lehrer != null)
+                                  Text(
+                                    subject!.lehrer!,
+                                    style: textStyle,
+                                    maxLines: 1,
+                                  ),
+                                if (subject!.raum != null)
+                                  Text(
+                                    subject!.raum!,
+                                    style: textStyle,
+                                    maxLines: 1,
+                                  ),
+                              ],
+                            ),
+                          )
+                        : SizedBox(),
+              ),
+            ),
     );
   }
 
