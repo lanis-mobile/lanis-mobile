@@ -24,7 +24,8 @@ class StudentTimetableSettings extends SettingsColours {
       _StudentTimetableSettingsState();
 }
 
-class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetableSettings> {
+class _StudentTimetableSettingsState
+    extends SettingsColoursState<StudentTimetableSettings> {
   List<TimetableDay> getSelectedPlan(
       TimeTable data, TimeTableType selectedType) {
     if (selectedType == TimeTableType.own) {
@@ -258,10 +259,11 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
             phpUrl: timeTableDefinition.appletPhpUrl,
             settingsDefaults: timeTableDefinition.settingsDefaults,
             accountType: AccountType.student,
-            builder: (context, timetable, _, settings, updateSettings, refresh) {
+            builder:
+                (context, timetable, _, settings, updateSettings, refresh) {
               final ids = settings['hidden-lessons'];
               Map<int, List<TimetableSubject>> lessons = {};
-          
+
               for (var (dayIndex, day) in timetable.planForAll!.indexed) {
                 lessons[dayIndex] = [];
                 if (ids == null) continue;
@@ -270,14 +272,14 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                   lessons[dayIndex]!.add(lesson);
                 }
               }
-          
+
               List<List<TimetableSubject>>? customLessons =
                   TimeTableHelper.getCustomLessons(settings);
-          
+
               List<String> weekDays =
                   DateFormat.EEEE(Platform.localeName).dateSymbols.WEEKDAYS;
               weekDays = weekDays.sublist(1)..add(weekDays[0]);
-          
+
               return Expanded(
                 child: DefaultTabController(
                   length: weekDays.length,
@@ -287,7 +289,9 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                       TabBar(
                         isScrollable: true,
                         tabAlignment: TabAlignment.center,
-                        tabs: weekDays.map((dayName) => Tab(text: dayName)).toList(),
+                        tabs: weekDays
+                            .map((dayName) => Tab(text: dayName))
+                            .toList(),
                       ),
                       Expanded(
                         child: TabBarView(
@@ -332,8 +336,10 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                                                     setState(() {
                                                       updateSettings(
                                                           'hidden-lessons',
-                                                          settings['hidden-lessons']
-                                                            ..remove(lesson.id));
+                                                          settings[
+                                                              'hidden-lessons']
+                                                            ..remove(
+                                                                lesson.id));
                                                     });
                                                   },
                                                 ),
@@ -341,7 +347,8 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                                             }),
                                           if (dayLessons.isEmpty)
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
                                               child: Text(
                                                 AppLocalizations.of(context)
                                                     .hiddenLessonsDescription,
@@ -382,7 +389,8 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                                                   "${lesson.startTime.format(context)} - ${lesson.endTime.format(context)}",
                                                 ),
                                                 trailing: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   children: [
                                                     IconButton(
                                                       icon: Icon(Icons.edit),
@@ -399,7 +407,8 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                                                       icon: Icon(Icons.delete),
                                                       onPressed: () {
                                                         setState(() {
-                                                          customLessons![currentDay]
+                                                          customLessons![
+                                                                  currentDay]
                                                               .remove(lesson);
                                                           updateSettings(
                                                               'custom-lessons',
@@ -448,7 +457,9 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
                               Icon(
                                 Icons.info_outline_rounded,
                                 size: 20.0,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                               SizedBox(
                                 height: 8.0,
@@ -472,7 +483,8 @@ class _StudentTimetableSettingsState extends SettingsColoursState<StudentTimetab
               );
             },
           ),
-        )],
+        )
+      ],
     );
   }
 }
