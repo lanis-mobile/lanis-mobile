@@ -9,7 +9,6 @@ import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:sph_plan/utils/file_operations.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -45,7 +44,6 @@ extension Actions on PickedFile {
 }
 
 const storageChannel = MethodChannel('io.github.lanis-mobile/storage');
-const utilsChannel = MethodChannel('io.github.lanis-mobile/utils');
 
 /// Allows the user to pick any file using any supported method
 Future<PickedFile?> pickSingleFile(
@@ -187,20 +185,10 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
 }
 
 
-// TODO: Add iOS support
 Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
-  if (!Platform.isIOS) {
-    var status = await Permission.camera.status;
-    if (status.isDenied || status.isPermanentlyDenied) {
-      final request = await Permission.camera.request();
-      if ((request.isDenied || request.isPermanentlyDenied) && context.mounted) {
-        await utilsChannel.invokeMethod("showToastShort", { "text": AppLocalizations.of(context).cameraPermissionToast }); // Just why do I need a library or native code to do this
-        return null;
-      }
-    }
-  }
-
-  String? path = await storageChannel.invokeMethod("takePhoto");
+  final ImagePicker imagePicker = ImagePicker();
+  final image = await imagePicker.pickImage(source: ImageSource.camera);
+  String? path = image?.path;
 
   if (path == null) {
     return null;
@@ -213,11 +201,8 @@ Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
       return null;
     }
 
-    if (!name.endsWith(".jpg")) {
-      name = "$name.jpg";
-    }
-
-    String newPath = path.replaceAll(path.split("/").last, name);
+    name = "$name.${path.split(".").last}";
+    String newPath = "${(await getApplicationCacheDirectory()).path}/$name";
     await moveFile(path, newPath);
 
     PickedFile pickedFile = PickedFile(name: newPath.split("/").last, path: newPath, size: await File(newPath).length());
