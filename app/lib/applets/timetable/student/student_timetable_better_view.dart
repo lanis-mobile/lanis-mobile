@@ -256,10 +256,10 @@ class TimeTableView extends StatelessWidget {
                             ),
                             ...(row.type == TimeTableRowType.lesson
                                 ? [
-                                    Text("${row.startTime.format(context)}", style: TextStyle(
+                                    Text(row.startTime.format(context), style: TextStyle(
                                       fontSize: 10,
                                     )),
-                                  Text("${row.endTime.format(context)}", style: TextStyle(
+                                  Text(row.endTime.format(context), style: TextStyle(
                                     fontSize: 10,
                                   )),
                                     // Text(row.endTime.format(context))
