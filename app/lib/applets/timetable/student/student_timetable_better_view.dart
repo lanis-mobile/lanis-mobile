@@ -126,6 +126,7 @@ class _StudentTimetableBetterViewState
                                       uniqueBadges[currentWeekIndex - 1]),
                             ),
                           ),
+                        IconButton(onPressed: () => updateSettings('single-day',  !(settings['single-day'] ?? false)), icon:  (settings['single-day'] ?? false) ? Icon(Icons.calendar_today) : Icon(Icons.calendar_today_outlined)),
                       ],
                     ),
                   )
@@ -286,7 +287,7 @@ class TimeTableView extends StatelessWidget {
                     builder: (context) {
                       var days = _itemDays(context);
 
-                      if(true) {
+                      if(!(settings['single-day'] ?? false)) {
                         return Row(
                           spacing: 4.0,
                           crossAxisAlignment: CrossAxisAlignment.start,
