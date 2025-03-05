@@ -126,7 +126,12 @@ class _StudentTimetableBetterViewState
                                       uniqueBadges[currentWeekIndex - 1]),
                             ),
                           ),
-                        IconButton(onPressed: () => updateSettings('single-day',  !(settings['single-day'] ?? false)), icon:  (settings['single-day'] ?? false) ? Icon(Icons.calendar_today) : Icon(Icons.calendar_today_outlined)),
+                        IconButton(
+                            onPressed: () => updateSettings('single-day',
+                                !(settings['single-day'] ?? false)),
+                            icon: (settings['single-day'] ?? false)
+                                ? Icon(Icons.calendar_today)
+                                : Icon(Icons.calendar_today_outlined)),
                       ],
                     ),
                   )
@@ -287,7 +292,7 @@ class TimeTableView extends StatelessWidget {
                     builder: (context) {
                       var days = _itemDays(context);
 
-                      if(!(settings['single-day'] ?? false)) {
+                      if (!(settings['single-day'] ?? false)) {
                         return Row(
                           spacing: 4.0,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +309,8 @@ class TimeTableView extends StatelessWidget {
                             child: TabBarView(
                               children: days.map((e) {
                                 return Padding(
-                                  padding: const EdgeInsets.only(left: 4.0, right: 8.0),
+                                  padding: const EdgeInsets.only(
+                                      left: 4.0, right: 8.0),
                                   child: e,
                                 );
                               }).toList(),
@@ -326,72 +332,65 @@ class TimeTableView extends StatelessWidget {
 
   List<Widget> _itemDays(BuildContext context) {
     return [
-                    for (int i = 0; i < data.timetableDays.length; i++)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainer,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Builder(builder: (context) {
-                              var today = DateTime.now().startOfWeek;
-                              var monday = DateTime(today.year, today.month,
-                                  today.day - (today.weekday - 1) + 7);
+      for (int i = 0; i < data.timetableDays.length; i++)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Builder(builder: (context) {
+                var today = DateTime.now().startOfWeek;
+                var monday = DateTime(today.year, today.month,
+                    today.day - (today.weekday - 1) + 7);
 
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    monday
-                                        .add(Duration(days: i))
-                                        .format('E'),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    monday
-                                        .add(Duration(days: i))
-                                        .format('dd.MM.'),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }),
-                          ),
-                          const SizedBox(height: 8.0),
-                          SizedBox(
-                            height: calculateColumnHeight(data.hours),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Stack(
-                                  children: [
-                                    for (var (index, row)
-                                        in data.hours.indexed)
-                                      ListItem(
-                                        iteration: index,
-                                        row: row,
-                                        data: data,
-                                        timetableDays: data.timetableDays,
-                                        i: i,
-                                        width: constraints.maxWidth,
-                                        settings: settings,
-                                        updateSettings: updateSettings,
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      monday.add(Duration(days: i)).format('E'),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      monday.add(Duration(days: i)).format('dd.MM.'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10,
                       ),
-                  ];
+                    ),
+                  ],
+                );
+              }),
+            ),
+            const SizedBox(height: 8.0),
+            SizedBox(
+              height: calculateColumnHeight(data.hours),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    children: [
+                      for (var (index, row) in data.hours.indexed)
+                        ListItem(
+                          iteration: index,
+                          row: row,
+                          data: data,
+                          timetableDays: data.timetableDays,
+                          i: i,
+                          width: constraints.maxWidth,
+                          settings: settings,
+                          updateSettings: updateSettings,
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+    ];
   }
 }
 
@@ -623,8 +622,10 @@ class ListItem extends StatelessWidget {
                 settings: settings,
                 updateSettings: updateSettings,
                 // Only show the color of the subject to save resources
-                onlyColor: subjectsInRow.length > 3,
-                disableAction: subjectsInRow.length > 6,
+                onlyColor: subjectsInRow.length > 3 &&
+                    !(settings['single-day'] ?? false),
+                disableAction: subjectsInRow.length > 6 &&
+                    !(settings['single-day'] ?? false),
               );
             }),
         ],
