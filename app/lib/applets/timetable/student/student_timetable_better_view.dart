@@ -282,28 +282,36 @@ class TimeTableView extends StatelessWidget {
                   ],
                 ),
                 Expanded(
-                  child: SizedBox(
-                    child: Builder(
-                      builder: (context) {
-                        var days = _itemDays(context);
+                  child: Builder(
+                    builder: (context) {
+                      var days = _itemDays(context);
 
-                        if(true) {
-                          return Row(
-                            spacing: 4.0,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: days,
-                          );
-                        } else {
-                          return DefaultTabController(
+                      if(true) {
+                        return Row(
+                          spacing: 4.0,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: days.map((e) {
+                            return Expanded(child: e);
+                          }).toList(),
+                        );
+                      } else {
+                        return SizedBox(
+                          height: calculateColumnHeight(data.hours) + 48,
+                          child: DefaultTabController(
                             length: days.length,
                             child: TabBarView(
-                              children: days,
+                              children: days.map((e) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(left: 4.0, right: 8.0),
+                                  child: e,
+                                );
+                              }).toList(),
                             ),
-                          );
-                        }
+                          ),
+                        );
                       }
-                    ),
+                    },
                   ),
                 ),
               ],
@@ -318,71 +326,69 @@ class TimeTableView extends StatelessWidget {
   List<Widget> _itemDays(BuildContext context) {
     return [
                     for (int i = 0; i < data.timetableDays.length; i++)
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainer,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Builder(builder: (context) {
-                                var today = DateTime.now().startOfWeek;
-                                var monday = DateTime(today.year, today.month,
-                                    today.day - (today.weekday - 1) + 7);
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainer,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Builder(builder: (context) {
+                              var today = DateTime.now().startOfWeek;
+                              var monday = DateTime(today.year, today.month,
+                                  today.day - (today.weekday - 1) + 7);
 
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    monday
+                                        .add(Duration(days: i))
+                                        .format('E'),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    monday
+                                        .add(Duration(days: i))
+                                        .format('dd.MM.'),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 8.0),
+                          SizedBox(
+                            height: calculateColumnHeight(data.hours),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Stack(
                                   children: [
-                                    Text(
-                                      monday
-                                          .add(Duration(days: i))
-                                          .format('E'),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      monday
-                                          .add(Duration(days: i))
-                                          .format('dd.MM.'),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 10,
+                                    for (var (index, row)
+                                        in data.hours.indexed)
+                                      ListItem(
+                                        iteration: index,
+                                        row: row,
+                                        data: data,
+                                        timetableDays: data.timetableDays,
+                                        i: i,
+                                        width: constraints.maxWidth,
+                                        settings: settings,
+                                        updateSettings: updateSettings,
                                       ),
-                                    ),
                                   ],
                                 );
-                              }),
+                              },
                             ),
-                            const SizedBox(height: 8.0),
-                            SizedBox(
-                              height: calculateColumnHeight(data.hours),
-                              child: LayoutBuilder(
-                                builder: (context, constraints) {
-                                  return Stack(
-                                    children: [
-                                      for (var (index, row)
-                                          in data.hours.indexed)
-                                        ListItem(
-                                          iteration: index,
-                                          row: row,
-                                          data: data,
-                                          timetableDays: data.timetableDays,
-                                          i: i,
-                                          width: constraints.maxWidth,
-                                          settings: settings,
-                                          updateSettings: updateSettings,
-                                        ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                   ];
   }
