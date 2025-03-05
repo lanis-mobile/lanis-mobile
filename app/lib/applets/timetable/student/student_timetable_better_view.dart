@@ -591,6 +591,9 @@ class ListItem extends StatelessWidget {
                 width: (width / maxNum) - (maxNum >= 2 ? 2 : 0),
                 settings: settings,
                 updateSettings: updateSettings,
+                // Only show the color of the subject to save resources
+                onlyColor: subjectsInRow.length > 3,
+                disableAction: subjectsInRow.length > 6,
               );
             }),
         ],
@@ -608,6 +611,7 @@ class ItemBlock extends StatelessWidget {
   final double width;
   final double? hOffset;
   final bool onlyColor;
+  final bool disableAction;
 
   final Map<String, dynamic> settings;
   final Function updateSettings;
@@ -624,6 +628,7 @@ class ItemBlock extends StatelessWidget {
     this.onlyColor = false,
     required this.settings,
     required this.updateSettings,
+    this.disableAction = false,
   });
 
   void showColorPicker(BuildContext context, Map<String, dynamic> settings,
@@ -776,6 +781,20 @@ class ItemBlock extends StatelessWidget {
     });
   }
 
+  Widget _colorContainer(double width, {Widget? child}) {
+    return Container(
+        width: width,
+        height: height,
+        clipBehavior:
+        Clip.hardEdge, // Clips any overflow, useful for the y axis
+        decoration: BoxDecoration(
+        border: Border.all(color: color, width: min(1, width / 3)),
+    color: color == Colors.white ? Colors.transparent : color,
+    borderRadius: BorderRadius.circular(8.0),
+    ),             padding: EdgeInsets.all(4.0),
+      child: child,);
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle textStyle = TextStyle(
@@ -789,20 +808,11 @@ class ItemBlock extends StatelessWidget {
     return Positioned(
       top: offset,
       left: hOffset,
-      child: InkWell(
+      child: disableAction ? _colorContainer(calcWidth, child: SizedBox()) : InkWell(
         onTap: subject != null ? () => showSubject(context) : null,
-        child: Container(
-          width: calcWidth,
-          height: height,
-          clipBehavior:
-              Clip.hardEdge, // Clips any overflow, useful for the y axis
-          decoration: BoxDecoration(
-            border: Border.all(color: color, width: min(1, calcWidth / 3)),
-            color: color == Colors.white ? Colors.transparent : color,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          padding: EdgeInsets.all(4.0),
-          child: (!onlyColor && subject != null)
+        child: _colorContainer(
+          calcWidth,
+          child: onlyColor ? SizedBox () : (!onlyColor && subject != null)
               ? SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -844,6 +854,7 @@ class ItemBlock extends StatelessWidget {
   })  : subject = null,
         color = Colors.white,
         onlyColor = false,
+        disableAction = true,
         empty = true;
 }
 
