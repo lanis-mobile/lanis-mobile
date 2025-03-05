@@ -185,7 +185,7 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
   }
 }
 
-
+// TODO: Test on actual iPhone
 Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
   final ImagePicker imagePicker = ImagePicker();
   final image = await imagePicker.pickImage(source: ImageSource.camera);
@@ -243,6 +243,7 @@ Future<PickedFile?> pickFileUsingGallery(BuildContext context) async {
   return null;
 }
 
+// TODO: Test on actual iPhone
 Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
   List<String> paths = List.empty(growable: true);
   bool breakLoop = false;
