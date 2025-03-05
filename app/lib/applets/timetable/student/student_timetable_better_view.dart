@@ -13,9 +13,10 @@ import 'package:sph_plan/models/account_types.dart';
 import 'package:sph_plan/models/timetable.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
-final double itemHeight = 40;
+final double itemHeight = 46;
 double headerHeight = 40;
 final double hourWidth = 70;
+final double pauseHeight = 18;
 
 class StudentTimetableBetterView extends StatefulWidget {
   final Function? openDrawerCb;
@@ -180,7 +181,7 @@ class TimeTableView extends StatelessWidget {
     double totalHeight = 0;
     for (var row in rows) {
       totalHeight +=
-          (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20) +
+          (row.type == TimeTableRowType.lesson ? itemHeight : itemHeight - pauseHeight) +
               8;
     }
     return totalHeight;
@@ -245,14 +246,22 @@ class TimeTableView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         width: hourWidth,
-                        height: itemHeight -
-                            (row.type == TimeTableRowType.lesson ? 0 : 20),
+                        height: row.type == TimeTableRowType.lesson ? itemHeight : pauseHeight,
                         child: Column(
                           children: [
-                            Text(row.label.replaceAll('Stunde', '')),
+                            Text(row.label,
+                            style: TextStyle(
+                              fontSize: 12,
+                            )
+                            ),
                             ...(row.type == TimeTableRowType.lesson
                                 ? [
-                                    Text("${row.startTime.format(context)} -"),
+                                    Text("${row.startTime.format(context)}", style: TextStyle(
+                                      fontSize: 10,
+                                    )),
+                                  Text("${row.endTime.format(context)}", style: TextStyle(
+                                    fontSize: 10,
+                                  )),
                                     // Text(row.endTime.format(context))
                                   ]
                                 : [
@@ -391,7 +400,7 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
       // Check if lesson is already over and add the height of the lesson (or height of break)
       // If in the lesson add percentage of the lesson that has already passed
       final height =
-          lesson.type == TimeTableRowType.lesson ? itemHeight : itemHeight - 20;
+          lesson.type == TimeTableRowType.lesson ? itemHeight : pauseHeight;
       if (now >= lesson.startTime && now <= lesson.endTime) {
         final diff = height *
             ((-now.differenceInMinutes(lesson.startTime)) /
@@ -457,7 +466,7 @@ class ListItem extends StatelessWidget {
       if (data.hours[j].type == TimeTableRowType.lesson) {
         verticalOffset += itemHeight;
       } else {
-        verticalOffset += itemHeight - 20;
+        verticalOffset += pauseHeight;
       }
       verticalOffset += 8;
     }
@@ -492,7 +501,7 @@ class ListItem extends StatelessWidget {
 
       if (!hidePause) {
         return ItemBlock(
-          height: itemHeight - 20,
+          height: pauseHeight,
           width: width,
           offset: verticalOffset,
           hOffset: horizontalOffset,
@@ -557,7 +566,7 @@ class ListItem extends StatelessWidget {
                 subject: subject,
                 height: itemHeight * subject.duration +
                     ((subject.duration - 1) * 8) +
-                    (numPauses * (itemHeight - 20 + 8)),
+                    (numPauses * (pauseHeight + 8)),
                 color: TimeTableHelper.getColorForLesson(settings, subject),
                 offset: verticalOffset,
                 // Calculate left offset based on subject index and max overlapping subjects
