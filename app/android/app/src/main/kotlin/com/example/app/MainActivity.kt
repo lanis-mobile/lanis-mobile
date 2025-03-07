@@ -92,7 +92,7 @@ class MainActivity: FlutterActivity() {
         val configuration = DocumentScanner.Configuration()
         configuration.imageQuality = 100
         configuration.imageType = Bitmap.CompressFormat.PNG
-        configuration.galleryButtonEnabled = true
+        configuration.galleryButtonEnabled = false // Is buggy with permissions
         DocumentScanner.init(this, configuration)
 
         val intent = Intent(this, AppScanActivity::class.java)
