@@ -243,7 +243,6 @@ Future<PickedFile?> pickFileUsingGallery(BuildContext context) async {
   return null;
 }
 
-// TODO: Test on actual iPhone
 Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
   List<String> paths = List.empty(growable: true);
   bool breakLoop = false;
