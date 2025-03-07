@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/utils/file_operations.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/random.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -185,7 +186,6 @@ Future<PickedFile?> pickFileUsingDocumentsUI(
   }
 }
 
-// TODO: Test on actual iPhone
 Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
   final ImagePicker imagePicker = ImagePicker();
   final image = await imagePicker.pickImage(source: ImageSource.camera);
@@ -294,19 +294,12 @@ Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {
       return null;
     }
 
-    final Map<Object?, Object?> map = scannedDocuments;
-    final Object? uris = map["Uri"];
+    logger.d("scannedDocuments: $scannedDocuments");
 
-    if (uris == null || uris.runtimeType != String) {
-      return null;
-    }
+    final List<Object?> list = scannedDocuments;
 
-    // Couldn't find the proper/intended way to parse this String and the examples just print the raw thing in the Terminal
-    final String dirtyUris = uris.toString().replaceAll("[", "").replaceAll("]", "").replaceAll("}", "").replaceAll("Page{imageUri=", "").replaceAll(", ", ",");
-    final List<String> uriStringList = dirtyUris.split(",");
-
-    for (final String s in uriStringList) {
-      final uri = Uri.parse(s);
+    for (final s in list) {
+      final uri = Uri.parse(s.toString());
       paths.add(uri.path);
     }
   } else {
