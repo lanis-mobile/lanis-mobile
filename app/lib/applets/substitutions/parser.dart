@@ -41,14 +41,20 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
     await loadFilterFromStorage();
     String document = await getSubstitutionPlanDocument();
     Document parsedDocument = parse(document);
+    
+    // Parse the last edit date from the HTML
     DateTime? lastEdit = parseLastEditDate(document);
+    
     var dates = getSubstitutionDates(document);
 
-    var fullPlan = SubstitutionPlan();
-    fullPlan.lastUpdated = lastEdit ?? DateTime.now();
-
+    // Create the plan with the extracted timestamp
+    var fullPlan = SubstitutionPlan(lastUpdated: lastEdit);
+    
     if (dates.isEmpty) {
       fullPlan = parseSubstitutionsNonAJAX(parsedDocument);
+      
+      // Make sure to preserve the timestamp even when using the non-AJAX format
+      fullPlan.lastUpdated = lastEdit ?? DateTime.now();
     } else {
       List<Future<SubstitutionDay>> futures =
       dates.map((date) => getSubstitutionsAJAX(date)).toList();
@@ -207,16 +213,26 @@ class SubstitutionsParser extends AppletParser<SubstitutionPlan> {
   ///"Letzte Aktualisierung: 08.05.2024 um 13:35:30 Uhr"
   DateTime? parseLastEditDate(String document) {
     RegExp lastEditPattern = RegExp(
-        r'Letzte Aktualisierung: (\d{2})\.(\d{2})\.(\d{4}) um (\d{2}):(\d{2}):(\d{2}) Uhr');
+        r'Letzte\s+Aktualisierung:\s*(\d{2})\.(\d{2})\.(\d{4})\s+um\s+(\d{2}):(\d{2}):(\d{2})\s+Uhr',
+        caseSensitive: false);
     RegExpMatch? match = lastEditPattern.firstMatch(document);
-    if (match == null) return null;
-    int day = int.parse(match.group(1) ?? "00");
-    int month = int.parse(match.group(2) ?? "00");
-    int year = int.parse(match.group(3) ?? "00");
-    int hour = int.parse(match.group(4) ?? "00");
-    int minute = int.parse(match.group(5) ?? "00");
-    int second = int.parse(match.group(6) ?? "00");
-    return DateTime(year, month, day, hour, minute, second);
+    if (match == null) {
+      return null;
+    }
+    
+    try {
+      int day = int.parse(match.group(1) ?? "00");
+      int month = int.parse(match.group(2) ?? "00");
+      int year = int.parse(match.group(3) ?? "00");
+      int hour = int.parse(match.group(4) ?? "00");
+      int minute = int.parse(match.group(5) ?? "00");
+      int second = int.parse(match.group(6) ?? "00");
+      
+      final timestamp = DateTime(year, month, day, hour, minute, second);
+      return timestamp;
+    } catch (e) {
+      return null;
+    }
   }
 
   static String parseHours(String hours) {
