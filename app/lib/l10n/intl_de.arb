@@ -274,6 +274,7 @@
   "accountExists": "Account existiert bereits",
   "errorOccurredDetails": "Problem: {problem}",
   "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren",
+  "undo": "Rückgängig",
   "quickActions": "Shortcuts",
   "applets": "Applets",
   "external": "Extern",
