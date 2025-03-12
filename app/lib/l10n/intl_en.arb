@@ -61,6 +61,7 @@
   "noFurtherEntries": "No further entries!",
   "noEntries": "No Entries!",
   "substitutionsEndCardMessage": "Not correct? Check whether your filter is set correctly. You may need to contact your school's IT department.\nLast edited: {time}",
+  "substitutionsLastEdit": "Last edit: {time}",
   "substitutionsInformationMessage": "There is information available for this day",
   "logout": "Logout",
   "logoutConfirmation": "Do you really want to log out?",
@@ -275,5 +276,12 @@
   "accountExists": "Account already exists",
   "errorOccurredDetails": "Problem: {problem}",
   "copyErrorToClipboard": "Copy error details to clipboard",
-  "undo": "Undo"
+  "undo": "Undo",
+  "quickActions": "Quick Actions",
+  "applets": "Applets",
+  "external": "External",
+  "restartRequired": "After a change, an app restart is required to apply the changes.",
+  "quickActionsDisclaimer": "You can add up to {num} actions. These actions are available on the home screen.",
+  "quickActionsAndroid": "Actions added to the home screen will work even after they are removed from the app, but they will not be updated. Therefore, you can add each action one by one.",
+  "copyErrorToClipboard": "Copy error details to clipboard"
 }

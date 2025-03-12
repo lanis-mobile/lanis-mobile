@@ -61,6 +61,7 @@
   "noFurtherEntries": "Keine weiteren Einträge!",
   "noEntries": "Keine Einträge!",
   "substitutionsEndCardMessage": "Nicht richtig? Überprüfe, ob dein Filter richtig eingestellt ist. Eventuell solltest du dich an die IT-Abteilung deiner Schule wenden.\nLetzte Aktualisierung: {time}",
+  "substitutionsLastEdit": "Letzte Aktualisierung: {time}",
   "substitutionsInformationMessage": "Es liegen Anmerkungen zu diesem Tag vor",
   "logout": "Logout",
   "logoutConfirmation": "Bist du sicher, dass du dich abmelden möchtest?",
@@ -273,5 +274,12 @@
   "accountExists": "Account existiert bereits",
   "errorOccurredDetails": "Problem: {problem}",
   "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren",
-  "undo": "Rückgängig"
+  "undo": "Rückgängig",
+  "quickActions": "Shortcuts",
+  "applets": "Applets",
+  "external": "Extern",
+  "restartRequired": "Nach einer Änderung ist ein Neustart der App erforderlich, um die Änderungen anzuwenden.",
+  "quickActionsDisclaimer": "Du kannst bis zu {num} Shortcuts hinzufügen. Diese Shortcuts sind auf dem Startbildschirm verfügbar.",
+  "quickActionsAndroid": "Shortcuts, die zum Startbildschirm hinzugefügt wurden, funktionieren auch nach der Deaktivierung aus der App, werden jedoch nicht aktualisiert. Daher ist es auch möglich mehr als 2 Shortcuts auf dem Startbildschirm zu benutzen.",
+  "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren"
 }
