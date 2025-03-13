@@ -341,8 +341,7 @@ class ListItem extends StatelessWidget {
           hOffset: horizontalOffset,
           color: Theme.of(context)
               .colorScheme
-              .surfaceContainer
-              .withValues(alpha: 0.5),
+              .surfaceContainerHigh,
           onlyColor: true,
           settings: settings,
           updateSettings: updateSettings,

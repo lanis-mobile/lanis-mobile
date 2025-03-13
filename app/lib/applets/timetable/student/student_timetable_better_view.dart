@@ -251,11 +251,10 @@ class TimeTableView extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           color: row.type == TimeTableRowType.lesson
-                              ? Theme.of(context).colorScheme.surfaceContainer
+                              ? Theme.of(context).colorScheme.surfaceContainerHighest
                               : Theme.of(context)
                                   .colorScheme
-                                  .surfaceContainer
-                                  .withValues(alpha: 0.5),
+                                  .surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         width: hourWidth,
@@ -278,12 +277,8 @@ class TimeTableView extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 10,
                                         )),
-                                    // Text(row.endTime.format(context))
                                   ]
-                                : [
-                                    // Text(
-                                    //   '${row.startTime.differenceInMinutes(row.endTime)} Min.'),
-                                  ]),
+                                : []),
                           ],
                         ),
                       ),
@@ -330,7 +325,7 @@ class TimeTableView extends StatelessWidget {
                 ),
               ],
             ),
-            if(!(settings['single-day'] ?? false)) TimeMarkerWidget(data: data, timetable: timetable),
+            TimeMarkerWidget(data: data, timetable: timetable, settings: settings,),
           ],
         ),
       ),
@@ -346,7 +341,7 @@ class TimeTableView extends StatelessWidget {
             Container(
               height: 40,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Builder(builder: (context) {
@@ -406,10 +401,12 @@ class TimeMarkerWidget extends StatefulWidget {
     super.key,
     required this.data,
     required this.timetable,
+    required this.settings,
   });
 
   final TimeTableData data;
   final TimeTable timetable;
+  final Map<String, dynamic> settings;
 
   @override
   State<TimeMarkerWidget> createState() => _TimeMarkerWidgetState();
@@ -469,7 +466,8 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
 
     // Padding for the sidebar
     final barWidth = hourWidth + 4;
-    final dayWidth = (MediaQuery.of(context).size.width - barWidth - 10) /
+    final wholeWidth = (MediaQuery.of(context).size.width - barWidth - 10);
+    final dayWidth = wholeWidth /
         widget.data.timetableDays.length;
 
     // Current day 0 Monday, 6 Sunday
@@ -478,18 +476,16 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
     const double lineHeight = 2;
     return Positioned(
       top: headerHeight + offset - (lineHeight / 2),
-      left: hourWidth +
+      left: (widget.settings['single-day'] ?? false) ? barWidth + 4
+          : hourWidth +
           4 +
           (currentDay * (dayWidth)) +
           (currentDay > 0 ? (currentDay - 1) * 2 : 0),
       child: Container(
         color: Colors.red,
-        width: dayWidth - 2,
+        width: (widget.settings['single-day'] ?? false) ? wholeWidth - 10 : dayWidth - 2,
         height: lineHeight,
       ),
     );
   }
 }
-
-
-
