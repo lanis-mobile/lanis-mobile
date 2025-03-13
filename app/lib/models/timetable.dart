@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sph_plan/applets/timetable/student/student_timetable_better_view.dart';
+import 'package:sph_plan/utils/extensions.dart';
 
 class TimetableSubject {
   // The ID is not nullable, to support legacy data where the ID was not present
@@ -122,3 +123,107 @@ class TimeTable {
     return data;
   }
 }
+
+class TimeTableRow {
+  final TimeTableRowType type;
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
+  final String label;
+  final int lessonIndex;
+
+  TimeTableRow(
+      this.type, this.startTime, this.endTime, this.label, this.lessonIndex);
+
+  @override
+  String toString() {
+    return 'TimeTableRow{type: \$type, subjects: \$subjects, startTime: \$startTime, endTime: \$endTime, label: \$label}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is TimeTableRow) {
+      return type == other.type &&
+          startTime == other.startTime &&
+          endTime == other.endTime &&
+          lessonIndex == other.lessonIndex &&
+          label == other.label;
+    }
+    return false;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'startTime': {'hour': startTime.hour, 'minute': startTime.minute},
+      'endTime': {'hour': endTime.hour, 'minute': endTime.minute},
+      'label': label,
+      'lessonIndex': lessonIndex,
+    };
+  }
+
+  factory TimeTableRow.fromJson(Map<String, dynamic> json) {
+    TimeTableRowType rowType = json['type'] == 'TimeTableRowType.lesson'
+        ? TimeTableRowType.lesson
+        : TimeTableRowType.pause;
+    TimeOfDay start = TimeOfDay(
+        hour: json['startTime']['hour'], minute: json['startTime']['minute']);
+    TimeOfDay end = TimeOfDay(
+        hour: json['endTime']['hour'], minute: json['endTime']['minute']);
+    TimeTableRow row =
+    TimeTableRow(rowType, start, end, json['label'], json['lessonIndex']);
+    return row;
+  }
+}
+
+class TimeTableData {
+  final List<TimeTableRow> hours = [];
+  late final String? weekBadge;
+  List<TimetableDay> timetableDays = [];
+
+  bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
+    return (weekBadge == null ||
+        weekBadge == "" ||
+        lesson.badge == null ||
+        lesson.badge == "")
+        ? true
+        : sameWeek
+        ? (weekBadge == lesson.badge)
+        : (weekBadge != lesson.badge);
+  }
+
+  TimeTableData(List<TimetableDay> data, TimeTable timetable,
+      Map<String, dynamic> settings, this.weekBadge) {
+    for (var (index, hour) in timetable.hours!.indexed) {
+      if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
+        if (timetable.hours![index - 1].endTime
+            .differenceInMinutes(hour.startTime) >
+            10) {
+          hours.add(TimeTableRow(
+              TimeTableRowType.pause,
+              timetable.hours![index - 1].endTime,
+              hour.startTime,
+              'Pause',
+              -1));
+        }
+      }
+      hours.add(hour);
+    }
+
+    List<dynamic>? hiddenLessons = settings['hidden-lessons'];
+    for (var day in data) {
+      List<TimetableSubject> dayData = [];
+      for (var subject in day) {
+        if (isCurrentWeek(subject, true) &&
+            (hiddenLessons == null || !hiddenLessons.contains(subject.id))) {
+          dayData.add(subject);
+        }
+      }
+      timetableDays.add(dayData);
+    }
+
+    timetableDays =
+        timetableDays.where((TimetableDay day) => day.isNotEmpty).toList();
+  }
+}
+
+enum TimeTableRowType { lesson, pause }
