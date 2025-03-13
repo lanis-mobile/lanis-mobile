@@ -2,8 +2,8 @@ name: Flutter Build
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
+  pull_request:
+    branches:
       - main
     paths:
       - 'app/lib/**'
@@ -48,12 +48,12 @@ jobs:
 
       - name: Build APK
         working-directory: ./app
-        run: flutter build apk --debug
+        run: flutter build apk --debug --flavor dev
 
       - name: Move APK and AAB files
         working-directory: ./app
         run: |
-          mv build/app/outputs/flutter-apk/app-debug.apk app-debug.apk
+          mv build/app/outputs/flutter-apk/app-dev-debug.apk app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
