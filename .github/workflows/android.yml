@@ -1,0 +1,67 @@
+name: Flutter Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - 'lib/**'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget curl xz-utils git>=2.0 bash unzip bash zip
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install jq
+        run: |
+          wget -O jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
+          chmod +x ./jq
+          mv jq /usr/local/bin
+
+      - name: Add exception
+        run: git config --global --add safe.directory /opt/hostedtoolcache/flutter/*
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Flutter setup
+        run: |
+            dart run build_runner build
+            dart run intl_utils:generate
+
+      - name: Build APK
+        run: flutter build apk --debug
+
+      - name: Move APK and AAB files
+        run: |
+          mv build/app/outputs/flutter-apk/app-debug.apk app-debug.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: app-release.apk
+
+      - name: Clean up
+        if: always()
+        run: |
+          sudo rm -rf build
