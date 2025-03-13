@@ -253,7 +253,8 @@ class _StudentTimetableSettingsState
       title: Text(timeTableDefinition.label(context)),
       backgroundColor: backgroundColor,
       children: [
-        Expanded(
+        SizedBox(
+          height: MediaQuery.of(context).size.height - 300,
           child: CombinedAppletBuilder<TimeTable>(
             parser: sph!.parser.timetableStudentParser,
             phpUrl: timeTableDefinition.appletPhpUrl,
