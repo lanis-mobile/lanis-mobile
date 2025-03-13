@@ -80,7 +80,7 @@ class ItemBlock extends StatelessWidget {
                 updateSettings('lesson-colors', {
                   ...settings['lesson-colors'],
                   lesson.id!.split('-')[0]:
-                  selectedColor.toHexString(enableAlpha: false)
+                      selectedColor.toHexString(enableAlpha: false)
                 });
               },
             ),
@@ -99,7 +99,7 @@ class ItemBlock extends StatelessWidget {
             width: double.infinity,
             child: Padding(
               padding:
-              const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+                  const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +211,7 @@ class ItemBlock extends StatelessWidget {
     );
 
     double calcWidth =
-    max(1, width - ((width > (hOffset ?? 0)) ? (hOffset ?? 0) : 0));
+        max(1, width - ((width > (hOffset ?? 0)) ? (hOffset ?? 0) : 0));
 
     return Positioned(
       top: offset,
@@ -219,39 +219,39 @@ class ItemBlock extends StatelessWidget {
       child: disableAction
           ? _colorContainer(calcWidth, child: SizedBox())
           : InkWell(
-        onTap: subject != null ? () => showSubject(context) : null,
-        child: _colorContainer(
-          calcWidth,
-          child: onlyColor
-              ? SizedBox()
-              : (!onlyColor && subject != null)
-              ? SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  subject!.name ?? '',
-                  style: textStyle,
-                  maxLines: 1,
-                ),
-                if (subject!.lehrer != null)
-                  Text(
-                    subject!.lehrer!,
-                    style: textStyle,
-                    maxLines: 1,
-                  ),
-                if (subject!.raum != null)
-                  Text(
-                    subject!.raum!,
-                    style: textStyle,
-                    maxLines: 1,
-                  ),
-              ],
+              onTap: subject != null ? () => showSubject(context) : null,
+              child: _colorContainer(
+                calcWidth,
+                child: onlyColor
+                    ? SizedBox()
+                    : (!onlyColor && subject != null)
+                        ? SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  subject!.name ?? '',
+                                  style: textStyle,
+                                  maxLines: 1,
+                                ),
+                                if (subject!.lehrer != null)
+                                  Text(
+                                    subject!.lehrer!,
+                                    style: textStyle,
+                                    maxLines: 1,
+                                  ),
+                                if (subject!.raum != null)
+                                  Text(
+                                    subject!.raum!,
+                                    style: textStyle,
+                                    maxLines: 1,
+                                  ),
+                              ],
+                            ),
+                          )
+                        : SizedBox(),
+              ),
             ),
-          )
-              : SizedBox(),
-        ),
-      ),
     );
   }
 
@@ -269,7 +269,6 @@ class ItemBlock extends StatelessWidget {
         disableAction = true,
         empty = true;
 }
-
 
 class ListItem extends StatelessWidget {
   final int iteration;
@@ -323,9 +322,9 @@ class ListItem extends StatelessWidget {
       for (var subject in subjectsInRow) {
         int numPauses = data.hours
             .where((element) =>
-        element.type == TimeTableRowType.pause &&
-            element.startTime >= subject.startTime &&
-            element.endTime <= subject.endTime)
+                element.type == TimeTableRowType.pause &&
+                element.startTime >= subject.startTime &&
+                element.endTime <= subject.endTime)
             .length;
         if (numPauses > 0) {
           hidePause = true;
@@ -339,9 +338,7 @@ class ListItem extends StatelessWidget {
           width: width,
           offset: verticalOffset,
           hOffset: horizontalOffset,
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHigh,
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           onlyColor: true,
           settings: settings,
           updateSettings: updateSettings,
@@ -390,9 +387,9 @@ class ListItem extends StatelessWidget {
 
               int numPauses = data.hours
                   .where((element) =>
-              element.type == TimeTableRowType.pause &&
-                  element.startTime >= subject.startTime &&
-                  element.endTime <= subject.endTime)
+                      element.type == TimeTableRowType.pause &&
+                      element.startTime >= subject.startTime &&
+                      element.endTime <= subject.endTime)
                   .length;
 
               return ItemBlock(

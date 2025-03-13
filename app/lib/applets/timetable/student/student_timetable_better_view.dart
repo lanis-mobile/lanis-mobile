@@ -251,7 +251,9 @@ class TimeTableView extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           color: row.type == TimeTableRowType.lesson
-                              ? Theme.of(context).colorScheme.surfaceContainerHighest
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
                               : Theme.of(context)
                                   .colorScheme
                                   .surfaceContainerHigh,
@@ -325,7 +327,11 @@ class TimeTableView extends StatelessWidget {
                 ),
               ],
             ),
-            TimeMarkerWidget(data: data, timetable: timetable, settings: settings,),
+            TimeMarkerWidget(
+              data: data,
+              timetable: timetable,
+              settings: settings,
+            ),
           ],
         ),
       ),
@@ -467,8 +473,7 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
     // Padding for the sidebar
     final barWidth = hourWidth + 4;
     final wholeWidth = (MediaQuery.of(context).size.width - barWidth - 10);
-    final dayWidth = wholeWidth /
-        widget.data.timetableDays.length;
+    final dayWidth = wholeWidth / widget.data.timetableDays.length;
 
     // Current day 0 Monday, 6 Sunday
     var currentDay = (DateTime.now().weekday - 1) % 7;
@@ -476,14 +481,17 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
     const double lineHeight = 2;
     return Positioned(
       top: headerHeight + offset - (lineHeight / 2),
-      left: (widget.settings['single-day'] ?? false) ? barWidth + 4
+      left: (widget.settings['single-day'] ?? false)
+          ? barWidth + 4
           : hourWidth +
-          4 +
-          (currentDay * (dayWidth)) +
-          (currentDay > 0 ? (currentDay - 1) * 2 : 0),
+              4 +
+              (currentDay * (dayWidth)) +
+              (currentDay > 0 ? (currentDay - 1) * 2 : 0),
       child: Container(
         color: Colors.red,
-        width: (widget.settings['single-day'] ?? false) ? wholeWidth - 10 : dayWidth - 2,
+        width: (widget.settings['single-day'] ?? false)
+            ? wholeWidth - 10
+            : dayWidth - 2,
         height: lineHeight,
       ),
     );
