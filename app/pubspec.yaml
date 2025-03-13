@@ -80,6 +80,7 @@ dependencies:
   quick_actions: ^1.1.0
   image_picker: ^1.1.2
   flutter_doc_scanner: ^0.0.16
+  pdf: ^3.11.3
 
   # TODO: Temporary migration to flutter_secure_storage. Please remove this in the future.
   flutter_keychain:
