@@ -11,7 +11,7 @@ import flutter_local_notifications
     GeneratedPluginRegistrant.register(with: self)
     
     if #available(iOS 13.0, *) {
-      UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+      UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
     
     FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { (registry) in
