@@ -5,8 +5,6 @@ on:
   push:
     branches-ignore:
       - main
-    paths:
-      - 'lib/**'
 
 jobs:
   build-android:
@@ -25,12 +23,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      - name: Install jq
-        run: |
-          wget -O jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
-          chmod +x ./jq
-          mv jq /usr/local/bin
 
       - name: Add exception
         run: git config --global --add safe.directory /opt/hostedtoolcache/flutter/*
@@ -59,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-build
-          path: app-release.apk
+          path: app-debug.apk
 
       - name: Clean up
         if: always()
