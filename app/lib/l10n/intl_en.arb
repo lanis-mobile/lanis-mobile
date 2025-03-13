@@ -276,6 +276,7 @@
   "accountExists": "Account already exists",
   "errorOccurredDetails": "Problem: {problem}",
   "copyErrorToClipboard": "Copy error details to clipboard",
+  "undo": "Undo",
   "quickActions": "Quick Actions",
   "applets": "Applets",
   "external": "External",
