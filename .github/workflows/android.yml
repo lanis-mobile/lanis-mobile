@@ -5,6 +5,8 @@ on:
   push:
     branches-ignore:
       - main
+    paths:
+      - 'app/lib/**'
 
 jobs:
   build-android:
@@ -57,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-build
-          path: app-debug.apk
+          path: ./app/app-debug.apk
 
       - name: Clean up
         if: always()
