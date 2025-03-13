@@ -6,6 +6,7 @@ import 'package:html/parser.dart';
 import 'package:sph_plan/applets/timetable/student/student_timetable_better_view.dart';
 import 'package:sph_plan/core/applet_parser.dart';
 import 'package:sph_plan/models/client_status_exceptions.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../models/timetable.dart';
 
@@ -157,6 +158,10 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
       // Id unique for every subject. Added with startTime to make it unique
       // even if lessons are removed.
       var id = row.attributes['data-mix'];
+      if (id == null || id.isEmpty) {
+        // Convert name to a reproducible unique id
+        id = Uuid().v5(Uuid.NAMESPACE_URL, name ?? raum).replaceAll('-', '');
+      }
 
       result.add(TimetableSubject(
           id: '$id-$day-${startTime.hour}-${startTime.minute}',
