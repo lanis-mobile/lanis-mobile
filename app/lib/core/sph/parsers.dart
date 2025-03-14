@@ -1,3 +1,5 @@
+import 'package:sph_plan/applets/abitur_helper/definition.dart';
+import 'package:sph_plan/applets/abitur_helper/parser.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/applets/calendar/parser.dart';
 import 'package:sph_plan/applets/conversations/definition.dart';
@@ -26,6 +28,7 @@ class Parsers {
   TimetableStudentParser? _timetableStudentParser;
   ConversationsParser? _conversationsParser;
   StudyGroupsStudentParser? _studyGroupsStudentParser;
+  AbiturParser? _abiturParser;
 
   Parsers({required this.sph});
 
@@ -69,5 +72,10 @@ class Parsers {
     _studyGroupsStudentParser ??=
         StudyGroupsStudentParser(sph, studyGroupsDefinition);
     return _studyGroupsStudentParser!;
+  }
+
+  AbiturParser get abiturParser {
+    _abiturParser ??= AbiturParser(sph, abiturHelperDefinition);
+    return _abiturParser!;
   }
 }
