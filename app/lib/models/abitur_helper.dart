@@ -1,33 +1,28 @@
+import 'dart:convert';
+
 class AbiturRow {
   final AbiturRowType type;
-
   final DateTime? date;
   final String room;
   final String grade;
-
   final String subject;
   final String inspector;
-
-  // For oral exams only
   final String? protocol;
   final String? chair;
-
-  // Calculated points
   final int? basePoints;
   final int? multiplicationPoints;
 
-  AbiturRow({
-    required this.type,
-    this.date,
-    required this.room,
-    required this.grade,
-    required this.subject,
-    required this.inspector,
-    this.protocol,
-    this.chair,
-    this.basePoints,
-    this.multiplicationPoints
-  });
+  AbiturRow(
+      {required this.type,
+      this.date,
+      required this.room,
+      required this.grade,
+      required this.subject,
+      required this.inspector,
+      this.protocol,
+      this.chair,
+      this.basePoints,
+      this.multiplicationPoints});
 
   @override
   String toString() {
@@ -63,50 +58,50 @@ class AbiturRow {
       basePoints.hashCode ^
       multiplicationPoints.hashCode;
 
-  AbiturRow copyWith({
-    AbiturRowType? type,
-    DateTime? date,
-    String? room,
-    String? grade,
-    String? subject,
-    String? inspector,
-    String? protocol,
-    String? chair,
-    int? basePoints,
-    int? multiplicationPoints
-  }) {
+  AbiturRow copyWith(
+      {AbiturRowType? type,
+      DateTime? date,
+      String? room,
+      String? grade,
+      String? subject,
+      String? inspector,
+      String? protocol,
+      String? chair,
+      int? basePoints,
+      int? multiplicationPoints}) {
     return AbiturRow(
-      type: type ?? this.type,
-      date: date ?? this.date,
-      room: room ?? this.room,
-      grade: grade ?? this.grade,
-      subject: subject ?? this.subject,
-      inspector: inspector ?? this.inspector,
-      protocol: protocol ?? this.protocol,
-      chair: chair ?? this.chair,
-      basePoints: basePoints ?? this.basePoints,
-        multiplicationPoints: multiplicationPoints ?? this.multiplicationPoints
-    );
+        type: type ?? this.type,
+        date: date ?? this.date,
+        room: room ?? this.room,
+        grade: grade ?? this.grade,
+        subject: subject ?? this.subject,
+        inspector: inspector ?? this.inspector,
+        protocol: protocol ?? this.protocol,
+        chair: chair ?? this.chair,
+        basePoints: basePoints ?? this.basePoints,
+        multiplicationPoints:
+            multiplicationPoints ?? this.multiplicationPoints);
   }
 
   factory AbiturRow.fromJson(Map<String, dynamic> json) {
     return AbiturRow(
-      type: json['type'] as AbiturRowType,
-      date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
-      room: json['room'] as String,
-      grade: json['grade'] as String,
-      subject: json['subject'] as String,
-      inspector: json['inspector'] as String,
-      protocol: json['protocol'] as String?,
-      chair: json['chair'] as String?,
-      basePoints: json['basePoints'] as int?,
-        multiplicationPoints: json['multiplicationPoints'] as int?
-    );
+        type: AbiturRowTypeExtension.fromString(json['type'] as String),
+        date: json['date'] == null
+            ? null
+            : DateTime.parse(json['date'] as String),
+        room: json['room'] as String,
+        grade: json['grade'] as String,
+        subject: json['subject'] as String,
+        inspector: json['inspector'] as String,
+        protocol: json['protocol'] as String?,
+        chair: json['chair'] as String?,
+        basePoints: json['basePoints'] as int?,
+        multiplicationPoints: json['multiplicationPoints'] as int?);
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'type': type,
+      'type': type.toJson(),
       'date': date?.toIso8601String(),
       'room': room,
       'grade': grade,
@@ -119,9 +114,26 @@ class AbiturRow {
     };
   }
 
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
+
+  static AbiturRow fromJsonString(String jsonString) {
+    return AbiturRow.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
+  }
 }
 
-enum AbiturRowType {
-  written,
-  oral
+enum AbiturRowType { written, oral }
+
+extension AbiturRowTypeExtension on AbiturRowType {
+  String toJson() {
+    return name;
+  }
+
+  static AbiturRowType fromString(String value) {
+    return AbiturRowType.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => throw ArgumentError('Invalid AbiturRowType: $value'),
+    );
+  }
 }
