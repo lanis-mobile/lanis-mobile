@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sph_plan/applets/abitur_helper/definition.dart';
 import 'package:sph_plan/applets/calendar/definition.dart';
 import 'package:sph_plan/applets/conversations/definition.dart';
 import 'package:sph_plan/applets/data_storage/definition.dart';
@@ -74,7 +75,8 @@ class AppDefinitions {
     conversationsDefinition,
     lessonsDefinition,
     dataStorageDefinition,
-    studyGroupsDefinition
+    studyGroupsDefinition,
+    abiturHelperDefinition
   ];
 
   static List<ExternalDefinition> external = [

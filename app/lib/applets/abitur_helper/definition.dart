@@ -16,7 +16,7 @@ final abiturHelperDefinition = AppletDefinition(
   supportedAccountTypes: [AccountType.student],
   allowOffline: true,
   settingsDefaults: {},
-  refreshInterval: const Duration(hours: 24),
+  refreshInterval: const Duration(minutes: 1),
   bodyBuilder: (context, accountType, openDrawerCb) {
     return AbiturHelperView(openDrawerCb: openDrawerCb);
   },
