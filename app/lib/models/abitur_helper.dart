@@ -13,8 +13,8 @@ class AbiturRow {
   final String? chair;
 
   // Calculated points
-  final int basePoints;
-  final int multiplicationPoints;
+  final int? basePoints;
+  final int? multiplicationPoints;
 
   AbiturRow({
     required this.type,
@@ -25,8 +25,8 @@ class AbiturRow {
     required this.inspector,
     this.protocol,
     this.chair,
-    required this.basePoints,
-    required this.multiplicationPoints
+    this.basePoints,
+    this.multiplicationPoints
   });
 
   @override
@@ -99,8 +99,8 @@ class AbiturRow {
       inspector: json['inspector'] as String,
       protocol: json['protocol'] as String?,
       chair: json['chair'] as String?,
-      basePoints: json['basePoints'] as int,
-        multiplicationPoints: json['multiplicationPoints'] as int
+      basePoints: json['basePoints'] as int?,
+        multiplicationPoints: json['multiplicationPoints'] as int?
     );
   }
 
