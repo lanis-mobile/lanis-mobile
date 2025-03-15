@@ -12,7 +12,7 @@ import 'package:sph_plan/utils/extensions.dart';
 class ItemBlock extends StatelessWidget {
   final TimetableSubject? subject;
   final double height;
-  final Color color;
+  final Color? color;
   final bool empty;
   final double offset;
   final double width;
@@ -27,7 +27,7 @@ class ItemBlock extends StatelessWidget {
     super.key,
     this.subject,
     required this.height,
-    this.color = Colors.white,
+    this.color,
     this.empty = false,
     required this.offset,
     required this.width,
@@ -194,8 +194,8 @@ class ItemBlock extends StatelessWidget {
       height: height,
       clipBehavior: Clip.hardEdge, // Clips any overflow, useful for the y axis
       decoration: BoxDecoration(
-        border: Border.all(color: color, width: min(1, width / 3)),
-        color: color == Colors.white ? Colors.transparent : color,
+        border: Border.all(color: color ?? Colors.transparent, width: min(1, width / 3)),
+        color: color ?? Colors.transparent,
         borderRadius: BorderRadius.circular(8.0),
       ),
       padding: EdgeInsets.all(4.0),
@@ -207,7 +207,7 @@ class ItemBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle textStyle = TextStyle(
       fontSize: 12,
-      color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+      color: color != null ? color!.computeLuminance() > 0.5 ? Colors.black : Colors.white : null,
     );
 
     double calcWidth =
@@ -264,7 +264,7 @@ class ItemBlock extends StatelessWidget {
     required this.updateSettings,
     required this.settings,
   })  : subject = null,
-        color = Colors.white,
+        color = null,
         onlyColor = false,
         disableAction = true,
         empty = true;
