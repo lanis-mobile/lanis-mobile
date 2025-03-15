@@ -1,13 +1,5 @@
 import 'package:flutter/material.dart';
 
-extension ComparableTimeOfDay on TimeOfDay {
-  bool operator <(TimeOfDay other) =>
-      (hour * 60 + minute) < (other.hour * 60 + other.minute);
-
-  bool operator >(TimeOfDay other) =>
-      (hour * 60 + minute) > (other.hour * 60 + other.minute);
-}
-
 extension ParsableTimeOfDay on TimeOfDay {
   double toTimeDouble() => hour + minute / 60.0;
 
@@ -20,5 +12,27 @@ extension ParsableTimeOfDay on TimeOfDay {
 
   TimeOfDay floor() {
     return TimeOfDay(hour: hour, minute: 0);
+  }
+}
+
+extension TimeOfDayExtension on TimeOfDay {
+  int differenceInMinutes(TimeOfDay other) {
+    return (other.hour - hour) * 60 + other.minute - minute;
+  }
+
+  operator <=(TimeOfDay other) {
+    return hour < other.hour || (hour == other.hour && minute <= other.minute);
+  }
+
+  operator >=(TimeOfDay other) {
+    return hour > other.hour || (hour == other.hour && minute >= other.minute);
+  }
+
+  operator >(TimeOfDay other) {
+    return hour > other.hour || (hour == other.hour && minute > other.minute);
+  }
+
+  operator <(TimeOfDay other) {
+    return hour < other.hour || (hour == other.hour && minute < other.minute);
   }
 }
