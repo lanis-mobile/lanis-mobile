@@ -315,7 +315,17 @@ class TimeTableView extends StatelessWidget {
                                 return Padding(
                                   padding: const EdgeInsets.only(
                                       left: 4.0, right: 8.0),
-                                  child: e,
+                                  child: Stack(
+                                    children: [
+                                      e,
+                                      TimeMarkerWidget(
+                                        data: data,
+                                        timetable: timetable,
+                                        settings: settings,
+                                        day: days.indexOf(e),
+                                      ),
+                                    ],
+                                  ),
                                 );
                               }).toList(),
                             ),
@@ -327,11 +337,12 @@ class TimeTableView extends StatelessWidget {
                 ),
               ],
             ),
-            TimeMarkerWidget(
-              data: data,
-              timetable: timetable,
-              settings: settings,
-            ),
+            if (!(settings['single-day'] ?? false))
+              TimeMarkerWidget(
+                data: data,
+                timetable: timetable,
+                settings: settings,
+              ),
           ],
         ),
       ),
@@ -408,11 +419,13 @@ class TimeMarkerWidget extends StatefulWidget {
     required this.data,
     required this.timetable,
     required this.settings,
+    this.day,
   });
 
   final TimeTableData data;
   final TimeTable timetable;
   final Map<String, dynamic> settings;
+  final int? day;
 
   @override
   State<TimeMarkerWidget> createState() => _TimeMarkerWidgetState();
@@ -478,11 +491,15 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
     // Current day 0 Monday, 6 Sunday
     var currentDay = (DateTime.now().weekday - 1) % 7;
 
+    if ((widget.settings['single-day'] ?? false) && currentDay != widget.day) {
+      return SizedBox();
+    }
+
     const double lineHeight = 2;
     return Positioned(
       top: headerHeight + offset - (lineHeight / 2),
       left: (widget.settings['single-day'] ?? false)
-          ? barWidth + 4
+          ? null
           : hourWidth +
               4 +
               (currentDay * (dayWidth)) +
