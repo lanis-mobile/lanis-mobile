@@ -297,7 +297,16 @@ class TimeTableView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: days.map((e) {
-                            return Expanded(child: e);
+                            return Expanded(
+                                child: Stack(children: [
+                              e,
+                              TimeMarkerWidget(
+                                data: data,
+                                timetable: timetable,
+                                settings: settings,
+                                day: days.indexOf(e),
+                              ),
+                            ]));
                           }).toList(),
                         );
                       } else {
@@ -337,12 +346,6 @@ class TimeTableView extends StatelessWidget {
                 ),
               ],
             ),
-            if (!(settings['single-day'] ?? false))
-              TimeMarkerWidget(
-                data: data,
-                timetable: timetable,
-                settings: settings,
-              ),
           ],
         ),
       ),
@@ -458,6 +461,13 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
     double offset = 8;
     final now = TimeOfDay.fromDateTime(DateTime.now());
 
+    // Current day 0 Monday, 6 Sunday
+    var currentDay = (DateTime.now().weekday - 1) % 7;
+
+    if (currentDay != widget.day) {
+      return SizedBox();
+    }
+
     if (now < widget.data.hours.first.startTime) {
       return SizedBox();
     }
@@ -488,27 +498,14 @@ class _TimeMarkerWidgetState extends State<TimeMarkerWidget> {
     final wholeWidth = (MediaQuery.of(context).size.width - barWidth - 10);
     final dayWidth = wholeWidth / widget.data.timetableDays.length;
 
-    // Current day 0 Monday, 6 Sunday
-    var currentDay = (DateTime.now().weekday - 1) % 7;
-
-    if ((widget.settings['single-day'] ?? false) && currentDay != widget.day) {
-      return SizedBox();
-    }
-
     const double lineHeight = 2;
     return Positioned(
       top: headerHeight + offset - (lineHeight / 2),
-      left: (widget.settings['single-day'] ?? false)
-          ? null
-          : hourWidth +
-              4 +
-              (currentDay * (dayWidth)) +
-              (currentDay > 0 ? (currentDay - 1) * 2 : 0),
       child: Container(
         color: Colors.red,
         width: (widget.settings['single-day'] ?? false)
             ? wholeWidth - 10
-            : dayWidth - 2,
+            : dayWidth,
         height: lineHeight,
       ),
     );

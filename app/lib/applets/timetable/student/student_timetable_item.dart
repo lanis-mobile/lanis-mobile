@@ -194,7 +194,8 @@ class ItemBlock extends StatelessWidget {
       height: height,
       clipBehavior: Clip.hardEdge, // Clips any overflow, useful for the y axis
       decoration: BoxDecoration(
-        border: Border.all(color: color ?? Colors.transparent, width: min(1, width / 3)),
+        border: Border.all(
+            color: color ?? Colors.transparent, width: min(1, width / 3)),
         color: color ?? Colors.transparent,
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -207,7 +208,11 @@ class ItemBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle textStyle = TextStyle(
       fontSize: 12,
-      color: color != null ? color!.computeLuminance() > 0.5 ? Colors.black : Colors.white : null,
+      color: color != null
+          ? color!.computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white
+          : null,
     );
 
     double calcWidth =
@@ -304,7 +309,7 @@ class ListItem extends StatelessWidget {
       verticalOffset += 8;
     }
 
-    double horizontalOffset = 2;
+    double horizontalOffset = 0;
 
     final List<TimetableSubject> timetable = timetableDays[i];
     List<TimetableSubject> subjects = timetable.where((element) {
