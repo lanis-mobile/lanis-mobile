@@ -55,7 +55,6 @@ dependencies:
   flutter_native_splash: ^2.4.1
   table_calendar: ^3.0.9
   intl: ^0.19.0
-  syncfusion_flutter_calendar: ^28.1.38
   flutter_localizations:
     sdk: flutter
   simple_shadow: ^0.3.1
@@ -68,7 +67,6 @@ dependencies:
   quill_html_converter: ^9.3.2
   flutter_tagging_plus: ^4.0.2
   flutter_inappwebview: ^6.1.5
-  syncfusion_localizations: ^28.1.38
   drift: ^2.21.0
   drift_flutter: ^0.2.1
   flutter_secure_storage: ^9.2.4
@@ -81,6 +79,8 @@ dependencies:
   image_picker: ^1.1.2
   flutter_doc_scanner: ^0.0.16
   pdf: ^3.11.3
+  html_unescape: ^2.0.0
+
 
   # TODO: Temporary migration to flutter_secure_storage. Please remove this in the future.
   flutter_keychain:

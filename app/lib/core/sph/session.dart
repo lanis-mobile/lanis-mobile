@@ -8,6 +8,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
@@ -42,6 +43,7 @@ class SessionHandler {
   SessionHandler({required this.sph, String? withLoginURL,});
 
   Future<void> prepareDio() async {
+    final unescape = HtmlUnescape();
     jar = CookieJar();
     dio.httpClientAdapter = getNativeAdapterInstance();
     dio.interceptors.add(CookieManager(jar));
@@ -60,6 +62,14 @@ class SessionHandler {
           connectionChecker.status = ConnectionStatus.disconnected;
         }
         return handler.next(error);
+      },
+    ));
+    dio.interceptors.add(InterceptorsWrapper(
+     onResponse: (Response response, ResponseInterceptorHandler handler) {
+       if (response.data is String) {
+         response.data = unescape.convert(response.data);
+       }
+       return handler.next(response);
       },
     ));
     dio.interceptors.add(InterceptorsWrapper(
