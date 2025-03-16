@@ -15,8 +15,6 @@ import 'core/database/account_database/account_db.dart'
     show AccountDatabase, ClearTextAccount;
 import 'core/sph/sph.dart' show SPH;
 
-const identifier = "io.github.alessioc42.pushservice";
-
 Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
 
   if ((await Permission.notification.isDenied)) {
@@ -41,11 +39,10 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
     return;
   }
 
-
+  final int targetIntervalMinutes = await accountDatabase.kv
+      .get('notifications-target-interval-minutes');
+  logger.i('Setting up background task with interval of $targetIntervalMinutes minutes');
   if (Platform.isAndroid) {
-    final int min = await accountDatabase.kv
-        .get('notifications-android-target-interval-minutes');
-    logger.i('Setting up background task with interval of $min minutes');
     await FlutterBackgroundExecutor().createRefreshTask(
       callback: callbackDispatcher,
       settings: RefreshTaskSettings(
@@ -55,7 +52,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
           requiresDeviceIdle: false,
           requiresStorageNotLow: false,
           initialDelay: Duration.zero,
-          repeatInterval: Duration(minutes: min),
+          repeatInterval: Duration(minutes: targetIntervalMinutes),
         ),
         // iosDetails: IosRefreshTaskDetails(taskIdentifier: 'com.dsr_corporation.refresh-task'),
       ),
@@ -68,7 +65,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   if (Platform.isIOS) {
     try {
       await bgf.BackgroundFetch.configure(bgf.BackgroundFetchConfig(
-          minimumFetchInterval: 15
+          minimumFetchInterval: targetIntervalMinutes
       ), (String taskId) async {
         try {
           await callbackDispatcher();
