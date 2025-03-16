@@ -450,7 +450,10 @@ class _NotificationSettingsState
                   ],
                 ),
               ),
-            )
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
           ];
         },
     );
