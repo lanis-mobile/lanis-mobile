@@ -121,6 +121,9 @@ Future<void> callbackDispatcher() async {
 
     final accounts =
     await (accountDatabase.select(accountDatabase.accountsTable)).get();
+
+    List<Future> futures = [];
+
     for (final account in accounts) {
       final ClearTextAccount clearTextAccount =
       await AccountDatabase.getAccountFromTableData(account);
@@ -129,34 +132,40 @@ Future<void> callbackDispatcher() async {
         sph.prefs.close();
         continue;
       }
-      bool authenticated = false;
-      for (final applet
-      in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
-        if (applet.supportedAccountTypes
-            .contains(clearTextAccount.accountType) &&
-            (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ??
-                true)) {
-          if (!authenticated) {
-            await sph.session.prepareDio();
-            await sph.session.authenticate(withoutData: true);
-            authenticated = true;
+      final accountExecutionTask = () async {
+        bool authenticated = false;
+        for (final applet
+        in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+          if (applet.supportedAccountTypes
+              .contains(clearTextAccount.accountType) &&
+              (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ??
+                  true)) {
+            if (!authenticated) {
+              await sph.session.prepareDio();
+              await sph.session.authenticate(withoutData: true);
+              authenticated = true;
+            }
+            if (!sph.session.doesSupportFeature(applet,
+                overrideAccountType: clearTextAccount.accountType)) {
+              continue;
+            }
+            await applet.notificationTask!(
+                sph,
+                clearTextAccount.accountType ?? AccountType.student,
+                BackgroundTaskToolkit(sph, applet.appletPhpUrl,
+                    multiAccount: accounts.length > 1));
           }
-          if (!sph.session.doesSupportFeature(applet,
-              overrideAccountType: clearTextAccount.accountType)) {
-            continue;
-          }
-          await applet.notificationTask!(
-              sph,
-              clearTextAccount.accountType ?? AccountType.student,
-              BackgroundTaskToolkit(sph, applet.appletPhpUrl,
-                  multiAccount: accounts.length > 1));
         }
-      }
-      if (authenticated) {
-        await sph.session.deAuthenticate();
-      }
-      sph.prefs.close();
+        if (authenticated) {
+          await sph.session.deAuthenticate();
+        }
+        sph.prefs.close();
+      }();
+      futures.add(accountExecutionTask);
     }
+
+    await Future.wait(futures);
+
     accountDatabase.close();
     backgroundLogger.i("Background fetch completed");
     return;
