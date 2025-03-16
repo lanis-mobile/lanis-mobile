@@ -20,5 +20,7 @@ echo ">>> build apk"
 flutter build apk --dart-define=cronetHttpNoPlay=true
 mv build/app/outputs/flutter-apk/app-release.apk artifacts/app-release-selfsigned.apk
 
+xdg-open artifacts
+
 # Kill left over gradle daemons
 pkill -f '.GradleDaemon.'
