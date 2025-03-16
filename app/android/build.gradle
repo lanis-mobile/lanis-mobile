@@ -4,7 +4,6 @@ allprojects {
         mavenCentral()
         maven { url 'https://jitpack.io' }
         maven { url "${project(':background_fetch').projectDir}/libs" }
-
     }
     subprojects {
         afterEvaluate { project ->
