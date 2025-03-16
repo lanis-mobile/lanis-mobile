@@ -122,7 +122,7 @@ Future<void> callbackDispatcher() async {
     final accounts =
     await (accountDatabase.select(accountDatabase.accountsTable)).get();
 
-    List<Future> futures = [];
+    List<Future> accountBackgroundTasks = [];
 
     for (final account in accounts) {
       final ClearTextAccount clearTextAccount =
@@ -132,7 +132,8 @@ Future<void> callbackDispatcher() async {
         sph.prefs.close();
         continue;
       }
-      final accountExecutionTask = () async {
+      accountBackgroundTasks.add(() async {
+        List<Future> appletTasks = [];
         bool authenticated = false;
         for (final applet
         in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
@@ -149,22 +150,22 @@ Future<void> callbackDispatcher() async {
                 overrideAccountType: clearTextAccount.accountType)) {
               continue;
             }
-            await applet.notificationTask!(
+            appletTasks.add(applet.notificationTask!(
                 sph,
                 clearTextAccount.accountType ?? AccountType.student,
                 BackgroundTaskToolkit(sph, applet.appletPhpUrl,
-                    multiAccount: accounts.length > 1));
+                    multiAccount: accounts.length > 1)));
           }
         }
+        await Future.wait(appletTasks);
         if (authenticated) {
           await sph.session.deAuthenticate();
         }
         sph.prefs.close();
-      }();
-      futures.add(accountExecutionTask);
+      }());
     }
 
-    await Future.wait(futures);
+    await Future.wait(accountBackgroundTasks);
 
     accountDatabase.close();
     backgroundLogger.i("Background fetch completed");
