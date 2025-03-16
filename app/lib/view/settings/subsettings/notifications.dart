@@ -33,9 +33,9 @@ class _NotificationSettingsState
   final Map<String, AppletDefinition> supportedApplets = {};
 
   double androidNotificationInterval = kvDefaults['notifications-android-target-interval-minutes'].toDouble();
-  List<bool> androidEnabledDays = kvDefaults['notifications-android-allowed-days'];
-  TimeOfDay androidStartTime = TimeOfDay(hour: kvDefaults['notifications-android-start-time'][0], minute: kvDefaults['notifications-android-start-time'][1]);
-  TimeOfDay androidEndTime = TimeOfDay(hour: kvDefaults['notifications-android-end-time'][0], minute: kvDefaults['notifications-android-end-time'][1]);
+  List<bool> androidEnabledDays = kvDefaults['notifications-allowed-days'];
+  TimeOfDay androidStartTime = TimeOfDay(hour: kvDefaults['notifications-start-time'][0], minute: kvDefaults['notifications-start-time'][1]);
+  TimeOfDay androidEndTime = TimeOfDay(hour: kvDefaults['notifications-end-time'][0], minute: kvDefaults['notifications-end-time'][1]);
   
   PermissionStatus notificationPermissionStatus = PermissionStatus.provisional;
   Timer? checkTimer;
@@ -72,16 +72,16 @@ class _NotificationSettingsState
     final globalSettings =
       await accountDatabase.kv.getMultiple(
           ['notifications-android-target-interval-minutes',
-            'notifications-android-allowed-days',
-            'notifications-android-start-time',
-            'notifications-android-end-time']);
+            'notifications-allowed-days',
+            'notifications-start-time',
+            'notifications-end-time']);
 
     setState(() {
       notificationPermissionStatus = notificationPermissionStatus;
       androidNotificationInterval = globalSettings['notifications-android-target-interval-minutes'].toDouble();
-      androidEnabledDays = globalSettings['notifications-android-allowed-days'].map<bool>((e) => e as bool).toList();
-      androidStartTime = TimeOfDay(hour: globalSettings['notifications-android-start-time'][0], minute: globalSettings['notifications-android-start-time'][1]);
-      androidEndTime = TimeOfDay(hour: globalSettings['notifications-android-end-time'][0], minute: globalSettings['notifications-android-end-time'][1]);
+      androidEnabledDays = globalSettings['notifications-allowed-days'].map<bool>((e) => e as bool).toList();
+      androidStartTime = TimeOfDay(hour: globalSettings['notifications-start-time'][0], minute: globalSettings['notifications-start-time'][1]);
+      androidEndTime = TimeOfDay(hour: globalSettings['notifications-end-time'][0], minute: globalSettings['notifications-end-time'][1]);
     });
   }
 
@@ -265,7 +265,7 @@ class _NotificationSettingsState
                               setState(() {
                                 androidEnabledDays[dayIndex - 1] = val;
                               });
-                              accountDatabase.kv.set('notifications-android-allowed-days', androidEnabledDays);
+                              accountDatabase.kv.set('notifications-allowed-days', androidEnabledDays);
                             } : null,
                           ),
                         ],
@@ -328,8 +328,8 @@ class _NotificationSettingsState
                   } : null,
                   onChangeEnd: (newValues) {
                     accountDatabase.kv.setMultiple({
-                      'notifications-android-start-time': [androidStartTime.hour, androidStartTime.minute],
-                      'notifications-android-end-time': [androidEndTime.hour, androidEndTime.minute],
+                      'notifications-start-time': [androidStartTime.hour, androidStartTime.minute],
+                      'notifications-end-time': [androidEndTime.hour, androidEndTime.minute],
                     });
                   },
                 ),

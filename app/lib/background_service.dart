@@ -250,20 +250,20 @@ class BackgroundTaskToolkit {
 
 Future<bool> isTaskWithinConstraints(AccountDatabase accountDB) async {
   final globalSettings = await accountDB.kv.getMultiple([
-    'notifications-android-allowed-days',
-    'notifications-android-start-time',
-    'notifications-android-end-time'
+    'notifications-allowed-days',
+    'notifications-start-time',
+    'notifications-end-time'
   ]);
   TimeOfDay currentTime = TimeOfDay.now();
   TimeOfDay startTime = TimeOfDay(
-      hour: globalSettings['notifications-android-start-time'][0],
-      minute: globalSettings['notifications-android-start-time'][1]);
+      hour: globalSettings['notifications-start-time'][0],
+      minute: globalSettings['notifications-start-time'][1]);
   TimeOfDay endTime = TimeOfDay(
-      hour: globalSettings['notifications-android-end-time'][0],
-      minute: globalSettings['notifications-android-end-time'][1]);
+      hour: globalSettings['notifications-end-time'][0],
+      minute: globalSettings['notifications-end-time'][1]);
   if (currentTime.hour < startTime.hour || currentTime.hour > endTime.hour) {
     return false;
   }
   int currentDayIndex = DateTime.now().weekday - 1;
-  return globalSettings['notifications-android-allowed-days'][currentDayIndex];
+  return globalSettings['notifications-allowed-days'][currentDayIndex];
 }
