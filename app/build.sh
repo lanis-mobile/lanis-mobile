@@ -1,4 +1,6 @@
 echo "Building selfsigned APK and AAB files"
+echo ">>> flutter clean"
+flutter clean
 echo ">>> pub get"
 flutter pub get
 echo ">>> pub upgrade"
