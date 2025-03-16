@@ -92,28 +92,28 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return androidInfo.version.sdkInt >= 33;
         },
       ),
-      if (Platform.isAndroid)
-        SettingsTile(
-            title: (context) => AppLocalizations.of(context).notifications,
-            subtitle: (context) async {
-              return AppLocalizations.of(context).intervalAppletsList;
-            },
-            icon: Icons.notifications_rounded,
-            screen: (context) async {
-              int accountCount = await accountDatabase
-                  .select(accountDatabase.accountsTable)
-                  .get()
-                  .then((value) => value.length);
+      SettingsTile(
+        title: (context) => AppLocalizations.of(context).notifications,
+        subtitle: (context) async {
+          return AppLocalizations.of(context).intervalAppletsList;
+        },
+        icon: Icons.notifications_rounded,
+        screen: (context) async {
+          int accountCount = await accountDatabase
+              .select(accountDatabase.accountsTable)
+              .get()
+              .then((value) => value.length);
 
-              if(context.mounted) {
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        NotificationSettings(accountCount: accountCount)),
-              );
-              }
-            }),
+          if(context.mounted) {
+            Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    NotificationSettings(accountCount: accountCount)),
+          );
+          }
+        },
+      ),
       SettingsTile(
           title: (context) => AppLocalizations.of(context).clearCache,
           subtitle: (context) async {
