@@ -75,7 +75,7 @@ class _QuickActionsState extends State<QuickActions> {
                       leading: applet.icon,
                       contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                       value: quickActions.contains(applet.appletPhpUrl),
-                      onChanged: quickActions.length >= 2 && !quickActions.contains(applet.appletPhpUrl) ?
+                      onChanged: quickActions.length >= maxQuickActions && !quickActions.contains(applet.appletPhpUrl) ?
                           null : (bool value) {
                         if (value) {
                           quickActions.add(applet.appletPhpUrl);
@@ -111,7 +111,7 @@ class _QuickActionsState extends State<QuickActions> {
                       leading: external.icon,
                       contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                       value: quickActions.contains(external.id),
-                      onChanged: quickActions.length >= 2 && !quickActions.contains(external.id) ?
+                      onChanged: quickActions.length >= maxQuickActions && !quickActions.contains(external.id) ?
                           null : (bool value) {
                         if (value) {
                           quickActions.add(external.id);
