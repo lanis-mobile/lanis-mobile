@@ -234,17 +234,24 @@ class ItemBlock extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text(
-                                  subject!.name ?? '',
-                                  style: textStyle,
-                                  maxLines: 1,
+                                Wrap(
+                                  runAlignment: WrapAlignment.spaceBetween,
+                                  alignment: WrapAlignment.spaceBetween,
+                                  spacing: height % itemHeight >= 1.99 ? 99999 : 8.0,
+                                  children: [
+                                    Text(
+                                      subject!.name ?? '',
+                                      style: textStyle,
+                                      maxLines: 1,
+                                    ),
+                                    if (subject!.lehrer != null)
+                                      Text(
+                                        subject!.lehrer!,
+                                        style: textStyle,
+                                        maxLines: 1,
+                                      ),
+                                  ],
                                 ),
-                                if (subject!.lehrer != null)
-                                  Text(
-                                    subject!.lehrer!,
-                                    style: textStyle,
-                                    maxLines: 1,
-                                  ),
                                 if (subject!.raum != null)
                                   Text(
                                     subject!.raum!,
