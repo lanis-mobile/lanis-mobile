@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
 import 'package:sph_plan/applets/timetable/student/student_timetable_item.dart';
@@ -196,11 +197,22 @@ class TimeTableView extends StatelessWidget {
     return totalHeight;
   }
 
+  int numOfWeeks(int year) {
+    DateTime dec28 = DateTime(year, 12, 28);
+    int dayOfDec28 = int.parse(DateFormat("D").format(dec28));
+    return ((dayOfDec28 - dec28.weekday + 10) / 7).floor();
+  }
+  
   int getCurrentWeekNumber() {
-    final now = DateTime.now();
-    final firstDayOfYear = DateTime(now.year, 1, 1);
-    final days = now.difference(firstDayOfYear).inDays;
-    return ((days + firstDayOfYear.weekday - 1) / 7).ceil();
+    DateTime date = DateTime.now();
+    int dayOfYear = int.parse(DateFormat("D").format(date));
+    int woy =  ((dayOfYear - date.weekday + 10) / 7).floor();
+    if (woy < 1) {
+      woy = numOfWeeks(date.year - 1);
+    } else if (woy > numOfWeeks(date.year)) {
+      woy = 1;
+    }
+    return woy;
   }
 
   const TimeTableView(
