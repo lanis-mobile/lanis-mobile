@@ -202,7 +202,7 @@ class TimeTableView extends StatelessWidget {
     int dayOfDec28 = int.parse(DateFormat("D").format(dec28));
     return ((dayOfDec28 - dec28.weekday + 10) / 7).floor();
   }
-  
+
   int getCurrentWeekNumber() {
     DateTime date = DateTime.now();
     int dayOfYear = int.parse(DateFormat("D").format(date));
@@ -385,7 +385,8 @@ class TimeTableView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      monday.add(Duration(days: i)).format('E'),
+                      DateFormat.E(Localizations.localeOf(context).languageCode)
+                          .format(monday.add(Duration(days: i))),
                       textAlign: TextAlign.center,
                     ),
                     Text(
