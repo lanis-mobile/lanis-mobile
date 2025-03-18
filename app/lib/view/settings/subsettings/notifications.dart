@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/gestures.dart';
@@ -32,10 +31,10 @@ class _NotificationSettingsState
     extends SettingsColoursState<NotificationSettings> {
   final Map<String, AppletDefinition> supportedApplets = {};
 
-  double androidNotificationInterval = kvDefaults['notifications-android-target-interval-minutes'].toDouble();
-  List<bool> androidEnabledDays = kvDefaults['notifications-android-allowed-days'];
-  TimeOfDay androidStartTime = TimeOfDay(hour: kvDefaults['notifications-android-start-time'][0], minute: kvDefaults['notifications-android-start-time'][1]);
-  TimeOfDay androidEndTime = TimeOfDay(hour: kvDefaults['notifications-android-end-time'][0], minute: kvDefaults['notifications-android-end-time'][1]);
+  double targetNotificationInterval = kvDefaults['notifications-target-interval-minutes'].toDouble();
+  List<bool> enabledDays = kvDefaults['notifications-allowed-days'];
+  TimeOfDay startTime = TimeOfDay(hour: kvDefaults['notifications-start-time'][0], minute: kvDefaults['notifications-start-time'][1]);
+  TimeOfDay endTime = TimeOfDay(hour: kvDefaults['notifications-end-time'][0], minute: kvDefaults['notifications-end-time'][1]);
   
   PermissionStatus notificationPermissionStatus = PermissionStatus.provisional;
   Timer? checkTimer;
@@ -71,17 +70,17 @@ class _NotificationSettingsState
 
     final globalSettings =
       await accountDatabase.kv.getMultiple(
-          ['notifications-android-target-interval-minutes',
-            'notifications-android-allowed-days',
-            'notifications-android-start-time',
-            'notifications-android-end-time']);
+          ['notifications-target-interval-minutes',
+            'notifications-allowed-days',
+            'notifications-start-time',
+            'notifications-end-time']);
 
     setState(() {
       notificationPermissionStatus = notificationPermissionStatus;
-      androidNotificationInterval = globalSettings['notifications-android-target-interval-minutes'].toDouble();
-      androidEnabledDays = globalSettings['notifications-android-allowed-days'].map<bool>((e) => e as bool).toList();
-      androidStartTime = TimeOfDay(hour: globalSettings['notifications-android-start-time'][0], minute: globalSettings['notifications-android-start-time'][1]);
-      androidEndTime = TimeOfDay(hour: globalSettings['notifications-android-end-time'][0], minute: globalSettings['notifications-android-end-time'][1]);
+      targetNotificationInterval = globalSettings['notifications-target-interval-minutes'].toDouble();
+      enabledDays = globalSettings['notifications-allowed-days'].map<bool>((e) => e as bool).toList();
+      startTime = TimeOfDay(hour: globalSettings['notifications-start-time'][0], minute: globalSettings['notifications-start-time'][1]);
+      endTime = TimeOfDay(hour: globalSettings['notifications-end-time'][0], minute: globalSettings['notifications-end-time'][1]);
     });
   }
 
@@ -225,63 +224,121 @@ class _NotificationSettingsState
             SizedBox(
               height: 8.0,
             ),
-            if (Platform.isAndroid) ...[
-              const Divider(),
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 12.0),
-                child: Text(
-                  "${AppLocalizations.of(context).backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context).forEveryAccount})' : ""}",
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: activateBackgroundServices
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 12.0),
+              child: Text(
+                "${AppLocalizations.of(context).backgroundService} ${widget.accountCount > 1 ? '(${AppLocalizations.of(context).forEveryAccount})' : ""}",
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                  color: activateBackgroundServices
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(
-                height: 8.0,
-              ),
-              Row(
-                children: [
-                  SizedBox(width: 16.0,),
-                  Icon(
-                      Icons.calendar_month,
-                      color: activateBackgroundServices
-                          ? Theme.of(context).colorScheme.onSurface
-                          : Theme.of(context).colorScheme.onSurfaceVariant),
-                  SizedBox(width: 24.0,),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        spacing: 8.0,
-                        children: [
-                          for (int dayIndex = 1; dayIndex < 8; dayIndex++) FilterChip(
-                            label: Text(
-                              DateFormat.E(Localizations.localeOf(context).languageCode).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
-                            ),
-                            selected: androidEnabledDays[dayIndex - 1],
-                            onSelected: activateBackgroundServices ? (val) {
-                              setState(() {
-                                androidEnabledDays[dayIndex - 1] = val;
-                              });
-                              accountDatabase.kv.set('notifications-android-allowed-days', androidEnabledDays);
-                            } : null,
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Row(
+              children: [
+                SizedBox(width: 16.0,),
+                Icon(
+                    Icons.calendar_month,
+                    color: activateBackgroundServices
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context).colorScheme.onSurfaceVariant),
+                SizedBox(width: 24.0,),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      spacing: 8.0,
+                      children: [
+                        for (int dayIndex = 1; dayIndex < 8; dayIndex++) FilterChip(
+                          label: Text(
+                            DateFormat.E(Localizations.localeOf(context).languageCode).dateSymbols.SHORTWEEKDAYS[dayIndex % 7],
                           ),
-                        ],
-                      ),
+                          selected: enabledDays[dayIndex - 1],
+                          onSelected: activateBackgroundServices ? (val) {
+                            setState(() {
+                              enabledDays[dayIndex - 1] = val;
+                            });
+                            accountDatabase.kv.set('notifications-allowed-days', enabledDays);
+                          } : null,
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 16.0,),
-                ],
+                ),
+                SizedBox(width: 16.0,),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+              child: RangeSliderTile(
+                title: Row(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).timePeriod,
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: activateBackgroundServices
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+                    ),
+                    Spacer(),
+                    Text(
+                      "${startTime.format(context)} - ${endTime.format(context)}",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: activateBackgroundServices
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(width: 16.0,),
+                  ],
+                ),
+                leading: Icon(
+                  Icons.schedule_outlined,
+                  color: activateBackgroundServices
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurfaceVariant),
+                values: RangeValues(
+                  minutesSinceZero(startTime).toDouble(),
+                  minutesSinceZero(endTime).toDouble(),
+                ),
+                max: 24 * 60,
+                min: 0,
+                divisions: 48,
+                labels: RangeLabels(
+                  startTime.format(context),
+                  endTime.format(context),
+                ),
+                onChanged: activateBackgroundServices ? (newValues) {
+                  setState(() {
+                    startTime = timeFromMinutesSinceZero(newValues.start.round());
+                    endTime = timeFromMinutesSinceZero(newValues.end.round());
+                  });
+                } : null,
+                onChangeEnd: (newValues) {
+                  accountDatabase.kv.setMultiple({
+                    'notifications-start-time': [startTime.hour, startTime.minute],
+                    'notifications-end-time': [endTime.hour, endTime.minute],
+                  });
+                },
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 8.0),
-                child: RangeSliderTile(
+            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: SliderTile(
                   title: Row(
                     children: [
                       Text(
-                        AppLocalizations.of(context).timePeriod,
+                        AppLocalizations.of(context).updateInterval,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: activateBackgroundServices
                               ? Theme.of(context).colorScheme.onSurface
@@ -292,7 +349,7 @@ class _NotificationSettingsState
                       ),
                       Spacer(),
                       Text(
-                        "${androidStartTime.format(context)} - ${androidEndTime.format(context)}",
+                        "${targetNotificationInterval.round()} min",
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: activateBackgroundServices
                               ? Theme.of(context).colorScheme.onSurface
@@ -304,92 +361,33 @@ class _NotificationSettingsState
                       SizedBox(width: 16.0,),
                     ],
                   ),
-                  leading: Icon(
-                    Icons.schedule_outlined,
-                    color: activateBackgroundServices
-                        ? Theme.of(context).colorScheme.onSurface
-                        : Theme.of(context).colorScheme.onSurfaceVariant),
-                  values: RangeValues(
-                    minutesSinceZero(androidStartTime).toDouble(),
-                    minutesSinceZero(androidEndTime).toDouble(),
-                  ),
-                  max: 24 * 60,
-                  min: 0,
-                  divisions: 48,
-                  labels: RangeLabels(
-                    androidStartTime.format(context),
-                    androidEndTime.format(context),
-                  ),
-                  onChanged: activateBackgroundServices ? (newValues) {
-                    setState(() {
-                      androidStartTime = timeFromMinutesSinceZero(newValues.start.round());
-                      androidEndTime = timeFromMinutesSinceZero(newValues.end.round());
-                    });
-                  } : null,
-                  onChangeEnd: (newValues) {
-                    accountDatabase.kv.setMultiple({
-                      'notifications-android-start-time': [androidStartTime.hour, androidStartTime.minute],
-                      'notifications-android-end-time': [androidEndTime.hour, androidEndTime.minute],
-                    });
-                  },
+                  leading: Icon(Icons.timer_outlined,
+                      color: activateBackgroundServices
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context).colorScheme.onSurfaceVariant),
+                  value: targetNotificationInterval,
+                  onChanged: activateBackgroundServices
+                      ? (val) {
+                          setState(() {
+                            targetNotificationInterval = val;
+                          });
+                        }
+                      : null,
+                  onChangedEnd: (val) {
+                          accountDatabase.kv.set(
+                              'notifications-target-interval-minutes',
+                              val.round());
+                        },
+                  label: "${targetNotificationInterval.round().toString()} min",
+                  min: 15.0,
+                  max: 180.0,
+                  divisions: 11,
+                  inactiveColor: sliderColor,
                 ),
-              ),
-              Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: SliderTile(
-                    title: Row(
-                      children: [
-                        Text(
-                          AppLocalizations.of(context).updateInterval,
-                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: activateBackgroundServices
-                                ? Theme.of(context).colorScheme.onSurface
-                                : Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                        ),
-                        Spacer(),
-                        Text(
-                          "${androidNotificationInterval.round()} min",
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: activateBackgroundServices
-                                ? Theme.of(context).colorScheme.onSurface
-                                : Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                        ),
-                        SizedBox(width: 16.0,),
-                      ],
-                    ),
-                    leading: Icon(Icons.timer_outlined,
-                        color: activateBackgroundServices
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurfaceVariant),
-                    value: androidNotificationInterval,
-                    onChanged: activateBackgroundServices
-                        ? (val) {
-                            setState(() {
-                              androidNotificationInterval = val;
-                            });
-                          }
-                        : null,
-                    onChangedEnd: (val) {
-                            accountDatabase.kv.set(
-                                'notifications-android-target-interval-minutes',
-                                val.round());
-                          },
-                    label: "${androidNotificationInterval.round().toString()} min",
-                    min: 15.0,
-                    max: 180.0,
-                    divisions: 11,
-                    inactiveColor: sliderColor,
-                  )),
-              SizedBox(
-                height: 16.0,
-              ),
-            ],
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
@@ -452,9 +450,13 @@ class _NotificationSettingsState
                   ],
                 ),
               ),
-            )
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
           ];
-        });
+        },
+    );
   }
 }
 

@@ -15,8 +15,6 @@ import 'core/database/account_database/account_db.dart'
     show AccountDatabase, ClearTextAccount;
 import 'core/sph/sph.dart' show SPH;
 
-const identifier = "io.github.alessioc42.pushservice";
-
 Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
 
   if ((await Permission.notification.isDenied)) {
@@ -41,11 +39,10 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
     return;
   }
 
-
+  final int targetIntervalMinutes = await accountDatabase.kv
+      .get('notifications-target-interval-minutes');
+  logger.i('Setting up background task with interval of $targetIntervalMinutes minutes');
   if (Platform.isAndroid) {
-    final int min = await accountDatabase.kv
-        .get('notifications-android-target-interval-minutes');
-    logger.i('Setting up background task with interval of $min minutes');
     await FlutterBackgroundExecutor().createRefreshTask(
       callback: callbackDispatcher,
       settings: RefreshTaskSettings(
@@ -55,7 +52,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
           requiresDeviceIdle: false,
           requiresStorageNotLow: false,
           initialDelay: Duration.zero,
-          repeatInterval: Duration(minutes: min),
+          repeatInterval: Duration(minutes: targetIntervalMinutes),
         ),
         // iosDetails: IosRefreshTaskDetails(taskIdentifier: 'com.dsr_corporation.refresh-task'),
       ),
@@ -68,7 +65,7 @@ Future<void> setupBackgroundService(AccountDatabase accountDatabase) async {
   if (Platform.isIOS) {
     try {
       await bgf.BackgroundFetch.configure(bgf.BackgroundFetchConfig(
-          minimumFetchInterval: 15
+          minimumFetchInterval: targetIntervalMinutes
       ), (String taskId) async {
         try {
           await callbackDispatcher();
@@ -121,6 +118,9 @@ Future<void> callbackDispatcher() async {
 
     final accounts =
     await (accountDatabase.select(accountDatabase.accountsTable)).get();
+
+    List<Future> accountBackgroundTasks = [];
+
     for (final account in accounts) {
       final ClearTextAccount clearTextAccount =
       await AccountDatabase.getAccountFromTableData(account);
@@ -129,34 +129,41 @@ Future<void> callbackDispatcher() async {
         sph.prefs.close();
         continue;
       }
-      bool authenticated = false;
-      for (final applet
-      in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
-        if (applet.supportedAccountTypes
-            .contains(clearTextAccount.accountType) &&
-            (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ??
-                true)) {
-          if (!authenticated) {
-            await sph.session.prepareDio();
-            await sph.session.authenticate(withoutData: true);
-            authenticated = true;
+      accountBackgroundTasks.add(() async {
+        List<Future> appletTasks = [];
+        bool authenticated = false;
+        for (final applet
+        in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
+          if (applet.supportedAccountTypes
+              .contains(clearTextAccount.accountType) &&
+              (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ??
+                  true)) {
+            if (!authenticated) {
+              await sph.session.prepareDio();
+              await sph.session.authenticate(withoutData: true);
+              authenticated = true;
+            }
+            if (!sph.session.doesSupportFeature(applet,
+                overrideAccountType: clearTextAccount.accountType)) {
+              continue;
+            }
+            appletTasks.add(applet.notificationTask!(
+                sph,
+                clearTextAccount.accountType ?? AccountType.student,
+                BackgroundTaskToolkit(sph, applet.appletPhpUrl,
+                    multiAccount: accounts.length > 1)));
           }
-          if (!sph.session.doesSupportFeature(applet,
-              overrideAccountType: clearTextAccount.accountType)) {
-            continue;
-          }
-          await applet.notificationTask!(
-              sph,
-              clearTextAccount.accountType ?? AccountType.student,
-              BackgroundTaskToolkit(sph, applet.appletPhpUrl,
-                  multiAccount: accounts.length > 1));
         }
-      }
-      if (authenticated) {
-        await sph.session.deAuthenticate();
-      }
-      sph.prefs.close();
+        await Future.wait(appletTasks);
+        if (authenticated) {
+          await sph.session.deAuthenticate();
+        }
+        sph.prefs.close();
+      }());
     }
+
+    await Future.wait(accountBackgroundTasks);
+
     accountDatabase.close();
     backgroundLogger.i("Background fetch completed");
     return;
@@ -240,20 +247,20 @@ class BackgroundTaskToolkit {
 
 Future<bool> isTaskWithinConstraints(AccountDatabase accountDB) async {
   final globalSettings = await accountDB.kv.getMultiple([
-    'notifications-android-allowed-days',
-    'notifications-android-start-time',
-    'notifications-android-end-time'
+    'notifications-allowed-days',
+    'notifications-start-time',
+    'notifications-end-time'
   ]);
   TimeOfDay currentTime = TimeOfDay.now();
   TimeOfDay startTime = TimeOfDay(
-      hour: globalSettings['notifications-android-start-time'][0],
-      minute: globalSettings['notifications-android-start-time'][1]);
+      hour: globalSettings['notifications-start-time'][0],
+      minute: globalSettings['notifications-start-time'][1]);
   TimeOfDay endTime = TimeOfDay(
-      hour: globalSettings['notifications-android-end-time'][0],
-      minute: globalSettings['notifications-android-end-time'][1]);
+      hour: globalSettings['notifications-end-time'][0],
+      minute: globalSettings['notifications-end-time'][1]);
   if (currentTime.hour < startTime.hour || currentTime.hour > endTime.hour) {
     return false;
   }
   int currentDayIndex = DateTime.now().weekday - 1;
-  return globalSettings['notifications-android-allowed-days'][currentDayIndex];
+  return globalSettings['notifications-allowed-days'][currentDayIndex];
 }
