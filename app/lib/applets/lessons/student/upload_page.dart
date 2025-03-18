@@ -291,7 +291,6 @@ class _UploadScreenState extends State<UploadScreen> {
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             icon: const Icon(Icons.add),
-                            // TODO: Actually test this bs
                             onPressed: () async {
                               final PickedFile? pickedFile = await pickSingleFile(context, snapshot.data["allowed_file_types"]);
 
@@ -299,7 +298,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                 return;
                               }
 
-                              if (!snapshot.data["allowed_file_types"].contains(pickedFile.extension)) {
+                              if (!snapshot.data["allowed_file_types"].contains(pickedFile.extension.toUpperCase())) {
                                 showSnackbar(
                                     text:
                                         "Die Datei hat keinen erlaubten Dateityp!");
