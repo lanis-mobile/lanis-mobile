@@ -116,10 +116,10 @@ class _StudentTimetableBetterViewState
                             timetable.weekBadge != null)
                           TextButton(
                             onPressed: () {
-                              updateSettings('student-selected-week',
-                                  currentWeekIndex != 0);
                               currentWeekIndex = (currentWeekIndex + 1) %
                                   (uniqueBadges.length + 1);
+                              updateSettings('student-selected-week',
+                                  currentWeekIndex == 0);
                             },
                             child: Text(
                               (currentWeekIndex < 1)

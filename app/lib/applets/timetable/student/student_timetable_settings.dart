@@ -192,7 +192,7 @@ class _StudentTimetableSettingsState
                   ),
                   ElevatedButton(
                       onPressed: (nameController.text.isNotEmpty &&
-                              hours.indexOf(startTime) < hours.indexOf(endTime))
+                              hours.indexOf(startTime) <= hours.indexOf(endTime))
                           ? () {
                               TimetableSubject newLesson = TimetableSubject(
                                   id:
