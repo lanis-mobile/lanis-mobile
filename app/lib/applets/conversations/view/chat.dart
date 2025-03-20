@@ -337,6 +337,8 @@ class _ConversationsChatState extends State<ConversationsChat>
                     final result = await Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => const ConversationsSend()));
 
+                    if (result == null) return;
+
                     scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
                     await sendMessage(result);
