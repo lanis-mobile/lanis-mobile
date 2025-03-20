@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:sph_plan/home_page.dart';
 
 import '../core/database/account_database/account_db.dart';
 import '../core/sph/sph.dart';
@@ -42,6 +43,8 @@ class AuthenticationState {
       logger.i('Authenticating...');
       await sph?.session.authenticate();
       logger.i('Authenticated');
+
+      homeKey.currentState?.resetState();
 
       if (exception.value == null) {
         status.value = LoginStatus.done;
