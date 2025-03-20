@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
@@ -81,8 +80,21 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
 
-  late bool doesSupportAnyApplet = false;
+  bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
+
+  void resetState() {
+    doesSupportAnyApplet = true;
+    setState(() {
+      selectedDestinationDrawer = -1;
+      destinations.clear();
+      for (var destination in AppDefinitions.applets) {
+        destinations.add(Destination.fromAppletDefinition(destination));
+      }
+      destinations.addAll(endDestinations);
+      setDefaultDestination();
+    });
+  }
 
   @override
   void initState() {
@@ -90,8 +102,8 @@ class HomePageState extends State<HomePage> {
       destinations.add(Destination.fromAppletDefinition(destination));
     }
     destinations.addAll(endDestinations);
-    super.initState();
     setDefaultDestination();
+    super.initState();
     showUpdateInfoIfRequired(context);
   }
 
@@ -158,7 +170,6 @@ class HomePageState extends State<HomePage> {
   ];
 
   void setDefaultDestination() {
-    if (selectedDestinationDrawer != -1) return;
     for (var destination in destinations) {
       if (destination.isSupported && destination.enableBottomNavigation) {
         selectedDestinationDrawer = destinations.indexOf(destination);
@@ -166,6 +177,7 @@ class HomePageState extends State<HomePage> {
         return;
       }
     }
+    doesSupportAnyApplet = false;
     selectedDestinationDrawer = -1;
   }
 
@@ -186,23 +198,32 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget noAppsSupported() {
-    return Center(
-      // In case no feature is supported at all just show an open in browser button.
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.disabled_by_default_outlined,
-            size: 150,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(32),
-            child: Text(AppLocalizations.of(context).noSupportOpenInBrowser),
-          ),
-          ElevatedButton(
-              onPressed: () => openLanisInBrowser(context),
-              child: Text(AppLocalizations.of(context).openLanisInBrowser))
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lanis-Mobile'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => _drawerKey.currentState!.openDrawer(),
+        ),
+      ),
+      body: Center(
+        // In case no feature is supported at all just show an open in browser button.
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.disabled_by_default_outlined,
+              size: 150,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(AppLocalizations.of(context).noSupportOpenInBrowser),
+            ),
+            ElevatedButton(
+                onPressed: () => openLanisInBrowser(context),
+                child: Text(AppLocalizations.of(context).openLanisInBrowser))
+          ],
+        ),
       ),
     );
   }
@@ -401,8 +422,4 @@ class HomePageState extends State<HomePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
     );
   }
-}
-
-bool randomBool(double chance) {
-  return Random().nextDouble() < chance;
 }
