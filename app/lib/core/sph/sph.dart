@@ -13,6 +13,7 @@ class SPH {
   late AccountPreferencesDatabase prefs = AccountPreferencesDatabase(localId: account.localId);
   String? withLoginURL;
 
+
   SPH({required this.account, this.withLoginURL});
 }
 

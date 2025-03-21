@@ -8,12 +8,12 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:html_unescape/html_unescape.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/applets/definitions.dart';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/native_adapter_instance.dart';
 
+import '../../globals.dart';
 import '../connection_checker.dart';
 import 'cryptor.dart';
 import '../../models/account_types.dart';
@@ -43,7 +43,6 @@ class SessionHandler {
   SessionHandler({required this.sph, String? withLoginURL,});
 
   Future<void> prepareDio() async {
-    final unescape = HtmlUnescape();
     jar = CookieJar();
     dio.httpClientAdapter = getNativeAdapterInstance();
     dio.interceptors.add(CookieManager(jar));
@@ -68,11 +67,13 @@ class SessionHandler {
      onResponse: (Response response, ResponseInterceptorHandler handler) {
        if (response.data is String) {
          final contentType = response.headers.value('content-type');
+         logger.d(contentType);
          if (contentType != null && contentType.contains('text/html')) {
            final decryptedString = cryptor.decryptEncodedTags(response.data);
            response.data = unescape.convert(decryptedString);
          }
        }
+        return handler.next(response);
       },
     ));
     dio.interceptors.add(InterceptorsWrapper(

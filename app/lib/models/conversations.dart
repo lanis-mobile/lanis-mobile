@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tagging_plus/flutter_tagging_plus.dart';
 
+import '../globals.dart';
+
 class ReceiverEntry extends Taggable {
   final String id;
   final String name;
@@ -147,9 +149,9 @@ class OverviewEntry {
 
   OverviewEntry.fromJson(Map<String, dynamic> json)
       : id = json["Uniquid"] as String
-      , title = json["Betreff"] as String
-      , shortName = json["kuerzel"] as String?
-      , fullName = getUsernameInsideHTML.firstMatch((json["SenderName"] as String))?.group(1) as String
+      , title = unescape.convert(json["Betreff"] as String)
+      , shortName = unescape.convert(json["kuerzel"]) as String?
+      , fullName = unescape.convert(getUsernameInsideHTML.firstMatch((json["SenderName"] as String))?.group(1) as String)
       , date = json["Datum"] as String
       , unread = (json["unread"] as int?) != null && (json["unread"] as int?) == 1
       , hidden = json["Papierkorb"] as String == "ja";
