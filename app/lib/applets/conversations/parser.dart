@@ -10,6 +10,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 
 import '../../core/connection_checker.dart';
 import '../../core/sph/cryptor.dart';
+import '../../globals.dart';
 import '../../models/client_status_exceptions.dart';
 import '../../models/conversations.dart';
 
@@ -196,18 +197,18 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       final Map<String, dynamic> conversation = jsonDecode(decryptedConversations);
 
       final UnparsedMessage parent = UnparsedMessage(
-          date: conversation["Datum"],
-          author: fixUsername(conversation["username"]),
+          date: unescape.convert(conversation["Datum"]),
+          author: unescape.convert(fixUsername(conversation["username"])),
           own: conversation["own"],
-          content: conversation["Inhalt"]);
+          content: unescape.convert(conversation["Inhalt"]));
 
       final List<UnparsedMessage> replies = [];
       for (dynamic reply in conversation["reply"]) {
         replies.add(UnparsedMessage(
-            date: reply["Datum"],
-            author: fixUsername(reply["username"]),
+            date: unescape.convert(reply["Datum"]),
+            author: unescape.convert(fixUsername(reply["username"])),
             own: reply["own"],
-            content: reply["Inhalt"]));
+            content: unescape.convert(reply["Inhalt"])));
       }
 
       int countStudents = conversation["statistik"]["teilnehmer"];
@@ -223,7 +224,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
 
       final Set<KnownParticipant> knownParticipants = {
         KnownParticipant(
-            name: fixUsername(conversation["username"]),
+            name: unescape.convert(fixUsername(conversation["username"])),
             type: PersonType.fromJson(conversation["SenderArt"])
         )
       };
@@ -231,7 +232,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       for (Map reply in conversation["reply"]) {
         knownParticipants.add(
             KnownParticipant(
-                name: fixUsername(reply["username"]),
+                name: unescape.convert(fixUsername(reply["username"])),
                 type: PersonType.fromJson(reply["SenderArt"])
             )
         );
@@ -240,7 +241,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       if (conversation["empf"] is List) {
         for (String receiver in conversation["empf"]) {
           final String name = parse(receiver).querySelector("span")!.text.substring(1);
-          knownParticipants.add(KnownParticipant(name: name, type: PersonType.other));
+          knownParticipants.add(KnownParticipant(name: unescape.convert(name), type: PersonType.other));
         }
       }
 
@@ -248,7 +249,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
         final others =
         parse(conversation["WeitereEmpfaenger"]).querySelectorAll("span");
         for (final other in others) {
-          knownParticipants.add(KnownParticipant(name: other.text.trim(), type: PersonType.group));
+          knownParticipants.add(KnownParticipant(name: unescape.convert(other.text.trim()), type: PersonType.group));
         }
       }
 
