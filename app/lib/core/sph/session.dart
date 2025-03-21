@@ -67,9 +67,12 @@ class SessionHandler {
     dio.interceptors.add(InterceptorsWrapper(
      onResponse: (Response response, ResponseInterceptorHandler handler) {
        if (response.data is String) {
-         response.data = unescape.convert(response.data);
+         final contentType = response.headers.value('content-type');
+         if (contentType != null && contentType.contains('text/html')) {
+           final decryptedString = cryptor.decryptEncodedTags(response.data);
+           response.data = unescape.convert(decryptedString);
+         }
        }
-       return handler.next(response);
       },
     ));
     dio.interceptors.add(InterceptorsWrapper(
