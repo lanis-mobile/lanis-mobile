@@ -294,13 +294,16 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                                                       "a.s.V."),
                                               style: Theme.of(context)
                                                   .textTheme
-                                                  .labelSmall,
+                                                  .labelSmall?.copyWith(
+                                                color: data!.history[index].presence == 'fehlend' ? Colors.red[300] : null,
+                                              ),
                                             ),
-                                            const Padding(
+                                            Padding(
                                               padding:
-                                                  EdgeInsets.only(left: 4.0),
+                                                  const EdgeInsets.only(left: 4.0),
                                               child: Icon(
                                                 Icons.meeting_room,
+                                                color: data!.history[index].presence == 'fehlend' ? Colors.red[300] : null,
                                                 size: 15,
                                               ),
                                             ),

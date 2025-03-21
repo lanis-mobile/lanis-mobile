@@ -21,8 +21,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
     final response =
     await sph.session.dio.get("https://start.schulportal.hessen.de/meinunterricht.php?cacheBreaker=$unixTime");
-    var encryptedHTML = sph.session.cryptor.decryptEncodedTags(response.data);
-    var document = parse(encryptedHTML);
+    var document = parse(response.data);
 
     var kursmappenDOM = document.getElementById("mappen");
     final row = kursmappenDOM?.getElementsByClassName("row");
@@ -143,8 +142,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
       final response =
       await sph.session.dio.get("https://start.schulportal.hessen.de/$url");
-      final String decryptedHTML = sph.session.cryptor.decryptEncodedTags(response.data);
-      Document document = parse(decryptedHTML);
+      Document document = parse(response.data);
 
       //course name
       var heading = document.getElementById("content")?.querySelector("h1");
