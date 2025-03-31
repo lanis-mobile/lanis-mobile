@@ -67,7 +67,6 @@ class SessionHandler {
      onResponse: (Response response, ResponseInterceptorHandler handler) {
        if (response.data is String) {
          final contentType = response.headers.value('content-type');
-         logger.d(contentType);
          if (contentType != null && contentType.contains('text/html')) {
            final decryptedString = cryptor.decryptEncodedTags(response.data);
            response.data = unescape.convert(decryptedString);
