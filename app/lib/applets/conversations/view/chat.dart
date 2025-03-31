@@ -36,7 +36,7 @@ class ConversationsChat extends StatefulWidget {
 
 class _ConversationsChatState extends State<ConversationsChat>
     with SingleTickerProviderStateMixin {
-  late final Future<dynamic> _conversationFuture = initConversation();
+  late final Future<void> _conversationFuture = initConversation();
   late final AnimationController appBarController;
 
   final TextEditingController messageField = TextEditingController();
@@ -77,7 +77,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
   }
 
-  animateAppBarTitle() {
+  void animateAppBarTitle() {
     const appBarHeight = 56.0;
 
     if (scrollController.offset >= appBarHeight &&
@@ -86,6 +86,18 @@ class _ConversationsChatState extends State<ConversationsChat>
     } else if (scrollController.offset == 0 && appBarController.value == 1) {
       appBarController.reverse();
     }
+  }
+
+  void scrollToBottom({Duration initDelay = Duration.zero}) {
+      Future.delayed(initDelay, () {
+        if (scrollController.hasClients) {
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
   }
 
   void showErrorDialog() {
@@ -372,6 +384,7 @@ class _ConversationsChatState extends State<ConversationsChat>
               }
             }
 
+            scrollToBottom(initDelay: Duration(milliseconds: 100));
             return NotificationListener<ScrollMetricsNotification>(
               onNotification: (_) {
                 toggleScrollToBottomFab();
