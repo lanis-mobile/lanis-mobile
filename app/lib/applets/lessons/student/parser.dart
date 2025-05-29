@@ -239,7 +239,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
         history.add(CurrentEntry(
           entryID: tableRow.attributes["data-entry"]!,
-          topicTitle: tableRow.children[1].querySelector("big>b")?.text.trim(),
+          topicTitle: tableRow.children[1].querySelector("td>b")?.text.trim(),
           description: description,
           presence: tableRow.children[2].text.trim() == 'nicht erfasst' ? null : tableRow.children[2].text.trim(),
           topicDate: DateTime.parse(dateInformation[0].split(".").reversed.join("-")),
