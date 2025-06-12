@@ -55,5 +55,19 @@ class Logger {
   }
 }
 
+
+class MemoryLogger {
+  String logs = '';
+
+  void log(String message) {
+    logs += '${DateTime.now().toIso8601String().split(".")[0]}| $message\n';
+  }
+
+  void write(String message) {
+    logs += message += '\n';
+  }
+}
+
+
 Logger logger = Logger('Lanis');
 Logger backgroundLogger = Logger('Lanis Background');

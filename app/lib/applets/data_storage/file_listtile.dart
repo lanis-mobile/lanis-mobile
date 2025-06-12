@@ -66,8 +66,11 @@ class _FileListTileState extends State<FileListTile> {
       leading: Badge(
           backgroundColor: exists.color,
           child: Icon(getIconByFileExtension(widget.file.fileExtension))),
-      onTap: () => launchFile(context, widget.file.downloadUrl,
-          widget.file.name, widget.file.groesse, updateLocalFileStatus),
+      onTap: () => launchFile(context, FileInfo(
+        name: widget.file.name,
+        size: widget.file.groesse,
+        url: Uri.parse(widget.file.downloadUrl),
+      ), updateLocalFileStatus),
       onLongPress: () {
         showFileModal(context, FileInfo(
           name: widget.file.name,
@@ -120,7 +123,10 @@ class _SearchFileListTileState extends State<SearchFileListTile> {
         child: Icon(getIconByFileExtension(widget.name.split('.').last)),
       ),
       onTap: () => launchFile(
-          context, widget.downloadUrl, widget.name, "", updateLocalFileStatus),
+          context, FileInfo(
+        name: widget.name,
+        url: Uri.parse(widget.downloadUrl),
+      ), updateLocalFileStatus),
       onLongPress: () => showFileModal(context, FileInfo(
         name: widget.name,
         url: Uri.parse(widget.downloadUrl),
