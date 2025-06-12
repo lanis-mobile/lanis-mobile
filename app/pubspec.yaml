@@ -54,7 +54,6 @@ dependencies:
   mime: ^2.0.0
   flutter_native_splash: ^2.4.1
   table_calendar: ^3.0.9
-  intl: ^0.19.0
   flutter_localizations:
     sdk: flutter
   simple_shadow: ^0.3.1
