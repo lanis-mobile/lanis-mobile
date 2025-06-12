@@ -42,13 +42,13 @@ class _DebugExportState extends State<DebugExport> {
         children: [
           ListTile(
             leading: Icon(Icons.warning, color: Colors.red,),
-            title: Text('DANGER ZONE'),
-            subtitle: Text('Diese Sektion ermöglicht es dir, Debug-Daten zu exportieren. Verwende diese Funktion mit Vorsicht, da sie sensible Informationen enthalten kann. Versende diese Daten nur an vertrauenswürdige Entwickler. Lösche die Daten, sobald du sie nicht mehr benötigst. Sie können sensible Informationen, die die Schule und Dich betreffen enthalten.'),
+            title: Text('UFFGEPASST!'),
+            subtitle: Text('Über diese Sektion kannst du Debug-Daten exportieren. Versende diese Daten nur an vertrauenswürdige Entwickler. Lösche die Daten, sobald du sie nicht mehr benötigst. Sie können sensible Informationen enthalten, die die Schule und dich betreffen.'),
           ),
           ListTile(
             leading: Icon(Icons.contact_mail),
             title: Text('Mit wem hast du Kontakt?'),
-            subtitle: Text('Wenn du Debug-Daten exportierst, stelle sicher, dass du sie AUSSCHLIEßLICH an lanis-mobile@alessioc42.dev sendest. Diese E-Mail-Adresse ist für den Empfang von Debug-Daten vorgesehen und wird von den Entwicklern überwacht. \nSENDE DIE DATEN NICHT AN ANDERE E-MAIL-ADRESSEN ODER ÜBER ANDERE WEGE!'),
+            subtitle: Text('Wenn du Debug-Daten exportierst, stelle sicher, dass du sie ausschließlich an lanis-mobile@alessioc42.dev sendest. Diese E-Mail-Adresse wird von dem Hauptentwickler betreut. Sende die Daten auf keinen Fall an andere E-Mail-Adressen oder über andere Wege!'),
           ),
           Divider(),
           Form(
