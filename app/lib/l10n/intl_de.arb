@@ -88,6 +88,11 @@
   "openFile": "Datei öffnen",
   "shareFile": "Datei teilen",
   "unknownFile": "Unbekannte Datei",
+  "fileTypeNotAllowed": "Die Datei hat keinen erlaubten Dateityp!",
+  "maxFileSizeExceeded": "Die Datei hat die maximale Dateigröße überschritten!",
+  "fileNameAlreadyExists": "Datei mit selben Namen existiert bereits!",
+  "failedToDetectFileType": "Beim Herausfinden des Dateityps ist ein Fehler aufgetreten!",
+  "maxOfFiveFiles": "Du darfst insgesamt nur maximal 5 Dateien haben",
 
   "camera": "Kamera",
   "cameraPermissionToast": "Bitte erlaube den Kamera zugriff",
@@ -297,6 +302,5 @@
   "external": "Extern",
   "restartRequired": "Nach einer Änderung ist ein Neustart der App erforderlich, um die Änderungen anzuwenden.",
   "quickActionsDisclaimer": "Du kannst bis zu {num} Shortcuts hinzufügen. Diese Shortcuts sind auf dem Startbildschirm verfügbar.",
-  "quickActionsAndroid": "Shortcuts, die zum Startbildschirm hinzugefügt wurden, funktionieren auch nach der Deaktivierung aus der App, werden jedoch nicht aktualisiert. Daher ist es auch möglich mehr als 2 Shortcuts auf dem Startbildschirm zu benutzen.",
-  "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren"
+  "quickActionsAndroid": "Shortcuts, die zum Startbildschirm hinzugefügt wurden, funktionieren auch nach der Deaktivierung aus der App, werden jedoch nicht aktualisiert. Daher ist es auch möglich mehr als 2 Shortcuts auf dem Startbildschirm zu benutzen."
 }

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/utils/file_picker.dart';
 import 'package:sph_plan/widgets/error_view.dart';
 
@@ -292,75 +293,79 @@ class _UploadScreenState extends State<UploadScreen> {
                             ),
                             icon: const Icon(Icons.add),
                             onPressed: () async {
-                              final PickedFile? pickedFile = await pickSingleFile(context, snapshot.data["allowed_file_types"]);
+                              final List<PickedFile> pickedFiles = await pickMultipleFiles(context, snapshot.data["allowed_file_types"]);
 
-                              if (pickedFile == null) {
+                              if (pickedFiles.isEmpty) {
                                 return;
                               }
 
-                              if (!snapshot.data["allowed_file_types"].contains(pickedFile.extension.toUpperCase())) {
-                                showSnackbar(
-                                    text:
-                                        "Die Datei hat keinen erlaubten Dateityp!");
-                                return;
+                              if ((pickedFiles.length + filesLength) > 5) {
+                                showSnackbar(text: AppLocalizations().maxOfFiveFiles);
                               }
 
                               num maxFileSize = num.parse(snapshot
-                                      .data["max_file_size"]
-                                      .replaceAll("MB", "")
-                                      .replaceAll(",", ".")) *
+                                  .data["max_file_size"]
+                                  .replaceAll("MB", "")
+                                  .replaceAll(",", ".")) *
                                   1000000;
 
-                              if ((pickedFile.size ?? 0) > maxFileSize) {
-                                showSnackbar(
-                                    text:
-                                        "Die Datei hat die maximale Dateigröße überschritten!");
-                                return;
-                              }
-
-                              // Only check for filename like Lanis.
-                              for (final element in _multipartFiles) {
-                                if (element.filename == pickedFile.name) {
+                              for (final file in pickedFiles) {
+                                if (!snapshot.data["allowed_file_types"].contains(file.extension.toUpperCase())) {
                                   showSnackbar(
                                       text:
-                                          "Der Name der Datei gibt es schon!");
+                                      "${AppLocalizations().fileTypeNotAllowed} (${file.name})");
+                                  continue;
+                                }
+
+                                if ((file.size ?? 0) > maxFileSize) {
+                                  showSnackbar(
+                                      text:
+                                      "${AppLocalizations().maxFileSizeExceeded} (${file.name})");
                                   return;
                                 }
+
+                                // Only check for filename like Lanis.
+                                for (final element in _multipartFiles) {
+                                  if (element.filename == file.name) {
+                                    showSnackbar(
+                                        text:
+                                        "${AppLocalizations().fileNameAlreadyExists} (${file.name})");
+                                    return;
+                                  }
+                                }
+
+                                final String? mimeType = file.mimeType;
+                                if (mimeType == null) {
+                                  showSnackbar(
+                                      text:
+                                      "${AppLocalizations().failedToDetectFileType} (${file.name})");
+                                  return;
+                                }
+
+                                final MultipartFile multipartFile = await file.intoMultipart();
+
+                                _multipartFiles.add(multipartFile);
+                                _fileWidgets.add(ListTile(
+                                  title: Text(file.name),
+                                  trailing: const Icon(Icons.remove),
+                                  onTap: () {
+                                    // We need to calculate the index dynamically because you can remove every tile at any index.
+                                    // Maybe there is a better way.
+                                    int tileIndex = _fileWidgets
+                                        .indexWhere((ListTile element) {
+                                      final Text textWidget =
+                                      element.title as Text;
+                                      final String text = textWidget.data!;
+
+                                      return text == file.name;
+                                    });
+                                    _fileWidgets.removeAt(tileIndex);
+                                    _multipartFiles.removeAt(tileIndex);
+                                    _addedFiles.value -= 1;
+                                  },
+                                ));
+                                _addedFiles.value += 1;
                               }
-
-                              // firstFile.extension only returns characters after the dot of the file name, not the MimeType
-                              final String? mimeType = pickedFile.mimeType;
-
-                              if (mimeType == null) {
-                                showSnackbar(
-                                    text:
-                                        "Beim Herausfinden des Dateityps ist ein Fehler entstanden!");
-                                return;
-                              }
-
-                              final MultipartFile multipartFile = await pickedFile.intoMultipart();
-
-                              _multipartFiles.add(multipartFile);
-                              _fileWidgets.add(ListTile(
-                                title: Text(pickedFile.name),
-                                trailing: const Icon(Icons.remove),
-                                onTap: () {
-                                  // We need to calculate the index dynamically because you can remove every tile at any index.
-                                  // Maybe there is a better way.
-                                  int tileIndex = _fileWidgets
-                                      .indexWhere((ListTile element) {
-                                    final Text textWidget =
-                                        element.title as Text;
-                                    final String text = textWidget.data!;
-
-                                    return text == pickedFile.name;
-                                  });
-                                  _fileWidgets.removeAt(tileIndex);
-                                  _multipartFiles.removeAt(tileIndex);
-                                  _addedFiles.value -= 1;
-                                },
-                              ));
-                              _addedFiles.value += 1;
                             },
                           ),
                         ]

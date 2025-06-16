@@ -119,6 +119,11 @@
   "openFile": "Open file",
   "shareFile": "Share file",
   "unknownFile": "Unknown File",
+  "fileTypeNotAllowed": "This filetype is NOT allowed!",
+  "maxFileSizeExceeded": "Max file size exceeded!",
+  "fileNameAlreadyExists": "File with same name already exists!",
+  "failedToDetectFileType": "Failed to detect filetype!",
+  "maxOfFiveFiles": "You may only have a total of maximum 5 files",
 
   "camera": "Camera",
   "cameraPermissionToast": "Please grant camera permission",
@@ -343,6 +348,5 @@
   "external": "External",
   "restartRequired": "After a change, an app restart is required to apply the changes.",
   "quickActionsDisclaimer": "You can add up to {num} actions. These actions are available on the home screen.",
-  "quickActionsAndroid": "Actions added to the home screen will work even after they are removed from the app, but they will not be updated. Therefore, you can add each action one by one.",
-  "copyErrorToClipboard": "Copy error details to clipboard"
+  "quickActionsAndroid": "Actions added to the home screen will work even after they are removed from the app, but they will not be updated. Therefore, you can add each action one by one."
 }

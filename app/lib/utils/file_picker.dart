@@ -47,9 +47,16 @@ extension Actions on PickedFile {
 
 const storageChannel = MethodChannel('io.github.lanis-mobile/storage');
 
-/// Allows the user to pick any file using any supported method
-Future<PickedFile?> pickSingleFile(
-    BuildContext context, List<String>? allowedExtensions) async {
+// /// Allows the user to pick any file using any supported method
+// Future<PickedFile?> pickSingleFile(
+//    BuildContext context, List<String>? allowedExtensions) async {
+//  List<bool> allowedMethods = [true, true, true, true];
+//  final picked = await showPickerUI(context, allowedMethods, allowedExtensions);
+//  return picked[0];
+//}
+
+/// Allows the user to pick multiple files using any supported method (only Gallery and File Manager support multiple files)
+Future<List<PickedFile>> pickMultipleFiles(BuildContext context, List<String>? allowedExtensions) async {
   List<bool> allowedMethods = [true, true, true, true];
   return showPickerUI(context, allowedMethods, allowedExtensions);
 }
@@ -61,7 +68,7 @@ Future<PickedFile?> pickSingleFile(
 /// 2 = Camera
 /// 3 = Gallery (iOS Only)
 /// ```
-Future<PickedFile?> showPickerUI(BuildContext context,
+Future<List<PickedFile>> showPickerUI(BuildContext context,
     List<bool> allowedMethods, List<String>? allowedExtensions) async {
   bool documentScannerSupported = true;
 
@@ -73,7 +80,7 @@ Future<PickedFile?> showPickerUI(BuildContext context,
     }
   }
 
-  PickedFile? pickedFile;
+  List<PickedFile> pickedFiles = [];
   if (context.mounted) {
     await showModalBottomSheet(
         context: context,
@@ -91,8 +98,8 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                     if (allowedMethods[0])
                       (MenuItemButton(
                         onPressed: () async {
-                          pickedFile = await pickFileUsingDocumentsUI(allowedExtensions);
-                          if (context.mounted && pickedFile != null) {
+                          pickedFiles.addAll(await pickFileUsingDocumentsUI(allowedExtensions));
+                          if (context.mounted && pickedFiles.isNotEmpty) {
                             Navigator.pop(context);
                           }
                         },
@@ -108,9 +115,12 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                     if (allowedMethods[1] && documentScannerSupported)
                       (MenuItemButton(
                         onPressed: () async {
-                          pickedFile = await pickFileUsingDocumentScanner(context);
+                          final result = await pickFileUsingDocumentScanner(context);
+                          if (result != null) {
+                            pickedFiles.add(result);
+                          }
 
-                          if (context.mounted && pickedFile != null) {
+                          if (context.mounted && pickedFiles.isNotEmpty) {
                             Navigator.pop(context);
                           }
                         },
@@ -126,8 +136,12 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                     if (allowedMethods[2])
                       (MenuItemButton(
                         onPressed: () async {
-                          pickedFile = await pickFileUsingCamera(context);
-                          if (context.mounted && pickedFile != null) {
+                          final result = await pickFileUsingCamera(context);
+                          if (result != null) {
+                            pickedFiles.add(result);
+                          }
+                          
+                          if (context.mounted && pickedFiles.isNotEmpty) {
                             Navigator.pop(context);
                           }
                         },
@@ -144,8 +158,9 @@ Future<PickedFile?> showPickerUI(BuildContext context,
                       (
                           MenuItemButton(
                         onPressed: () async {
-                          pickedFile = await pickFileUsingGallery(context);
-                          if (context.mounted && pickedFile != null) {
+                          pickedFiles.addAll(await pickFilesUsingGallery(context));
+                          
+                          if (context.mounted && pickedFiles.isNotEmpty) {
                             Navigator.pop(context);
                           }
                         },
@@ -165,25 +180,28 @@ Future<PickedFile?> showPickerUI(BuildContext context,
           );
         });
   }
-  return pickedFile;
+  return pickedFiles;
 }
 
-Future<PickedFile?> pickFileUsingDocumentsUI(
+Future<List<PickedFile>> pickFileUsingDocumentsUI(
     List<String>? allowedExtensions) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
     allowedExtensions: allowedExtensions,
+    allowMultiple: true
   );
+  List<PickedFile> returnResult = [];
 
-  if (result == null) {
-    return null;
-  } else {
-    final PlatformFile firstFile = result.files.first;
-
-    final PickedFile pickedFile = PickedFile(
-        name: firstFile.name, path: firstFile.path, size: firstFile.size);
-    return pickedFile;
+  if (result != null) {
+    for (final file in result.files) {
+      returnResult.add(PickedFile(
+          name: file.name, path: file.path, size: file.size
+      ));
+    }
   }
+
+    
+    return returnResult;
 }
 
 Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
@@ -206,41 +224,39 @@ Future<PickedFile?> pickFileUsingCamera(BuildContext context) async {
     String newPath = "${(await getApplicationCacheDirectory()).path}/$name";
     await moveFile(path, newPath);
 
-    PickedFile pickedFile = PickedFile(name: newPath.split("/").last, path: newPath, size: await File(newPath).length());
-    return pickedFile;
+    return PickedFile(name: newPath.split("/").last, path: newPath, size: await File(newPath).length());
   }
 
   return null;
 }
 
-/// This will return null if called on anything other than iOS
-Future<PickedFile?> pickFileUsingGallery(BuildContext context) async {
+/// This will return an empty list if called on anything other than iOS
+Future<List<PickedFile>> pickFilesUsingGallery(BuildContext context) async {
+  List<PickedFile> result = [];
   if (Platform.isIOS) {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final List<XFile> images = await picker.pickMultiImage();
 
-    if (image == null) {
-      return null;
-    }
 
     if (context.mounted) {
       final name = await askFileName(context);
 
       if (name == null) {
-        return null;
+        return result;
       }
 
-      final String extension = image.path.split(".").last;
-      final path = "${(await getApplicationCacheDirectory()).path}/$name.$extension";
-      await moveFile(image.path, path);
-      final file = File(path);
-      final size = await file.length();
+      for (final image in images) {
+        final String extension = image.path.split(".").last;
+        final path = "${(await getApplicationCacheDirectory()).path}/$name.$extension";
+        await moveFile(image.path, path);
+        final file = File(path);
+        final size = await file.length();
 
-      final PickedFile pickedFile = PickedFile(name: file.path.split("/").last, size: size, path: file.path);
-      return pickedFile;
+        result.add(PickedFile(name: file.path.split("/").last, size: size, path: file.path));
+      }
     }
   }
-  return null;
+  return result;
 }
 
 Future<PickedFile?> pickFileUsingDocumentScanner(BuildContext context) async {

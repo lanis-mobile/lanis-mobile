@@ -14,8 +14,8 @@ class UploadFileToCourseChip extends StatelessWidget {
   const UploadFileToCourseChip({super.key, required this.courseId, required this.entryId, this.onFileUploaded});
 
   void uploadFile(BuildContext context) async {
-    final pickedFile = await pickSingleFile(context, null);
-    if (pickedFile == null) return;
+    final pickedFiles = await pickMultipleFiles(context, null);
+    if (pickedFiles.isEmpty) return;
 
     ValueNotifier<double> progressNotifier = ValueNotifier<double>(0.0);
     ValueNotifier<String> fileNameNotifier = ValueNotifier<String>('');
@@ -50,7 +50,10 @@ class UploadFileToCourseChip extends StatelessWidget {
     }
 
     List<MultipartFile> multiPartFiles = [];
-    multiPartFiles.add(await pickedFile.intoMultipart());
+    for (final file in pickedFiles) {
+      multiPartFiles.add(await file.intoMultipart());
+    }
+
     List<FormData> formData = multiPartFiles.map((e) => FormData.fromMap({
       'a': 'uploadFileBook',
       'id': courseId,
