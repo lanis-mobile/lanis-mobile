@@ -150,15 +150,13 @@ class _UploadScreenState extends State<UploadScreen> {
                                       context: context,
                                       builder: (context) {
                                         return AlertDialog(
-                                          title: const Text(
-                                              "Hochladen nicht möglich!"),
-                                          content: const Text(
-                                              "Bei dieser Abgabe ist das Hochladen mehrerer Dateien oder beliebig häufiger Dateien nicht möglich und da wir dafür noch keine Unterstützung anbieten, kannst du gerade per App noch nichts hochladen."),
+                                          title: Text(AppLocalizations().uploadNotPossible),
+                                          content: Text(AppLocalizations().multipleOrUnlimitedSubmissionNotSupportedMsg),
                                           actions: [
                                             FilledButton(
                                               onPressed: () =>
                                                   Navigator.of(context).pop(),
-                                              child: const Text("Zurück"),
+                                              child: Text(AppLocalizations().back),
                                             )
                                           ],
                                         );
@@ -168,8 +166,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                   }
 
                                   showSnackbar(
-                                      text:
-                                          "Versuche die Datei(en) hochzuladen...");
+                                      text: AppLocalizations().tryingToUploadFiles
+                                  );
 
                                   List<FileStatus> fileStatus;
 
@@ -219,9 +217,9 @@ class _UploadScreenState extends State<UploadScreen> {
 
                                   showSnackbar(
                                       text:
-                                          "$successfulUploads/${fileStatus.length} wurden erfolgreich hochgeladen. ${renamed == true ? 'Manche Dateien wurden jedoch umbenannt.' : ''}",
+                                          "$successfulUploads/${fileStatus.length} ${AppLocalizations().xWasUploadedSuccessfully} ${renamed == true ? AppLocalizations().howeverSomeFilesWereRenamed : ''}",
                                       action: SnackBarAction(
-                                          label: "Mehr sehen",
+                                          label: AppLocalizations().seeMore,
                                           onPressed: () {
                                             // We render the Widgets before so we can have a dynamically sized AlertDialog.
                                             final List<ListTile>
@@ -246,8 +244,9 @@ class _UploadScreenState extends State<UploadScreen> {
                                                 context: context,
                                                 builder: (context) {
                                                   return AlertDialog(
-                                                    title: const Text(
-                                                        "Mehr Details"),
+                                                    title: Text(
+                                                      AppLocalizations().moreDetails
+                                                    ),
                                                     content: Column(
                                                       mainAxisSize:
                                                           MainAxisSize.min,
@@ -261,8 +260,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                                               Navigator.of(
                                                                       context)
                                                                   .pop(),
-                                                          child: const Text(
-                                                              "Zurück"))
+                                                          child: Text(AppLocalizations().back)
+                                                      )
                                                     ],
                                                   );
                                                 });
@@ -377,15 +376,15 @@ class _UploadScreenState extends State<UploadScreen> {
                   children: [
                     requirementsInfo([
                       ListTile(
-                        title: const Text(
-                          "Start",
+                        title: Text(
+                          AppLocalizations().start,
                         ),
                         subtitle: Text(snapshot.data["start"]),
                         leading: const Icon(Icons.hourglass_top),
                       ),
                       ListTile(
-                        title: const Text(
-                          "Ende",
+                        title: Text(
+                          AppLocalizations().end,
                         ),
                         subtitle: Text(snapshot.data["deadline"]),
                         leading: const Icon(Icons.hourglass_bottom),
@@ -396,26 +395,25 @@ class _UploadScreenState extends State<UploadScreen> {
                           isBeforeStart || snapshot.data["course_id"] != null,
                       child: requirementsInfo([
                         ListTile(
-                          title: const Text(
-                            "Hochladen mehrerer Dateien",
+                          title: Text(
+                            AppLocalizations().uploadOfMultipleFiles,
                           ),
                           subtitle: Text(
                             snapshot.data["upload_multiple_files"]
-                                ? 'Möglich'
-                                : 'Nicht möglich',
+                                ? AppLocalizations().possible
+                                : AppLocalizations().notPossible,
                           ),
                           leading: snapshot.data["upload_multiple_files"]
                               ? const Icon(Icons.file_upload)
                               : const Icon(Icons.file_upload_off),
                         ),
                         ListTile(
-                          title: const Text(
-                            "Beliebig häufig hochladen",
-                          ),
+                          title: Text(AppLocalizations().uploadUnlimitedTimes),
                           subtitle: Text(
                               snapshot.data["upload_any_number_of_times"]
-                                  ? 'Möglich'
-                                  : 'Nicht möglich'),
+                                  ? AppLocalizations().possible
+                                  : AppLocalizations().notPossible
+                          ),
                           leading: snapshot.data["upload_any_number_of_times"]
                               ? const Icon(Icons.file_upload)
                               : const Icon(Icons.file_upload_off),
@@ -428,13 +426,13 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: requirementsInfo([
                         ListTile(
                           title: Text(
-                            "Dateien sichtbar für ${snapshot.data["visibility"]}",
+                            "${AppLocalizations().filesVisibleForX}${snapshot.data["visibility"]}",
                           ),
                           leading: const Icon(Icons.visibility),
                         ),
                         ListTile(
-                          title: const Text(
-                            "Automatische Löschung",
+                          title: Text(
+                            AppLocalizations().automaticDeletion,
                           ),
                           subtitle: Text(snapshot.data["automatic_deletion"]),
                           leading: const Icon(Icons.delete_forever),
@@ -448,10 +446,8 @@ class _UploadScreenState extends State<UploadScreen> {
                         [
                           ListTile(
                             title: filesDeleted
-                                ? const Text("Dateien wurden gelöscht!")
-                                : const Text(
-                                    "Automatische Löschung",
-                                  ),
+                                ? Text(AppLocalizations().filesWereDeleted)
+                                : Text(AppLocalizations().automaticDeletion),
                             subtitle: filesDeleted
                                 ? null
                                 : Text(snapshot.data["automatic_deletion"]),
