@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -112,9 +113,14 @@ class _UploadScreenState extends State<UploadScreen> {
 
             final DateTime startDate = DateFormat("EEEE d.M.yy H:mm", "de")
                 .parse(snapshot.data["start"]
-                    .replaceAll(",", "")
-                    .replaceAll(" den", "")
-                    .replaceAll(" Uhr", ""));
+                .replaceAll(",", "")
+                .replaceAll(" den", "")
+                .replaceAll(" Uhr", ""));
+            final DateTime endDate = DateFormat("EEEE d.M.yy H:mm", "de")
+                .parse(snapshot.data["deadline"]
+                .replaceAll(",", "")
+                .replaceAll(" den", "")
+                .replaceAll(" Uhr", ""));
             final DateTime now = DateTime.now();
 
             final DateTime deleteDate = DateFormat("d.M.yyyy", "de")
@@ -379,14 +385,14 @@ class _UploadScreenState extends State<UploadScreen> {
                         title: Text(
                           AppLocalizations().start,
                         ),
-                        subtitle: Text(snapshot.data["start"]),
+                        subtitle: Text(AppLocalizations().dateTimeString(startDate.format("EEEE"), startDate.format("dd.MM.yyyy"), startDate.format("hh:mm"))),
                         leading: const Icon(Icons.hourglass_top),
                       ),
                       ListTile(
                         title: Text(
                           AppLocalizations().end,
                         ),
-                        subtitle: Text(snapshot.data["deadline"]),
+                        subtitle: Text(AppLocalizations().dateTimeString(endDate.format("EEEE"), endDate.format("dd.MM.yyyy"), endDate.format("hh:mm"))),
                         leading: const Icon(Icons.hourglass_bottom),
                       ),
                     ]),
@@ -462,9 +468,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           isBeforeStart || snapshot.data["course_id"] != null,
                       child: requirementsInfo([
                         ListTile(
-                          title: const Text(
-                            "Erlaubte Dateitypen",
-                          ),
+                          title: Text(AppLocalizations().allowedFileTypes,),
                           subtitle: Text(snapshot.data["allowed_file_types"]
                               .toString()
                               .substring(
@@ -476,9 +480,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           leading: const Icon(Icons.description),
                         ),
                         ListTile(
-                          title: const Text(
-                            "Maximale Dateigröße",
-                          ),
+                          title: Text(AppLocalizations().maxFileSize),
                           subtitle: Text(snapshot.data["max_file_size"]),
                           leading: const Icon(Icons.description),
                         ),
@@ -489,9 +491,7 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: requirementsInfo([
                         if (snapshot.data["additional_text"] != null) ...[
                           ListTile(
-                            title: const Text(
-                              "Zusätzliche Informationen",
-                            ),
+                            title: Text(AppLocalizations().moreInformation),
                             subtitle:
                                 Text(snapshot.data["additional_text"] ?? ""),
                             leading: const Icon(Icons.info),
@@ -526,8 +526,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                         context: context,
                                         barrierDismissible: false,
                                         builder: (BuildContext context) {
-                                          return const AlertDialog(
-                                            title: Text("Download..."),
+                                          return AlertDialog(
+                                            title: Text(AppLocalizations().downloading),
                                             content: Center(
                                               heightFactor: 1.1,
                                               child:
@@ -549,13 +549,11 @@ class _UploadScreenState extends State<UploadScreen> {
                                           showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                    title:
-                                                        const Text("Fehler!"),
-                                                    content: Text(
-                                                        "Beim Download der Datei ${snapshot.data["public_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                                    title: Text("${AppLocalizations().error}!"),
+                                                    content: Text(AppLocalizations().failedToDownloadFileMsg(snapshot.data["public_files"][index].name)),
                                                     actions: [
                                                       TextButton(
-                                                        child: const Text('OK'),
+                                                        child: Text(AppLocalizations().ok),
                                                         onPressed: () {
                                                           Navigator.of(context)
                                                               .pop();
@@ -585,7 +583,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                 .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12)),
                         child: Text(
-                          "Du hast nichts abgegeben!",
+                          AppLocalizations().noSubmissionMsg,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )
@@ -627,8 +625,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return AlertDialog(
-                                              title: const Text(
-                                                  "Bestätige mit deinen Passwort"),
+                                              title: Text(AppLocalizations().confirmWithPassword),
                                               content: TextField(
                                                 obscureText: true,
                                                 enableSuggestions: false,
@@ -639,15 +636,12 @@ class _UploadScreenState extends State<UploadScreen> {
                                                 TextButton(
                                                     onPressed: () =>
                                                         Navigator.pop(context),
-                                                    child:
-                                                        const Text("Zurück")),
+                                                    child: Text(AppLocalizations().back)),
                                                 FilledButton(
                                                   onPressed: () async {
                                                     Navigator.pop(context);
 
-                                                    showSnackbar(
-                                                        text:
-                                                            "Versuche die Datei(en) zu löschen...");
+                                                    showSnackbar(text: AppLocalizations().tryingToDeleteFiles);
                                                     String response;
                                                     try {
                                                       response = await sph!
@@ -692,20 +686,14 @@ class _UploadScreenState extends State<UploadScreen> {
                                                       return;
                                                     }
 
-                                                    String message =
-                                                        "Ein unbekannter Fehler entstand beim Löschen!";
+                                                    String message = AppLocalizations().unknownErrorWhileDeletingFile;
 
                                                     if (response == "-1") {
-                                                      message =
-                                                          "Falsches Passwort!";
-                                                    } else if (response ==
-                                                        "-2") {
-                                                      message =
-                                                          "Das Löschen der Datei war nicht möglich!";
-                                                    } else if (response ==
-                                                        "1") {
-                                                      message =
-                                                          "Die Datei wurde erfolgreich gelöscht!";
+                                                      message = AppLocalizations().wrongPassword;
+                                                    } else if (response == "-2") {
+                                                      message = AppLocalizations().failedToDeleteFile;
+                                                    } else if (response == "1") {
+                                                      message = AppLocalizations().fileDeletedSuccessfully;
                                                     }
 
                                                     showSnackbar(
@@ -714,7 +702,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                                                     forceReloadPage();
                                                   },
-                                                  child: const Row(
+                                                  child: Row(
                                                     mainAxisSize:
                                                         MainAxisSize.min,
                                                     children: [
@@ -725,7 +713,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                         child:
                                                             Icon(Icons.warning),
                                                       ),
-                                                      Text("Dauerhaft löschen")
+                                                      Text(AppLocalizations().deletePermanently)
                                                     ],
                                                   ),
                                                 ),
@@ -741,8 +729,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                         context: context,
                                         barrierDismissible: false,
                                         builder: (BuildContext context) {
-                                          return const AlertDialog(
-                                            title: Text("Download..."),
+                                          return AlertDialog(
+                                            title: Text(AppLocalizations().downloading),
                                             content: Center(
                                               heightFactor: 1.1,
                                               child:
@@ -764,13 +752,11 @@ class _UploadScreenState extends State<UploadScreen> {
                                           showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                    title:
-                                                        const Text("Fehler!"),
-                                                    content: Text(
-                                                        "Beim Download der Datei ${snapshot.data["own_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                                    title: Text(AppLocalizations().error),
+                                                    content: Text(AppLocalizations().submissionPossibleInX(snapshot.data["own_files"][index].name)),
                                                     actions: [
                                                       TextButton(
-                                                        child: const Text('OK'),
+                                                        child: Text(AppLocalizations().ok),
                                                         onPressed: () {
                                                           Navigator.of(context)
                                                               .pop();
@@ -800,23 +786,35 @@ class _UploadScreenState extends State<UploadScreen> {
                                   now.difference(startDate);
 
                               if (difference.inHours >= 24) {
-                                waitingTime = "${difference.inDays} Tag(e)";
+                                final days = difference.inDays;
+                                if (days == 1) {
+                                  waitingTime = "$days ${AppLocalizations().day}";
+                                } else {
+                                  waitingTime = "$days ${AppLocalizations().days}";
+                                }
+
                               } else if (difference.inHours <= 1) {
-                                waitingTime =
-                                    "${difference.inMinutes} Minute(n)";
+                                final minutes = difference.inMinutes;
+                                if (minutes == 1) {
+                                  waitingTime = "$minutes ${AppLocalizations().minute}";
+                                } else {
+                                  waitingTime = "$minutes ${AppLocalizations().minutes}";
+                                }
                               } else {
-                                waitingTime = "${difference.inHours} Stunden";
+                                final hours = difference.inHours;
+                                if (hours == 1) {
+                                  waitingTime = "$hours ${AppLocalizations().hour}";
+                                } else {
+                                  waitingTime = "$hours ${AppLocalizations().hours}";
+                                }
                               }
 
-                              return uploadStatusContainer(
-                                  "Die Abgabe ist in $waitingTime möglich.");
+                              return uploadStatusContainer(AppLocalizations().submissionPossibleInX(waitingTime));
                             }
 
-                            return uploadStatusContainer(
-                                "Die Abgabe ist nicht mehr möglich.");
+                            return uploadStatusContainer(AppLocalizations().submissionNoLongerPossible);
                           } else if (value == 0) {
-                            return uploadStatusContainer(
-                                "Füge dateien zum Upload hinzu.");
+                            return uploadStatusContainer(AppLocalizations().addFilesToUpload);
                           } else {
                             return Container(
                                 margin: const EdgeInsets.only(
