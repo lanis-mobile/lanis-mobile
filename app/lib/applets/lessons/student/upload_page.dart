@@ -306,6 +306,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                               if ((pickedFiles.length + filesLength) > 5) {
                                 showSnackbar(text: AppLocalizations().maxOfFiveFiles);
+                                return;
                               }
 
                               num maxFileSize = num.parse(snapshot
@@ -326,7 +327,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                   showSnackbar(
                                       text:
                                       "${AppLocalizations().maxFileSizeExceeded} (${file.name})");
-                                  return;
+                                  continue;
                                 }
 
                                 // Only check for filename like Lanis.
@@ -335,7 +336,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                     showSnackbar(
                                         text:
                                         "${AppLocalizations().fileNameAlreadyExists} (${file.name})");
-                                    return;
+                                    continue;
                                   }
                                 }
 
@@ -344,7 +345,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                   showSnackbar(
                                       text:
                                       "${AppLocalizations().failedToDetectFileType} (${file.name})");
-                                  return;
+                                  continue;
                                 }
 
                                 final MultipartFile multipartFile = await file.intoMultipart();
