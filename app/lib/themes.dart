@@ -78,7 +78,7 @@ class Themes {
           backgroundColor: amoledColors[AmoledColor.background],
           surfaceTintColor: amoledColors[AmoledColor.background],
         ),
-        dialogTheme: DialogTheme(
+        dialogTheme: DialogThemeData(
           backgroundColor: amoledColors[AmoledColor.secondary],
           surfaceTintColor: amoledColors[AmoledColor.secondary],
         ),

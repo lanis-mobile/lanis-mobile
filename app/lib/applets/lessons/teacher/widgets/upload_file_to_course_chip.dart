@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:mime/mime.dart';
+import 'package:sph_plan/utils/file_picker.dart';
 
 import '../../../../core/sph/sph.dart';
 import '../../../../models/lessons_teacher.dart';
@@ -16,12 +14,8 @@ class UploadFileToCourseChip extends StatelessWidget {
   const UploadFileToCourseChip({super.key, required this.courseId, required this.entryId, this.onFileUploaded});
 
   void uploadFile(BuildContext context) async {
-    FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        withReadStream: true
-    );
-    if (pickerResult == null) return;
-    if (pickerResult.files.isEmpty) return;
+    final pickedFiles = await pickMultipleFiles(context, null);
+    if (pickedFiles.isEmpty) return;
 
     ValueNotifier<double> progressNotifier = ValueNotifier<double>(0.0);
     ValueNotifier<String> fileNameNotifier = ValueNotifier<String>('');
@@ -56,14 +50,10 @@ class UploadFileToCourseChip extends StatelessWidget {
     }
 
     List<MultipartFile> multiPartFiles = [];
-    for (PlatformFile file in pickerResult.files) {
-      multiPartFiles.add(MultipartFile.fromStream(
-            () => file.readStream!,
-        file.size,
-        filename: file.name,
-        contentType: MediaType.parse(lookupMimeType(file.path!) ?? 'application/octet-stream'),
-      ));
+    for (final file in pickedFiles) {
+      multiPartFiles.add(await file.intoMultipart());
     }
+
     List<FormData> formData = multiPartFiles.map((e) => FormData.fromMap({
       'a': 'uploadFileBook',
       'id': courseId,

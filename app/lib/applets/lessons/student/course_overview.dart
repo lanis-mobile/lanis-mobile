@@ -124,9 +124,11 @@ class _CourseOverviewAnsichtState extends State<CourseOverviewAnsicht> {
                           label: Text(file.name ?? "..."),
                           onPressed: () => launchFile(
                             context,
-                            file.url.toString(),
-                            file.name ?? '',
-                            file.size,
+                            FileInfo(
+                              name: file.name,
+                              size: file.size,
+                              url: Uri.parse(file.url.toString()),
+                            ),
                             () {},
                           ),
                         )));
