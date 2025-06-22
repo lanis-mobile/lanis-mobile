@@ -1,17 +1,19 @@
 import 'dart:async';
 
+import 'package:dart_date/dart_date.dart';
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:http_parser/http_parser.dart'; // needed for MimeType declarations
-import 'package:mime/mime.dart';
 import 'package:open_file/open_file.dart';
+import 'package:sph_plan/generated/l10n.dart';
+import 'package:sph_plan/utils/file_picker.dart';
 import 'package:sph_plan/widgets/error_view.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
 import '../../../models/client_status_exceptions.dart';
+import '../../../utils/file_operations.dart';
+import '../../../utils/logger.dart';
 
 class UploadScreen extends StatefulWidget {
   final String url;
@@ -113,9 +115,14 @@ class _UploadScreenState extends State<UploadScreen> {
 
             final DateTime startDate = DateFormat("EEEE d.M.yy H:mm", "de")
                 .parse(snapshot.data["start"]
-                    .replaceAll(",", "")
-                    .replaceAll(" den", "")
-                    .replaceAll(" Uhr", ""));
+                .replaceAll(",", "")
+                .replaceAll(" den", "")
+                .replaceAll(" Uhr", ""));
+            final DateTime endDate = DateFormat("EEEE d.M.yy H:mm", "de")
+                .parse(snapshot.data["deadline"]
+                .replaceAll(",", "")
+                .replaceAll(" den", "")
+                .replaceAll(" Uhr", ""));
             final DateTime now = DateTime.now();
 
             final DateTime deleteDate = DateFormat("d.M.yyyy", "de")
@@ -151,15 +158,13 @@ class _UploadScreenState extends State<UploadScreen> {
                                       context: context,
                                       builder: (context) {
                                         return AlertDialog(
-                                          title: const Text(
-                                              "Hochladen nicht möglich!"),
-                                          content: const Text(
-                                              "Bei dieser Abgabe ist das Hochladen mehrerer Dateien oder beliebig häufiger Dateien nicht möglich und da wir dafür noch keine Unterstützung anbieten, kannst du gerade per App noch nichts hochladen."),
+                                          title: Text(AppLocalizations().uploadNotPossible),
+                                          content: Text(AppLocalizations().multipleOrUnlimitedSubmissionNotSupportedMsg),
                                           actions: [
                                             FilledButton(
                                               onPressed: () =>
                                                   Navigator.of(context).pop(),
-                                              child: const Text("Zurück"),
+                                              child: Text(AppLocalizations().back),
                                             )
                                           ],
                                         );
@@ -169,8 +174,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                   }
 
                                   showSnackbar(
-                                      text:
-                                          "Versuche die Datei(en) hochzuladen...");
+                                      text: AppLocalizations().tryingToUploadFiles
+                                  );
 
                                   List<FileStatus> fileStatus;
 
@@ -220,9 +225,9 @@ class _UploadScreenState extends State<UploadScreen> {
 
                                   showSnackbar(
                                       text:
-                                          "$successfulUploads/${fileStatus.length} wurden erfolgreich hochgeladen. ${renamed == true ? 'Manche Dateien wurden jedoch umbenannt.' : ''}",
+                                          "$successfulUploads/${fileStatus.length} ${AppLocalizations().xWasUploadedSuccessfully} ${renamed == true ? AppLocalizations().howeverSomeFilesWereRenamed : ''}",
                                       action: SnackBarAction(
-                                          label: "Mehr sehen",
+                                          label: AppLocalizations().seeMore,
                                           onPressed: () {
                                             // We render the Widgets before so we can have a dynamically sized AlertDialog.
                                             final List<ListTile>
@@ -247,8 +252,9 @@ class _UploadScreenState extends State<UploadScreen> {
                                                 context: context,
                                                 builder: (context) {
                                                   return AlertDialog(
-                                                    title: const Text(
-                                                        "Mehr Details"),
+                                                    title: Text(
+                                                      AppLocalizations().moreDetails
+                                                    ),
                                                     content: Column(
                                                       mainAxisSize:
                                                           MainAxisSize.min,
@@ -262,8 +268,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                                               Navigator.of(
                                                                       context)
                                                                   .pop(),
-                                                          child: const Text(
-                                                              "Zurück"))
+                                                          child: Text(AppLocalizations().back)
+                                                      )
                                                     ],
                                                   );
                                                 });
@@ -294,87 +300,80 @@ class _UploadScreenState extends State<UploadScreen> {
                             ),
                             icon: const Icon(Icons.add),
                             onPressed: () async {
-                              FilePickerResult? file =
-                                  await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions:
-                                    snapshot.data["allowed_file_types"],
-                              );
+                              final List<PickedFile> pickedFiles = await pickMultipleFiles(context, snapshot.data["allowed_file_types"]);
 
-                              final PlatformFile firstFile = file!.files.first;
+                              if (pickedFiles.isEmpty) {
+                                return;
+                              }
 
-                              if (!snapshot.data["allowed_file_types"].contains(
-                                  firstFile.extension?.toUpperCase())) {
-                                showSnackbar(
-                                    text:
-                                        "Die Datei hat keinen erlaubten Dateityp!");
+                              if ((pickedFiles.length + filesLength) > 5) {
+                                showSnackbar(text: AppLocalizations().maxOfFiveFiles);
                                 return;
                               }
 
                               num maxFileSize = num.parse(snapshot
-                                      .data["max_file_size"]
-                                      .replaceAll("MB", "")
-                                      .replaceAll(",", ".")) *
+                                  .data["max_file_size"]
+                                  .replaceAll("MB", "")
+                                  .replaceAll(",", ".")) *
                                   1000000;
 
-                              if (firstFile.size > maxFileSize) {
-                                showSnackbar(
-                                    text:
-                                        "Die Datei hat die maximale Dateigröße überschritten!");
-                                return;
-                              }
-
-                              // Only check for filename like Lanis.
-                              for (final element in _multipartFiles) {
-                                if (element.filename == firstFile.name) {
+                              for (final file in pickedFiles) {
+                                if (!snapshot.data["allowed_file_types"].contains(file.extension.toUpperCase())) {
                                   showSnackbar(
                                       text:
-                                          "Der Name der Datei gibt es schon!");
-                                  return;
+                                      "${AppLocalizations().fileTypeNotAllowed} (${file.name})");
+                                  continue;
                                 }
+
+                                if ((file.size ?? 0) > maxFileSize) {
+                                  showSnackbar(
+                                      text:
+                                      "${AppLocalizations().maxFileSizeExceeded} (${file.name})");
+                                  continue;
+                                }
+
+                                // Only check for filename like Lanis.
+                                for (final element in _multipartFiles) {
+                                  if (element.filename == file.name) {
+                                    showSnackbar(
+                                        text:
+                                        "${AppLocalizations().fileNameAlreadyExists} (${file.name})");
+                                    continue;
+                                  }
+                                }
+
+                                final String? mimeType = file.mimeType;
+                                if (mimeType == null) {
+                                  showSnackbar(
+                                      text:
+                                      "${AppLocalizations().failedToDetectFileType} (${file.name})");
+                                  continue;
+                                }
+
+                                final MultipartFile multipartFile = await file.intoMultipart();
+
+                                _multipartFiles.add(multipartFile);
+                                _fileWidgets.add(ListTile(
+                                  title: Text(file.name),
+                                  trailing: const Icon(Icons.remove),
+                                  onTap: () {
+                                    // We need to calculate the index dynamically because you can remove every tile at any index.
+                                    // Maybe there is a better way.
+                                    int tileIndex = _fileWidgets
+                                        .indexWhere((ListTile element) {
+                                      final Text textWidget =
+                                      element.title as Text;
+                                      final String text = textWidget.data!;
+
+                                      return text == file.name;
+                                    });
+                                    _fileWidgets.removeAt(tileIndex);
+                                    _multipartFiles.removeAt(tileIndex);
+                                    _addedFiles.value -= 1;
+                                  },
+                                ));
+                                _addedFiles.value += 1;
                               }
-
-                              // firstFile.extension only returns characters after the dot of the file name, not the MimeType
-                              final String? mimeType =
-                                  lookupMimeType(firstFile.path!);
-
-                              if (mimeType == null) {
-                                showSnackbar(
-                                    text:
-                                        "Beim Herausfinden des Dateityps ist ein Fehler entstanden!");
-                                return;
-                              }
-
-                              // MultipartFile doesn't accept a String, only MediaType
-                              final MediaType parsedMimeType =
-                                  MediaType.parse(mimeType);
-
-                              final MultipartFile multipartFile =
-                                  await MultipartFile.fromFile(firstFile.path!,
-                                      filename: firstFile.name,
-                                      contentType: parsedMimeType);
-
-                              _multipartFiles.add(multipartFile);
-                              _fileWidgets.add(ListTile(
-                                title: Text(firstFile.name),
-                                trailing: const Icon(Icons.remove),
-                                onTap: () {
-                                  // We need to calculate the index dynamically because you can remove every tile at any index.
-                                  // Maybe there is a better way.
-                                  int tileIndex = _fileWidgets
-                                      .indexWhere((ListTile element) {
-                                    final Text textWidget =
-                                        element.title as Text;
-                                    final String text = textWidget.data!;
-
-                                    return text == firstFile.name;
-                                  });
-                                  _fileWidgets.removeAt(tileIndex);
-                                  _multipartFiles.removeAt(tileIndex);
-                                  _addedFiles.value -= 1;
-                                },
-                              ));
-                              _addedFiles.value += 1;
                             },
                           ),
                         ]
@@ -386,17 +385,17 @@ class _UploadScreenState extends State<UploadScreen> {
                   children: [
                     requirementsInfo([
                       ListTile(
-                        title: const Text(
-                          "Start",
+                        title: Text(
+                          AppLocalizations().start,
                         ),
-                        subtitle: Text(snapshot.data["start"]),
+                        subtitle: Text(AppLocalizations().dateTimeString(startDate.format("EEEE"), startDate.format("dd.MM.yyyy"), startDate.format("hh:mm"))),
                         leading: const Icon(Icons.hourglass_top),
                       ),
                       ListTile(
-                        title: const Text(
-                          "Ende",
+                        title: Text(
+                          AppLocalizations().end,
                         ),
-                        subtitle: Text(snapshot.data["deadline"]),
+                        subtitle: Text(AppLocalizations().dateTimeString(endDate.format("EEEE"), endDate.format("dd.MM.yyyy"), endDate.format("hh:mm"))),
                         leading: const Icon(Icons.hourglass_bottom),
                       ),
                     ]),
@@ -405,26 +404,25 @@ class _UploadScreenState extends State<UploadScreen> {
                           isBeforeStart || snapshot.data["course_id"] != null,
                       child: requirementsInfo([
                         ListTile(
-                          title: const Text(
-                            "Hochladen mehrerer Dateien",
+                          title: Text(
+                            AppLocalizations().uploadOfMultipleFiles,
                           ),
                           subtitle: Text(
                             snapshot.data["upload_multiple_files"]
-                                ? 'Möglich'
-                                : 'Nicht möglich',
+                                ? AppLocalizations().possible
+                                : AppLocalizations().notPossible,
                           ),
                           leading: snapshot.data["upload_multiple_files"]
                               ? const Icon(Icons.file_upload)
                               : const Icon(Icons.file_upload_off),
                         ),
                         ListTile(
-                          title: const Text(
-                            "Beliebig häufig hochladen",
-                          ),
+                          title: Text(AppLocalizations().uploadUnlimitedTimes),
                           subtitle: Text(
                               snapshot.data["upload_any_number_of_times"]
-                                  ? 'Möglich'
-                                  : 'Nicht möglich'),
+                                  ? AppLocalizations().possible
+                                  : AppLocalizations().notPossible
+                          ),
                           leading: snapshot.data["upload_any_number_of_times"]
                               ? const Icon(Icons.file_upload)
                               : const Icon(Icons.file_upload_off),
@@ -437,13 +435,13 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: requirementsInfo([
                         ListTile(
                           title: Text(
-                            "Dateien sichtbar für ${snapshot.data["visibility"]}",
+                            "${AppLocalizations().filesVisibleForX}${snapshot.data["visibility"]}",
                           ),
                           leading: const Icon(Icons.visibility),
                         ),
                         ListTile(
-                          title: const Text(
-                            "Automatische Löschung",
+                          title: Text(
+                            AppLocalizations().automaticDeletion,
                           ),
                           subtitle: Text(snapshot.data["automatic_deletion"]),
                           leading: const Icon(Icons.delete_forever),
@@ -457,10 +455,8 @@ class _UploadScreenState extends State<UploadScreen> {
                         [
                           ListTile(
                             title: filesDeleted
-                                ? const Text("Dateien wurden gelöscht!")
-                                : const Text(
-                                    "Automatische Löschung",
-                                  ),
+                                ? Text(AppLocalizations().filesWereDeleted)
+                                : Text(AppLocalizations().automaticDeletion),
                             subtitle: filesDeleted
                                 ? null
                                 : Text(snapshot.data["automatic_deletion"]),
@@ -475,9 +471,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           isBeforeStart || snapshot.data["course_id"] != null,
                       child: requirementsInfo([
                         ListTile(
-                          title: const Text(
-                            "Erlaubte Dateitypen",
-                          ),
+                          title: Text(AppLocalizations().allowedFileTypes,),
                           subtitle: Text(snapshot.data["allowed_file_types"]
                               .toString()
                               .substring(
@@ -489,9 +483,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           leading: const Icon(Icons.description),
                         ),
                         ListTile(
-                          title: const Text(
-                            "Maximale Dateigröße",
-                          ),
+                          title: Text(AppLocalizations().maxFileSize),
                           subtitle: Text(snapshot.data["max_file_size"]),
                           leading: const Icon(Icons.description),
                         ),
@@ -502,9 +494,7 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: requirementsInfo([
                         if (snapshot.data["additional_text"] != null) ...[
                           ListTile(
-                            title: const Text(
-                              "Zusätzliche Informationen",
-                            ),
+                            title: Text(AppLocalizations().moreInformation),
                             subtitle:
                                 Text(snapshot.data["additional_text"] ?? ""),
                             leading: const Icon(Icons.info),
@@ -539,8 +529,8 @@ class _UploadScreenState extends State<UploadScreen> {
                                         context: context,
                                         barrierDismissible: false,
                                         builder: (BuildContext context) {
-                                          return const AlertDialog(
-                                            title: Text("Download..."),
+                                          return AlertDialog(
+                                            title: Text(AppLocalizations().downloading),
                                             content: Center(
                                               heightFactor: 1.1,
                                               child:
@@ -562,13 +552,11 @@ class _UploadScreenState extends State<UploadScreen> {
                                           showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                    title:
-                                                        const Text("Fehler!"),
-                                                    content: Text(
-                                                        "Beim Download der Datei ${snapshot.data["public_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
+                                                    title: Text("${AppLocalizations().error}!"),
+                                                    content: Text(AppLocalizations().failedToDownloadFileMsg(snapshot.data["public_files"][index].name)),
                                                     actions: [
                                                       TextButton(
-                                                        child: const Text('OK'),
+                                                        child: Text(AppLocalizations().ok),
                                                         onPressed: () {
                                                           Navigator.of(context)
                                                               .pop();
@@ -598,7 +586,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                 .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12)),
                         child: Text(
-                          "Du hast nichts abgegeben!",
+                          AppLocalizations().noSubmissionMsg,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )
@@ -640,8 +628,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return AlertDialog(
-                                              title: const Text(
-                                                  "Bestätige mit deinen Passwort"),
+                                              title: Text(AppLocalizations().confirmWithPassword),
                                               content: TextField(
                                                 obscureText: true,
                                                 enableSuggestions: false,
@@ -652,15 +639,12 @@ class _UploadScreenState extends State<UploadScreen> {
                                                 TextButton(
                                                     onPressed: () =>
                                                         Navigator.pop(context),
-                                                    child:
-                                                        const Text("Zurück")),
+                                                    child: Text(AppLocalizations().back)),
                                                 FilledButton(
                                                   onPressed: () async {
                                                     Navigator.pop(context);
 
-                                                    showSnackbar(
-                                                        text:
-                                                            "Versuche die Datei(en) zu löschen...");
+                                                    showSnackbar(text: AppLocalizations().tryingToDeleteFiles);
                                                     String response;
                                                     try {
                                                       response = await sph!
@@ -705,20 +689,14 @@ class _UploadScreenState extends State<UploadScreen> {
                                                       return;
                                                     }
 
-                                                    String message =
-                                                        "Ein unbekannter Fehler entstand beim Löschen!";
+                                                    String message = AppLocalizations().unknownErrorWhileDeletingFile;
 
                                                     if (response == "-1") {
-                                                      message =
-                                                          "Falsches Passwort!";
-                                                    } else if (response ==
-                                                        "-2") {
-                                                      message =
-                                                          "Das Löschen der Datei war nicht möglich!";
-                                                    } else if (response ==
-                                                        "1") {
-                                                      message =
-                                                          "Die Datei wurde erfolgreich gelöscht!";
+                                                      message = AppLocalizations().wrongPassword;
+                                                    } else if (response == "-2") {
+                                                      message = AppLocalizations().failedToDeleteFile;
+                                                    } else if (response == "1") {
+                                                      message = AppLocalizations().fileDeletedSuccessfully;
                                                     }
 
                                                     showSnackbar(
@@ -727,7 +705,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
                                                     forceReloadPage();
                                                   },
-                                                  child: const Row(
+                                                  child: Row(
                                                     mainAxisSize:
                                                         MainAxisSize.min,
                                                     children: [
@@ -738,7 +716,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                                         child:
                                                             Icon(Icons.warning),
                                                       ),
-                                                      Text("Dauerhaft löschen")
+                                                      Text(AppLocalizations().deletePermanently)
                                                     ],
                                                   ),
                                                 ),
@@ -748,55 +726,22 @@ class _UploadScreenState extends State<UploadScreen> {
                                     },
                                     icon: const Icon(Icons.delete))
                                 : null,
+                            onLongPress: !filesDeleted
+                                ? () {
+                              showFileModal(context, FileInfo(
+                                name: snapshot.data["own_files"][index].name,
+                                url: Uri.parse(snapshot.data["own_files"][index].url),
+                              ));
+                                  }
+                                : null,
                             onTap: !filesDeleted
                                 ? () {
-                                    showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (BuildContext context) {
-                                          return const AlertDialog(
-                                            title: Text("Download..."),
-                                            content: Center(
-                                              heightFactor: 1.1,
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            ),
-                                          );
-                                        });
-                                    sph!.storage
-                                        .downloadFile(
-                                            snapshot
-                                                .data["own_files"][index].url,
-                                            snapshot
-                                                .data["own_files"][index].name)
-                                        .then((filepath) {
-                                      if(context.mounted) {
-                                        Navigator.of(context).pop();
-
-                                        if (filepath == "") {
-                                          showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                    title:
-                                                        const Text("Fehler!"),
-                                                    content: Text(
-                                                        "Beim Download der Datei ${snapshot.data["own_files"][index].name} ist ein unerwarteter Fehler aufgetreten. Wenn dieses Problem besteht, senden Sie uns bitte einen Fehlerbericht."),
-                                                    actions: [
-                                                      TextButton(
-                                                        child: const Text('OK'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ));
-                                        }
-                                      } else {
-                                        OpenFile.open(filepath);
-                                      }
-                                    });
-                                  }
+                              logger.d(snapshot.data["own_files"][index]);
+                              launchFile(context, FileInfo(
+                                name: snapshot.data["own_files"][index].name,
+                                url: Uri.parse(snapshot.data["own_files"][index].url),
+                              ), (){});
+                            }
                                 : null,
                           );
                         }),
@@ -813,23 +758,35 @@ class _UploadScreenState extends State<UploadScreen> {
                                   now.difference(startDate);
 
                               if (difference.inHours >= 24) {
-                                waitingTime = "${difference.inDays} Tag(e)";
+                                final days = difference.inDays;
+                                if (days == 1) {
+                                  waitingTime = "$days ${AppLocalizations().day}";
+                                } else {
+                                  waitingTime = "$days ${AppLocalizations().days}";
+                                }
+
                               } else if (difference.inHours <= 1) {
-                                waitingTime =
-                                    "${difference.inMinutes} Minute(n)";
+                                final minutes = difference.inMinutes;
+                                if (minutes == 1) {
+                                  waitingTime = "$minutes ${AppLocalizations().minute}";
+                                } else {
+                                  waitingTime = "$minutes ${AppLocalizations().minutes}";
+                                }
                               } else {
-                                waitingTime = "${difference.inHours} Stunden";
+                                final hours = difference.inHours;
+                                if (hours == 1) {
+                                  waitingTime = "$hours ${AppLocalizations().hour}";
+                                } else {
+                                  waitingTime = "$hours ${AppLocalizations().hours}";
+                                }
                               }
 
-                              return uploadStatusContainer(
-                                  "Die Abgabe ist in $waitingTime möglich.");
+                              return uploadStatusContainer(AppLocalizations().submissionPossibleInX(waitingTime));
                             }
 
-                            return uploadStatusContainer(
-                                "Die Abgabe ist nicht mehr möglich.");
+                            return uploadStatusContainer(AppLocalizations().submissionNoLongerPossible);
                           } else if (value == 0) {
-                            return uploadStatusContainer(
-                                "Füge dateien zum Upload hinzu.");
+                            return uploadStatusContainer(AppLocalizations().addFilesToUpload);
                           } else {
                             return Container(
                                 margin: const EdgeInsets.only(
