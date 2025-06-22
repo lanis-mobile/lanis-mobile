@@ -12,6 +12,8 @@ import 'package:sph_plan/widgets/error_view.dart';
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
 import '../../../models/client_status_exceptions.dart';
+import '../../../utils/file_operations.dart';
+import '../../../utils/logger.dart';
 
 class UploadScreen extends StatefulWidget {
   final String url;
@@ -724,53 +726,22 @@ class _UploadScreenState extends State<UploadScreen> {
                                     },
                                     icon: const Icon(Icons.delete))
                                 : null,
+                            onLongPress: !filesDeleted
+                                ? () {
+                              showFileModal(context, FileInfo(
+                                name: snapshot.data["own_files"][index].name,
+                                url: Uri.parse(snapshot.data["own_files"][index].url),
+                              ));
+                                  }
+                                : null,
                             onTap: !filesDeleted
                                 ? () {
-                                    showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text(AppLocalizations().downloading),
-                                            content: Center(
-                                              heightFactor: 1.1,
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            ),
-                                          );
-                                        });
-                                    sph!.storage
-                                        .downloadFile(
-                                            snapshot
-                                                .data["own_files"][index].url,
-                                            snapshot
-                                                .data["own_files"][index].name)
-                                        .then((filepath) {
-                                      if(context.mounted) {
-                                        Navigator.of(context).pop();
-
-                                        if (filepath == "") {
-                                          showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                    title: Text(AppLocalizations().error),
-                                                    content: Text(AppLocalizations().submissionPossibleInX(snapshot.data["own_files"][index].name)),
-                                                    actions: [
-                                                      TextButton(
-                                                        child: Text(AppLocalizations().ok),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ));
-                                        }
-                                      } else {
-                                        OpenFile.open(filepath);
-                                      }
-                                    });
-                                  }
+                              logger.d(snapshot.data["own_files"][index]);
+                              launchFile(context, FileInfo(
+                                name: snapshot.data["own_files"][index].name,
+                                url: Uri.parse(snapshot.data["own_files"][index].url),
+                              ), (){});
+                            }
                                 : null,
                           );
                         }),

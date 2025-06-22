@@ -12,6 +12,9 @@ read -p "Press enter to continue..."
 sleep 1
 mkdir artifacts
 
+echo ">>> generate localization files"
+dart run intl_utils:generate
+
 echo ">>> build appbundle"
 flutter build appbundle --dart-define=cronetHttpNoPlay=true
 mv build/app/outputs/bundle/release/app-release.aab artifacts/app-release.aab
