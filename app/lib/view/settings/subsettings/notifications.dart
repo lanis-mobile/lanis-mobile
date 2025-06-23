@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/gestures.dart';
@@ -446,6 +447,59 @@ class _NotificationSettingsState
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            if (Platform.isAndroid) Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: AppLocalizations.of(context).ignoreBatteryOptimizationPart1,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color:
+                        Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    TextSpan(
+                      text: AppLocalizations.of(context).ignoreBatteryOptimizationSettings,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          final permStatus = await Permission.ignoreBatteryOptimizations.request();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                              permStatus == PermissionStatus.granted
+                                  ? AppLocalizations.of(context).ignoreBatteryOptimizationGranted
+                                  : AppLocalizations.of(context).ignoreBatteryOptimizationDenied,
+                              style: permStatus == PermissionStatus.granted ?
+                                  Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  ) :
+                                  Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    color: Theme.of(context).colorScheme.onErrorContainer,
+                                  )
+                            ),
+                            backgroundColor: permStatus == PermissionStatus.granted
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Theme.of(context).colorScheme.errorContainer,
+                          ));
+                          }
+                        },
+                    ),
+                    TextSpan(
+                      text: AppLocalizations.of(context).otherSettingsAvailablePart2,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color:
+                        Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     )
                   ],
                 ),
