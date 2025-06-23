@@ -70,6 +70,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
+    <!-- for devices with heavy background monitoring -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <!-- Document Scanner is not available on older APIs so safe to ignore -->
     <uses-sdk tools:overrideLibrary="com.zynksoftware.documentscanner, org.opencv"/>
 
