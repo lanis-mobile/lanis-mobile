@@ -393,32 +393,32 @@ class HomePageState extends State<HomePage> {
           : noAppsSupported(),
       bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
       drawer: navDrawer(context),
-      floatingActionButton: StreamBuilder(
-        stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
-        builder: (context, snapshot) {
-          return Visibility(
-            visible: !snapshot.hasData || !snapshot.data,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
-              child: ElevatedButton(
-                  onPressed: () async {
-                    await launchUrl(Uri.parse(surveyUrl));
-                    await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
-                  },
-                  child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 4,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Icon(Icons.feedback),
-                    Text(AppLocalizations.of(context).feedback)
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-      ),
+      // floatingActionButton: StreamBuilder(
+      //         stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
+      //         builder: (context, snapshot) {
+      //           return Visibility(
+      //             visible: !snapshot.hasData || !snapshot.data,
+      //             child: Padding(
+      //               padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
+      //               child: ElevatedButton(
+      //                   onPressed: () async {
+      //                     await launchUrl(Uri.parse(surveyUrl));
+      //                     await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
+      //                   },
+      //                   child: Row(
+      //                   mainAxisSize: MainAxisSize.min,
+      //                   spacing: 4,
+      //                   crossAxisAlignment: CrossAxisAlignment.end,
+      //                   children: [
+      //                     Icon(Icons.feedback),
+      //                     Text(AppLocalizations.of(context).feedback)
+      //                   ],
+      //                 ),
+      //               ),
+      //             ),
+      //           );
+      //         }
+      //       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
     );
   }
