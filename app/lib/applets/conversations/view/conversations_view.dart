@@ -504,13 +504,29 @@ class _ConversationsViewState extends State<ConversationsView> {
                                     checked: checkedTiles[data[index].id] ??
                                         false,
                                     onTap: (entry) {
-                                      setState(() {
-                                        loadedConversation = ConversationsChat.fromEntry(
-                                          key: Key(entry.id),
-                                            entry
+                                      if (tabletMode!) {
+                                        setState(() {
+                                          loadedConversation = ConversationsChat.fromEntry(
+                                              key: Key(entry.id),
+                                              entry
+                                          );
+                                          loadedConversationId = entry.id;
+                                        });
+                                      } else {
+                                        Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            if (entry.unread == true) {
+                                              sph!.parser.conversationsParser.filter
+                                                  .toggleEntry(entry.id, unread: true);
+                                              sph!.parser.conversationsParser.filter.pushEntries();
+                                            }
+                                            return ConversationsChat.fromEntry(entry);
+                                          },
+                                        ),
                                         );
-                                        loadedConversationId = entry.id;
-                                      });
+                                      }
                                     },
                                   );
                                 },
@@ -770,20 +786,6 @@ class ConversationTile extends StatelessWidget {
                       return;
                     }
                     onTap(entry);
-                    // Navigator.push(
-                    //                     context,
-                    //                     MaterialPageRoute(
-                    //                       builder: (context) {
-                    //                         if (entry.unread == true) {
-                    //                           sph!.parser.conversationsParser.filter
-                    //                               .toggleEntry(entry.id, unread: true);
-                    //                           sph!.parser.conversationsParser.filter.pushEntries();
-                    //                         }
-                    //
-                    //                         return ConversationsChat.fromEntry(entry);
-                    //                       },
-                    //                     ),
-                    //                   );
                   },
                   onLongPress: () async {
                     // Try to let the tile be in same place as in the old list.
