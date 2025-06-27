@@ -321,6 +321,7 @@ class _ConversationsChatState extends State<ConversationsChat>
               return Visibility(
                 visible: isVisible,
                 child: FloatingActionButton.small(
+
                   onPressed: () {
                     scrollController.animateTo(
                       scrollController.position.maxScrollExtent,
@@ -343,6 +344,7 @@ class _ConversationsChatState extends State<ConversationsChat>
               return Visibility(
                 visible: isVisible,
                 child: FloatingActionButton.extended(
+                  heroTag: 'send',
                   label: Text(AppLocalizations.of(context).newMessage),
                   icon: const Icon(Icons.edit),
                   onPressed: () async {

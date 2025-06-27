@@ -71,6 +71,9 @@ class _ConversationsViewState extends State<ConversationsView> {
   bool loadingCreateButton = false;
   bool disableToggleButton = false;
 
+  Widget? loadedConversation;
+  String? loadedConversationId;
+
   Widget toggleModeAppBar() {
     return SizedBox(
       height: 64,
@@ -479,9 +482,19 @@ class _ConversationsViewState extends State<ConversationsView> {
 
                                   return ConversationTile(
                                     entry: data[index],
+                                    isOpen: loadedConversationId == data[index].id,
                                     toggleMode: toggleMode,
                                     checked: checkedTiles[data[index].id] ??
                                         false,
+                                    onTap: (entry) {
+                                      setState(() {
+                                        loadedConversation = ConversationsChat.fromEntry(
+                                          key: Key(entry.id),
+                                            entry
+                                        );
+                                        loadedConversationId = entry.id;
+                                      });
+                                    },
                                   );
                                 },
                               )
@@ -649,7 +662,7 @@ class _ConversationsViewState extends State<ConversationsView> {
             ),
             Expanded(
               flex: 2,
-              child: sideBarNoConversationsLoaded(),
+              child: loadedConversation == null ? sideBarNoConversationsLoaded() : loadedConversation!,
             )
           ],
         ),
@@ -662,12 +675,17 @@ class ConversationTile extends StatelessWidget {
   final OverviewEntry entry;
   final bool toggleMode;
   final bool checked;
+  final Function(OverviewEntry) onTap;
+  final bool isOpen;
 
   const ConversationTile(
       {super.key,
       required this.entry,
       required this.toggleMode,
-      required this.checked});
+      required this.checked,
+      required this.onTap,
+      required this.isOpen
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -682,139 +700,160 @@ class ConversationTile extends StatelessWidget {
                 .withValues(alpha: 0.8)
             : null,
         child: Stack(
-          alignment: Alignment.center,
           children: [
-            if (entry.hidden) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
+            if (isOpen) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 64.0),
-                    child: Icon(
-                      Icons.visibility_off,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withValues(alpha: 0.05)
-                          : Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerLow
-                              .withValues(alpha: 0.8),
-                      size: 65,
+                  Container(
+                    width: 10,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(8.0)
                     ),
-                  ),
+                  )
                 ],
-              ),
+              )
             ],
-            Badge(
-              smallSize: entry.unread ? 9 : 0,
-              child: InkWell(
-                onTap: () {
-                  if (toggleMode) {
-                    CheckTileNotification(id: entry.id).dispatch(context);
-                    return;
-                  }
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        if (entry.unread == true) {
-                          sph!.parser.conversationsParser.filter
-                              .toggleEntry(entry.id, unread: true);
-                          sph!.parser.conversationsParser.filter.pushEntries();
-                        }
-
-                        return ConversationsChat.fromEntry(entry);
-                      },
-                    ),
-                  );
-                },
-                onLongPress: () async {
-                  // Try to let the tile be in same place as in the old list.
-                  if (!toggleMode) {
-                    final List<OverviewEntry> oldEntries = sph!.parser.conversationsParser.stream.value.content!;
-                    final oldPosition = oldEntries.indexOf(entry) * tileSize;
-
-                    CheckTileNotification(id: entry.id).dispatch(context);
-
-                    final List<OverviewEntry> entries = sph!.parser.conversationsParser.stream.value.content!;
-
-                    final index = entries.indexOf(entry);
-                    final position = index * tileSize;
-                    final offset =
-                        Scrollable.of(context).deltaToScrollOrigin.dy;
-
-                    final newOffset = position + (offset - oldPosition);
-                    JumpToNotification(position: newOffset).dispatch(context);
-                  }
-                },
-                customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Row(
+            Stack(
+              alignment: Alignment.center,
+              children: [
+              if (entry.hidden) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Visibility(
-                        visible: toggleMode,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 12.0),
-                          child: Icon(
-                            checked
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        )),
-                    Expanded(
-                      child: ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              flex: 3,
-                              child: Text(
-                                entry.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            if (entry.shortName != null) ...[
-                              Flexible(
-                                child: Text(
-                                  entry.shortName!,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: entry.shortName != null
-                                      ? Theme.of(context).textTheme.titleMedium
-                                      : Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .error),
-                                ),
-                              ),
-                            ]
-                          ],
-                        ),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              entry.date,
-                            ),
-                            Text(
-                              entry.fullName,
-                            ),
-                          ],
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 64.0),
+                      child: Icon(
+                        Icons.visibility_off,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: 0.05)
+                            : Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerLow
+                                .withValues(alpha: 0.8),
+                        size: 65,
                       ),
                     ),
                   ],
                 ),
+              ],
+              Badge(
+                smallSize: entry.unread ? 9 : 0,
+                child: InkWell(
+                  onTap: () {
+                    if (toggleMode) {
+                      CheckTileNotification(id: entry.id).dispatch(context);
+                      return;
+                    }
+                    onTap(entry);
+                    // Navigator.push(
+                    //                     context,
+                    //                     MaterialPageRoute(
+                    //                       builder: (context) {
+                    //                         if (entry.unread == true) {
+                    //                           sph!.parser.conversationsParser.filter
+                    //                               .toggleEntry(entry.id, unread: true);
+                    //                           sph!.parser.conversationsParser.filter.pushEntries();
+                    //                         }
+                    //
+                    //                         return ConversationsChat.fromEntry(entry);
+                    //                       },
+                    //                     ),
+                    //                   );
+                  },
+                  onLongPress: () async {
+                    // Try to let the tile be in same place as in the old list.
+                    if (!toggleMode) {
+                      final List<OverviewEntry> oldEntries = sph!.parser.conversationsParser.stream.value.content!;
+                      final oldPosition = oldEntries.indexOf(entry) * tileSize;
+
+                      CheckTileNotification(id: entry.id).dispatch(context);
+
+                      final List<OverviewEntry> entries = sph!.parser.conversationsParser.stream.value.content!;
+
+                      final index = entries.indexOf(entry);
+                      final position = index * tileSize;
+                      final offset =
+                          Scrollable.of(context).deltaToScrollOrigin.dy;
+
+                      final newOffset = position + (offset - oldPosition);
+                      JumpToNotification(position: newOffset).dispatch(context);
+                    }
+                  },
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Visibility(
+                          visible: toggleMode,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 12.0),
+                            child: Icon(
+                              checked
+                                  ? Icons.check_box
+                                  : Icons.check_box_outline_blank,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          )),
+                      Expanded(
+                        child: ListTile(
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                flex: 3,
+                                child: Text(
+                                  entry.title,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              if (entry.shortName != null) ...[
+                                Flexible(
+                                  child: Text(
+                                    entry.shortName!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: entry.shortName != null
+                                        ? Theme.of(context).textTheme.titleMedium
+                                        : Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .error),
+                                  ),
+                                ),
+                              ]
+                            ],
+                          ),
+                          subtitle: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                entry.date,
+                              ),
+                              Text(
+                                entry.fullName,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
+            )
           ],
         ),
       ),
