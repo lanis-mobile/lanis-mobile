@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/conversations/definition.dart';
 import 'package:sph_plan/applets/conversations/parser.dart';
@@ -12,77 +13,6 @@ import 'overview_dialogs.dart';
 
 const double tileSize = 80.0;
 
-class ScrolledDownContainer extends StatefulWidget {
-  final Widget child;
-
-  const ScrolledDownContainer({super.key, required this.child});
-
-  @override
-  State<ScrolledDownContainer> createState() => _ScrolledDownContainerState();
-}
-
-class _ScrolledDownContainerState extends State<ScrolledDownContainer> {
-  ScrollNotificationObserverState? scrollNotificationObserver;
-  bool scrolledDown = false;
-
-  late Color surface;
-  late Color tintedSurface;
-
-  void handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification &&
-        defaultScrollNotificationPredicate(notification)) {
-      final ScrollMetrics metrics = notification.metrics;
-      if (scrolledDown != metrics.extentBefore > 0) {
-        setState(() {
-          scrolledDown = metrics.extentBefore > 0;
-        });
-      }
-    }
-  }
-
-  void calculateColor() {
-    surface = Theme.of(context).appBarTheme.backgroundColor ??
-        Theme.of(context).colorScheme.surface;
-    tintedSurface = ElevationOverlay.applySurfaceTint(
-        Theme.of(context).appBarTheme.backgroundColor ??
-            Theme.of(context).colorScheme.surfaceContainer,
-        Theme.of(context).appBarTheme.surfaceTintColor ??
-            Theme.of(context).colorScheme.surfaceTint,
-        3);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    scrollNotificationObserver?.removeListener(handleScrollNotification);
-    scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-    scrollNotificationObserver?.addListener(handleScrollNotification);
-
-    // Not perfect but better than calculating every time.
-    calculateColor();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    if (scrollNotificationObserver != null) {
-      scrollNotificationObserver!.removeListener(handleScrollNotification);
-      scrollNotificationObserver = null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scrolledDown ? tintedSurface : surface,
-      ),
-      child: widget.child,
-    );
-  }
-}
 
 class CheckTileNotification extends Notification {
   final String? id;
@@ -150,7 +80,7 @@ class _ConversationsViewState extends State<ConversationsView> {
           children: [
             IconButton(
               icon: Icon(
-                Icons.arrow_back,
+                Icons.close,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
               constraints: BoxConstraints.tightFor(
@@ -354,6 +284,23 @@ class _ConversationsViewState extends State<ConversationsView> {
         ));
   }
 
+  String? noConversationAsset;
+  Widget sideBarNoConversationsLoaded() {
+    final List<String> assets = [
+      "assets/undraw/chat/undraw_work-chat_hc3y.svg",
+      "assets/undraw/chat/undraw_quick-chat_3gj8.svg",
+      "assets/undraw/chat/undraw_online-message_k64b.svg",
+      "assets/undraw/chat/undraw_chatting_5u5z.svg",
+      "assets/undraw/chat/undraw_chat_qmyo.svg",
+    ];
+    noConversationAsset ??= assets[(DateTime.now().millisecondsSinceEpoch / 1000).toInt() % assets.length];
+
+    return Center(
+      child: SvgPicture.asset(noConversationAsset!,
+          height: 175.0),
+    );
+  }
+
   // Switching between two lists of overview entries messes up the scroll controller, so we just try to jump to the top visible tile and anchor to it.
   // If top tile is not visible in the new list, we try to find the first visible tile above the top tile and jump to it.
   void jumpToTopTile(
@@ -475,222 +422,237 @@ class _ConversationsViewState extends State<ConversationsView> {
 
           return false;
         },
-        child: Scaffold(
-            body: CombinedAppletBuilder<List<OverviewEntry>>(
-                parser: sph!.parser.conversationsParser,
-                phpUrl: conversationsDefinition.appletPhpUrl,
-                settingsDefaults: conversationsDefinition.settingsDefaults,
-                accountType: sph!.session.accountType,
-                builder: (context, data, accountType, settings, updateSetting, refresh) {
-                  return RefreshIndicator(
-                      key: _refreshKey,
-                      edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
-                      onRefresh: refresh!,
-                      child: CustomScrollView(
-                        controller: scrollController,
-                        physics: AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          PinnedHeaderSliver(
-                            child: ScrolledDownContainer(
+        child: Row(
+          children: [
+            Expanded(
+                child: Scaffold(
+                body: CombinedAppletBuilder<List<OverviewEntry>>(
+                    parser: sph!.parser.conversationsParser,
+                    phpUrl: conversationsDefinition.appletPhpUrl,
+                    settingsDefaults: conversationsDefinition.settingsDefaults,
+                    accountType: sph!.session.accountType,
+                    builder: (context, data, accountType, settings, updateSetting, refresh) {
+                      return RefreshIndicator(
+                          key: _refreshKey,
+                          edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
+                          onRefresh: refresh!,
+                          child: CustomScrollView(
+                            controller: scrollController,
+                            physics: AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              SliverFloatingHeader(
                                 child: toggleMode
                                     ? toggleModeAppBar()
-                                    : searchWidget()),
-                          ),
-                          SliverVariedExtentList.builder(
-                            itemCount: data.length + 1,
-                            itemExtentBuilder: (index, _) {
-                              if (index > data.length - 1) {
-                                return tileSize * 2.5;
-                              }
+                                    : searchWidget(),
+                              ),
+                              SliverVariedExtentList.builder(
+                                itemCount: data.length + 1,
+                                itemExtentBuilder: (index, _) {
+                                  if (index > data.length - 1) {
+                                    return tileSize * 2.5;
+                                  }
 
-                              return tileSize;
-                            },
-                            itemBuilder: (context, index) {
-                              if (index > data.length - 1) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 12.0, left: 12.0, right: 12.0),
-                                  child: ListTile(
+                                  return tileSize;
+                                },
+                                itemBuilder: (context, index) {
+                                  if (index > data.length - 1) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 12.0, left: 12.0, right: 12.0),
+                                      child: ListTile(
+                                        title: Text(
+                                          AppLocalizations.of(context)
+                                              .noFurtherEntries,
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge,
+                                        ),
+                                        subtitle: Text(
+                                          AppLocalizations.of(context)
+                                              .conversationNote,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return ConversationTile(
+                                    entry: data[index],
+                                    toggleMode: toggleMode,
+                                    checked: checkedTiles[data[index].id] ??
+                                        false,
+                                  );
+                                },
+                              )
+                            ],
+                          ));
+                    }),
+                floatingActionButton: toggleMode
+                    ? disableToggleButton
+                    ? FloatingActionButton(
+                    onPressed: null,
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: const CircularProgressIndicator(),
+                    ))
+                    : FloatingActionButton.extended(
+                    icon: Icon(Icons.visibility),
+                    label: Text(AppLocalizations.of(context).hideShow),
+                    onPressed: () async {
+                      setState(() {
+                        disableToggleButton = true;
+                      });
+
+                      // So you don't see each tile being toggled
+                      Map<String, bool> toggled = {};
+
+                      for (final tile in checkedTiles.entries) {
+                        if (tile.value == true) {
+                          final isHidden = filter.entries
+                              .where((element) => element.id == tile.key)
+                              .first
+                              .hidden;
+
+                          late bool result;
+                          try {
+                            if (isHidden) {
+                              result = await sph!.parser.conversationsParser
+                                  .showConversation(tile.key);
+                            } else {
+                              result = await sph!.parser.conversationsParser
+                                  .hideConversation(tile.key);
+                            }
+                          } on NoConnectionException {
+                            setState(() {
+                              disableToggleButton = false;
+                            });
+
+                            if(context.mounted) {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    icon: const Icon(Icons.wifi_off),
                                     title: Text(
-                                      AppLocalizations.of(context)
-                                          .noFurtherEntries,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                    ),
-                                    subtitle: Text(
-                                      AppLocalizations.of(context)
-                                          .conversationNote,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                );
-                              }
-
-                              return ConversationTile(
-                                entry: data[index],
-                                toggleMode: toggleMode,
-                                checked: checkedTiles[data[index].id] ??
-                                    false,
-                              );
-                            },
-                          )
-                        ],
-                      ));
-                }),
-            floatingActionButton: toggleMode
-                ? disableToggleButton
-                ? FloatingActionButton(
-                onPressed: null,
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: const CircularProgressIndicator(),
-                ))
-                : FloatingActionButton.extended(
-                icon: Icon(Icons.visibility),
-                label: Text(AppLocalizations.of(context).hideShow),
-                onPressed: () async {
-                  setState(() {
-                    disableToggleButton = true;
-                  });
-
-                  // So you don't see each tile being toggled
-                  Map<String, bool> toggled = {};
-
-                  for (final tile in checkedTiles.entries) {
-                    if (tile.value == true) {
-                      final isHidden = filter.entries
-                          .where((element) => element.id == tile.key)
-                          .first
-                          .hidden;
-
-                      late bool result;
-                      try {
-                        if (isHidden) {
-                          result = await sph!.parser.conversationsParser
-                              .showConversation(tile.key);
-                        } else {
-                          result = await sph!.parser.conversationsParser
-                              .hideConversation(tile.key);
-                        }
-                      } on NoConnectionException {
-                        setState(() {
-                          disableToggleButton = false;
-                        });
-
-                        if(context.mounted) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              icon: const Icon(Icons.wifi_off),
-                              title: Text(
-                                  AppLocalizations.of(context)
-                                      .noInternetConnection2),
-                              actions: [
-                                FilledButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text(
                                         AppLocalizations.of(context)
-                                            .back))
-                              ],
-                            ));
+                                            .noInternetConnection2),
+                                    actions: [
+                                      FilledButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text(
+                                              AppLocalizations.of(context)
+                                                  .back))
+                                    ],
+                                  ));
+                            }
+                            return;
+                          }
+
+                          if (!result) {
+                            setState(() {
+                              disableToggleButton = false;
+                            });
+
+                            if(context.mounted) {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    icon: const Icon(Icons.error),
+                                    title: Text(
+                                        AppLocalizations.of(context)
+                                            .errorOccurred),
+                                    actions: [
+                                      FilledButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text(
+                                              AppLocalizations.of(context)
+                                                  .back))
+                                    ],
+                                  ));
+                            }
+                            return;
+                          }
+
+                          toggled.addEntries([tile]);
+                          checkedTiles[tile.key] = false;
                         }
-                        return;
                       }
 
-                      if (!result) {
-                        setState(() {
-                          disableToggleButton = false;
-                        });
-
-                        if(context.mounted) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              icon: const Icon(Icons.error),
-                              title: Text(
-                                  AppLocalizations.of(context)
-                                      .errorOccurred),
-                              actions: [
-                                FilledButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text(
-                                        AppLocalizations.of(context)
-                                            .back))
-                              ],
-                            ));
-                        }
-                        return;
+                      for (final id in toggled.keys) {
+                        filter.toggleEntry(id, hidden: true);
                       }
 
-                      toggled.addEntries([tile]);
-                      checkedTiles[tile.key] = false;
+                      filter.pushEntries();
+                      closeToggleMode();
+                    })
+                    : FloatingActionButton(
+                  onPressed: () async {
+                    if (sph!.parser.conversationsParser.cachedCanChooseType != null) {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        if (sph!.parser.conversationsParser.cachedCanChooseType!) {
+                          return const TypeChooser();
+                        }
+                        return const CreateConversation(chatType: null);
+                      }));
+                      return;
                     }
-                  }
 
-                  for (final id in toggled.keys) {
-                    filter.toggleEntry(id, hidden: true);
-                  }
+                    setState(() {
+                      loadingCreateButton = true;
+                    });
 
-                  filter.pushEntries();
-                  closeToggleMode();
-                })
-                : FloatingActionButton(
-              onPressed: () async {
-                if (sph!.parser.conversationsParser.cachedCanChooseType != null) {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    if (sph!.parser.conversationsParser.cachedCanChooseType!) {
-                      return const TypeChooser();
+                    bool canChooseType;
+                    try {
+                      canChooseType =
+                      await sph!.parser.conversationsParser.canChooseType();
+                    } on NoConnectionException {
+                      setState(() {
+                        loadingCreateButton = false;
+                      });
+                      return;
                     }
-                    return const CreateConversation(chatType: null);
-                  }));
-                  return;
-                }
 
-                setState(() {
-                  loadingCreateButton = true;
-                });
+                    setState(() {
+                      loadingCreateButton = false;
+                    });
 
-                bool canChooseType;
-                try {
-                  canChooseType =
-                  await sph!.parser.conversationsParser.canChooseType();
-                } on NoConnectionException {
-                  setState(() {
-                    loadingCreateButton = false;
-                  });
-                  return;
-                }
-
-                setState(() {
-                  loadingCreateButton = false;
-                });
-
-                if(context.mounted) {
-                  Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  if (canChooseType) {
-                    return const TypeChooser();
-                  }
-                  return const CreateConversation(chatType: null);
-                }));
-                }
-              },
-              child: loadingCreateButton
-                  ? SizedBox(
-                width: 24,
-                height: 24,
-                child: const CircularProgressIndicator(),
-              )
-                  : const Icon(Icons.edit),
-            )),
+                    if(context.mounted) {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        if (canChooseType) {
+                          return const TypeChooser();
+                        }
+                        return const CreateConversation(chatType: null);
+                      }));
+                    }
+                  },
+                  child: loadingCreateButton
+                      ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: const CircularProgressIndicator(),
+                  )
+                      : const Icon(Icons.edit),
+                ),
+              ),
+            ),
+            Container(
+              height: double.infinity,
+              width: 1,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            Expanded(
+              flex: 2,
+              child: sideBarNoConversationsLoaded(),
+            )
+          ],
+        ),
       ),
     );
   }
