@@ -67,6 +67,7 @@ class _ConversationsViewState extends State<ConversationsView> {
   final KeyboardObserver keyboardObserver = KeyboardObserver();
 
   final Map<String, bool> checkedTiles = {};
+  bool? tabletMode;
 
   bool loadingCreateButton = false;
   bool disableToggleButton = false;
@@ -397,7 +398,20 @@ class _ConversationsViewState extends State<ConversationsView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (tabletMode != null) return;
+    double deviceWidth = MediaQuery.of(context).size.width;
+    int widthParts = deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350;
+    tabletMode = widthParts > 1;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    double deviceWidth = MediaQuery.of(context).size.width;
+    int widthParts = deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350;
+
     return Scaffold(
       appBar: widget.openDrawerCb != null ? AppBar(
         title: Text(conversationsDefinition.label(context)),
@@ -428,6 +442,7 @@ class _ConversationsViewState extends State<ConversationsView> {
         child: Row(
           children: [
             Expanded(
+              flex: widthParts >= 3 ? 1 : 4,
                 child: Scaffold(
                 body: CombinedAppletBuilder<List<OverviewEntry>>(
                     parser: sph!.parser.conversationsParser,
@@ -660,8 +675,8 @@ class _ConversationsViewState extends State<ConversationsView> {
               width: 1,
               color: Theme.of(context).colorScheme.outline,
             ),
-            Expanded(
-              flex: 2,
+            if (tabletMode!) Expanded(
+              flex: widthParts >= 3 ? 2 : 6,
               child: loadedConversation == null ? sideBarNoConversationsLoaded() : loadedConversation!,
             )
           ],
