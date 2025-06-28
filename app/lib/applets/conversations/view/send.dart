@@ -11,8 +11,8 @@ import 'shared.dart';
 
 class ConversationsSend extends StatefulWidget {
   final ChatCreationData? creationData;
-
-  const ConversationsSend({super.key, this.creationData});
+  final bool isTablet;
+  const ConversationsSend({super.key, this.creationData, required this.isTablet});
 
   @override
   State<ConversationsSend> createState() => _ConversationsSendState();
@@ -139,6 +139,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
             builder: (context) => ConversationsChat(
                 title: widget.creationData!.subject,
                 id: response.id!,
+                isTablet: widget.isTablet,
                 newSettings: NewConversationSettings(
                     firstMessage: textMessage,
                     settings: ConversationSettings(

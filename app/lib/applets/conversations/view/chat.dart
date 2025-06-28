@@ -19,12 +19,13 @@ class ConversationsChat extends StatefulWidget {
   final String title;
   final NewConversationSettings? newSettings;
   final bool hidden;
+  final bool isTablet;
 
   const ConversationsChat(
-      {super.key, required this.title, required this.id, this.newSettings,
+      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet,
         this.hidden = false});
 
-  ConversationsChat.fromEntry(OverviewEntry entry, {super.key})
+  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key})
       : id = entry.id
       , title = entry.title
       , newSettings = null
@@ -44,6 +45,7 @@ class _ConversationsChatState extends State<ConversationsChat>
 
   final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
   final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(false);
+  final TextEditingController textEditingController = TextEditingController();
 
   final Map<String, TextStyle> textStyles = {};
 
@@ -308,295 +310,337 @@ class _ConversationsChatState extends State<ConversationsChat>
     }
   }
 
+  Future<void> openSendPage(BuildContext context) async {
+  final result = await Navigator.of(context).push(MaterialPageRoute(
+  builder: (context) => ConversationsSend(isTablet: widget.isTablet)));
+
+  if (result == null) return;
+
+  scrollController.jumpTo(scrollController.position.maxScrollExtent);
+
+  await sendMessage(result);
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          ValueListenableBuilder(
-            valueListenable: isScrollToBottomVisible,
-            builder: (context, isVisible, _) {
-              return Visibility(
-                visible: isVisible,
-                child: FloatingActionButton.small(
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: isScrollToBottomVisible,
+        builder: (context, isVisible, _) {
+          return Visibility(
+            visible: isVisible,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 60,),
+              child: FloatingActionButton.small(
 
-                  onPressed: () {
-                    scrollController.animateTo(
-                      scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                    );
-                  },
-                  heroTag: "small",
-                  child: const Icon(Icons.keyboard_arrow_down),
-                ),
-              );
-            },
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          ValueListenableBuilder(
-            valueListenable: isSendVisible,
-            builder: (context, isVisible, _) {
-              return Visibility(
-                visible: isVisible,
-                child: FloatingActionButton.extended(
-                  heroTag: 'send',
-                  label: Text(AppLocalizations.of(context).newMessage),
-                  icon: const Icon(Icons.edit),
-                  onPressed: () async {
-                    final result = await Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const ConversationsSend()));
-
-                    if (result == null) return;
-
-                    scrollController.jumpTo(scrollController.position.maxScrollExtent);
-
-                    await sendMessage(result);
-                  },
-                ),
-              );
-            },
-          ),
-        ],
+                onPressed: () {
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                  );
+                },
+                heroTag: "scrollToBottom",
+                child: const Icon(Icons.keyboard_arrow_down),
+              ),
+            ),
+          );
+        },
       ),
-      body: FutureBuilder(
-        future: _conversationFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.waiting) {
-            // Error content
-            if (snapshot.hasError) {
-              if (snapshot.error is LanisException) {
-                return ErrorView(
-                  error: snapshot.error as LanisException,
-                  showAppBar: true,
-                  retry: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => ConversationsChat(
-                          title: widget.title,
-                          id: widget.id,
-                          newSettings: widget.newSettings,
-                      ))
-                    );
-                  },
-                );
+      body: SafeArea(
+        child: FutureBuilder(
+          future: _conversationFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.waiting) {
+              // Error content
+              if (snapshot.hasError) {
+                if (snapshot.error is LanisException) {
+                  return ErrorView(
+                    error: snapshot.error as LanisException,
+                    showAppBar: true,
+                    retry: () {
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => ConversationsChat(
+                            title: widget.title,
+                            id: widget.id,
+                            newSettings: widget.newSettings,
+                            isTablet: widget.isTablet,
+                          ))
+                      );
+                    },
+                  );
+                }
               }
-            }
 
-            scrollToBottom(initDelay: Duration(milliseconds: 100));
-            return NotificationListener<ScrollMetricsNotification>(
-              onNotification: (_) {
-                toggleScrollToBottomFab();
-                return false;
-              },
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  SliverAppBar(
-                    title: Animate(
-                      effects: const [
-                        FadeEffect(
-                          curve: Curves.easeIn,
-                        )
-                      ],
-                      value: 0,
-                      autoPlay: false,
-                      controller: appBarController,
-                      child: Text(widget.title),
-                    ),
-                    snap: true,
-                    floating: true,
-                    actions: [
-                      if (settings.groupChat == false &&
-                          settings.onlyPrivateAnswers == false &&
-                          settings.noReply == false) ...[
-                        IconButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  icon: const Icon(Icons.groups),
-                                  title: Text(
-                                      AppLocalizations.of(context)
-                                          .conversationTypeName(
-                                          ChatType.openChat.name)),
-                                  content: Text(
-                                      AppLocalizations.of(context)
-                                          .openChatWarning),
-                                  actions: [
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Ok"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.warning),
-                        ),
-                      ],
-                      IconButton(
-                          onPressed: () async {
-                            if (hidden == true) {
-                              bool result;
-                              try {
-                                result = await sph!.parser.conversationsParser.showConversation(widget.id);
-                              } on NoConnectionException {
-                                showNoInternetDialog();
-                                return;
-                              }
-
-
-                              if (!result) {
-                                showErrorDialog();
-                                return;
-                              } else {
-                                setState(() {
-                                  hidden = false;
-                                });
-                                sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
-                                sph!.parser.conversationsParser.filter.pushEntries();
-                              }
-
-                              return;
-                            }
-
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  icon: const Icon(Icons.visibility_off),
-                                  title: Text(AppLocalizations.of(context).conversationHide),
-                                  content: Text(AppLocalizations.of(context).hideNote),
-                                  actions: [
-                                    OutlinedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text(AppLocalizations.of(context).back)
-                                    ),
-                                    FilledButton(
-                                        onPressed: () async {
-                                          bool result = false;
-                                          try {
-                                            result = await sph!.parser.conversationsParser.hideConversation(widget.id);
-                                          } on NoConnectionException {
-                                            showNoInternetDialog();
-                                            return;
-                                          }
-
-                                          if (!result) {
-                                            showErrorDialog();
-                                            return;
-                                          } else {
-                                            setState(() {
-                                              hidden = true;
-                                            });
-                                            sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
-                                          }
-
-                                          if(context.mounted) Navigator.of(context).pop();
-                                        },
-                                        child: Text(AppLocalizations.of(context).conversationHide)
-                                    )
-                                  ],
+              scrollToBottom(initDelay: Duration(milliseconds: 100));
+              return Column(
+                children: [
+                  Expanded(
+                    child: NotificationListener<ScrollMetricsNotification>(
+                      onNotification: (_) {
+                        toggleScrollToBottomFab();
+                        return false;
+                      },
+                      child: CustomScrollView(
+                        controller: scrollController,
+                        slivers: [
+                          SliverAppBar(
+                            title: Animate(
+                              effects: const [
+                                FadeEffect(
+                                  curve: Curves.easeIn,
                                 )
-                            );
-                          },
-                          icon: hidden ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off)
-                      ),
-                      if (statistics != null) ...[
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => StatisticWidget(
-                                    statistics: statistics!,
-                                    conversationTitle: widget.title),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.people),
-                        ),
-                      ],
-                    ],
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12.0),
-                                  child: Text(
-                                    widget.title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium,
-                                    textAlign: TextAlign.center,
-                                  ),
+                              ],
+                              value: 0,
+                              autoPlay: false,
+                              controller: appBarController,
+                              child: Text(widget.title),
+                            ),
+                            snap: true,
+                            floating: true,
+                            actions: [
+                              if (settings.groupChat == false &&
+                                  settings.onlyPrivateAnswers == false &&
+                                  settings.noReply == false) ...[
+                                IconButton(
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          icon: const Icon(Icons.groups),
+                                          title: Text(
+                                              AppLocalizations.of(context)
+                                                  .conversationTypeName(
+                                                  ChatType.openChat.name)),
+                                          content: Text(
+                                              AppLocalizations.of(context)
+                                                  .openChatWarning),
+                                          actions: [
+                                            FilledButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text("Ok"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: const Icon(Icons.warning),
                                 ),
+                              ],
+                              IconButton(
+                                  onPressed: () async {
+                                    if (hidden == true) {
+                                      bool result;
+                                      try {
+                                        result = await sph!.parser.conversationsParser.showConversation(widget.id);
+                                      } on NoConnectionException {
+                                        showNoInternetDialog();
+                                        return;
+                                      }
+
+
+                                      if (!result) {
+                                        showErrorDialog();
+                                        return;
+                                      } else {
+                                        setState(() {
+                                          hidden = false;
+                                        });
+                                        sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
+                                        sph!.parser.conversationsParser.filter.pushEntries();
+                                      }
+
+                                      return;
+                                    }
+
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          icon: const Icon(Icons.visibility_off),
+                                          title: Text(AppLocalizations.of(context).conversationHide),
+                                          content: Text(AppLocalizations.of(context).hideNote),
+                                          actions: [
+                                            OutlinedButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text(AppLocalizations.of(context).back)
+                                            ),
+                                            FilledButton(
+                                                onPressed: () async {
+                                                  bool result = false;
+                                                  try {
+                                                    result = await sph!.parser.conversationsParser.hideConversation(widget.id);
+                                                  } on NoConnectionException {
+                                                    showNoInternetDialog();
+                                                    return;
+                                                  }
+
+                                                  if (!result) {
+                                                    showErrorDialog();
+                                                    return;
+                                                  } else {
+                                                    setState(() {
+                                                      hidden = true;
+                                                    });
+                                                    sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
+                                                  }
+
+                                                  if(context.mounted) Navigator.of(context).pop();
+                                                },
+                                                child: Text(AppLocalizations.of(context).conversationHide)
+                                            )
+                                          ],
+                                        )
+                                    );
+                                  },
+                                  icon: hidden ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off)
                               ),
+                              if (statistics != null) ...[
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => StatisticWidget(
+                                            statistics: statistics!,
+                                            conversationTitle: widget.title),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.people),
+                                ),
+                              ],
                             ],
                           ),
-                          if (settings.onlyPrivateAnswers && !settings.own) ...[
-                            Container(
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 12.0),
-                              margin: const EdgeInsets.only(top: 16.0),
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHigh),
-                              child: Text(
-                                "${settings.author} ${AppLocalizations.of(context).privateConversation}",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                textAlign: TextAlign.center,
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12.0),
+                                          child: Text(
+                                            widget.title,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headlineMedium,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (settings.onlyPrivateAnswers && !settings.own) ...[
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0, horizontal: 12.0),
+                                      margin: const EdgeInsets.only(top: 16.0),
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceContainerHigh),
+                                      child: Text(
+                                        "${settings.author} ${AppLocalizations.of(context).privateConversation}",
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
-                          ],
+                          ),
+                          SliverList.builder(
+                            itemCount: chat.length,
+                            itemBuilder: (context, index) {
+                              if (chat[index] is Message) {
+                                return MessageWidget(
+                                    message: chat[index],
+                                    textStyle: textStyles[chat[index].author]);
+                              } else {
+                                return DateHeaderWidget(header: chat[index]);
+                              }
+                            },
+                          ),
+                          const SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 20,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
-                  SliverList.builder(
-                    itemCount: chat.length,
-                    itemBuilder: (context, index) {
-                      if (chat[index] is Message) {
-                        return MessageWidget(
-                            message: chat[index],
-                            textStyle: textStyles[chat[index].author]);
-                      } else {
-                        return DateHeaderWidget(header: chat[index]);
-                      }
-                    },
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 75,
+                  Container(
+                    width: double.infinity,
+                    height: 60,
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: IconButton(
+                            onPressed: () => openSendPage(context),
+                            icon: Icon(Icons.expand,),
+                            color: Theme.of(context).colorScheme.onSecondary,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: textEditingController,
+                            decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)
+                                  .sendMessagePlaceholder,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 8.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: IconButton(
+                            onPressed: () async {
+                              final String text = textEditingController.text.trim();
+                              if (text.isEmpty) return;
+
+                              textEditingController.clear();
+                              await sendMessage(text);
+                              scrollToBottom();
+                            },
+                            icon: Icon(Icons.send,),
+                            color: Theme.of(context).colorScheme.onTertiary,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  )
                 ],
-              ),
+              );
+            }
+            // Waiting content
+            return const Center(
+              child: CircularProgressIndicator(),
             );
-          }
-          // Waiting content
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
+          },
+        ),
       ),
     );
   }

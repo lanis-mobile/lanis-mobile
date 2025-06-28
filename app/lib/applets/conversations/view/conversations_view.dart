@@ -508,7 +508,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                                         setState(() {
                                           loadedConversation = ConversationsChat.fromEntry(
                                               key: Key(entry.id),
-                                              entry
+                                              entry,
+                                            tabletMode!
                                           );
                                           loadedConversationId = entry.id;
                                         });
@@ -522,7 +523,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                                   .toggleEntry(entry.id, unread: true);
                                               sph!.parser.conversationsParser.filter.pushEntries();
                                             }
-                                            return ConversationsChat.fromEntry(entry);
+                                            return ConversationsChat.fromEntry(entry, tabletMode!);
                                           },
                                         ),
                                         );
@@ -639,12 +640,11 @@ class _ConversationsViewState extends State<ConversationsView> {
                     : FloatingActionButton(
                   onPressed: () async {
                     if (sph!.parser.conversationsParser.cachedCanChooseType != null) {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                         if (sph!.parser.conversationsParser.cachedCanChooseType!) {
-                          return const TypeChooser();
+                          return TypeChooser(isTablet: tabletMode!,);
                         }
-                        return const CreateConversation(chatType: null);
+                        return CreateConversation(chatType: null, isTablet: tabletMode!,);
                       }));
                       return;
                     }
@@ -672,9 +672,9 @@ class _ConversationsViewState extends State<ConversationsView> {
                       Navigator.of(context)
                           .push(MaterialPageRoute(builder: (context) {
                         if (canChooseType) {
-                          return const TypeChooser();
+                          return TypeChooser(isTablet: tabletMode!,);
                         }
-                        return const CreateConversation(chatType: null);
+                        return CreateConversation(chatType: null, isTablet: tabletMode!,);
                       }));
                     }
                   },
