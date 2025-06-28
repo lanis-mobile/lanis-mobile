@@ -72,7 +72,7 @@ class _ConversationsViewState extends State<ConversationsView> {
   bool loadingCreateButton = false;
   bool disableToggleButton = false;
 
-  Widget? loadedConversation;
+  ConversationsChat? loadedConversation;
   String? loadedConversationId;
 
   Widget toggleModeAppBar() {
@@ -249,7 +249,12 @@ class _ConversationsViewState extends State<ConversationsView> {
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
                       onPressed: () {
+
                         setState(() {
+                          if (showHidden) {
+                            loadedConversation = null;
+                            loadedConversationId = null;
+                          }
                           showHidden = !showHidden;
                         });
 
@@ -268,9 +273,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                     ),
                     const Divider(),
                     MenuItemButton(
-                      leadingIcon: SizedBox.fromSize(
-                        size: Size(24, 0),
-                      ),
+                      leadingIcon: Icon(Icons.restore_from_trash),
                       onPressed: () {
                         final oldEntries = sph!.parser.conversationsParser.stream.value.content;
 
@@ -402,10 +405,8 @@ class _ConversationsViewState extends State<ConversationsView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (tabletMode != null) return;
-    double deviceWidth = MediaQuery.of(context).size.width;
-    int widthParts = deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350;
-    tabletMode = widthParts > 1;
+    final mediaQueryData = MediaQueryData.fromView(WidgetsBinding.instance.platformDispatcher.views.first);
+    tabletMode ??= !(mediaQueryData.size.shortestSide < 550);
   }
 
   @override
@@ -550,10 +551,13 @@ class _ConversationsViewState extends State<ConversationsView> {
                     onPressed: () async {
                       setState(() {
                         disableToggleButton = true;
+                        loadedConversationId = null;
+                        loadedConversation = null;
                       });
 
                       // So you don't see each tile being toggled
                       Map<String, bool> toggled = {};
+
 
                       for (final tile in checkedTiles.entries) {
                         if (tile.value == true) {
@@ -562,7 +566,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                               .first
                               .hidden;
 
-                          late bool result;
+                            late bool result;
                           try {
                             if (isHidden) {
                               result = await sph!.parser.conversationsParser
@@ -688,7 +692,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                 ),
               ),
             ),
-            Container(
+            if (tabletMode!) Container(
               height: double.infinity,
               width: 1,
               color: Theme.of(context).colorScheme.outline,

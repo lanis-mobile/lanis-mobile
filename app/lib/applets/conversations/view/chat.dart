@@ -312,7 +312,7 @@ class _ConversationsChatState extends State<ConversationsChat>
 
   Future<void> openSendPage(BuildContext context) async {
   final result = await Navigator.of(context).push(MaterialPageRoute(
-  builder: (context) => ConversationsSend(isTablet: widget.isTablet)));
+  builder: (context) => ConversationsSend(isTablet: widget.isTablet, title: widget.title,)));
 
   if (result == null) return;
 
@@ -431,7 +431,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                                   icon: const Icon(Icons.warning),
                                 ),
                               ],
-                              IconButton(
+                              if (!widget.isTablet) IconButton(
                                   onPressed: () async {
                                     if (hidden == true) {
                                       bool result;

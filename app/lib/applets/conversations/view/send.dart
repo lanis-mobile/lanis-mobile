@@ -12,7 +12,8 @@ import 'shared.dart';
 class ConversationsSend extends StatefulWidget {
   final ChatCreationData? creationData;
   final bool isTablet;
-  const ConversationsSend({super.key, this.creationData, required this.isTablet});
+  final String? title;
+  const ConversationsSend({super.key, this.creationData, required this.isTablet, this.title});
 
   @override
   State<ConversationsSend> createState() => _ConversationsSendState();
@@ -134,23 +135,30 @@ class _ConversationsSendState extends State<ConversationsSend> {
       if(mounted) {
         Navigator.pop(context);
         Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ConversationsChat(
-                title: widget.creationData!.subject,
-                id: response.id!,
-                isTablet: widget.isTablet,
-                newSettings: NewConversationSettings(
-                    firstMessage: textMessage,
-                    settings: ConversationSettings(
-                        id: response.id!,
-                        groupChat:
-                            widget.creationData!.type == ChatType.groupOnly,
-                        onlyPrivateAnswers: widget.creationData!.type ==
-                            ChatType.privateAnswerOnly,
-                        noReply: widget.creationData!.type ==
-                            ChatType.noAnswerAllowed,
-                        own: true)))));
+        if (!widget.isTablet) {
+          Navigator.pop(context);
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) =>
+                  ConversationsChat(
+                      title: widget.creationData!.subject,
+                      id: response.id!,
+                      isTablet: widget.isTablet,
+                      newSettings: NewConversationSettings(
+                          firstMessage: textMessage,
+                          settings: ConversationSettings(
+                              id: response.id!,
+                              groupChat:
+                              widget.creationData!.type == ChatType.groupOnly,
+                              onlyPrivateAnswers: widget.creationData!.type ==
+                                  ChatType.privateAnswerOnly,
+                              noReply: widget.creationData!.type ==
+                                  ChatType.noAnswerAllowed,
+                              own: true),
+                      ),
+                  ),
+          ),
+          );
+        }
       }
     } else {
       if(mounted) {
@@ -178,6 +186,9 @@ class _ConversationsSendState extends State<ConversationsSend> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          title: Text(
+            widget.creationData?.subject ?? widget.title!
+          ),
           actions: [
             IconButton(
               onPressed: () {
@@ -201,14 +212,14 @@ class _ConversationsSendState extends State<ConversationsSend> {
             ),
           ],
         ),
-        body: Column(
+        body: SafeArea(child: Column(
           children: [
             Expanded(
               child: QuillEditor.basic(
                   configurations: QuillEditorConfigurations(
                       controller: _controller,
                       placeholder:
-                          AppLocalizations.of(context).sendMessagePlaceholder,
+                      AppLocalizations.of(context).sendMessagePlaceholder,
                       padding: const EdgeInsets.symmetric(horizontal: 16.0))),
             ),
             QuillToolbar(
@@ -267,6 +278,6 @@ class _ConversationsSendState extends State<ConversationsSend> {
               ),
             ),
           ],
-        ));
+        )));
   }
 }
