@@ -86,6 +86,7 @@ dependencies:
     git:
       url: https://github.com/lanis-mobile/flutter_keychain_fix
       ref: 007aa23
+  custom_refresh_indicator: ^4.0.1
 
 # flutter_tagging_plus is old and isn't being updated since a long time.
 dependency_overrides:
