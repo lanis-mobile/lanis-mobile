@@ -143,6 +143,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
                       title: widget.creationData!.subject,
                       id: response.id!,
                       isTablet: widget.isTablet,
+                      afterSendCallback: () {},
                       newSettings: NewConversationSettings(
                           firstMessage: textMessage,
                           settings: ConversationSettings(

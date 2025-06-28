@@ -20,17 +20,17 @@ class ConversationsChat extends StatefulWidget {
   final NewConversationSettings? newSettings;
   final bool hidden;
   final bool isTablet;
+  final Function afterSendCallback;
 
   const ConversationsChat(
-      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet,
+      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet, required this.afterSendCallback,
         this.hidden = false});
 
-  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key})
+  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key, required this.afterSendCallback})
       : id = entry.id
       , title = entry.title
       , newSettings = null
       , hidden = entry.hidden;
-
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
 }
@@ -197,6 +197,7 @@ class _ConversationsChatState extends State<ConversationsChat>
         settings.onlyPrivateAnswers ? "ja" : "nein",
         text);
 
+    widget.afterSendCallback();
     setState(() {
       if (result) {
         chat.last.status = MessageStatus.sent;
@@ -361,6 +362,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                     retry: () {
                       Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (_) => ConversationsChat(
+                            afterSendCallback: widget.afterSendCallback,
                             title: widget.title,
                             id: widget.id,
                             newSettings: widget.newSettings,

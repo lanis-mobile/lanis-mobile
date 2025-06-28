@@ -509,6 +509,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                         setState(() {
                                           loadedConversation = ConversationsChat.fromEntry(
                                               key: Key(entry.id),
+                                              afterSendCallback: refresh,
                                               entry,
                                             tabletMode!
                                           );
@@ -524,7 +525,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                                   .toggleEntry(entry.id, unread: true);
                                               sph!.parser.conversationsParser.filter.pushEntries();
                                             }
-                                            return ConversationsChat.fromEntry(entry, tabletMode!);
+                                            return ConversationsChat.fromEntry(afterSendCallback: refresh, entry, tabletMode!);
                                           },
                                         ),
                                         );
