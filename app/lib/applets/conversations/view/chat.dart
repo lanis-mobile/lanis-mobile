@@ -7,6 +7,7 @@ import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/conversations/view/send.dart';
+import 'dart:async';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/client_status_exceptions.dart';
@@ -41,6 +42,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     with SingleTickerProviderStateMixin {
   late final Future<void> _conversationFuture = initConversation();
   late final AnimationController appBarController;
+  late Timer _refreshTimer;
 
   final TextEditingController messageField = TextEditingController();
   final ScrollController scrollController = ScrollController();
@@ -58,6 +60,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   late ParticipationStatistics? statistics;
 
   late bool hidden;
+  bool refreshing = false;
 
   final List<dynamic> chat = [];
 
@@ -68,6 +71,19 @@ class _ConversationsChatState extends State<ConversationsChat>
     scrollController.addListener(animateAppBarTitle);
     scrollController.addListener(toggleScrollToBottomFab);
     hidden = widget.hidden;
+
+    // Initialize periodic refresh timer (every 1 minute)
+    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
+      if (mounted) {
+        setState(() {
+          refreshing = true;
+        });
+        await refreshConversation(scrollToEnd: false);
+        setState(() {
+          refreshing = false;
+        });
+      }
+    });
   }
 
   @override
@@ -75,6 +91,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     super.dispose();
     appBarController.dispose();
     scrollController.dispose();
+    _refreshTimer.cancel();
   }
 
   void toggleScrollToBottomFab() {
@@ -83,8 +100,7 @@ class _ConversationsChatState extends State<ConversationsChat>
 
     isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
   }
-
-  Future<void> refreshConversation() async {
+  Future<void> refreshConversation({bool scrollToEnd = true}) async {
     if (widget.newSettings == null) {
       try {
         // Fetch latest conversation data
@@ -124,7 +140,7 @@ class _ConversationsChatState extends State<ConversationsChat>
         }
 
         // Scroll to bottom after refresh
-        scrollToBottom();
+        if (scrollToEnd) scrollToBottom();
       } on NoConnectionException {
         showNoInternetDialog();
       } catch (e) {
@@ -458,6 +474,17 @@ class _ConversationsChatState extends State<ConversationsChat>
                               snap: true,
                               floating: true,
                               actions: [
+                                if (refreshing) Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
                                 if (settings.groupChat == false &&
                                     settings.onlyPrivateAnswers == false &&
                                     settings.noReply == false) ...[
@@ -574,6 +601,7 @@ class _ConversationsChatState extends State<ConversationsChat>
                                   ),
                                 ],
                               ],
+
                             ),
                             SliverToBoxAdapter(
                               child: Padding(
