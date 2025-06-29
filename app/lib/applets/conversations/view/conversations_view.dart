@@ -74,6 +74,7 @@ class _ConversationsViewState extends State<ConversationsView> {
 
   ConversationsChat? loadedConversation;
   String? loadedConversationId;
+  List<String> noBadgeConversations = [];
 
   Widget toggleModeAppBar() {
     return SizedBox(
@@ -452,6 +453,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                     settingsDefaults: conversationsDefinition.settingsDefaults,
                     accountType: sph!.session.accountType,
                     builder: (context, data, accountType, settings, updateSetting, refresh) {
+                      noBadgeConversations = [];
                       return RefreshIndicator(
                           key: _refreshKey,
                           edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
@@ -502,14 +504,17 @@ class _ConversationsViewState extends State<ConversationsView> {
                                     entry: data[index],
                                     isOpen: loadedConversationId == data[index].id,
                                     toggleMode: toggleMode,
+                                    loadedConversationId: loadedConversationId,
+                                    noBadgeConversations: noBadgeConversations,
                                     checked: checkedTiles[data[index].id] ??
                                         false,
                                     onTap: (entry) {
                                       if (tabletMode!) {
                                         setState(() {
+                                          noBadgeConversations.add(entry.id);
                                           loadedConversation = ConversationsChat.fromEntry(
                                               key: Key(entry.id),
-                                              afterSendCallback: refresh,
+                                              refreshSidebar: refresh,
                                               entry,
                                             tabletMode!
                                           );
@@ -525,7 +530,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                                   .toggleEntry(entry.id, unread: true);
                                               sph!.parser.conversationsParser.filter.pushEntries();
                                             }
-                                            return ConversationsChat.fromEntry(afterSendCallback: refresh, entry, tabletMode!);
+                                            return ConversationsChat.fromEntry(refreshSidebar: refresh, entry, tabletMode!);
                                           },
                                         ),
                                         );
@@ -535,7 +540,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                                 },
                               )
                             ],
-                          ));
+                          ),
+                      );
                     }),
                 floatingActionButton: toggleMode
                     ? disableToggleButton
@@ -715,6 +721,8 @@ class ConversationTile extends StatelessWidget {
   final bool checked;
   final Function(OverviewEntry) onTap;
   final bool isOpen;
+  final String? loadedConversationId;
+  final List<String> noBadgeConversations;
 
   const ConversationTile(
       {super.key,
@@ -722,7 +730,9 @@ class ConversationTile extends StatelessWidget {
       required this.toggleMode,
       required this.checked,
       required this.onTap,
-      required this.isOpen
+      required this.isOpen,
+      required this.loadedConversationId,
+      required this.noBadgeConversations
       });
 
   @override
@@ -783,7 +793,7 @@ class ConversationTile extends StatelessWidget {
                 ),
               ],
               Badge(
-                smallSize: entry.unread ? 9 : 0,
+                smallSize: (entry.unread && entry.id != loadedConversationId || noBadgeConversations.contains(entry.id)) ? 9 : 0,
                 child: InkWell(
                   onTap: () {
                     if (toggleMode) {

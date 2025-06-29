@@ -299,7 +299,6 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
           )
       );
 
-      logger.d("Refreshing conversation $uniqID");
       final decodedResponse = jsonDecode(response.data);
       final messages = jsonDecode(sph.session.cryptor.decryptString(decodedResponse['reply'])!);
       final int newLastRefresh = decodedResponse['time'];

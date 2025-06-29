@@ -19,18 +19,18 @@ import '../../../widgets/format_text.dart';
 import 'shared.dart';
 
 class ConversationsChat extends StatefulWidget {
-  final String id; // uniqueId
+  final String id;
   final String title;
   final NewConversationSettings? newSettings;
   final bool hidden;
   final bool isTablet;
-  final Function afterSendCallback;
+  final Function refreshSidebar;
 
   const ConversationsChat(
-      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet, required this.afterSendCallback,
+      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet, required this.refreshSidebar,
         this.hidden = false});
 
-  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key, required this.afterSendCallback})
+  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key, required this.refreshSidebar})
       : id = entry.id
       , title = entry.title
       , newSettings = null
@@ -45,7 +45,7 @@ class _ConversationsChatState extends State<ConversationsChat>
   late final AnimationController appBarController;
   Timer? _refreshTimer;
   int _lastRefresh = 0;
-  List<String> _messagesSendInThisSession = [];
+  final List<String> _messagesSendInThisSession = [];
 
   final TextEditingController messageField = TextEditingController();
   final ScrollController scrollController = ScrollController();
@@ -69,7 +69,7 @@ class _ConversationsChatState extends State<ConversationsChat>
 
   void initRefreshTimer() {
     _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 20), (_) async {
       if (mounted) {
         setState(() {
           refreshing = true;
@@ -109,11 +109,6 @@ class _ConversationsChatState extends State<ConversationsChat>
     isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
   }
   Future<void> refreshConversation({bool scrollToEnd = true}) async {
-
-    if (scrollToEnd) {
-      initRefreshTimer();
-    }
-
     if (widget.newSettings == null) {
       try {
         final result = await sph!.parser.conversationsParser.refreshConversation(widget.id, _lastRefresh);
@@ -126,6 +121,9 @@ class _ConversationsChatState extends State<ConversationsChat>
           setState(() {
             _renderSingleMessage(message);
           });
+        }
+        if (result.messages.isNotEmpty) {
+          widget.refreshSidebar();
         }
 
         // Update send button visibility
@@ -157,10 +155,11 @@ class _ConversationsChatState extends State<ConversationsChat>
   }
 
   void scrollToBottom({Duration initDelay = Duration.zero}) {
+    logger.d("Scrolling to bottom");
       Future.delayed(initDelay, () {
         if (scrollController.hasClients) {
           scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
+            scrollController.position.maxScrollExtent + 10,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
@@ -263,7 +262,7 @@ class _ConversationsChatState extends State<ConversationsChat>
         settings.onlyPrivateAnswers ? "ja" : "nein",
         text);
 
-    widget.afterSendCallback();
+    widget.refreshSidebar();
     setState(() {
       if (result.success) {
         _messagesSendInThisSession.add(result.messageId);
@@ -406,17 +405,28 @@ void renderMessages(Conversation unparsedMessages) {
             visible: isVisible,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 60,),
-              child: FloatingActionButton.small(
-
-                onPressed: () {
+              child: InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () {
                   scrollController.animateTo(
                     scrollController.position.maxScrollExtent,
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOut,
                   );
                 },
-                heroTag: "scrollToBottom",
-                child: const Icon(Icons.keyboard_arrow_down),
+                child: Container(
+                  height: 30,
+                  width: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.secondaryFixedDim,
+                      width: 1.5,
+                    ),
+                    color: Theme.of(context).colorScheme.surfaceDim
+                  ),
+                  child: const Icon(Icons.keyboard_arrow_down),
+                ),
               ),
             ),
           );
@@ -436,7 +446,7 @@ void renderMessages(Conversation unparsedMessages) {
                     retry: () {
                       Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (_) => ConversationsChat(
-                            afterSendCallback: widget.afterSendCallback,
+                            refreshSidebar: widget.refreshSidebar,
                             title: widget.title,
                             id: widget.id,
                             newSettings: widget.newSettings,
