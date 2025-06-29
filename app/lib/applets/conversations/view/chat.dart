@@ -13,6 +13,7 @@ import '../../../core/sph/sph.dart';
 import '../../../models/client_status_exceptions.dart';
 import '../../../models/conversations.dart';
 import '../../../utils/fetch_more_indicator.dart';
+import '../../../utils/logger.dart';
 import '../../../widgets/error_view.dart';
 import '../../../widgets/format_text.dart';
 import 'shared.dart';
@@ -42,7 +43,9 @@ class _ConversationsChatState extends State<ConversationsChat>
     with SingleTickerProviderStateMixin {
   late final Future<void> _conversationFuture = initConversation();
   late final AnimationController appBarController;
-  late Timer _refreshTimer;
+  Timer? _refreshTimer;
+  int _lastRefresh = 0;
+  List<String> _messagesSendInThisSession = [];
 
   final TextEditingController messageField = TextEditingController();
   final ScrollController scrollController = ScrollController();
@@ -64,16 +67,9 @@ class _ConversationsChatState extends State<ConversationsChat>
 
   final List<dynamic> chat = [];
 
-  @override
-  void initState() {
-    super.initState();
-    appBarController = AnimationController(vsync: this);
-    scrollController.addListener(animateAppBarTitle);
-    scrollController.addListener(toggleScrollToBottomFab);
-    hidden = widget.hidden;
-
-    // Initialize periodic refresh timer (every 1 minute)
-    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
+  void initRefreshTimer() {
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
       if (mounted) {
         setState(() {
           refreshing = true;
@@ -87,11 +83,23 @@ class _ConversationsChatState extends State<ConversationsChat>
   }
 
   @override
+  void initState() {
+    super.initState();
+    appBarController = AnimationController(vsync: this);
+    scrollController.addListener(animateAppBarTitle);
+    scrollController.addListener(toggleScrollToBottomFab);
+    hidden = widget.hidden;
+
+    // Initialize periodic refresh timer (every 1 minute)
+    initRefreshTimer();
+  }
+
+  @override
   void dispose() {
     super.dispose();
     appBarController.dispose();
     scrollController.dispose();
-    _refreshTimer.cancel();
+    _refreshTimer?.cancel();
   }
 
   void toggleScrollToBottomFab() {
@@ -101,36 +109,24 @@ class _ConversationsChatState extends State<ConversationsChat>
     isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
   }
   Future<void> refreshConversation({bool scrollToEnd = true}) async {
+
+    if (scrollToEnd) {
+      initRefreshTimer();
+    }
+
     if (widget.newSettings == null) {
       try {
-        // Fetch latest conversation data
-        Conversation response =
-            await sph!.parser.conversationsParser.getSingleConversation(widget.id);
+        final result = await sph!.parser.conversationsParser.refreshConversation(widget.id, _lastRefresh);
 
-        setState(() {
-          // Clear current chat list
-          chat.clear();
-
-          // Update conversation settings
-          settings = ConversationSettings(
-            id: widget.id,
-            groupChat: response.groupChat,
-            onlyPrivateAnswers: response.onlyPrivateAnswers,
-            noReply: response.noReply,
-            author: response.parent.author,
-            own: response.parent.own,
-          );
-
-          // Update statistics
-          statistics = ParticipationStatistics(
-              countParents: response.countParents,
-              countStudents: response.countStudents,
-              countTeachers: response.countTeachers,
-              knownParticipants: response.knownParticipants);
-
-          // Parse and add new messages
-          parseMessages(response);
-        });
+        _lastRefresh = result.lastRefresh;
+        for (final UnparsedMessage message in result.messages) {
+          if (_messagesSendInThisSession.contains(message.id)) {
+            continue;
+          }
+          setState(() {
+            _renderSingleMessage(message);
+          });
+        }
 
         // Update send button visibility
         if (settings.own) {
@@ -260,7 +256,7 @@ class _ConversationsChatState extends State<ConversationsChat>
       }
     });
 
-    final bool result = await sph!.parser.conversationsParser.replyToConversation(
+    final result = await sph!.parser.conversationsParser.replyToConversation(
         settings.id,
         "all",
         settings.groupChat ? "ja" : "nein",
@@ -269,7 +265,8 @@ class _ConversationsChatState extends State<ConversationsChat>
 
     widget.afterSendCallback();
     setState(() {
-      if (result) {
+      if (result.success) {
+        _messagesSendInThisSession.add(result.messageId);
         chat.last.status = MessageStatus.sent;
       } else {
         chat.last.status = MessageStatus.error;
@@ -293,76 +290,83 @@ class _ConversationsChatState extends State<ConversationsChat>
     );
   }
 
-  void parseMessages(Conversation unparsedMessages) {
-    DateTime date = parseDateString(unparsedMessages.parent.date);
-    String author = unparsedMessages.parent.author;
-    MessageState position = MessageState.first;
+  List<String> authors = [];
 
-    final Set<String> authors = {};
+void _renderSingleMessage(UnparsedMessage message) {
+  final DateTime messageDate = parseDateString(message.date);
+  final String messageAuthor = message.author;
+  MessageState position = MessageState.first;
 
-    if (unparsedMessages.parent.own != true) {
-      authors.add(author);
+  // Check if this message should be part of a series by examining the last message in chat
+  if (chat.isNotEmpty && chat.last is Message) {
+    Message lastMessage = chat.last;
+    if (messageAuthor == lastMessage.author &&
+        messageDate.isSameDay(lastMessage.date)) {
+      position = MessageState.series;
     }
-
-    chat.addAll([
-      DateHeader(date: date),
-      addMessage(unparsedMessages.parent, position)
-    ]);
-
-    late DateTime currentDate;
-    for (UnparsedMessage current in unparsedMessages.replies) {
-      currentDate = parseDateString(current.date);
-
-      position = MessageState.first;
-      if (current.author == author) {
-        if (date.isSameDay(currentDate)) {
-          position = MessageState.series;
-        }
-      }
-
-      if (date.isSameDay(currentDate) && current.author == author) {
-        chat.add(addMessage(current, position));
-      } else if (date.isSameDay(currentDate) && current.author != author) {
-        author = current.author;
-        chat.addAll([addMessage(current, position)]);
-      } else if (!date.isSameDay(currentDate) && current.author == author) {
-        date = currentDate;
-        chat.addAll([DateHeader(date: date), addMessage(current, position)]);
-      } else {
-        date = currentDate;
-        author = current.author;
-        chat.addAll([DateHeader(date: date), addMessage(current, position)]);
-      }
-
-      if (current.own != true) {
-        authors.add(author);
-      }
-    }
-
-    addAuthorTextStyles(authors.toList());
   }
 
+  // Add message to appropriate authors list for styling
+  if (message.own != true) {
+    authors.add(messageAuthor);
+  }
+
+  // Add message to chat with appropriate date header if needed
+  if (chat.isEmpty || (chat.last is Message && !messageDate.isSameDay(chat.last.date))) {
+    chat.addAll([DateHeader(date: messageDate), addMessage(message, position)]);
+  } else {
+    chat.add(addMessage(message, position));
+  }
+}
+
+void renderMessages(Conversation unparsedMessages) {
+  chat.clear(); // Clear existing messages for refresh capability
+  authors.clear(); // Clear existing authors
+
+  // Process parent message
+  final DateTime parentDate = parseDateString(unparsedMessages.parent.date);
+  final String parentAuthor = unparsedMessages.parent.author;
+
+  if (unparsedMessages.parent.own != true) {
+    authors.add(parentAuthor);
+  }
+
+  // Add parent message with initial date header
+  chat.addAll([
+    DateHeader(date: parentDate),
+    addMessage(unparsedMessages.parent, MessageState.first)
+  ]);
+
+  // Process all replies
+  for (UnparsedMessage reply in unparsedMessages.replies) {
+    _renderSingleMessage(reply);
+  }
+
+  addAuthorTextStyles(authors.toList());
+}
   Future<void> initConversation() async {
     if (widget.newSettings == null) {
-      Conversation response =
+      Conversation result =
           await sph!.parser.conversationsParser.getSingleConversation(widget.id);
+      _lastRefresh = result.msgLastRefresh;
+      logger.d("last refresh: $_lastRefresh");
 
       settings = ConversationSettings(
         id: widget.id,
-        groupChat: response.groupChat,
-        onlyPrivateAnswers: response.onlyPrivateAnswers,
-        noReply: response.noReply,
-        author: response.parent.author,
-        own: response.parent.own,
+        groupChat: result.groupChat,
+        onlyPrivateAnswers: result.onlyPrivateAnswers,
+        noReply: result.noReply,
+        author: result.parent.author,
+        own: result.parent.own,
       );
 
       statistics = ParticipationStatistics(
-          countParents: response.countParents,
-          countStudents: response.countStudents,
-          countTeachers: response.countTeachers,
-          knownParticipants: response.knownParticipants);
+          countParents: result.countParents,
+          countStudents: result.countStudents,
+          countTeachers: result.countTeachers,
+          knownParticipants: result.knownParticipants);
 
-      parseMessages(response);
+      renderMessages(result);
     } else {
       settings = widget.newSettings!.settings;
 
