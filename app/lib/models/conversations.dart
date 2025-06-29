@@ -76,6 +76,7 @@ class Conversation {
   final int countStudents;
   final int countTeachers;
   final int countParents;
+  final int msgLastRefresh;
 
   final List<KnownParticipant> knownParticipants;
 
@@ -91,17 +92,34 @@ class Conversation {
       required this.countStudents,
       required this.countTeachers,
       required this.knownParticipants,
+      required this.msgLastRefresh,
       this.replies = const []});
 }
 
+class ReplyToConversationResult {
+  final bool success;
+  final String messageId;
+
+  const ReplyToConversationResult({required this.success, required this.messageId});
+}
+
+class ConversationsRefreshResult {
+  final List<UnparsedMessage> messages;
+  final int lastRefresh;
+  
+  const ConversationsRefreshResult({required this.messages, required this.lastRefresh});
+}
+
 class UnparsedMessage {
+  final String id;
   final String date;
   final String author;
   final bool own;
   final String content;
 
   const UnparsedMessage(
-      {required this.date,
+      {required this.id,
+      required this.date,
       required this.author,
       required this.own,
       required this.content});
