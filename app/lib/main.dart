@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/generated/l10n.dart';
@@ -37,8 +36,9 @@ void main() async {
   accountDatabase = AccountDatabase();
 
 
-  if (Platform.isIOS && await secureStorage.read(key: 'ios-cert-ownership-transfer') == null) {
-    logger.w('iOS build with old keychain detected, deleting all accounts and data.');    
+  if (((await secureStorage.read(key: 'encryption_key')) == null && (await accountDatabase.select(accountDatabase.accountsTable).get()).isNotEmpty)) {
+    logger.w('iOS build with old keychain detected, deleting all accounts and data.');
+    await secureStorage.deleteAll();
     await secureStorage.write(
       key: 'ios-cert-ownership-transfer',
       value: 'done',
@@ -48,19 +48,19 @@ void main() async {
     final directory = await getTemporaryDirectory();
     final userDir = Directory(directory.path);
     if (userDir.existsSync()) {
-      userDir.deleteSync(recursive: true);
-    }
-    final direcotry2 = await getApplicationDocumentsDirectory();
-    final userDir2 = Directory(direcotry2.path);
-    if (userDir2.existsSync()) {
-      userDir2.deleteSync(recursive: true);
+      for (var entity in userDir.listSync(recursive: false)) {
+      entity.deleteSync(recursive: true);
+      }
     }
     final directory3 = await getApplicationCacheDirectory();
     final userDir3 = Directory(directory3.path);
     if (userDir3.existsSync()) {
-      userDir3.deleteSync(recursive: true);
+      for (var entity in userDir3.listSync(recursive: false)) {
+      entity.deleteSync(recursive: true);
+      }
     }
   }
+  
 
   enableTransparentNavigationBar();
 
