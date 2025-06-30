@@ -262,6 +262,15 @@ class AccountDatabase extends _$AccountDatabase {
     return account.isNotEmpty;
   }
 
+  Future<void> deleteAllAccounts() async {
+    await delete(accountsTable).go();
+    final tempDir = await getTemporaryDirectory();
+    final userDir = Directory(tempDir.path);
+    if (userDir.existsSync()) {
+      userDir.deleteSync(recursive: true);
+    }
+  }
+
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'accounts_database');
   }

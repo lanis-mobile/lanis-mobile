@@ -9,17 +9,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sph_plan/core/sph/sph.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/utils/authentication_state.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:sph_plan/utils/quick_actions.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'applets/conversations/view/shared.dart';
 import 'background_service.dart';
-import 'core/database/account_database/account_db.dart';
+import 'core/database/account_database/account_db.dart' show secureStorage, accountDatabase, AccountDatabase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +35,32 @@ void main() async {
 
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
+
+
+  if (Platform.isIOS && await secureStorage.read(key: 'ios-cert-ownership-transfer') == null) {
+    logger.w('iOS build with old keychain detected, deleting all accounts and data.');    
+    await secureStorage.write(
+      key: 'ios-cert-ownership-transfer',
+      value: 'done',
+    );
+    await accountDatabase.deleteAllAccounts();
+    
+    final directory = await getTemporaryDirectory();
+    final userDir = Directory(directory.path);
+    if (userDir.existsSync()) {
+      userDir.deleteSync(recursive: true);
+    }
+    final direcotry2 = await getApplicationDocumentsDirectory();
+    final userDir2 = Directory(direcotry2.path);
+    if (userDir2.existsSync()) {
+      userDir2.deleteSync(recursive: true);
+    }
+    final directory3 = await getApplicationCacheDirectory();
+    final userDir3 = Directory(directory3.path);
+    if (userDir3.existsSync()) {
+      userDir3.deleteSync(recursive: true);
+    }
+  }
 
   enableTransparentNavigationBar();
 
