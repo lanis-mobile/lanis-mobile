@@ -155,7 +155,6 @@ class _ConversationsChatState extends State<ConversationsChat>
   }
 
   void scrollToBottom({Duration initDelay = Duration.zero}) {
-    logger.d("Scrolling to bottom");
       Future.delayed(initDelay, () {
         if (scrollController.hasClients) {
           scrollController.animateTo(
@@ -395,6 +394,7 @@ void renderMessages(Conversation unparsedMessages) {
   await sendMessage(result);
 }
 
+  bool initScrollToBottom = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -457,8 +457,10 @@ void renderMessages(Conversation unparsedMessages) {
                   );
                 }
               }
-
-              scrollToBottom(initDelay: Duration(milliseconds: 100));
+              if (initScrollToBottom) {
+                initScrollToBottom = false;
+                scrollToBottom(initDelay: Duration(milliseconds: 100));
+              }
               return Column(
                 children: [
                   Expanded(
