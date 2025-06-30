@@ -1,3 +1,4 @@
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dart_date/dart_date.dart';
@@ -6,30 +7,34 @@ import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/applets/conversations/view/send.dart';
+import 'dart:async';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/client_status_exceptions.dart';
 import '../../../models/conversations.dart';
+import '../../../utils/fetch_more_indicator.dart';
+import '../../../utils/logger.dart';
 import '../../../widgets/error_view.dart';
 import '../../../widgets/format_text.dart';
 import 'shared.dart';
 
 class ConversationsChat extends StatefulWidget {
-  final String id; // uniqueId
+  final String id;
   final String title;
   final NewConversationSettings? newSettings;
   final bool hidden;
+  final bool isTablet;
+  final Function refreshSidebar;
 
   const ConversationsChat(
-      {super.key, required this.title, required this.id, this.newSettings,
+      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet, required this.refreshSidebar,
         this.hidden = false});
 
-  ConversationsChat.fromEntry(OverviewEntry entry, {super.key})
+  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key, required this.refreshSidebar})
       : id = entry.id
       , title = entry.title
       , newSettings = null
       , hidden = entry.hidden;
-
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
 }
@@ -38,21 +43,44 @@ class _ConversationsChatState extends State<ConversationsChat>
     with SingleTickerProviderStateMixin {
   late final Future<void> _conversationFuture = initConversation();
   late final AnimationController appBarController;
+  Timer? _refreshTimer;
+  int _lastRefresh = 0;
+  final List<String> _messagesSendInThisSession = [];
 
   final TextEditingController messageField = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
   final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
   final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(false);
+  final TextEditingController textEditingController = TextEditingController();
+
+  final IndicatorController refreshIndicatorController = IndicatorController();
+
 
   final Map<String, TextStyle> textStyles = {};
 
-  late final ConversationSettings settings;
-  late final ParticipationStatistics? statistics;
+  late ConversationSettings settings;
+  late ParticipationStatistics? statistics;
 
   late bool hidden;
+  bool refreshing = false;
 
   final List<dynamic> chat = [];
+
+  void initRefreshTimer() {
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 20), (_) async {
+      if (mounted) {
+        setState(() {
+          refreshing = true;
+        });
+        await refreshConversation(scrollToEnd: false);
+        setState(() {
+          refreshing = false;
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -61,6 +89,9 @@ class _ConversationsChatState extends State<ConversationsChat>
     scrollController.addListener(animateAppBarTitle);
     scrollController.addListener(toggleScrollToBottomFab);
     hidden = widget.hidden;
+
+    // Initialize periodic refresh timer (every 1 minute)
+    initRefreshTimer();
   }
 
   @override
@@ -68,6 +99,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     super.dispose();
     appBarController.dispose();
     scrollController.dispose();
+    _refreshTimer?.cancel();
   }
 
   void toggleScrollToBottomFab() {
@@ -75,6 +107,40 @@ class _ConversationsChatState extends State<ConversationsChat>
     final currentScrollPosition = scrollController.position.pixels;
 
     isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
+  }
+  Future<void> refreshConversation({bool scrollToEnd = true}) async {
+    if (widget.newSettings == null) {
+      try {
+        final result = await sph!.parser.conversationsParser.refreshConversation(widget.id, _lastRefresh);
+
+        _lastRefresh = result.lastRefresh;
+        for (final UnparsedMessage message in result.messages) {
+          if (_messagesSendInThisSession.contains(message.id)) {
+            continue;
+          }
+          setState(() {
+            _renderSingleMessage(message);
+          });
+        }
+        if (result.messages.isNotEmpty) {
+          widget.refreshSidebar();
+        }
+
+        // Update send button visibility
+        if (settings.own) {
+          isSendVisible.value = true;
+        } else {
+          isSendVisible.value = !settings.noReply;
+        }
+
+        // Scroll to bottom after refresh
+        if (scrollToEnd) scrollToBottom();
+      } on NoConnectionException {
+        showNoInternetDialog();
+      } catch (e) {
+        logger.w("Error while refreshing conversation. This can happen, when the user tuns off their phone or suspends the app.",);
+      }
+    }
   }
 
   void animateAppBarTitle() {
@@ -92,7 +158,7 @@ class _ConversationsChatState extends State<ConversationsChat>
       Future.delayed(initDelay, () {
         if (scrollController.hasClients) {
           scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
+            scrollController.position.maxScrollExtent + 10,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
@@ -188,15 +254,17 @@ class _ConversationsChatState extends State<ConversationsChat>
       }
     });
 
-    final bool result = await sph!.parser.conversationsParser.replyToConversation(
+    final result = await sph!.parser.conversationsParser.replyToConversation(
         settings.id,
         "all",
         settings.groupChat ? "ja" : "nein",
         settings.onlyPrivateAnswers ? "ja" : "nein",
         text);
 
+    widget.refreshSidebar();
     setState(() {
-      if (result) {
+      if (result.success) {
+        _messagesSendInThisSession.add(result.messageId);
         chat.last.status = MessageStatus.sent;
       } else {
         chat.last.status = MessageStatus.error;
@@ -220,76 +288,83 @@ class _ConversationsChatState extends State<ConversationsChat>
     );
   }
 
-  void parseMessages(Conversation unparsedMessages) {
-    DateTime date = parseDateString(unparsedMessages.parent.date);
-    String author = unparsedMessages.parent.author;
-    MessageState position = MessageState.first;
+  List<String> authors = [];
 
-    final Set<String> authors = {};
+void _renderSingleMessage(UnparsedMessage message) {
+  final DateTime messageDate = parseDateString(message.date);
+  final String messageAuthor = message.author;
+  MessageState position = MessageState.first;
 
-    if (unparsedMessages.parent.own != true) {
-      authors.add(author);
+  // Check if this message should be part of a series by examining the last message in chat
+  if (chat.isNotEmpty && chat.last is Message) {
+    Message lastMessage = chat.last;
+    if (messageAuthor == lastMessage.author &&
+        messageDate.isSameDay(lastMessage.date)) {
+      position = MessageState.series;
     }
-
-    chat.addAll([
-      DateHeader(date: date),
-      addMessage(unparsedMessages.parent, position)
-    ]);
-
-    late DateTime currentDate;
-    for (UnparsedMessage current in unparsedMessages.replies) {
-      currentDate = parseDateString(current.date);
-
-      position = MessageState.first;
-      if (current.author == author) {
-        if (date.isSameDay(currentDate)) {
-          position = MessageState.series;
-        }
-      }
-
-      if (date.isSameDay(currentDate) && current.author == author) {
-        chat.add(addMessage(current, position));
-      } else if (date.isSameDay(currentDate) && current.author != author) {
-        author = current.author;
-        chat.addAll([addMessage(current, position)]);
-      } else if (!date.isSameDay(currentDate) && current.author == author) {
-        date = currentDate;
-        chat.addAll([DateHeader(date: date), addMessage(current, position)]);
-      } else {
-        date = currentDate;
-        author = current.author;
-        chat.addAll([DateHeader(date: date), addMessage(current, position)]);
-      }
-
-      if (current.own != true) {
-        authors.add(author);
-      }
-    }
-
-    addAuthorTextStyles(authors.toList());
   }
 
+  // Add message to appropriate authors list for styling
+  if (message.own != true) {
+    authors.add(messageAuthor);
+  }
+
+  // Add message to chat with appropriate date header if needed
+  if (chat.isEmpty || (chat.last is Message && !messageDate.isSameDay(chat.last.date))) {
+    chat.addAll([DateHeader(date: messageDate), addMessage(message, position)]);
+  } else {
+    chat.add(addMessage(message, position));
+  }
+}
+
+void renderMessages(Conversation unparsedMessages) {
+  chat.clear(); // Clear existing messages for refresh capability
+  authors.clear(); // Clear existing authors
+
+  // Process parent message
+  final DateTime parentDate = parseDateString(unparsedMessages.parent.date);
+  final String parentAuthor = unparsedMessages.parent.author;
+
+  if (unparsedMessages.parent.own != true) {
+    authors.add(parentAuthor);
+  }
+
+  // Add parent message with initial date header
+  chat.addAll([
+    DateHeader(date: parentDate),
+    addMessage(unparsedMessages.parent, MessageState.first)
+  ]);
+
+  // Process all replies
+  for (UnparsedMessage reply in unparsedMessages.replies) {
+    _renderSingleMessage(reply);
+  }
+
+  addAuthorTextStyles(authors.toList());
+}
   Future<void> initConversation() async {
     if (widget.newSettings == null) {
-      Conversation response =
+      Conversation result =
           await sph!.parser.conversationsParser.getSingleConversation(widget.id);
+      _lastRefresh = result.msgLastRefresh;
+      logger.d("last refresh: $_lastRefresh");
 
       settings = ConversationSettings(
         id: widget.id,
-        groupChat: response.groupChat,
-        onlyPrivateAnswers: response.onlyPrivateAnswers,
-        noReply: response.noReply,
-        author: response.parent.author,
-        own: response.parent.own,
+        groupChat: result.groupChat,
+        onlyPrivateAnswers: result.onlyPrivateAnswers,
+        noReply: result.noReply,
+        author: result.parent.author,
+        own: result.parent.own,
       );
 
       statistics = ParticipationStatistics(
-          countParents: response.countParents,
-          countStudents: response.countStudents,
-          countTeachers: response.countTeachers,
-          knownParticipants: response.knownParticipants);
+          countParents: result.countParents,
+          countStudents: result.countStudents,
+          countTeachers: result.countTeachers,
+          knownParticipants: result.knownParticipants);
 
-      parseMessages(response);
+      renderMessages(result);
     } else {
       settings = widget.newSettings!.settings;
 
@@ -308,293 +383,368 @@ class _ConversationsChatState extends State<ConversationsChat>
     }
   }
 
+  Future<void> openSendPage(BuildContext context) async {
+  final result = await Navigator.of(context).push(MaterialPageRoute(
+  builder: (context) => ConversationsSend(isTablet: widget.isTablet, title: widget.title,)));
+
+  if (result == null) return;
+
+  scrollController.jumpTo(scrollController.position.maxScrollExtent);
+
+  await sendMessage(result);
+}
+
+  bool initScrollToBottom = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          ValueListenableBuilder(
-            valueListenable: isScrollToBottomVisible,
-            builder: (context, isVisible, _) {
-              return Visibility(
-                visible: isVisible,
-                child: FloatingActionButton.small(
-                  onPressed: () {
-                    scrollController.animateTo(
-                      scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                    );
-                  },
-                  heroTag: "small",
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: isScrollToBottomVisible,
+        builder: (context, isVisible, _) {
+          return Visibility(
+            visible: isVisible,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 60,),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () {
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                  );
+                },
+                child: Container(
+                  height: 30,
+                  width: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.secondaryFixedDim,
+                      width: 1.5,
+                    ),
+                    color: Theme.of(context).colorScheme.surfaceDim
+                  ),
                   child: const Icon(Icons.keyboard_arrow_down),
                 ),
-              );
-            },
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          ValueListenableBuilder(
-            valueListenable: isSendVisible,
-            builder: (context, isVisible, _) {
-              return Visibility(
-                visible: isVisible,
-                child: FloatingActionButton.extended(
-                  label: Text(AppLocalizations.of(context).newMessage),
-                  icon: const Icon(Icons.edit),
-                  onPressed: () async {
-                    final result = await Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const ConversationsSend()));
-
-                    if (result == null) return;
-
-                    scrollController.jumpTo(scrollController.position.maxScrollExtent);
-
-                    await sendMessage(result);
-                  },
-                ),
-              );
-            },
-          ),
-        ],
+              ),
+            ),
+          );
+        },
       ),
-      body: FutureBuilder(
-        future: _conversationFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.waiting) {
-            // Error content
-            if (snapshot.hasError) {
-              if (snapshot.error is LanisException) {
-                return ErrorView(
-                  error: snapshot.error as LanisException,
-                  showAppBar: true,
-                  retry: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => ConversationsChat(
-                          title: widget.title,
-                          id: widget.id,
-                          newSettings: widget.newSettings,
-                      ))
-                    );
-                  },
-                );
+      body: SafeArea(
+        child: FutureBuilder(
+          future: _conversationFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.waiting) {
+              // Error content
+              if (snapshot.hasError) {
+                if (snapshot.error is LanisException) {
+                  return ErrorView(
+                    error: snapshot.error as LanisException,
+                    showAppBar: true,
+                    retry: () {
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => ConversationsChat(
+                            refreshSidebar: widget.refreshSidebar,
+                            title: widget.title,
+                            id: widget.id,
+                            newSettings: widget.newSettings,
+                            isTablet: widget.isTablet,
+                          ))
+                      );
+                    },
+                  );
+                }
               }
-            }
-
-            scrollToBottom(initDelay: Duration(milliseconds: 100));
-            return NotificationListener<ScrollMetricsNotification>(
-              onNotification: (_) {
-                toggleScrollToBottomFab();
-                return false;
-              },
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  SliverAppBar(
-                    title: Animate(
-                      effects: const [
-                        FadeEffect(
-                          curve: Curves.easeIn,
-                        )
-                      ],
-                      value: 0,
-                      autoPlay: false,
-                      controller: appBarController,
-                      child: Text(widget.title),
-                    ),
-                    snap: true,
-                    floating: true,
-                    actions: [
-                      if (settings.groupChat == false &&
-                          settings.onlyPrivateAnswers == false &&
-                          settings.noReply == false) ...[
-                        IconButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  icon: const Icon(Icons.groups),
-                                  title: Text(
-                                      AppLocalizations.of(context)
-                                          .conversationTypeName(
-                                          ChatType.openChat.name)),
-                                  content: Text(
-                                      AppLocalizations.of(context)
-                                          .openChatWarning),
-                                  actions: [
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Ok"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.warning),
-                        ),
-                      ],
-                      IconButton(
-                          onPressed: () async {
-                            if (hidden == true) {
-                              bool result;
-                              try {
-                                result = await sph!.parser.conversationsParser.showConversation(widget.id);
-                              } on NoConnectionException {
-                                showNoInternetDialog();
-                                return;
-                              }
-
-
-                              if (!result) {
-                                showErrorDialog();
-                                return;
-                              } else {
-                                setState(() {
-                                  hidden = false;
-                                });
-                                sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
-                                sph!.parser.conversationsParser.filter.pushEntries();
-                              }
-
-                              return;
-                            }
-
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  icon: const Icon(Icons.visibility_off),
-                                  title: Text(AppLocalizations.of(context).conversationHide),
-                                  content: Text(AppLocalizations.of(context).hideNote),
-                                  actions: [
-                                    OutlinedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text(AppLocalizations.of(context).back)
-                                    ),
-                                    FilledButton(
-                                        onPressed: () async {
-                                          bool result = false;
-                                          try {
-                                            result = await sph!.parser.conversationsParser.hideConversation(widget.id);
-                                          } on NoConnectionException {
-                                            showNoInternetDialog();
-                                            return;
-                                          }
-
-                                          if (!result) {
-                                            showErrorDialog();
-                                            return;
-                                          } else {
-                                            setState(() {
-                                              hidden = true;
-                                            });
-                                            sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
-                                          }
-
-                                          if(context.mounted) Navigator.of(context).pop();
-                                        },
-                                        child: Text(AppLocalizations.of(context).conversationHide)
-                                    )
-                                  ],
-                                )
-                            );
-                          },
-                          icon: hidden ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off)
-                      ),
-                      if (statistics != null) ...[
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => StatisticWidget(
-                                    statistics: statistics!,
-                                    conversationTitle: widget.title),
+              if (initScrollToBottom) {
+                initScrollToBottom = false;
+                scrollToBottom(initDelay: Duration(milliseconds: 100));
+              }
+              return Column(
+                children: [
+                  Expanded(
+                    child: NotificationListener<ScrollMetricsNotification>(
+                      onNotification: (_) {
+                        toggleScrollToBottomFab();
+                        return false;
+                      },
+                      child: FetchMoreIndicator(
+                        controller: refreshIndicatorController,
+                        onAction: refreshConversation,
+                        child: CustomScrollView(
+                          controller: scrollController,
+                          slivers: [
+                            SliverAppBar(
+                              title: Animate(
+                                effects: const [
+                                  FadeEffect(
+                                    curve: Curves.easeIn,
+                                  )
+                                ],
+                                value: 0,
+                                autoPlay: false,
+                                controller: appBarController,
+                                child: Text(widget.title),
                               ),
-                            );
-                          },
-                          icon: const Icon(Icons.people),
-                        ),
-                      ],
-                    ],
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12.0),
-                                  child: Text(
-                                    widget.title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium,
-                                    textAlign: TextAlign.center,
+                              snap: true,
+                              floating: true,
+                              actions: [
+                                if (refreshing) Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
                                   ),
                                 ),
+                                if (settings.groupChat == false &&
+                                    settings.onlyPrivateAnswers == false &&
+                                    settings.noReply == false) ...[
+                                  IconButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            icon: const Icon(Icons.groups),
+                                            title: Text(
+                                                AppLocalizations.of(context)
+                                                    .conversationTypeName(
+                                                    ChatType.openChat.name)),
+                                            content: Text(
+                                                AppLocalizations.of(context)
+                                                    .openChatWarning),
+                                            actions: [
+                                              FilledButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("Ok"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    icon: const Icon(Icons.warning),
+                                  ),
+                                ],
+                                if (!widget.isTablet) IconButton(
+                                    onPressed: () async {
+                                      if (hidden == true) {
+                                        bool result;
+                                        try {
+                                          result = await sph!.parser.conversationsParser.showConversation(widget.id);
+                                        } on NoConnectionException {
+                                          showNoInternetDialog();
+                                          return;
+                                        }
+                        
+                        
+                                        if (!result) {
+                                          showErrorDialog();
+                                          return;
+                                        } else {
+                                          setState(() {
+                                            hidden = false;
+                                          });
+                                          sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
+                                          sph!.parser.conversationsParser.filter.pushEntries();
+                                        }
+                        
+                                        return;
+                                      }
+                        
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            icon: const Icon(Icons.visibility_off),
+                                            title: Text(AppLocalizations.of(context).conversationHide),
+                                            content: Text(AppLocalizations.of(context).hideNote),
+                                            actions: [
+                                              OutlinedButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text(AppLocalizations.of(context).back)
+                                              ),
+                                              FilledButton(
+                                                  onPressed: () async {
+                                                    bool result = false;
+                                                    try {
+                                                      result = await sph!.parser.conversationsParser.hideConversation(widget.id);
+                                                    } on NoConnectionException {
+                                                      showNoInternetDialog();
+                                                      return;
+                                                    }
+                        
+                                                    if (!result) {
+                                                      showErrorDialog();
+                                                      return;
+                                                    } else {
+                                                      setState(() {
+                                                        hidden = true;
+                                                      });
+                                                      sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
+                                                    }
+                        
+                                                    if(context.mounted) Navigator.of(context).pop();
+                                                  },
+                                                  child: Text(AppLocalizations.of(context).conversationHide)
+                                              )
+                                            ],
+                                          )
+                                      );
+                                    },
+                                    icon: hidden ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off)
+                                ),
+                                if (statistics != null) ...[
+                                  IconButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => StatisticWidget(
+                                              statistics: statistics!,
+                                              conversationTitle: widget.title),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.people),
+                                  ),
+                                ],
+                              ],
+
+                            ),
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12.0),
+                                            child: Text(
+                                              widget.title,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineMedium,
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (settings.onlyPrivateAnswers && !settings.own) ...[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 12.0),
+                                        margin: const EdgeInsets.only(top: 16.0),
+                                        decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHigh),
+                                        child: Text(
+                                          "${settings.author} ${AppLocalizations.of(context).privateConversation}",
+                                          style: Theme.of(context).textTheme.bodyMedium,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
-                          if (settings.onlyPrivateAnswers && !settings.own) ...[
-                            Container(
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 12.0),
-                              margin: const EdgeInsets.only(top: 16.0),
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHigh),
-                              child: Text(
-                                "${settings.author} ${AppLocalizations.of(context).privateConversation}",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                textAlign: TextAlign.center,
+                            ),
+                            SliverList.builder(
+                              itemCount: chat.length,
+                              itemBuilder: (context, index) {
+                                if (chat[index] is Message) {
+                                  return MessageWidget(
+                                      message: chat[index],
+                                      textStyle: textStyles[chat[index].author]);
+                                } else {
+                                  return DateHeaderWidget(header: chat[index]);
+                                }
+                              },
+                            ),
+                            const SliverToBoxAdapter(
+                              child: SizedBox(
+                                height: 20,
                               ),
                             ),
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                  SliverList.builder(
-                    itemCount: chat.length,
-                    itemBuilder: (context, index) {
-                      if (chat[index] is Message) {
-                        return MessageWidget(
-                            message: chat[index],
-                            textStyle: textStyles[chat[index].author]);
-                      } else {
-                        return DateHeaderWidget(header: chat[index]);
-                      }
-                    },
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 75,
+                  Container(
+                    width: double.infinity,
+                    height: 60,
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: IconButton(
+                            onPressed: () => openSendPage(context),
+                            icon: Icon(Icons.expand,),
+                            color: Theme.of(context).colorScheme.onSecondary,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: textEditingController,
+                            decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)
+                                  .sendMessagePlaceholder,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 8.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: IconButton(
+                            onPressed: () async {
+                              final String text = textEditingController.text.trim();
+                              if (text.isEmpty) return;
+
+                              textEditingController.clear();
+                              await sendMessage(text);
+                              scrollToBottom();
+                            },
+                            icon: Icon(Icons.send,),
+                            color: Theme.of(context).colorScheme.onTertiary,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  )
                 ],
-              ),
+              );
+            }
+            // Waiting content
+            return const Center(
+              child: CircularProgressIndicator(),
             );
-          }
-          // Waiting content
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
+          },
+        ),
       ),
     );
   }

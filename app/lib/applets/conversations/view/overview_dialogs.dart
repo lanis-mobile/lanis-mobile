@@ -7,7 +7,8 @@ import '../../../core/sph/sph.dart';
 import '../../../models/conversations.dart';
 
 class TypeChooser extends StatefulWidget {
-  const TypeChooser({super.key});
+  const TypeChooser({super.key, required this.isTablet});
+  final bool isTablet;
 
   @override
   State<TypeChooser> createState() => _TypeChooserState();
@@ -25,7 +26,7 @@ class _TypeChooserState extends State<TypeChooser> {
         ),
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateConversation(chatType: selectedValue,)));
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateConversation(chatType: selectedValue, isTablet: widget.isTablet,)));
             },
             icon: const Icon(Icons.arrow_forward),
             label: Text(AppLocalizations.of(context).select)
@@ -82,7 +83,8 @@ class _TypeChooserState extends State<TypeChooser> {
 
 class CreateConversation extends StatefulWidget {
   final ChatType? chatType;
-  const CreateConversation({super.key, this.chatType});
+  final bool isTablet;
+  const CreateConversation({super.key, this.chatType, required this.isTablet});
 
   @override
   State<CreateConversation> createState() => _CreateConversationState();
@@ -133,6 +135,7 @@ class _CreateConversationState extends State<CreateConversation> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => ConversationsSend(
+                        isTablet: widget.isTablet,
                         creationData: ChatCreationData(
                             type: widget.chatType,
                             subject: subjectController.text,
