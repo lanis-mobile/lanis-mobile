@@ -13,6 +13,7 @@ import '../../core/sph/cryptor.dart';
 import '../../globals.dart';
 import '../../models/client_status_exceptions.dart';
 import '../../models/conversations.dart';
+import '../../utils/logger.dart';
 
 class ConversationsParser extends AppletParser<List<OverviewEntry>> {
   late final OverviewFiltering filter;
@@ -197,6 +198,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       final Map<String, dynamic> conversation = jsonDecode(decryptedConversations);
 
       final UnparsedMessage parent = UnparsedMessage(
+        id: conversation["Uniquid"],
           date: unescape.convert(conversation["Datum"]),
           author: unescape.convert(fixUsername(conversation["username"])),
           own: conversation["own"],
@@ -205,6 +207,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
       final List<UnparsedMessage> replies = [];
       for (dynamic reply in conversation["reply"]) {
         replies.add(UnparsedMessage(
+          id: reply["Uniquid"],
             date: unescape.convert(reply["Datum"]),
             author: unescape.convert(fixUsername(reply["username"])),
             own: reply["own"],
@@ -262,13 +265,65 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
           countTeachers: countTeachers,
           countParents: countParents,
           knownParticipants: knownParticipants.toList(),
-          replies: replies);
+          replies: replies,
+          msgLastRefresh: encryptedJSON["time"]
+      );
     } on (SocketException, DioException) {
       throw NetworkException();
     } on LanisException {
       rethrow;
     } catch (e) {
       throw UnknownException();
+    }
+  }
+
+  Future<ConversationsRefreshResult> refreshConversation(String uniqID, int lastRefresh) async {
+    try {
+      final response = await sph.session.dio.post(
+          "https://start.schulportal.hessen.de/nachrichten.php",
+          data: {
+            "a": "refresh",
+            "last": "$lastRefresh",
+            "uniqid": sph.session.cryptor.encryptString(uniqID),
+          },
+          options: Options(
+            headers: {
+              "Accept": "*/*",
+              "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          )
+      );
+
+      final decodedResponse = jsonDecode(response.data);
+      final messages = jsonDecode(sph.session.cryptor.decryptString(decodedResponse['reply'])!);
+      final int newLastRefresh = decodedResponse['time'];
+
+
+      return ConversationsRefreshResult(
+        messages: messages.map<UnparsedMessage>((dynamic message) {
+          return UnparsedMessage(
+            id: message["Uniquid"],
+              date: unescape.convert(message["Datum"]),
+              author: unescape.convert(fixUsername(message["username"])),
+              own: message["own"],
+              content: unescape.convert(message["Inhalt"]));
+        }).toList(),
+        lastRefresh: newLastRefresh,
+      );
+    } catch (e, s) {
+      logger.e(e, stackTrace: s);
+      if (e is SocketException || e is DioException) {
+        throw NetworkException();
+      } else if (e is LanisException) {
+        rethrow;
+      } else {
+        throw UnknownException();
+      }
     }
   }
 
@@ -283,7 +338,7 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
   /// [message] supports Lanis-styled text.
   ///
   /// If successful, it returns `true`.
-  Future<bool> replyToConversation(String headId, String sender,
+  Future<ReplyToConversationResult> replyToConversation(String headId, String sender,
       String groupOnly, String privateAnswerOnly, String message) async {
     try {
       final Map replyData = {
@@ -314,8 +369,12 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
             },
           ));
 
-      return json
-          .decode(response.data)["back"]; // "back" should be bool, id is Uniquid
+      final jsonDecode = json.decode(response.data);
+
+      return ReplyToConversationResult(
+        success: jsonDecode["back"],
+        messageId: jsonDecode["id"],
+      );
     } on (SocketException, DioException) {
       throw NetworkException();
     } on LanisException {
