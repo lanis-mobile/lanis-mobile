@@ -138,7 +138,7 @@ class _ConversationsChatState extends State<ConversationsChat>
       } on NoConnectionException {
         showNoInternetDialog();
       } catch (e) {
-        showErrorDialog();
+        logger.w("Error while refreshing conversation. This can happen, when the user tuns off their phone or suspends the app.",);
       }
     }
   }
