@@ -22,7 +22,7 @@ class AttendancesScreen extends StatelessWidget {
               children: [
                 AttendanceCard(
                   title: AppLocalizations.of(context).allAttendances,
-                  teacher: null,
+                  teachers: [],
                   attendances: getCombinedAttendances(lessons),
                 ),
                 Divider(),
@@ -32,7 +32,7 @@ class AttendancesScreen extends StatelessWidget {
           final lesson = lessons[index - 1];
           return AttendanceCard(
             title: lesson.name,
-            teacher: lesson.teacherKuerzel ?? lesson.teacher ?? '???',
+            teachers: lesson.teachers,
             attendances: lesson.attendances!,
           );
         },
@@ -43,18 +43,18 @@ class AttendancesScreen extends StatelessWidget {
 
 class AttendanceCard extends StatelessWidget {
   final String title;
-  final String? teacher;
+  final List<LessonTeacher> teachers;
   final Map<String, String> attendances;
   const AttendanceCard(
       {super.key,
       required this.attendances,
       required this.title,
-      required this.teacher});
+      required this.teachers});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: teacher == null ? 8 : null,
+      elevation: teachers.isEmpty ? 8 : null,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
@@ -72,13 +72,14 @@ class AttendanceCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                  if (teacher != null) ...[
+                  if (teachers.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     Text(
-                      teacher!,
+                      teachers.map((e) => e.teacherKuerzel).join(", "),
                     ),
-                    const Icon(
-                      Icons.person,
+                    const SizedBox(width: 4),
+                    Icon(
+                      teachers.length > 1 ? Icons.people : Icons.person,
                       size: 16,
                     ),
                   ]
