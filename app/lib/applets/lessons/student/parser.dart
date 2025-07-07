@@ -31,7 +31,12 @@ class LessonsStudentParser extends AppletParser<Lessons> {
         String url = mappe.querySelector("a.btn.btn-primary")!.attributes["href"]!;
         lessons.add(Lesson(
           name: mappe.getElementsByTagName("h2")[0].text.trim(),
-          teacher: mappe.querySelector("div.btn-group>button")?.attributes["title"],
+          teachers: mappe.querySelectorAll("div.btn-group>button").map<LessonTeacher>(
+            (e) => LessonTeacher(
+              teacher: e.attributes["title"]?.split(" (")[0].trim(),
+              teacherKuerzel: e.text.trim(),
+            ),
+          ).toList(),
           courseURL: Uri.parse(url),
           courseID: url.split("id=")[1],
         ));
@@ -41,15 +46,8 @@ class LessonsStudentParser extends AppletParser<Lessons> {
     //Aktuelle Einträge
     var schoolClasses = document.querySelectorAll("tr.printable");
     for (var schoolClass in schoolClasses) {
-      var teacher = schoolClass.querySelector(".teacher");
-
       if (schoolClass.querySelector(".datum") != null) {
         String? topicTitle = schoolClass.querySelector(".thema")?.text.trim();
-        String? teacherKuerzel = teacher
-            ?.getElementsByClassName("btn btn-primary dropdown-toggle btn-xs")[0]
-            .text
-            .trim();
-        String? teacherName = teacher?.querySelector("ul>li>a>i.fa")?.parent?.text.trim();
         String? topicDateString = schoolClass.querySelector(".datum")?.text.trim();
         DateTime? topicDate = DateTime.parse(topicDateString!.split(".").reversed.join("-"));
         String? courseURL = schoolClass.querySelector("td>h3>a")?.attributes["href"];
@@ -75,8 +73,6 @@ class LessonsStudentParser extends AppletParser<Lessons> {
               uploads: const [],
               files: List.generate(fileCount, (_)=> FileInfo()),
             );
-            lesson.teacher = teacherName;
-            lesson.teacherKuerzel = teacherKuerzel;
             break;
           }
         }
@@ -327,12 +323,14 @@ class LessonsStudentParser extends AppletParser<Lessons> {
           ));
         }
       }
-      Element teacherButton = document.getElementsByClassName("btn btn-primary dropdown-toggle btn-md")[0];
+      final teacherButtons = document.getElementsByClassName("btn btn-primary dropdown-toggle btn-md");
       return DetailedLesson(
         courseID: courseID,
         name: courseTitle!,
-        teacher: teacherButton.parent!.querySelector(".dropdown-menu")!.text.trim(),
-        teacherKuerzel: teacherButton.text.trim(),
+        teachers: teacherButtons.map<LessonTeacher>((e) => LessonTeacher(
+          teacher: e.parent!.querySelector('ul>li>a')!.text.trim(),
+          teacherKuerzel: e.text.trim(),
+        )).toList(),
         history: history,
         marks: marks,
         exams: lessonExams,
