@@ -59,9 +59,9 @@ class SettingsPage extends StatelessWidget {
       ),
       body: Padding(
         padding: contentPadding,
-        child: ListView(
+        child: children.length > 1 ? ListView(
           children: children,
-        ),
+        ) : children.first,
       ),
       floatingActionButton: floatingActionButton,
     );

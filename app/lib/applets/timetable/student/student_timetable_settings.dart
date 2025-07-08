@@ -4,12 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sph_plan/applets/conversations/view/shared.dart';
 import 'package:sph_plan/applets/timetable/definition.dart';
-import 'package:sph_plan/applets/timetable/student/student_timetable_better_view.dart';
 import 'package:sph_plan/applets/timetable/student/timetable_helper.dart';
 import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/models/account_types.dart';
-import 'package:sph_plan/utils/large_appbar.dart';
-import 'package:sph_plan/utils/large_appbar.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 import 'package:sph_plan/widgets/combined_applet_builder.dart';
 
@@ -252,250 +249,236 @@ class _StudentTimetableSettingsState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: LargeAppBar(
-        title: Text(timeTableDefinition.label(context)),
-        back: () => Navigator.of(context).pop(),
-        showBackButton: widget.showBack,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-      ),
-      body: CombinedAppletBuilder<TimeTable>(
-        parser: sph!.parser.timetableStudentParser,
-        phpUrl: timeTableDefinition.appletPhpUrl,
-        settingsDefaults: timeTableDefinition.settingsDefaults,
-        accountType: AccountType.student,
-        loadingAppBar: AppBar(
-          title: Text(timeTableDefinition.label(context)),
-          leading: widget.openDrawerCb != null
-              ? IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => widget.openDrawerCb!(),
-                )
-              : null,
-        ),
-        builder: (context, timetable, _, settings, updateSettings, refresh) {
-          final ids = settings['hidden-lessons'];
-          Map<int, List<TimetableSubject>> lessons = {};
+    return SettingsPage(
+      backgroundColor: backgroundColor,
+      title: Text(AppLocalizations.of(context).timeTable),
+      showBackButton: widget.showBack,
+      children: [
+        CombinedAppletBuilder<TimeTable>(
+          parser: sph!.parser.timetableStudentParser,
+          phpUrl: timeTableDefinition.appletPhpUrl,
+          settingsDefaults: timeTableDefinition.settingsDefaults,
+          accountType: AccountType.student,
+          builder: (context, timetable, _, settings, updateSettings, refresh) {
+            final ids = settings['hidden-lessons'];
+            Map<int, List<TimetableSubject>> lessons = {};
 
-              for (var (dayIndex, day) in timetable.planForAll!.indexed) {
-                lessons[dayIndex] = [];
-                if (ids == null) continue;
-                for (var lesson in day) {
-                  if (!ids.contains(lesson.id)) continue;
-                  lessons[dayIndex]!.add(lesson);
-                }
+            for (var (dayIndex, day) in timetable.planForAll!.indexed) {
+              lessons[dayIndex] = [];
+              if (ids == null) continue;
+              for (var lesson in day) {
+                if (!ids.contains(lesson.id)) continue;
+                lessons[dayIndex]!.add(lesson);
               }
+            }
 
-              List<List<TimetableSubject>>? customLessons =
-                  TimeTableHelper.getCustomLessons(settings);
+            List<List<TimetableSubject>>? customLessons =
+            TimeTableHelper.getCustomLessons(settings);
 
-              List<String> weekDays =
-                  DateFormat.EEEE(Platform.localeName).dateSymbols.WEEKDAYS;
-              weekDays = weekDays.sublist(1)..add(weekDays[0]);
+            List<String> weekDays =
+                DateFormat.EEEE(Platform.localeName).dateSymbols.WEEKDAYS;
+            weekDays = weekDays.sublist(1)..add(weekDays[0]);
 
-              return Expanded(
-                child: DefaultTabController(
-                  length: weekDays.length,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TabBar(
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.center,
-                        tabs: weekDays
-                            .map((dayName) => Tab(text: dayName))
-                            .toList(),
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          children: weekDays.map((dayName) {
-                            final dayLessons =
-                                lessons[weekDays.indexOf(dayName)] ?? [];
-                            final List<TimetableSubject>? customDayLessons =
-                                customLessons?[weekDays.indexOf(dayName)];
-                            final currentDay = weekDays.indexOf(dayName);
-                            return SingleChildScrollView(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  spacing: 8,
-                                  children: [
-                                    Card(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              AppLocalizations.of(context)
-                                                  .hiddenLessons,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge,
+            return DefaultTabController(
+              length: weekDays.length,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.center,
+                    tabs: weekDays
+                        .map((dayName) => Tab(text: dayName))
+                        .toList(),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: weekDays.map((dayName) {
+                        final dayLessons =
+                            lessons[weekDays.indexOf(dayName)] ?? [];
+                        final List<TimetableSubject>? customDayLessons =
+                        customLessons?[weekDays.indexOf(dayName)];
+                        final currentDay = weekDays.indexOf(dayName);
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              spacing: 8,
+                              children: [
+                                Card(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          AppLocalizations.of(context)
+                                              .hiddenLessons,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge,
+                                        ),
+                                      ),
+                                      if (dayLessons.isNotEmpty)
+                                        ...dayLessons.map((lesson) {
+                                          return ListTile(
+                                            dense: true,
+                                            title: Text(lesson.name ?? ''),
+                                            subtitle: Text(
+                                              "${lesson.startTime.format(context)} - ${lesson.endTime.format(context)}",
                                             ),
+                                            trailing: IconButton(
+                                              icon: Icon(Icons.delete),
+                                              onPressed: () {
+                                                setState(() {
+                                                  updateSettings(
+                                                      'hidden-lessons',
+                                                      settings[
+                                                      'hidden-lessons']
+                                                        ..remove(
+                                                            lesson.id));
+                                                });
+                                              },
+                                            ),
+                                          );
+                                        }),
+                                      if (dayLessons.isEmpty)
+                                        Padding(
+                                          padding:
+                                          const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            AppLocalizations.of(context)
+                                                .hiddenLessonsDescription,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall!
+                                                .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant),
                                           ),
-                                          if (dayLessons.isNotEmpty)
-                                            ...dayLessons.map((lesson) {
-                                              return ListTile(
-                                                dense: true,
-                                                title: Text(lesson.name ?? ''),
-                                                subtitle: Text(
-                                                  "${lesson.startTime.format(context)} - ${lesson.endTime.format(context)}",
+                                        )
+                                    ],
+                                  ),
+                                ),
+                                Card(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          AppLocalizations.of(context)
+                                              .customLessons,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge,
+                                        ),
+                                      ),
+                                      if (customDayLessons != null &&
+                                          customDayLessons.isNotEmpty)
+                                        ...customDayLessons.map((lesson) {
+                                          return ListTile(
+                                            dense: true,
+                                            title: Text(lesson.name ?? ''),
+                                            subtitle: Text(
+                                              "${lesson.startTime.format(context)} - ${lesson.endTime.format(context)}",
+                                            ),
+                                            trailing: Row(
+                                              mainAxisSize:
+                                              MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: Icon(Icons.edit),
+                                                  onPressed: () =>
+                                                      showCustomLessonDialog(
+                                                          timetable,
+                                                          updateSettings,
+                                                          settings,
+                                                          customLessons,
+                                                          currentDay,
+                                                          lesson: lesson),
                                                 ),
-                                                trailing: IconButton(
+                                                IconButton(
                                                   icon: Icon(Icons.delete),
                                                   onPressed: () {
                                                     setState(() {
+                                                      customLessons![
+                                                      currentDay]
+                                                          .remove(lesson);
                                                       updateSettings(
-                                                          'hidden-lessons',
-                                                          settings[
-                                                              'hidden-lessons']
-                                                            ..remove(
-                                                                lesson.id));
+                                                          'custom-lessons',
+                                                          customLessons);
                                                     });
                                                   },
                                                 ),
-                                              );
-                                            }),
-                                          if (dayLessons.isEmpty)
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                AppLocalizations.of(context)
-                                                    .hiddenLessonsDescription,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall!
-                                                    .copyWith(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurfaceVariant),
-                                              ),
-                                            )
-                                        ],
-                                      ),
-                                    ),
-                                    Card(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              AppLocalizations.of(context)
-                                                  .customLessons,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge,
+                                              ],
                                             ),
-                                          ),
-                                          if (customDayLessons != null &&
-                                              customDayLessons.isNotEmpty)
-                                            ...customDayLessons.map((lesson) {
-                                              return ListTile(
-                                                dense: true,
-                                                title: Text(lesson.name ?? ''),
-                                                subtitle: Text(
-                                                  "${lesson.startTime.format(context)} - ${lesson.endTime.format(context)}",
-                                                ),
-                                                trailing: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    IconButton(
-                                                      icon: Icon(Icons.edit),
-                                                      onPressed: () =>
-                                                          showCustomLessonDialog(
-                                                              timetable,
-                                                              updateSettings,
-                                                              settings,
-                                                              customLessons,
-                                                              currentDay,
-                                                              lesson: lesson),
-                                                    ),
-                                                    IconButton(
-                                                      icon: Icon(Icons.delete),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          customLessons![
-                                                                  currentDay]
-                                                              .remove(lesson);
-                                                          updateSettings(
-                                                              'custom-lessons',
-                                                              customLessons);
-                                                        });
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0, vertical: 2.0),
-                                            child: ElevatedButton(
-                                                onPressed: () =>
-                                                    showCustomLessonDialog(
-                                                        timetable,
-                                                        updateSettings,
-                                                        settings,
-                                                        customLessons,
-                                                        currentDay),
-                                                child: Text(
-                                                    AppLocalizations.of(context)
-                                                        .addLesson)),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                          );
+                                        }),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0, vertical: 2.0),
+                                        child: ElevatedButton(
+                                            onPressed: () =>
+                                                showCustomLessonDialog(
+                                                    timetable,
+                                                    updateSettings,
+                                                    settings,
+                                                    customLessons,
+                                                    currentDay),
+                                            child: Text(
+                                                AppLocalizations.of(context)
+                                                    .addLesson)),
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16.0, right: 16.0, bottom: 32.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 28.0,
-                              ),
-                              Icon(
-                                Icons.info_outline_rounded,
-                                size: 20.0,
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16.0, right: 16.0, bottom: 32.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 28.0,
+                          ),
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 20.0,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Text(
+                            AppLocalizations.of(context)
+                                .customizeTimetableDisclaimer,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                              SizedBox(
-                                height: 8.0,
-                              ),
-                              Text(
-                                AppLocalizations.of(context)
-                                    .customizeTimetableDisclaimer,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall!
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant),
-                              )
-                            ],
-                          )),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                                    .onSurfaceVariant),
+                          )
+                        ],
+                      )),
+                ],
+              ),
+            );
+          },
         )
       ],
     );

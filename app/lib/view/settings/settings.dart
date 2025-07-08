@@ -138,7 +138,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
         icon: Icons.extension,
         screen: (context) => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QuickActions()),
+          MaterialPageRoute(builder: (context) => QuickActions(showBackButton: true,)),
         ),
       )
     ]),
@@ -147,7 +147,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
       SettingsGroup(tiles: [
         if (sph!.session.doesSupportFeature(calendarDefinition))
           SettingsTile(
-            title: (context) => AppLocalizations.of(context)!.calendarExport,
+            title: (context) => AppLocalizations.of(context).calendarExport,
             subtitle: (context) async => 'PDF, iCal, ICS, CSV',
             icon: Icons.download_rounded,
             screen: (context) => Navigator.push(
@@ -160,9 +160,9 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
         if (sph!.session.doesSupportFeature(timeTableDefinition))
           SettingsTile(
             title: (context) =>
-                AppLocalizations.of(context)!.customizeTimetable,
+                AppLocalizations.of(context).customizeTimetable,
             subtitle: (context) async =>
-                AppLocalizations.of(context)!.customizeTimetableDescription,
+                AppLocalizations.of(context).customizeTimetableDescription,
             icon: Icons.timelapse,
             screen: (context) => Navigator.push(
               context,
@@ -245,7 +245,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                   onSelect: isTablet
                       ? (tile) {
                           if (tile.title(context) ==
-                              AppLocalizations.of(context)!.language) {
+                              AppLocalizations.of(context).language) {
                             return tile.screen(context);
                           }
                           setState(() => selectedTile = tile);
@@ -262,7 +262,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     if (!isTablet) {
       return SettingsPage(
         backgroundColor: backgroundColor,
-        title: Text(AppLocalizations.of(context)!.settings),
+        title: Text(AppLocalizations.of(context).settings),
         children: [settingsList],
       );
     }
@@ -271,7 +271,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.settings),
+        title: Text(AppLocalizations.of(context).settings),
         backgroundColor: backgroundColor,
       ),
       body: Row(
@@ -294,28 +294,31 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     return Builder(
       builder: (context) {
         final isTablet = Responsive.isTablet(context);
-        if (tile.title(context) == AppLocalizations.of(context)!.appearance) {
+        if (tile.title(context) == AppLocalizations.of(context).appearance) {
           return AppearanceSettings(showBackButton: !isTablet);
         } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.notifications) {
+            AppLocalizations.of(context).notifications) {
           return NotificationSettings(
               accountCount: 1, showBackButton: !isTablet);
         } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.clearCache) {
+            AppLocalizations.of(context).clearCache) {
           return CacheSettings(showBackButton: !isTablet);
         } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.userData) {
+            AppLocalizations.of(context).userData) {
           return UserDataSettings(showBackButton: !isTablet);
-        } else if (tile.title(context) == AppLocalizations.of(context)!.about) {
+        } else if (tile.title(context) == AppLocalizations.of(context).about) {
           return AboutSettings(showBackButton: !isTablet);
         } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.calendarExport) {
+            AppLocalizations.of(context).calendarExport) {
           return CalendarExport(showBackButton: !isTablet);
         } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.customizeTimetable) {
+            AppLocalizations.of(context).customizeTimetable) {
           return StudentTimetableSettings(showBack: !isTablet);
         } else if (tile.title(context) ==
-            AppLocalizations.of(context)!.inThisUpdate) {
+            AppLocalizations.of(context).quickActions) {
+          return QuickActions(showBackButton: !isTablet);
+        } else if (tile.title(context) ==
+            AppLocalizations.of(context).inThisUpdate) {
           return FutureBuilder(
               future: showLocalUpdateInfo(context, dialog: false),
               builder: (context, snapshot) {
@@ -325,14 +328,14 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                         showBackButton: false,
                         backgroundColor: backgroundColor,
                         title:
-                            Text(AppLocalizations.of(context)!.inThisUpdate)),
+                            Text(AppLocalizations.of(context).inThisUpdate)),
                     body: snapshot.data as Widget,
                   );
                 }
                 return const Center(child: CircularProgressIndicator());
               });
         }
-        return Center(child: Text(AppLocalizations.of(context)!.noResults));
+        return Center(child: Text(AppLocalizations.of(context).noResults));
       },
     );
   }

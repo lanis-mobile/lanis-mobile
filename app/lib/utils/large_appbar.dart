@@ -15,7 +15,7 @@ class LargeAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + 88);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + (showBackButton ? 88 : 0));
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +26,9 @@ class LargeAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icon(Icons.arrow_back),
         onPressed: back ?? () => Navigator.of(context).pop(),
       ) : null,
+      title: !showBackButton ? title : null,
       automaticallyImplyLeading: showBackButton,
-      bottom: PreferredSize(
+      bottom: showBackButton ? PreferredSize(
         preferredSize: Size.fromHeight(88),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -42,7 +43,7 @@ class LargeAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ],
         ),
-      ),
+      ) : null,
     );
   }
 }
