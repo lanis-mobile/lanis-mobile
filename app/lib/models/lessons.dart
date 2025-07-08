@@ -5,27 +5,32 @@ typedef Lessons = List<Lesson>;
 class Lesson {
   String courseID;
   String name;
-  String? teacher;
-  String? teacherKuerzel;
   Uri courseURL;
+  List<LessonTeacher> teachers;
   Map<String, String>? attendances;
   CurrentEntry? currentEntry;
 
-  Lesson({required this.courseID, required this.name, required this.teacher, this.teacherKuerzel, required this.courseURL, this.attendances, this.currentEntry});
+  Lesson({required this.courseID, required this.name, required this.teachers, required this.courseURL, this.attendances, this.currentEntry});
+}
+
+class LessonTeacher {
+  String? teacher;
+  String? teacherKuerzel;
+
+  LessonTeacher({this.teacher, this.teacherKuerzel});
 }
 
 class DetailedLesson {
   String courseID;
   String name;
-  String teacher;
-  String teacherKuerzel;
+  List<LessonTeacher> teachers;
   List<CurrentEntry> history;
   List<LessonMark> marks;
   List<LessonExam> exams;
   Map<String, String> attendances;
   Uri? semester1URL;
 
-  DetailedLesson({required this.courseID, required this.name, required this.teacher, required this.teacherKuerzel, required this.history, required this.marks, required this.exams, required this.attendances, this.semester1URL});
+  DetailedLesson({required this.courseID, required this.name, required this.teachers, required this.history, required this.marks, required this.exams, required this.attendances, this.semester1URL});
 }
 
 class LessonExam {

@@ -77,6 +77,12 @@ android {
         }
     }
 
+    // Exclude just to be safe
+    configurations {
+        all*.exclude group: 'com.google.android.gms'
+        all*.exclude group: 'com.google.android.datatransport'
+    }
+
 }
 
 flutter {
