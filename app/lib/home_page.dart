@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 import 'package:sph_plan/core/database/account_database/account_db.dart';
 import 'package:sph_plan/core/sph/session.dart';
@@ -21,6 +20,9 @@ import 'core/sph/sph.dart';
 const String surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
 typedef ActionFunction = void Function(BuildContext);
+
+int selectedDestinationDrawer = -1;
+final GlobalKey<HomePageState> homeKey = GlobalKey<HomePageState>();
 
 class Destination {
   final Icon icon;
@@ -72,15 +74,27 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
 
-  late int selectedDestinationDrawer;
-  late bool doesSupportAnyApplet = false;
+  bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
+
+  void resetState() {
+    doesSupportAnyApplet = true;
+    setState(() {
+      selectedDestinationDrawer = -1;
+      destinations.clear();
+      for (var destination in AppDefinitions.applets) {
+        destinations.add(Destination.fromAppletDefinition(destination));
+      }
+      destinations.addAll(endDestinations);
+      setDefaultDestination();
+    });
+  }
 
   @override
   void initState() {
@@ -88,14 +102,20 @@ class _HomePageState extends State<HomePage> {
       destinations.add(Destination.fromAppletDefinition(destination));
     }
     destinations.addAll(endDestinations);
-    super.initState();
     setDefaultDestination();
+    super.initState();
     showUpdateInfoIfRequired(context);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+  }
+
+  void updateDestination(int newIndex) {
+    setState(() {
+      selectedDestinationDrawer = newIndex;
+    });
   }
 
   final List<Destination> endDestinations = [
@@ -157,6 +177,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
     }
+    doesSupportAnyApplet = false;
     selectedDestinationDrawer = -1;
   }
 
@@ -177,23 +198,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget noAppsSupported() {
-    return Center(
-      // In case no feature is supported at all just show an open in browser button.
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.disabled_by_default_outlined,
-            size: 150,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(32),
-            child: Text(AppLocalizations.of(context).noSupportOpenInBrowser),
-          ),
-          ElevatedButton(
-              onPressed: () => openLanisInBrowser(context),
-              child: Text(AppLocalizations.of(context).openLanisInBrowser))
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lanis-Mobile'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => _drawerKey.currentState!.openDrawer(),
+        ),
+      ),
+      body: Center(
+        // In case no feature is supported at all just show an open in browser button.
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.disabled_by_default_outlined,
+              size: 150,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(AppLocalizations.of(context).noSupportOpenInBrowser),
+            ),
+            ElevatedButton(
+                onPressed: () => openLanisInBrowser(context),
+                child: Text(AppLocalizations.of(context).openLanisInBrowser))
+          ],
+        ),
       ),
     );
   }
@@ -363,37 +393,33 @@ class _HomePageState extends State<HomePage> {
           : noAppsSupported(),
       bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
       drawer: navDrawer(context),
-      floatingActionButton: StreamBuilder(
-        stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
-        builder: (context, snapshot) {
-          return Visibility(
-            visible: !snapshot.hasData || !snapshot.data,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
-              child: ElevatedButton(
-                  onPressed: () async {
-                    await launchUrl(Uri.parse(surveyUrl));
-                    await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
-                  },
-                  child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 4,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Icon(Icons.feedback),
-                    Text(AppLocalizations.of(context).feedback)
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-      ),
+      // floatingActionButton: StreamBuilder(
+      //         stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
+      //         builder: (context, snapshot) {
+      //           return Visibility(
+      //             visible: !snapshot.hasData || !snapshot.data,
+      //             child: Padding(
+      //               padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
+      //               child: ElevatedButton(
+      //                   onPressed: () async {
+      //                     await launchUrl(Uri.parse(surveyUrl));
+      //                     await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
+      //                   },
+      //                   child: Row(
+      //                   mainAxisSize: MainAxisSize.min,
+      //                   spacing: 4,
+      //                   crossAxisAlignment: CrossAxisAlignment.end,
+      //                   children: [
+      //                     Icon(Icons.feedback),
+      //                     Text(AppLocalizations.of(context).feedback)
+      //                   ],
+      //                 ),
+      //               ),
+      //             ),
+      //           );
+      //         }
+      //       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
     );
   }
-}
-
-bool randomBool(double chance) {
-  return Random().nextDouble() < chance;
 }

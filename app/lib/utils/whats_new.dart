@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sph_plan/utils/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sph_plan/generated/l10n.dart';
 
@@ -62,6 +63,11 @@ Future<ReleaseNotesScreen?> showLocalUpdateInfo(BuildContext context,
 }
 
 void showUpdateInfoIfRequired(BuildContext context) async {
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  if (packageInfo.installerStore != "com.google.vending" && packageInfo.installerStore != null && Platform.isAndroid) {
+    logger.i("App was installed by: \"${packageInfo.installerStore}\"! Skipping version check.");
+    return;
+  }
   final latestReleaseInfo = await getReleaseInfo(null);
   if (latestReleaseInfo == null) return;
   final String latestReleaseTag = latestReleaseInfo['tag_name'];

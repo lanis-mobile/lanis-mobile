@@ -14,6 +14,7 @@ import 'package:sph_plan/view/settings/subsettings/about.dart';
 import 'package:sph_plan/view/settings/subsettings/appearance.dart';
 import 'package:sph_plan/view/settings/subsettings/cache.dart';
 import 'package:sph_plan/view/settings/subsettings/notifications.dart';
+import 'package:sph_plan/view/settings/subsettings/quick_actions.dart';
 import 'package:sph_plan/view/settings/subsettings/userdata.dart';
 
 import '../../applets/calendar/calendar_export.dart';
@@ -93,28 +94,28 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           return androidInfo.version.sdkInt >= 33;
         },
       ),
-      if (Platform.isAndroid)
-        SettingsTile(
-            title: (context) => AppLocalizations.of(context).notifications,
-            subtitle: (context) async {
-              return AppLocalizations.of(context).intervalAppletsList;
-            },
-            icon: Icons.notifications_rounded,
-            screen: (context) async {
-              int accountCount = await accountDatabase
-                  .select(accountDatabase.accountsTable)
-                  .get()
-                  .then((value) => value.length);
+      SettingsTile(
+        title: (context) => AppLocalizations.of(context).notifications,
+        subtitle: (context) async {
+          return AppLocalizations.of(context).intervalAppletsList;
+        },
+        icon: Icons.notifications_rounded,
+        screen: (context) async {
+          int accountCount = await accountDatabase
+              .select(accountDatabase.accountsTable)
+              .get()
+              .then((value) => value.length);
 
-              if(context.mounted) {
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        NotificationSettings(accountCount: accountCount)),
-              );
-              }
-            }),
+          if(context.mounted) {
+            Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    NotificationSettings(accountCount: accountCount)),
+          );
+          }
+        },
+      ),
       SettingsTile(
           title: (context) => AppLocalizations.of(context).clearCache,
           subtitle: (context) async {
@@ -131,6 +132,15 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => CacheSettings()),
               )),
+      SettingsTile(
+        title: (context) => AppLocalizations.of(context).quickActions,
+        subtitle: (context) async => "${AppLocalizations.of(context).applets}, ${AppLocalizations.of(context).external}",
+        icon: Icons.extension,
+        screen: (context) => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => QuickActions()),
+        ),
+      )
     ]),
     if (sph!.session.doesSupportFeature(calendarDefinition) ||
         sph!.session.doesSupportFeature(timeTableDefinition))

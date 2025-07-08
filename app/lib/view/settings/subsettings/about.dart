@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
+import 'package:sph_plan/view/settings/subsettings/debug_export.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sph_plan/generated/l10n.dart';
@@ -71,10 +72,12 @@ class AvatarTile extends StatelessWidget {
 class AboutLink {
   final String Function(BuildContext context) title;
   final Future<void> Function(BuildContext context) onTap;
+  final void Function(BuildContext)? onLongPress;
+
   final IconData iconData;
 
   const AboutLink(
-      {required this.title, required this.onTap, required this.iconData});
+      {required this.title, required this.onTap, required this.iconData, this.onLongPress});
 }
 
 class AboutSettings extends SettingsColours {
@@ -162,6 +165,9 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
             });
         }
       },
+      onLongPress: (context) => Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => DebugExport(),)
+      )
     ),
   ];
 
@@ -339,6 +345,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
               leading: Icon(link.iconData),
               title: Text(link.title(context)),
               onTap: () => link.onTap(context),
+              onLongPress: () =>  link.onLongPress?.call(context),
             ),
           if (error) ...[
             SizedBox(

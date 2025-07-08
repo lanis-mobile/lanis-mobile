@@ -7,18 +7,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:sph_plan/generated/l10n.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sph_plan/core/sph/sph.dart';
+import 'package:sph_plan/generated/l10n.dart';
 import 'package:sph_plan/startup.dart';
 import 'package:sph_plan/themes.dart';
 import 'package:sph_plan/utils/authentication_state.dart';
+import 'package:sph_plan/utils/logger.dart';
+import 'package:sph_plan/utils/quick_actions.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 import 'applets/conversations/view/shared.dart';
 import 'background_service.dart';
-import 'core/database/account_database/account_db.dart';
+import 'core/database/account_database/account_db.dart' show secureStorage, accountDatabase, AccountDatabase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,9 +35,38 @@ void main() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   accountDatabase = AccountDatabase();
 
+
+  if (((await secureStorage.read(key: 'encryption_key')) == null && (await accountDatabase.select(accountDatabase.accountsTable).get()).isNotEmpty)) {
+    logger.w('iOS build with old keychain detected, deleting all accounts and data.');
+    await secureStorage.deleteAll();
+    await secureStorage.write(
+      key: 'ios-cert-ownership-transfer',
+      value: 'done',
+    );
+    await accountDatabase.deleteAllAccounts();
+    
+    final directory = await getTemporaryDirectory();
+    final userDir = Directory(directory.path);
+    if (userDir.existsSync()) {
+      for (var entity in userDir.listSync(recursive: false)) {
+      entity.deleteSync(recursive: true);
+      }
+    }
+    final directory3 = await getApplicationCacheDirectory();
+    final userDir3 = Directory(directory3.path);
+    if (userDir3.existsSync()) {
+      for (var entity in userDir3.listSync(recursive: false)) {
+      entity.deleteSync(recursive: true);
+      }
+    }
+  }
+  
+
   enableTransparentNavigationBar();
 
-  authenticationState.login();
+  authenticationState.login().then((v) {
+    if(sph?.session != null) QuickActionsStartUp();
+  });
 
   await setupBackgroundService(accountDatabase);
   await initializeNotifications();
@@ -135,8 +167,7 @@ class App extends StatelessWidget {
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              SfGlobalLocalizations.delegate
+              GlobalCupertinoLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
             home: const Scaffold(

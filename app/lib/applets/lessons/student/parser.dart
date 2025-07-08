@@ -21,8 +21,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
     final response =
     await sph.session.dio.get("https://start.schulportal.hessen.de/meinunterricht.php?cacheBreaker=$unixTime");
-    var encryptedHTML = sph.session.cryptor.decryptEncodedTags(response.data);
-    var document = parse(encryptedHTML);
+    var document = parse(response.data);
 
     var kursmappenDOM = document.getElementById("mappen");
     final row = kursmappenDOM?.getElementsByClassName("row");
@@ -143,8 +142,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
       final response =
       await sph.session.dio.get("https://start.schulportal.hessen.de/$url");
-      final String decryptedHTML = sph.session.cryptor.decryptEncodedTags(response.data);
-      Document document = parse(decryptedHTML);
+      Document document = parse(response.data);
 
       //course name
       var heading = document.getElementById("content")?.querySelector("h1");
@@ -241,7 +239,7 @@ class LessonsStudentParser extends AppletParser<Lessons> {
 
         history.add(CurrentEntry(
           entryID: tableRow.attributes["data-entry"]!,
-          topicTitle: tableRow.children[1].querySelector("big>b")?.text.trim(),
+          topicTitle: tableRow.children[1].querySelector("td>b")?.text.trim(),
           description: description,
           presence: tableRow.children[2].text.trim() == 'nicht erfasst' ? null : tableRow.children[2].text.trim(),
           topicDate: DateTime.parse(dateInformation[0].split(".").reversed.join("-")),

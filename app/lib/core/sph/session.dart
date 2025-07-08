@@ -63,16 +63,29 @@ class SessionHandler {
       },
     ));
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-        options.headers.addAll({
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'User-Agent': 'Lanis-Mobile'
-        });
-        options.queryParameters['_cachebreaker'] = DateTime.now().millisecondsSinceEpoch.toString();
-        return handler.next(options);
+     onResponse: (Response response, ResponseInterceptorHandler handler) {
+       if (response.data is String) {
+         final contentType = response.headers.value('content-type');
+         if (contentType != null && contentType.contains('text/html')) {
+           final decryptedString = cryptor.decryptEncodedTags(response.data);
+           //response.data = unescape.convert(decryptedString);
+            response.data = decryptedString;
+         }
+       }
+        return handler.next(response);
       },
     ));
+    // dio.interceptors.add(InterceptorsWrapper(
+    //   onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+    //     options.headers.addAll({
+    //       'Cache-Control': 'no-cache',
+    //       'Pragma': 'no-cache',
+    //       'User-Agent': 'Lanis-Mobile'
+    //     });
+    //    options.queryParameters['_cachebreaker'] = DateTime.now().millisecondsSinceEpoch.toString();
+    //     return handler.next(options);
+    //   },
+    // ));
     dio.options.followRedirects = false;
     dio.options.connectTimeout = Duration(seconds: 8);
     dio.options.validateStatus =
@@ -126,7 +139,8 @@ class SessionHandler {
   void asyncLogRequest() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     try {
-      await dio.post("https://lanis-logger.orion.alessioc42.dev/api/log-login?schoolid=${sph.account.schoolID}&versioncode=${packageInfo.buildNumber}");
+      String platform = Platform.isAndroid ? 'android' : Platform.isIOS ? 'ios' : 'unknown';
+      await dio.post("https://lanis-logger.orion.alessioc42.dev/api/log-login?schoolid=${sph.account.schoolID}&versioncode=${packageInfo.buildNumber}&platform=$platform");
       logger.i('Logged account login to orion. (${sph.account.schoolID}, ${packageInfo.buildNumber})');
     } catch (e) {
       logger.w('Failed to log account login to orion. (${sph.account.schoolID}, ${packageInfo.buildNumber})');

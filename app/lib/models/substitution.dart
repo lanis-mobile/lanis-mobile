@@ -102,8 +102,10 @@ class Substitution {
     if (value == null) {
       return false;
     }
+    // remove all HTML tags from the value
+    value = value.replaceAll(RegExp(r'<[^>]*>'), '');
     if (!(strict ?? true)) {
-      return filter.any((element) => value.contains(element));
+      return filter.any((element) => value!.contains(element));
     }
     for (var singleFilter in filter) {
       if (!value.contains(singleFilter)) {
