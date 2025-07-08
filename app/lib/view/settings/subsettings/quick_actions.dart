@@ -9,13 +9,14 @@ import 'package:sph_plan/utils/switch_tile.dart';
 import 'package:sph_plan/view/settings/settings_page_builder.dart';
 
 class QuickActions extends StatefulWidget {
-  const QuickActions({super.key});
+  final bool showBackButton;
+  const QuickActions({super.key, required bool this.showBackButton});
 
   @override
   State<QuickActions> createState() => _QuickActionsState();
 }
 
-class _QuickActionsState extends State<QuickActions> {
+class _QuickActionsState extends SettingsColoursState<QuickActions> {
   // Android supports 2 quick actions, iOS 4
   final int maxQuickActions = Platform.isAndroid ? 2 : 4;
 
@@ -36,7 +37,8 @@ class _QuickActionsState extends State<QuickActions> {
 
     return SettingsPage(
       title: Text(AppLocalizations.of(context).quickActions),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      backgroundColor: backgroundColor,
+      showBackButton: widget.showBackButton,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
