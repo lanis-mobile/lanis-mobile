@@ -100,7 +100,7 @@ class _AboutSettingsState extends SettingsColoursState<AboutSettings> {
 
     try {
       final response = await sph!.session.dio.get(
-          'https://api.github.com/repos/lanis-mobile/lanis-mobile/contributors');
+          'https://api.github.com/repos/lanis-mobile/lanis/contributors');
       setState(() {
         contributors = response.data;
       });

@@ -116,10 +116,10 @@ Future<String> getDeviceReleaseTag() async {
 Future<Map?> getReleaseInfo(String? releaseTag) async {
   try {
     String url =
-        'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/latest';
+        'https://api.github.com/repos/lanis-mobile/lanis/releases/latest';
     if (releaseTag != null) {
       url =
-          'https://api.github.com/repos/lanis-mobile/lanis-mobile/releases/tags/$releaseTag';
+          'https://api.github.com/repos/lanis-mobile/lanis/releases/tags/$releaseTag';
     }
     final response = await sph!.session.dio.get(url);
     return response.data;
