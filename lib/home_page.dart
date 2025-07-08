@@ -82,6 +82,7 @@ class HomePageState extends State<HomePage> {
 
   bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
+  bool? tabletMode;
 
   void resetState() {
     doesSupportAnyApplet = true;
@@ -110,6 +111,9 @@ class HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final mediaQueryData = MediaQueryData.fromView(WidgetsBinding.instance.platformDispatcher.views.first);
+    tabletMode ??= !(mediaQueryData.size.shortestSide < 600); // set to 600
   }
 
   void updateDestination(int newIndex) {
@@ -381,45 +385,77 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  Widget navRail(BuildContext context) {
+    List<NavigationRailDestination> railDestinations = [];
+
+    for (var destination in destinations) {
+      if (destination.isSupported) {
+        railDestinations.add(NavigationRailDestination(
+          label: Text(destination.label(context)),
+          icon: destination.icon,
+          selectedIcon: destination.selectedIcon,
+          disabled: !destination.isSupported,
+        ));
+      }
+    }
+
+    List<int?> indexNavbarTranslationLayer = [];
+
+    int helpIndex = 0;
+    for (var destination in destinations) {
+      if (destination.isSupported) {
+        indexNavbarTranslationLayer.add(helpIndex);
+        helpIndex += 1;
+      } else {
+        indexNavbarTranslationLayer.add(null);
+      }
+    }
+
+    return NavigationRail(
+      selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
+      onDestinationSelected: (int index) =>
+          openDestination(indexNavbarTranslationLayer.indexOf(index), false),
+      labelType: NavigationRailLabelType.all,
+      destinations: railDestinations,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
-      body: doesSupportAnyApplet
-          ? destinations[selectedDestinationDrawer].body!(
-              context, sph!.session.accountType, () {
+      bottomNavigationBar: tabletMode == false ? doesSupportAnyApplet ? navBar(context) : null : null,
+      drawerEdgeDragWidth: tabletMode??false ? 100 : 30,
+      drawer: navDrawer(context),
+      body: Row(
+        children: <Widget>[
+          if (tabletMode == true) ...[
+            LayoutBuilder(
+              builder: (context, constraint) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraint.maxHeight),
+                    child: IntrinsicHeight(
+                      child: navRail(context),
+                    ),
+                  ),
+                );
+              },
+            ),
+            VerticalDivider(thickness: 1, width: 1),
+          ],
+          // This is the main content.
+          Expanded(
+            child: doesSupportAnyApplet
+                ? destinations[selectedDestinationDrawer].body!(
+                context, sph!.session.accountType, () {
               _drawerKey.currentState!.openDrawer();
             })
-          : noAppsSupported(),
-      bottomNavigationBar: doesSupportAnyApplet ? navBar(context) : null,
-      drawer: navDrawer(context),
-      // floatingActionButton: StreamBuilder(
-      //         stream: sph!.prefs.kv.subscribe('poll_survey_1_12_25_clicked'),
-      //         builder: (context, snapshot) {
-      //           return Visibility(
-      //             visible: !snapshot.hasData || !snapshot.data,
-      //             child: Padding(
-      //               padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight + 24),
-      //               child: ElevatedButton(
-      //                   onPressed: () async {
-      //                     await launchUrl(Uri.parse(surveyUrl));
-      //                     await sph!.prefs.kv.set('poll_survey_1_12_25_clicked', true);
-      //                   },
-      //                   child: Row(
-      //                   mainAxisSize: MainAxisSize.min,
-      //                   spacing: 4,
-      //                   crossAxisAlignment: CrossAxisAlignment.end,
-      //                   children: [
-      //                     Icon(Icons.feedback),
-      //                     Text(AppLocalizations.of(context).feedback)
-      //                   ],
-      //                 ),
-      //               ),
-      //             ),
-      //           );
-      //         }
-      //       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
+                : noAppsSupported(),
+          )
+        ],
+      ),
     );
   }
 }
