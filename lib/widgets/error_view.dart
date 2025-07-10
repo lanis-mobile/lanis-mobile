@@ -21,10 +21,6 @@ class ErrorView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (showAppBar) ...[
-          AppBar(),
-          Spacer(),
-        ],
         Icon(
           error is! NoConnectionException ? Icons.warning_rounded : Icons.wifi_off_rounded,
           size: 60,

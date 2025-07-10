@@ -48,7 +48,6 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
         phpUrl: studyGroupsDefinition.appletPhpIdentifier,
         settingsDefaults: studyGroupsDefinition.settingsDefaults,
         accountType: sph!.session.accountType,
-        showErrorAppBar: true,
         builder:
             (context, data, accountType, settings, updateSetting, refresh) {
           List<StudentStudyGroupsContainer> studyData = data

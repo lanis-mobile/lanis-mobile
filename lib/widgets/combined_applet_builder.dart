@@ -19,8 +19,6 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
   final Map<String, dynamic> settingsDefaults;
   final AccountType accountType;
   final BuilderFunction<T> builder;
-  final bool showErrorAppBar;
-  final AppBar? loadingAppBar;
 
   const CombinedAppletBuilder({
     super.key,
@@ -29,8 +27,6 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
     required this.settingsDefaults,
     required this.accountType,
     required this.builder,
-    this.showErrorAppBar = false,
-    this.loadingAppBar,
   });
 
   @override
@@ -43,11 +39,8 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
   bool _loading = true;
 
   Widget _loadingState() {
-    return Scaffold(
-      appBar: widget.loadingAppBar,
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 
@@ -76,7 +69,6 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
           return Scaffold(
             body: ErrorView(
-              showAppBar: widget.showErrorAppBar,
               error: snapshot.data!.contentStatus == ContentStatus.offline
                   ? NoConnectionException()
                   : UnknownException(),
