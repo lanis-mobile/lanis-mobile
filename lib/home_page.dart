@@ -172,13 +172,6 @@ class HomePageState extends State<HomePage> {
 
   Widget noAppsSupported() {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Lanis-Mobile'),
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () => _drawerKey.currentState!.openDrawer(),
-        ),
-      ),
       body: Center(
         // In case no feature is supported at all just show an open in browser button.
         child: Column(

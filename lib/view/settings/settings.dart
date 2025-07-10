@@ -270,10 +270,6 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     // Tablet layout
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).settings),
-        backgroundColor: backgroundColor,
-      ),
       body: Row(
         children: [
           SizedBox(
