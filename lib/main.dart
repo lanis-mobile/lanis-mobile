@@ -175,9 +175,7 @@ class App extends StatelessWidget {
               navigationNotifier.value = navigationNotifier.value + 1;
               return notification.canHandlePop;
             },
-            home: const Scaffold(
-              body: StartupScreen(),
-            ),
+            home: StartupScreen(),
           );
         });
       },

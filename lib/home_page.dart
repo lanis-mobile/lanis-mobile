@@ -7,7 +7,6 @@ import 'package:lanis/generated/l10n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lanis/utils/authentication_state.dart';
-import 'package:lanis/utils/logger.dart';
 import 'package:lanis/utils/responsive.dart';
 import 'package:lanis/utils/whats_new.dart';
 import 'package:lanis/utils/cached_network_image.dart';
@@ -85,7 +84,6 @@ class HomePageState extends State<HomePage> {
   void checkFirstLevelRoute() {
     navigatorKey.currentState?.popUntil((route) {
       setState(() {
-        logger.d(route.isFirst);
         isFirstLevelRoute = route.isFirst;
       });
       return true;
@@ -115,7 +113,6 @@ class HomePageState extends State<HomePage> {
     super.initState();
     showUpdateInfoIfRequired(context);
     navigationNotifier.addListener(() {
-      logger.d('route changed!');
       checkFirstLevelRoute();
     });
   }

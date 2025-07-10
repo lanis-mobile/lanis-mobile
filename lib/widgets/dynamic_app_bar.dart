@@ -7,6 +7,7 @@ class AppBarController extends ChangeNotifier {
 
   final Map<String, Widget> _actions = {};
   String? overrideTitle;
+  Color? overrideColor;
 
   List<Widget> get actions => List.unmodifiable(_actions.values);
 
@@ -26,9 +27,16 @@ class AppBarController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Color setOverrideColor(Color? color) {
+    overrideColor = color;
+    notifyListeners();
+    return overrideColor ?? Colors.transparent;
+  }
+
   void clear() {
     _actions.clear();
     overrideTitle = null;
+    overrideColor = null;
     notifyListeners();
   }
 }
@@ -45,6 +53,7 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
       builder: (context, _) => AppBar(
         title: Text(title),
         automaticallyImplyLeading: automaticallyImplyLeading,
+        backgroundColor: AppBarController.instance.overrideColor,
         actions: AppBarController.instance.actions,
       ),
     );

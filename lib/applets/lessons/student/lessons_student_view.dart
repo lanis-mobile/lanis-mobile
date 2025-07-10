@@ -6,7 +6,6 @@ import 'package:lanis/widgets/dynamic_app_bar.dart';
 
 import '../../../core/sph/sph.dart';
 import '../../../models/lessons.dart';
-import '../../../utils/logger.dart';
 import 'attendances.dart';
 import 'lesson_list_tile.dart';
 
@@ -64,9 +63,6 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
           ),
       );
     }
-    logger.d(
-      'No global settings or update function available, cannot build app bar action toggle.',
-    );
     return SizedBox.shrink();
   }
 

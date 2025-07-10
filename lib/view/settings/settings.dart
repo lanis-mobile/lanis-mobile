@@ -22,6 +22,7 @@ import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
 import '../../utils/press_tile.dart';
 import '../../utils/whats_new.dart';
+import '../../widgets/dynamic_app_bar.dart';
 
 class SettingsGroup {
   final List<SettingsTile> tiles;
@@ -207,6 +208,15 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   ];
 
   SettingsTile? selectedTile;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.setOverrideColor(backgroundColor);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
