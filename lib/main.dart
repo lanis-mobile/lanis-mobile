@@ -171,7 +171,10 @@ class App extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
-            navigatorKey: globalNavigatorKey,
+            onNavigationNotification: (notification) {
+              navigationNotifier.value = navigationNotifier.value + 1;
+              return notification.canHandlePop;
+            },
             home: const Scaffold(
               body: StartupScreen(),
             ),

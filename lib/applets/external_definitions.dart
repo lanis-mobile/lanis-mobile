@@ -15,15 +15,3 @@ final openLanisDefinition = ExternalDefinition(
     });
   }
 );
-
-final openMoodleDefinition = ExternalDefinition(
-  id: 'openMoodle',
-  label: (context) => AppLocalizations.of(context).openMoodle,
-  action: (context) {
-    if(context == null) {
-      return;
-    }
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const MoodleWebView()));
-  }
-);

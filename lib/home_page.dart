@@ -7,6 +7,7 @@ import 'package:lanis/generated/l10n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lanis/utils/authentication_state.dart';
+import 'package:lanis/utils/logger.dart';
 import 'package:lanis/utils/responsive.dart';
 import 'package:lanis/utils/whats_new.dart';
 import 'package:lanis/utils/cached_network_image.dart';
@@ -17,6 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
+import 'globals.dart';
 
 const String surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
@@ -78,6 +80,17 @@ class HomePageState extends State<HomePage> {
 
   bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
+  bool isFirstLevelRoute = true;
+
+  void checkFirstLevelRoute() {
+    navigatorKey.currentState?.popUntil((route) {
+      setState(() {
+        logger.d(route.isFirst);
+        isFirstLevelRoute = route.isFirst;
+      });
+      return true;
+    });
+  }
 
   void resetState() {
     doesSupportAnyApplet = true;
@@ -101,6 +114,10 @@ class HomePageState extends State<HomePage> {
     setDefaultDestination();
     super.initState();
     showUpdateInfoIfRequired(context);
+    navigationNotifier.addListener(() {
+      logger.d('route changed!');
+      checkFirstLevelRoute();
+    });
   }
 
   final List<Destination> endDestinations = [
@@ -201,6 +218,7 @@ class HomePageState extends State<HomePage> {
       destinations[index].action!(context, navigatorKey);
     } else {
       AppBarController.instance.clear();
+      navigatorKey.currentState?.popUntil((route) => route.isFirst );
       setState(() {
         selectedDestinationDrawer = index;
         if (fromDrawer) Navigator.pop(context);
@@ -409,7 +427,7 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
-      bottomNavigationBar: Responsive.isTablet(context) == false ? doesSupportAnyApplet ? navBar(context) : null : null,
+      bottomNavigationBar: Responsive.isTablet(context) == false && isFirstLevelRoute && doesSupportAnyApplet ? navBar(context) : null,
       drawerEdgeDragWidth: Responsive.isTablet(context) ? 100 : 30,
       drawer: navDrawer(context),
       body: Row(

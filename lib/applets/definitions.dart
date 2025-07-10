@@ -75,7 +75,6 @@ class AppDefinitions {
 
   static List<ExternalDefinition> external = [
     openLanisDefinition,
-    openMoodleDefinition,
   ];
 
   static bool isAppletSupported(AccountType accountType, String phpIdentifier) {
