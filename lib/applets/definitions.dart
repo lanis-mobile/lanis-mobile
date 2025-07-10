@@ -11,42 +11,37 @@ import 'package:lanis/models/account_types.dart';
 
 import '../background_service.dart';
 import '../core/sph/sph.dart';
+import 'moodle/definition.dart';
 
 typedef StringBuildContextCallback = String Function(BuildContext context);
 typedef WidgetBuildBody = Widget Function(BuildContext context, AccountType accountType, Function? openDrawerCb);
 typedef BackgroundTaskFunction = Future<void> Function(SPH sph, AccountType accountType, BackgroundTaskToolkit toolkit);
-
-enum AppletType {
-  nested,
-  navigation,
-}
+typedef WidgetWithContextCallback = Widget Function(BuildContext context);
 
 class AppletDefinition {
-  final String appletPhpUrl;
-  final Icon icon;
-  final Icon selectedIcon;
-  final AppletType appletType;
+  final String appletPhpIdentifier;
+  final WidgetWithContextCallback icon;
+  final WidgetWithContextCallback selectedIcon;
   final bool addDivider;
   final StringBuildContextCallback label;
   final List<AccountType> supportedAccountTypes;
   final bool allowOffline;
+  final bool useBottomNavigation;
   final Duration refreshInterval;
   final Map<String, dynamic> settingsDefaults;
   WidgetBuildBody? bodyBuilder;
   BackgroundTaskFunction? notificationTask;
 
-  bool get enableBottomNavigation => appletType == AppletType.nested;
-
   AppletDefinition({
-    required this.appletPhpUrl,
+    required this.appletPhpIdentifier,
     required this.icon,
     required this.selectedIcon,
-    required this.appletType,
     required this.addDivider,
     required this.label,
     required this.supportedAccountTypes,
     required this.refreshInterval,
     required this.settingsDefaults,
+    required this.useBottomNavigation,
     this.notificationTask,
     this.bodyBuilder,
     this.allowOffline = false,
@@ -74,7 +69,8 @@ class AppDefinitions {
     conversationsDefinition,
     lessonsDefinition,
     dataStorageDefinition,
-    studyGroupsDefinition
+    studyGroupsDefinition,
+    moodleDefinition
   ];
 
   static List<ExternalDefinition> external = [
@@ -85,16 +81,16 @@ class AppDefinitions {
   static bool isAppletSupported(AccountType accountType, String phpIdentifier) {
     return applets.any((element) =>
         element.supportedAccountTypes.contains(accountType) &&
-        element.appletPhpUrl == phpIdentifier);
+        element.appletPhpIdentifier == phpIdentifier);
   }
 
   static getByPhpIdentifier(String phpIdentifier) {
     return applets
-        .firstWhere((element) => element.appletPhpUrl == phpIdentifier);
+        .firstWhere((element) => element.appletPhpIdentifier == phpIdentifier);
   }
 
   static getIndexByPhpIdentifier(String phpIdentifier) {
     return applets
-        .indexWhere((element) => element.appletPhpUrl == phpIdentifier);
+        .indexWhere((element) => element.appletPhpIdentifier == phpIdentifier);
   }
 }

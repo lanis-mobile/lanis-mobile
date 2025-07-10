@@ -4,6 +4,7 @@ import 'package:lanis/generated/l10n.dart';
 import '../../core/sph/sph.dart';
 import '../../models/datastorage.dart';
 import '../../models/client_status_exceptions.dart';
+import '../../widgets/dynamic_app_bar.dart';
 import 'file_listtile.dart';
 import 'folder_listtile.dart';
 
@@ -21,6 +22,8 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
   late List<FolderNode> folders;
   final SearchController searchController = SearchController();
 
+  final Widget searchAnchor = const AsyncSearchAnchor();
+  bool searchAnchorAdded = false;
   @override
   void initState() {
     super.initState();
@@ -43,6 +46,10 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
       setState(() {
         loading = false;
       });
+      if (!searchAnchorAdded) {
+        AppBarController.instance.add("dataStorageSearch", searchAnchor);
+        searchAnchorAdded = true;
+      }
     } on LanisException {
       setState(() {
         error = true;
@@ -65,29 +72,21 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).storage),
-        actions: const [
-          AsyncSearchAnchor(),
-        ],
-      ),
-      body: loading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : error
-              ? Center(
-                  child: Column(
-                  children: [
-                    Icon(Icons.error_outline, size: 100),
-                    SizedBox(height: 10),
-                    Text(AppLocalizations.of(context).couldNotLoadDataStorage),
-                  ],
-                ))
-              : ListView(
-                  children: getListTiles(),
-                ),
+    return loading
+        ? Center(
+      child: CircularProgressIndicator(),
+    )
+        : error
+        ? Center(
+        child: Column(
+          children: [
+            Icon(Icons.error_outline, size: 100),
+            SizedBox(height: 10),
+            Text(AppLocalizations.of(context).couldNotLoadDataStorage),
+          ],
+        ))
+        : ListView(
+      children: getListTiles(),
     );
   }
 }
@@ -116,13 +115,14 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
     }, suggestionsBuilder:
             (BuildContext context, SearchController controller) async {
       _searchingWithQuery = controller.text;
-      var options = await sph!.parser.dataStorageParser.searchFiles(_searchingWithQuery??'');
+      var options = await sph!.parser.dataStorageParser
+          .searchFiles(_searchingWithQuery ?? '');
 
       if (_searchingWithQuery != controller.text) {
         return _lastOptions;
       }
 
-      _lastOptions = List<Widget>.generate(options?.length??0, (int index) {
+      _lastOptions = List<Widget>.generate(options?.length ?? 0, (int index) {
         final Map item = options[index];
         return SearchFileListTile(
             context: context,
@@ -134,7 +134,9 @@ class _AsyncSearchAnchorState extends State<AsyncSearchAnchor> {
       if (_lastOptions.isEmpty) {
         _lastOptions = <Widget>[
           ListTile(
-            title: Text(context.mounted ? AppLocalizations.of(context).noResults : 'Error'),
+            title: Text(context.mounted
+                ? AppLocalizations.of(context).noResults
+                : 'Error'),
           )
         ];
       }

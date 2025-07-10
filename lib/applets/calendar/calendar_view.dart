@@ -352,296 +352,285 @@ class _CalendarViewState extends State<CalendarView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: widget.openDrawerCb != null
-          ? AppBar(
-              title: Text(calendarDefinition.label(context)),
-              leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => widget.openDrawerCb!(),
-              ),
-            )
-          : null,
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
-            child: Focus(
-              onFocusChange: (hasFocus) {
-                if (hasFocus == true && noTrigger == false) {
-                  FocusManager.instance.primaryFocus?.consumeKeyboardToken();
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
+          child: Focus(
+            onFocusChange: (hasFocus) {
+              if (hasFocus == true && noTrigger == false) {
+                FocusManager.instance.primaryFocus?.consumeKeyboardToken();
 
-                  if (keyboardObserver.value == KeyboardStatus.closed) {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  }
-                }
-              },
-              child: SearchAnchor.bar(
-                searchController: searchController,
-                isFullScreen: false,
-                viewLeading: IconButton(
-                    onPressed: () {
-                      searchController.closeView(null);
-                    },
-                    icon: Icon(Icons.arrow_back)),
-                barTrailing: [
-                  if (!_selectedDay!.isSameDay(DateTime.now()))
-                    IconButton(
-                      icon: const Icon(Icons.restore),
-                      onPressed: () {
-                        setState(() {
-                          searchController.text = "";
-                          _selectedDay = DateTime.now();
-                          _focusedDay = DateTime.now();
-                        });
-                      },
-                    ),
-                ],
-                onSubmitted: (_) {
+                if (keyboardObserver.value == KeyboardStatus.closed) {
                   FocusManager.instance.primaryFocus?.unfocus();
-                },
-                suggestionsBuilder: (context, searchController) {
-                  final results = fuzzySearchEventList(searchController.text);
+                }
+              }
+            },
+            child: SearchAnchor.bar(
+              searchController: searchController,
+              isFullScreen: false,
+              viewLeading: IconButton(
+                  onPressed: () {
+                    searchController.closeView(null);
+                  },
+                  icon: Icon(Icons.arrow_back)),
+              barTrailing: [
+                if (!_selectedDay!.isSameDay(DateTime.now()))
+                  IconButton(
+                    icon: const Icon(Icons.restore),
+                    onPressed: () {
+                      setState(() {
+                        searchController.text = "";
+                        _selectedDay = DateTime.now();
+                        _focusedDay = DateTime.now();
+                      });
+                    },
+                  ),
+              ],
+              onSubmitted: (_) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              suggestionsBuilder: (context, searchController) {
+                final results = fuzzySearchEventList(searchController.text);
 
-                  return results
-                      .map(
-                        (event) => ListTile(
-                          title: Text(event.title),
-                          iconColor: event.color,
-                          subtitle: Text(
-                              '${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
-                          leading: event.endTime.isBefore(DateTime.now())
-                              ? const Icon(Icons.done)
-                              : const Icon(Icons.event),
-                          onTap: () async {
-                            setState(() {
-                              _selectedDay = event.startTime;
-                              _focusedDay = event.startTime;
-                            });
-                            searchController.closeView(null);
+                return results
+                    .map(
+                      (event) => ListTile(
+                    title: Text(event.title),
+                    iconColor: event.color,
+                    subtitle: Text(
+                        '${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                    leading: event.endTime.isBefore(DateTime.now())
+                        ? const Icon(Icons.done)
+                        : const Icon(Icons.event),
+                    onTap: () async {
+                      setState(() {
+                        _selectedDay = event.startTime;
+                        _focusedDay = event.startTime;
+                      });
+                      searchController.closeView(null);
 
-                            noTrigger = true;
-                            if (keyboardObserver.value ==
-                                KeyboardStatus.closed) {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                            }
+                      noTrigger = true;
+                      if (keyboardObserver.value ==
+                          KeyboardStatus.closed) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      }
 
-                            await openEventBottomSheet(event).whenComplete(() {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              noTrigger = false;
-                            });
-                          },
-                        ),
-                      )
-                      .toList();
-                },
-              ),
+                      await openEventBottomSheet(event).whenComplete(() {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        noTrigger = false;
+                      });
+                    },
+                  ),
+                )
+                    .toList();
+              },
             ),
           ),
-          Expanded(
-              child: CombinedAppletBuilder<List<CalendarEvent>>(
-                  parser: sph!.parser.calendarParser,
-                  phpUrl: calendarDefinition.appletPhpUrl,
-                  settingsDefaults: calendarDefinition.settingsDefaults,
-                  accountType: sph!.session.accountType,
-                  builder: (context, data, accountType, settings, updateSetting,
-                      refresh) {
-                    eventList = data;
-                    _selectedEvents.value = _getEventsForDay(_selectedDay!);
+        ),
+        Expanded(
+            child: CombinedAppletBuilder<List<CalendarEvent>>(
+                parser: sph!.parser.calendarParser,
+                phpUrl: calendarDefinition.appletPhpIdentifier,
+                settingsDefaults: calendarDefinition.settingsDefaults,
+                accountType: sph!.session.accountType,
+                builder: (context, data, accountType, settings, updateSetting,
+                    refresh) {
+                  eventList = data;
+                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
 
-                    return Column(
-                      children: [
-                        TableCalendar<CalendarEvent>(
-                          locale: AppLocalizations.of(context).locale,
-                          firstDay: DateTime.utc(2020),
-                          lastDay: DateTime.utc(2030),
-                          availableCalendarFormats: {
-                            CalendarFormat.month: AppLocalizations.of(context)
-                                .calendarFormatMonth,
-                            CalendarFormat.twoWeeks:
-                                AppLocalizations.of(context)
-                                    .calendarFormatTwoWeeks,
-                            CalendarFormat.week: AppLocalizations.of(context)
-                                .calendarFormatWeek,
-                          },
-                          focusedDay: _focusedDay,
-                          selectedDayPredicate: (day) =>
-                              isSameDay(_selectedDay, day),
-                          calendarFormat: _calendarFormat,
-                          eventLoader: _getEventsForDay,
-                          startingDayOfWeek: StartingDayOfWeek.monday,
-                          calendarStyle: CalendarStyle(
-                            outsideDaysVisible: false,
-                            defaultDecoration:
-                                const BoxDecoration(shape: BoxShape.circle),
-                            selectedDecoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                shape: BoxShape.circle),
-                            selectedTextStyle: TextStyle(
-                                fontSize: 16.0,
-                                color: Theme.of(context).colorScheme.onPrimary),
-                            todayDecoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondary,
-                              shape: BoxShape.circle,
-                            ),
-                            todayTextStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onSecondary,
-                              fontSize: 16,
-                            ),
-                            markerDecoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
-                            ),
-                            markerSize: 8,
-                            isTodayHighlighted: false,
+                  return Column(
+                    children: [
+                      TableCalendar<CalendarEvent>(
+                        locale: AppLocalizations.of(context).locale,
+                        firstDay: DateTime.utc(2020),
+                        lastDay: DateTime.utc(2030),
+                        availableCalendarFormats: {
+                          CalendarFormat.month: AppLocalizations.of(context)
+                              .calendarFormatMonth,
+                          CalendarFormat.twoWeeks:
+                          AppLocalizations.of(context)
+                              .calendarFormatTwoWeeks,
+                          CalendarFormat.week: AppLocalizations.of(context)
+                              .calendarFormatWeek,
+                        },
+                        focusedDay: _focusedDay,
+                        selectedDayPredicate: (day) =>
+                            isSameDay(_selectedDay, day),
+                        calendarFormat: _calendarFormat,
+                        eventLoader: _getEventsForDay,
+                        startingDayOfWeek: StartingDayOfWeek.monday,
+                        calendarStyle: CalendarStyle(
+                          outsideDaysVisible: false,
+                          defaultDecoration:
+                          const BoxDecoration(shape: BoxShape.circle),
+                          selectedDecoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              shape: BoxShape.circle),
+                          selectedTextStyle: TextStyle(
+                              fontSize: 16.0,
+                              color: Theme.of(context).colorScheme.onPrimary),
+                          todayDecoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary,
+                            shape: BoxShape.circle,
                           ),
-                          onDaySelected: _onDaySelected,
-                          calendarBuilders: CalendarBuilders(
-                            markerBuilder:
-                                (BuildContext context, date, events) {
-                              if (events.isEmpty) return SizedBox();
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: events.length,
+                          todayTextStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.onSecondary,
+                            fontSize: 16,
+                          ),
+                          markerDecoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color:
+                            Theme.of(context).colorScheme.inversePrimary,
+                          ),
+                          markerSize: 8,
+                          isTodayHighlighted: false,
+                        ),
+                        onDaySelected: _onDaySelected,
+                        calendarBuilders: CalendarBuilders(
+                          markerBuilder:
+                              (BuildContext context, date, events) {
+                            if (events.isEmpty) return SizedBox();
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: events.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: const EdgeInsets.only(top: 21),
+                                  padding: const EdgeInsets.all(1),
+                                  child: Container(
+                                    height: 6,
+                                    width: 6,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: events[index].color,
+                                        border: (events[index]
+                                            .color
+                                            .computeLuminance() -
+                                            Theme.of(context)
+                                                .colorScheme
+                                                .surface
+                                                .computeLuminance())
+                                            .abs() <
+                                            0.02
+                                            ? Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                            width: 0.75)
+                                            : null),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        pageJumpingEnabled: true,
+                        onFormatChanged: (format) {
+                          if (_calendarFormat != format) {
+                            setState(() {
+                              _calendarFormat = format;
+                            });
+                          }
+                        },
+                        headerStyle: HeaderStyle(
+                          formatButtonTextStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary),
+                          formatButtonDecoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        onPageChanged: (focusedDay) {
+                          _focusedDay = focusedDay;
+                        },
+                      ),
+                      Expanded(
+                        child: ValueListenableBuilder<List<CalendarEvent>>(
+                          valueListenable: _selectedEvents,
+                          builder: (context, value, _) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: ListView.builder(
+                                itemCount: value.length,
                                 itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(top: 21),
-                                    padding: const EdgeInsets.all(1),
-                                    child: Container(
-                                      height: 6,
-                                      width: 6,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: events[index].color,
-                                          border: (events[index]
-                                                              .color
-                                                              .computeLuminance() -
-                                                          Theme.of(context)
-                                                              .colorScheme
-                                                              .surface
-                                                              .computeLuminance())
-                                                      .abs() <
-                                                  0.02
-                                              ? Border.all(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface,
-                                                  width: 0.75)
-                                              : null),
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8, right: 8, bottom: 4),
+                                    child: Card(
+                                      child: InkWell(
+                                        borderRadius:
+                                        BorderRadius.circular(12),
+                                        onTap: () async {
+                                          await openEventBottomSheet(
+                                              value[index]);
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 8,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                  color: value[index].color,
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      8)),
+                                            ),
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                const EdgeInsets.all(8),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .start,
+                                                  children: [
+                                                    Text(
+                                                      value[index].title,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleMedium,
+                                                    ),
+                                                    Text(
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                      value[index]
+                                                          .category
+                                                          ?.name ??
+                                                          value[index]
+                                                              .place ??
+                                                          value[index]
+                                                              .description,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyMedium,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Icon(Icons.arrow_right),
+                                            SizedBox(
+                                              width: 8,
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },
-                              );
-                            },
-                          ),
-                          pageJumpingEnabled: true,
-                          onFormatChanged: (format) {
-                            if (_calendarFormat != format) {
-                              setState(() {
-                                _calendarFormat = format;
-                              });
-                            }
-                          },
-                          headerStyle: HeaderStyle(
-                            formatButtonTextStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary),
-                            formatButtonDecoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                          ),
-                          onPageChanged: (focusedDay) {
-                            _focusedDay = focusedDay;
+                              ),
+                            );
                           },
                         ),
-                        Expanded(
-                          child: ValueListenableBuilder<List<CalendarEvent>>(
-                            valueListenable: _selectedEvents,
-                            builder: (context, value, _) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 12),
-                                child: ListView.builder(
-                                  itemCount: value.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 8, right: 8, bottom: 4),
-                                      child: Card(
-                                        child: InkWell(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          onTap: () async {
-                                            await openEventBottomSheet(
-                                                value[index]);
-                                          },
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                width: 8,
-                                                height: 40,
-                                                decoration: BoxDecoration(
-                                                    color: value[index].color,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8)),
-                                              ),
-                                              Expanded(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        value[index].title,
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .titleMedium,
-                                                      ),
-                                                      Text(
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        value[index]
-                                                                .category
-                                                                ?.name ??
-                                                            value[index]
-                                                                .place ??
-                                                            value[index]
-                                                                .description,
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .bodyMedium,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              Icon(Icons.arrow_right),
-                                              SizedBox(
-                                                width: 8,
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  })),
-        ],
-      ),
+                      ),
+                    ],
+                  );
+                })),
+      ],
     );
   }
 }

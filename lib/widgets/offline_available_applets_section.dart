@@ -61,7 +61,7 @@ class _OfflineAvailableAppletsSectionState extends State<OfflineAvailableApplets
               (offlineApplet) => ListTile(
               title: Text(offlineApplet.definition.label(context)),
               subtitle: Text(offlineApplet.userDisplayName),
-              leading: offlineApplet.definition.icon,
+              leading: offlineApplet.definition.icon(context),
               onTap: () async {
                 ClearTextAccount acc = await accountDatabase.getClearTextAccountFromId(offlineApplet.localUserId);
                 sph = SPH(account: acc);

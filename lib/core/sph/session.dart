@@ -277,7 +277,7 @@ class SessionHandler {
 
   bool doesSupportFeature(AppletDefinition applet, {AccountType? overrideAccountType}) {
     var app = travelMenu
-      .where((element) => element["link"].toString() == applet.appletPhpUrl)
+      .where((element) => element["link"].toString() == applet.appletPhpIdentifier)
       .singleOrNull;
     if (app == null) {
       return false;

@@ -6,11 +6,11 @@ import 'package:lanis/generated/l10n.dart';
 import '../../models/account_types.dart';
 
 final calendarDefinition = AppletDefinition(
-  appletPhpUrl: 'kalender.php',
+  appletPhpIdentifier: 'kalender.php',
   addDivider: false,
-  appletType: AppletType.nested,
-  icon: const Icon(Icons.calendar_today),
-  selectedIcon: const Icon(Icons.calendar_today_outlined),
+  useBottomNavigation: true,
+  icon: (context) =>  const Icon(Icons.calendar_today),
+  selectedIcon: (context) => const Icon(Icons.calendar_today_outlined),
   label: (context) => AppLocalizations.of(context).calendar,
   supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
   allowOffline: false,

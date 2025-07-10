@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:lanis/applets/definitions.dart';
-import 'package:lanis/applets/timetable/student/student_timetable_better_view.dart';
+import 'package:lanis/applets/timetable/student/student_timetable_view.dart';
 import 'package:lanis/generated/l10n.dart';
 
 import '../../models/account_types.dart';
 
 final timeTableDefinition = AppletDefinition(
-  appletPhpUrl: 'stundenplan.php',
-  icon: Icon(Icons.timelapse),
-  selectedIcon: Icon(Icons.timelapse_outlined),
-  appletType: AppletType.nested,
+  appletPhpIdentifier: 'stundenplan.php',
+  icon: (context) => Icon(Icons.timelapse),
+  selectedIcon: (context) => Icon(Icons.timelapse_outlined),
+  useBottomNavigation: true,
   addDivider: false,
   label: (context) => AppLocalizations.of(context).timeTable,
   supportedAccountTypes: [AccountType.student],
@@ -21,7 +21,7 @@ final timeTableDefinition = AppletDefinition(
   },
   bodyBuilder: (context, accountType, openDrawerCb) {
     if (accountType == AccountType.student) {
-      return StudentTimetableBetterView(openDrawerCb: openDrawerCb);
+      return StudentTimetableView(openDrawerCb: openDrawerCb);
     } else {
       return Placeholder();
     }

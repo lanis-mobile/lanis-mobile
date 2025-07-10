@@ -182,27 +182,14 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     return CombinedAppletBuilder<SubstitutionPlan>(
       accountType: sph!.session.accountType,
       parser: sph!.parser.substitutionsParser,
-      phpUrl: substitutionDefinition.appletPhpUrl,
+      phpUrl: substitutionDefinition.appletPhpIdentifier,
       settingsDefaults: substitutionDefinition.settingsDefaults,
-      loadingAppBar: AppBar(
-        title: Text(substitutionDefinition.label(context)),
-        leading: Icon(Icons.menu), // will be fixed with Builder Redesign
-      ),
       builder: (context, data, accountType, settings, updateSetting, refresh) {
         if (data.days.isEmpty) {
           // GlobalKeys for RefreshIndicator and Refresh-FAB
           globalKeys += List.generate(
               data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
           return Scaffold(
-            appBar: AppBar(
-              title: Text(substitutionDefinition.label(context)),
-              leading: widget.openDrawerCb != null
-                  ? IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => widget.openDrawerCb!(),
-                    )
-                  : null,
-            ),
             floatingActionButton: widget.openDrawerCb != null
                 ? FloatingActionButton(
                     onPressed: () async {
@@ -272,15 +259,6 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           });
 
           return Scaffold(
-            appBar: AppBar(
-              title: Text(substitutionDefinition.label(context)),
-              leading: widget.openDrawerCb != null
-                  ? IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => widget.openDrawerCb!(),
-                    )
-                  : null,
-            ),
             floatingActionButton: widget.openDrawerCb != null
                 ? FloatingActionButton(
                     onPressed: () async {

@@ -136,7 +136,7 @@ Future<void> callbackDispatcher() async {
         in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
           if (applet.supportedAccountTypes
               .contains(clearTextAccount.accountType) &&
-              (await sph.prefs.kv.get('notification-${applet.appletPhpUrl}') ??
+              (await sph.prefs.kv.get('notification-${applet.appletPhpIdentifier}') ??
                   true)) {
             if (!authenticated) {
               await sph.session.prepareDio();
@@ -150,7 +150,7 @@ Future<void> callbackDispatcher() async {
             appletTasks.add(applet.notificationTask!(
                 sph,
                 clearTextAccount.accountType ?? AccountType.student,
-                BackgroundTaskToolkit(sph, applet.appletPhpUrl,
+                BackgroundTaskToolkit(sph, applet.appletPhpIdentifier,
                     multiAccount: accounts.length > 1)));
           }
         }

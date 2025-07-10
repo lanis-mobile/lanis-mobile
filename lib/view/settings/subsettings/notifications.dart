@@ -48,8 +48,8 @@ class _NotificationSettingsState
     for (final applet
         in AppDefinitions.applets.where((a) => a.notificationTask != null)) {
       if (sph!.session.doesSupportFeature(applet)) {
-        result.add('notification-${applet.appletPhpUrl}');
-        supportedApplets['notification-${applet.appletPhpUrl}'] = applet;
+        result.add('notification-${applet.appletPhpIdentifier}');
+        supportedApplets['notification-${applet.appletPhpIdentifier}'] = applet;
       }
     }
 
@@ -210,9 +210,7 @@ class _NotificationSettingsState
                     title: Text(
                       supportedApplets[key]?.label(context) ?? key,
                     ),
-                    leading: Icon(
-                      supportedApplets[key]?.selectedIcon.icon,
-                    ),
+                    leading: supportedApplets[key]?.selectedIcon(context),
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                     value: (snapshot.data![key] ?? true) == true,
                     onChanged: notificationsActive

@@ -10,10 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'dart:io' as dio_core;
 
-import '../core/connection_checker.dart';
-import '../core/native_adapter_instance.dart';
-import '../core/sph/sph.dart';
-import '../utils/file_operations.dart';
+import '../../core/connection_checker.dart';
+import '../../core/native_adapter_instance.dart';
+import '../../core/sph/sph.dart';
+import '../../utils/file_operations.dart';
 
 class MoodleWebView extends StatefulWidget {
   const MoodleWebView({super.key});
@@ -208,18 +208,6 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Moodle"),
-          leading: IconButton(
-              onPressed: () async {
-                setState(() {
-                  showWebView = false;
-                });
-
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.arrow_back)),
-        ),
         body: Stack(
           children: [
             PopScope(
@@ -237,7 +225,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                     showWebView = false;
                   });
 
-                  if(context.mounted) Navigator.pop(context);
+                  //if(context.mounted) Navigator.pop(context);
                 }
               },
               child: Visibility(

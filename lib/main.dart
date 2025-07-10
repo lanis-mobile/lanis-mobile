@@ -22,6 +22,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'applets/conversations/view/shared.dart';
 import 'background_service.dart';
 import 'core/database/account_database/account_db.dart' show secureStorage, accountDatabase, AccountDatabase;
+import 'globals.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -170,6 +171,7 @@ class App extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
+            navigatorKey: globalNavigatorKey,
             home: const Scaffold(
               body: StartupScreen(),
             ),

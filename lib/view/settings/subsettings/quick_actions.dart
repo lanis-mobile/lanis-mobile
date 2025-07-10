@@ -28,7 +28,7 @@ class _QuickActionsState extends SettingsColoursState<QuickActions> {
     for (final applet in AppDefinitions.applets) {
       if (
       sph!.session.doesSupportFeature(applet) &&
-          (!Platform.isAndroid || applet.appletType != AppletType.navigation)
+          (!Platform.isAndroid || applet.useBottomNavigation)
       ) {
         applets.add(applet);
       }
@@ -74,15 +74,15 @@ class _QuickActionsState extends SettingsColoursState<QuickActions> {
                       title: Text(
                         applet.label(context),
                       ),
-                      leading: applet.icon,
+                      leading: applet.icon(context),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                      value: quickActions.contains(applet.appletPhpUrl),
-                      onChanged: quickActions.length >= maxQuickActions && !quickActions.contains(applet.appletPhpUrl) ?
+                      value: quickActions.contains(applet.appletPhpIdentifier),
+                      onChanged: quickActions.length >= maxQuickActions && !quickActions.contains(applet.appletPhpIdentifier) ?
                           null : (bool value) {
                         if (value) {
-                          quickActions.add(applet.appletPhpUrl);
+                          quickActions.add(applet.appletPhpIdentifier);
                         } else {
-                          quickActions.remove(applet.appletPhpUrl);
+                          quickActions.remove(applet.appletPhpIdentifier);
                         }
                         accountDatabase.kv.set('quick-actions', quickActions);
                       },

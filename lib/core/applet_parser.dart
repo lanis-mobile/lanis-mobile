@@ -56,7 +56,7 @@ class AppletParser<T> {
     if (!(await connectionChecker.connected)) {
       if (isEmpty) {
         final offlineData =
-            await sph.prefs.getAppletData(appletDefinition.appletPhpUrl);
+            await sph.prefs.getAppletData(appletDefinition.appletPhpIdentifier);
         if (offlineData != null) {
           addResponse(
             FetcherResponse(
@@ -104,7 +104,7 @@ class AppletParser<T> {
       final T value = await getHome();
       if (appletDefinition.allowOffline) {
         await sph.prefs
-            .setAppletData(appletDefinition.appletPhpUrl, jsonEncode(value));
+            .setAppletData(appletDefinition.appletPhpIdentifier, jsonEncode(value));
       }
       return value;
   }

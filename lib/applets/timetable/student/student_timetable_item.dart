@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:lanis/applets/conversations/view/shared.dart';
-import 'package:lanis/applets/timetable/student/student_timetable_better_view.dart';
+import 'package:lanis/applets/timetable/student/student_timetable_view.dart';
 import 'package:lanis/applets/timetable/student/timetable_helper.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'package:lanis/models/timetable.dart';

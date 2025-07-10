@@ -256,7 +256,7 @@ class _StudentTimetableSettingsState
       children: [
         CombinedAppletBuilder<TimeTable>(
           parser: sph!.parser.timetableStudentParser,
-          phpUrl: timeTableDefinition.appletPhpUrl,
+          phpUrl: timeTableDefinition.appletPhpIdentifier,
           settingsDefaults: timeTableDefinition.settingsDefaults,
           accountType: AccountType.student,
           builder: (context, timetable, _, settings, updateSettings, refresh) {

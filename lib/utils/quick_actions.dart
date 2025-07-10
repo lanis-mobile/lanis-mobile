@@ -22,31 +22,30 @@ class QuickActionsStartUp {
     quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       for (final applet in AppDefinitions.applets) {
-        if (applet.appletPhpUrl == shortcutType) {
+        if (applet.appletPhpIdentifier == shortcutType) {
 
           if (!sph!.session.doesSupportFeature(applet)) {
-            logger.e('Applet not supported: ${applet.appletPhpUrl}');
+            logger.e('Applet not supported: ${applet.appletPhpIdentifier}');
             return;
           }
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            logger.i('Opening applet: ${applet.appletPhpUrl}');
+            logger.i('Opening applet: ${applet.appletPhpIdentifier}');
             Destination destination = Destination.fromAppletDefinition(applet);
             if(homeKey.currentContext != null) Navigator.popUntil(homeKey.currentContext!, (route) => route.isFirst);
             if(destination.enableBottomNavigation) {
               int appletIndex = AppDefinitions.getIndexByPhpIdentifier(
-                  applet.appletPhpUrl);
+                  applet.appletPhpIdentifier);
 
               if (homeKey.currentState != null) {
-                homeKey.currentState?.updateDestination(appletIndex);
+                homeKey.currentState?.openDestination(appletIndex,false);
               } else {
                 logger.e('Tried to open applet without homeKey');
               }
-
             } else {
               if(homeKey.currentContext != null) {
-                destination.action?.call(homeKey.currentContext!);
-                logger.i('Opened applet: ${applet.appletPhpUrl}');
+                destination.action?.call(homeKey.currentContext!, homeKey.currentState!.navigatorKey);
+                logger.i('Opened applet: ${applet.appletPhpIdentifier}');
               } else {
                 logger.e('Tried to open applet without context');
               }
@@ -99,9 +98,9 @@ class QuickActionsStartUp {
 
     List<ShortcutItem> shortcuts = [];
     for (final applet in AppDefinitions.applets) {
-      if (enabledShortcutsList.contains(applet.appletPhpUrl)) {
+      if (enabledShortcutsList.contains(applet.appletPhpIdentifier)) {
         shortcuts.add(ShortcutItem(
-          type: applet.appletPhpUrl,
+          type: applet.appletPhpIdentifier,
           localizedTitle: applet.label(context),
           icon: '@mipmap/ic_launcher_monochrome',
         ));

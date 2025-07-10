@@ -449,7 +449,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                 child: Scaffold(
                 body: CombinedAppletBuilder<List<OverviewEntry>>(
                     parser: sph!.parser.conversationsParser,
-                    phpUrl: conversationsDefinition.appletPhpUrl,
+                    phpUrl: conversationsDefinition.appletPhpIdentifier,
                     settingsDefaults: conversationsDefinition.settingsDefaults,
                     accountType: sph!.session.accountType,
                     builder: (context, data, accountType, settings, updateSetting, refresh) {
