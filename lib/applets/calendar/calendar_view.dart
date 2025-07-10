@@ -350,6 +350,219 @@ class _CalendarViewState extends State<CalendarView> {
     }
   }
 
+  Widget _itemsListView(context) {
+    return ValueListenableBuilder<List<CalendarEvent>>(
+      valueListenable: _selectedEvents,
+      builder: (context, value, _) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CustomScrollView(
+            slivers: [
+              if (value.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.event_available,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          AppLocalizations.of(context).noEntries,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              SliverList.builder(
+                itemCount: value.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                        left: 8, right: 8, bottom: 4),
+                    child: Card(
+                      child: InkWell(
+                        borderRadius:
+                        BorderRadius.circular(12),
+                        onTap: () async {
+                          await openEventBottomSheet(
+                              value[index]);
+                        },
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                  color: value[index].color,
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                      8)),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                const EdgeInsets.all(8),
+                                child: Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
+                                  children: [
+                                    Text(
+                                      value[index].title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    Text(
+                                      maxLines: 1,
+                                      overflow: TextOverflow
+                                          .ellipsis,
+                                      value[index]
+                                          .category
+                                          ?.name ??
+                                          value[index]
+                                              .place ??
+                                          value[index]
+                                              .description,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.arrow_right),
+                            SizedBox(
+                              width: 8,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _tableCalendar(BuildContext context) {
+    return TableCalendar<CalendarEvent>(
+      locale: AppLocalizations.of(context).locale,
+      firstDay: DateTime.utc(2020),
+      lastDay: DateTime.utc(2030),
+      availableCalendarFormats: {
+        CalendarFormat.month: AppLocalizations.of(context)
+            .calendarFormatMonth,
+        CalendarFormat.twoWeeks:
+        AppLocalizations.of(context)
+            .calendarFormatTwoWeeks,
+        CalendarFormat.week: AppLocalizations.of(context)
+            .calendarFormatWeek,
+      },
+      focusedDay: _focusedDay,
+      selectedDayPredicate: (day) =>
+          isSameDay(_selectedDay, day),
+      calendarFormat: _calendarFormat,
+      eventLoader: _getEventsForDay,
+      startingDayOfWeek: StartingDayOfWeek.monday,
+      calendarStyle: CalendarStyle(
+        outsideDaysVisible: false,
+        defaultDecoration:
+        const BoxDecoration(shape: BoxShape.circle),
+        selectedDecoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            shape: BoxShape.circle),
+        selectedTextStyle: TextStyle(
+            fontSize: 16.0,
+            color: Theme.of(context).colorScheme.onPrimary),
+        todayDecoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondary,
+          shape: BoxShape.circle,
+        ),
+        todayTextStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSecondary,
+          fontSize: 16,
+        ),
+        markerDecoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color:
+          Theme.of(context).colorScheme.inversePrimary,
+        ),
+        markerSize: 8,
+        isTodayHighlighted: false,
+      ),
+      onDaySelected: _onDaySelected,
+      calendarBuilders: CalendarBuilders(
+        markerBuilder:
+            (BuildContext context, date, events) {
+          if (events.isEmpty) return SizedBox();
+          return ListView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.only(top: 21),
+                padding: const EdgeInsets.all(1),
+                child: Container(
+                  height: 6,
+                  width: 6,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: events[index].color,
+                      border: (events[index]
+                          .color
+                          .computeLuminance() -
+                          Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .computeLuminance())
+                          .abs() <
+                          0.02
+                          ? Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface,
+                          width: 0.75)
+                          : null),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      pageJumpingEnabled: true,
+      onFormatChanged: (format) {
+        if (_calendarFormat != format) {
+          setState(() {
+            _calendarFormat = format;
+          });
+        }
+      },
+      headerStyle: HeaderStyle(
+        formatButtonTextStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary),
+        formatButtonDecoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+      onPageChanged: (focusedDay) {
+        _focusedDay = focusedDay;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -440,196 +653,33 @@ class _CalendarViewState extends State<CalendarView> {
                   eventList = data;
                   _selectedEvents.value = _getEventsForDay(_selectedDay!);
 
-                  return Column(
-                    children: [
-                      TableCalendar<CalendarEvent>(
-                        locale: AppLocalizations.of(context).locale,
-                        firstDay: DateTime.utc(2020),
-                        lastDay: DateTime.utc(2030),
-                        availableCalendarFormats: {
-                          CalendarFormat.month: AppLocalizations.of(context)
-                              .calendarFormatMonth,
-                          CalendarFormat.twoWeeks:
-                          AppLocalizations.of(context)
-                              .calendarFormatTwoWeeks,
-                          CalendarFormat.week: AppLocalizations.of(context)
-                              .calendarFormatWeek,
-                        },
-                        focusedDay: _focusedDay,
-                        selectedDayPredicate: (day) =>
-                            isSameDay(_selectedDay, day),
-                        calendarFormat: _calendarFormat,
-                        eventLoader: _getEventsForDay,
-                        startingDayOfWeek: StartingDayOfWeek.monday,
-                        calendarStyle: CalendarStyle(
-                          outsideDaysVisible: false,
-                          defaultDecoration:
-                          const BoxDecoration(shape: BoxShape.circle),
-                          selectedDecoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              shape: BoxShape.circle),
-                          selectedTextStyle: TextStyle(
-                              fontSize: 16.0,
-                              color: Theme.of(context).colorScheme.onPrimary),
-                          todayDecoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            shape: BoxShape.circle,
+                  return LayoutBuilder(builder: (context, constrains)  {
+                    if (constrains.maxWidth >550) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: _tableCalendar(context),
                           ),
-                          todayTextStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.onSecondary,
-                            fontSize: 16,
+                          const VerticalDivider(),
+                          Expanded(
+                            child: _itemsListView(context),
                           ),
-                          markerDecoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                            Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                          markerSize: 8,
-                          isTodayHighlighted: false,
+                        ],
+                      );
+                    }
+                    return Column(
+                      children: [
+                        _tableCalendar(context),
+                        Expanded(
+                          child: _itemsListView(context),
                         ),
-                        onDaySelected: _onDaySelected,
-                        calendarBuilders: CalendarBuilders(
-                          markerBuilder:
-                              (BuildContext context, date, events) {
-                            if (events.isEmpty) return SizedBox();
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: events.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin: const EdgeInsets.only(top: 21),
-                                  padding: const EdgeInsets.all(1),
-                                  child: Container(
-                                    height: 6,
-                                    width: 6,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: events[index].color,
-                                        border: (events[index]
-                                            .color
-                                            .computeLuminance() -
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .surface
-                                                .computeLuminance())
-                                            .abs() <
-                                            0.02
-                                            ? Border.all(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
-                                            width: 0.75)
-                                            : null),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        pageJumpingEnabled: true,
-                        onFormatChanged: (format) {
-                          if (_calendarFormat != format) {
-                            setState(() {
-                              _calendarFormat = format;
-                            });
-                          }
-                        },
-                        headerStyle: HeaderStyle(
-                          formatButtonTextStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary),
-                          formatButtonDecoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                        onPageChanged: (focusedDay) {
-                          _focusedDay = focusedDay;
-                        },
-                      ),
-                      Expanded(
-                        child: ValueListenableBuilder<List<CalendarEvent>>(
-                          valueListenable: _selectedEvents,
-                          builder: (context, value, _) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: ListView.builder(
-                                itemCount: value.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8, right: 8, bottom: 4),
-                                    child: Card(
-                                      child: InkWell(
-                                        borderRadius:
-                                        BorderRadius.circular(12),
-                                        onTap: () async {
-                                          await openEventBottomSheet(
-                                              value[index]);
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 8,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                  color: value[index].color,
-                                                  borderRadius:
-                                                  BorderRadius.circular(
-                                                      8)),
-                                            ),
-                                            Expanded(
-                                              child: Padding(
-                                                padding:
-                                                const EdgeInsets.all(8),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment
-                                                      .start,
-                                                  children: [
-                                                    Text(
-                                                      value[index].title,
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .titleMedium,
-                                                    ),
-                                                    Text(
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow
-                                                          .ellipsis,
-                                                      value[index]
-                                                          .category
-                                                          ?.name ??
-                                                          value[index]
-                                                              .place ??
-                                                          value[index]
-                                                              .description,
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyMedium,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Icon(Icons.arrow_right),
-                                            SizedBox(
-                                              width: 8,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                })),
+                      ],
+                    );
+                  });
+                },
+            ),
+        ),
       ],
     );
   }
