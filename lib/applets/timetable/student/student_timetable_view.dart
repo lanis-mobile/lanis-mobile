@@ -25,12 +25,10 @@ class StudentTimetableView extends StatefulWidget {
   const StudentTimetableView({super.key, this.openDrawerCb});
 
   @override
-  State<StudentTimetableView> createState() =>
-      _StudentTimetableViewState();
+  State<StudentTimetableView> createState() => _StudentTimetableViewState();
 }
 
-class _StudentTimetableViewState
-    extends State<StudentTimetableView> {
+class _StudentTimetableViewState extends State<StudentTimetableView> {
   List<TimetableDay> getSelectedPlan(TimeTable data, TimeTableType selectedType,
       Map<String, dynamic> settings) {
     List<List<TimetableSubject>>? customLessons =
@@ -43,49 +41,9 @@ class _StudentTimetableViewState
 
   int currentWeekIndex = -1;
 
-  Widget _buildAppBarAction(BuildContext context, List<String> uniqueBadges, TimeTable timetable, Function updateSettings, Map<String, dynamic> settings) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        children: [
-          if (uniqueBadges.isNotEmpty &&
-              timetable.weekBadge != null)
-            TextButton(
-              onPressed: () {
-                currentWeekIndex = (currentWeekIndex + 1) %
-                    (uniqueBadges.length + 1);
-                updateSettings('student-selected-week',
-                    currentWeekIndex == 0);
-              },
-              child: Text(
-                (currentWeekIndex < 1)
-                    ? AppLocalizations.of(context)
-                    .timetableAllWeeks
-                    : AppLocalizations.of(context).timetableWeek(
-                    uniqueBadges[currentWeekIndex - 1]),
-              ),
-            ),
-          IconButton(
-              onPressed: () => updateSettings('single-day',
-                  !(settings['single-day'] ?? false)),
-              icon: (settings['single-day'] ?? false)
-                  ? Icon(Icons.calendar_today)
-                  : Icon(Icons.calendar_today_outlined)),
-        ],
-      ),
-    );
-  }
-
-  void updateAppBar(
-      BuildContext context,
-      List<String> uniqueBadges,
-      TimeTable timetable,
-      Function updateSettings,
-      Map<String, dynamic> settings) {
+  void updateAppBar(Widget action) {
     AppBarController.instance.remove('studentTimetable');
-    AppBarController.instance.add(
-        'studentTimetable',
-        _buildAppBarAction(context, uniqueBadges, timetable, updateSettings, settings));
+    AppBarController.instance.add('studentTimetable', action);
   }
 
   @override
@@ -130,6 +88,38 @@ class _StudentTimetableViewState
 
           headerHeight = 40;
 
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            updateAppBar(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
+                      TextButton(
+                        onPressed: () {
+                          currentWeekIndex = (currentWeekIndex + 1) %
+                              (uniqueBadges.length + 1);
+                          updateSettings(
+                              'student-selected-week', currentWeekIndex == 0);
+                        },
+                        child: Text(
+                          (currentWeekIndex < 1)
+                              ? AppLocalizations.of(context).timetableAllWeeks
+                              : AppLocalizations.of(context).timetableWeek(
+                                  uniqueBadges[currentWeekIndex - 1]),
+                        ),
+                      ),
+                    IconButton(
+                        onPressed: () => updateSettings(
+                            'single-day', !(settings['single-day'] ?? false)),
+                        icon: (settings['single-day'] ?? false)
+                            ? Icon(Icons.calendar_today)
+                            : Icon(Icons.calendar_today_outlined)),
+                  ],
+                ),
+              ),
+            );
+          });
           return Scaffold(
               body: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -197,7 +187,7 @@ class TimeTableView extends StatelessWidget {
   int getCurrentWeekNumber() {
     DateTime date = DateTime.now();
     int dayOfYear = int.parse(DateFormat("D").format(date));
-    int woy =  ((dayOfYear - date.weekday + 10) / 7).floor();
+    int woy = ((dayOfYear - date.weekday + 10) / 7).floor();
     if (woy < 1) {
       woy = numOfWeeks(date.year - 1);
     } else if (woy > numOfWeeks(date.year)) {
