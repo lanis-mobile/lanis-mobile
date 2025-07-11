@@ -19,11 +19,10 @@ import 'package:lanis/utils/authentication_state.dart';
 import 'package:lanis/utils/logger.dart';
 import 'package:lanis/utils/quick_actions.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:lanis/core/database/account_database/account_db.dart' show secureStorage, accountDatabase, AccountDatabase;
 
 import 'applets/conversations/view/shared.dart';
 import 'background_service.dart';
-import 'core/database/account_database/account_db.dart' show secureStorage, accountDatabase, AccountDatabase;
-import 'globals.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

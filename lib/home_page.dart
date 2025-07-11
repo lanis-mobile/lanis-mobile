@@ -9,7 +9,7 @@ import 'package:lanis/generated/l10n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lanis/utils/authentication_state.dart';
-import 'package:lanis/utils/logger.dart';
+import 'package:lanis/utils/pop_scope_handler_provider.dart';
 import 'package:lanis/utils/responsive.dart';
 import 'package:lanis/utils/whats_new.dart';
 import 'package:lanis/utils/cached_network_image.dart';
@@ -20,10 +20,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
-import 'globals.dart';
-
-const String surveyUrl =
-    'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
 typedef ActionFunction = void Function(BuildContext, GlobalKey<NavigatorState>);
 typedef WidgetWithContextCallback = Widget Function(BuildContext context);
@@ -80,6 +76,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final PopScopeHandlerProvider popScopeHandlerProvider = PopScopeHandlerProvider();
 
   bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
@@ -162,12 +159,14 @@ class HomePageState extends State<HomePage> {
     for (var destination in destinations) {
       if (destination.isSupported && destination.enableBottomNavigation) {
         selectedDestinationDrawer = destinations.indexOf(destination);
+        lastAppletWithBottomNavSupport = selectedDestinationDrawer;
         doesSupportAnyApplet = true;
         return;
       }
     }
     doesSupportAnyApplet = false;
     selectedDestinationDrawer = -1;
+    lastAppletWithBottomNavSupport = null;
   }
 
   void openLanisInBrowser(BuildContext? context) {
@@ -215,6 +214,7 @@ class HomePageState extends State<HomePage> {
     if (destinations[index].action != null) {
       destinations[index].action!(context, navigatorKey);
     } else {
+      popScopeHandlerProvider.clearHandler();
       AppBarController.instance.clear();
       navigatorKey.currentState?.popUntil((route) => route.isFirst);
       setState(() {
@@ -463,15 +463,23 @@ class HomePageState extends State<HomePage> {
                     canPop: false,
                     onPopInvokedWithResult:
                         (bool didPop, Object? result) async {
+
                       if (didPop) {
                         return;
                       }
+
+                      if (popScopeHandlerProvider.hasHandler) {
+                        final shouldContinueWithNormalRun = await popScopeHandlerProvider.handler!(navigatorKey);
+                        if (!shouldContinueWithNormalRun) return;
+                        popScopeHandlerProvider.clearHandler();
+                      }
+
                       if (!isFirstLevelRoute) {
                         navigatorKey.currentState?.pop();
                         return;
-                      } else if (!Responsive.isTablet(context) && lastAppletWithBottomNavSupport != null) {
+                      } else if (context.mounted &&!Responsive.isTablet(context) && lastAppletWithBottomNavSupport != null) {
                         openDestination(lastAppletWithBottomNavSupport!, false);
-                      } else if (context.mounted) {
+                      } else {
                         // close drawer first if open
                         if (_drawerKey.currentState?.isDrawerOpen ?? false) {
                           _drawerKey.currentState?.closeDrawer();

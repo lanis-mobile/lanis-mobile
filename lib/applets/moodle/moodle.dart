@@ -6,6 +6,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:lanis/home_page.dart';
+import 'package:lanis/utils/logger.dart';
+import 'package:lanis/utils/responsive.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'dart:io' as dio_core;
@@ -186,6 +189,24 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     super.initState();
 
     getCookies();
+
+    homeKey.currentState?.popScopeHandlerProvider.setHandler((navigator) async {
+      logger.d('checking if WebView can go back in moodle.dart');
+      final webCanGoBack = await webViewController!.canGoBack();
+      logger.d('WebView can go back: $webCanGoBack');
+      if (webCanGoBack) {
+        webViewController!.goBack();
+      } else {
+        logger.d('WebView cannot go back, continuing with normal run');
+        //setState(() {
+          // showWebView = false;
+        //});
+        logger.d('Returning true from POPSCOPE in moodle.dart');
+        return true;
+      }
+      logger.d('Returning false from POPSCOPE in moodle.dart');
+      return false;
+    });
   }
 
   @override
@@ -210,129 +231,110 @@ class _MoodleWebViewState extends State<MoodleWebView> {
     return Scaffold(
         body: Stack(
           children: [
-            PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (bool res, _) async {
-                if (res) {
-                  return;
-                }
-
-                final canGoBack = await webViewController!.canGoBack();
-                if (canGoBack) {
-                  webViewController!.goBack();
-                } else {
-                  setState(() {
-                    showWebView = false;
-                  });
-
-                  //if(context.mounted) Navigator.pop(context);
-                }
-              },
-              child: Visibility(
-                visible: showWebView,
-                child: InAppWebView(
-                  pullToRefreshController: pullToRefreshController,
-                  initialSettings: InAppWebViewSettings(
-                    transparentBackground: true,
-                  ),
-                  onWebViewCreated: (controller) {
-                    webViewController = controller;
-                  },
-                  shouldOverrideUrlLoading:
-                      (controller, navigationAction) async {
-                    error = null;
-
-                    final WebUri uri = navigationAction.request.url!;
-
-                    if (uri.rawValue.contains(
-                            ".schulportal.hessen.de/login/logout.php") ||
-                        uri.rawValue.contains(
-                            ".schulportal.hessen.de/index.php?logout=all")) {
-                      return NavigationActionPolicy.CANCEL;
-                    }
-
-                    if (uri.rawValue.contains('start.schulportal.hessen.de')) {
-                      setState(() {
-                        showWebView = false;
-                      });
-                      Navigator.pop(context);
-                      return NavigationActionPolicy.CANCEL;
-                    }
-
-                    if (!uri.rawValue.contains(".schulportal.hessen.de")) {
-                      await launchUrl(uri);
-
-                      return NavigationActionPolicy.CANCEL;
-                    }
-
-                    return NavigationActionPolicy.ALLOW;
-                  },
-                  onLoadStart: (controller, uri) async {
-                    error = null;
-                    errorUrl = null;
-
-                    if (await controller.canGoBack()) {
-                      canGoBack.value = true;
-                    } else {
-                      canGoBack.value = false;
-                    }
-
-                    if (await controller.canGoForward()) {
-                      canGoForward.value = true;
-                    } else {
-                      canGoForward.value = false;
-                    }
-                  },
-                  onLoadStop: (controller, url) async {
-                    pullToRefreshController!.endRefreshing();
-                    progressIndicator.value = 0;
-
-                    setState(() {}); // error
-                  },
-                  onTitleChanged: (controller, title) {
-                    currentPageTitle.value = title ?? "";
-                  },
-                  onPageCommitVisible: (controller, uri) async {
-                    // Hack to enable pull to refresh in Moodle.
-                    controller.evaluateJavascript(
-                        source:
-                            "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
-
-                    // Hide logout buttons.
-                    controller.evaluateJavascript(
-                        source:
-                            '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
-                    controller.evaluateJavascript(
-                        source:
-                            '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
-                  },
-                  onProgressChanged: (controller, progress) {
-                    if (progress == 100) {
-                      pullToRefreshController!.endRefreshing();
-                      progressIndicator.value = 0;
-                      return;
-                    }
-
-                    progressIndicator.value = progress;
-                  },
-                  onReceivedError: (controller, request, response) async {
-                    error = response.description;
-                    errorUrl = request.url;
-
-                    pullToRefreshController!.endRefreshing();
-                    progressIndicator.value = 0;
-                  },
-                  onDownloadStartRequest: (controller, request) {
-                    double fileSize = request.contentLength / 1000000;
-
-                    showFileModal(context, FileInfo(
-                      name: request.suggestedFilename ??
-                          sph!.storage.generateUniqueHash(request.url.rawValue),
-                      url: request.url,
-                      size: "(${fileSize.toStringAsFixed(2)} MB)",
-                    ));
-                  },
+            Visibility(
+              visible: showWebView,
+              child: InAppWebView(
+                pullToRefreshController: pullToRefreshController,
+                initialSettings: InAppWebViewSettings(
+                  transparentBackground: true,
                 ),
+                onWebViewCreated: (controller) {
+                  webViewController = controller;
+                },
+                shouldOverrideUrlLoading:
+                    (controller, navigationAction) async {
+                  error = null;
+            
+                  final WebUri uri = navigationAction.request.url!;
+            
+                  if (uri.rawValue.contains(
+                          ".schulportal.hessen.de/login/logout.php") ||
+                      uri.rawValue.contains(
+                          ".schulportal.hessen.de/index.php?logout=all")) {
+                    return NavigationActionPolicy.CANCEL;
+                  }
+            
+                  if (uri.rawValue.contains('start.schulportal.hessen.de')) {
+                    setState(() {
+                      showWebView = false;
+                    });
+                    Navigator.pop(context);
+                    return NavigationActionPolicy.CANCEL;
+                  }
+            
+                  if (!uri.rawValue.contains(".schulportal.hessen.de")) {
+                    await launchUrl(uri);
+            
+                    return NavigationActionPolicy.CANCEL;
+                  }
+            
+                  return NavigationActionPolicy.ALLOW;
+                },
+                onLoadStart: (controller, uri) async {
+                  error = null;
+                  errorUrl = null;
+            
+                  if (await controller.canGoBack()) {
+                    canGoBack.value = true;
+                  } else {
+                    canGoBack.value = false;
+                  }
+            
+                  if (await controller.canGoForward()) {
+                    canGoForward.value = true;
+                  } else {
+                    canGoForward.value = false;
+                  }
+                },
+                onLoadStop: (controller, url) async {
+                  pullToRefreshController!.endRefreshing();
+                  progressIndicator.value = 0;
+            
+                  setState(() {}); // error
+                },
+                onTitleChanged: (controller, title) {
+                  currentPageTitle.value = title ?? "";
+                },
+                onPageCommitVisible: (controller, uri) async {
+                  // Hack to enable pull to refresh in Moodle.
+                  controller.evaluateJavascript(
+                      source:
+                          "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
+            
+                  // Hide logout buttons.
+                  controller.evaluateJavascript(
+                      source:
+                          '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
+                  controller.evaluateJavascript(
+                      source:
+                          '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
+                },
+                onProgressChanged: (controller, progress) {
+                  if (progress == 100) {
+                    pullToRefreshController!.endRefreshing();
+                    progressIndicator.value = 0;
+                    return;
+                  }
+            
+                  progressIndicator.value = progress;
+                },
+                onReceivedError: (controller, request, response) async {
+                  error = response.description;
+                  errorUrl = request.url;
+            
+                  pullToRefreshController!.endRefreshing();
+                  progressIndicator.value = 0;
+                },
+                onDownloadStartRequest: (controller, request) {
+                  double fileSize = request.contentLength / 1000000;
+            
+                  showFileModal(context, FileInfo(
+                    name: request.suggestedFilename ??
+                        sph!.storage.generateUniqueHash(request.url.rawValue),
+                    url: request.url,
+                    size: "(${fileSize.toStringAsFixed(2)} MB)",
+                  ));
+                },
               ),
             ),
 

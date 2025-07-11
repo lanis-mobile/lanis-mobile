@@ -211,7 +211,6 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppBarController.instance.setOverrideColor(backgroundColor);
