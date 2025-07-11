@@ -3,4 +3,3 @@ import 'package:html_unescape/html_unescape.dart';
 
 final unescape = HtmlUnescape();
 final GlobalKey globalAppBarKey = GlobalKey();
-final ValueNotifier<int> navigationNotifier = ValueNotifier(0);

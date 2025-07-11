@@ -84,6 +84,7 @@ class HomePageState extends State<HomePage> {
   bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
   bool isFirstLevelRoute = true;
+  int? lastAppletWithBottomNavSupport;
 
   void checkFirstLevelRoute() {
     navigatorKey.currentState?.popUntil((route) {
@@ -96,6 +97,7 @@ class HomePageState extends State<HomePage> {
 
   void resetState() {
     doesSupportAnyApplet = true;
+    lastAppletWithBottomNavSupport = null;
     setState(() {
       selectedDestinationDrawer = -1;
       destinations.clear();
@@ -116,9 +118,6 @@ class HomePageState extends State<HomePage> {
     setDefaultDestination();
     super.initState();
     showUpdateInfoIfRequired(context);
-    navigationNotifier.addListener(() {
-      checkFirstLevelRoute();
-    });
   }
 
   final List<Destination> endDestinations = [
@@ -213,7 +212,6 @@ class HomePageState extends State<HomePage> {
 
   void openDestination(int index, bool fromDrawer) {
     if (index == selectedDestinationDrawer) return;
-
     if (destinations[index].action != null) {
       destinations[index].action!(context, navigatorKey);
     } else {
@@ -223,6 +221,9 @@ class HomePageState extends State<HomePage> {
         selectedDestinationDrawer = index;
         if (fromDrawer) Navigator.pop(context);
       });
+    }
+    if (destinations[index].enableBottomNavigation) {
+      lastAppletWithBottomNavSupport = index;
     }
   }
 
@@ -462,13 +463,14 @@ class HomePageState extends State<HomePage> {
                     canPop: false,
                     onPopInvokedWithResult:
                         (bool didPop, Object? result) async {
-                      logger.d('PopScope: didPop: $didPop, result: $result');
                       if (didPop) {
                         return;
                       }
                       if (!isFirstLevelRoute) {
                         navigatorKey.currentState?.pop();
                         return;
+                      } else if (!Responsive.isTablet(context) && lastAppletWithBottomNavSupport != null) {
+                        openDestination(lastAppletWithBottomNavSupport!, false);
                       } else if (context.mounted) {
                         // close drawer first if open
                         if (_drawerKey.currentState?.isDrawerOpen ?? false) {

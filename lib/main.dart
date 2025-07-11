@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:lanis/home_page.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:lanis/core/sph/sph.dart';
 import 'package:lanis/generated/l10n.dart';
@@ -172,7 +173,7 @@ class App extends StatelessWidget {
             ],
             supportedLocales: AppLocalizations.delegate.supportedLocales,
             onNavigationNotification: (notification) {
-              navigationNotifier.value = navigationNotifier.value + 1;
+              homeKey.currentState?.checkFirstLevelRoute();
               return notification.canHandlePop;
             },
             home: StartupScreen(),
