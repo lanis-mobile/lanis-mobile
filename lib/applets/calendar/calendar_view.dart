@@ -2,6 +2,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:lanis/applets/calendar/definition.dart';
+import 'package:lanis/globals.dart';
 import 'package:lanis/utils/keyboard_observer.dart';
 import 'package:lanis/widgets/combined_applet_builder.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -413,22 +414,22 @@ class _CalendarViewState extends State<CalendarView> {
                                       .start,
                                   children: [
                                     Text(
-                                      value[index].title,
+                                      unescape.convert(value[index].title),
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleMedium,
                                     ),
                                     Text(
-                                      maxLines: 1,
-                                      overflow: TextOverflow
-                                          .ellipsis,
-                                      value[index]
+                                      unescape.convert(value[index]
                                           .category
                                           ?.name ??
                                           value[index]
                                               .place ??
                                           value[index]
-                                              .description,
+                                              .description),
+                                      maxLines: 1,
+                                      overflow: TextOverflow
+                                          .ellipsis,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,
