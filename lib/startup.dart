@@ -26,7 +26,7 @@ class StartupScreen extends StatefulWidget {
 
 class _StartupScreenState extends State<StartupScreen> with TickerProviderStateMixin{
   void openWelcomeScreen() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const WelcomeLoginScreen()),
     );

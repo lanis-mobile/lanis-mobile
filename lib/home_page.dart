@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:lanis/core/database/account_database/account_db.dart';
 import 'package:lanis/core/sph/session.dart';
 import 'package:lanis/models/account_types.dart';
@@ -7,6 +9,7 @@ import 'package:lanis/generated/l10n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lanis/utils/authentication_state.dart';
+import 'package:lanis/utils/logger.dart';
 import 'package:lanis/utils/responsive.dart';
 import 'package:lanis/utils/whats_new.dart';
 import 'package:lanis/utils/cached_network_image.dart';
@@ -19,7 +22,8 @@ import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
 import 'globals.dart';
 
-const String surveyUrl = 'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
+const String surveyUrl =
+    'https://ruggmtk.edudocs.de/apps/forms/s/ScZp5xZMKYTksEcQMwgPHfFz';
 
 typedef ActionFunction = void Function(BuildContext, GlobalKey<NavigatorState>);
 typedef WidgetWithContextCallback = Widget Function(BuildContext context);
@@ -141,19 +145,18 @@ class HomePageState extends State<HomePage> {
       body: (context, accType, openDrawerCb) => const SettingsScreen(),
     ),
     Destination(
-      isSupported: true,
-      enableBottomNavigation: false,
-      hideInRail: true,
-      enableDrawer: true,
-      icon: (context) => Icon(Icons.logout),
-      selectedIcon: (context) => Icon(Icons.logout_outlined),
-      label: (context) => AppLocalizations.of(context).logout,
-      action: (context, navigator) async {
-        await sph!.session.deAuthenticate();
-        await accountDatabase.deleteAccount(sph!.account.localId);
-        if(context.mounted) authenticationState.reset(context);
-      }
-    ),
+        isSupported: true,
+        enableBottomNavigation: false,
+        hideInRail: true,
+        enableDrawer: true,
+        icon: (context) => Icon(Icons.logout),
+        selectedIcon: (context) => Icon(Icons.logout_outlined),
+        label: (context) => AppLocalizations.of(context).logout,
+        action: (context, navigator) async {
+          await sph!.session.deAuthenticate();
+          await accountDatabase.deleteAccount(sph!.account.localId);
+          if (context.mounted) authenticationState.reset(context);
+        }),
   ];
 
   void setDefaultDestination() {
@@ -215,7 +218,7 @@ class HomePageState extends State<HomePage> {
       destinations[index].action!(context, navigatorKey);
     } else {
       AppBarController.instance.clear();
-      navigatorKey.currentState?.popUntil((route) => route.isFirst );
+      navigatorKey.currentState?.popUntil((route) => route.isFirst);
       setState(() {
         selectedDestinationDrawer = index;
         if (fromDrawer) Navigator.pop(context);
@@ -284,28 +287,28 @@ class HomePageState extends State<HomePage> {
                       ),
                     ),
                     Padding(
-                        padding: const EdgeInsets.only(left: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor),
-                            ),
-                            Text(
-                              sph!.account.schoolName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(color: textColor),
-                            ),
-                          ],
-                        ),
+                      padding: const EdgeInsets.only(left: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${sph?.session.userData["nachname"]}, ${sph?.session.userData["vorname"]}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor),
+                          ),
+                          Text(
+                            sph!.account.schoolName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(color: textColor),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -356,13 +359,16 @@ class HomePageState extends State<HomePage> {
         indexNavbarTranslationLayer.add(null);
       }
     }
-    return indexNavbarTranslationLayer[selectedDestinationDrawer] != null ? NavigationBar(
-      destinations: barDestinations,
-      selectedIndex: indexNavbarTranslationLayer[selectedDestinationDrawer]!,
-      onDestinationSelected: (int index) =>
-          openDestination(indexNavbarTranslationLayer.indexOf(index), false),
-      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-    ) : null;
+    return indexNavbarTranslationLayer[selectedDestinationDrawer] != null
+        ? NavigationBar(
+            destinations: barDestinations,
+            selectedIndex:
+                indexNavbarTranslationLayer[selectedDestinationDrawer]!,
+            onDestinationSelected: (int index) => openDestination(
+                indexNavbarTranslationLayer.indexOf(index), false),
+            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+          )
+        : null;
   }
 
   Widget navRail(BuildContext context) {
@@ -371,12 +377,12 @@ class HomePageState extends State<HomePage> {
     for (var destination in destinations) {
       if (destination.isSupported && !destination.hideInRail) {
         railDestinations.add(NavigationRailDestination(
-          label: Text(destination.label(context)),
-          icon: destination.icon(context),
-          selectedIcon: destination.selectedIcon(context),
-          disabled: !destination.isSupported,
-          padding:  EdgeInsets.only(top: destination.addDivider ? 20 : 4, left: 4, right: 4)
-        ));
+            label: Text(destination.label(context)),
+            icon: destination.icon(context),
+            selectedIcon: destination.selectedIcon(context),
+            disabled: !destination.isSupported,
+            padding: EdgeInsets.only(
+                top: destination.addDivider ? 20 : 4, left: 4, right: 4)));
       }
     }
 
@@ -424,7 +430,11 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
-      bottomNavigationBar: Responsive.isTablet(context) == false && isFirstLevelRoute && doesSupportAnyApplet ? navBar(context) : null,
+      bottomNavigationBar: Responsive.isTablet(context) == false &&
+              isFirstLevelRoute &&
+              doesSupportAnyApplet
+          ? navBar(context)
+          : null,
       drawerEdgeDragWidth: Responsive.isTablet(context) ? 100 : 30,
       drawer: navDrawer(context),
       body: Row(
@@ -434,7 +444,8 @@ class HomePageState extends State<HomePage> {
               builder: (context, constraint) {
                 return SingleChildScrollView(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraint.maxHeight),
+                    constraints:
+                        BoxConstraints(minHeight: constraint.maxHeight),
                     child: IntrinsicHeight(
                       child: navRail(context),
                     ),
@@ -447,35 +458,50 @@ class HomePageState extends State<HomePage> {
           // This is the main content.
           Expanded(
             child: doesSupportAnyApplet
-              ? Navigator(
-                  key: navigatorKey,
-                  onGenerateRoute: (settings) {
-                    return MaterialPageRoute(
-                      builder: (context) => Column(
-                        children: [
-                          DynamicAppBar(
-                            title: destinations[selectedDestinationDrawer].label(context),
-                            automaticallyImplyLeading: !Responsive.isTablet(context),
+                ? PopScope(
+                    canPop: false,
+                    onPopInvokedWithResult:
+                        (bool didPop, Object? result) async {
+                      logger.d('PopScope: didPop: $didPop, result: $result');
+                      if (didPop) {
+                        return;
+                      }
+                      if (!isFirstLevelRoute) {
+                        navigatorKey.currentState?.pop();
+                        return;
+                      } else if (context.mounted) {
+                        // close drawer first if open
+                        if (_drawerKey.currentState?.isDrawerOpen ?? false) {
+                          _drawerKey.currentState?.closeDrawer();
+                        } else {
+                          if (Platform.isAndroid) SystemNavigator.pop();
+                        }
+                      }
+                    },
+                    child: Navigator(
+                      key: navigatorKey,
+                      onGenerateRoute: (settings) {
+                        return MaterialPageRoute(
+                          builder: (context) => Column(
+                            children: [
+                              DynamicAppBar(
+                                title: destinations[selectedDestinationDrawer]
+                                    .label(context),
+                                automaticallyImplyLeading:
+                                    !Responsive.isTablet(context),
+                              ),
+                              Expanded(
+                                child: destinations[selectedDestinationDrawer]
+                                        .body!(
+                                    context, sph!.session.accountType, () {
+                                  _drawerKey.currentState!.openDrawer();
+                                }),
+                              )
+                            ],
                           ),
-                          Expanded(
-                            child: destinations[selectedDestinationDrawer].body!(
-                                context, sph!.session.accountType, () {
-                              _drawerKey.currentState!.openDrawer();
-                            }
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                  onPopPage: (route, result) {
-                    if (!route.didPop(result)) {
-                      return false;
-                    }
-                    // Optionally handle custom pop logic here
-                    return true;
-                  },
-                )
+                        );
+                      },
+                    ))
                 : noAppsSupported(),
           )
         ],

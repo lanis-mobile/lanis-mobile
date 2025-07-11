@@ -407,7 +407,7 @@ class _ConversationsViewState extends State<ConversationsView> {
     super.didChangeDependencies();
 
     final mediaQueryData = MediaQueryData.fromView(WidgetsBinding.instance.platformDispatcher.views.first);
-    tabletMode ??= !(mediaQueryData.size.shortestSide < 550);
+    tabletMode ??= !(mediaQueryData.size.shortestSide < 660);
   }
 
   @override

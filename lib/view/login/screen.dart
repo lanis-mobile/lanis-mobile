@@ -48,6 +48,6 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(canPop: false, child: buildBody());
+    return buildBody();
   }
 }

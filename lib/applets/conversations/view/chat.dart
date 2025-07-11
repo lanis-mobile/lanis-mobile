@@ -433,6 +433,7 @@ void renderMessages(Conversation unparsedMessages) {
         },
       ),
       body: SafeArea(
+        top: false,
         child: FutureBuilder(
           future: _conversationFuture,
           builder: (context, snapshot) {

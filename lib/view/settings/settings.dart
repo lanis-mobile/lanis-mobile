@@ -220,13 +220,13 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = Responsive.isTablet(context);
+    final isTablet = Responsive.isTabletApplet(context);
     final double availableHeight = MediaQuery.of(context).size.height -
         kToolbarHeight -
         MediaQuery.of(context).padding.top;
 
     if (mounted &&
-        Responsive.isTablet(context) &&
+        Responsive.isTabletApplet(context) &&
         settingsTiles.isNotEmpty &&
         settingsTiles[0].tiles.isNotEmpty &&
         selectedTile == null) {
@@ -299,7 +299,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   Widget _buildSettingDetail(SettingsTile tile) {
     return Builder(
       builder: (context) {
-        final isTablet = Responsive.isTablet(context);
+        final isTablet = Responsive.isTabletApplet(context);
         if (tile.title(context) == AppLocalizations.of(context).appearance) {
           return AppearanceSettings(showBackButton: !isTablet);
         } else if (tile.title(context) ==
