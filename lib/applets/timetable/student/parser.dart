@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:lanis/applets/timetable/student/student_timetable_better_view.dart';
 import 'package:lanis/core/applet_parser.dart';
 import 'package:lanis/models/client_status_exceptions.dart';
 import 'package:uuid/uuid.dart';
@@ -25,7 +24,8 @@ class TimetableStudentParser extends AppletParser<TimeTable> {
     final String? weekBadge =
         document.querySelector("#aktuelleWoche")?.text.trim();
     final List<TimetableDay> parsedAll = parseRoomPlan(tbodyAll!);
-    final List<TimetableDay>? parsedOwn = (tbodyOwn == null ? null : parseRoomPlan(tbodyOwn));
+    final List<TimetableDay>? parsedOwn =
+        (tbodyOwn == null ? null : parseRoomPlan(tbodyOwn));
 
     final hours = parseRows(tbodyAll);
 

@@ -24,7 +24,7 @@ class LoginTimeoutException extends LanisException {
 
   LoginTimeoutException(this.time, [String? cause])
       : super((cause ?? AppLocalizations.current.loginTimeout(time))
-      .replaceAll('{time}', time));
+            .replaceAll('{time}', time));
 }
 
 class CredentialsIncompleteException extends LanisException {

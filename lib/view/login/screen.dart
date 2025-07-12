@@ -39,7 +39,9 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
       );
     } else if (currentPage == PageType.login) {
       return Scaffold(
-        body: LoginForm(showBackButton: false,),
+        body: LoginForm(
+          showBackButton: false,
+        ),
       );
     }
 
@@ -48,6 +50,6 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(canPop: false, child: buildBody());
+    return buildBody();
   }
 }

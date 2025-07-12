@@ -14,7 +14,7 @@
   "storage": "Datastorage",
   "settings": "Settings",
   "about": "About Lanis-Mobile",
-  "openLanisInBrowser": "Open in Browser",
+  "openLanisInBrowser": "Open web",
   "openMoodle": "Open Moodle",
   "userData": "User data",
   "personalSchoolSupport": "Personal school support",
@@ -390,5 +390,6 @@
   "ignoreBatteryOptimizationPart1": "If you do not recieve notifications, this can be due to manufacturer-specific battery optimizations. You can disable them for this app in the ",
   "ignoreBatteryOptimizationSettings": "Battery optimization settings",
   "ignoreBatteryOptimizationGranted": "Successfully granted the battery optimization permission.",
-  "ignoreBatteryOptimizationDenied": "Failed to grant the battery optimization permission. Please try again or do it manually in the system settings."
+  "ignoreBatteryOptimizationDenied": "Failed to grant the battery optimization permission. Please try again or do it manually in the system settings.",
+  "recommended": "Recommended"
 }

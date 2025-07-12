@@ -34,31 +34,35 @@ class FormatStyle {
   late final Color codeBackground;
   late final Color codeForeground;
 
-  FormatStyle({required this.textStyle,
-    required this.timeColor,
-    required this.linkBackground,
-    required this.linkForeground,
-    required this.codeBackground,
-    required this.codeForeground});
+  FormatStyle(
+      {required this.textStyle,
+      required this.timeColor,
+      required this.linkBackground,
+      required this.linkForeground,
+      required this.codeBackground,
+      required this.codeForeground});
 }
 
 class DefaultFormatStyle extends FormatStyle {
   late final BuildContext context;
 
-  DefaultFormatStyle({required this.context}) : super(
-    textStyle: Theme.of(context).textTheme.bodyMedium!,
-    timeColor: Theme.of(context).colorScheme.primary,
-    linkBackground: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
-    linkForeground: Theme.of(context).colorScheme.primary,
-    codeBackground: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.25),
-    codeForeground: Theme.of(context).colorScheme.onSurface
-  );
+  DefaultFormatStyle({required this.context})
+      : super(
+            textStyle: Theme.of(context).textTheme.bodyMedium!,
+            timeColor: Theme.of(context).colorScheme.primary,
+            linkBackground:
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+            linkForeground: Theme.of(context).colorScheme.primary,
+            codeBackground:
+                Theme.of(context).colorScheme.secondary.withValues(alpha: 0.25),
+            codeForeground: Theme.of(context).colorScheme.onSurface);
 }
 
 class FormattedText extends StatelessWidget {
   final String text;
   final FormatStyle formatStyle;
-  const FormattedText({super.key, required this.text, required this.formatStyle});
+  const FormattedText(
+      {super.key, required this.text, required this.formatStyle});
 
   /// Replaces all occurrences of map keys with their respective value
   String convertByMap(String string, Map<String, String> map) {
@@ -103,21 +107,13 @@ class FormattedText extends StatelessWidget {
           startTag: "<b>",
           endTag: "</b>"),
       FormatPattern(
-          regExp: RegExp(r"_\((.*?)\)"),
-          startTag: "<sub>",
-          endTag: "</sub>"),
+          regExp: RegExp(r"_\((.*?)\)"), startTag: "<sub>", endTag: "</sub>"),
       FormatPattern(
-          regExp: RegExp(r"_(.)\s"),
-          startTag: "<sub>",
-          endTag: "</sub>"),
+          regExp: RegExp(r"_(.)\s"), startTag: "<sub>", endTag: "</sub>"),
       FormatPattern(
-          regExp: RegExp(r"\^\((.*?)\)"),
-          startTag: "<sup>",
-          endTag: "</sup>"),
+          regExp: RegExp(r"\^\((.*?)\)"), startTag: "<sup>", endTag: "</sup>"),
       FormatPattern(
-          regExp: RegExp(r"\^(.)\s"),
-          startTag: "<sup>",
-          endTag: "</sup>"),
+          regExp: RegExp(r"\^(.)\s"), startTag: "<sup>", endTag: "</sup>"),
       FormatPattern(
           regExp: RegExp(r"~~(([^~]|~(?!~))+)~~"),
           startTag: "<i>",
@@ -160,8 +156,8 @@ class FormattedText extends StatelessWidget {
       if (pattern.specialCaseRegExp == null) break;
       formattedText = formattedText.replaceAllMapped(
           pattern.specialCaseRegExp!,
-              (match) =>
-          "${pattern.specialCaseTag ?? ""}${convertByMap(match.groups(pattern.specialCaseGroups).join(), pattern.map)}${pattern.endTag ?? ""}");
+          (match) =>
+              "${pattern.specialCaseTag ?? ""}${convertByMap(match.groups(pattern.specialCaseGroups).join(), pattern.map)}${pattern.endTag ?? ""}");
     }
 
     // Apply formatting
@@ -171,7 +167,7 @@ class FormattedText extends StatelessWidget {
           (match) =>
               "${pattern.startTag ?? ""}${convertByMap(match.group(pattern.group)!, pattern.map)}${pattern.endTag ?? ""}");
     }
-    
+
     // Surround emails and links with <a> tag
     final List<LinkifyElement> linkifiedElements = linkify(formattedText,
         options: const LinkifyOptions(humanize: true, removeWww: true),
@@ -201,33 +197,29 @@ class FormattedText extends StatelessWidget {
       style: formatStyle.textStyle,
       tags: {
         "b": const StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold)),
-        "u": StyledTextCustomTag(
-            parse: (_, attributes) {
-              List<TextDecoration> textDecorations = [TextDecoration.underline];
-              if (attributes.containsKey("hasDel")) textDecorations.add(TextDecoration.lineThrough);
+        "u": StyledTextCustomTag(parse: (_, attributes) {
+          List<TextDecoration> textDecorations = [TextDecoration.underline];
+          if (attributes.containsKey("hasDel"))
+            textDecorations.add(TextDecoration.lineThrough);
 
-              return TextStyle(
-                decoration: TextDecoration.combine(textDecorations),
-              );
-            }
-        ),
+          return TextStyle(
+            decoration: TextDecoration.combine(textDecorations),
+          );
+        }),
         "i": const StyledTextTag(style: TextStyle(fontStyle: FontStyle.italic)),
-        "del": StyledTextCustomTag(
-          parse: (_, attributes) {
-            List<TextDecoration> textDecorations = [TextDecoration.lineThrough];
-            if (attributes.containsKey("hasU")) textDecorations.add(TextDecoration.underline);
+        "del": StyledTextCustomTag(parse: (_, attributes) {
+          List<TextDecoration> textDecorations = [TextDecoration.lineThrough];
+          if (attributes.containsKey("hasU"))
+            textDecorations.add(TextDecoration.underline);
 
-            return TextStyle(
-                decoration: TextDecoration.combine(textDecorations),
-            );
-          }
-        ),
+          return TextStyle(
+            decoration: TextDecoration.combine(textDecorations),
+          );
+        }),
         "sup": const StyledTextTag(
-          style: TextStyle(fontFeatures: [FontFeature.superscripts()])
-        ),
+            style: TextStyle(fontFeatures: [FontFeature.superscripts()])),
         "sub": const StyledTextTag(
-            style: TextStyle(fontFeatures: [FontFeature.subscripts()])
-        ),
+            style: TextStyle(fontFeatures: [FontFeature.subscripts()])),
         "code": StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
               padding: const EdgeInsets.only(top: 2, bottom: 2),
               child: Container(
@@ -235,15 +227,13 @@ class FormattedText extends StatelessWidget {
                     left: 8.0, right: 8.0, top: 4, bottom: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color:
-                  formatStyle.codeBackground,
+                  color: formatStyle.codeBackground,
                 ),
                 child: Text(
                   textContent!,
                   style: TextStyle(
-                    fontFamily: "Roboto Mono",
-                    color: formatStyle.codeForeground
-                  ),
+                      fontFamily: "Roboto Mono",
+                      color: formatStyle.codeForeground),
                 ),
               ),
             )),
@@ -287,11 +277,9 @@ class FormattedText extends StatelessWidget {
           late final Icon icon;
 
           if (attributes["type"] == "url") {
-            icon =
-                Icon(Icons.link, color: formatStyle.linkForeground);
+            icon = Icon(Icons.link, color: formatStyle.linkForeground);
           } else {
-            icon = Icon(Icons.email_rounded,
-                color: formatStyle.linkForeground);
+            icon = Icon(Icons.email_rounded, color: formatStyle.linkForeground);
           }
 
           return Padding(
@@ -299,7 +287,8 @@ class FormattedText extends StatelessWidget {
             child: InkWell(
               onTap: () async {
                 if (!await launchUrl(Uri.parse(attributes["href"]!))) {
-                  logger.w('${attributes["href"]} konnte nicht geöffnet werden.');
+                  logger
+                      .w('${attributes["href"]} konnte nicht geöffnet werden.');
                 }
               },
               borderRadius: BorderRadius.circular(6),
@@ -320,8 +309,7 @@ class FormattedText extends StatelessWidget {
                       Flexible(
                         child: Text(
                           textContent!,
-                          style: TextStyle(
-                              color: formatStyle.linkForeground),
+                          style: TextStyle(color: formatStyle.linkForeground),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),

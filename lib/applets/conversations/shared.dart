@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
 
-import '../../../models/conversations.dart';
-import '../../../widgets/format_text.dart';
+import '../../models/conversations.dart';
+import '../../widgets/format_text.dart';
 
 class ConversationSettings {
   final String id; // uniqueId
@@ -134,7 +134,8 @@ abstract class BubbleStyles {
     if (theme.brightness == Brightness.dark) {
       other = BubbleStyle(
           mainColor: theme.colorScheme.inversePrimary,
-          pressedColor: theme.colorScheme.inversePrimary.withValues(alpha: 0.65),
+          pressedColor:
+              theme.colorScheme.inversePrimary.withValues(alpha: 0.65),
           mainTextStyle: baseTextStyle.copyWith(
               color: theme.colorScheme.onSurface,
               decorationColor: theme.colorScheme.onPrimary),

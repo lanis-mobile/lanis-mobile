@@ -14,8 +14,7 @@ import '../../core/sph/sph.dart';
 import '../../widgets/combined_applet_builder.dart';
 
 class SubstitutionsView extends StatefulWidget {
-  final Function? openDrawerCb;
-  const SubstitutionsView({super.key, this.openDrawerCb});
+  const SubstitutionsView({super.key});
 
   @override
   State<SubstitutionsView> createState() => _SubstitutionsViewState();
@@ -182,37 +181,22 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
     return CombinedAppletBuilder<SubstitutionPlan>(
       accountType: sph!.session.accountType,
       parser: sph!.parser.substitutionsParser,
-      phpUrl: substitutionDefinition.appletPhpUrl,
+      phpUrl: substitutionDefinition.appletPhpIdentifier,
       settingsDefaults: substitutionDefinition.settingsDefaults,
-      loadingAppBar: AppBar(
-        title: Text(substitutionDefinition.label(context)),
-        leading: Icon(Icons.menu), // will be fixed with Builder Redesign
-      ),
       builder: (context, data, accountType, settings, updateSetting, refresh) {
         if (data.days.isEmpty) {
           // GlobalKeys for RefreshIndicator and Refresh-FAB
           globalKeys += List.generate(
               data.days.length, (index) => GlobalKey<RefreshIndicatorState>());
           return Scaffold(
-            appBar: AppBar(
-              title: Text(substitutionDefinition.label(context)),
-              leading: widget.openDrawerCb != null
-                  ? IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => widget.openDrawerCb!(),
-                    )
-                  : null,
+            floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SubstitutionsFilterSettings(),
+                ));
+              },
+              child: const Icon(Icons.filter_alt),
             ),
-            floatingActionButton: widget.openDrawerCb != null
-                ? FloatingActionButton(
-                    onPressed: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SubstitutionsFilterSettings(),
-                      ));
-                    },
-                    child: const Icon(Icons.filter_alt),
-                  )
-                : null,
             body: RefreshIndicator(
               key: globalKeys[0],
               notificationPredicate:
@@ -239,10 +223,11 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                         ),
                         Spacer(),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
                           child: Text(
-                            AppLocalizations.of(context)
-                                .substitutionsLastEdit(data.lastUpdated.format('dd.MM.yyyy HH:mm')),
+                            AppLocalizations.of(context).substitutionsLastEdit(
+                                data.lastUpdated.format('dd.MM.yyyy HH:mm')),
                             textAlign: TextAlign.center,
                           ),
                         )
@@ -272,25 +257,14 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
           });
 
           return Scaffold(
-            appBar: AppBar(
-              title: Text(substitutionDefinition.label(context)),
-              leading: widget.openDrawerCb != null
-                  ? IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => widget.openDrawerCb!(),
-                    )
-                  : null,
+            floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SubstitutionsFilterSettings(),
+                ));
+              },
+              child: const Icon(Icons.filter_alt),
             ),
-            floatingActionButton: widget.openDrawerCb != null
-                ? FloatingActionButton(
-                    onPressed: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SubstitutionsFilterSettings(),
-                      ));
-                    },
-                    child: const Icon(Icons.filter_alt),
-                  )
-                : null,
             body: Column(
               children: [
                 TabBar(

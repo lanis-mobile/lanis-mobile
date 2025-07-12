@@ -7,18 +7,22 @@ import '../../models/account_types.dart';
 import 'background.dart';
 
 final substitutionDefinition = AppletDefinition(
-  appletPhpUrl: 'vertretungsplan.php',
-  icon: Icon(Icons.people),
-  selectedIcon: Icon(Icons.people_outline),
-  appletType: AppletType.nested,
+  appletPhpIdentifier: 'vertretungsplan.php',
+  icon: (context) => Icon(Icons.people),
+  selectedIcon: (context) => Icon(Icons.people_outline),
+  useBottomNavigation: true,
   addDivider: false,
   allowOffline: true,
   label: (context) => AppLocalizations.of(context).substitutions,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
+  supportedAccountTypes: [
+    AccountType.student,
+    AccountType.teacher,
+    AccountType.parent
+  ],
   refreshInterval: Duration(minutes: 10),
   settingsDefaults: {},
   notificationTask: substitutionsBackgroundTask,
   bodyBuilder: (context, accountType, openDrawerCb) {
-    return SubstitutionsView(openDrawerCb: openDrawerCb,);
+    return SubstitutionsView();
   },
 );
