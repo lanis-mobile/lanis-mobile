@@ -10,7 +10,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:lanis/generated/l10n.dart';
 
-
 import '../../core/sph/sph.dart';
 import '../../models/calendar_event.dart';
 import '../../models/client_status_exceptions.dart';
@@ -322,15 +321,15 @@ class _CalendarViewState extends State<CalendarView> {
     try {
       var singleEvent = await fetchEvent(calendarData.id);
       if (singleEvent == null) return;
-      if(mounted) {
+      if (mounted) {
         await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          showDragHandle: true,
-          builder: (context) {
-            return eventBottomSheet(calendarData, singleEvent);
-          });
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            showDragHandle: true,
+            builder: (context) {
+              return eventBottomSheet(calendarData, singleEvent);
+            });
       }
     } on NoConnectionException {
       if (mounted) {
@@ -383,15 +382,13 @@ class _CalendarViewState extends State<CalendarView> {
                 itemCount: value.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(
-                        left: 8, right: 8, bottom: 4),
+                    padding:
+                        const EdgeInsets.only(left: 8, right: 8, bottom: 4),
                     child: Card(
                       child: InkWell(
-                        borderRadius:
-                        BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12),
                         onTap: () async {
-                          await openEventBottomSheet(
-                              value[index]);
+                          await openEventBottomSheet(value[index]);
                         },
                         child: Row(
                           children: [
@@ -400,18 +397,13 @@ class _CalendarViewState extends State<CalendarView> {
                               height: 40,
                               decoration: BoxDecoration(
                                   color: value[index].color,
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                      8)),
+                                  borderRadius: BorderRadius.circular(8)),
                             ),
                             Expanded(
                               child: Padding(
-                                padding:
-                                const EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       unescape.convert(value[index].title),
@@ -420,16 +412,12 @@ class _CalendarViewState extends State<CalendarView> {
                                           .titleMedium,
                                     ),
                                     Text(
-                                      unescape.convert(value[index]
-                                          .category
-                                          ?.name ??
-                                          value[index]
-                                              .place ??
-                                          value[index]
-                                              .description),
+                                      unescape.convert(
+                                          value[index].category?.name ??
+                                              value[index].place ??
+                                              value[index].description),
                                       maxLines: 1,
-                                      overflow: TextOverflow
-                                          .ellipsis,
+                                      overflow: TextOverflow.ellipsis,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,
@@ -462,30 +450,24 @@ class _CalendarViewState extends State<CalendarView> {
       firstDay: DateTime.utc(2020),
       lastDay: DateTime.utc(2030),
       availableCalendarFormats: {
-        CalendarFormat.month: AppLocalizations.of(context)
-            .calendarFormatMonth,
+        CalendarFormat.month: AppLocalizations.of(context).calendarFormatMonth,
         CalendarFormat.twoWeeks:
-        AppLocalizations.of(context)
-            .calendarFormatTwoWeeks,
-        CalendarFormat.week: AppLocalizations.of(context)
-            .calendarFormatWeek,
+            AppLocalizations.of(context).calendarFormatTwoWeeks,
+        CalendarFormat.week: AppLocalizations.of(context).calendarFormatWeek,
       },
       focusedDay: _focusedDay,
-      selectedDayPredicate: (day) =>
-          isSameDay(_selectedDay, day),
+      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
       calendarFormat: _calendarFormat,
       eventLoader: _getEventsForDay,
       startingDayOfWeek: StartingDayOfWeek.monday,
       calendarStyle: CalendarStyle(
         outsideDaysVisible: false,
-        defaultDecoration:
-        const BoxDecoration(shape: BoxShape.circle),
+        defaultDecoration: const BoxDecoration(shape: BoxShape.circle),
         selectedDecoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primary,
             shape: BoxShape.circle),
         selectedTextStyle: TextStyle(
-            fontSize: 16.0,
-            color: Theme.of(context).colorScheme.onPrimary),
+            fontSize: 16.0, color: Theme.of(context).colorScheme.onPrimary),
         todayDecoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondary,
           shape: BoxShape.circle,
@@ -496,16 +478,14 @@ class _CalendarViewState extends State<CalendarView> {
         ),
         markerDecoration: BoxDecoration(
           shape: BoxShape.circle,
-          color:
-          Theme.of(context).colorScheme.inversePrimary,
+          color: Theme.of(context).colorScheme.inversePrimary,
         ),
         markerSize: 8,
         isTodayHighlighted: false,
       ),
       onDaySelected: _onDaySelected,
       calendarBuilders: CalendarBuilders(
-        markerBuilder:
-            (BuildContext context, date, events) {
+        markerBuilder: (BuildContext context, date, events) {
           if (events.isEmpty) return SizedBox();
           return ListView.builder(
             shrinkWrap: true,
@@ -521,20 +501,16 @@ class _CalendarViewState extends State<CalendarView> {
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: events[index].color,
-                      border: (events[index]
-                          .color
-                          .computeLuminance() -
-                          Theme.of(context)
-                              .colorScheme
-                              .surface
-                              .computeLuminance())
-                          .abs() <
-                          0.02
+                      border: (events[index].color.computeLuminance() -
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .surface
+                                          .computeLuminance())
+                                  .abs() <
+                              0.02
                           ? Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface,
-                          width: 0.75)
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 0.75)
                           : null),
                 ),
               );
@@ -551,8 +527,8 @@ class _CalendarViewState extends State<CalendarView> {
         }
       },
       headerStyle: HeaderStyle(
-        formatButtonTextStyle: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary),
+        formatButtonTextStyle:
+            TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         formatButtonDecoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(24),
@@ -611,75 +587,74 @@ class _CalendarViewState extends State<CalendarView> {
                 return results
                     .map(
                       (event) => ListTile(
-                    title: Text(event.title),
-                    iconColor: event.color,
-                    subtitle: Text(
-                        '${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
-                    leading: event.endTime.isBefore(DateTime.now())
-                        ? const Icon(Icons.done)
-                        : const Icon(Icons.event),
-                    onTap: () async {
-                      setState(() {
-                        _selectedDay = event.startTime;
-                        _focusedDay = event.startTime;
-                      });
-                      searchController.closeView(null);
+                        title: Text(event.title),
+                        iconColor: event.color,
+                        subtitle: Text(
+                            '${event.startTime.format("E d MMM y", "de_DE")} - ${event.endTime.format("E d MMM y", "de_DE")}'),
+                        leading: event.endTime.isBefore(DateTime.now())
+                            ? const Icon(Icons.done)
+                            : const Icon(Icons.event),
+                        onTap: () async {
+                          setState(() {
+                            _selectedDay = event.startTime;
+                            _focusedDay = event.startTime;
+                          });
+                          searchController.closeView(null);
 
-                      noTrigger = true;
-                      if (keyboardObserver.value ==
-                          KeyboardStatus.closed) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      }
+                          noTrigger = true;
+                          if (keyboardObserver.value == KeyboardStatus.closed) {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          }
 
-                      await openEventBottomSheet(event).whenComplete(() {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        noTrigger = false;
-                      });
-                    },
-                  ),
-                )
+                          await openEventBottomSheet(event).whenComplete(() {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            noTrigger = false;
+                          });
+                        },
+                      ),
+                    )
                     .toList();
               },
             ),
           ),
         ),
         Expanded(
-            child: CombinedAppletBuilder<List<CalendarEvent>>(
-                parser: sph!.parser.calendarParser,
-                phpUrl: calendarDefinition.appletPhpIdentifier,
-                settingsDefaults: calendarDefinition.settingsDefaults,
-                accountType: sph!.session.accountType,
-                builder: (context, data, accountType, settings, updateSetting,
-                    refresh) {
-                  eventList = data;
-                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+          child: CombinedAppletBuilder<List<CalendarEvent>>(
+            parser: sph!.parser.calendarParser,
+            phpUrl: calendarDefinition.appletPhpIdentifier,
+            settingsDefaults: calendarDefinition.settingsDefaults,
+            accountType: sph!.session.accountType,
+            builder:
+                (context, data, accountType, settings, updateSetting, refresh) {
+              eventList = data;
+              _selectedEvents.value = _getEventsForDay(_selectedDay!);
 
-                  return LayoutBuilder(builder: (context, constrains)  {
-                    if (constrains.maxWidth >550) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: _tableCalendar(context),
-                          ),
-                          const VerticalDivider(),
-                          Expanded(
-                            child: _itemsListView(context),
-                          ),
-                        ],
-                      );
-                    }
-                    return Column(
-                      children: [
-                        _tableCalendar(context),
-                        Expanded(
-                          child: _itemsListView(context),
-                        ),
-                      ],
-                    );
-                  });
-                },
-            ),
+              return LayoutBuilder(builder: (context, constrains) {
+                if (constrains.maxWidth > 550) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: _tableCalendar(context),
+                      ),
+                      const VerticalDivider(),
+                      Expanded(
+                        child: _itemsListView(context),
+                      ),
+                    ],
+                  );
+                }
+                return Column(
+                  children: [
+                    _tableCalendar(context),
+                    Expanded(
+                      child: _itemsListView(context),
+                    ),
+                  ],
+                );
+              });
+            },
+          ),
         ),
       ],
     );

@@ -49,8 +49,8 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
         .getAllApplet(widget.phpUrl, widget.settingsDefaults);
     if (mounted) {
       setState(() {
-      _loading = false;
-    });
+        _loading = false;
+      });
     }
   }
 
@@ -107,10 +107,13 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                           ),
                           Text(
                               '${AppLocalizations.of(context).offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
-                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              )
-                          ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  )),
                         ],
                       ),
                     ),
@@ -122,13 +125,14 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                   snapshot.data!.content as T,
                   widget.accountType,
                   appletSettings,
-                      (String key, dynamic value) async {
-                    await sph!.prefs.kv.setAppletValue(widget.phpUrl, key, value);
+                  (String key, dynamic value) async {
+                    await sph!.prefs.kv
+                        .setAppletValue(widget.phpUrl, key, value);
                     setState(() {
                       appletSettings[key] = value;
                     });
                   },
-                      () async {
+                  () async {
                     await widget.parser.fetchData(forceRefresh: true);
                   },
                 ),

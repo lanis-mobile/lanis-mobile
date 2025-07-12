@@ -44,7 +44,10 @@ class AppBarController extends ChangeNotifier {
 class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool automaticallyImplyLeading;
-  const DynamicAppBar({super.key, required this.title, required this.automaticallyImplyLeading});
+  const DynamicAppBar(
+      {super.key,
+      required this.title,
+      required this.automaticallyImplyLeading});
 
   @override
   Widget build(BuildContext context) {

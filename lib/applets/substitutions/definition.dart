@@ -14,7 +14,11 @@ final substitutionDefinition = AppletDefinition(
   addDivider: false,
   allowOffline: true,
   label: (context) => AppLocalizations.of(context).substitutions,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
+  supportedAccountTypes: [
+    AccountType.student,
+    AccountType.teacher,
+    AccountType.parent
+  ],
   refreshInterval: Duration(minutes: 10),
   settingsDefaults: {},
   notificationTask: substitutionsBackgroundTask,

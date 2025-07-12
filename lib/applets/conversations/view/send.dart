@@ -13,7 +13,8 @@ class ConversationsSend extends StatefulWidget {
   final ChatCreationData? creationData;
   final bool isTablet;
   final String? title;
-  const ConversationsSend({super.key, this.creationData, required this.isTablet, this.title});
+  const ConversationsSend(
+      {super.key, this.creationData, required this.isTablet, this.title});
 
   @override
   State<ConversationsSend> createState() => _ConversationsSendState();
@@ -93,22 +94,22 @@ class _ConversationsSendState extends State<ConversationsSend> {
   Future<void> newConversation(String text) async {
     final bool status = await connectionChecker.connected;
     if (!status) {
-      if(mounted) {
+      if (mounted) {
         showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              icon: const Icon(Icons.wifi_off),
-              title: Text(AppLocalizations.of(context).noInternetConnection2),
-              actions: [
-                FilledButton(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Ok")),
-              ],
-            );
-          });
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                icon: const Icon(Icons.wifi_off),
+                title: Text(AppLocalizations.of(context).noInternetConnection2),
+                actions: [
+                  FilledButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Ok")),
+                ],
+              );
+            });
       }
       return;
     }
@@ -132,53 +133,53 @@ class _ConversationsSendState extends State<ConversationsSend> {
     if (response.success) {
       sph!.parser.conversationsParser.fetchData(forceRefresh: true);
 
-      if(mounted) {
+      if (mounted) {
         Navigator.pop(context);
         Navigator.pop(context);
         if (!widget.isTablet) {
           Navigator.pop(context);
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) =>
-                  ConversationsChat(
-                      title: widget.creationData!.subject,
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ConversationsChat(
+                title: widget.creationData!.subject,
+                id: response.id!,
+                isTablet: widget.isTablet,
+                refreshSidebar: () {},
+                newSettings: NewConversationSettings(
+                  firstMessage: textMessage,
+                  settings: ConversationSettings(
                       id: response.id!,
-                      isTablet: widget.isTablet,
-                      refreshSidebar: () {},
-                      newSettings: NewConversationSettings(
-                          firstMessage: textMessage,
-                          settings: ConversationSettings(
-                              id: response.id!,
-                              groupChat:
-                              widget.creationData!.type == ChatType.groupOnly,
-                              onlyPrivateAnswers: widget.creationData!.type ==
-                                  ChatType.privateAnswerOnly,
-                              noReply: widget.creationData!.type ==
-                                  ChatType.noAnswerAllowed,
-                              own: true),
-                      ),
-                  ),
-          ),
+                      groupChat:
+                          widget.creationData!.type == ChatType.groupOnly,
+                      onlyPrivateAnswers: widget.creationData!.type ==
+                          ChatType.privateAnswerOnly,
+                      noReply:
+                          widget.creationData!.type == ChatType.noAnswerAllowed,
+                      own: true),
+                ),
+              ),
+            ),
           );
         }
       }
     } else {
-      if(mounted) {
+      if (mounted) {
         showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              icon: const Icon(Icons.error),
-              title:
-                  Text(AppLocalizations.of(context).errorCreatingConversation),
-              actions: [
-                FilledButton(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Ok")),
-              ],
-            );
-          });
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                icon: const Icon(Icons.error),
+                title: Text(
+                    AppLocalizations.of(context).errorCreatingConversation),
+                actions: [
+                  FilledButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Ok")),
+                ],
+              );
+            });
       }
     }
   }
@@ -187,9 +188,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(
-            widget.creationData?.subject ?? widget.title!
-          ),
+          title: Text(widget.creationData?.subject ?? widget.title!),
           actions: [
             IconButton(
               onPressed: () {
@@ -213,14 +212,15 @@ class _ConversationsSendState extends State<ConversationsSend> {
             ),
           ],
         ),
-        body: SafeArea(child: Column(
+        body: SafeArea(
+            child: Column(
           children: [
             Expanded(
               child: QuillEditor.basic(
                   configurations: QuillEditorConfigurations(
                       controller: _controller,
                       placeholder:
-                      AppLocalizations.of(context).sendMessagePlaceholder,
+                          AppLocalizations.of(context).sendMessagePlaceholder,
                       padding: const EdgeInsets.symmetric(horizontal: 16.0))),
             ),
             QuillToolbar(

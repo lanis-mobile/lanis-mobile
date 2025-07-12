@@ -13,7 +13,11 @@ final moodleDefinition = AppletDefinition(
   selectedIcon: (context) => Icon(BrowserIcons.moodle),
   settingsDefaults: {},
   label: (context) => 'Moodle',
-  supportedAccountTypes: [AccountType.student, AccountType.parent, AccountType.teacher],
+  supportedAccountTypes: [
+    AccountType.student,
+    AccountType.parent,
+    AccountType.teacher
+  ],
   allowOffline: false,
   refreshInterval: Duration(days: 356),
   bodyBuilder: (context, accountType, openDrawerCb) {

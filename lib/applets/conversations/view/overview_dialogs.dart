@@ -26,11 +26,14 @@ class _TypeChooserState extends State<TypeChooser> {
         ),
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateConversation(chatType: selectedValue, isTablet: widget.isTablet,)));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => CreateConversation(
+                        chatType: selectedValue,
+                        isTablet: widget.isTablet,
+                      )));
             },
             icon: const Icon(Icons.arrow_forward),
-            label: Text(AppLocalizations.of(context).select)
-        ),
+            label: Text(AppLocalizations.of(context).select)),
         body: ListView.builder(
           itemCount: chatTypes.length,
           itemBuilder: (context, index) {
@@ -49,19 +52,15 @@ class _TypeChooserState extends State<TypeChooser> {
                     child: Icon(chatTypes[index].icon),
                   ),
                   Text(AppLocalizations.of(context)
-                      .conversationTypeName(
-                      chatTypes[index].name)),
+                      .conversationTypeName(chatTypes[index].name)),
                   if (chatTypes[index] == ChatType.openChat) ...[
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.only(right: 4.0),
                       child: Text(
-                        AppLocalizations.of(context)
-                            .experimental
-                            .toUpperCase(),
+                        AppLocalizations.of(context).experimental.toUpperCase(),
                         style: const TextStyle(
-                            fontSize: 10.0,
-                            fontWeight: FontWeight.bold),
+                            fontSize: 10.0, fontWeight: FontWeight.bold),
                       ),
                     )
                   ]
@@ -69,15 +68,13 @@ class _TypeChooserState extends State<TypeChooser> {
               ),
               subtitle: Text(
                 AppLocalizations.of(context)
-                    .conversationTypeDescription(
-                    chatTypes[index].name),
+                    .conversationTypeDescription(chatTypes[index].name),
                 textAlign: TextAlign.start,
               ),
               isThreeLine: index == 3,
             );
           },
-        )
-    );
+        ));
   }
 }
 
@@ -97,10 +94,10 @@ class TriggerRebuild with ChangeNotifier {
 }
 
 class _CreateConversationState extends State<CreateConversation> {
-  static final TextEditingController subjectController = TextEditingController();
+  static final TextEditingController subjectController =
+      TextEditingController();
   static final List<ReceiverEntry> receivers = [];
   final TriggerRebuild rebuildSearch = TriggerRebuild();
-
 
   @override
   Widget build(BuildContext context) {
@@ -122,8 +119,7 @@ class _CreateConversationState extends State<CreateConversation> {
                 },
                 heroTag: "clearAll",
                 icon: const Icon(Icons.clear_all),
-                label: Text(AppLocalizations.of(context).clearAll)
-            ),
+                label: Text(AppLocalizations.of(context).clearAll)),
           ),
           FloatingActionButton.extended(
               onPressed: () {
@@ -135,19 +131,18 @@ class _CreateConversationState extends State<CreateConversation> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => ConversationsSend(
-                        isTablet: widget.isTablet,
-                        creationData: ChatCreationData(
-                            type: widget.chatType,
-                            subject: subjectController.text,
-                            receivers: receivers
-                                .map((entry) => entry.id)
-                                .toList()),
-                      )),
+                            isTablet: widget.isTablet,
+                            creationData: ChatCreationData(
+                                type: widget.chatType,
+                                subject: subjectController.text,
+                                receivers: receivers
+                                    .map((entry) => entry.id)
+                                    .toList()),
+                          )),
                 );
               },
               icon: const Icon(Icons.create),
-              label: Text(AppLocalizations.of(context).create)
-          ),
+              label: Text(AppLocalizations.of(context).create)),
         ],
       ),
       body: ListView(
@@ -164,7 +159,8 @@ class _CreateConversationState extends State<CreateConversation> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0),
+            padding:
+                const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0),
             child: ListenableBuilder(
               listenable: rebuildSearch,
               builder: (context, widget) {
@@ -172,23 +168,25 @@ class _CreateConversationState extends State<CreateConversation> {
                   initialItems: receivers,
                   textFieldConfiguration: TextFieldConfiguration(
                     decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)
-                          .addReceiversHint,
-                      labelText: AppLocalizations.of(context)
-                          .addReceivers,
+                      hintText: AppLocalizations.of(context).addReceiversHint,
+                      labelText: AppLocalizations.of(context).addReceivers,
                     ),
                   ),
                   configureSuggestion: (entry) {
                     return SuggestionConfiguration(
                       title: Text(entry.name),
-                      leading: Icon(entry.isTeacher ? Icons.school : Icons.person),
-                      subtitle: entry.isTeacher ? Text(AppLocalizations.of(context).teacher) : null,
+                      leading:
+                          Icon(entry.isTeacher ? Icons.school : Icons.person),
+                      subtitle: entry.isTeacher
+                          ? Text(AppLocalizations.of(context).teacher)
+                          : null,
                     );
                   },
                   configureChip: (entry) {
                     return ChipConfiguration(
                       label: Text(entry.name),
-                      avatar: Icon(entry.isTeacher ? Icons.school : Icons.person),
+                      avatar:
+                          Icon(entry.isTeacher ? Icons.school : Icons.person),
                     );
                   },
                   loadingBuilder: (context) {
@@ -200,13 +198,14 @@ class _CreateConversationState extends State<CreateConversation> {
                       ),
                       title: Text(AppLocalizations.of(context).loading),
                     );
-
                   },
                   emptyBuilder: (context) {
-                    if (connectionChecker.status == ConnectionStatus.disconnected) {
+                    if (connectionChecker.status ==
+                        ConnectionStatus.disconnected) {
                       return ListTile(
                         leading: const Icon(Icons.wifi_off),
-                        title: Text(AppLocalizations.of(context).noInternetConnection2),
+                        title: Text(
+                            AppLocalizations.of(context).noInternetConnection2),
                       );
                     }
 
@@ -228,7 +227,8 @@ class _CreateConversationState extends State<CreateConversation> {
                   },
                 );
               },
-            ),),
+            ),
+          ),
         ],
       ),
     );

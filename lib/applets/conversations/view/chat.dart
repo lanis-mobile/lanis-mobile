@@ -27,14 +27,20 @@ class ConversationsChat extends StatefulWidget {
   final Function refreshSidebar;
 
   const ConversationsChat(
-      {super.key, required this.title, required this.id, this.newSettings, required this.isTablet, required this.refreshSidebar,
-        this.hidden = false});
+      {super.key,
+      required this.title,
+      required this.id,
+      this.newSettings,
+      required this.isTablet,
+      required this.refreshSidebar,
+      this.hidden = false});
 
-  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet, {super.key, required this.refreshSidebar})
-      : id = entry.id
-      , title = entry.title
-      , newSettings = null
-      , hidden = entry.hidden;
+  ConversationsChat.fromEntry(OverviewEntry entry, this.isTablet,
+      {super.key, required this.refreshSidebar})
+      : id = entry.id,
+        title = entry.title,
+        newSettings = null,
+        hidden = entry.hidden;
   @override
   State<ConversationsChat> createState() => _ConversationsChatState();
 }
@@ -51,11 +57,11 @@ class _ConversationsChatState extends State<ConversationsChat>
   final ScrollController scrollController = ScrollController();
 
   final ValueNotifier<bool> isSendVisible = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> isScrollToBottomVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isScrollToBottomVisible =
+      ValueNotifier<bool>(false);
   final TextEditingController textEditingController = TextEditingController();
 
   final IndicatorController refreshIndicatorController = IndicatorController();
-
 
   final Map<String, TextStyle> textStyles = {};
 
@@ -106,12 +112,15 @@ class _ConversationsChatState extends State<ConversationsChat>
     final maxScrollExtent = scrollController.position.maxScrollExtent;
     final currentScrollPosition = scrollController.position.pixels;
 
-    isScrollToBottomVisible.value = currentScrollPosition < maxScrollExtent - 100;
+    isScrollToBottomVisible.value =
+        currentScrollPosition < maxScrollExtent - 100;
   }
+
   Future<void> refreshConversation({bool scrollToEnd = true}) async {
     if (widget.newSettings == null) {
       try {
-        final result = await sph!.parser.conversationsParser.refreshConversation(widget.id, _lastRefresh);
+        final result = await sph!.parser.conversationsParser
+            .refreshConversation(widget.id, _lastRefresh);
 
         _lastRefresh = result.lastRefresh;
         for (final UnparsedMessage message in result.messages) {
@@ -138,7 +147,9 @@ class _ConversationsChatState extends State<ConversationsChat>
       } on NoConnectionException {
         showNoInternetDialog();
       } catch (e) {
-        logger.w("Error while refreshing conversation. This can happen, when the user tuns off their phone or suspends the app.",);
+        logger.w(
+          "Error while refreshing conversation. This can happen, when the user tuns off their phone or suspends the app.",
+        );
       }
     }
   }
@@ -155,51 +166,47 @@ class _ConversationsChatState extends State<ConversationsChat>
   }
 
   void scrollToBottom({Duration initDelay = Duration.zero}) {
-      Future.delayed(initDelay, () {
-        if (scrollController.hasClients) {
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent + 10,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
-      });
+    Future.delayed(initDelay, () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent + 10,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   void showErrorDialog() {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          icon: const Icon(Icons.error),
-          title: Text(AppLocalizations.of(context).errorOccurred),
-          actions: [
-            FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(AppLocalizations.of(context).back)
-            )
-          ],
-        )
-    );
+              icon: const Icon(Icons.error),
+              title: Text(AppLocalizations.of(context).errorOccurred),
+              actions: [
+                FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(AppLocalizations.of(context).back))
+              ],
+            ));
   }
 
   void showNoInternetDialog() {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          icon: const Icon(Icons.wifi_off),
-          title: Text(AppLocalizations.of(context).noInternetConnection2),
-          actions: [
-            FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(AppLocalizations.of(context).back)
-            )
-          ],
-        )
-    );
+              icon: const Icon(Icons.wifi_off),
+              title: Text(AppLocalizations.of(context).noInternetConnection2),
+              actions: [
+                FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(AppLocalizations.of(context).back))
+              ],
+            ));
   }
 
   static DateTime parseDateString(String date) {
@@ -268,8 +275,7 @@ class _ConversationsChatState extends State<ConversationsChat>
         chat.last.status = MessageStatus.sent;
       } else {
         chat.last.status = MessageStatus.error;
-        showSnackbar(
-            context, AppLocalizations.of(context).errorSendingMessage);
+        showSnackbar(context, AppLocalizations.of(context).errorSendingMessage);
       }
     });
   }
@@ -290,62 +296,65 @@ class _ConversationsChatState extends State<ConversationsChat>
 
   List<String> authors = [];
 
-void _renderSingleMessage(UnparsedMessage message) {
-  final DateTime messageDate = parseDateString(message.date);
-  final String messageAuthor = message.author;
-  MessageState position = MessageState.first;
+  void _renderSingleMessage(UnparsedMessage message) {
+    final DateTime messageDate = parseDateString(message.date);
+    final String messageAuthor = message.author;
+    MessageState position = MessageState.first;
 
-  // Check if this message should be part of a series by examining the last message in chat
-  if (chat.isNotEmpty && chat.last is Message) {
-    Message lastMessage = chat.last;
-    if (messageAuthor == lastMessage.author &&
-        messageDate.isSameDay(lastMessage.date)) {
-      position = MessageState.series;
+    // Check if this message should be part of a series by examining the last message in chat
+    if (chat.isNotEmpty && chat.last is Message) {
+      Message lastMessage = chat.last;
+      if (messageAuthor == lastMessage.author &&
+          messageDate.isSameDay(lastMessage.date)) {
+        position = MessageState.series;
+      }
+    }
+
+    // Add message to appropriate authors list for styling
+    if (message.own != true) {
+      authors.add(messageAuthor);
+    }
+
+    // Add message to chat with appropriate date header if needed
+    if (chat.isEmpty ||
+        (chat.last is Message && !messageDate.isSameDay(chat.last.date))) {
+      chat.addAll(
+          [DateHeader(date: messageDate), addMessage(message, position)]);
+    } else {
+      chat.add(addMessage(message, position));
     }
   }
 
-  // Add message to appropriate authors list for styling
-  if (message.own != true) {
-    authors.add(messageAuthor);
+  void renderMessages(Conversation unparsedMessages) {
+    chat.clear(); // Clear existing messages for refresh capability
+    authors.clear(); // Clear existing authors
+
+    // Process parent message
+    final DateTime parentDate = parseDateString(unparsedMessages.parent.date);
+    final String parentAuthor = unparsedMessages.parent.author;
+
+    if (unparsedMessages.parent.own != true) {
+      authors.add(parentAuthor);
+    }
+
+    // Add parent message with initial date header
+    chat.addAll([
+      DateHeader(date: parentDate),
+      addMessage(unparsedMessages.parent, MessageState.first)
+    ]);
+
+    // Process all replies
+    for (UnparsedMessage reply in unparsedMessages.replies) {
+      _renderSingleMessage(reply);
+    }
+
+    addAuthorTextStyles(authors.toList());
   }
 
-  // Add message to chat with appropriate date header if needed
-  if (chat.isEmpty || (chat.last is Message && !messageDate.isSameDay(chat.last.date))) {
-    chat.addAll([DateHeader(date: messageDate), addMessage(message, position)]);
-  } else {
-    chat.add(addMessage(message, position));
-  }
-}
-
-void renderMessages(Conversation unparsedMessages) {
-  chat.clear(); // Clear existing messages for refresh capability
-  authors.clear(); // Clear existing authors
-
-  // Process parent message
-  final DateTime parentDate = parseDateString(unparsedMessages.parent.date);
-  final String parentAuthor = unparsedMessages.parent.author;
-
-  if (unparsedMessages.parent.own != true) {
-    authors.add(parentAuthor);
-  }
-
-  // Add parent message with initial date header
-  chat.addAll([
-    DateHeader(date: parentDate),
-    addMessage(unparsedMessages.parent, MessageState.first)
-  ]);
-
-  // Process all replies
-  for (UnparsedMessage reply in unparsedMessages.replies) {
-    _renderSingleMessage(reply);
-  }
-
-  addAuthorTextStyles(authors.toList());
-}
   Future<void> initConversation() async {
     if (widget.newSettings == null) {
-      Conversation result =
-          await sph!.parser.conversationsParser.getSingleConversation(widget.id);
+      Conversation result = await sph!.parser.conversationsParser
+          .getSingleConversation(widget.id);
       _lastRefresh = result.msgLastRefresh;
       logger.d("last refresh: $_lastRefresh");
 
@@ -384,15 +393,18 @@ void renderMessages(Conversation unparsedMessages) {
   }
 
   Future<void> openSendPage(BuildContext context) async {
-  final result = await Navigator.of(context).push(MaterialPageRoute(
-  builder: (context) => ConversationsSend(isTablet: widget.isTablet, title: widget.title,)));
+    final result = await Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ConversationsSend(
+              isTablet: widget.isTablet,
+              title: widget.title,
+            )));
 
-  if (result == null) return;
+    if (result == null) return;
 
-  scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
-  await sendMessage(result);
-}
+    await sendMessage(result);
+  }
 
   bool initScrollToBottom = true;
   @override
@@ -404,7 +416,9 @@ void renderMessages(Conversation unparsedMessages) {
           return Visibility(
             visible: isVisible,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 60,),
+              padding: const EdgeInsets.only(
+                bottom: 60,
+              ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(15),
                 onTap: () {
@@ -418,13 +432,12 @@ void renderMessages(Conversation unparsedMessages) {
                   height: 30,
                   width: 30,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.secondaryFixedDim,
-                      width: 1.5,
-                    ),
-                    color: Theme.of(context).colorScheme.surfaceDim
-                  ),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.secondaryFixedDim,
+                        width: 1.5,
+                      ),
+                      color: Theme.of(context).colorScheme.surfaceDim),
                   child: const Icon(Icons.keyboard_arrow_down),
                 ),
               ),
@@ -445,15 +458,14 @@ void renderMessages(Conversation unparsedMessages) {
                     error: snapshot.error as LanisException,
                     showAppBar: true,
                     retry: () {
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => ConversationsChat(
-                            refreshSidebar: widget.refreshSidebar,
-                            title: widget.title,
-                            id: widget.id,
-                            newSettings: widget.newSettings,
-                            isTablet: widget.isTablet,
-                          ))
-                      );
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (_) => ConversationsChat(
+                                refreshSidebar: widget.refreshSidebar,
+                                title: widget.title,
+                                id: widget.id,
+                                newSettings: widget.newSettings,
+                                isTablet: widget.isTablet,
+                              )));
                     },
                   );
                 }
@@ -491,17 +503,21 @@ void renderMessages(Conversation unparsedMessages) {
                               snap: true,
                               floating: true,
                               actions: [
-                                if (refreshing) Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                if (refreshing)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
                                     ),
                                   ),
-                                ),
                                 if (settings.groupChat == false &&
                                     settings.onlyPrivateAnswers == false &&
                                     settings.noReply == false) ...[
@@ -512,9 +528,9 @@ void renderMessages(Conversation unparsedMessages) {
                                         builder: (context) {
                                           return AlertDialog(
                                             icon: const Icon(Icons.groups),
-                                            title: Text(
-                                                AppLocalizations.of(context)
-                                                    .conversationTypeName(
+                                            title: Text(AppLocalizations.of(
+                                                    context)
+                                                .conversationTypeName(
                                                     ChatType.openChat.name)),
                                             content: Text(
                                                 AppLocalizations.of(context)
@@ -534,75 +550,108 @@ void renderMessages(Conversation unparsedMessages) {
                                     icon: const Icon(Icons.warning),
                                   ),
                                 ],
-                                if (!widget.isTablet) IconButton(
-                                    onPressed: () async {
-                                      if (hidden == true) {
-                                        bool result;
-                                        try {
-                                          result = await sph!.parser.conversationsParser.showConversation(widget.id);
-                                        } on NoConnectionException {
-                                          showNoInternetDialog();
+                                if (!widget.isTablet)
+                                  IconButton(
+                                      onPressed: () async {
+                                        if (hidden == true) {
+                                          bool result;
+                                          try {
+                                            result = await sph!
+                                                .parser.conversationsParser
+                                                .showConversation(widget.id);
+                                          } on NoConnectionException {
+                                            showNoInternetDialog();
+                                            return;
+                                          }
+
+                                          if (!result) {
+                                            showErrorDialog();
+                                            return;
+                                          } else {
+                                            setState(() {
+                                              hidden = false;
+                                            });
+                                            sph!.parser.conversationsParser
+                                                .filter
+                                                .toggleEntry(widget.id,
+                                                    hidden: true);
+                                            sph!.parser.conversationsParser
+                                                .filter
+                                                .pushEntries();
+                                          }
+
                                           return;
                                         }
-                        
-                        
-                                        if (!result) {
-                                          showErrorDialog();
-                                          return;
-                                        } else {
-                                          setState(() {
-                                            hidden = false;
-                                          });
-                                          sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
-                                          sph!.parser.conversationsParser.filter.pushEntries();
-                                        }
-                        
-                                        return;
-                                      }
-                        
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            icon: const Icon(Icons.visibility_off),
-                                            title: Text(AppLocalizations.of(context).conversationHide),
-                                            content: Text(AppLocalizations.of(context).hideNote),
-                                            actions: [
-                                              OutlinedButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: Text(AppLocalizations.of(context).back)
-                                              ),
-                                              FilledButton(
-                                                  onPressed: () async {
-                                                    bool result = false;
-                                                    try {
-                                                      result = await sph!.parser.conversationsParser.hideConversation(widget.id);
-                                                    } on NoConnectionException {
-                                                      showNoInternetDialog();
-                                                      return;
-                                                    }
-                        
-                                                    if (!result) {
-                                                      showErrorDialog();
-                                                      return;
-                                                    } else {
-                                                      setState(() {
-                                                        hidden = true;
-                                                      });
-                                                      sph!.parser.conversationsParser.filter.toggleEntry(widget.id, hidden: true);
-                                                    }
-                        
-                                                    if(context.mounted) Navigator.of(context).pop();
-                                                  },
-                                                  child: Text(AppLocalizations.of(context).conversationHide)
-                                              )
-                                            ],
-                                          )
-                                      );
-                                    },
-                                    icon: hidden ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off)
-                                ),
+
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                                  icon: const Icon(
+                                                      Icons.visibility_off),
+                                                  title: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .conversationHide),
+                                                  content: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .hideNote),
+                                                  actions: [
+                                                    OutlinedButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: Text(
+                                                            AppLocalizations.of(
+                                                                    context)
+                                                                .back)),
+                                                    FilledButton(
+                                                        onPressed: () async {
+                                                          bool result = false;
+                                                          try {
+                                                            result = await sph!
+                                                                .parser
+                                                                .conversationsParser
+                                                                .hideConversation(
+                                                                    widget.id);
+                                                          } on NoConnectionException {
+                                                            showNoInternetDialog();
+                                                            return;
+                                                          }
+
+                                                          if (!result) {
+                                                            showErrorDialog();
+                                                            return;
+                                                          } else {
+                                                            setState(() {
+                                                              hidden = true;
+                                                            });
+                                                            sph!
+                                                                .parser
+                                                                .conversationsParser
+                                                                .filter
+                                                                .toggleEntry(
+                                                                    widget.id,
+                                                                    hidden:
+                                                                        true);
+                                                          }
+
+                                                          if (context.mounted)
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                        },
+                                                        child: Text(
+                                                            AppLocalizations.of(
+                                                                    context)
+                                                                .conversationHide))
+                                                  ],
+                                                ));
+                                      },
+                                      icon: hidden
+                                          ? const Icon(Icons.visibility)
+                                          : const Icon(Icons.visibility_off)),
                                 if (statistics != null) ...[
                                   IconButton(
                                     onPressed: () {
@@ -618,7 +667,6 @@ void renderMessages(Conversation unparsedMessages) {
                                   ),
                                 ],
                               ],
-
                             ),
                             SliverToBoxAdapter(
                               child: Padding(
@@ -626,7 +674,8 @@ void renderMessages(Conversation unparsedMessages) {
                                 child: Column(
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Flexible(
                                           child: Padding(
@@ -643,19 +692,23 @@ void renderMessages(Conversation unparsedMessages) {
                                         ),
                                       ],
                                     ),
-                                    if (settings.onlyPrivateAnswers && !settings.own) ...[
+                                    if (settings.onlyPrivateAnswers &&
+                                        !settings.own) ...[
                                       Container(
                                         alignment: Alignment.center,
                                         padding: const EdgeInsets.symmetric(
                                             vertical: 8.0, horizontal: 12.0),
-                                        margin: const EdgeInsets.only(top: 16.0),
+                                        margin:
+                                            const EdgeInsets.only(top: 16.0),
                                         decoration: BoxDecoration(
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .surfaceContainerHigh),
                                         child: Text(
                                           "${settings.author} ${AppLocalizations.of(context).privateConversation}",
-                                          style: Theme.of(context).textTheme.bodyMedium,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
@@ -670,7 +723,8 @@ void renderMessages(Conversation unparsedMessages) {
                                 if (chat[index] is Message) {
                                   return MessageWidget(
                                       message: chat[index],
-                                      textStyle: textStyles[chat[index].author]);
+                                      textStyle:
+                                          textStyles[chat[index].author]);
                                 } else {
                                   return DateHeaderWidget(header: chat[index]);
                                 }
@@ -696,10 +750,13 @@ void renderMessages(Conversation unparsedMessages) {
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: IconButton(
                             onPressed: () => openSendPage(context),
-                            icon: Icon(Icons.expand,),
+                            icon: Icon(
+                              Icons.expand,
+                            ),
                             color: Theme.of(context).colorScheme.onSecondary,
                             style: IconButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.secondary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.secondary,
                             ),
                           ),
                         ),
@@ -711,7 +768,8 @@ void renderMessages(Conversation unparsedMessages) {
                                   .sendMessagePlaceholder,
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0,
+                                horizontal: 12.0,
+                                vertical: 8.0,
                               ),
                             ),
                           ),
@@ -720,17 +778,21 @@ void renderMessages(Conversation unparsedMessages) {
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: IconButton(
                             onPressed: () async {
-                              final String text = textEditingController.text.trim();
+                              final String text =
+                                  textEditingController.text.trim();
                               if (text.isEmpty) return;
 
                               textEditingController.clear();
                               await sendMessage(text);
                               scrollToBottom();
                             },
-                            icon: Icon(Icons.send,),
+                            icon: Icon(
+                              Icons.send,
+                            ),
                             color: Theme.of(context).colorScheme.onTertiary,
                             style: IconButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.tertiary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.tertiary,
                             ),
                           ),
                         ),
@@ -758,7 +820,8 @@ class StatisticWidget extends StatelessWidget {
   const StatisticWidget(
       {super.key, required this.statistics, required this.conversationTitle});
 
-  Widget statisticsHeaderRow(BuildContext context, Icon icon, String title, int count) {
+  Widget statisticsHeaderRow(
+      BuildContext context, Icon icon, String title, int count) {
     return Column(
       children: [
         icon,
@@ -782,12 +845,17 @@ class StatisticWidget extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          const SizedBox(height: 30,),
+          const SizedBox(
+            height: 30,
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(Icons.groups_outlined, size: 60,),
+              const Icon(
+                Icons.groups_outlined,
+                size: 60,
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Text(
@@ -798,7 +866,9 @@ class StatisticWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 30,),
+          const SizedBox(
+            height: 30,
+          ),
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Padding(
@@ -807,21 +877,41 @@ class StatisticWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.person), AppLocalizations.of(context).participants, statistics.countStudents)),
-                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.school), AppLocalizations.of(context).supervisors, statistics.countTeachers)),
-                  Expanded(child: statisticsHeaderRow(context, const Icon(Icons.supervisor_account), AppLocalizations.of(context).parents, statistics.countParents)),
+                  Expanded(
+                      child: statisticsHeaderRow(
+                          context,
+                          const Icon(Icons.person),
+                          AppLocalizations.of(context).participants,
+                          statistics.countStudents)),
+                  Expanded(
+                      child: statisticsHeaderRow(
+                          context,
+                          const Icon(Icons.school),
+                          AppLocalizations.of(context).supervisors,
+                          statistics.countTeachers)),
+                  Expanded(
+                      child: statisticsHeaderRow(
+                          context,
+                          const Icon(Icons.supervisor_account),
+                          AppLocalizations.of(context).parents,
+                          statistics.countParents)),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 15,),
-          Text(
-              AppLocalizations.of(context).knownReceivers,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
+          const SizedBox(
+            height: 15,
           ),
-          const SizedBox(height: 5,),
-          for (final KnownParticipant participant in statistics.knownParticipants) ...[
+          Text(
+            AppLocalizations.of(context).knownReceivers,
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          for (final KnownParticipant participant
+              in statistics.knownParticipants) ...[
             ListTile(
               title: Text(participant.name),
               leading: Icon(participant.type.icon),
@@ -920,9 +1010,9 @@ class _MessageWidgetState extends State<MessageWidget>
                   HapticFeedback.vibrate();
                   await Clipboard.setData(
                       ClipboardData(text: widget.message.text));
-                  if(context.mounted) {
+                  if (context.mounted) {
                     showSnackbar(
-                      context, AppLocalizations.of(context).copiedMessage);
+                        context, AppLocalizations.of(context).copiedMessage);
                   }
                   controller.value = 0;
                   controller.forward();

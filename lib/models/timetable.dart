@@ -169,7 +169,7 @@ class TimeTableRow {
     TimeOfDay end = TimeOfDay(
         hour: json['endTime']['hour'], minute: json['endTime']['minute']);
     TimeTableRow row =
-    TimeTableRow(rowType, start, end, json['label'], json['lessonIndex']);
+        TimeTableRow(rowType, start, end, json['label'], json['lessonIndex']);
     return row;
   }
 }
@@ -181,13 +181,13 @@ class TimeTableData {
 
   bool isCurrentWeek(TimetableSubject lesson, bool sameWeek) {
     return (weekBadge == null ||
-        weekBadge == "" ||
-        lesson.badge == null ||
-        lesson.badge == "")
+            weekBadge == "" ||
+            lesson.badge == null ||
+            lesson.badge == "")
         ? true
         : sameWeek
-        ? (weekBadge == lesson.badge)
-        : (weekBadge != lesson.badge);
+            ? (weekBadge == lesson.badge)
+            : (weekBadge != lesson.badge);
   }
 
   TimeTableData(List<TimetableDay> data, TimeTable timetable,
@@ -195,7 +195,7 @@ class TimeTableData {
     for (var (index, hour) in timetable.hours!.indexed) {
       if (index > 0 && timetable.hours![index - 1].endTime != hour.startTime) {
         if (timetable.hours![index - 1].endTime
-            .differenceInMinutes(hour.startTime) >
+                .differenceInMinutes(hour.startTime) >
             10) {
           hours.add(TimeTableRow(
               TimeTableRowType.pause,

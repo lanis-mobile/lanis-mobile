@@ -74,20 +74,20 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
   Widget build(BuildContext context) {
     return loading
         ? Center(
-      child: CircularProgressIndicator(),
-    )
+            child: CircularProgressIndicator(),
+          )
         : error
-        ? Center(
-        child: Column(
-          children: [
-            Icon(Icons.error_outline, size: 100),
-            SizedBox(height: 10),
-            Text(AppLocalizations.of(context).couldNotLoadDataStorage),
-          ],
-        ))
-        : ListView(
-      children: getListTiles(),
-    );
+            ? Center(
+                child: Column(
+                children: [
+                  Icon(Icons.error_outline, size: 100),
+                  SizedBox(height: 10),
+                  Text(AppLocalizations.of(context).couldNotLoadDataStorage),
+                ],
+              ))
+            : ListView(
+                children: getListTiles(),
+              );
   }
 }
 

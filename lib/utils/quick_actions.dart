@@ -13,17 +13,15 @@ bool _quickActionsSet = false;
 bool _requestFailed = false;
 
 class QuickActionsStartUp {
-
   static final Completer<void> _initializationCompleter = Completer<void>();
   bool _initialized = false;
 
   QuickActionsStartUp() {
-    if(_initialized) return;
+    if (_initialized) return;
     quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       for (final applet in AppDefinitions.applets) {
         if (applet.appletPhpIdentifier == shortcutType) {
-
           if (!sph!.session.doesSupportFeature(applet)) {
             logger.e('Applet not supported: ${applet.appletPhpIdentifier}');
             return;
@@ -32,33 +30,33 @@ class QuickActionsStartUp {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             logger.i('Opening applet: ${applet.appletPhpIdentifier}');
             Destination destination = Destination.fromAppletDefinition(applet);
-            if(homeKey.currentContext != null) Navigator.popUntil(homeKey.currentContext!, (route) => route.isFirst);
-            if(destination.enableBottomNavigation) {
+            if (homeKey.currentContext != null)
+              Navigator.popUntil(
+                  homeKey.currentContext!, (route) => route.isFirst);
+            if (destination.enableBottomNavigation) {
               int appletIndex = AppDefinitions.getIndexByPhpIdentifier(
                   applet.appletPhpIdentifier);
 
               if (homeKey.currentState != null) {
-                homeKey.currentState?.openDestination(appletIndex,false);
+                homeKey.currentState?.openDestination(appletIndex, false);
               } else {
                 logger.e('Tried to open applet without homeKey');
               }
             } else {
-              if(homeKey.currentContext != null) {
-                destination.action?.call(homeKey.currentContext!, homeKey.currentState!.navigatorKey);
+              if (homeKey.currentContext != null) {
+                destination.action?.call(homeKey.currentContext!,
+                    homeKey.currentState!.navigatorKey);
                 logger.i('Opened applet: ${applet.appletPhpIdentifier}');
               } else {
                 logger.e('Tried to open applet without context');
               }
             }
-
-
           });
           break;
         }
       }
       for (final applet in AppDefinitions.external) {
         if (applet.id == shortcutType) {
-
           // Wait until the flutter app is fully initialized
           WidgetsBinding.instance.addPostFrameCallback((_) {
             applet.action?.call(homeKey.currentContext);
@@ -75,11 +73,13 @@ class QuickActionsStartUp {
     try {
       await _initializationCompleter.future.timeout(
         const Duration(seconds: 20),
-        onTimeout: () => throw TimeoutException('QuickActions initialization timed out.'),
+        onTimeout: () =>
+            throw TimeoutException('QuickActions initialization timed out.'),
       );
       return true;
     } on TimeoutException catch (_) {
-      logger.e('QuickActions initialization timed out. Likely the user is not logged in.');
+      logger.e(
+          'QuickActions initialization timed out. Likely the user is not logged in.');
       return false;
     }
   }
@@ -93,7 +93,8 @@ class QuickActionsStartUp {
       return;
     }
     if (_quickActionsSet) return;
-    List<String> enabledShortcutsList = List<String>.from((await accountDatabase.kv.get('quick-actions')) ?? []);
+    List<String> enabledShortcutsList = List<String>.from(
+        (await accountDatabase.kv.get('quick-actions')) ?? []);
     if (!context.mounted) return;
 
     List<ShortcutItem> shortcuts = [];

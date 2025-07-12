@@ -47,20 +47,20 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
         message: showHomework
             ? AppLocalizations.of(context).lessons
             : AppLocalizations.of(context).homework,
-          child: IconButton(
+        child: IconButton(
           icon: Icon(
             showHomework ? Icons.school_outlined : Icons.task_outlined,
           ),
-            onPressed: () {
-              globalUpdateSetting!(
-                'showHomework',
+          onPressed: () {
+            globalUpdateSetting!(
+              'showHomework',
               !showHomework,
-              );
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                setState(() {});
-              });
-            },
-          ),
+            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {});
+            });
+          },
+        ),
       );
     }
     return SizedBox.shrink();
@@ -116,9 +116,8 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
             return (a.currentEntry?.homework?.homeWorkDone ?? false) ? 1 : -1;
           });
         } else {
-          attendanceLessons = lessons
-              .where((element) => element.attendances != null)
-              .toList();
+          attendanceLessons =
+              lessons.where((element) => element.attendances != null).toList();
         }
 
         return Scaffold(
@@ -126,28 +125,27 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
             onRefresh: () => refresh!(),
             child: lessons.isNotEmpty
                 ? ListView.builder(
-              itemCount: lessons.length,
-              itemBuilder: (BuildContext context, int index) => Padding(
-                padding: EdgeInsets.only(
-                  top: 4,
-                  bottom: index == lessons.length - 1 ? 80 : 0,
-                  left: 8,
-                  right: 8,
-                ),
-                child: LessonListTile(lesson: lessons[index]),
-              ),
-            )
+                    itemCount: lessons.length,
+                    itemBuilder: (BuildContext context, int index) => Padding(
+                      padding: EdgeInsets.only(
+                        top: 4,
+                        bottom: index == lessons.length - 1 ? 80 : 0,
+                        left: 8,
+                        right: 8,
+                      ),
+                      child: LessonListTile(lesson: lessons[index]),
+                    ),
+                  )
                 : Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                noDataScreen(context),
-              ],
-            ),
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      noDataScreen(context),
+                    ],
+                  ),
           ),
           floatingActionButton: Visibility(
-            visible:
-            attendanceLessons != null && attendanceLessons.isNotEmpty,
+            visible: attendanceLessons != null && attendanceLessons.isNotEmpty,
             child: FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(

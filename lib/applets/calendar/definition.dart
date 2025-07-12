@@ -9,10 +9,14 @@ final calendarDefinition = AppletDefinition(
   appletPhpIdentifier: 'kalender.php',
   addDivider: false,
   useBottomNavigation: true,
-  icon: (context) =>  const Icon(Icons.calendar_today),
+  icon: (context) => const Icon(Icons.calendar_today),
   selectedIcon: (context) => const Icon(Icons.calendar_today_outlined),
   label: (context) => AppLocalizations.of(context).calendar,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
+  supportedAccountTypes: [
+    AccountType.student,
+    AccountType.teacher,
+    AccountType.parent
+  ],
   allowOffline: false,
   settingsDefaults: {},
   refreshInterval: const Duration(hours: 1),

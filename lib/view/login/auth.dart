@@ -31,21 +31,21 @@ class LoginFormState extends State<LoginForm> {
   bool dseAgree = false;
   String selectedSchoolName = "";
 
-
   void login(String username, String password, String schoolID) async {
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-              title: Text(AppLocalizations.of(context).logInTitle),
-              content: const Center(
-                heightFactor: 1.2,
-                child: CircularProgressIndicator(),
-              ),
-            ),
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).logInTitle),
+        content: const Center(
+          heightFactor: 1.2,
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
     try {
-      if (await accountDatabase.doesAccountExist(int.parse(schoolID), username)) {
+      if (await accountDatabase.doesAccountExist(
+          int.parse(schoolID), username)) {
         throw AccountAlreadyExistsException();
       }
 
@@ -67,7 +67,7 @@ class LoginFormState extends State<LoginForm> {
       );
       await sph?.session.deAuthenticate();
       await accountDatabase.setNextLogin(newID);
-      if(mounted) authenticationState.reset(context);
+      if (mounted) authenticationState.reset(context);
     } on LanisException catch (ex) {
       setState(() {
         Navigator.pop(context); //pop dialog
@@ -106,13 +106,14 @@ class LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        if (widget.showBackButton) Padding(
-          padding: EdgeInsets.only(right: 32, top: 32),
-          child: IconButton(
+        if (widget.showBackButton)
+          Padding(
+            padding: EdgeInsets.only(right: 32, top: 32),
+            child: IconButton(
               onPressed: () => Navigator.pop(context),
               icon: Icon(Icons.arrow_back),
+            ),
           ),
-        ),
         Padding(
           padding: const EdgeInsets.all(padding),
           child: Center(
@@ -159,11 +160,12 @@ class LoginFormState extends State<LoginForm> {
                           autofillHints: [AutofillHints.username],
                           autocorrect: false,
                           decoration: InputDecoration(
-                              labelText:
-                              AppLocalizations.of(context).authUsernameHint),
+                              labelText: AppLocalizations.of(context)
+                                  .authUsernameHint),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context).authValidationError;
+                              return AppLocalizations.of(context)
+                                  .authValidationError;
                             }
 
                             return null;
@@ -179,11 +181,13 @@ class LoginFormState extends State<LoginForm> {
                           autocorrect: false,
                           obscureText: true,
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).authPasswordHint,
+                            labelText:
+                                AppLocalizations.of(context).authPasswordHint,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context).authValidationError;
+                              return AppLocalizations.of(context)
+                                  .authValidationError;
                             }
                             return null;
                           },
@@ -198,7 +202,8 @@ class LoginFormState extends State<LoginForm> {
                               value: dseAgree,
                               title: RichText(
                                 text: TextSpan(
-                                  text: AppLocalizations.of(context).authIAccept,
+                                  text:
+                                      AppLocalizations.of(context).authIAccept,
                                   style: DefaultTextStyle.of(context).style,
                                   children: <TextSpan>[
                                     TextSpan(
@@ -233,11 +238,13 @@ class LoginFormState extends State<LoginForm> {
                         ElevatedButton(
                           onPressed: dseAgree
                               ? () {
-                            if (_formKey.currentState!.validate()) {
-                              login(usernameController.text.toLowerCase(),
-                                  passwordController.text, schoolIDController.text);
-                            }
-                          }
+                                  if (_formKey.currentState!.validate()) {
+                                    login(
+                                        usernameController.text.toLowerCase(),
+                                        passwordController.text,
+                                        schoolIDController.text);
+                                  }
+                                }
                               : null,
                           child: Text(AppLocalizations.of(context).logIn),
                         ),
@@ -245,10 +252,12 @@ class LoginFormState extends State<LoginForm> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                                onPressed: schoolIDController.text.isNotEmpty ? () => launchUrl(Uri.parse(
-                                    "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=${schoolIDController.text}")) : null,
-                                child: Text(
-                                    AppLocalizations.of(context).authResetPassword))
+                                onPressed: schoolIDController.text.isNotEmpty
+                                    ? () => launchUrl(Uri.parse(
+                                        "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userPWreminder&i=${schoolIDController.text}"))
+                                    : null,
+                                child: Text(AppLocalizations.of(context)
+                                    .authResetPassword))
                           ],
                         )
                       ],

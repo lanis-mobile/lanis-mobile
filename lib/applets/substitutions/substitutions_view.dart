@@ -223,10 +223,11 @@ class _SubstitutionsViewState extends State<SubstitutionsView>
                         ),
                         Spacer(),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
                           child: Text(
-                            AppLocalizations.of(context)
-                                .substitutionsLastEdit(data.lastUpdated.format('dd.MM.yyyy HH:mm')),
+                            AppLocalizations.of(context).substitutionsLastEdit(
+                                data.lastUpdated.format('dd.MM.yyyy HH:mm')),
                             textAlign: TextAlign.center,
                           ),
                         )

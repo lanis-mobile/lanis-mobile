@@ -16,8 +16,8 @@ class StudentStudyGroupsView extends StatefulWidget {
 }
 
 class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
-
-  Widget _buildToggleExamsButton(BuildContext context, Map settings, Function updateSetting) {
+  Widget _buildToggleExamsButton(
+      BuildContext context, Map settings, Function updateSetting) {
     final showExams = settings['showExams'] == 'true';
     return Tooltip(
       message: showExams
@@ -27,8 +27,7 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
         icon: Icon(
           showExams ? Icons.groups_outlined : Icons.article_outlined,
         ),
-        onPressed: () =>
-        {
+        onPressed: () => {
           updateSetting('showExams', showExams ? 'false' : 'true'),
         },
       ),
@@ -66,8 +65,8 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
           updateAppBar(
             _buildToggleExamsButton(context, settings, updateSetting),
             settings['showExams'] != 'true'
-              ? AppLocalizations.of(context).studyGroups
-              : AppLocalizations.of(context).exams,
+                ? AppLocalizations.of(context).studyGroups
+                : AppLocalizations.of(context).exams,
           );
           return settings['showExams'] == 'true'
               ? StudentExamsView(studyData: studyData)
