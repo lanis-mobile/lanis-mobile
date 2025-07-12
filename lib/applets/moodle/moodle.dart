@@ -6,9 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:lanis/home_page.dart';
 import 'package:lanis/utils/logger.dart';
-import 'package:lanis/utils/responsive.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'dart:io' as dio_core;
@@ -17,6 +15,7 @@ import '../../core/connection_checker.dart';
 import '../../core/native_adapter_instance.dart';
 import '../../core/sph/sph.dart';
 import '../../utils/file_operations.dart';
+import '../../utils/back_navigation_manager.dart';
 
 class MoodleWebView extends StatefulWidget {
   const MoodleWebView({super.key});
@@ -25,7 +24,8 @@ class MoodleWebView extends StatefulWidget {
   State<MoodleWebView> createState() => _MoodleWebViewState();
 }
 
-class _MoodleWebViewState extends State<MoodleWebView> {
+class _MoodleWebViewState extends State<MoodleWebView>
+    with BackNavigationMixin {
   static const noInternetError = "net::ERR_INTERNET_DISCONNECTED";
 
   final CookieManager cookieManager = CookieManager.instance();
@@ -47,6 +47,37 @@ class _MoodleWebViewState extends State<MoodleWebView> {
 
   InAppWebViewController? webViewController;
   PullToRefreshController? pullToRefreshController;
+
+  @override
+  Future<bool> canHandleBackNavigation() async {
+    if (webViewController != null) {
+      final canGoBack = await webViewController!.canGoBack();
+      if (canGoBack) return true;
+    }
+
+    if (showWebView) return false;
+
+    return false;
+  }
+
+  @override
+  Future<bool> handleBackNavigation() async {
+    if (webViewController != null) {
+      final canGoBack = await webViewController!.canGoBack();
+      if (canGoBack) {
+        webViewController!.goBack();
+        logger.d(
+            'Handled back navigation in MoodleWebView (webView can go back)');
+        return true;
+      }
+    }
+    if (showWebView) {
+      setState(() {
+        showWebView = false;
+      });
+    }
+    return false;
+  }
 
   void addWebViewCookies(
       final List<dio_core.Cookie> cookies, List<String> urls) {
@@ -187,26 +218,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   @override
   void initState() {
     super.initState();
-
     getCookies();
-
-    homeKey.currentState?.popScopeHandlerProvider.setHandler((navigator) async {
-      logger.d('checking if WebView can go back in moodle.dart');
-      final webCanGoBack = await webViewController!.canGoBack();
-      logger.d('WebView can go back: $webCanGoBack');
-      if (webCanGoBack) {
-        webViewController!.goBack();
-      } else {
-        logger.d('WebView cannot go back, continuing with normal run');
-        //setState(() {
-          // showWebView = false;
-        //});
-        logger.d('Returning true from POPSCOPE in moodle.dart');
-        return true;
-      }
-      logger.d('Returning false from POPSCOPE in moodle.dart');
-      return false;
-    });
   }
 
   @override
@@ -229,266 +241,224 @@ class _MoodleWebViewState extends State<MoodleWebView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Stack(
-          children: [
-            Visibility(
-              visible: showWebView,
-              child: InAppWebView(
-                pullToRefreshController: pullToRefreshController,
-                initialSettings: InAppWebViewSettings(
-                  transparentBackground: true,
-                ),
-                onWebViewCreated: (controller) {
-                  webViewController = controller;
-                },
-                shouldOverrideUrlLoading:
-                    (controller, navigationAction) async {
-                  error = null;
-            
-                  final WebUri uri = navigationAction.request.url!;
-            
-                  if (uri.rawValue.contains(
-                          ".schulportal.hessen.de/login/logout.php") ||
-                      uri.rawValue.contains(
-                          ".schulportal.hessen.de/index.php?logout=all")) {
-                    return NavigationActionPolicy.CANCEL;
-                  }
-            
-                  if (uri.rawValue.contains('start.schulportal.hessen.de')) {
-                    setState(() {
-                      showWebView = false;
-                    });
-                    Navigator.pop(context);
-                    return NavigationActionPolicy.CANCEL;
-                  }
-            
-                  if (!uri.rawValue.contains(".schulportal.hessen.de")) {
-                    await launchUrl(uri);
-            
-                    return NavigationActionPolicy.CANCEL;
-                  }
-            
-                  return NavigationActionPolicy.ALLOW;
-                },
-                onLoadStart: (controller, uri) async {
-                  error = null;
-                  errorUrl = null;
-            
-                  if (await controller.canGoBack()) {
-                    canGoBack.value = true;
-                  } else {
-                    canGoBack.value = false;
-                  }
-            
-                  if (await controller.canGoForward()) {
-                    canGoForward.value = true;
-                  } else {
-                    canGoForward.value = false;
-                  }
-                },
-                onLoadStop: (controller, url) async {
-                  pullToRefreshController!.endRefreshing();
-                  progressIndicator.value = 0;
-            
-                  setState(() {}); // error
-                },
-                onTitleChanged: (controller, title) {
-                  currentPageTitle.value = title ?? "";
-                },
-                onPageCommitVisible: (controller, uri) async {
-                  // Hack to enable pull to refresh in Moodle.
-                  controller.evaluateJavascript(
-                      source:
-                          "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
-            
-                  // Hide logout buttons.
-                  controller.evaluateJavascript(
-                      source:
-                          '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
-                  controller.evaluateJavascript(
-                      source:
-                          '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
-                },
-                onProgressChanged: (controller, progress) {
-                  if (progress == 100) {
-                    pullToRefreshController!.endRefreshing();
-                    progressIndicator.value = 0;
-                    return;
-                  }
-            
-                  progressIndicator.value = progress;
-                },
-                onReceivedError: (controller, request, response) async {
-                  error = response.description;
-                  errorUrl = request.url;
-            
-                  pullToRefreshController!.endRefreshing();
-                  progressIndicator.value = 0;
-                },
-                onDownloadStartRequest: (controller, request) {
-                  double fileSize = request.contentLength / 1000000;
-            
-                  showFileModal(context, FileInfo(
-                    name: request.suggestedFilename ??
-                        sph!.storage.generateUniqueHash(request.url.rawValue),
-                    url: request.url,
-                    size: "(${fileSize.toStringAsFixed(2)} MB)",
-                  ));
-                },
+      body: Stack(
+        children: [
+          Visibility(
+            visible: showWebView,
+            child: InAppWebView(
+              pullToRefreshController: pullToRefreshController,
+              initialSettings: InAppWebViewSettings(
+                transparentBackground: true,
               ),
-            ),
+              onWebViewCreated: (controller) {
+                webViewController = controller;
+              },
+              shouldOverrideUrlLoading: (controller, navigationAction) async {
+                error = null;
 
-            // Background
-            if (!isLoggedIn || error != null) ...[
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      width: double.maxFinite,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface),
-                      ),
+                final WebUri uri = navigationAction.request.url!;
+
+                if (uri.rawValue
+                        .contains(".schulportal.hessen.de/login/logout.php") ||
+                    uri.rawValue.contains(
+                        ".schulportal.hessen.de/index.php?logout=all")) {
+                  return NavigationActionPolicy.CANCEL;
+                }
+
+                if (uri.rawValue.contains('start.schulportal.hessen.de')) {
+                  setState(() {
+                    showWebView = false;
+                  });
+                  return NavigationActionPolicy.CANCEL;
+                }
+
+                if (!uri.rawValue.contains(".schulportal.hessen.de")) {
+                  await launchUrl(uri);
+
+                  return NavigationActionPolicy.CANCEL;
+                }
+
+                return NavigationActionPolicy.ALLOW;
+              },
+              onLoadStart: (controller, uri) async {
+                error = null;
+                errorUrl = null;
+
+                if (await controller.canGoBack()) {
+                  canGoBack.value = true;
+                } else {
+                  canGoBack.value = false;
+                }
+
+                if (await controller.canGoForward()) {
+                  canGoForward.value = true;
+                } else {
+                  canGoForward.value = false;
+                }
+              },
+              onLoadStop: (controller, url) async {
+                pullToRefreshController!.endRefreshing();
+                progressIndicator.value = 0;
+
+                setState(() {}); // error
+              },
+              onTitleChanged: (controller, title) {
+                currentPageTitle.value = title ?? "";
+              },
+              onPageCommitVisible: (controller, uri) async {
+                // Hack to enable pull to refresh in Moodle.
+                controller.evaluateJavascript(
+                    source:
+                        "document.documentElement.style.height = document.documentElement.clientHeight + 1 + 'px';");
+
+                // Hide logout buttons.
+                controller.evaluateJavascript(
+                    source:
+                        '''document.querySelector("div#user-action-menu a.dropdown-item[href*='/login/logout.php']").style.display = "none";''');
+                controller.evaluateJavascript(
+                    source:
+                        '''document.querySelector("div.navbar li a[href*='index.php?logout=']").style.display = "none";''');
+              },
+              onProgressChanged: (controller, progress) {
+                if (progress == 100) {
+                  pullToRefreshController!.endRefreshing();
+                  progressIndicator.value = 0;
+                  return;
+                }
+
+                progressIndicator.value = progress;
+              },
+              onReceivedError: (controller, request, response) async {
+                error = response.description;
+                errorUrl = request.url;
+
+                pullToRefreshController!.endRefreshing();
+                progressIndicator.value = 0;
+              },
+              onDownloadStartRequest: (controller, request) {
+                double fileSize = request.contentLength / 1000000;
+
+                showFileModal(
+                    context,
+                    FileInfo(
+                      name: request.suggestedFilename ??
+                          sph!.storage.generateUniqueHash(request.url.rawValue),
+                      url: request.url,
+                      size: "(${fileSize.toStringAsFixed(2)} MB)",
+                    ));
+              },
+            ),
+          ),
+
+          // Background
+          if (!isLoggedIn || error != null) ...[
+            Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    width: double.maxFinite,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface),
                     ),
+                  ),
+                )
+              ],
+            )
+          ],
+
+          // Login
+          if (!isLoggedIn && !isLoginError) ...[
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Text(
+                    AppLocalizations.of(context).logInTitle,
+                    style: Theme.of(context).textTheme.labelLarge,
                   )
                 ],
-              )
-            ],
-
-            // Login
-            if (!isLoggedIn && !isLoginError) ...[
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(
-                      height: 24,
+              ),
+            )
+          ] else if (!isLoggedIn) ...[
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (noInternetLogin) ...[
+                    const Icon(
+                      Icons.wifi_off,
+                      size: 60,
                     ),
-                    Text(
-                      AppLocalizations.of(context).logInTitle,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    )
-                  ],
-                ),
-              )
-            ] else if (!isLoggedIn) ...[
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (noInternetLogin) ...[
-                      const Icon(
-                        Icons.wifi_off,
-                        size: 60,
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      Text(
-                        AppLocalizations.of(context).noInternetConnection2,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ] else ...[
-                      const Icon(
-                        Icons.warning,
-                        size: 60,
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      Text(
-                        AppLocalizations.of(context).errorOccurred,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(
-                        height: 4,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          loginError,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    ],
                     SizedBox(
                       height: 16,
                     ),
-                    FilledButton(
-                        onPressed: () async {
-                          await getCookies();
-                        },
-                        child: Text(AppLocalizations.of(context).tryAgain)),
-                  ],
-                ),
-              )
-            ],
-
-            // Error
-            if (error != null) ...[
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      error == noInternetError ? Icons.wifi_off : Icons.warning,
+                    Text(
+                      AppLocalizations.of(context).noInternetConnection2,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ] else ...[
+                    const Icon(
+                      Icons.warning,
                       size: 60,
                     ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    Text(
+                      AppLocalizations.of(context).errorOccurred,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        error == noInternetError
-                            ? AppLocalizations.of(context).noInternetConnection2
-                            : AppLocalizations.of(context).errorOccurredWebsite,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        loginError,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
-                    if (error != noInternetError) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer,
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 4.0, horizontal: 8.0),
-                                child: Text(
-                                  AppLocalizations.of(context).error,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge!
-                                      .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Flexible(
-                              child: Text(
-                                error ?? "",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                    ],
+                  ],
+                  SizedBox(
+                    height: 16,
+                  ),
+                  FilledButton(
+                      onPressed: () async {
+                        await getCookies();
+                      },
+                      child: Text(AppLocalizations.of(context).tryAgain)),
+                ],
+              ),
+            )
+          ],
+
+          // Error
+          if (error != null) ...[
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    error == noInternetError ? Icons.wifi_off : Icons.warning,
+                    size: 60,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Text(
+                      error == noInternetError
+                          ? AppLocalizations.of(context).noInternetConnection2
+                          : AppLocalizations.of(context).errorOccurredWebsite,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  if (error != noInternetError) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(
@@ -504,7 +474,7 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                               padding: const EdgeInsets.symmetric(
                                   vertical: 4.0, horizontal: 8.0),
                               child: Text(
-                                "URL",
+                                AppLocalizations.of(context).error,
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelLarge!
@@ -520,99 +490,142 @@ class _MoodleWebViewState extends State<MoodleWebView> {
                           ),
                           Flexible(
                             child: Text(
-                              errorUrl?.rawValue ?? "Unknown error",
+                              error ?? "",
                               style: Theme.of(context).textTheme.bodyMedium,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           )
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-        bottomNavigationBar: isLoggedIn
-            ? SafeArea(
-              child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ValueListenableBuilder(
-                        valueListenable: progressIndicator,
-                        builder: (context, progress, _) {
-                          return Visibility(
-                            visible: progress != 0,
-                            maintainSize: true,
-                            maintainState: true,
-                            maintainAnimation: true,
-                            child: LinearProgressIndicator(
-                              value: progress / 100,
-                            ),
-                          );
-                        }),
-                    Row(
-                      children: [
-                        IconButton(
-                            onPressed: refresh, icon: const Icon(Icons.refresh)),
-                        IconButton(
-                            onPressed: () async {
-                              if (error != null) {
-                                await Clipboard.setData(ClipboardData(
-                                    text: errorUrl?.rawValue ?? "Unknown error"));
-              
-                                return;
-                              }
-              
-                              if (webViewController != null) {
-                                await Clipboard.setData(ClipboardData(
-                                    text: (await webViewController!.getUrl())!
-                                        .rawValue));
-                              }
-                            },
-                            icon: const Icon(Icons.link)),
-                        Expanded(
-                          child: error == null
-                              ? Center(
-                                  child: ValueListenableBuilder(
-                                  valueListenable: currentPageTitle,
-                                  builder: (context, title, _) => Text(
-                                    title,
-                                    style: Theme.of(context).textTheme.labelLarge,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ))
-                              : SizedBox.shrink(),
-                        ),
-                        ValueListenableBuilder(
-                            valueListenable: canGoBack,
-                            builder: (context, can, _) {
-                              return IconButton(
-                                  onPressed: can
-                                      ? () {
-                                          webViewController?.goBack();
-                                        }
-                                      : null,
-                                  icon: const Icon(Icons.arrow_back));
-                            }),
-                        ValueListenableBuilder(
-                            valueListenable: canGoForward,
-                            builder: (context, can, _) {
-                              return IconButton(
-                                  onPressed: can
-                                      ? () {
-                                          webViewController?.goForward();
-                                        }
-                                      : null,
-                                  icon: const Icon(Icons.arrow_forward));
-                            }),
-                      ],
+                    const SizedBox(
+                      height: 4,
                     ),
                   ],
-                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 8.0),
+                            child: Text(
+                              "URL",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge!
+                                  .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Flexible(
+                          child: Text(
+                            errorUrl?.rawValue ?? "Unknown error",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+      bottomNavigationBar: isLoggedIn
+          ? SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ValueListenableBuilder(
+                      valueListenable: progressIndicator,
+                      builder: (context, progress, _) {
+                        return Visibility(
+                          visible: progress != 0,
+                          maintainSize: true,
+                          maintainState: true,
+                          maintainAnimation: true,
+                          child: LinearProgressIndicator(
+                            value: progress / 100,
+                          ),
+                        );
+                      }),
+                  Row(
+                    children: [
+                      IconButton(
+                          onPressed: refresh, icon: const Icon(Icons.refresh)),
+                      IconButton(
+                          onPressed: () async {
+                            if (error != null) {
+                              await Clipboard.setData(ClipboardData(
+                                  text: errorUrl?.rawValue ?? "Unknown error"));
+
+                              return;
+                            }
+
+                            if (webViewController != null) {
+                              await Clipboard.setData(ClipboardData(
+                                  text: (await webViewController!.getUrl())!
+                                      .rawValue));
+                            }
+                          },
+                          icon: const Icon(Icons.link)),
+                      Expanded(
+                        child: error == null
+                            ? Center(
+                                child: ValueListenableBuilder(
+                                valueListenable: currentPageTitle,
+                                builder: (context, title, _) => Text(
+                                  title,
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ))
+                            : SizedBox.shrink(),
+                      ),
+                      ValueListenableBuilder(
+                          valueListenable: canGoBack,
+                          builder: (context, can, _) {
+                            return IconButton(
+                                onPressed: can
+                                    ? () {
+                                        webViewController?.goBack();
+                                      }
+                                    : null,
+                                icon: const Icon(Icons.arrow_back));
+                          }),
+                      ValueListenableBuilder(
+                          valueListenable: canGoForward,
+                          builder: (context, can, _) {
+                            return IconButton(
+                                onPressed: can
+                                    ? () {
+                                        webViewController?.goForward();
+                                      }
+                                    : null,
+                                icon: const Icon(Icons.arrow_forward));
+                          }),
+                    ],
+                  ),
+                ],
+              ),
             )
-            : SizedBox.shrink());
+          : null,
+    );
   }
 }

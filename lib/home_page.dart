@@ -9,7 +9,6 @@ import 'package:lanis/generated/l10n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lanis/utils/authentication_state.dart';
-import 'package:lanis/utils/pop_scope_handler_provider.dart';
 import 'package:lanis/utils/responsive.dart';
 import 'package:lanis/utils/whats_new.dart';
 import 'package:lanis/utils/cached_network_image.dart';
@@ -20,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'applets/definitions.dart';
 import 'core/sph/sph.dart';
+import 'utils/back_navigation_manager.dart';
 
 typedef ActionFunction = void Function(BuildContext, GlobalKey<NavigatorState>);
 typedef WidgetWithContextCallback = Widget Function(BuildContext context);
@@ -37,6 +37,7 @@ class Destination {
   final String Function(BuildContext) label;
   final ActionFunction? action;
   final Widget Function(BuildContext, AccountType, Function openDrawerCb)? body;
+  final String? routeName;
   late final bool isSupported;
 
   Destination(
@@ -49,7 +50,8 @@ class Destination {
       required this.enableDrawer,
       required this.icon,
       required this.selectedIcon,
-      required this.label});
+      required this.label,
+      this.routeName});
 
   factory Destination.fromAppletDefinition(AppletDefinition appletDefinition) {
     return Destination(
@@ -62,6 +64,7 @@ class Destination {
       icon: appletDefinition.icon,
       selectedIcon: appletDefinition.selectedIcon,
       label: appletDefinition.label,
+      routeName: '/applet_${appletDefinition.runtimeType.toString()}',
     );
   }
 }
@@ -76,7 +79,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  final PopScopeHandlerProvider popScopeHandlerProvider = PopScopeHandlerProvider();
 
   bool doesSupportAnyApplet = true;
   List<Destination> destinations = [];
@@ -103,6 +105,7 @@ class HomePageState extends State<HomePage> {
       }
       destinations.addAll(endDestinations);
       setDefaultDestination();
+      navigateToInitialDestination();
     });
   }
 
@@ -115,6 +118,7 @@ class HomePageState extends State<HomePage> {
     setDefaultDestination();
     super.initState();
     showUpdateInfoIfRequired(context);
+    navigateToInitialDestination();
   }
 
   final List<Destination> endDestinations = [
@@ -139,6 +143,7 @@ class HomePageState extends State<HomePage> {
       enableDrawer: true,
       addDivider: true,
       body: (context, accType, openDrawerCb) => const SettingsScreen(),
+      routeName: '/settings',
     ),
     Destination(
         isSupported: true,
@@ -214,9 +219,16 @@ class HomePageState extends State<HomePage> {
     if (destinations[index].action != null) {
       destinations[index].action!(context, navigatorKey);
     } else {
-      popScopeHandlerProvider.clearHandler();
       AppBarController.instance.clear();
-      navigatorKey.currentState?.popUntil((route) => route.isFirst);
+
+      // Use pushReplacement with named routes
+      if (destinations[index].routeName != null) {
+        navigatorKey.currentState?.pushReplacementNamed(
+          destinations[index].routeName!,
+          arguments: index,
+        );
+      }
+
       setState(() {
         selectedDestinationDrawer = index;
         if (fromDrawer) Navigator.pop(context);
@@ -224,6 +236,18 @@ class HomePageState extends State<HomePage> {
     }
     if (destinations[index].enableBottomNavigation) {
       lastAppletWithBottomNavSupport = index;
+    }
+  }
+
+  void navigateToInitialDestination() {
+    if (selectedDestinationDrawer >= 0 &&
+        destinations[selectedDestinationDrawer].routeName != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigatorKey.currentState?.pushReplacementNamed(
+          destinations[selectedDestinationDrawer].routeName!,
+          arguments: selectedDestinationDrawer,
+        );
+      });
     }
   }
 
@@ -463,22 +487,37 @@ class HomePageState extends State<HomePage> {
                     canPop: false,
                     onPopInvokedWithResult:
                         (bool didPop, Object? result) async {
-
                       if (didPop) {
                         return;
                       }
 
-                      if (popScopeHandlerProvider.hasHandler) {
-                        final shouldContinueWithNormalRun = await popScopeHandlerProvider.handler!(navigatorKey);
-                        if (!shouldContinueWithNormalRun) return;
-                        popScopeHandlerProvider.clearHandler();
+                      // First check if any widget can handle back navigation
+                      if (await BackNavigationManager
+                          .canHandleBackNavigation()) {
+                        await BackNavigationManager.handleBackNavigation();
+                        return;
                       }
 
                       if (!isFirstLevelRoute) {
                         navigatorKey.currentState?.pop();
                         return;
-                      } else if (context.mounted &&!Responsive.isTablet(context) && lastAppletWithBottomNavSupport != null) {
-                        openDestination(lastAppletWithBottomNavSupport!, false);
+                      } else if (context.mounted &&
+                          !Responsive.isTablet(context) &&
+                          lastAppletWithBottomNavSupport != null) {
+                        // Navigate back to the last applet with bottom nav support using routes
+                        if (destinations[lastAppletWithBottomNavSupport!]
+                                .routeName !=
+                            null) {
+                          navigatorKey.currentState?.pushReplacementNamed(
+                            destinations[lastAppletWithBottomNavSupport!]
+                                .routeName!,
+                            arguments: lastAppletWithBottomNavSupport,
+                          );
+                          setState(() {
+                            selectedDestinationDrawer =
+                                lastAppletWithBottomNavSupport!;
+                          });
+                        }
                       } else {
                         // close drawer first if open
                         if (_drawerKey.currentState?.isDrawerOpen ?? false) {
@@ -491,18 +530,48 @@ class HomePageState extends State<HomePage> {
                     child: Navigator(
                       key: navigatorKey,
                       onGenerateRoute: (settings) {
+                        // Find destination by route name or use selected destination
+                        int destinationIndex = selectedDestinationDrawer;
+
+                        if (settings.arguments is int) {
+                          destinationIndex = settings.arguments as int;
+                        } else if (settings.name != null &&
+                            settings.name != '/') {
+                          // Find destination by route name
+                          for (int i = 0; i < destinations.length; i++) {
+                            if (destinations[i].routeName == settings.name) {
+                              destinationIndex = i;
+                              break;
+                            }
+                          }
+                        }
+
+                        // Validate destination index and ensure it has a body
+                        if (destinationIndex < 0 ||
+                            destinationIndex >= destinations.length ||
+                            destinations[destinationIndex].body == null) {
+                          // Find first available destination with a body
+                          for (int i = 0; i < destinations.length; i++) {
+                            if (destinations[i].body != null &&
+                                destinations[i].isSupported) {
+                              destinationIndex = i;
+                              break;
+                            }
+                          }
+                        }
+
                         return MaterialPageRoute(
+                          settings: settings,
                           builder: (context) => Column(
                             children: [
                               DynamicAppBar(
-                                title: destinations[selectedDestinationDrawer]
+                                title: destinations[destinationIndex]
                                     .label(context),
                                 automaticallyImplyLeading:
                                     !Responsive.isTablet(context),
                               ),
                               Expanded(
-                                child: destinations[selectedDestinationDrawer]
-                                        .body!(
+                                child: destinations[destinationIndex].body!(
                                     context, sph!.session.accountType, () {
                                   _drawerKey.currentState!.openDrawer();
                                 }),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:lanis/applets/conversations/view/conversations_layout_builder.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'package:lanis/applets/conversations/definition.dart';
 import 'package:lanis/applets/conversations/parser.dart';
@@ -67,7 +68,6 @@ class _ConversationsViewState extends State<ConversationsView> {
   final KeyboardObserver keyboardObserver = KeyboardObserver();
 
   final Map<String, bool> checkedTiles = {};
-  bool? tabletMode;
 
   bool loadingCreateButton = false;
   bool disableToggleButton = false;
@@ -142,7 +142,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                 }
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8.0, top: 2.0),
                   child: SearchBar(
                     hintText: AppLocalizations.of(context)
                         .individualSearchHint(function.name),
@@ -403,18 +403,7 @@ class _ConversationsViewState extends State<ConversationsView> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final mediaQueryData = MediaQueryData.fromView(WidgetsBinding.instance.platformDispatcher.views.first);
-    tabletMode ??= !(mediaQueryData.size.shortestSide < 660);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    double deviceWidth = MediaQuery.of(context).size.width;
-    int widthParts = deviceWidth ~/ 350 == 0 ? 1 : deviceWidth ~/ 350;
-
     return NotificationListener(
       onNotification: (notification) {
         if (notification is CheckTileNotification) {
@@ -434,11 +423,8 @@ class _ConversationsViewState extends State<ConversationsView> {
 
         return false;
       },
-      child: Row(
-        children: [
-          Expanded(
-            flex: widthParts >= 3 ? 1 : 4,
-            child: Scaffold(
+      child: ConversationsLayoutBuilder(
+        leftBuilder: (context, isTablet) => Scaffold(
               body: CombinedAppletBuilder<List<OverviewEntry>>(
                   parser: sph!.parser.conversationsParser,
                   phpUrl: conversationsDefinition.appletPhpIdentifier,
@@ -501,32 +487,22 @@ class _ConversationsViewState extends State<ConversationsView> {
                                 checked: checkedTiles[data[index].id] ??
                                     false,
                                 onTap: (entry) {
-                                  if (tabletMode!) {
-                                    setState(() {
-                                      noBadgeConversations.add(entry.id);
-                                      loadedConversation = ConversationsChat.fromEntry(
-                                          key: Key(entry.id),
-                                          refreshSidebar: refresh,
-                                          entry,
-                                          tabletMode!
-                                      );
-                                      loadedConversationId = entry.id;
-                                    });
-                                  } else {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          if (entry.unread == true) {
-                                            sph!.parser.conversationsParser.filter
-                                                .toggleEntry(entry.id, unread: true);
-                                            sph!.parser.conversationsParser.filter.pushEntries();
-                                          }
-                                          return ConversationsChat.fromEntry(refreshSidebar: refresh, entry, tabletMode!);
-                                        },
-                                      ),
-                                    );
+                                  // todo: revise, of makes sense to do this in chat.dart
+                                  if (entry.unread == true) {
+                                    sph!.parser.conversationsParser.filter
+                                        .toggleEntry(entry.id, unread: true);
+                                    sph!.parser.conversationsParser.filter.pushEntries();
                                   }
+                                  setState(() {
+                                    noBadgeConversations.add(entry.id);
+                                    loadedConversation = ConversationsChat.fromEntry(
+                                        key: Key(entry.id),
+                                        refreshSidebar: refresh,
+                                        entry,
+                                        isTablet
+                                    );
+                                    loadedConversationId = entry.id;
+                                  });
                                 },
                               );
                             },
@@ -645,9 +621,9 @@ class _ConversationsViewState extends State<ConversationsView> {
                   if (sph!.parser.conversationsParser.cachedCanChooseType != null) {
                     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                       if (sph!.parser.conversationsParser.cachedCanChooseType!) {
-                        return TypeChooser(isTablet: tabletMode!,);
+                        return TypeChooser(isTablet: isTablet,);
                       }
-                      return CreateConversation(chatType: null, isTablet: tabletMode!,);
+                      return CreateConversation(chatType: null, isTablet: isTablet,);
                     }));
                     return;
                   }
@@ -675,9 +651,9 @@ class _ConversationsViewState extends State<ConversationsView> {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
                       if (canChooseType) {
-                        return TypeChooser(isTablet: tabletMode!,);
+                        return TypeChooser(isTablet: isTablet,);
                       }
-                      return CreateConversation(chatType: null, isTablet: tabletMode!,);
+                      return CreateConversation(chatType: null, isTablet: isTablet,);
                     }));
                   }
                 },
@@ -690,17 +666,15 @@ class _ConversationsViewState extends State<ConversationsView> {
                     : const Icon(Icons.edit),
               ),
             ),
-          ),
-          if (tabletMode!) Container(
-            height: double.infinity,
-            width: 1,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          if (tabletMode!) Expanded(
-            flex: widthParts >= 3 ? 2 : 6,
-            child: loadedConversation == null ? sideBarNoConversationsLoaded() : loadedConversation!,
-          )
-        ],
+        rightBuilder: (loadedConversation != null) ? (context, isTablet) => loadedConversation! : null,
+        rightPlaceholder: sideBarNoConversationsLoaded(),
+        onPopRight: () {
+          setState(() {
+            loadedConversation = null;
+            loadedConversationId = null;
+            noBadgeConversations.clear();
+          });
+        }
       ),
     );
   }
