@@ -22,7 +22,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:lanis/core/database/account_database/account_db.dart'
     show secureStorage, accountDatabase, AccountDatabase;
 
-import 'applets/conversations/view/shared.dart';
+import 'applets/conversations/shared.dart';
 import 'background_service.dart';
 
 void main() async {

@@ -7,14 +7,21 @@ import '../../../core/connection_checker.dart';
 import '../../../core/sph/sph.dart';
 import '../../../models/conversations.dart';
 import 'chat.dart';
-import 'shared.dart';
+import '../shared.dart';
 
 class ConversationsSend extends StatefulWidget {
   final ChatCreationData? creationData;
   final bool isTablet;
   final String? title;
+  final void Function(ConversationsChat) onCreateChat;
+  final void Function() refreshSidebar;
   const ConversationsSend(
-      {super.key, this.creationData, required this.isTablet, this.title});
+      {super.key,
+      this.creationData,
+      required this.isTablet,
+      this.title,
+      required this.onCreateChat,
+      required this.refreshSidebar});
 
   @override
   State<ConversationsSend> createState() => _ConversationsSendState();
@@ -129,39 +136,26 @@ class _ConversationsSendState extends State<ConversationsSend> {
             widget.creationData!.type?.name,
             widget.creationData!.subject,
             text);
-
     if (response.success) {
       sph!.parser.conversationsParser.fetchData(forceRefresh: true);
 
-      if (mounted) {
-        Navigator.pop(context);
-        Navigator.pop(context);
-        if (!widget.isTablet) {
-          Navigator.pop(context);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ConversationsChat(
-                title: widget.creationData!.subject,
-                id: response.id!,
-                isTablet: widget.isTablet,
-                refreshSidebar: () {},
-                newSettings: NewConversationSettings(
-                  firstMessage: textMessage,
-                  settings: ConversationSettings(
-                      id: response.id!,
-                      groupChat:
-                          widget.creationData!.type == ChatType.groupOnly,
-                      onlyPrivateAnswers: widget.creationData!.type ==
-                          ChatType.privateAnswerOnly,
-                      noReply:
-                          widget.creationData!.type == ChatType.noAnswerAllowed,
-                      own: true),
-                ),
-              ),
-            ),
-          );
-        }
-      }
+      widget.onCreateChat(ConversationsChat(
+        key: Key(response.id!),
+        title: widget.creationData!.subject,
+        id: response.id!,
+        isTablet: widget.isTablet,
+        refreshSidebar: widget.refreshSidebar,
+        newSettings: NewConversationSettings(
+          firstMessage: textMessage,
+          settings: ConversationSettings(
+              id: response.id!,
+              groupChat: widget.creationData!.type == ChatType.groupOnly,
+              onlyPrivateAnswers:
+                  widget.creationData!.type == ChatType.privateAnswerOnly,
+              noReply: widget.creationData!.type == ChatType.noAnswerAllowed,
+              own: true),
+        ),
+      ));
     } else {
       if (mounted) {
         showDialog(
@@ -205,6 +199,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
                 if (widget.creationData != null) {
                   newConversation(text);
                 } else {
+                  // TODO: In chat handling, not only new chat
                   Navigator.pop(context, text);
                 }
               },

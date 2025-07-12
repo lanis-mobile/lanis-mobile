@@ -16,7 +16,7 @@ import '../../../utils/fetch_more_indicator.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/error_view.dart';
 import '../../../widgets/format_text.dart';
-import 'shared.dart';
+import '../shared.dart';
 
 class ConversationsChat extends StatefulWidget {
   final String id;
@@ -397,6 +397,8 @@ class _ConversationsChatState extends State<ConversationsChat>
         builder: (context) => ConversationsSend(
               isTablet: widget.isTablet,
               title: widget.title,
+              onCreateChat: (_) {},
+              refreshSidebar: () => null,
             )));
 
     if (result == null) return;

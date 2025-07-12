@@ -41,8 +41,13 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
   int currentWeekIndex = -1;
 
+  @override
+  void dispose() {
+    //AppBarController.instance.clear();
+    super.dispose();
+  }
+
   void updateAppBar(Widget action) {
-    AppBarController.instance.remove('studentTimetable');
     AppBarController.instance.add('studentTimetable', action);
   }
 

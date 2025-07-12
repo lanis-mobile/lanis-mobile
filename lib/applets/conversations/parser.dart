@@ -467,20 +467,12 @@ class ConversationsParser extends AppletParser<List<OverviewEntry>> {
     }
 
     try {
-      final html = await sph.session.dio
-          .get("https://start.schulportal.hessen.de/nachrichten.php",
-              options: Options(
-                headers: {
-                  "Accept": "*/*",
-                  "Sec-Fetch-Dest": "document",
-                  "Sec-Fetch-Mode": "navigate",
-                  "Sec-Fetch-Site": "none",
-                },
-              ));
+      final response = await sph.session.dio
+          .get("https://start.schulportal.hessen.de/nachrichten.php");
 
-      final document = parse(html.data);
+      final String body = response.data.toString();
 
-      cachedCanChooseType = document.querySelector("#MsgOptions") != null;
+      cachedCanChooseType = body.contains("MsgOptions");
 
       return cachedCanChooseType!;
     } on (SocketException, DioException) {
