@@ -34,6 +34,7 @@ class SettingsPage extends StatelessWidget {
   final void Function()? back;
   final Widget? floatingActionButton;
   final bool showBackButton;
+  final bool showAppBar;
 
   const SettingsPage({
     super.key,
@@ -43,6 +44,7 @@ class SettingsPage extends StatelessWidget {
     this.back,
     required this.children,
     this.floatingActionButton,
+    this.showAppBar = true,
     this.showBackButton = true,
   });
 
@@ -50,12 +52,14 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: LargeAppBar(
-        title: title,
-        backgroundColor: backgroundColor,
-        back: back,
-        showBackButton: showBackButton,
-      ),
+      appBar: showAppBar
+          ? LargeAppBar(
+              title: title,
+              backgroundColor: backgroundColor,
+              back: back,
+              showBackButton: showBackButton,
+            )
+          : null,
       body: Padding(
         padding: contentPadding,
         child: children.length > 1

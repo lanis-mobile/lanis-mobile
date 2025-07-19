@@ -284,6 +284,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
       return SettingsPage(
         backgroundColor: backgroundColor,
         title: Text(AppLocalizations.of(context).settings),
+        showAppBar: false,
         children: [settingsList],
       );
     }

@@ -21,6 +21,7 @@ class LargeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      scrolledUnderElevation: 0.0,
       backgroundColor:
           backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
       leading: showBackButton
