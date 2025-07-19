@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:lanis/applets/conversations/view/shared.dart';
-import 'package:lanis/applets/timetable/student/student_timetable_better_view.dart';
+import 'package:lanis/applets/conversations/shared.dart';
+import 'package:lanis/applets/timetable/student/student_timetable_view.dart';
 import 'package:lanis/applets/timetable/student/timetable_helper.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'package:lanis/models/timetable.dart';
@@ -237,7 +237,8 @@ class ItemBlock extends StatelessWidget {
                                 Wrap(
                                   runAlignment: WrapAlignment.spaceBetween,
                                   alignment: WrapAlignment.spaceBetween,
-                                  spacing: height % itemHeight >= 1.99 ? 99999 : 8.0,
+                                  spacing:
+                                      height % itemHeight >= 1.99 ? 99999 : 8.0,
                                   children: [
                                     Text(
                                       subject!.name ?? '',

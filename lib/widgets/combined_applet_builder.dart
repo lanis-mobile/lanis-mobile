@@ -4,6 +4,7 @@ import 'package:lanis/models/account_types.dart';
 
 import 'package:lanis/generated/l10n.dart';
 import 'package:lanis/models/client_status_exceptions.dart';
+import 'package:lanis/utils/logger.dart';
 import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
 import 'error_view.dart';
@@ -19,8 +20,6 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
   final Map<String, dynamic> settingsDefaults;
   final AccountType accountType;
   final BuilderFunction<T> builder;
-  final bool showErrorAppBar;
-  final AppBar? loadingAppBar;
 
   const CombinedAppletBuilder({
     super.key,
@@ -29,8 +28,6 @@ class CombinedAppletBuilder<T> extends StatefulWidget {
     required this.settingsDefaults,
     required this.accountType,
     required this.builder,
-    this.showErrorAppBar = false,
-    this.loadingAppBar,
   });
 
   @override
@@ -43,11 +40,8 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
   bool _loading = true;
 
   Widget _loadingState() {
-    return Scaffold(
-      appBar: widget.loadingAppBar,
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 
@@ -56,8 +50,8 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
         .getAllApplet(widget.phpUrl, widget.settingsDefaults);
     if (mounted) {
       setState(() {
-      _loading = false;
-    });
+        _loading = false;
+      });
     }
   }
 
@@ -76,7 +70,6 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
         if (snapshot.hasError || snapshot.data?.status == FetcherStatus.error) {
           return Scaffold(
             body: ErrorView(
-              showAppBar: widget.showErrorAppBar,
               error: snapshot.data!.contentStatus == ContentStatus.offline
                   ? NoConnectionException()
                   : UnknownException(),
@@ -115,10 +108,13 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                           ),
                           Text(
                               '${AppLocalizations.of(context).offline} (${snapshot.data?.fetchedAt.format('E dd.MM HH:mm')})',
-                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              )
-                          ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  )),
                         ],
                       ),
                     ),
@@ -130,13 +126,14 @@ class _CombinedAppletBuilderState<T> extends State<CombinedAppletBuilder<T>> {
                   snapshot.data!.content as T,
                   widget.accountType,
                   appletSettings,
-                      (String key, dynamic value) async {
-                    await sph!.prefs.kv.setAppletValue(widget.phpUrl, key, value);
+                  (String key, dynamic value) async {
+                    await sph!.prefs.kv
+                        .setAppletValue(widget.phpUrl, key, value);
                     setState(() {
                       appletSettings[key] = value;
                     });
                   },
-                      () async {
+                  () async {
                     await widget.parser.fetchData(forceRefresh: true);
                   },
                 ),

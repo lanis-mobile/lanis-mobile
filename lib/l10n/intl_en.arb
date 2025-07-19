@@ -14,7 +14,7 @@
   "storage": "Datastorage",
   "settings": "Settings",
   "about": "About Lanis-Mobile",
-  "openLanisInBrowser": "Open in Browser",
+  "openLanisInBrowser": "Open web",
   "openMoodle": "Open Moodle",
   "userData": "User data",
   "personalSchoolSupport": "Personal school support",
@@ -245,6 +245,7 @@
   "conversationTypeDescription": "{conversationTypeDescription, select, noAnswerAllowed{Replies won't be possible.} privateAnswerOnly{Replies can only be seen by you.} groupOnly{Replies can be seen by everyone.} openChat{Replies can be seen by everyone or only specific people. The latter is currently not possible in the app.} other{Error}}",
   "conversationTypeName": "{conversationTypeName, select, noAnswerAllowed{Hint} privateAnswerOnly{Notice} groupOnly{Group Chat} openChat{Open Chat} other{Fehler}}",
   "createNewConversation": "New Conversation",
+  "replyToPerson": "Reply to {name}...",
   "subject": "Subject",
   "select": "Select",
   "addReceivers": "Add receiver",
@@ -252,9 +253,9 @@
   "createResetTooltip": "Reset subject and receivers",
   "sendMessagePlaceholder": "Write your message here...",
   "newMessage": "New message",
-  "openChatWarning": "Currently in the app you can only write messages to everyone. Normally you also could write to specific people if you have the required permissions.",
-  "privateConversation": "can only see your message!",
-  "copiedMessage": "Message was copied!",
+  "openChatWarning": "Reply to everyone in the conversation...",
+  "privateConversation": "Only {name} can read your messages!",
+  "copyWholeMessage": "Copy whole message",
   "errorSendingMessage": "Error occurred during sending the message!",
   "errorCreatingConversation": "Couldn't create new conversation!",
   "receivers": "Receivers",
@@ -390,5 +391,6 @@
   "ignoreBatteryOptimizationPart1": "If you do not recieve notifications, this can be due to manufacturer-specific battery optimizations. You can disable them for this app in the ",
   "ignoreBatteryOptimizationSettings": "Battery optimization settings",
   "ignoreBatteryOptimizationGranted": "Successfully granted the battery optimization permission.",
-  "ignoreBatteryOptimizationDenied": "Failed to grant the battery optimization permission. Please try again or do it manually in the system settings."
+  "ignoreBatteryOptimizationDenied": "Failed to grant the battery optimization permission. Please try again or do it manually in the system settings.",
+  "recommended": "Recommended"
 }

@@ -313,7 +313,9 @@ flutter:
     - family: Roboto Mono
       fonts:
         - asset: fonts/RobotoMono-Regular.ttf
-
+    - family:  browser_icons
+      fonts:
+        - asset: fonts/browser_icons.ttf
   generate: true
 
 flutter_intl:

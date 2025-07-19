@@ -7,13 +7,17 @@ import '../../models/account_types.dart';
 import 'background.dart';
 
 final conversationsDefinition = AppletDefinition(
-  appletPhpUrl: 'nachrichten.php',
+  appletPhpIdentifier: 'nachrichten.php',
   addDivider: false,
-  appletType: AppletType.nested,
-  icon: const Icon(Icons.forum),
-  selectedIcon: const Icon(Icons.forum_outlined),
+  useBottomNavigation: true,
+  icon: (context) => const Icon(Icons.forum),
+  selectedIcon: (context) => const Icon(Icons.forum_outlined),
   label: (context) => AppLocalizations.of(context).messages,
-  supportedAccountTypes: [AccountType.student, AccountType.teacher, AccountType.parent],
+  supportedAccountTypes: [
+    AccountType.student,
+    AccountType.teacher,
+    AccountType.parent
+  ],
   allowOffline: false,
   settingsDefaults: {},
   notificationTask: conversationsBackgroundTask,
@@ -21,5 +25,4 @@ final conversationsDefinition = AppletDefinition(
   bodyBuilder: (context, accountType, openDrawerCb) {
     return ConversationsView(openDrawerCb: openDrawerCb);
   },
-
 );

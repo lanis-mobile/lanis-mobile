@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:intl/intl.dart';
-import 'package:lanis/applets/conversations/view/shared.dart';
 import 'package:lanis/applets/timetable/definition.dart';
 import 'package:lanis/applets/timetable/student/student_timetable_item.dart';
 import 'package:lanis/applets/timetable/student/timetable_helper.dart';
@@ -16,22 +13,22 @@ import 'package:lanis/models/timetable.dart';
 import 'package:lanis/utils/extensions.dart';
 import 'package:lanis/widgets/combined_applet_builder.dart';
 
+import '../../../widgets/dynamic_app_bar.dart';
+
 final double itemHeight = 46;
 double headerHeight = 40;
 final double hourWidth = 70;
 final double pauseHeight = 18;
 
-class StudentTimetableBetterView extends StatefulWidget {
+class StudentTimetableView extends StatefulWidget {
   final Function? openDrawerCb;
-  const StudentTimetableBetterView({super.key, this.openDrawerCb});
+  const StudentTimetableView({super.key, this.openDrawerCb});
 
   @override
-  State<StudentTimetableBetterView> createState() =>
-      _StudentTimetableBetterViewState();
+  State<StudentTimetableView> createState() => _StudentTimetableViewState();
 }
 
-class _StudentTimetableBetterViewState
-    extends State<StudentTimetableBetterView> {
+class _StudentTimetableViewState extends State<StudentTimetableView> {
   List<TimetableDay> getSelectedPlan(TimeTable data, TimeTableType selectedType,
       Map<String, dynamic> settings) {
     List<List<TimetableSubject>>? customLessons =
@@ -45,21 +42,24 @@ class _StudentTimetableBetterViewState
   int currentWeekIndex = -1;
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.removeAction('studentTimetable');
+    });
+    super.dispose();
+  }
+
+  void updateAppBar(Widget action) {
+    AppBarController.instance.addAction('studentTimetable', action);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder<TimeTable>(
         parser: sph!.parser.timetableStudentParser,
-        phpUrl: timeTableDefinition.appletPhpUrl,
+        phpUrl: timeTableDefinition.appletPhpIdentifier,
         settingsDefaults: timeTableDefinition.settingsDefaults,
         accountType: AccountType.student,
-        loadingAppBar: AppBar(
-          title: Text(timeTableDefinition.label(context)),
-          leading: widget.openDrawerCb != null
-              ? IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => widget.openDrawerCb!(),
-                )
-              : null,
-        ),
         builder: (BuildContext context,
             TimeTable timetable,
             _,
@@ -93,53 +93,41 @@ class _StudentTimetableBetterViewState
                   ? null
                   : uniqueBadges[currentWeekIndex - 1]);
 
-          headerHeight =
-              timetable.weekBadge != null && timetable.weekBadge!.isNotEmpty
-                  ? 40
-                  : 26;
+          headerHeight = 40;
 
-          return Scaffold(
-              appBar: AppBar(
-                title: Text(timeTableDefinition.label(context)),
-                leading: widget.openDrawerCb != null
-                    ? IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: () => widget.openDrawerCb!(),
-                      )
-                    : null,
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      children: [
-                        if (uniqueBadges.isNotEmpty &&
-                            timetable.weekBadge != null)
-                          TextButton(
-                            onPressed: () {
-                              currentWeekIndex = (currentWeekIndex + 1) %
-                                  (uniqueBadges.length + 1);
-                              updateSettings('student-selected-week',
-                                  currentWeekIndex == 0);
-                            },
-                            child: Text(
-                              (currentWeekIndex < 1)
-                                  ? AppLocalizations.of(context)
-                                      .timetableAllWeeks
-                                  : AppLocalizations.of(context).timetableWeek(
-                                      uniqueBadges[currentWeekIndex - 1]),
-                            ),
-                          ),
-                        IconButton(
-                            onPressed: () => updateSettings('single-day',
-                                !(settings['single-day'] ?? false)),
-                            icon: (settings['single-day'] ?? false)
-                                ? Icon(Icons.calendar_today)
-                                : Icon(Icons.calendar_today_outlined)),
-                      ],
-                    ),
-                  )
-                ],
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            updateAppBar(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    if (uniqueBadges.isNotEmpty && timetable.weekBadge != null)
+                      TextButton(
+                        onPressed: () {
+                          currentWeekIndex = (currentWeekIndex + 1) %
+                              (uniqueBadges.length + 1);
+                          updateSettings(
+                              'student-selected-week', currentWeekIndex == 0);
+                        },
+                        child: Text(
+                          (currentWeekIndex < 1)
+                              ? AppLocalizations.of(context).timetableAllWeeks
+                              : AppLocalizations.of(context).timetableWeek(
+                                  uniqueBadges[currentWeekIndex - 1]),
+                        ),
+                      ),
+                    IconButton(
+                        onPressed: () => updateSettings(
+                            'single-day', !(settings['single-day'] ?? false)),
+                        icon: (settings['single-day'] ?? false)
+                            ? Icon(Icons.calendar_today)
+                            : Icon(Icons.calendar_today_outlined)),
+                  ],
+                ),
               ),
+            );
+          });
+          return Scaffold(
               body: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: TimeTableView(
@@ -206,7 +194,7 @@ class TimeTableView extends StatelessWidget {
   int getCurrentWeekNumber() {
     DateTime date = DateTime.now();
     int dayOfYear = int.parse(DateFormat("D").format(date));
-    int woy =  ((dayOfYear - date.weekday + 10) / 7).floor();
+    int woy = ((dayOfYear - date.weekday + 10) / 7).floor();
     if (woy < 1) {
       woy = numOfWeeks(date.year - 1);
     } else if (woy > numOfWeeks(date.year)) {

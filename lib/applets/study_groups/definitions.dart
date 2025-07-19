@@ -6,11 +6,11 @@ import 'package:lanis/applets/study_groups/student/student_study_groups_view.dar
 import '../../models/account_types.dart';
 
 final studyGroupsDefinition = AppletDefinition(
-  appletPhpUrl: 'lerngruppen.php',
+  appletPhpIdentifier: 'lerngruppen.php',
   addDivider: false,
-  appletType: AppletType.navigation,
-  icon: const Icon(Icons.groups),
-  selectedIcon: const Icon(Icons.groups_outlined),
+  useBottomNavigation: false,
+  icon: (context) => const Icon(Icons.groups),
+  selectedIcon: (context) => const Icon(Icons.groups_outlined),
   label: (context) => AppLocalizations.of(context).studyGroups,
   supportedAccountTypes: [AccountType.student],
   allowOffline: true,

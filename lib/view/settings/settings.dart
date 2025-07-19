@@ -22,6 +22,7 @@ import '../../core/database/account_database/account_db.dart';
 import '../../core/sph/sph.dart';
 import '../../utils/press_tile.dart';
 import '../../utils/whats_new.dart';
+import '../../widgets/dynamic_app_bar.dart';
 
 class SettingsGroup {
   final List<SettingsTile> tiles;
@@ -106,13 +107,13 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
               .get()
               .then((value) => value.length);
 
-          if(context.mounted) {
+          if (context.mounted) {
             Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    NotificationSettings(accountCount: accountCount)),
-          );
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      NotificationSettings(accountCount: accountCount)),
+            );
           }
         },
       ),
@@ -134,11 +135,15 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
               )),
       SettingsTile(
         title: (context) => AppLocalizations.of(context).quickActions,
-        subtitle: (context) async => "${AppLocalizations.of(context).applets}, ${AppLocalizations.of(context).external}",
+        subtitle: (context) async =>
+            "${AppLocalizations.of(context).applets}, ${AppLocalizations.of(context).external}",
         icon: Icons.extension,
         screen: (context) => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QuickActions(showBackButton: true,)),
+          MaterialPageRoute(
+              builder: (context) => QuickActions(
+                    showBackButton: true,
+                  )),
         ),
       )
     ]),
@@ -159,15 +164,14 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
           ),
         if (sph!.session.doesSupportFeature(timeTableDefinition))
           SettingsTile(
-            title: (context) =>
-                AppLocalizations.of(context).customizeTimetable,
+            title: (context) => AppLocalizations.of(context).customizeTimetable,
             subtitle: (context) async =>
                 AppLocalizations.of(context).customizeTimetableDescription,
             icon: Icons.timelapse,
             screen: (context) => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const StudentTimetableSettings()),
+                  builder: (context) => const StudentTimetableSettings()),
             ),
           ),
       ]),
@@ -200,7 +204,8 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
         icon: Icons.question_mark,
         show: () async => true,
         title: (context) => AppLocalizations.of(context).inThisUpdate,
-        subtitle: (context) async => AppLocalizations.of(context).showReleaseNotesForThisVersion,
+        subtitle: (context) async =>
+            AppLocalizations.of(context).showReleaseNotesForThisVersion,
         screen: (context) async => showLocalUpdateInfo(context),
       )
     ]),
@@ -209,14 +214,30 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   SettingsTile? selectedTile;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.setOverrideColor((context) => backgroundColor);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.clear();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isTablet = Responsive.isTablet(context);
+    final isTablet = Responsive.isTabletApplet(context);
     final double availableHeight = MediaQuery.of(context).size.height -
         kToolbarHeight -
         MediaQuery.of(context).padding.top;
 
     if (mounted &&
-        Responsive.isTablet(context) &&
+        Responsive.isTabletApplet(context) &&
         settingsTiles.isNotEmpty &&
         settingsTiles[0].tiles.isNotEmpty &&
         selectedTile == null) {
@@ -263,6 +284,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
       return SettingsPage(
         backgroundColor: backgroundColor,
         title: Text(AppLocalizations.of(context).settings),
+        showAppBar: false,
         children: [settingsList],
       );
     }
@@ -270,10 +292,6 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
     // Tablet layout
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).settings),
-        backgroundColor: backgroundColor,
-      ),
       body: Row(
         children: [
           SizedBox(
@@ -293,7 +311,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   Widget _buildSettingDetail(SettingsTile tile) {
     return Builder(
       builder: (context) {
-        final isTablet = Responsive.isTablet(context);
+        final isTablet = Responsive.isTabletApplet(context);
         if (tile.title(context) == AppLocalizations.of(context).appearance) {
           return AppearanceSettings(showBackButton: !isTablet);
         } else if (tile.title(context) ==
@@ -327,8 +345,7 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
                     appBar: LargeAppBar(
                         showBackButton: false,
                         backgroundColor: backgroundColor,
-                        title:
-                            Text(AppLocalizations.of(context).inThisUpdate)),
+                        title: Text(AppLocalizations.of(context).inThisUpdate)),
                     body: snapshot.data as Widget,
                   );
                 }

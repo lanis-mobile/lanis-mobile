@@ -6,6 +6,7 @@ import 'package:lanis/applets/study_groups/student/student_exams_view.dart';
 import 'package:lanis/core/sph/sph.dart';
 import 'package:lanis/models/study_groups.dart';
 import 'package:lanis/widgets/combined_applet_builder.dart';
+import 'package:lanis/widgets/dynamic_app_bar.dart';
 
 class StudentStudyGroupsView extends StatefulWidget {
   const StudentStudyGroupsView({super.key});
@@ -15,15 +16,46 @@ class StudentStudyGroupsView extends StatefulWidget {
 }
 
 class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
+  Widget _buildToggleExamsButton(
+      BuildContext context, Map settings, Function updateSetting) {
+    final showExams = settings['showExams'] == 'true';
+    return Tooltip(
+      message: showExams
+          ? AppLocalizations.of(context).studyGroups
+          : AppLocalizations.of(context).exams,
+      child: IconButton(
+        icon: Icon(
+          showExams ? Icons.groups_outlined : Icons.article_outlined,
+        ),
+        onPressed: () => {
+          updateSetting('showExams', showExams ? 'false' : 'true'),
+        },
+      ),
+    );
+  }
+
+  void updateAppBar(Widget appBarAction, String newTitle) {
+    AppBarController.instance.removeAction('studentStudyGroups');
+    AppBarController.instance.addAction('studentStudyGroups', appBarAction);
+    AppBarController.instance.setOverrideTitle(newTitle);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.removeAction('studentStudyGroups');
+      AppBarController.instance.setOverrideTitle(null);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder(
         parser: sph!.parser.studyGroupsStudentParser,
-        phpUrl: studyGroupsDefinition.appletPhpUrl,
+        phpUrl: studyGroupsDefinition.appletPhpIdentifier,
         settingsDefaults: studyGroupsDefinition.settingsDefaults,
         accountType: sph!.session.accountType,
-        showErrorAppBar: true,
-        loadingAppBar: AppBar(),
         builder:
             (context, data, accountType, settings, updateSetting, refresh) {
           List<StudentStudyGroupsContainer> studyData = data
@@ -39,34 +71,15 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
               .toList();
 
           studyData.sort((a, b) => a.exam.date.compareTo(b.exam.date));
-
-          return Scaffold(
-            appBar: AppBar(
-              title: settings['showExams'] != 'true'
-                  ? Text(AppLocalizations.of(context).studyGroups)
-                  : Text(AppLocalizations.of(context).exams),
-              actions: [
-                settings['showExams'] != 'true'
-                    ? Tooltip(
-                        message: AppLocalizations.of(context).exams,
-                        child: IconButton(
-                          icon: Icon(Icons.article_outlined),
-                          onPressed: () => updateSetting('showExams', 'true'),
-                        ),
-                      )
-                    : Tooltip(
-                        message: AppLocalizations.of(context).studyGroups,
-                        child: IconButton(
-                          icon: Icon(Icons.groups_outlined),
-                          onPressed: () => updateSetting('showExams', 'false'),
-                        ),
-                      ),
-              ],
-            ),
-            body: settings['showExams'] == 'true'
-                ? StudentExamsView(studyData: studyData)
-                : StudentCourseView(studyData: data),
+          updateAppBar(
+            _buildToggleExamsButton(context, settings, updateSetting),
+            settings['showExams'] != 'true'
+                ? AppLocalizations.of(context).studyGroups
+                : AppLocalizations.of(context).exams,
           );
+          return settings['showExams'] == 'true'
+              ? StudentExamsView(studyData: studyData)
+              : StudentCourseView(studyData: data);
         });
   }
 }
