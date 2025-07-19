@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:lanis/applets/conversations/view/components/rich_chat_text_editor.dart';
 import 'package:lanis/generated/l10n.dart';
 import 'package:lanis/utils/bottom_nav_bar_change_notifier.dart';
+import 'package:lanis/utils/logger.dart';
 import 'package:lanis/widgets/dynamic_app_bar.dart';
 import 'dart:async';
 
@@ -15,7 +16,6 @@ import '../../../core/sph/sph.dart';
 import '../../../models/client_status_exceptions.dart';
 import '../../../models/conversations.dart';
 import '../../../utils/fetch_more_indicator.dart';
-import '../../../utils/logger.dart';
 import '../../../widgets/error_view.dart';
 import '../../../widgets/format_text.dart';
 
@@ -402,7 +402,6 @@ class _ConversationsChatState extends State<ConversationsChat>
       Conversation result = await sph!.parser.conversationsParser
           .getSingleConversation(widget.id);
       _lastRefresh = result.msgLastRefresh;
-      logger.d("last refresh: $_lastRefresh");
 
       settings = ConversationSettings(
         id: widget.id,

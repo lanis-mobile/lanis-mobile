@@ -136,8 +136,8 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
                     itemCount: lessons.length,
                     itemBuilder: (BuildContext context, int index) => Padding(
                       padding: EdgeInsets.only(
-                        top: 4,
-                        bottom: index == lessons.length - 1 ? 80 : 0,
+                        top: 0,
+                        bottom: 4 + (index == lessons.length - 1 ? 80 : 0),
                         left: 8,
                         right: 8,
                       ),

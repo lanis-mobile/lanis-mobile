@@ -4,6 +4,7 @@ import 'package:lanis/models/account_types.dart';
 
 import 'package:lanis/generated/l10n.dart';
 import 'package:lanis/models/client_status_exceptions.dart';
+import 'package:lanis/utils/logger.dart';
 import '../core/applet_parser.dart';
 import '../core/sph/sph.dart';
 import 'error_view.dart';
