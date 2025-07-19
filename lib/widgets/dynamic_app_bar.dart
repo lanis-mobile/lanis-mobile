@@ -15,7 +15,7 @@ class AppBarController extends ChangeNotifier {
       })> _leadingActions = {};
   String? overrideTitle;
   String? secondTitle;
-  Color? overrideColor;
+  Color? Function(BuildContext)? overrideColor;
 
   List<Widget> get actions => List.unmodifiable(_actions.values);
 
@@ -69,10 +69,9 @@ class AppBarController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Color setOverrideColor(Color? color) {
-    overrideColor = color;
+  void setOverrideColor(Color? Function(BuildContext)? colorCallback) {
+    overrideColor = colorCallback;
     notifyListeners();
-    return overrideColor ?? Colors.transparent;
   }
 
   void clear() {
@@ -117,7 +116,8 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
                   automaticallyImplyLeading && leadingAction == null,
               leading: leadingAction,
               backgroundColor:
-                  AppBarController.instance.overrideColor ?? Colors.transparent,
+                  AppBarController.instance.overrideColor?.call(context) ??
+                      Colors.transparent,
               actions: AppBarController.instance.actions,
             );
           },
