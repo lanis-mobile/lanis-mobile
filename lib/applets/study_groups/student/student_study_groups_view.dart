@@ -41,6 +41,15 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.removeAction('studentStudyGroups');
+      AppBarController.instance.setOverrideTitle(null);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder(
         parser: sph!.parser.studyGroupsStudentParser,

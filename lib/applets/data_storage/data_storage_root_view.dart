@@ -33,6 +33,9 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
   @override
   void dispose() {
     searchController.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.removeAction("dataStorageSearch");
+    });
     super.dispose();
   }
 

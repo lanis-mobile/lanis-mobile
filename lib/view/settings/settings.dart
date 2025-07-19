@@ -222,6 +222,14 @@ class _SettingsScreenState extends SettingsColoursState<SettingsScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.clear();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTabletApplet(context);
     final double availableHeight = MediaQuery.of(context).size.height -

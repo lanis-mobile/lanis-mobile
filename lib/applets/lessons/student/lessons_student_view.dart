@@ -75,6 +75,14 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.removeAction('lessonsStudentView');
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CombinedAppletBuilder<Lessons>(
       parser: sph!.parser.lessonsStudentParser,

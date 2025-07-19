@@ -43,7 +43,9 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
 
   @override
   void dispose() {
-    //AppBarController.instance.clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.removeAction('studentTimetable');
+    });
     super.dispose();
   }
 

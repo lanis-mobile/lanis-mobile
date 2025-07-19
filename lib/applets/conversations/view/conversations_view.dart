@@ -491,15 +491,19 @@ class _ConversationsViewState extends State<ConversationsView>
   @override
   void dispose() {
     super.dispose();
-
     simpleSearchController.dispose();
     for (final value in SearchFunction.values) {
       advancedSearchControllers[value]!.dispose();
     }
-
     keyboardObserver.dispose();
-
     scrollController.dispose();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppBarController.instance.setOverrideTitle(null);
+      AppBarController.instance.removeLeadingAction('createConversation');
+      AppBarController.instance.removeAction('conversationsStatistics');
+      AppBarController.instance.setSecondTitle(null);
+    });
   }
 
   @override
