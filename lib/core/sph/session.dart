@@ -99,42 +99,54 @@ class SessionHandler {
   ///Logs the user in and fetches the necessary metadata.
   Future<void> authenticate(
       {bool withoutData = false, String? withLoginUrl}) async {
+    logger
+        .d("connectionChecker connected: ${await connectionChecker.connected}");
     if (!(await connectionChecker.connected)) {
+      logger.w("No connection to the server, cannot authenticate.");
       throw NoConnectionException();
     }
 
-    jar.deleteAll();
-    dio.options.validateStatus = (status) =>
-        status != null && (status == 200 || status == 302 || status == 503);
+    try {
+      jar.deleteAll();
+      dio.options.validateStatus = (status) =>
+          status != null && (status == 200 || status == 302 || status == 503);
 
-    late String loginURL;
+      late String loginURL;
 
-    if (withLoginUrl != null) {
-      loginURL = withLoginUrl;
-    } else {
-      loginURL = await getLoginURL(sph.account);
+      if (withLoginUrl != null) {
+        loginURL = withLoginUrl;
+      } else {
+        loginURL = await getLoginURL(sph.account);
+      }
+
+      await dio.get(loginURL);
+
+      preventLogoutTimer?.cancel();
+      preventLogoutTimer = Timer.periodic(
+          const Duration(seconds: 10), (timer) => preventLogout());
+
+      travelMenu = await getFastTravelMenu();
+      if (!withoutData) {
+        if (kReleaseMode) asyncLogRequest();
+        accountDatabase.updateLastLogin(sph.account.localId);
+
+        final response = await dio.get(
+            "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
+        userData = parseUserData(parse(response.data));
+        _accountType = parseAccountType(parse(response.data));
+
+        await accountDatabase.setAccountType(sph.account.localId, accountType);
+      }
+
+      await cryptor.initialize(dio);
+    } on LanisException {
+      logger.d("LanisException caught during authentication");
+      rethrow;
+    } catch (e) {
+      throw LoginTimeoutException(
+          "Lanis ist momentan nicht erreichbar. Bitte versuche es später erneut.",
+          "Lanis ist momentan nicht erreichbar. Bitte versuche es später erneut.");
     }
-
-    await dio.get(loginURL);
-
-    preventLogoutTimer?.cancel();
-    preventLogoutTimer =
-        Timer.periodic(const Duration(seconds: 10), (timer) => preventLogout());
-
-    travelMenu = await getFastTravelMenu();
-    if (!withoutData) {
-      if (kReleaseMode) asyncLogRequest();
-      accountDatabase.updateLastLogin(sph.account.localId);
-
-      final response = await dio.get(
-          "https://start.schulportal.hessen.de/benutzerverwaltung.php?a=userData");
-      userData = parseUserData(parse(response.data));
-      _accountType = parseAccountType(parse(response.data));
-
-      await accountDatabase.setAccountType(sph.account.localId, accountType);
-    }
-
-    await cryptor.initialize(dio);
   }
 
   /// Logs the login by schoolID and version code to the orion server.

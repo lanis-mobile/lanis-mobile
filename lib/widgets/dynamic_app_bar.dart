@@ -6,109 +6,82 @@ class AppBarController extends ChangeNotifier {
   static final AppBarController instance = AppBarController._();
 
   final Map<String, Widget> _actions = {};
+  final Map<
+      String,
+      ({
+        Widget widget,
+        int weight,
+        bool Function(BoxConstraints)? canBeUsed
+      })> _leadingActions = {};
   String? overrideTitle;
-  String? secondTitle; // Added secondTitle field
+  String? secondTitle;
   Color? overrideColor;
-  Widget? _leadingAction;
-  bool _isClearing = false;
 
   List<Widget> get actions => List.unmodifiable(_actions.values);
-  Widget? get leadingAction => _leadingAction;
 
-  void add(String id, Widget action) {
-    if (_isClearing) {
-      // If we're in the middle of clearing, schedule this addition for the next frame
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_isClearing) {
-          _actions[id] = action;
-          notifyListeners();
-        }
-      });
-      return;
-    }
+  Widget? getLeadingAction(BoxConstraints constraints) {
+    if (_leadingActions.isEmpty) return null;
+
+    // Filter actions that can be used in the current constraints
+    var availableActions = _leadingActions.values.where((action) {
+      return action.canBeUsed?.call(constraints) ?? true;
+    });
+
+    if (availableActions.isEmpty) return null;
+
+    // Find the leading action with the highest weight among available actions
+    var highest = availableActions.reduce(
+        (current, next) => next.weight > current.weight ? next : current);
+    return highest.widget;
+  }
+
+  void addAction(String id, Widget action) {
     _actions[id] = action;
     notifyListeners();
   }
 
-  void setLeadingAction(Widget? widget) {
-    if (_isClearing) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_isClearing) {
-          _leadingAction = widget;
-          notifyListeners();
-        }
-      });
-      return;
-    }
-    _leadingAction = widget;
+  void setLeadingAction(String id, Widget widget,
+      {int weight = 0, bool Function(BoxConstraints)? canBeUsed}) {
+    _leadingActions[id] =
+        (widget: widget, weight: weight, canBeUsed: canBeUsed);
     notifyListeners();
   }
 
-  void remove(String id) {
+  void removeLeadingAction(String id) {
+    if (_leadingActions.remove(id) != null) {
+      notifyListeners();
+    }
+  }
+
+  void removeAction(String id) {
     if (_actions.remove(id) != null) {
       notifyListeners();
     }
   }
 
   void setOverrideTitle(String? title) {
-    if (_isClearing) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_isClearing) {
-          overrideTitle = title;
-          notifyListeners();
-        }
-      });
-      return;
-    }
     overrideTitle = title;
     notifyListeners();
   }
 
-  // Add method to set secondTitle
   void setSecondTitle(String? title) {
-    if (_isClearing) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_isClearing) {
-          secondTitle = title;
-          notifyListeners();
-        }
-      });
-      return;
-    }
     secondTitle = title;
     notifyListeners();
   }
 
   Color setOverrideColor(Color? color) {
-    if (_isClearing) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_isClearing) {
-          overrideColor = color;
-          notifyListeners();
-        }
-      });
-      return overrideColor ?? Colors.transparent;
-    }
     overrideColor = color;
     notifyListeners();
     return overrideColor ?? Colors.transparent;
   }
 
   void clear() {
-    _isClearing = true;
     _actions.clear();
+    _leadingActions.clear();
     overrideTitle = null;
-    secondTitle = null; // Clear secondTitle as well
+    secondTitle = null;
     overrideColor = null;
-    _leadingAction = null;
     notifyListeners();
-
-    // Reset the clearing flag after a delay to allow the new route to settle
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 100), () {
-        _isClearing = false;
-      });
-    });
   }
 }
 
@@ -125,20 +98,29 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AnimatedBuilder(
       animation: AppBarController.instance,
       builder: (context, _) {
-        // Construct the combined title
-        String displayTitle = AppBarController.instance.overrideTitle ?? title;
-        if (AppBarController.instance.secondTitle != null) {
-          displayTitle =
-              '$displayTitle - ${AppBarController.instance.secondTitle}';
-        }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            String displayTitle =
+                AppBarController.instance.overrideTitle ?? title;
+            if (AppBarController.instance.secondTitle != null) {
+              displayTitle =
+                  '$displayTitle - ${AppBarController.instance.secondTitle}';
+            }
 
-        return AppBar(
-          title: Text(displayTitle),
-          automaticallyImplyLeading: automaticallyImplyLeading &&
-              AppBarController.instance.leadingAction == null,
-          leading: AppBarController.instance.leadingAction,
-          backgroundColor: AppBarController.instance.overrideColor,
-          actions: AppBarController.instance.actions,
+            final leadingAction =
+                AppBarController.instance.getLeadingAction(constraints);
+
+            return AppBar(
+              scrolledUnderElevation: 0,
+              title: Text(displayTitle),
+              automaticallyImplyLeading:
+                  automaticallyImplyLeading && leadingAction == null,
+              leading: leadingAction,
+              backgroundColor:
+                  AppBarController.instance.overrideColor ?? Colors.transparent,
+              actions: AppBarController.instance.actions,
+            );
+          },
         );
       },
     );

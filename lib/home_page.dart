@@ -220,7 +220,6 @@ class HomePageState extends State<HomePage> {
       destinations[index].action!(context, navigatorKey);
     } else {
       AppBarController.instance.clear();
-
       // Use pushReplacement with named routes
       if (destinations[index].routeName != null) {
         navigatorKey.currentState?.pushReplacementNamed(

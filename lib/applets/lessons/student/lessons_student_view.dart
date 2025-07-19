@@ -67,8 +67,8 @@ class _LessonsStudentViewState extends State<LessonsStudentView>
   }
 
   void updateAppBarActions(Widget action) {
-    AppBarController.instance.remove('lessonsStudentView');
-    AppBarController.instance.add(
+    AppBarController.instance.removeAction('lessonsStudentView');
+    AppBarController.instance.addAction(
       'lessonsStudentView',
       action,
     );

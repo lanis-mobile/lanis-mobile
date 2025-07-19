@@ -75,7 +75,7 @@ class _ConversationsViewState extends State<ConversationsView>
 
   @override
   Future<bool> canHandleBackNavigation() async {
-    if (loadedWidget != null || showCreateScreen) {
+    if (loadedWidget != null || showCreateScreen || toggleMode) {
       return true;
     }
     return false;
@@ -85,8 +85,11 @@ class _ConversationsViewState extends State<ConversationsView>
   Future<bool> handleBackNavigation() async {
     if (await canHandleBackNavigation() && mounted) {
       final isTablet = Responsive.isTablet(context);
-
       if (isTablet) {
+        if (toggleMode) {
+          closeToggleMode();
+          return true;
+        }
         if (showCreateScreen) {
           closeCreateScreen();
           return true;
@@ -418,12 +421,14 @@ class _ConversationsViewState extends State<ConversationsView>
     AppBarController.instance
         .setOverrideTitle(AppLocalizations.of(context).createNewConversation);
     AppBarController.instance.setLeadingAction(
+      'createConversation',
       IconButton(
         icon: const Icon(Icons.close),
         onPressed: () {
           closeCreateScreen();
         },
       ),
+      weight: 1,
     );
     setState(() {
       showCreateScreen = true;
@@ -432,7 +437,7 @@ class _ConversationsViewState extends State<ConversationsView>
 
   void closeCreateScreen() {
     AppBarController.instance.setOverrideTitle(null);
-    AppBarController.instance.setLeadingAction(null);
+    AppBarController.instance.removeLeadingAction('createConversation');
     setState(() {
       showCreateScreen = false;
     });
@@ -448,8 +453,13 @@ class _ConversationsViewState extends State<ConversationsView>
       loadedWidget = ConversationsSend(
         creationData: chatData,
         isTablet: Responsive.isTablet(context),
-        refreshSidebar: () => _refreshKey.currentState?.show(),
+        refreshSidebar: () =>
+            sph!.parser.conversationsParser.filter.pushEntries(),
         onCreateChat: startNewConversation,
+        closeChat: () => setState(() {
+          loadedWidget = null;
+          noBadgeConversations.clear();
+        }),
       );
       noBadgeConversations.clear();
     });
@@ -597,10 +607,17 @@ class _ConversationsViewState extends State<ConversationsView>
                                         noBadgeConversations.add(entry.id);
                                         loadedWidget =
                                             ConversationsChat.fromEntry(
-                                                key: Key(entry.id),
-                                                refreshSidebar: refresh,
-                                                entry,
-                                                isTablet);
+                                          key: Key(entry.id),
+                                          refreshSidebar: refresh,
+                                          entry,
+                                          isTablet,
+                                          closeChat: () {
+                                            setState(() {
+                                              loadedWidget = null;
+                                              noBadgeConversations.clear();
+                                            });
+                                          },
+                                        );
                                       });
                                     },
                                   );

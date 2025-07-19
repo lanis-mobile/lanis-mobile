@@ -47,7 +47,7 @@ class _DataStorageRootViewState extends State<DataStorageRootView> {
         loading = false;
       });
       if (!searchAnchorAdded) {
-        AppBarController.instance.add("dataStorageSearch", searchAnchor);
+        AppBarController.instance.addAction("dataStorageSearch", searchAnchor);
         searchAnchorAdded = true;
       }
     } on LanisException {

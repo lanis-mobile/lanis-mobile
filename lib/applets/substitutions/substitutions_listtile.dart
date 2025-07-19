@@ -170,7 +170,9 @@ class SubstitutionsFormattedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(text: _format(data, style));
+    return SelectionArea(
+      child: RichText(text: _format(data, style)),
+    );
   }
 
   TextSpan _format(String data, TextStyle style) {

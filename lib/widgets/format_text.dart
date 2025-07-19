@@ -192,134 +192,142 @@ class FormattedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StyledText(
-      text: convertLanisSyntax(text),
-      style: formatStyle.textStyle,
-      tags: {
-        "b": const StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold)),
-        "u": StyledTextCustomTag(parse: (_, attributes) {
-          List<TextDecoration> textDecorations = [TextDecoration.underline];
-          if (attributes.containsKey("hasDel"))
-            textDecorations.add(TextDecoration.lineThrough);
+    return SelectionArea(
+      child: StyledText(
+        text: convertLanisSyntax(text),
+        style: formatStyle.textStyle,
+        tags: {
+          "b": const StyledTextTag(
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          "u": StyledTextCustomTag(parse: (_, attributes) {
+            List<TextDecoration> textDecorations = [TextDecoration.underline];
+            if (attributes.containsKey("hasDel")) {
+              textDecorations.add(TextDecoration.lineThrough);
+            }
 
-          return TextStyle(
-            decoration: TextDecoration.combine(textDecorations),
-          );
-        }),
-        "i": const StyledTextTag(style: TextStyle(fontStyle: FontStyle.italic)),
-        "del": StyledTextCustomTag(parse: (_, attributes) {
-          List<TextDecoration> textDecorations = [TextDecoration.lineThrough];
-          if (attributes.containsKey("hasU"))
-            textDecorations.add(TextDecoration.underline);
+            return TextStyle(
+              decoration: TextDecoration.combine(textDecorations),
+            );
+          }),
+          "i": const StyledTextTag(
+              style: TextStyle(fontStyle: FontStyle.italic)),
+          "del": StyledTextCustomTag(parse: (_, attributes) {
+            List<TextDecoration> textDecorations = [TextDecoration.lineThrough];
+            if (attributes.containsKey("hasU")) {
+              textDecorations.add(TextDecoration.underline);
+            }
 
-          return TextStyle(
-            decoration: TextDecoration.combine(textDecorations),
-          );
-        }),
-        "sup": const StyledTextTag(
-            style: TextStyle(fontFeatures: [FontFeature.superscripts()])),
-        "sub": const StyledTextTag(
-            style: TextStyle(fontFeatures: [FontFeature.subscripts()])),
-        "code": StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
-              padding: const EdgeInsets.only(top: 2, bottom: 2),
-              child: Container(
-                padding: const EdgeInsets.only(
-                    left: 8.0, right: 8.0, top: 4, bottom: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: formatStyle.codeBackground,
-                ),
-                child: Text(
-                  textContent!,
-                  style: TextStyle(
-                      fontFamily: "Roboto Mono",
-                      color: formatStyle.codeForeground),
-                ),
-              ),
-            )),
-        "date": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 2),
-                  child: Icon(Icons.calendar_today,
-                      size: 20, color: formatStyle.timeColor),
-                ),
-                Flexible(
-                  child: Text(
-                    textContent!,
-                    style: TextStyle(
-                        color: formatStyle.timeColor,
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            )),
-        "time": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 2),
-                  child: Icon(Icons.access_time_filled,
-                      size: 20, color: formatStyle.timeColor),
-                ),
-                Flexible(
-                  child: Text(
-                    textContent!,
-                    style: TextStyle(
-                        color: formatStyle.timeColor,
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            )),
-        "a": StyledTextWidgetBuilderTag((context, attributes, textContent) {
-          late final Icon icon;
-
-          if (attributes["type"] == "url") {
-            icon = Icon(Icons.link, color: formatStyle.linkForeground);
-          } else {
-            icon = Icon(Icons.email_rounded, color: formatStyle.linkForeground);
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(top: 2, bottom: 2),
-            child: InkWell(
-              onTap: () async {
-                if (!await launchUrl(Uri.parse(attributes["href"]!))) {
-                  logger
-                      .w('${attributes["href"]} konnte nicht geöffnet werden.');
-                }
-              },
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                  padding: const EdgeInsets.only(
-                      left: 7, right: 8, top: 2, bottom: 2),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: formatStyle.linkBackground,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: icon,
+            return TextStyle(
+              decoration: TextDecoration.combine(textDecorations),
+            );
+          }),
+          "sup": const StyledTextTag(
+              style: TextStyle(fontFeatures: [FontFeature.superscripts()])),
+          "sub": const StyledTextTag(
+              style: TextStyle(fontFeatures: [FontFeature.subscripts()])),
+          "code":
+              StyledTextWidgetBuilderTag((context, _, textContent) => Padding(
+                    padding: const EdgeInsets.only(top: 2, bottom: 2),
+                    child: Container(
+                      padding: const EdgeInsets.only(
+                          left: 8.0, right: 8.0, top: 4, bottom: 4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: formatStyle.codeBackground,
                       ),
-                      Flexible(
-                        child: Text(
-                          textContent!,
-                          style: TextStyle(color: formatStyle.linkForeground),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
+                      child: Text(
+                        textContent!,
+                        style: TextStyle(
+                            fontFamily: "Roboto Mono",
+                            color: formatStyle.codeForeground),
                       ),
-                    ],
+                    ),
                   )),
-            ),
-          );
-        }),
-      },
+          "date": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 2),
+                    child: Icon(Icons.calendar_today,
+                        size: 20, color: formatStyle.timeColor),
+                  ),
+                  Flexible(
+                    child: Text(
+                      textContent!,
+                      style: TextStyle(
+                          color: formatStyle.timeColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              )),
+          "time": StyledTextWidgetBuilderTag((context, _, textContent) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 2),
+                    child: Icon(Icons.access_time_filled,
+                        size: 20, color: formatStyle.timeColor),
+                  ),
+                  Flexible(
+                    child: Text(
+                      textContent!,
+                      style: TextStyle(
+                          color: formatStyle.timeColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              )),
+          "a": StyledTextWidgetBuilderTag((context, attributes, textContent) {
+            late final Icon icon;
+
+            if (attributes["type"] == "url") {
+              icon = Icon(Icons.link, color: formatStyle.linkForeground);
+            } else {
+              icon =
+                  Icon(Icons.email_rounded, color: formatStyle.linkForeground);
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 2),
+              child: InkWell(
+                onTap: () async {
+                  if (!await launchUrl(Uri.parse(attributes["href"]!))) {
+                    logger.w(
+                        '${attributes["href"]} konnte nicht geöffnet werden.');
+                  }
+                },
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                    padding: const EdgeInsets.only(
+                        left: 7, right: 8, top: 2, bottom: 2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      color: formatStyle.linkBackground,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: icon,
+                        ),
+                        Flexible(
+                          child: Text(
+                            textContent!,
+                            style: TextStyle(color: formatStyle.linkForeground),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    )),
+              ),
+            );
+          }),
+        },
+      ),
     );
   }
 }

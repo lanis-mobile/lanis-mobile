@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lanis/applets/definitions.dart';
 import 'package:lanis/core/database/account_database/account_db.dart';
+import 'package:lanis/widgets/dynamic_app_bar.dart';
 
 import '../core/database/account_preferences_database/account_preferences_db.dart';
 import '../core/sph/sph.dart';
@@ -74,14 +75,20 @@ class _OfflineAvailableAppletsSectionState
                         .getClearTextAccountFromId(offlineApplet.localUserId);
                     sph = SPH(account: acc);
                     if (context.mounted) {
-                      Navigator.push(
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              offlineApplet.definition.bodyBuilder!(context,
-                                  acc.accountType ?? AccountType.student, null),
+                          builder: (context) => Scaffold(
+                            appBar: DynamicAppBar(
+                                title: offlineApplet.definition.label(context),
+                                automaticallyImplyLeading: true),
+                            body: offlineApplet.definition.bodyBuilder!(context,
+                                acc.accountType ?? AccountType.student, null),
+                          ),
                         ),
                       );
+                      await Future.delayed(const Duration(milliseconds: 20));
+                      AppBarController.instance.clear();
                     }
                   }),
             )

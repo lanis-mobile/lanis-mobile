@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_executor/flutter_background_executor.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:lanis/core/connection_checker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lanis/applets/definitions.dart';
 import 'package:lanis/models/account_types.dart';
@@ -106,6 +107,12 @@ Future<void> callbackDispatcher() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   try {
     backgroundLogger.i("Background fetch triggered");
+
+    if (!await connectionChecker.connected) {
+      backgroundLogger.w('No network connection, aborting background fetch');
+      return;
+    }
+
     await initializeNotifications();
 
     AccountDatabase accountDatabase = AccountDatabase();

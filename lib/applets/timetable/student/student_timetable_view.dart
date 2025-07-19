@@ -48,7 +48,7 @@ class _StudentTimetableViewState extends State<StudentTimetableView> {
   }
 
   void updateAppBar(Widget action) {
-    AppBarController.instance.add('studentTimetable', action);
+    AppBarController.instance.addAction('studentTimetable', action);
   }
 
   @override

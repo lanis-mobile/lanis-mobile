@@ -35,8 +35,8 @@ class _StudentStudyGroupsViewState extends State<StudentStudyGroupsView> {
   }
 
   void updateAppBar(Widget appBarAction, String newTitle) {
-    AppBarController.instance.remove('studentStudyGroups');
-    AppBarController.instance.add('studentStudyGroups', appBarAction);
+    AppBarController.instance.removeAction('studentStudyGroups');
+    AppBarController.instance.addAction('studentStudyGroups', appBarAction);
     AppBarController.instance.setOverrideTitle(newTitle);
   }
 

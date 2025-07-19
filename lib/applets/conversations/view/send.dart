@@ -15,22 +15,20 @@ class ConversationsSend extends StatefulWidget {
   final String? title;
   final void Function(ConversationsChat) onCreateChat;
   final void Function() refreshSidebar;
+  final VoidCallback closeChat;
   const ConversationsSend(
       {super.key,
       this.creationData,
       required this.isTablet,
       this.title,
       required this.onCreateChat,
+      required this.closeChat,
       required this.refreshSidebar});
 
   @override
   State<ConversationsSend> createState() => _ConversationsSendState();
-}
 
-class _ConversationsSendState extends State<ConversationsSend> {
-  final QuillController _controller = QuillController.basic();
-
-  String parseText(Delta delta) {
+  static String parseText(Delta delta) {
     String text = "";
 
     List<Operation> operations = delta.operations;
@@ -97,26 +95,32 @@ class _ConversationsSendState extends State<ConversationsSend> {
 
     return text.substring(0, text.length - 1);
   }
+}
+
+class _ConversationsSendState extends State<ConversationsSend> {
+  final QuillController _controller = QuillController.basic();
 
   Future<void> newConversation(String text) async {
     final bool status = await connectionChecker.connected;
     if (!status) {
       if (mounted) {
         showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                icon: const Icon(Icons.wifi_off),
-                title: Text(AppLocalizations.of(context).noInternetConnection2),
-                actions: [
-                  FilledButton(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Ok")),
-                ],
-              );
-            });
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              icon: const Icon(Icons.wifi_off),
+              title: Text(AppLocalizations.of(context).noInternetConnection2),
+              actions: [
+                FilledButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Ok"),
+                ),
+              ],
+            );
+          },
+        );
       }
       return;
     }
@@ -145,6 +149,7 @@ class _ConversationsSendState extends State<ConversationsSend> {
         id: response.id!,
         isTablet: widget.isTablet,
         refreshSidebar: widget.refreshSidebar,
+        closeChat: () => widget.closeChat,
         newSettings: NewConversationSettings(
           firstMessage: textMessage,
           settings: ConversationSettings(
@@ -179,6 +184,12 @@ class _ConversationsSendState extends State<ConversationsSend> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -192,14 +203,14 @@ class _ConversationsSendState extends State<ConversationsSend> {
             ),
             IconButton(
               onPressed: () {
-                final String text = parseText(_controller.document.toDelta());
+                final String text =
+                    ConversationsSend.parseText(_controller.document.toDelta());
 
                 if (text.isEmpty) return;
 
                 if (widget.creationData != null) {
                   newConversation(text);
                 } else {
-                  // TODO: In chat handling, not only new chat
                   Navigator.pop(context, text);
                 }
               },
