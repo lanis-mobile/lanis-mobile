@@ -508,292 +508,298 @@ class _ConversationsViewState extends State<ConversationsView>
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener(
-      onNotification: (notification) {
-        if (notification is CheckTileNotification) {
-          if (!toggleMode) {
-            openToggleMode();
+    return SafeArea(
+      child: NotificationListener(
+        onNotification: (notification) {
+          if (notification is CheckTileNotification) {
+            if (!toggleMode) {
+              openToggleMode();
+            }
+
+            setState(() {
+              checkedTiles[notification.id!] =
+                  !(checkedTiles[notification.id!] ?? false);
+            });
+            return true;
+          } else if (notification is JumpToNotification) {
+            scrollController.jumpTo(notification.position!);
+            return true;
           }
 
-          setState(() {
-            checkedTiles[notification.id!] =
-                !(checkedTiles[notification.id!] ?? false);
-          });
-          return true;
-        } else if (notification is JumpToNotification) {
-          scrollController.jumpTo(notification.position!);
-          return true;
-        }
+          return false;
+        },
+        child: ConversationsLayoutBuilder(
+            leftBuilder: (context, isTablet) => showCreateScreen
+                ? NewConversationConfigurator(
+                    isTablet: isTablet,
+                    onChatCreated: onInitializeChat,
+                  )
+                : Scaffold(
+                    body: CombinedAppletBuilder<List<OverviewEntry>>(
+                        parser: sph!.parser.conversationsParser,
+                        phpUrl: conversationsDefinition.appletPhpIdentifier,
+                        settingsDefaults:
+                            conversationsDefinition.settingsDefaults,
+                        accountType: sph!.session.accountType,
+                        builder: (context, data, accountType, settings,
+                            updateSetting, refresh) {
+                          noBadgeConversations = [];
+                          return RefreshIndicator(
+                            key: _refreshKey,
+                            edgeOffset:
+                                advancedSearch && !toggleMode ? 256 : 64,
+                            onRefresh: refresh!,
+                            child: CustomScrollView(
+                              controller: scrollController,
+                              physics: AlwaysScrollableScrollPhysics(),
+                              slivers: [
+                                SliverFloatingHeader(
+                                  child: ScrolledDownContainer(
+                                      child: toggleMode
+                                          ? toggleModeAppBar()
+                                          : searchWidget()),
+                                ),
+                                SliverVariedExtentList.builder(
+                                  itemCount: data.length + 1,
+                                  itemExtentBuilder: (index, _) {
+                                    if (index > data.length - 1) {
+                                      return tileSize * 2.5;
+                                    }
 
-        return false;
-      },
-      child: ConversationsLayoutBuilder(
-          leftBuilder: (context, isTablet) => showCreateScreen
-              ? NewConversationConfigurator(
-                  isTablet: isTablet,
-                  onChatCreated: onInitializeChat,
-                )
-              : Scaffold(
-                  body: CombinedAppletBuilder<List<OverviewEntry>>(
-                      parser: sph!.parser.conversationsParser,
-                      phpUrl: conversationsDefinition.appletPhpIdentifier,
-                      settingsDefaults:
-                          conversationsDefinition.settingsDefaults,
-                      accountType: sph!.session.accountType,
-                      builder: (context, data, accountType, settings,
-                          updateSetting, refresh) {
-                        noBadgeConversations = [];
-                        return RefreshIndicator(
-                          key: _refreshKey,
-                          edgeOffset: advancedSearch && !toggleMode ? 256 : 64,
-                          onRefresh: refresh!,
-                          child: CustomScrollView(
-                            controller: scrollController,
-                            physics: AlwaysScrollableScrollPhysics(),
-                            slivers: [
-                              SliverFloatingHeader(
-                                child: ScrolledDownContainer(
-                                    child: toggleMode
-                                        ? toggleModeAppBar()
-                                        : searchWidget()),
-                              ),
-                              SliverVariedExtentList.builder(
-                                itemCount: data.length + 1,
-                                itemExtentBuilder: (index, _) {
-                                  if (index > data.length - 1) {
-                                    return tileSize * 2.5;
-                                  }
+                                    return tileSize;
+                                  },
+                                  itemBuilder: (context, index) {
+                                    if (index > data.length - 1) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 12.0, left: 12.0, right: 12.0),
+                                        child: ListTile(
+                                          title: Text(
+                                            AppLocalizations.of(context)
+                                                .noFurtherEntries,
+                                            textAlign: TextAlign.center,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge,
+                                          ),
+                                          subtitle: Text(
+                                            AppLocalizations.of(context)
+                                                .conversationNote,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      );
+                                    }
 
-                                  return tileSize;
-                                },
-                                itemBuilder: (context, index) {
-                                  if (index > data.length - 1) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 12.0, left: 12.0, right: 12.0),
-                                      child: ListTile(
-                                        title: Text(
-                                          AppLocalizations.of(context)
-                                              .noFurtherEntries,
-                                          textAlign: TextAlign.center,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge,
-                                        ),
-                                        subtitle: Text(
-                                          AppLocalizations.of(context)
-                                              .conversationNote,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
+                                    return ConversationTile(
+                                      entry: data[index],
+                                      isOpen: loadedConversationId ==
+                                          data[index].id,
+                                      toggleMode: toggleMode,
+                                      loadedConversationId:
+                                          loadedConversationId,
+                                      noBadgeConversations:
+                                          noBadgeConversations,
+                                      checked:
+                                          checkedTiles[data[index].id] ?? false,
+                                      onTap: (entry) {
+                                        // TODO: revise, of makes sense to do this in chat.dart
+                                        if (entry.unread == true) {
+                                          sph!.parser.conversationsParser.filter
+                                              .toggleEntry(entry.id,
+                                                  unread: true);
+                                          sph!.parser.conversationsParser.filter
+                                              .pushEntries();
+                                        }
+                                        setState(() {
+                                          noBadgeConversations.add(entry.id);
+                                          loadedWidget =
+                                              ConversationsChat.fromEntry(
+                                            key: Key(entry.id),
+                                            refreshSidebar: refresh,
+                                            entry,
+                                            isTablet,
+                                            closeChat: () {
+                                              setState(() {
+                                                loadedWidget = null;
+                                                noBadgeConversations.clear();
+                                              });
+                                            },
+                                          );
+                                        });
+                                      },
                                     );
-                                  }
-
-                                  return ConversationTile(
-                                    entry: data[index],
-                                    isOpen:
-                                        loadedConversationId == data[index].id,
-                                    toggleMode: toggleMode,
-                                    loadedConversationId: loadedConversationId,
-                                    noBadgeConversations: noBadgeConversations,
-                                    checked:
-                                        checkedTiles[data[index].id] ?? false,
-                                    onTap: (entry) {
-                                      // TODO: revise, of makes sense to do this in chat.dart
-                                      if (entry.unread == true) {
-                                        sph!.parser.conversationsParser.filter
-                                            .toggleEntry(entry.id,
-                                                unread: true);
-                                        sph!.parser.conversationsParser.filter
-                                            .pushEntries();
-                                      }
-                                      setState(() {
-                                        noBadgeConversations.add(entry.id);
-                                        loadedWidget =
-                                            ConversationsChat.fromEntry(
-                                          key: Key(entry.id),
-                                          refreshSidebar: refresh,
-                                          entry,
-                                          isTablet,
-                                          closeChat: () {
-                                            setState(() {
-                                              loadedWidget = null;
-                                              noBadgeConversations.clear();
-                                            });
-                                          },
-                                        );
-                                      });
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                        );
-                      }),
-                  floatingActionButton: toggleMode
-                      ? disableToggleButton
-                          ? FloatingActionButton(
-                              onPressed: null,
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: const CircularProgressIndicator(),
-                              ))
-                          : FloatingActionButton.extended(
-                              icon: Icon(Icons.visibility),
-                              label:
-                                  Text(AppLocalizations.of(context).hideShow),
-                              onPressed: () async {
-                                setState(() {
-                                  disableToggleButton = true;
-                                  loadedWidget = null;
-                                });
-
-                                // So you don't see each tile being toggled
-                                Map<String, bool> toggled = {};
-
-                                for (final tile in checkedTiles.entries) {
-                                  if (tile.value == true) {
-                                    final isHidden = filter.entries
-                                        .where(
-                                            (element) => element.id == tile.key)
-                                        .first
-                                        .hidden;
-
-                                    late bool result;
-                                    try {
-                                      if (isHidden) {
-                                        result = await sph!
-                                            .parser.conversationsParser
-                                            .showConversation(tile.key);
-                                      } else {
-                                        result = await sph!
-                                            .parser.conversationsParser
-                                            .hideConversation(tile.key);
-                                      }
-                                    } on NoConnectionException {
-                                      setState(() {
-                                        disableToggleButton = false;
-                                      });
-
-                                      if (context.mounted) {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  icon: const Icon(
-                                                      Icons.wifi_off),
-                                                  title: Text(AppLocalizations
-                                                          .of(context)
-                                                      .noInternetConnection2),
-                                                  actions: [
-                                                    FilledButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: Text(
-                                                            AppLocalizations.of(
-                                                                    context)
-                                                                .back))
-                                                  ],
-                                                ));
-                                      }
-                                      return;
-                                    }
-
-                                    if (!result) {
-                                      setState(() {
-                                        disableToggleButton = false;
-                                      });
-
-                                      if (context.mounted) {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  icon: const Icon(Icons.error),
-                                                  title: Text(
-                                                      AppLocalizations.of(
-                                                              context)
-                                                          .errorOccurred),
-                                                  actions: [
-                                                    FilledButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: Text(
-                                                            AppLocalizations.of(
-                                                                    context)
-                                                                .back))
-                                                  ],
-                                                ));
-                                      }
-                                      return;
-                                    }
-
-                                    toggled.addEntries([tile]);
-                                    checkedTiles[tile.key] = false;
-                                  }
-                                }
-
-                                for (final id in toggled.keys) {
-                                  filter.toggleEntry(id, hidden: true);
-                                }
-
-                                filter.pushEntries();
-                                closeToggleMode();
-                              })
-                      : FloatingActionButton(
-                          heroTag: "create_conversation",
-                          onPressed: () async {
-                            if (sph!.parser.conversationsParser
-                                    .cachedCanChooseType !=
-                                null) {
-                              openCreateScreen();
-                            }
-
-                            setState(() {
-                              loadingCreateButton = true;
-                            });
-
-                            try {
-                              await sph!.parser.conversationsParser
-                                  .canChooseType();
-                            } on NoConnectionException {
-                              setState(() {
-                                loadingCreateButton = false;
-                              });
-                              return;
-                            }
-
-                            setState(() {
-                              loadingCreateButton = false;
-                            });
-
-                            if (context.mounted) {
-                              openCreateScreen();
-                            }
-                          },
-                          child: loadingCreateButton
-                              ? SizedBox(
+                                  },
+                                )
+                              ],
+                            ),
+                          );
+                        }),
+                    floatingActionButton: toggleMode
+                        ? disableToggleButton
+                            ? FloatingActionButton(
+                                onPressed: null,
+                                child: SizedBox(
                                   width: 24,
                                   height: 24,
                                   child: const CircularProgressIndicator(),
-                                )
-                              : const Icon(Icons.edit),
-                        ),
-                ),
-          rightBuilder: (loadedWidget != null)
-              ? (context, isTablet) => loadedWidget!
-              : null,
-          rightPlaceholder: sideBarNoConversationsLoaded(),
-          onPopRight: () {
-            setState(() {
-              loadedWidget = null;
-              noBadgeConversations.clear();
-            });
-          }),
+                                ))
+                            : FloatingActionButton.extended(
+                                icon: Icon(Icons.visibility),
+                                label:
+                                    Text(AppLocalizations.of(context).hideShow),
+                                onPressed: () async {
+                                  setState(() {
+                                    disableToggleButton = true;
+                                    loadedWidget = null;
+                                  });
+
+                                  // So you don't see each tile being toggled
+                                  Map<String, bool> toggled = {};
+
+                                  for (final tile in checkedTiles.entries) {
+                                    if (tile.value == true) {
+                                      final isHidden = filter.entries
+                                          .where((element) =>
+                                              element.id == tile.key)
+                                          .first
+                                          .hidden;
+
+                                      late bool result;
+                                      try {
+                                        if (isHidden) {
+                                          result = await sph!
+                                              .parser.conversationsParser
+                                              .showConversation(tile.key);
+                                        } else {
+                                          result = await sph!
+                                              .parser.conversationsParser
+                                              .hideConversation(tile.key);
+                                        }
+                                      } on NoConnectionException {
+                                        setState(() {
+                                          disableToggleButton = false;
+                                        });
+
+                                        if (context.mounted) {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                    icon: const Icon(
+                                                        Icons.wifi_off),
+                                                    title: Text(AppLocalizations
+                                                            .of(context)
+                                                        .noInternetConnection2),
+                                                    actions: [
+                                                      FilledButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Text(
+                                                              AppLocalizations.of(
+                                                                      context)
+                                                                  .back))
+                                                    ],
+                                                  ));
+                                        }
+                                        return;
+                                      }
+
+                                      if (!result) {
+                                        setState(() {
+                                          disableToggleButton = false;
+                                        });
+
+                                        if (context.mounted) {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                    icon:
+                                                        const Icon(Icons.error),
+                                                    title: Text(
+                                                        AppLocalizations.of(
+                                                                context)
+                                                            .errorOccurred),
+                                                    actions: [
+                                                      FilledButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Text(
+                                                              AppLocalizations.of(
+                                                                      context)
+                                                                  .back))
+                                                    ],
+                                                  ));
+                                        }
+                                        return;
+                                      }
+
+                                      toggled.addEntries([tile]);
+                                      checkedTiles[tile.key] = false;
+                                    }
+                                  }
+
+                                  for (final id in toggled.keys) {
+                                    filter.toggleEntry(id, hidden: true);
+                                  }
+
+                                  filter.pushEntries();
+                                  closeToggleMode();
+                                })
+                        : FloatingActionButton(
+                            heroTag: "create_conversation",
+                            onPressed: () async {
+                              if (sph!.parser.conversationsParser
+                                      .cachedCanChooseType !=
+                                  null) {
+                                openCreateScreen();
+                              }
+
+                              setState(() {
+                                loadingCreateButton = true;
+                              });
+
+                              try {
+                                await sph!.parser.conversationsParser
+                                    .canChooseType();
+                              } on NoConnectionException {
+                                setState(() {
+                                  loadingCreateButton = false;
+                                });
+                                return;
+                              }
+
+                              setState(() {
+                                loadingCreateButton = false;
+                              });
+
+                              if (context.mounted) {
+                                openCreateScreen();
+                              }
+                            },
+                            child: loadingCreateButton
+                                ? SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: const CircularProgressIndicator(),
+                                  )
+                                : const Icon(Icons.edit),
+                          ),
+                  ),
+            rightBuilder: (loadedWidget != null)
+                ? (context, isTablet) => loadedWidget!
+                : null,
+            rightPlaceholder: sideBarNoConversationsLoaded(),
+            onPopRight: () {
+              setState(() {
+                loadedWidget = null;
+                noBadgeConversations.clear();
+              });
+            }),
+      ),
     );
   }
 }

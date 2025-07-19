@@ -7,6 +7,7 @@ import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:lanis/applets/conversations/view/components/rich_chat_text_editor.dart';
 import 'package:lanis/generated/l10n.dart';
+import 'package:lanis/utils/bottom_nav_bar_change_notifier.dart';
 import 'package:lanis/widgets/dynamic_app_bar.dart';
 import 'dart:async';
 
@@ -122,6 +123,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     hidden = widget.hidden;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      BottomNavBarChangeNotifier.instance.setVisible(false);
       AppBarController.instance.setSecondTitle(widget.title);
       AppBarController.instance
           .setLeadingAction('conversationsExitChat', backButton(), weight: 2,
@@ -146,6 +148,7 @@ class _ConversationsChatState extends State<ConversationsChat>
     _refreshTimer?.cancel();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      BottomNavBarChangeNotifier.instance.setVisible(true);
       AppBarController.instance.setSecondTitle(null);
       AppBarController.instance.removeAction('conversationsStatistics');
       AppBarController.instance.removeLeadingAction('conversationsExitChat');

@@ -9,6 +9,7 @@ import 'package:lanis/generated/l10n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lanis/utils/authentication_state.dart';
+import 'package:lanis/utils/bottom_nav_bar_change_notifier.dart';
 import 'package:lanis/utils/responsive.dart';
 import 'package:lanis/utils/whats_new.dart';
 import 'package:lanis/utils/cached_network_image.dart';
@@ -450,13 +451,22 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  void updateShowBottomAppBar(bool show) {
+    setState(() {
+      showBottomAppBar = show;
+    });
+  }
+
+  bool showBottomAppBar = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
       bottomNavigationBar: Responsive.isTablet(context) == false &&
               isFirstLevelRoute &&
-              doesSupportAnyApplet
+              doesSupportAnyApplet &&
+              showBottomAppBar
           ? navBar(context)
           : null,
       drawerEdgeDragWidth: Responsive.isTablet(context) ? 100 : 30,
